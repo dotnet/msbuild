@@ -22,7 +22,7 @@ namespace Microsoft.Build.CommandLine
     /// Unlike the CommandLineSwitchException, this exception is NOT thrown for syntax errors in switches.
     /// </remarks>
     [Serializable]
-    internal sealed class InitializationException : Exception
+    internal sealed class InitializationException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// This constructor initializes the exception message.
@@ -59,7 +59,7 @@ namespace Microsoft.Build.CommandLine
             StreamingContext context) :
             base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info);
 
             invalidSwitch = info.GetString("invalidSwitch");
         }

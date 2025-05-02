@@ -139,6 +139,9 @@
   <data name="NoBuildInProgress" xml:space="preserve">
     <value>The operation cannot be completed because BeginBuild has not yet been called.</value>
   </data>
+  <data name="AbortingBuild" xml:space="preserve">
+    <value>Attempting to cancel the build...</value>
+  </data>
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
@@ -531,7 +534,7 @@
     <comment>{StrBegin="MSB4101: "}</comment>
   </data>
   <data name="ImportedProjectNotFound" xml:space="preserve">
-    <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}" is correct, and that the file exists on disk.</value>
+    <value>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</value>
     <comment>{StrBegin="MSB4019: "}LOCALIZATION: &lt;Import&gt; should not be localized.</comment>
   </data>
   <data name="ImportedProjectFromVSDistribution" xml:space="preserve">
@@ -600,6 +603,9 @@
       UE: This message is shown when the user attempts to provide an expression like "$(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)"
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
+  </data>
+  <data name="CouldNotDifferentiateBetweenCompatibleMethods">
+    <value>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</value>
   </data>
   <data name="InvalidFunctionPropertyExpression" xml:space="preserve">
     <value>MSB4184: The expression "{0}" cannot be evaluated. {1}</value>
@@ -844,7 +850,7 @@
     <value>Task name cannot be empty.</value>
   </data>
   <data name="ProjectUpgradeNeeded" xml:space="preserve">
-    <value>MSB4075: The project file "{0}" must be opened in the Visual Studio IDE and converted to the latest version before it can be built by MSBuild.</value>
+    <value>MSB4075: The project file "{0}" must be opened in a version of Visual Studio IDE that supports it and converted to the latest version before it can be built by MSBuild. More info: https://aka.ms/DeprecatedProjectConversion</value>
     <comment>{StrBegin="MSB4075: "}</comment>
   </data>
   <data name="ProjectUpgradeNeededToVcxProj" xml:space="preserve">
@@ -1102,6 +1108,9 @@
   <data name="OutputItemParameterMessagePrefix" xml:space="preserve">
     <value>Output Item(s): </value>
   </data>
+  <data name="OutputPropertyLogMessagePrefix" xml:space="preserve">
+    <value>Output Property: </value>
+  </data>
   <data name="OutputPropertyLogMessage" xml:space="preserve">
     <value>Output Property: {0}={1}</value>
   </data>
@@ -1344,6 +1353,12 @@ Warnings: {2}
 Errors: {3}</value>
     <comment>
       LOCALIZATION: Do not localize the word SDK. "{2}" is new line separated warnings or "null". "{3}" is new line separated errors or "null".
+    </comment>
+  </data>
+  <data name="SDKResolverNullMessage" xml:space="preserve">
+    <value>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</value>
+    <comment>
+      LOCALIZATION: Do not localize the word SDK.
     </comment>
   </data>
   <data name="CouldNotRunNuGetSdkResolver" xml:space="preserve">
@@ -2000,7 +2015,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
   </data>
-   <data name="DefaultSDKResolverError" xml:space="preserve">
+  <data name="DefaultSDKResolverError" xml:space="preserve">
     <value>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
   </data>
   <data name="SDKResolverReturnedNull" xml:space="preserve">
@@ -2094,6 +2109,291 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <comment>
       LOCALIZATION: {0} is integer number denoting number of bytes. 'int.MaxValue' should not be translated.
     </comment>
+  </data>
+  <data name="CustomCheckSuccessfulAcquisition" xml:space="preserve">
+    <value>Custom check rule: '{0}' has been registered successfully.</value>
+    <comment>The message is emitted on successful loading of the custom check rule in process.</comment>
+  </data>
+  <data name="CustomCheckFailedAcquisition" xml:space="preserve">
+    <value>Failed to register the custom check: '{0}'.</value>
+    <comment>The message is emitted on failed loading of the custom check in process.</comment>
+  </data>
+  <data name="CustomCheckFailedRuleLoading" xml:space="preserve">
+    <value>Failed to instantiate the custom check rule with the following exception: '{0}'.</value>
+    <comment>The message is emitted on failed loading of the custom check rule in process.</comment>
+  </data>
+  <data name="CustomCheckAssemblyNotExist" xml:space="preserve">
+    <value>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</value>
+    <comment>The message is emitted when the custom check assembly can not be found.</comment>
+  </data>
+  <data name="CustomCheckBaseTypeNotAssignable" xml:space="preserve">
+    <value>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</value>
+    <comment>The message is emitted when the custom check assembly can not be successfully registered.</comment>
+  </data>
+  <data name="TaskAssemblyLocationMismatch" xml:space="preserve">
+    <value>Task assembly was loaded from '{0}' while the desired location was '{1}'.</value>
+  </data>
+  <data name="ProjectImportsCollectorFileIOFail" xml:space="preserve">
+    <value>An exception occurred when adding the file '{0}', Exception: '{1}'</value>
+  </data>
+  <data name="BuildCheckEnabled" xml:space="preserve">
+    <value>The BuildCheck is enabled for this build.</value>
+  </data>
+  <data name="CustomCheckRegistered" xml:space="preserve">
+    <value>The custom check: '{0}' is registered for the build from the location: '{1}'.</value>
+  </data>
+  <data name="IllegalCharactersInFileOrDirectory" xml:space="preserve">
+    <value>There are illegal characters in '{0}' in the {1} item.</value>
+  </data>
+  <data name="BuildCheck_BC0101_Title" xml:space="preserve">
+    <value>Two projects should not share their 'OutputPath' nor 'IntermediateOutputPath' locations.</value>
+    <comment>'OutputPath' and 'IntermediateOutputPath' not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0101_MessageFmt" xml:space="preserve">
+    <value>Projects {0} and {1} have conflicting output paths: {2}.</value>
+  </data>
+  <data name="BuildCheck_BC0102_Title" xml:space="preserve">
+    <value>Two tasks should not write the same file.</value>
+  </data>
+  <data name="BuildCheck_BC0102_MessageFmt" xml:space="preserve">
+    <value>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</value>
+  </data>
+  <data name="BuildCheck_BC0103_Title" xml:space="preserve">
+    <value>No implicit property derived from an environment variable should be used during the build.</value>
+  </data>
+  <data name="BuildCheck_BC0103_MessageFmt" xml:space="preserve">
+    <value>Property is derived from environment variable: {0}. Properties should be passed explicitly using the /p option.</value>
+  </data>
+  <data name="BuildCheck_BC0103_MessageAddendum" xml:space="preserve">
+    <value>'{0}' with value: '{1}'</value>
+    <comment>Will be used as a parameter {0} in previous message.</comment>
+  </data>
+  <data name="BuildCheck_BC0104_Title" xml:space="preserve">
+    <value>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</value>
+  </data>
+  <data name="BuildCheck_BC0104_MessageFmt" xml:space="preserve">
+    <value>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</value>
+  </data>
+  <data name="BuildCheck_BC0105_Title" xml:space="preserve">
+    <value>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0105_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0106_Title" xml:space="preserve">
+    <value>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0106_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</value>
+	  <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0107_Title" xml:space="preserve">
+    <value>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0107_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0108_Title" xml:space="preserve">
+    <value>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0108_MessageFmt" xml:space="preserve">
+    <value>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0302_Title" xml:space="preserve">
+    <value>The 'Exec' task should not be used to build a project.</value>
+  </data>
+  <data name="BuildCheck_BC0302_MessageFmt" xml:space="preserve">
+    <value>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</value>
+  </data>
+  <data name="BuildCheck_BC0201_Title" xml:space="preserve">
+    <value>A property that is accessed should be declared first.</value>
+  </data>
+  <data name="BuildCheck_BC0201_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' was accessed, but it was never initialized.</value>
+  </data>
+  <data name="BuildCheck_BC0202_Title" xml:space="preserve">
+    <value>A property should be declared before it is first used.</value>
+  </data>
+  <data name="BuildCheck_BC0202_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' first declared/initialized at {1} used before it was initialized.</value>
+  </data>
+  <data name="BuildCheck_BC0203_Title" xml:space="preserve">
+    <value>A property that is not used should not be declared.</value>
+  </data>
+  <data name="BuildCheck_BC0203_MessageFmt" xml:space="preserve">
+    <value>Property: '{0}' was declared/initialized, but it was never used.</value>
+  </data>
+  <data name="BuildCheck_BC0301_Title" xml:space="preserve">
+    <value>Downloads folder is untrusted for projects building.</value>
+  </data>
+  <data name="BuildCheck_BC0301_MessageFmt" xml:space="preserve">
+    <value>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</value>
+  </data>
+  <data name="GlobExpansionFailed" xml:space="preserve">
+    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
+  </data>
+  <data name="UnknownLoggingType" xml:space="preserve">
+    <value>Logging type {0} is not understood by {1}.</value>
+  </data>
+  <data name="DurationDisplay" xml:space="preserve">
+    <value>({0:F1}s)</value>
+    <comment>
+        {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
+      </comment>
+  </data>
+  <data name="RestoreComplete" xml:space="preserve">
+    <value>Restore complete ({0}s)</value>
+    <comment>
+      {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="RestoreCompleteWithMessage" xml:space="preserve">
+    <value>Restore {0} in {1}s</value>
+    <comment>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="BuildFinished" xml:space="preserve">
+    <value>Build {0} in {1}s</value>
+    <comment>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="ProjectFinished_NoTF" xml:space="preserve">
+    <value>{0}{1} {2} ({3}s)</value>
+    <comment>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="ProjectFinished_WithTF" xml:space="preserve">
+    <value>{0}{1} {2} {3} ({4}s)</value>
+    <comment>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrors" xml:space="preserve">
+    <value>failed with {0} error(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithErrorsAndWarnings" xml:space="preserve">
+    <value>failed with {0} error(s) and {1} warning(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_FailedWithWarnings" xml:space="preserve">
+    <value>failed with {0} warning(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Failed" xml:space="preserve">
+    <value>failed</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_Succeeded" xml:space="preserve">
+    <value>succeeded</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="BuildResult_SucceededWithWarnings" xml:space="preserve">
+    <value>succeeded with {0} warning(s)</value>
+    <comment>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </comment>
+  </data>
+  <data name="TestProjectFinished_NoTF" xml:space="preserve">
+    <value>{0}{1} test {2} ({3}s)</value>
+    <comment>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="TestProjectFinished_WithTF" xml:space="preserve">
+    <value>{0}{1} test {2} {3} ({4}s)</value>
+    <comment>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="ProjectFinished_OutputPath" xml:space="preserve">
+    <value> → {0}</value>
+    <comment>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </comment>
+  </data>
+  <data name="BuildSummary" xml:space="preserve">
+    <value>Build summary:</value>
+    <comment>
+      A header used by Terminal Logger to introduce the build summary.
+    </comment>
+  </data>
+  <data name="TestSummary_BannerAndTotal" xml:space="preserve">
+    <value>Test summary: total: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Duration" xml:space="preserve">
+    <value>duration: {0}s</value>
+    <comment>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="TestSummary_Failed" xml:space="preserve">
+    <value>failed: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Skipped" xml:space="preserve">
+    <value>skipped: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="TestSummary_Succeeded" xml:space="preserve">
+    <value>succeeded: {0}</value>
+    <comment>{0} whole number</comment>
+  </data>
+  <data name="OpenTelemetryLoadFailed" xml:space="preserve">
+    <value>Loading telemetry libraries failed with exception: {0}.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

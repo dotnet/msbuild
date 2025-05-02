@@ -137,7 +137,7 @@ namespace Microsoft.Build.BackEnd
                 _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
                 _nodeEndpoint.Listen(this);
 
-                var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
+                WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
                 _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
@@ -220,6 +220,16 @@ namespace Microsoft.Build.BackEnd
         {
             // The in-proc endpoint shouldn't be serializing, just routing.
             ErrorUtilities.ThrowInternalError("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
+        }
+
+        /// <summary>
+        /// Not necessary for in-proc node - we don't serialize.
+        /// </summary>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            // The in-proc endpoint shouldn't be serializing, just routing.
+            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializePacket on the in-proc node.");
+            return null;
         }
 
         /// <summary>

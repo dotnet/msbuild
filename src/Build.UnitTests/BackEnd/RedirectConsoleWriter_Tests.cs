@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Experimental;
@@ -18,7 +17,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             StringBuilder sb = new StringBuilder();
 
-            using (TextWriter writer = OutOfProcServerNode.RedirectConsoleWriter.Create(text => sb.Append(text)))
+            using (OutOfProcServerNode.RedirectConsoleWriter writer = new(text => sb.Append(text)))
             {
                 writer.WriteLine("Line 1");
                 await Task.Delay(80); // should be somehow bigger than `RedirectConsoleWriter` flush period - see its constructor

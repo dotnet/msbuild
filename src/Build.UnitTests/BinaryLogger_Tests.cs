@@ -6,14 +6,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Reflection;
 using System.Text;
+using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -350,7 +351,7 @@ namespace Microsoft.Build.UnitTests
 </Project>";
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                
+
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{_logFile}", out bool success);
                 success.ShouldBeTrue();
 
@@ -409,7 +410,7 @@ namespace Microsoft.Build.UnitTests
                     """;
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                
+
                 env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{_logFile} -flp1:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile2.log")};verbosity=normal", out bool success);
                 success.ShouldBeTrue();
@@ -635,6 +636,61 @@ namespace Microsoft.Build.UnitTests
                     consoleOutput2.ShouldNotContain(expected2);
                 }
             }
+        }
+
+        [Theory]
+        // Wildcard - new scenario
+        [InlineData("mylog-{}-foo", "mylog-xxxxx-foo.binlog")]
+        [InlineData("mylog-{}-foo-{}", "mylog-xxxxx-foo-xxxxx.binlog")]
+        [InlineData("\"mylog-{}-foo\"", "mylog-xxxxx-foo.binlog")]
+        [InlineData("foo\\bar\\mylog-{}-foo.binlog", "foo\\bar\\mylog-xxxxx-foo.binlog")]
+        [InlineData("ProjectImports=None;LogFile=mylog-{}-foo", "mylog-xxxxx-foo.binlog")]
+        // No wildcard - pre-existing scenarios
+        [InlineData("mylog-foo.binlog", "mylog-foo.binlog")]
+        [InlineData("\"mylog-foo.binlog\"", "mylog-foo.binlog")]
+        [InlineData("foo\\bar\\mylog-foo.binlog", "foo\\bar\\mylog-foo.binlog")]
+        [InlineData("ProjectImports=None;LogFile=mylog-foo.binlog", "mylog-foo.binlog")]
+        public void BinlogFileNameParameterParsing(string parameters, string expectedBinlogFile)
+        {
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = parameters
+            };
+            string random = "xxxxx";
+            binaryLogger.PathParameterExpander = _ => random;
+
+            var eventSource = A.Fake<IEventSource>();
+
+            binaryLogger.Initialize(eventSource);
+            string expectedLog = Path.GetFullPath(expectedBinlogFile);
+            binaryLogger.FilePath.Should().BeEquivalentTo(expectedLog);
+            binaryLogger.Shutdown();
+            File.Exists(binaryLogger.FilePath).ShouldBeTrue();
+            FileUtilities.DeleteNoThrow(binaryLogger.FilePath);
+
+            // We need to create the file to satisfy the invariant set by the ctor of this testclass
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void BinlogFileNameWildcardGeneration()
+        {
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = "{}"
+            };
+
+            var eventSource = A.Fake<IEventSource>();
+
+            binaryLogger.Initialize(eventSource);
+            binaryLogger.FilePath.Should().EndWith(".binlog");
+            binaryLogger.FilePath.Length.ShouldBeGreaterThan(10);
+            binaryLogger.Shutdown();
+            File.Exists(binaryLogger.FilePath).ShouldBeTrue();
+            FileUtilities.DeleteNoThrow(binaryLogger.FilePath);
+
+            // We need to create the file to satisfy the invariant set by the ctor of this testclass
+            File.Create(_logFile).Dispose();
         }
 
         public void Dispose()

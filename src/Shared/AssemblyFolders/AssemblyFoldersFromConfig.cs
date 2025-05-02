@@ -29,8 +29,8 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <param name="targetArchitecture">The <see cref="ProcessorArchitecture"/> to target.</param>
         internal AssemblyFoldersFromConfig(string configFile, string targetRuntimeVersion, ProcessorArchitecture targetArchitecture)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configFile, nameof(configFile));
-            ErrorUtilities.VerifyThrowArgumentNull(targetRuntimeVersion, nameof(targetRuntimeVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(configFile);
+            ErrorUtilities.VerifyThrowArgumentNull(targetRuntimeVersion);
 
             var collection = AssemblyFolderCollection.Load(configFile);
             var assemblyTargets = GatherVersionStrings(targetRuntimeVersion, collection);
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             // Platform-agnostic folders first.
             FindDirectories(assemblyTargets, target => string.IsNullOrEmpty(target.Platform));
 
-            if (EnvironmentUtilities.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
                 if (targeting64Bit)
                 {

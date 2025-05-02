@@ -30,6 +30,7 @@ namespace Microsoft.Build.Shared
         internal const string UseUtf8Never = "NEVER";
         internal const string UseUtf8Detect = "DETECT";
         internal const string UseUtf8System = "SYSTEM";
+        internal const string UseUtf8True = "TRUE";
 
         /// <summary>
         /// Get the current system locale code page, OEM version. OEM code pages are used for console-based input/output
@@ -241,6 +242,7 @@ namespace Microsoft.Build.Shared
             switch (useUtf8.ToUpperInvariant())
             {
                 case EncodingUtilities.UseUtf8Always:
+                case EncodingUtilities.UseUtf8True:
                     return EncodingUtilities.Utf8WithoutBom;
                 case EncodingUtilities.UseUtf8Never:
                 case EncodingUtilities.UseUtf8System:
@@ -264,20 +266,22 @@ namespace Microsoft.Build.Shared
         /// </returns>
         public static CultureInfo? GetExternalOverriddenUILanguageIfSupportableWithEncoding()
         {
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
-            {
-                return null;
-            }
-
             CultureInfo? externalLanguageSetting = GetExternalOverriddenUILanguage();
             if (externalLanguageSetting != null)
             {
                 if (CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
                 {
-                    // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
-                    Console.OutputEncoding = Encoding.UTF8;
-                    // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
-                    Console.InputEncoding = Encoding.UTF8;
+                    try
+                    {
+                        // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
+                        Console.OutputEncoding = Encoding.UTF8;
+                        // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
+                        Console.InputEncoding = Encoding.UTF8;
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is SecurityException)
+                    {
+                        // The encoding is unavailable. Do nothing.
+                    }
                     return externalLanguageSetting;
                 }
                 else if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

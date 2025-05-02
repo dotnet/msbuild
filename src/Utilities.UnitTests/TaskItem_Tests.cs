@@ -11,7 +11,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #pragma warning disable 0219
 
@@ -428,7 +427,7 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             public void Run(string[] includes, IDictionary<string, string> metadataToAdd)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(includes, nameof(includes));
+                ErrorUtilities.VerifyThrowArgumentNull(includes);
 
                 CreatedTaskItems = new TaskItem[includes.Length];
 

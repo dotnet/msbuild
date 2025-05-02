@@ -10,7 +10,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -135,6 +134,30 @@ namespace Microsoft.Build.UnitTests
             Assert.True(result);
             Assert.Equal(file.ItemSpec, task.OutputFile.ItemSpec);
             Assert.True(File.Exists(task.OutputFile.ItemSpec));
+        }
+
+        /// <summary>
+        /// File name is set but no OutputDirectory
+        /// </summary>
+        [Fact]
+        public void FileNameNoDirectory()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            var file = env.ExpectFile(Directory.GetCurrentDirectory(), ".tmp");
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            task.Language = "c#";
+            task.AssemblyAttributes = new TaskItem[] { new TaskItem("aa") };
+
+            string fileName = Path.GetFileName(file.Path);
+            task.OutputFile = new TaskItem(fileName);
+            bool result = task.Execute();
+
+            Assert.True(result);
+
+            Assert.Equal(fileName, task.OutputFile.ItemSpec);
+            Assert.True(File.Exists(file.Path));
         }
 
         /// <summary>

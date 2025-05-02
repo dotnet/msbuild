@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
@@ -325,7 +324,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if (count > ioThreshold)
                 {
                     string message = String.Format("File.Exists() was called {0} times with path {1}.", count, path);
-                    Assert.True(false, message);
+                    Assert.Fail(message);
                 }
             }
 
@@ -346,7 +345,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if (count > 0)
                 {
                     string message = String.Format("File.Exists() was called {0} times with path {1}.", count, path);
-                    Assert.True(false, message);
+                    Assert.Fail(message);
                 }
             }
 
@@ -358,7 +357,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if (count > 0)
                 {
                     string message = String.Format("GetAssemblyName() was called {0} times with path {1}.", count, path);
-                    Assert.True(false, message);
+                    Assert.Fail(message);
                 }
             }
 
@@ -644,7 +643,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
             else
             {
-                Assert.True(false, "Unsupported GetFiles pattern " + pattern);
+                Assert.Fail("Unsupported GetFiles pattern " + pattern);
             }
 
             ArrayList matches = new ArrayList();
@@ -2769,7 +2768,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Assert.True(false, $"New GetRegistrySubKeyNames parameters encountered, need to add unittesting support for subKey={subKey}");
+            Assert.Fail($"New GetRegistrySubKeyNames parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 
@@ -2908,7 +2907,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 }
             }
 
-            Assert.True(false, $"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
+            Assert.Fail($"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
 

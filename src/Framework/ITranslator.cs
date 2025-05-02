@@ -255,18 +255,6 @@ namespace Microsoft.Build.BackEnd
         void TranslateEnum<T>(ref T value, int numericValue)
             where T : struct, Enum;
 
-        /// <summary>
-        /// Translates a value using the .Net binary formatter.
-        /// </summary>
-        /// <typeparam name="T">The reference type.</typeparam>
-        /// <param name="value">The value to be translated.</param>
-        /// <remarks>
-        /// The primary purpose of this method is to support serialization of Exceptions and
-        /// custom build logging events, since these do not support our custom serialization
-        /// methods.
-        /// </remarks>
-        void TranslateDotNet<T>(ref T value);
-
         void TranslateException(ref Exception value);
 
         /// <summary>
@@ -318,6 +306,19 @@ namespace Microsoft.Build.BackEnd
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer);
+
+        /// <summary>
+        /// Translates a dictionary of { string, string } adding additional entries.
+        /// </summary>
+        /// <param name="dictionary">The dictionary to be translated.</param>
+        /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
+        /// <param name="additionalEntries">Additional entries to be translated</param>
+        /// <param name="additionalEntriesKeys">Additional entries keys</param>
+        /// <remarks>
+        /// This overload is needed for a workaround concerning serializing BuildResult with a version.
+        /// It serializes/deserializes additional entries together with the main dictionary.
+        /// </remarks>
+        void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
 
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
 

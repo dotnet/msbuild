@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 
 #nullable disable
@@ -25,11 +27,10 @@ namespace Microsoft.Build.Framework
     /// For dev docs: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves-Dev.md
     internal static class ChangeWaves
     {
-        internal static readonly Version Wave17_4 = new Version(17, 4);
-        internal static readonly Version Wave17_6 = new Version(17, 6);
-        internal static readonly Version Wave17_8 = new Version(17, 8);
         internal static readonly Version Wave17_10 = new Version(17, 10);
-        internal static readonly Version[] AllWaves = { Wave17_4, Wave17_6, Wave17_8, Wave17_10 };
+        internal static readonly Version Wave17_12 = new Version(17, 12);
+        internal static readonly Version Wave17_14 = new Version(17, 14);
+        internal static readonly Version[] AllWaves = { Wave17_10, Wave17_12, Wave17_14 };
 
         /// <summary>
         /// Special value indicating that all features behind all Change Waves should be enabled.

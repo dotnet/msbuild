@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -140,7 +139,7 @@ namespace Microsoft.Build.Tasks
         {
             if (_redistList == null)
             {
-                return Enumerable.Empty<AssemblyEntry>();
+                return [];
             }
 
             return _redistList.FindAssemblyNameFromSimpleName(simpleName);

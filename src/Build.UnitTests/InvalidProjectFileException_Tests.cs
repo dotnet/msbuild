@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Exceptions;
 
 using Xunit;
@@ -72,7 +71,7 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger(_testOutput);
                 ObjectModelHelpers.BuildTempProjectFileExpectFailure(file, logger);
 
-                Assert.True(false, "Loading an invalid project should have thrown an InvalidProjectFileException.");
+                Assert.Fail("Loading an invalid project should have thrown an InvalidProjectFileException.");
             }
             catch (InvalidProjectFileException e)
             {

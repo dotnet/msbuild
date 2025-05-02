@@ -21,11 +21,15 @@ namespace Microsoft.Build.Graph
         private readonly HashSet<ProjectGraphNode> _projectReferences = new HashSet<ProjectGraphNode>();
         private readonly HashSet<ProjectGraphNode> _referencingProjects = new HashSet<ProjectGraphNode>();
 
+        internal ProjectInterpretation.ProjectType ProjectType { get; }
+
         // No public creation.
         internal ProjectGraphNode(ProjectInstance projectInstance)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectInstance, nameof(projectInstance));
+            ErrorUtilities.VerifyThrowInternalNull(projectInstance);
             ProjectInstance = projectInstance;
+
+            ProjectType = ProjectInterpretation.GetProjectType(projectInstance);
         }
 
         /// <summary>

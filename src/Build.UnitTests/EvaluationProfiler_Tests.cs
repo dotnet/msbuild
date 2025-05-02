@@ -5,7 +5,6 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -301,10 +300,9 @@ namespace Microsoft.Build.Engine.UnitTests
         /// </summary>
         private Project CreateProject(string contents, string toolsVersion, ProjectCollection projectCollection)
         {
-            Project project = new Project(XmlReader.Create(new StringReader(contents)), null, toolsVersion, projectCollection)
-            {
-                FullPath = _env.CreateFile().Path
-            };
+            using ProjectFromString projectFromString = new(contents, null, toolsVersion, projectCollection);
+            Project project = projectFromString.Project;
+            project.FullPath = _env.CreateFile().Path;
 
             project.Save();
 

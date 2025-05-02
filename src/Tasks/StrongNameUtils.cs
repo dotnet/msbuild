@@ -46,8 +46,11 @@ namespace Microsoft.Build.Tasks
                 // Read the stuff from the file stream
                 using (FileStream fs = new FileStream(keyFile, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    keyFileContents = new byte[(int)fs.Length];
-                    fs.Read(keyFileContents, 0, (int)fs.Length);
+                    int fileLength = (int)fs.Length;
+                    keyFileContents = new byte[fileLength];
+
+                    // TODO: Read the count of read bytes and check if it matches the expected length, if not raise an exception
+                    fs.ReadExactly(keyFileContents, 0, fileLength);
                 }
             }
             catch (ArgumentException e)
@@ -132,7 +135,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal static StrongNameLevel GetAssemblyStrongNameLevel(string assemblyPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath, nameof(assemblyPath));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyPath);
 
             StrongNameLevel snLevel = StrongNameLevel.Unknown;
             IntPtr fileHandle = NativeMethods.InvalidIntPtr;

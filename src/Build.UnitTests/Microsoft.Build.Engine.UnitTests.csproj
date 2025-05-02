@@ -16,14 +16,21 @@
 
   <ItemGroup>
     <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <PackageReference Include="FluentAssertions" />
+    <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+
+    <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="FakeItEasy" />
     <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
+    <PackageReference Include="Verify.Xunit" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -49,6 +56,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\UnitTests\CommunicationUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />

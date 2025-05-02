@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Shouldly;
@@ -18,7 +17,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(null, false, "MSB3991")]
         [InlineData("", false, "MSB3991")]
         [InlineData(null, true, "MSB3992")]
-        public void RootElementNameNotValid(string rootElementName, bool UseAttributeForTargetFrameworkInfoPropertyNames, string errorCode)
+        public void RootElementNameNotValid(string? rootElementName, bool UseAttributeForTargetFrameworkInfoPropertyNames, string errorCode)
         {
             MockEngine e = new MockEngine();
             var task = new CombineTargetFrameworkInfoProperties();

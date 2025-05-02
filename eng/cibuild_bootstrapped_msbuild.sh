@@ -3,6 +3,7 @@
 configuration="Debug"
 host_type="core"
 build_stage1=true
+onlyDocChanged=0
 properties=
 extra_properties=
 
@@ -29,6 +30,10 @@ while [[ $# -gt 0 ]]; do
       host_type=$2
       shift 2
       ;;
+    --onlydocchanged)
+      onlyDocChanged=$2
+      shift 2
+      ;;
     *)
       properties="$properties $1"
       shift 1
@@ -46,16 +51,20 @@ InitializeDotNetCli true
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
+	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration $properties $extra_properties || exit $?
 fi
 
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
-  _InitializeBuildToolCommand="$bootstrapRoot/net8.0/MSBuild/MSBuild.dll"
-  _InitializeBuildToolFramework="net8.0"
+  script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  props_file="$script_dir/Versions.props"
+  sdk_version=$(grep -A1 "BootstrapSdkVersion" "$props_file" | grep -o ">.*<" | sed 's/[><]//g')
+
+  _InitializeBuildTool="${bootstrapRoot}/core/dotnet"
+  _InitializeBuildToolCommand="${bootstrapRoot}/core/sdk/${sdk_version}/MSBuild.dll"
+  _InitializeBuildToolFramework="net9.0"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1
@@ -75,6 +84,11 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 
 # When using bootstrapped MSBuild:
 # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-# - Do run tests
-# - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+# - Create bootstrap environment as it's required when also running tests
+if [ $onlyDocChanged = 0 ]
+then
+    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration $properties $extra_properties
+
+else
+    . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
+fi

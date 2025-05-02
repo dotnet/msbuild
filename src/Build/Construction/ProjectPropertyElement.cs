@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
@@ -20,7 +21,7 @@ namespace Microsoft.Build.Construction
     /// So the CM only represents Normal properties.
     /// </remarks>
     [DebuggerDisplay("{Name} Value={Value} Condition={Condition}")]
-    public class ProjectPropertyElement : ProjectElement
+    public class ProjectPropertyElement : ProjectElement, IPropertyElementWithLocation
     {
         internal ProjectPropertyElementLink PropertyLink => (ProjectPropertyElementLink)Link;
 
@@ -38,7 +39,7 @@ namespace Microsoft.Build.Construction
         internal ProjectPropertyElement(XmlElementWithLocation xmlElement, ProjectPropertyGroupElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -68,7 +69,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(Value));
+                ErrorUtilities.VerifyThrowArgumentNull(value);
                 if (Link != null)
                 {
                     PropertyLink.Value = value;
@@ -108,7 +109,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void ChangeName(string newName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newName, nameof(newName));
+            ErrorUtilities.VerifyThrowArgumentLength(newName);
             XmlUtilities.VerifyThrowArgumentValidElementName(newName);
             ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(newName), "CannotModifyReservedProperty", newName);
             if (Link != null)

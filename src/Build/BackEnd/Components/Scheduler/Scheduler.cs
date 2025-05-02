@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -580,7 +579,7 @@ namespace Microsoft.Build.BackEnd
                 return Task.FromResult(0);
             }
 
-            Func<int, int> grantCores = (int availableCores) =>
+            Func<int, int> grantCores = (availableCores) =>
             {
                 int grantedCores = Math.Min(requestedCores, availableCores);
                 if (grantedCores > 0)
@@ -600,7 +599,7 @@ namespace Microsoft.Build.BackEnd
                 // We have no cores to grant at the moment, queue up the request.
                 TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
                 _pendingRequestCoresCallbacks.Enqueue(completionSource);
-                return completionSource.Task.ContinueWith((Task<int> task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
+                return completionSource.Task.ContinueWith((task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 
@@ -1019,11 +1018,8 @@ namespace Microsoft.Build.BackEnd
         private void AssignUnscheduledRequestsWithConfigurationCountLevelling(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
             // Assign requests but try to keep the same number of configurations on each node
-            List<int> nodesByConfigurationCountAscending = new List<int>(_availableNodes.Keys);
-            nodesByConfigurationCountAscending.Sort(delegate (int left, int right)
-            {
-                return Comparer<int>.Default.Compare(_schedulingData.GetConfigurationsCountByNode(left, true /* excludeTraversals */, _configCache), _schedulingData.GetConfigurationsCountByNode(right, true /* excludeTraversals */, _configCache));
-            });
+            // Use OrderBy to sort since it will cache the lookup in configCache which. This reduces the number of times we have to acquire the lock.
+            IEnumerable<int> nodesByConfigurationCountAscending = _availableNodes.Keys.OrderBy(x => _schedulingData.GetConfigurationsCountByNode(x, excludeTraversals: true, _configCache));
 
             // Assign projects to nodes, preferring to assign work to nodes with the fewest configurations first.
             foreach (int nodeId in nodesByConfigurationCountAscending)
@@ -1354,8 +1350,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestToNode(SchedulableRequest request, int nodeId, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(request, nameof(request));
-            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
+            ErrorUtilities.VerifyThrowArgumentNull(request);
+            ErrorUtilities.VerifyThrowArgumentNull(responses);
             ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
 
             request.VerifyState(SchedulableRequestState.Unscheduled);
@@ -1619,15 +1615,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedOnInProgressTarget(SchedulableRequest blockedRequest, BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest, nameof(blockedRequest));
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
+            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest);
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
 
             // We are blocked on an in-progress request building a target whose results we need.
             SchedulableRequest blockingRequest = _schedulingData.GetScheduledRequest(blocker.BlockingRequestId);
 
             // The request we blocked on couldn't have been executing (because we are) so it must either be yielding (which is ok because
             // it isn't modifying its own state, just running a background process), ready, or still blocked.
-            blockingRequest.VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked });
+            blockingRequest.VerifyOneOfStates([SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked]);
 
             // detect the case for https://github.com/dotnet/msbuild/issues/3047
             // if we have partial results AND blocked and blocking share the same configuration AND are blocked on each other
@@ -1651,7 +1647,7 @@ namespace Microsoft.Build.BackEnd
         private void HandleRequestBlockedOnResultsTransfer(SchedulableRequest parentRequest, List<ScheduleResponse> responses)
         {
             // Create the new request which will go to the configuration's results node.
-            BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, Array.Empty<string>(), null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
+            BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, [], null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
 
             // Assign a new global request id - always different from any other.
             newRequest.GlobalRequestId = _nextGlobalRequestId;
@@ -1678,8 +1674,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedByNewRequests(SchedulableRequest parentRequest, BuildRequestBlocker blocker, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
-            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
+            ErrorUtilities.VerifyThrowArgumentNull(responses);
 
             // The request is waiting on new requests.
             bool abortRequestBatch = false;
@@ -2033,7 +2029,7 @@ namespace Microsoft.Build.BackEnd
                 SchedulableRequest parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
                     ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
 
-                ErrorUtilities.VerifyThrowInternalNull(parentRequest, nameof(parentRequest));
+                ErrorUtilities.VerifyThrowInternalNull(parentRequest);
                 ErrorUtilities.VerifyThrow(
                     configCache.HasConfiguration(parentRequest.BuildRequest.ConfigurationId),
                     "All non root requests should have a parent with a loaded configuration");
@@ -2434,7 +2430,7 @@ namespace Microsoft.Build.BackEnd
 
             bool haveNonIdleNode = false;
             StringBuilder stringBuilder = new StringBuilder(64);
-            stringBuilder.AppendFormat("{0}:   ", previousEventTime.Ticks);
+            stringBuilder.Append(previousEventTime.Ticks).Append(":   ");
             for (int i = 0; i < currentWork.Length; i++)
             {
                 if (currentWork[i] == invalidWorkId)
@@ -2565,13 +2561,19 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
-                FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                try
+                {
+                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
-                file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
-                file.WriteLine(format, stuff);
-                file.Flush();
-                file.Dispose();
+                    using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, _schedulingData.EventTime.Ticks);
+                    file.WriteLine(format, stuff);
+                    file.Flush();
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Ignore exceptions
+                }
             }
         }
 
@@ -2584,9 +2586,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    try
                     {
+                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------");
 
@@ -2680,6 +2684,10 @@ namespace Microsoft.Build.BackEnd
 
                         file.WriteLine();
                     }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Ignore exceptions
+                    }
                 }
             }
         }
@@ -2693,8 +2701,10 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    try
                     {
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+
                         file.WriteLine("Configurations used during this build");
                         file.WriteLine("-------------------------------------");
 
@@ -2714,6 +2724,10 @@ namespace Microsoft.Build.BackEnd
 
                         file.Flush();
                     }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Ignore exceptions
+                    }
                 }
             }
         }
@@ -2727,13 +2741,19 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_schedulingData != null)
                 {
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    try
                     {
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+
                         file.WriteLine("Requests used during the build:");
                         file.WriteLine("-------------------------------");
                         file.WriteLine("Format: GlobalRequestId: [NodeId] FinalState (ConfigId) Path (Targets)");
                         DumpRequestHierarchy(file, null, 0);
                         file.Flush();
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Ignore exceptions
                     }
                 }
             }
@@ -2793,7 +2813,7 @@ namespace Microsoft.Build.BackEnd
                 request.State,
                 buildRequest.ConfigurationId,
                 _configCache[buildRequest.ConfigurationId].ProjectFullPath,
-                string.Join(", ", buildRequest.Targets.ToArray()));
+                string.Join(", ", buildRequest.Targets));
         }
 
         /// <summary>

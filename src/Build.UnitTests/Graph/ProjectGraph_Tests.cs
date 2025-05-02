@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -107,10 +108,11 @@ namespace Microsoft.Build.Graph.UnitTests
                     (projectPath, globalProperties, projectCollection) =>
                     {
                         factoryCalled = true;
-                        return ProjectGraph.DefaultProjectInstanceFactory(
+                        return ProjectGraph.StaticProjectInstanceFactory(
                             projectPath,
                             globalProperties,
-                            projectCollection);
+                            projectCollection,
+                            EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated));
                     });
                 projectGraph.ProjectNodes.Count.ShouldBe(1);
                 projectGraph.ProjectNodes.First().ProjectInstance.FullPath.ShouldBe(entryProject.Path);
@@ -2133,7 +2135,7 @@ $@"
 
             graph.ProjectNodes.Count.ShouldBe(4);
 
-            var outerBuild = graph.GraphRoots.First(IsOuterBuild);
+            var outerBuild = graph.GraphRoots.First(i => i.ProjectType == ProjectInterpretation.ProjectType.OuterBuild);
 
             AssertOuterBuild(outerBuild, graph, additionalGlobalProperties);
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 2), additionalGlobalProperties);
@@ -2215,7 +2217,7 @@ $@"
 
             AssertOuterBuild(outerBuild1, graph, additionalGlobalProperties);
 
-            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => IsInnerBuild(n) && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
+            var innerBuild1WithReferenceToInnerBuild2 = outerBuild1.ProjectReferences.FirstOrDefault(n => n.ProjectType == ProjectInterpretation.ProjectType.InnerBuild && n.ProjectInstance.GlobalProperties[InnerBuildPropertyName] == "a");
             innerBuild1WithReferenceToInnerBuild2.ShouldNotBeNull();
 
             var outerBuild2 = GetOuterBuild(graph, 2);
@@ -2805,6 +2807,119 @@ $@"
             {
                 // GetTargetFrameworks actually shouldn't be here...
                 targetLists[inner].ShouldBe(new[] { "GetTargetFrameworks", "GetTargetPath", "GetNativeManifest", "GetTargetFrameworksWithPlatformForSingleTargetFramework" });
+            }
+        }
+
+        [Theory]
+        // Built-in targets
+        [InlineData(new string[0], new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [InlineData(new[] { "Build" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [InlineData(new[] { "Rebuild" }, new[] { "Rebuild" }, new[] { "Rebuild" })]
+        [InlineData(new[] { "Clean" }, new[] { "Clean" }, new[] { "Clean" })]
+        [InlineData(new[] { "Publish" }, new[] { "Publish" }, new[] { "Publish" })]
+        // Traversal targets
+        [InlineData(new[] { "Project1" }, new[] { "Project1Default" }, new string[0])]
+        [InlineData(new[] { "Project2" }, new string[0], new[] { "Project2Default" })]
+        [InlineData(new[] { "Project1", "Project2" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [InlineData(new[] { "Project1:Rebuild" }, new[] { "Rebuild" }, new string[0])]
+        [InlineData(new[] { "Project2:Rebuild" }, new string[0], new[] { "Rebuild" })]
+        [InlineData(new[] { "Project1:Rebuild", "Project2:Clean" }, new[] { "Rebuild" }, new[] { "Clean" })]
+        [InlineData(new[] { "CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
+        [InlineData(new[] { "Project1:CustomTarget" }, new[] { "CustomTarget" }, new string[0])]
+        [InlineData(new[] { "Project2:CustomTarget" }, new string[0], new[] { "CustomTarget" })]
+        [InlineData(new[] { "Project1:CustomTarget", "Project2:CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
+        public void GetTargetListsWithSolution(string[] entryTargets, string[] expectedProject1Targets, string[] expectedProject2Targets)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                const string ExtraContent = """
+                    <Target Name="CustomTarget" />
+                    """;
+                TransientTestFile project1File = CreateProjectFile(env: env, projectNumber: 1, defaultTargets: "Project1Default", extraContent: ExtraContent);
+                TransientTestFile project2File = CreateProjectFile(env: env, projectNumber: 2, defaultTargets: "Project2Default", extraContent: ExtraContent);
+
+                string solutionFileContents = $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{project1File.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                    EndProject
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project2", "{{project2File.Path}}", "{2022C11A-1405-4983-BEC2-3A8B0233108F}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                            Release|x64 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.ActiveCfg = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.Build.0 = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.ActiveCfg = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|x64.Build.0 = Debug|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.ActiveCfg = Release|x64
+                            {2022C11A-1405-4983-BEC2-3A8B0233108F}.Release|x64.Build.0 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                    EndGlobal
+                    """;
+                TransientTestFile slnFile = env.CreateFile(@"Solution.sln", solutionFileContents);
+                SolutionFile solutionFile = SolutionFile.Parse(slnFile.Path);
+
+                ProjectGraph projectGraph = new(slnFile.Path);
+                ProjectGraphNode project1Node = GetFirstNodeWithProjectNumber(projectGraph, 1);
+                ProjectGraphNode project2Node = GetFirstNodeWithProjectNumber(projectGraph, 2);
+
+                IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(entryTargets);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists[project1Node].ShouldBe(expectedProject1Targets);
+                targetLists[project2Node].ShouldBe(expectedProject2Targets);
+            }
+        }
+
+        [Theory]
+        [InlineData("Project1:Build")]
+        [InlineData("Project1:")]
+        public void GetTargetListsWithSolutionInvalidTargets(string entryTarget)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                TransientTestFile project1File = CreateProjectFile(env: env, projectNumber: 1);
+                string solutionFileContents = $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{project1File.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                            Release|x64 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.ActiveCfg = Release|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Release|x64.Build.0 = Release|x64
+                        EndGlobalSection
+                        GlobalSection(SolutionProperties) = preSolution
+                            HideSolutionNode = FALSE
+                        EndGlobalSection
+                    EndGlobal
+                    """;
+                TransientTestFile slnFile = env.CreateFile(@"Solution.sln", solutionFileContents);
+                SolutionFile solutionFile = SolutionFile.Parse(slnFile.Path);
+
+                ProjectGraph projectGraph = new(slnFile.Path);
+
+                var getTargetListsFunc = (() => projectGraph.GetTargetLists([entryTarget]));
+                InvalidProjectFileException exception = getTargetListsFunc.ShouldThrow<InvalidProjectFileException>();
+                exception.Message.ShouldContain($"The target \"{entryTarget}\" does not exist in the project.");
             }
         }
 

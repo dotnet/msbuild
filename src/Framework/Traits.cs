@@ -4,16 +4,15 @@
 using System;
 using System.Globalization;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    ///     Represents toggleable features of the MSBuild engine
+    ///     Represents toggleable features of the MSBuild engine.
     /// </summary>
     internal class Traits
     {
         private static Traits _instance = new Traits();
+
         public static Traits Instance
         {
             get
@@ -30,13 +29,13 @@ namespace Microsoft.Build.Framework
         {
             EscapeHatches = new EscapeHatches();
 
-            DebugScheduler = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
+            DebugScheduler = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
             DebugNodeCommunication = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"));
         }
 
         public EscapeHatches EscapeHatches { get; }
 
-        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
+        internal readonly string? MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
@@ -67,7 +66,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Allow the user to specify that two processes should not be communicating via an environment variable.
         /// </summary>
-        public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+        public static readonly string? MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
 
         /// <summary>
         /// Override property "MSBuildRuntimeType" to "Full", ignoring the actual runtime type of MSBuild.
@@ -103,18 +102,15 @@ namespace Microsoft.Build.Framework
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
 
         /// <summary>
-        /// Log all environment variables whether or not they are used in a build in the binary log.
+        /// Log all assembly loads including those that come from known MSBuild and .NET SDK sources in the binary log.
         /// </summary>
         public readonly bool LogAllAssemblyLoads = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLASSEMBLYLOADS"));
 
         /// <summary>
         /// Log all environment variables whether or not they are used in a build in the binary log.
         /// </summary>
-        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"))
-#if !TASKHOST
-            && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4)
-#endif
-            ;
+        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"));
+
         /// <summary>
         /// Log property tracking information.
         /// </summary>
@@ -133,8 +129,24 @@ namespace Microsoft.Build.Framework
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
+        public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+
+        /// <summary>
+        /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
+        /// mirroring
+        /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry
+        /// </summary>
+        public bool SdkTelemetryOptOut = IsEnvVarOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
+        public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
+        public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
+        public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
+        public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
+
+        // for VS17.14
+        public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
+        public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
 
         public static void UpdateFromEnvironment()
         {
@@ -150,6 +162,27 @@ namespace Microsoft.Build.Framework
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
                 ? result
                 : defaultValue;
+        }
+
+        /// <summary>
+        /// Parse a double from an environment variable with invariant culture.
+        /// </summary>
+        private static double? ParseDoubleFromEnvironmentVariable(string environmentVariable)
+        {
+            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable),
+                                  NumberStyles.Float,
+                                  CultureInfo.InvariantCulture,
+                                  out double result)
+                ? result
+                : null;
+        }
+
+        internal static bool IsEnvVarOneOrTrue(string name)
+        {
+            string? value = Environment.GetEnvironmentVariable(name);
+            return value != null &&
+                   (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                    value.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -358,6 +391,19 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         public readonly bool UseMinimalResxParsingInCoreScenarios = Environment.GetEnvironmentVariable("MSBUILDUSEMINIMALRESX") == "1";
 
+        /// <summary>
+        /// Escape hatch to ensure msbuild produces the compatible build results cache without versioning.
+        /// </summary>
+        /// <remarks>
+        /// Escape hatch for problems arising from https://github.com/dotnet/msbuild/issues/10208.
+        /// </remarks>
+        public readonly bool DoNotVersionBuildResult = Environment.GetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT") == "1";
+
+        /// <summary>
+        /// Escape hatch to ensure build check does not limit amount of results.
+        /// </summary>
+        public readonly bool DoNotLimitBuildCheckResultsNumber = Environment.GetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER") == "1";
+
         private bool _sdkReferencePropertyExpansionInitialized;
         private SdkReferencePropertyExpansionMode? _sdkReferencePropertyExpansionValue;
 
@@ -381,29 +427,6 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        /// <summary>
-        /// Allows displaying the deprecation warning for BinaryFormatter in your current environment.
-        /// </summary>
-        public bool EnableWarningOnCustomBuildEvent
-        {
-            get
-            {
-                var value = Environment.GetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING");
-
-                if (value == null)
-                {
-                    // If variable is not set explicitly, for .NETCORE warning appears.
-#if RUNTIME_TYPE_NETCORE
-                    return true;
-#else
-                    return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
-#endif
-                }
-
-                return value == "1";
-            }
-        }
-
         public bool UnquoteTargetSwitchParameters
         {
             get
@@ -411,27 +434,6 @@ namespace Microsoft.Build.Framework
                 return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
             }
         }
-
-        private bool? _isBinaryFormatterSerializationAllowed;
-        public bool IsBinaryFormatterSerializationAllowed
-        {
-            get
-            {
-                if (!_isBinaryFormatterSerializationAllowed.HasValue)
-                {
-#if RUNTIME_TYPE_NETCORE
-                    AppContext.TryGetSwitch("System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization",
-                        out bool enabled);
-                    _isBinaryFormatterSerializationAllowed = enabled;
-#else
-                    _isBinaryFormatterSerializationAllowed = true;
-#endif
-                }
-
-                return _isBinaryFormatterSerializationAllowed.Value;
-            }
-        }
-
 
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
@@ -548,7 +550,7 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// Clone from ErrorUtilities which isn't available in Framework.
         /// </remarks>
-        internal static void ThrowInternalError(string message, params object[] args)
+        internal static void ThrowInternalError(string message, params object?[] args)
         {
             throw new InternalErrorException(FormatString(message, args));
         }
@@ -567,7 +569,7 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// Clone from ResourceUtilities which isn't available in Framework.
         /// </remarks>
-        internal static string FormatString(string unformatted, params object[] args)
+        internal static string FormatString(string unformatted, params object?[] args)
         {
             string formatted = unformatted;
 
@@ -577,7 +579,7 @@ namespace Microsoft.Build.Framework
 #if DEBUG
                 // If you accidentally pass some random type in that can't be converted to a string,
                 // FormatResourceString calls ToString() which returns the full name of the type!
-                foreach (object param in args)
+                foreach (object? param in args)
                 {
                     // Check it has a real implementation of ToString() and the type is not actually System.String
                     if (param != null)

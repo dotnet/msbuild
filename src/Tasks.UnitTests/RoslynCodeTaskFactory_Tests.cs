@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -37,7 +36,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public RoslynCodeTaskFactory_Tests()
         {
             UseProjectRelativeDirectory("TaskFactorySource");
-            
+
             _verifySettings = new();
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
@@ -438,12 +437,15 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "You must specify source code within the Code element or a path to a file containing source code.");
         }
 
-        [Fact]
-        public void EmptyIncludeAttributeOnReferenceElement()
+        [Theory]
+        [InlineData("")]
+        [InlineData("Include=\"\"")]
+        [InlineData("Include=\" \"")]
+        public void EmptyIncludeAttributeOnReferenceElement(string includeSetting)
         {
             TryLoadTaskBodyAndExpectFailure(
-                taskBody: "<Reference Include=\"\" />",
-                expectedErrorMessage: "The \"Include\" attribute of the <Reference> element has been set but is empty. If the \"Include\" attribute is set it must not be empty.");
+                taskBody: $"<Reference {includeSetting} />",
+                expectedErrorMessage: $"The \"Include\" attribute of the <Reference> element in the task \"{TaskName}\" has been set but is empty. Make sure the attribute has a proper value.");
         }
 
         [Fact]
@@ -642,6 +644,81 @@ namespace InlineTask
                 var logger = proj.BuildProjectExpectFailure();
                 logger.AssertLogContains(errorMessage);
             }
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFromSourceFileInBinlog()
+        {
+            string taskName = "HelloTask";
+
+            string sourceContent = $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
+                    {
+                        public override bool Execute()
+                        {
+                            Log.LogMessage("Hello, world!");
+                            return !Log.HasLoggedErrors;
+                        }
+                    }
+                }
+                """;
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, taskName, sourceContent, true);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile()
+        {
+            string taskName = "HelloTask";
+
+            string sourceContent = $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
+                    {
+                """;
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, taskName, sourceContent, false);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlog()
+        {
+            string taskXml = @"
+                <Task>
+                    <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                              Log.LogMessage(""Hello, World!"");
+                		   ]]>
+                    </Code>
+                </Task>";
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, "HelloTask", taskXml, true);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlogWhenFailsToCompile()
+        {
+            string taskXml = @"
+                <Task>
+                    <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                              Log.LogMessage(""Hello, World!
+                		   ]]>
+                    </Code>
+                </Task>";
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                FactoryType.RoslynCodeTaskFactory, "HelloTask", taskXml, false);
         }
 
 #if !FEATURE_RUN_EXE_IN_TESTS

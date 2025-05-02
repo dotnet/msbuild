@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Graph;
@@ -30,7 +29,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             MSBuildFileSystemBase fileSystem,
             ProjectGraph? graph = null,
             IReadOnlyCollection<ProjectGraphEntryPoint>? graphEntryPoints = null)
-            : this(pluginSettings, fileSystem, requestedTargets: Array.Empty<string>(), graph, graphEntryPoints)
+            : this(pluginSettings, fileSystem, requestedTargets: [], graph, graphEntryPoints)
         {
         }
 

@@ -5,12 +5,11 @@
 /*  This test is designed especially to test Configuration parsing in net5.0
  *  which means it WON'T work in net472 and thus we don't run it in net472 */
 
+using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
-using Xunit;
-using System.Collections.Generic;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 
@@ -26,7 +25,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         // paths such as SDK path and RoslynTargetPath and nothing else. This behavior is expected and the exact same as before.
         public void ToolsetDefinitionLocationsIsDefault()
         {
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
             IDictionary<string, string> toolsetProperties
                 = new Dictionary<string, string>();
 
@@ -53,7 +52,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         // Most toolsets are available and the MsBuildTools and SDK paths are all in the net5.0 runtime.
         public void ToolsetDefinitionLocationsIsConfiguration()
         {
-            var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
+            using var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
             IDictionary<string, string> toolsetProperties
                 = new Dictionary<string, string>();
 

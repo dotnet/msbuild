@@ -15,50 +15,6 @@
         <target state="translated">生成失败。无法获取属性、项目和目标结果。在上面的 stderr 中查看详细信息。</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">在 {1} 秒内生成 {0}</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">失败</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with errors</source>
-        <target state="translated">失败，出现错误</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with warnings</source>
-        <target state="translated">失败，出现警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">已成功</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with warnings</source>
-        <target state="translated">成功，但出现警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">命令行参数 = "{0}"</target>
@@ -76,13 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: 不能在 MSBuild.rsp 自动响应文件中或由该自动响应文件引用的任何响应文件中指定 -noAutoResponse 开关。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -123,6 +72,204 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_43_GetPropertySwitch">
+        <source>  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </source>
+        <target state="translated">  -getProperty:propertyName,...
+                    在计算后写出一个或多个指定属性的值，
+                    但不执行生成，或者如果使用的是
+                    -targets 选项或 -getTargetResult 选项，
+                    则在生成后写出这些值。
+   </target>
+        <note>
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_44_GetItemSwitch">
+        <source>  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </source>
+        <target state="translated">  -getItem:itemName,...
+                    在计算后写出一个或多个指定项的值及其
+                    关联的元数据，但不
+                    执行生成，或者如果使用的是 -targets 选项
+                    或 -getTargetResult 选项，则在生成后写出
+                    这些值。
+   </target>
+        <note>
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
+        <source>  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </source>
+        <target state="translated">  -getTargetResult:targetName,...
+                    写出一个或多个目标的输出值，
+                    并且将执行指定的目标。
+   </target>
+        <note>
+      LOCALIZATION: "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
+        <source>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </source>
+        <target state="translated">  -featureAvailability:featureName,...
+                    检查功能可用性。结果是以下字符串之一:
+                    "Undefined"、"Available"、"NotAvailable" 和
+                    "Preview"。
+                    - Undefined - 未定义功能的可用性
+                    (功能可用性检查器不知道
+                    该功能名称)
+                    - NotAvailable - 功能不可用(不同于
+                    Undefined，功能可用性检查器知道
+                    该功能名称，并且还知道该功能不
+                    受当前 MSBuild 引擎支持)
+                    - Available - 功能可用
+                    - Preview - 功能处于预览状态(不稳定)
+                    (缩写: -fa)
+   </target>
+        <note>
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
+        <source>  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </source>
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                    启用或禁用终端记录器。终端记录器
+                    在控制台上实时提供增强的生成输出，
+                    这些输出在逻辑上按项目进行整理，旨在突出显示
+                    可操作信息。指定 auto (或使用
+                    不带参数的选项)，仅在标准输出未重定向的情况下
+                    使用终端记录器。不要分析输出，
+                    也不要依赖于它在将来的版本中保持
+                    不变。此选项在 MSBuild 17.8 和
+                    更高版本中提供。
+                    (缩写: -tl)
+   </target>
+        <note>
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
+        <source>  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
+
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </source>
+        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
+                    终端记录器的参数。(缩写: -tlp)
+                    可用参数。
+                       default - 指定终端
+                       记录器的默认行为。它需要以下值之一:
+                          - `on`、`true` 可强制使用 TerminalLogger，
+                           即使它已禁用也是如此。
+                          - `off`、`false` 可强制不使用 TerminalLogger，
+                           即使它已启用也是如此。
+                          - `auto` 可在终端支持 TerminalLogger
+                           且会话没有重定向的 stdout/stderr 时
+                           启用 TerminalLogger
+                       verbosity - 替代此记录器的 -verbosity
+                       设置
+                       showCommandLine - 显示 TaskCommandLineEvent 消息
+
+                     示例:
+                       -tlp:default=auto;verbosity=diag;shownCommandLine
+   </target>
+        <note>
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
+        <source>  -getResultOutputFile:file
+                     Redirect output from get* into a file.
+
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </source>
+        <target state="translated">  -getResultOutputFile:file
+                    将 get* 的输出重定向到文件中。
+
+                    示例:
+                    -getProperty:Bar -getResultOutputFile:Biz.txt
+                    这会将属性 Bar 的值写入 Biz.txt。
+   </target>
+        <note>
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_52_BuildCheckSwitch">
+        <source>  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see aka.ms/buildcheck
+	</source>
+        <target state="translated">  -check
+                     在生成中启用 BuildChecks。
+                     BuildCheck 允许评估规则以确保生成的
+                     属性。有关详细信息，请参阅 aka.ms/buildcheck
+	</target>
+        <note>
+    {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
+    LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+  </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: 低优先级值无效。{0}</target>
@@ -152,6 +299,26 @@
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LongPaths">
+        <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
+        <target state="translated">基于 Windows 注册表项 LongPathsEnabled，LongPaths 功能为 {0}。</target>
+        <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
+      </trans-unit>
+      <trans-unit id="LongPaths_Disabled">
+        <source>disabled</source>
+        <target state="translated">已禁用</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Enabled">
+        <source>enabled</source>
+        <target state="translated">已启用</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Missing">
+        <source>not set</source>
+        <target state="translated">未设置</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -1322,11 +1489,11 @@
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
-        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: 必须为功能可用性开关提供功能名称。</target>
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
+        <target state="translated">MSBUILD : error MSB1067: 必须为 featureAvailability 开关提供功能名称。</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1345,6 +1512,15 @@
         <note>
       {StrBegin="MSBUILD : error MSB1010: "}UE: This happens if the user does something like "msbuild.exe -getProperty". The user must pass in an actual property name
       following the switch, as in "msbuild.exe -getProperty:blah".
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="MissingGetResultFileError">
+        <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
+        <target state="translated">MSBUILD : error MSB1068: 必须为 getResultOutputFile 开关提供文件。</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
+      following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1415,7 +1591,7 @@
         <target state="translated">MSBUILD : error MSB1066: 为终端记录器指定一个或多个参数 (如果使用 -terminalLoggerParameters 开关)</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1492,37 +1668,6 @@
         <target state="translated">进程 = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3})</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4})</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: 项目文件不存在。</target>
@@ -1570,21 +1715,25 @@
       These are response file switches with the location of the response file on disk.
     </note>
       </trans-unit>
-      <trans-unit id="RestoreComplete">
-        <source>Restore complete ({0}s)</source>
-        <target state="translated">还原完成({0} 秒)</target>
-        <note>
-      {0}: duration in seconds with 1 decimal point
-    </note>
+      <trans-unit id="SAC">
+        <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
+        <target state="translated">基于 Windows 注册表项 VerifiedAndReputablePolicyState，SAC 状态 = {0}。</target>
+        <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
-      <trans-unit id="RestoreCompleteWithMessage">
-        <source>Restore {0} in {1}s</source>
-        <target state="translated">在 {1} 秒内还原 {0}</target>
-        <note>
-      Restore summary when finished with warning or error
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-    </note>
+      <trans-unit id="SAC_Enforcement">
+        <source>1: in enforcement</source>
+        <target state="translated">1: 强制中</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SAC_Evaluation">
+        <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
+        <target state="translated">2: 评估中。建议关闭开发环境中的智能应用控制，否则性能可能会受到影响</target>
+        <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Off">
+        <source>0: turned off</source>
+        <target state="translated">0: 已关闭</target>
+        <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
@@ -1649,35 +1798,6 @@
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
         <target state="translated">未使用终端记录器，因为正在将输出重定向到文件。</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_NoTF">
-        <source>{0}{1} test {2} ({3}s)</source>
-        <target state="new">{0}{1} test {2} ({3}s)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_WithTF">
-        <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="new">{0}{1} test {2} {3} ({4}s)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary">
-        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="new">Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</target>
-        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
@@ -1756,38 +1876,10 @@
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
       </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">正在尝试取消生成...</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: 要预处理的文件无效。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
-      </trans-unit>
-      <trans-unit id="LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: 无法创建记录器的实例。{0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1021: "}
-      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
-      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
-      </trans-unit>
-      <trans-unit id="LoggerNotFoundError">
-        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD : error MSB1020: 找不到记录器。请检查下列各项: 1.)指定的记录器名称与记录器类的名称相同。2.)记录器类为“public”并且实现 Microsoft.Build.Framework.ILogger 接口。3.)记录器程序集的路径正确无误，或者只使用所提供的程序集名称就可以加载记录器。</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
-      logger class must exist in the given assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectUpgradeNeededToVcxProj">
-        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD : error MSB4192: 项目文件“{0}”为“.vcproj”或“.dsp”文件格式，而 MSBuild 无法直接生成这些文件格式。请通过在 Visual Studio IDE 中打开该项目或运行转换工具来转换该项目；对于“.vcproj”格式，还可以使用 MSBuild 来生成包含该项目的解决方案文件。</target>
-        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
@@ -2082,6 +2174,29 @@
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD :错误 MSB1054: 必须指定文件名才可生成探查器结果。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XMake.LoggerCreationError">
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
+        <target state="translated">MSBUILD : error MSB1021: 无法创建记录器的实例。{0}</target>
+        <note>{StrBegin="MSBUILD : error MSB1021: "}
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
+      </trans-unit>
+      <trans-unit id="XMake.LoggerNotFoundError">
+        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
+        <target state="translated">MSBUILD : error MSB1020: 找不到记录器。请检查下列各项: 1.)指定的记录器名称与记录器类的名称相同。2.)记录器类为“public”并且实现 Microsoft.Build.Framework.ILogger 接口。3.)记录器程序集的路径正确无误，或者只使用所提供的程序集名称就可以加载记录器。</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
+      logger class must exist in the given assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
+        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
+        <target state="translated">MSBUILD : error MSB4192: 项目文件“{0}”为“.vcproj”或“.dsp”文件格式，而 MSBuild 无法直接生成这些文件格式。请通过在 Visual Studio IDE 中打开该项目或运行转换工具来转换该项目；对于“.vcproj”格式，还可以使用 MSBuild 来生成包含该项目的解决方案文件。</target>
+        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
   </file>

@@ -1090,7 +1090,7 @@ namespace Microsoft.Build.Tasks
                 string currentAssembly = String.Empty;
                 try
                 {
-#if NETCOREAPP
+#if NET
                     currentAssembly = Assembly.GetExecutingAssembly().Location;
 #else
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
@@ -1168,7 +1168,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(redistPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Enumerable.Empty<string>();
+                return [];
             }
 
             /// <summary>
@@ -1182,7 +1182,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(referencesPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Enumerable.Empty<string>();
+                return [];
             }
         }
 

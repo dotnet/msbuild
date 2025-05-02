@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -338,8 +337,8 @@ BuildEngine5.BuildProjectFilesInParallel(
             var deserializedOutputCacheRoot = CacheSerialization.DeserializeCaches(outputCaches[topoSortedProjectGraphNodes[1]]);
             deserializedOutputCacheDeclaredReference.exception.ShouldBeNull();
             deserializedOutputCacheRoot.exception.ShouldBeNull();
-            BuildResult[] declaredReferenceBuildResults = deserializedOutputCacheDeclaredReference.ResultsCache.GetEnumerator().ToArray();
-            BuildResult[] rootBuildResults = deserializedOutputCacheRoot.ResultsCache.GetEnumerator().ToArray();
+            BuildResult[] declaredReferenceBuildResults = deserializedOutputCacheDeclaredReference.ResultsCache.ToArray();
+            BuildResult[] rootBuildResults = deserializedOutputCacheRoot.ResultsCache.ToArray();
 
             // Both the root and declared reference projects should only have one build result.
             declaredReferenceBuildResults.Length.ShouldBe(1);

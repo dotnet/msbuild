@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 
 
@@ -45,7 +44,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.True(false);
+                    Assert.Fail();
                 }
 
                 // Make sure the pointer passed back for the method is not null
@@ -123,7 +122,7 @@ namespace Microsoft.Build.UnitTests
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    nonexistentDirectory = Path.Combine(currentDirectory, "foo", "bar", "baz") + Guid.NewGuid();
+                    nonexistentDirectory = $"{Path.Combine(currentDirectory, "foo", "bar", "baz")}{Guid.NewGuid()}";
 
                     if (!Directory.Exists(nonexistentDirectory))
                     {

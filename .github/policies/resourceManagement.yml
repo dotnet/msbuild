@@ -20,8 +20,8 @@ configuration:
           milestone: Backlog
       - isNotPartOfMilestone:
           milestone: Discussion
-      - isNotLabeledWith:
-          label: needs-triage
+      - hasLabel:
+          label: triaged
       - isIssue
       - isNotLabeledWith:
           label: stale
@@ -50,8 +50,8 @@ configuration:
           milestone: Backlog
       - isNotPartOfMilestone:
           milestone: Discussion
-      - isNotLabeledWith:
-          label: needs-triage
+      - hasLabel:
+          label: triaged
       actions:
       - closeIssue
       - addReply:
@@ -64,46 +64,53 @@ configuration:
       - isOpen
       - hasLabel:
           label: stale
+      - hasLabel:
+          label: triaged
       - not:
           hasLabel:
             label: bot-exclude
       then:
       - removeLabel:
           label: stale
-      - addLabel:
-          label: needs-triage
+      - removeLabel:
+          label: triaged
       description: Unstale Open Issues that get comments
     - if:
       - payloadType: Issue_Comment
       - not: isOpen
       - hasLabel:
           label: stale
+      - hasLabel:
+          label: triaged
       - not:
           hasLabel:
             label: bot-exclude
       then:
-      - addLabel:
-          label: needs-triage
-      description: Apply needs-triage to closed stale issues that get comments
+      - removeLabel:
+          label: triaged
+      description: Remove label triaged from closed stale issues that get comments
     - if:
       - payloadType: Issues
       - labelAdded:
           label: needs-more-info
-      - hasLabel:
-          label: needs-triage
+      - not:
+          hasLabel:
+            label: triaged
       then:
-      - removeLabel:
-          label: needs-triage
-      description: remove needs-triage when needs-more-info is applied
+      - addLabel:
+          label: triaged
+      description: Add label triaged to issue when needs-more-info is applied
     - if:
       - payloadType: Issue_Comment
       - isActivitySender:
           issueAuthor: True
       - hasLabel:
           label: needs-more-info
+      - hasLabel:
+          label: triaged
       then:
-      - addLabel:
-          label: needs-triage
+      - removeLabel:
+          label: triaged
       - addLabel:
           label: author-responded
       - removeLabel:
@@ -145,5 +152,52 @@ configuration:
       - addReply:
           reply: Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version.
       description: Comment on vs* branches
+    - if:
+      - payloadType: Pull_Request
+      - or:
+        - isAction:
+            action: Opened
+        - isAction:
+            action: Reopened
+      - or:
+        - filesMatchPattern:
+            pattern: ^.+\.swr$
+        - filesMatchPattern:
+            pattern: src/Package/MSBuild.VSSetup.*/.*
+      then:
+      - addReply:
+          reply: Hello @${issueAuthor}, I noticed that you’re changing an *.swr file or any file under src/Package/MSBuild.VSSetup.*. Please make sure to validate this change by an experimental VS insertion. This is accomplished by pushing to an exp/* branch, which requires write permissions to this repo.
+      description: Remind to run VS Perf DDRITs when deployed assemblies change
+    - if:
+      - payloadType: Issues
+      - labelAdded:
+          label: breaking-change
+      then:
+      - addReply:
+          reply: >-
+            Refer to the [.NET SDK breaking change guidelines](https://github.com/dotnet/sdk/blob/main/documentation/project-docs/breaking-change-guidelines.md#required-process-for-all-net-sdk-breaking-changes)
+      description: Add breaking change doc instructions to issue
+    - if:
+      - payloadType: Pull_Request
+      - labelAdded:
+          label: breaking-change
+      then:
+      - addLabel:
+          label: needs-breaking-change-doc-created
+      - addReply:
+          reply: >-
+            Added `needs-breaking-change-doc-created` label because this PR has the `breaking-change` label. 
+
+
+            When you commit this breaking change:
+
+
+            1. [ ] Create and link to this PR and the issue a matching issue in the dotnet/docs repo using the [breaking change documentation template](https://aka.ms/dotnet/docs/new-breaking-change-issue), then remove this `needs-breaking-change-doc-created` label.
+
+            2. [ ] Ask a committer to mail the `.NET SDK Breaking Change Notification` email list.
+
+
+            You can refer to the [.NET SDK breaking change guidelines](https://github.com/dotnet/sdk/blob/main/documentation/project-docs/breaking-change-guidelines.md)
+      description: Add breaking change instructions to PR.      
 onFailure: 
 onSuccess: 

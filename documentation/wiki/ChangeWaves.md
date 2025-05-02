@@ -6,6 +6,7 @@ Opt-out is a better approach for us because we'd likely get limited feedback whe
 
 ## How do they work?
 The opt-out comes in the form of setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
+The opt-out should be just a *temporary* workaround for a problem - as the feature will anyways become permanent eventually. For this reason - **please make sure to create or upvote a bug describing the issue making you opt-out**.
 
 ## When do they become permanent?
 A wave of features is set to "rotate out" (i.e. become standard functionality) two bands after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
@@ -23,40 +24,31 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 17.14
+- ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
+- ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details
+- [VS Telemetry](https://github.com/dotnet/msbuild/pull/11255)
+
+### 17.12
+- [Log TaskParameterEvent for scalar parameters](https://github.com/dotnet/msbuild/pull/9908)
+- [Convert.ToString during a property evaluation uses the InvariantCulture for all types](https://github.com/dotnet/msbuild/pull/9874)
+- [Fix oversharing of build results in ResultsCache](https://github.com/dotnet/msbuild/pull/9987)
+- [Add ParameterName and PropertyName to TaskParameterEventArgs](https://github.com/dotnet/msbuild/pull/10130)
+- [Emit eval props if requested by any sink](https://github.com/dotnet/msbuild/pull/10243)
+- [Load Microsoft.DotNet.MSBuildSdkResolver into default load context (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/10603)
+
 ### 17.10
-- [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
+- [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`. **Please note that [any usage of BinaryFormatter is insecure](https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide).**
 - [Warning on serialization custom events by default in .NET framework](https://github.com/dotnet/msbuild/pull/9318)
 - [Cache SDK resolver data process-wide](https://github.com/dotnet/msbuild/pull/9335)
 - [Target parameters will be unquoted](https://github.com/dotnet/msbuild/pull/9452), meaning  the ';' symbol in the parameter target name will always be treated as separator
 - [Add Link metadata to Resources in AssignLinkMetadata target](https://github.com/dotnet/msbuild/pull/9464)
 - [Change Version switch output to finish with a newline](https://github.com/dotnet/msbuild/pull/9485)
-- [Load Microsoft.DotNet.MSBuildSdkResolver into default load context (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9439)
 - [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
 - [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
 - [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
-
-
-### 17.8
-- [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
-- [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
-- [Moving from SHA1 to SHA256 for Hash task](https://github.com/dotnet/msbuild/pull/8812)
-- [Deprecating custom derived BuildEventArgs](https://github.com/dotnet/msbuild/pull/8917) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
-
-
-### 17.6
-- [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)
-- [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
-- [Log an error when no provided search path for an import exists](https://github.com/dotnet/msbuild/pull/8095)
-- [Log assembly loads](https://github.com/dotnet/msbuild/pull/8316)
-- [AnyHaveMetadataValue returns false when passed an empty list](https://github.com/dotnet/msbuild/pull/8603)
-- [Log item self-expansion](https://github.com/dotnet/msbuild/pull/8581)
-
-### 17.4
-- [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
-- [Consider `Platform` as default during Platform Negotiation](https://github.com/dotnet/msbuild/pull/7511)
-- [Adding accepted SDK name match pattern to SDK manifests](https://github.com/dotnet/msbuild/pull/7597)
-- [Throw warning indicating invalid project types](https://github.com/dotnet/msbuild/pull/7708)
-- [MSBuild server](https://github.com/dotnet/msbuild/pull/7634)
+- [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
+- [Keep the encoding of standard output & error consistent with the console code page for ToolTask](https://github.com/dotnet/msbuild/pull/9539)
 
 ## Change Waves No Longer In Rotation
 ### 16.8
@@ -83,3 +75,27 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Add Microsoft.IO.Redist for directory enumeration](https://github.com/dotnet/msbuild/pull/6771)
 - [Process-wide caching of ToolsetConfigurationSection](https://github.com/dotnet/msbuild/pull/6832)
 - [Normalize RAR output paths](https://github.com/dotnet/msbuild/pull/6533)
+
+### 17.4
+
+- [Respect deps.json when loading assemblies](https://github.com/dotnet/msbuild/pull/7520)
+- [Consider `Platform` as default during Platform Negotiation](https://github.com/dotnet/msbuild/pull/7511)
+- [Adding accepted SDK name match pattern to SDK manifests](https://github.com/dotnet/msbuild/pull/7597)
+- [Throw warning indicating invalid project types](https://github.com/dotnet/msbuild/pull/7708)
+- [MSBuild server](https://github.com/dotnet/msbuild/pull/7634)
+
+### 17.6
+
+- [Parse invalid property under target](https://github.com/dotnet/msbuild/pull/8190)
+- [Eliminate project string cache](https://github.com/dotnet/msbuild/pull/7965)
+- [Log an error when no provided search path for an import exists](https://github.com/dotnet/msbuild/pull/8095)
+- [Log assembly loads](https://github.com/dotnet/msbuild/pull/8316)
+- [AnyHaveMetadataValue returns false when passed an empty list](https://github.com/dotnet/msbuild/pull/8603)
+- [Log item self-expansion](https://github.com/dotnet/msbuild/pull/8581)
+
+### 17.8
+
+- [[RAR] Don't do I/O on SDK-provided references](https://github.com/dotnet/msbuild/pull/8688)
+- [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
+- [Moving from SHA1 to SHA256 for Hash task](https://github.com/dotnet/msbuild/pull/8812)
+- [Deprecating custom derived BuildEventArgs](https://github.com/dotnet/msbuild/pull/8917) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`

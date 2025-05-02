@@ -14,7 +14,7 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.FileAccesses
 {
-    internal sealed class FileAccessManager : IFileAccessManager, IBuildComponent
+    internal sealed class FileAccessManager : IFileAccessManager
     {
         private record Handlers(Action<BuildRequest, FileAccessData> FileAccessHander, Action<BuildRequest, ProcessData> ProcessHandler);
 
@@ -22,7 +22,7 @@ namespace Microsoft.Build.FileAccesses
         // is used to mark when the file accesses should be considered complete. Only after both this special file access is seen
         // and the build result is reported can plugins be notified about project completion.
         // NOTE! This is currently Windows-specific and will need to change once this feature is opened up to more scenarios.
-        private static readonly string FileAccessCompletionPrefix = BuildParameters.StartupDirectory[0] + @":\{MSBuildFileAccessCompletion}\";
+        private static readonly string FileAccessCompletionPrefix = $@"{BuildParameters.StartupDirectory[0]}:\{{MSBuildFileAccessCompletion}}\";
 
         private IScheduler? _scheduler;
         private IConfigCache? _configCache;

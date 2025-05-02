@@ -2,15 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
+#if FEATURE_COMPILED_XSL
+using System.Collections.Generic;
+using System.Reflection;
+#endif
 
 #nullable disable
 
@@ -292,7 +295,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     XmlMode = XmlModes.Xml;
-                    _data = new[] { xml };
+                    _data = [xml];
                 }
             }
 
@@ -451,8 +454,12 @@ namespace Microsoft.Build.Tasks
                 switch (_xslMode)
                 {
                     case XslModes.Xslt:
-                        xslct.Load(XmlReader.Create(new StringReader(_data)), settings, new XmlUrlResolver());
-                        break;
+                        {
+                            using var sr = new StringReader(_data);
+                            using var xmlReader = XmlReader.Create(sr);
+                            xslct.Load(xmlReader, settings, new XmlUrlResolver());
+                            break;
+                        }
                     case XslModes.XsltFile:
                         if (useTrustedSettings)
                         {
@@ -491,6 +498,7 @@ namespace Microsoft.Build.Tasks
                 return xslct;
             }
 
+#if FEATURE_COMPILED_XSL
             /// <summary>
             /// Find the type from an assembly and loads it.
             /// </summary>
@@ -524,6 +532,7 @@ namespace Microsoft.Build.Tasks
                     throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.MustSpecifyType", assemblyPath));
                 }
             }
+#endif
         }
         #endregion
     }

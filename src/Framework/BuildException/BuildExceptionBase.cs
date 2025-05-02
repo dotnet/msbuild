@@ -89,7 +89,7 @@ public abstract class BuildExceptionBase : Exception
 #if NET || NET45_OR_GREATER
         int? hresult = exception.HResult;
 #else
-            int? hresult = null;
+        int? hresult = null;
 #endif
         writer.WriteOptionalInt32(hresult);
 
@@ -127,7 +127,7 @@ public abstract class BuildExceptionBase : Exception
         string? deserializedStackTrace = reader.ReadOptionalString();
         string? source = reader.ReadOptionalString();
         string? helpLink = reader.ReadOptionalString();
-        int hResult = reader.ReadOptionalInt32();
+        int hResult = reader.ReadOptionalInt32() ?? 0;
 
         IDictionary<string, string?>? customKeyedSerializedData = null;
         if (reader.ReadByte() == 1)

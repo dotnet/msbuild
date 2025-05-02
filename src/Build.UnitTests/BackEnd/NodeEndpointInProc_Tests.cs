@@ -8,9 +8,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Xunit;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable
 
@@ -81,6 +80,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 throw new NotImplementedException();
             }
 
+            public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent => throw new NotImplementedException("Not expected to be used.");
+
             public void RegisterFactory(BuildComponentType type, BuildComponentFactoryDelegate factory)
             {
             }
@@ -100,6 +101,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+            {
+                throw new NotImplementedException();
+            }
+
+            public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
             {
                 throw new NotImplementedException();
             }
@@ -330,7 +336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             endpoints.ManagerEndpoint.SendData(managerPacket);
             if (!_host.DataReceivedEvent.WaitOne(1000))
             {
-                Assert.True(false, "Data not received before timeout expired.");
+                Assert.Fail("Data not received before timeout expired.");
             }
             Assert.Equal(_host.DataReceivedContext.packet, managerPacket);
             Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
@@ -340,7 +346,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             endpoints.NodeEndpoint.SendData(nodePacket);
             if (!_host.DataReceivedEvent.WaitOne(1000))
             {
-                Assert.True(false, "Data not received before timeout expired.");
+                Assert.Fail("Data not received before timeout expired.");
             }
             Assert.Equal(_host.DataReceivedContext.packet, nodePacket);
             Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);

@@ -11,19 +11,20 @@ using System.Runtime.Remoting.Lifetime;
 #endif
 using System.Diagnostics;
 using System.Reflection;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.FileAccesses;
+#endif
 
 #nullable disable
 
@@ -42,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Help diagnose tasks that log after they return.
         /// </summary>
-        private static bool s_breakOnLogAfterTaskReturns = Environment.GetEnvironmentVariable("MSBUILDBREAKONLOGAFTERTASKRETURNS") == "1";
+        private static readonly bool s_breakOnLogAfterTaskReturns = Environment.GetEnvironmentVariable("MSBUILDBREAKONLOGAFTERTASKRETURNS") == "1";
 
         /// <summary>
         /// The build component host
@@ -114,9 +115,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="targetBuilderCallback">An <see cref="ITargetBuilderCallback"/> to use to invoke targets and build projects.</param>
         public TaskHost(IBuildComponentHost host, BuildRequestEntry requestEntry, ElementLocation taskLocation, ITargetBuilderCallback targetBuilderCallback)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
-            ErrorUtilities.VerifyThrowInternalNull(taskLocation, nameof(taskLocation));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
+            ErrorUtilities.VerifyThrowInternalNull(taskLocation);
 
             _host = host;
             _requestEntry = requestEntry;
@@ -261,11 +262,11 @@ namespace Microsoft.Build.BackEnd
         {
             VerifyActiveProxy();
             return BuildProjectFilesInParallel(
-                new string[] { projectFileName },
+                [projectFileName],
                 targetNames,
-                new IDictionary[] { globalProperties },
-                new IDictionary[] { targetOutputs },
-                new string[] { toolsVersion },
+                [globalProperties],
+                [targetOutputs],
+                [toolsVersion],
                 true,
                 false);
         }
@@ -357,7 +358,7 @@ namespace Microsoft.Build.BackEnd
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId == -1, "Cannot call Yield() while yielding.");
-                _yieldThreadId = Thread.CurrentThread.ManagedThreadId;
+                _yieldThreadId = Environment.CurrentManagedThreadId;
                 MSBuildEventSource.Log.ExecuteTaskYieldStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Yield();
             }
@@ -386,7 +387,7 @@ namespace Microsoft.Build.BackEnd
             {
                 IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
                 ErrorUtilities.VerifyThrow(_yieldThreadId != -1, "Cannot call Reacquire() before Yield().");
-                ErrorUtilities.VerifyThrow(_yieldThreadId == Thread.CurrentThread.ManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Thread.CurrentThread.ManagedThreadId, _yieldThreadId);
+                ErrorUtilities.VerifyThrow(_yieldThreadId == Environment.CurrentManagedThreadId, "Cannot call Reacquire() on thread {0} when Yield() was called on thread {1}", Environment.CurrentManagedThreadId, _yieldThreadId);
                 MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
                 builderCallback.Reacquire();
@@ -395,7 +396,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#endregion
+        #endregion
 
         #region IBuildEngine Members
 
@@ -408,7 +409,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+                ErrorUtilities.VerifyThrowArgumentNull(e);
 
                 if (!_activeProxy)
                 {
@@ -478,7 +479,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+                ErrorUtilities.VerifyThrowArgumentNull(e);
 
                 if (!_activeProxy)
                 {
@@ -519,7 +520,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+                ErrorUtilities.VerifyThrowArgumentNull(e);
 
                 if (!_activeProxy)
                 {
@@ -560,7 +561,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
+                ErrorUtilities.VerifyThrowArgumentNull(e);
 
                 if (!_activeProxy)
                 {
@@ -651,7 +652,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_callbackMonitor)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(eventName, nameof(eventName));
+                ErrorUtilities.VerifyThrowArgumentNull(eventName);
 
                 if (!_activeProxy)
                 {
@@ -957,7 +958,7 @@ namespace Microsoft.Build.BackEnd
 
         public EngineServices EngineServices { get; }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Called by the internal MSBuild task.
@@ -965,8 +966,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public async Task<BuildEngineResult> InternalBuildProjects(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames);
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
             VerifyActiveProxy();
 
             BuildEngineResult result;
@@ -1138,8 +1139,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A Task returning a structure containing the result of the build, success or failure and the list of target outputs per project</returns>
         private async Task<BuildEngineResult> BuildProjectFilesInParallelAsync(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<String>[] undefineProperties, string[] toolsVersion, bool returnTargetOutputs, bool skipNonexistentTargets = false)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames, nameof(projectFileNames));
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFileNames);
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
             VerifyActiveProxy();
 
             List<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = null;
@@ -1205,8 +1206,8 @@ namespace Microsoft.Build.BackEnd
                     BuildResult[] results = await builderCallback.BuildProjects(
                         projectFileNames,
                         propertyDictionaries,
-                        toolsVersion ?? Array.Empty<string>(),
-                        targetNames ?? Array.Empty<string>(),
+                        toolsVersion ?? [],
+                        targetNames ?? [],
                         waitForResults: true,
                         skipNonexistentTargets: skipNonexistentTargets);
 

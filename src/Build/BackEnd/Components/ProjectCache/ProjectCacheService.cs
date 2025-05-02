@@ -16,12 +16,15 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
+#if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
+#endif
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
@@ -31,7 +34,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
     {
         private static readonly ParallelOptions s_parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
-        private static HashSet<string> s_projectSpecificPropertyNames = new(StringComparer.OrdinalIgnoreCase) { "TargetFramework", "Configuration", "Platform", "TargetPlatform", "OutputType" };
+        private static readonly HashSet<string> s_projectSpecificPropertyNames = new(StringComparer.OrdinalIgnoreCase) { "TargetFramework", "Configuration", "Platform", "TargetPlatform", "OutputType" };
 
         private readonly BuildManager _buildManager;
         private readonly IBuildComponentHost _componentHost;
@@ -114,8 +117,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                             foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(node.ProjectInstance))
                             {
                                 // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, requestedTargets, cancellationToken)
-                                    .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
+                                _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph, buildRequestConfiguration: null, requestedTargets, cancellationToken);
                             }
                         });
                 },
@@ -148,8 +150,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         projectCacheDescriptor =>
                         {
                             // Intentionally fire-and-forget to asynchronously initialize the plugin. Any exceptions will bubble up later when querying.
-                            _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, requestedTargets, cancellationToken)
-                                .ContinueWith(t => { }, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted);
+                            _ = GetProjectCachePluginAsync(projectCacheDescriptor, projectGraph: null, buildRequestConfiguration, requestedTargets, cancellationToken);
                         });
                 },
                 cancellationToken);
@@ -271,23 +272,23 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 }
 
 #if FEATURE_REPORTFILEACCESSES
-            FileAccessManager.HandlerRegistration? handlerRegistration = null;
-            if (_componentHost.BuildParameters.ReportFileAccesses)
-            {
-                handlerRegistration = _fileAccessManager.RegisterHandlers(
-                    (buildRequest, fileAccessData) =>
-                    {
-                        // TODO: Filter out projects which do not configure this plugin
-                        FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                        pluginInstance.HandleFileAccess(fileAccessContext, fileAccessData);
-                    },
-                    (buildRequest, processData) =>
-                    {
-                        // TODO: Filter out projects which do not configure this plugin
-                        FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                        pluginInstance.HandleProcess(fileAccessContext, processData);
-                    });
-            }
+                FileAccessManager.HandlerRegistration? handlerRegistration = null;
+                if (_componentHost.BuildParameters.ReportFileAccesses)
+                {
+                    handlerRegistration = _fileAccessManager.RegisterHandlers(
+                        (buildRequest, fileAccessData) =>
+                        {
+                            // TODO: Filter out projects which do not configure this plugin
+                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                            pluginInstance.HandleFileAccess(fileAccessContext, fileAccessData);
+                        },
+                        (buildRequest, processData) =>
+                        {
+                            // TODO: Filter out projects which do not configure this plugin
+                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                            pluginInstance.HandleProcess(fileAccessContext, processData);
+                        });
+                }
 #endif
 
                 return new ProjectCachePlugin(
@@ -448,13 +449,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 },
                 cancellationToken);
 
-            async Task<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
+            async ValueTask<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
             {
                 EvaluateProjectIfNecessary(cacheRequest.Submission, cacheRequest.Configuration);
 
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
-                    cacheRequest.Submission.BuildRequestData.TargetNames.ToArray());
+                    cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? []);
                 BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
                     cacheRequest.Submission.SubmissionId,
                     evaluationId: cacheRequest.Configuration.Project.EvaluationId,
@@ -477,13 +478,16 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             void EvaluateProjectIfNecessary(BuildSubmission submission, BuildRequestConfiguration configuration)
             {
+                ErrorUtilities.VerifyThrow(submission.BuildRequestData != null,
+                    "Submission BuildRequestData is not populated.");
+
                 lock (configuration)
                 {
                     if (!configuration.IsLoaded)
                     {
                         configuration.LoadProjectIntoConfiguration(
                             _buildManager,
-                            submission.BuildRequestData.Flags,
+                            submission.BuildRequestData!.Flags,
                             submission.SubmissionId,
                             Scheduler.InProcNodeId);
 
@@ -495,7 +499,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
         }
 
-        private async Task<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
+        private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {
             ErrorUtilities.VerifyThrowInternalNull(buildRequest.ProjectInstance, nameof(buildRequest.ProjectInstance));
 
@@ -519,7 +523,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             HashSet<ProjectCacheDescriptor> queriedCaches = new(ProjectCacheDescriptorEqualityComparer.Instance);
             CacheResult? cacheResult = null;
-            foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(buildRequest.ProjectInstance))
+            foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(buildRequest.ProjectInstance!))
             {
                 // Ensure each unique plugin is only queried once
                 if (!queriedCaches.Add(projectCacheDescriptor))
@@ -583,7 +587,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     // TODO: This should be indented by the console logger. That requires making these log events structured.
                     if (!buildRequestConfiguration.IsTraversal)
                     {
-                        _loggingService.LogComment(buildEventContext, MessageImportance.High, "ProjectCacheHitWithOutputs", buildRequest.ProjectInstance.GetPropertyValue(ReservedPropertyNames.projectName));
+                        _loggingService.LogComment(buildEventContext, MessageImportance.High, "ProjectCacheHitWithOutputs", buildRequest.ProjectInstance!.GetPropertyValue(ReservedPropertyNames.projectName));
                     }
 
                     break;
@@ -647,7 +651,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
             }
             else
             {
-                return new[] { new ProjectGraphEntryPoint(configuration.ProjectFullPath, globalProperties) };
+                return [new ProjectGraphEntryPoint(configuration.ProjectFullPath, globalProperties)];
             }
 
             static IReadOnlyCollection<ProjectGraphEntryPoint> GenerateGraphEntryPointsFromSolutionConfigurationXml(
@@ -734,7 +738,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             IReadOnlyDictionary<string, string> globalProperties = GetGlobalProperties(requestConfiguration);
 
-            List<string> targets = buildResult.ResultsByTarget.Keys.ToList();
+            List<string> targets = buildResult.ResultsByTarget?.Keys.ToList() ?? new();
             string? targetNames = string.Join(", ", targets);
 
             FileAccessContext fileAccessContext = new(requestConfiguration.ProjectFullPath, globalProperties, targets);

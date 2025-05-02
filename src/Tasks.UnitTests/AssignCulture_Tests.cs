@@ -6,7 +6,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -14,11 +13,9 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class AssignCulture_Tests
     {
-        /*
-        * Method:   Basic
-        *
-        * Test the basic functionality.
-        */
+        /// <summary>
+        /// Tests the basic functionality.
+        /// </summary>
         [Fact]
         public void Basic()
         {
@@ -35,11 +32,9 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
-        /*
-        * Method:   CultureAttributePrecedence
-        *
-        * Any pre-existing Culture attribute on the item is to be ignored
-        */
+        /// <summary>
+        /// Any pre-existing Culture attribute on the item is to be ignored
+        /// </summary>
         [Fact]
         public void CultureAttributePrecedence()
         {
@@ -57,13 +52,11 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
-        /*
-        * Method:   CultureAttributePrecedenceWithBogusCulture
-        *
-        * This is really a corner case.
-        * If the incoming item has a 'Culture' attribute already, but that culture is invalid,
-        * we still overwrite that culture.
-        */
+        /// <summary>
+        /// This is really a corner case.
+        /// If the incoming item has a 'Culture' attribute already, but that culture is invalid,
+        /// we still overwrite that culture.
+        /// </summary>
         [Fact]
         public void CultureAttributePrecedenceWithBogusCulture()
         {
@@ -81,14 +74,10 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
-
-
-        /*
-        * Method:   AttributeForwarding
-        *
-        * Make sure that attributes set on input items are forwarded to output items.
-        * This applies to every attribute except for the one pointed to by CultureAttribute.
-        */
+        /// <summary>
+        /// Make sure that attributes set on input items are forwarded to output items.
+        /// This applies to every attribute except for the one pointed to by CultureAttribute.
+        /// </summary>
         [Fact]
         public void AttributeForwarding()
         {
@@ -108,12 +97,10 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        /*
-        * Method:   NoCulture
-        *
-        * Test the case where an item has no embedded culture. For example,
-        * "MyResource.resx"
-        */
+        /// <summary>
+        /// Test the case where an item has no embedded culture. For example:
+        /// "MyResource.resx"
+        /// </summary>
         [Fact]
         public void NoCulture()
         {
@@ -130,11 +117,9 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
-        /*
-        * Method:   NoExtension
-        *
-        * Test the case where an item has no extension. For example "MyResource".
-        */
+        /// <summary>
+        /// Test the case where an item has no extension. For example "MyResource".
+        /// </summary>
         [Fact]
         public void NoExtension()
         {
@@ -151,12 +136,10 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MyResource", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
 
-        /*
-        * Method:   DoubleDot
-        *
-        * Test the case where an item has two dots embedded, but otherwise looks
-        * like a well-formed item. For example "MyResource..resx".
-        */
+        /// <summary>
+        ///  Test the case where an item has two dots embedded, but otherwise looks
+        /// like a well-formed item.For example "MyResource..resx".
+        /// </summary>
         [Fact]
         public void DoubleDot()
         {
@@ -194,12 +177,11 @@ namespace Microsoft.Build.UnitTests
             Assert.Single(t.AssignedFilesWithNoCulture);
         }
 
-        /*
-        * Method:   PseudoLocalization
-        *
-        * Test the usage of Windows Pseudo-Locales
-        * https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
-        */
+        /// <summary>
+        /// Test the usage of Windows Pseudo-Locales
+        /// https://docs.microsoft.com/en-gb/windows/desktop/Intl/pseudo-locales
+        /// </summary>
+        /// <param name="culture"></param>
         [Theory]
         [InlineData("qps-ploc")]
         [InlineData("qps-plocm")]
@@ -275,6 +257,48 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("true", t.AssignedFiles[0].GetMetadata("WithCulture"));
             Assert.Equal(culture, t.AssignedFiles[0].GetMetadata("Culture"));
             Assert.Equal($"MyResource.{culture}.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
+
+        /// <summary>
+        /// Any pre-existing Culture attribute on the item is to be respected
+        /// </summary>
+        [Fact]
+        public void CultureMetaDataShouldBeRespected()
+        {
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem("MyResource.fr.resx");
+            i.SetMetadata("Culture", "en-GB");
+            t.Files = new ITaskItem[] { i };
+            t.RespectAlreadyAssignedItemCulture = true;
+            t.Execute();
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
+            Assert.Equal("en-GB", t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
+            Assert.Equal("MyResource.fr.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
+        }
+
+        /// <summary>
+        /// Any pre-existing Culture attribute on the item is not to be respected, because culture is not set
+        /// </summary>
+        [Fact]
+        public void CultureMetaDataShouldNotBeRespected()
+        {
+            AssignCulture t = new AssignCulture();
+            t.BuildEngine = new MockEngine();
+            ITaskItem i = new TaskItem("MyResource.fr.resx");
+            i.SetMetadata("Culture", "");
+            t.Files = new ITaskItem[] { i };
+            t.RespectAlreadyAssignedItemCulture = true;
+            t.Execute();
+
+            Assert.Single(t.AssignedFiles);
+            Assert.Single(t.CultureNeutralAssignedFiles);
+            Assert.Equal("fr", t.AssignedFiles[0].GetMetadata("Culture"));
+            Assert.Equal("MyResource.fr.resx", t.AssignedFiles[0].ItemSpec);
             Assert.Equal("MyResource.resx", t.CultureNeutralAssignedFiles[0].ItemSpec);
         }
     }

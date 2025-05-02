@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -555,7 +554,7 @@ namespace Microsoft.Build.CommandLine
 
         public EngineServices EngineServices { get; }
 
-#endregion
+        #endregion
 
 #endif
 
@@ -590,6 +589,16 @@ namespace Microsoft.Build.CommandLine
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+        }
+
+        /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>
@@ -644,7 +653,7 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
-            WaitHandle[] waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent };
+            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent];
 
             while (true)
             {
@@ -810,13 +819,11 @@ namespace Microsoft.Build.CommandLine
             // Wait for the RunTask task runner thread before shutting down so that we can cleanly dispose all WaitHandles.
             _taskRunnerThread?.Join();
 
-            if (_debugCommunications)
-            {
-                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
-                {
-                    writer.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
-                }
-            }
+            using StreamWriter debugWriter = _debugCommunications
+                    ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
+                    : null;
+
+            debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
 #if !CLR2COMPATIBILITY
             _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
@@ -827,8 +834,15 @@ namespace Microsoft.Build.CommandLine
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            // Restore the original environment.
-            CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+            // Restore the original environment, best effort.
+            try
+            {
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+            }
+            catch (Exception ex)
+            {
+                debugWriter?.WriteLine("Failed to restore the original environment: {0}.", ex);
+            }
 
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {

@@ -14,7 +14,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
@@ -417,7 +416,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(2, regularILoggerB.BuildStartedCount);
             Assert.Equal(2, regularILoggerC.BuildStartedCount);
 
-            // Make sure if we call build started again we only get one other build started event.
+            // Make sure if we call build finished again we only get one other build finished event.
             _initializedService.LogBuildFinished(true);
             Assert.Equal(2, regularILoggerA.BuildFinishedCount);
             Assert.Equal(2, regularILoggerB.BuildFinishedCount);
@@ -1123,13 +1122,13 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 _initializedService.ShutdownComponent();
-                Assert.True(false, "No Exceptions Generated");
+                Assert.Fail("No Exceptions Generated");
             }
             catch (Exception e)
             {
                 if (e.GetType() != expectedExceptionType)
                 {
-                    Assert.True(false, "Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
+                    Assert.Fail("Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
                 }
             }
         }

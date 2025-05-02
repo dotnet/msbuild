@@ -16,7 +16,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Resources;
 using System.Resources.Extensions;
 using System.Reflection;
@@ -42,6 +41,7 @@ using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using Microsoft.Win32;
+using System.Linq;
 #endif
 
 #nullable disable
@@ -145,7 +145,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESGEN
         // Our calculation is not quite correct. Using a number substantially less than 32768 in order to
         // be sure we don't exceed it.
-        private static int s_maximumCommandLength = 28000;
+        private const int s_maximumCommandLength = 28000;
 #endif // FEATURE_RESGEN
 
         // Contains the list of paths from which inputs will not be taken into account during up-to-date check.
@@ -579,7 +579,7 @@ namespace Microsoft.Build.Tasks
                     if (!ExtractResWFiles)
                     {
                         commandLineBuilder.AppendFileNamesIfNotNull(
-                            new string[] { inputFiles[i].ItemSpec, outputFiles[i].ItemSpec },
+                            [inputFiles[i].ItemSpec, outputFiles[i].ItemSpec],
                             ",");
                     }
                     else
@@ -597,7 +597,7 @@ namespace Microsoft.Build.Tasks
                 // append the strongly-typed resource details
                 commandLineBuilder.AppendSwitchIfNotNull(
                     "/str:",
-                    new string[] { StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName },
+                    [StronglyTypedLanguage, StronglyTypedNamespace, StronglyTypedClassName, StronglyTypedFileName],
                     ",");
             }
 
@@ -617,7 +617,7 @@ namespace Microsoft.Build.Tasks
         {
             // Throw an internal error, since this method should only ever get called by other aspects of this task, not
             // anything that the user touches.
-            ErrorUtilities.VerifyThrowInternalNull(resGenCommand, nameof(resGenCommand));
+            ErrorUtilities.VerifyThrowInternalNull(resGenCommand);
 
             // append the /useSourcePath flag if requested.
             if (UseSourcePath)
@@ -974,8 +974,8 @@ namespace Microsoft.Build.Tasks
                 // XML files are only dangerous if there are unrecognized objects in them
                 dangerous = false;
 
-                FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                XmlTextReader reader = new XmlTextReader(stream);
+                using FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using XmlTextReader reader = new XmlTextReader(stream);
                 reader.DtdProcessing = DtdProcessing.Ignore;
                 reader.XmlResolver = null;
                 try
@@ -1238,7 +1238,7 @@ namespace Microsoft.Build.Tasks
             while (currentCommand.Length < s_maximumCommandLength && i < inputsToProcess.Count)
             {
                 currentCommand.AppendFileNamesIfNotNull(
-                        new ITaskItem[] { inputsToProcess[i], outputsToProcess[i] },
+                        [inputsToProcess[i], outputsToProcess[i]],
                         ",");
                 i++;
             }
@@ -1622,14 +1622,13 @@ namespace Microsoft.Build.Tasks
         private void GetStronglyTypedResourceToProcess(ref List<ITaskItem> inputsToProcess, ref List<ITaskItem> outputsToProcess)
         {
             bool needToRebuildSTR = false;
+            CodeDomProvider provider = null;
 
             // The resource file isn't out of date. So check whether the STR class file is.
             try
             {
                 if (StronglyTypedFileName == null)
                 {
-                    CodeDomProvider provider = null;
-
                     if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
                     {
                         StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(provider, OutputResources[0].ItemSpec);
@@ -1644,6 +1643,10 @@ namespace Microsoft.Build.Tasks
                 _unsuccessfullyCreatedOutFiles.Add(OutputResources[0].ItemSpec);
                 _stronglyTypedResourceSuccessfullyCreated = false;
                 return;
+            }
+            finally
+            {
+                provider?.Dispose();
             }
 
             // Now we have the filename, check if it's up to date
@@ -1702,7 +1705,7 @@ namespace Microsoft.Build.Tasks
 
             // Check the timestamp of each of the passed-in references to find the newest;
             // and then the additional inputs
-            var inputs = (this.References ?? Enumerable.Empty<ITaskItem>()).Concat(this.AdditionalInputs ?? Enumerable.Empty<ITaskItem>());
+            ITaskItem[] inputs = this.References ?? [.. (this.AdditionalInputs ?? [])];
 
             foreach (ITaskItem input in inputs)
             {
@@ -1790,7 +1793,7 @@ namespace Microsoft.Build.Tasks
                                             string resolvedTypeName = typeName;
 
                                             // This type name might be an alias, so first resolve that if any.
-                                            int indexOfSeperator = typeName.IndexOf(",", StringComparison.Ordinal);
+                                            int indexOfSeperator = typeName.IndexOf(',');
 
                                             if (indexOfSeperator != -1)
                                             {
@@ -2005,17 +2008,13 @@ namespace Microsoft.Build.Tasks
 
             using (MemoryStream memoryStream = new MemoryStream(serializedData))
             {
+                // CodeQL [SM03722] required trust of BinaryFormatter-serialized resources documented at https://learn.microsoft.com/visualstudio/msbuild/generateresource-task
+                // CodeQL [SM04191] required trust of BinaryFormatter-serialized resources documented at https://learn.microsoft.com/visualstudio/msbuild/generateresource-task
                 object result = binaryFormatter.Deserialize(memoryStream);
 
                 return result != null;
             }
         }
-#endif
-
-        /// <summary>
-        /// Chars that should be ignored in the nicely justified block of base64
-        /// </summary>
-        private static readonly char[] s_specialChars = new char[] { ' ', '\r', '\n' };
 
         /// <summary>
         /// Turns the nicely justified block of base64 found in a resx into a byte array.
@@ -2023,7 +2022,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static byte[] ByteArrayFromBase64WrappedString(string text)
         {
-            if (text.IndexOfAny(s_specialChars) != -1)
+            if (text.AsSpan().IndexOfAny(' ', '\r', '\n') != -1) // Chars that should be ignored in the nicely justified block of base64
             {
                 StringBuilder sb = new StringBuilder(text.Length);
                 for (int i = 0; i < text.Length; i++)
@@ -2046,6 +2045,7 @@ namespace Microsoft.Build.Tasks
                 return Convert.FromBase64String(text);
             }
         }
+#endif
 
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
@@ -2153,11 +2153,18 @@ namespace Microsoft.Build.Tasks
             {
                 if (StronglyTypedFileName == null)
                 {
-                    CodeDomProvider provider;
-                    if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
+                    CodeDomProvider provider = null;
+                    try
                     {
-                        StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
-                            provider, OutputResources[0].ItemSpec);
+                        if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
+                        {
+                            StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
+                                provider, OutputResources[0].ItemSpec);
+                        }
+                    }
+                    finally
+                    {
+                        provider?.Dispose();
                     }
                 }
 
@@ -2288,10 +2295,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _inFiles;
 
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// List of satellite input files to process.
         /// </summary>
         private List<ITaskItem> _satelliteInFiles;
+#endif
 
         /// <summary>
         /// List of output files to process.
@@ -2302,11 +2311,6 @@ namespace Microsoft.Build.Tasks
         /// Whether we are extracting ResW files from an assembly, instead of creating .resources files.
         /// </summary>
         private bool _extractResWFiles;
-
-        /// <summary>
-        /// Where to write extracted ResW files.
-        /// </summary>
-        private string _resWOutputDirectory;
 
         private bool _usePreserializedResources;
 
@@ -2395,7 +2399,9 @@ namespace Microsoft.Build.Tasks
             _logger = log;
             _assemblyFiles = assemblyFilesList;
             _inFiles = inputs;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             _satelliteInFiles = satelliteInputs;
+#endif
             _outFiles = outputs;
             _useSourcePath = sourcePath;
             _stronglyTypedLanguage = language;
@@ -2406,7 +2412,6 @@ namespace Microsoft.Build.Tasks
             _stronglyTypedClassIsPublic = publicClass;
             _readers = new List<ReaderInfo>();
             _extractResWFiles = extractingResWFiles;
-            _resWOutputDirectory = resWOutputDirectory;
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
             _usePreserializedResources = usePreserializedResources;
             _logWarningForBinaryFormatter = logWarningForBinaryFormatter;
@@ -3032,7 +3037,7 @@ namespace Microsoft.Build.Tasks
 
                     default:
                         // We should never get here, we've already checked the format
-                        Debug.Fail("Unknown format " + format.ToString());
+                        Debug.Fail($"Unknown format {format}");
                         return;
                 }
                 _logger.LogMessageFromResources(MessageImportance.Low, "GenerateResource.ReadResourceMessage", reader.resources.Count, filename);
@@ -3313,7 +3318,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
-                    _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
+                    _logger.LogError($"{format} not supported on .NET Core MSBuild");
 #endif
                     break;
 
@@ -3327,7 +3332,7 @@ namespace Microsoft.Build.Tasks
 
                 default:
                     // We should never get here, we've already checked the format
-                    Debug.Fail("Unknown format " + format.ToString());
+                    Debug.Fail($"Unknown format {format}");
                     break;
             }
         }
@@ -3412,61 +3417,69 @@ namespace Microsoft.Build.Tasks
         /// <param name="sourceFile">The generated strongly typed filename</param>
         private void CreateStronglyTypedResources(ReaderInfo reader, String outFile, String inputFileName, out String sourceFile)
         {
-            CodeDomProvider provider;
-            if (!TryCreateCodeDomProvider(_logger, _stronglyTypedLanguage, out provider))
+            CodeDomProvider provider = null;
+            try
             {
-                sourceFile = null;
-                return;
-            }
-
-            // Default the class name if we need to
-            if (_stronglyTypedClassName == null)
-            {
-                _stronglyTypedClassName = Path.GetFileNameWithoutExtension(outFile);
-            }
-
-            // Default the filename if we need to
-            if (_stronglyTypedFilename == null)
-            {
-                _stronglyTypedFilename = GenerateDefaultStronglyTypedFilename(provider, outFile);
-            }
-            sourceFile = this.StronglyTypedFilename;
-
-            _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
-
-            // Generate the STR class
-            String[] errors;
-            bool generateInternalClass = !_stronglyTypedClassIsPublic;
-            // StronglyTypedResourcesNamespace can be null and this is ok.
-            // If it is null then the default namespace (=stronglyTypedNamespace) is used.
-            CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
-                    reader.resourcesHashTable,
-                    _stronglyTypedClassName,
-                    _stronglyTypedNamespace,
-                    _stronglyTypedResourcesNamespace,
-                    provider,
-                    generateInternalClass,
-                    out errors);
-
-            CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
-            using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
-            {
-                provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
-            }
-
-            if (errors.Length > 0)
-            {
-                _logger.LogErrorWithCodeFromResources("GenerateResource.ErrorFromCodeDom", inputFileName);
-                foreach (String error in errors)
+                if (!TryCreateCodeDomProvider(_logger, _stronglyTypedLanguage, out provider))
                 {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CodeDomError", error);
+                    sourceFile = null;
+                    return;
+                }
+
+
+                // Default the class name if we need to
+                if (_stronglyTypedClassName == null)
+                {
+                    _stronglyTypedClassName = Path.GetFileNameWithoutExtension(outFile);
+                }
+
+                // Default the filename if we need to
+                if (_stronglyTypedFilename == null)
+                {
+                    _stronglyTypedFilename = GenerateDefaultStronglyTypedFilename(provider, outFile);
+                }
+                sourceFile = this.StronglyTypedFilename;
+
+                _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
+
+                // Generate the STR class
+                String[] errors;
+                bool generateInternalClass = !_stronglyTypedClassIsPublic;
+                // StronglyTypedResourcesNamespace can be null and this is ok.
+                // If it is null then the default namespace (=stronglyTypedNamespace) is used.
+                CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
+                        reader.resourcesHashTable,
+                        _stronglyTypedClassName,
+                        _stronglyTypedNamespace,
+                        _stronglyTypedResourcesNamespace,
+                        provider,
+                        generateInternalClass,
+                        out errors);
+
+                CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
+                using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
+                {
+                    provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
+                }
+
+                if (errors.Length > 0)
+                {
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.ErrorFromCodeDom", inputFileName);
+                    foreach (String error in errors)
+                    {
+                        _logger.LogErrorWithCodeFromResources("GenerateResource.CodeDomError", error);
+                    }
+                }
+                else
+                {
+                    // No errors, and no exceptions - we presumably did create the STR class file
+                    // and it should get added to FilesWritten. So set a flag to indicate this.
+                    _stronglyTypedResourceSuccessfullyCreated = true;
                 }
             }
-            else
+            finally
             {
-                // No errors, and no exceptions - we presumably did create the STR class file
-                // and it should get added to FilesWritten. So set a flag to indicate this.
-                _stronglyTypedResourceSuccessfullyCreated = true;
+                provider?.Dispose();
             }
         }
 
@@ -3542,15 +3555,16 @@ namespace Microsoft.Build.Tasks
 #endif // FEATURE_RESXREADER_LIVEDESERIALIZATION
 
         /// <summary>
-        /// Read resources from a text format file
+        /// Read resources from a text format file.
         /// </summary>
-        /// <param name="reader">Reader info</param>
-        /// <param name="fileName">Input resources filename</param>
+        /// <param name="reader">Reader info.</param>
+        /// <param name="fileName">Input resources filename.</param>
         private void ReadTextResources(ReaderInfo reader, String fileName)
         {
             // Check for byte order marks in the beginning of the input file, but
             // default to UTF-8.
-            using (LineNumberStreamReader sr = new LineNumberStreamReader(fileName, new UTF8Encoding(true), true))
+            using var fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using (LineNumberStreamReader sr = new LineNumberStreamReader(fs, new UTF8Encoding(true), true))
             {
                 StringBuilder name = new StringBuilder(255);
                 StringBuilder value = new StringBuilder(2048);
@@ -3674,7 +3688,13 @@ namespace Microsoft.Build.Tasks
                                     }
                                     try
                                     {
-                                        ch = (char)UInt16.Parse(new String(hex), NumberStyles.HexNumber, CultureInfo.CurrentCulture);
+                                        ch = (char)UInt16.Parse(
+#if NET
+                                            hex,
+#else
+                                            new String(hex),
+#endif
+                                            NumberStyles.HexNumber, CultureInfo.CurrentCulture);
                                     }
                                     catch (FormatException)
                                     {
@@ -3876,8 +3896,8 @@ namespace Microsoft.Build.Tasks
             private int _lineNumber;
             private int _col;
 
-            internal LineNumberStreamReader(String fileName, Encoding encoding, bool detectEncoding)
-                : base(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read), encoding, detectEncoding)
+            internal LineNumberStreamReader(Stream fileStream, Encoding encoding, bool detectEncoding)
+                : base(fileStream, encoding, detectEncoding)
             {
                 _lineNumber = 1;
                 _col = 0;
@@ -4129,7 +4149,7 @@ namespace Microsoft.Build.Tasks
                             result = a.GetType(name, false, ignoreCase);
                             if (result == null)
                             {
-                                int indexOfComma = name.IndexOf(",", StringComparison.Ordinal);
+                                int indexOfComma = name.IndexOf(',');
                                 if (indexOfComma != -1)
                                 {
                                     string shortName = name.Substring(0, indexOfComma);

@@ -3,8 +3,6 @@
 
 using System.Runtime.InteropServices;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -75,7 +73,7 @@ namespace Microsoft.Build.Framework
         /// to defaults. If a logger does not take parameters, it can ignore this property.
         /// </summary>
         /// <value>The parameter string (can be null).</value>
-        string Parameters { get; set; }
+        string? Parameters { get; set; }
 
         /// <summary>
         /// Called by the build engine to allow loggers to subscribe to the events they desire.

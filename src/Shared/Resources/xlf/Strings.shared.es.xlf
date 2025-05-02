@@ -28,8 +28,8 @@
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
-        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Uso de BinaryFormatter no seguro durante la serialización del tipo de evento personalizado "{0}". Esto estará en desuso pronto. En su lugar, use Extended*EventArgs. Más información: https://aka.ms/msbuild/eventargs</target>
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">No se admite el tipo de evento personalizado '{0}' porque todos los tipos de eventos personalizados estaban en desuso. Use Extended*EventArgs en su lugar. Más información: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
@@ -126,8 +126,8 @@
         <note>{StrBegin="MSB5003: "}</note>
       </trans-unit>
       <trans-unit id="Shared.FailedDeletingTempFile">
-        <source>MSB5018: Failed to delete the temporary file "{0}". {1}</source>
-        <target state="translated">MSB5018: No se pudo eliminar el archivo temporal "{0}". {1}</target>
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: No se pudo eliminar el archivo temporal "{0}". {1} {2}</target>
         <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
       <trans-unit id="Shared.InvalidFilespecForTransform">
@@ -324,8 +324,8 @@
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
-        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined.</source>
-        <target state="translated">MSB5029: El valor “{0}” del atributo “{1}” en el elemento &lt;{2}&gt; en el archivo "{3}" es un carácter comodín que da como resultado la enumeración de todos los archivos de la unidad, lo que probablemente no estaba previsto. Compruebe que siempre se definan las propiedades a las que se hace referencia.</target>
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
+        <target state="translated">MSB5029: el valor "{0}" del atributo "{1}" en el elemento &lt;{2}&gt; en el archivo "{3}" es un carácter comodín que da como resultado enumerar todos los archivos de la unidad, lo que probablemente no estaba previsto. Compruebe que las propiedades a las que se hace referencia siempre están definidas y que el proyecto y el directorio de trabajo actual no están en la raíz de la unidad.</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

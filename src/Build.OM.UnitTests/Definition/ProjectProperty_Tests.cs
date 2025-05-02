@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
 using Xunit;
 
 #nullable disable
@@ -285,7 +283,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         private static ProjectProperty GetFirstProperty(string content)
         {
-            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
+
             Project project = new Project(projectXml);
             ProjectProperty property = project.GetProperty("p");
 

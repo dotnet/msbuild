@@ -1,13 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Xml;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 
 using Shouldly;
@@ -18,12 +13,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
     public class IntrinsicFunctionOverload_Tests
     {
-        private Version ChangeWaveForOverloading = ChangeWaves.Wave17_8;
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void MSBuildAddInteger(bool isIntrinsicFunctionOverloadsEnabled)
+        [Fact]
+        public void MSBuildAddInteger()
         {
             const string projectContent = @"
                     <Project>
@@ -32,18 +23,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = isIntrinsicFunctionOverloadsEnabled ? unchecked(long.MaxValue + 1).ToString() : (long.MaxValue + 1.0).ToString();
+            string expected = unchecked(long.MaxValue + 1).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
             ChangeWaves.ResetStateForTests();
-            if (!isIntrinsicFunctionOverloadsEnabled)
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-            }
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -58,13 +45,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = ((long.MaxValue +1D) + 1).ToString();
+            string expected = ((long.MaxValue + 1D) + 1).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -85,7 +73,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -106,15 +95,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void MSBuildSubtractInteger(bool isIntrinsicFunctionOverloadsEnabled)
+        [Fact]
+        public void MSBuildSubtractInteger()
         {
             const string projectContent = @"
                     <Project>
@@ -123,18 +111,12 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = isIntrinsicFunctionOverloadsEnabled ? 1.ToString() : 0.ToString();
+            string expected = 1.ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
-            ChangeWaves.ResetStateForTests();
-            if (!isIntrinsicFunctionOverloadsEnabled)
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-            }
-
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -155,7 +137,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -176,7 +159,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -197,15 +181,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void MSBuildMultiplyInteger(bool isIntrinsicFunctionOverloadsEnabled)
+        [Fact]
+        public void MSBuildMultiplyInteger()
         {
             const string projectContent = @"
                     <Project>
@@ -214,18 +197,12 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = isIntrinsicFunctionOverloadsEnabled ? unchecked(long.MaxValue * 2).ToString() : (long.MaxValue * 2.0).ToString();
+            string expected = unchecked(long.MaxValue * 2).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
-            ChangeWaves.ResetStateForTests();
-            if (!isIntrinsicFunctionOverloadsEnabled)
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-            }
-
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -246,7 +223,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -267,7 +245,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -288,15 +267,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void MSBuildDivideInteger(bool isIntrinsicFunctionOverloadsEnabled)
+        [Fact]
+        public void MSBuildDivideInteger()
         {
             const string projectContent = @"
                     <Project>
@@ -305,18 +283,12 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = isIntrinsicFunctionOverloadsEnabled ? (10 / 3).ToString() : (10.0 / 3.0).ToString();
+            string expected = (10 / 3).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 
-            ChangeWaves.ResetStateForTests();
-            if (!isIntrinsicFunctionOverloadsEnabled)
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-            }
-
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -337,7 +309,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -358,7 +331,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -379,15 +353,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void MSBuildModuloInteger(bool isIntrinsicFunctionOverloadsEnabled)
+        [Fact]
+        public void MSBuildModuloInteger()
         {
             const string projectContent = @"
                     <Project>
@@ -400,14 +373,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             using TestEnvironment env = TestEnvironment.Create();
 
-            ChangeWaves.ResetStateForTests();
-            if (!isIntrinsicFunctionOverloadsEnabled)
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaveForOverloading.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-            }
-
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -428,7 +395,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -449,7 +417,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
@@ -470,7 +439,8 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
             ChangeWaves.ResetStateForTests();
 
-            var project = new Project(XmlReader.Create(new StringReader(projectContent.Cleanup())));
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }

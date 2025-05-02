@@ -13,11 +13,9 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -1185,6 +1183,7 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         question: false,
+                                        isBuildCheckEnabled: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,
                                         saveProjectResult: false,
@@ -1528,25 +1527,6 @@ namespace Microsoft.Build.UnitTests
 #else
             MSBuildApp.Execute(new[] { @"msbuild.exe", project, "/t:foo.bar" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
 #endif
-        }
-
-        /// <summary>
-        /// Verifies that when the /profileevaluation switch is used with invalid filenames an error is shown.
-        /// </summary>
-        [MemberData(nameof(GetInvalidFilenames))]
-        [WindowsFullFrameworkOnlyTheory(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-        public void ProcessProfileEvaluationInvalidFilename(string filename)
-        {
-            bool enableProfiler = false;
-            Should.Throw(
-                () => MSBuildApp.ProcessProfileEvaluationSwitch(new[] { filename }, new List<ILogger>(), out enableProfiler),
-                typeof(CommandLineSwitchException));
-        }
-
-        public static IEnumerable<object[]> GetInvalidFilenames()
-        {
-            yield return new object[] { $"a_file_with${Path.GetInvalidFileNameChars().First()}invalid_chars" };
-            yield return new object[] { $"C:\\a_path\\with{Path.GetInvalidPathChars().First()}invalid\\chars" };
         }
 
         /// <summary>

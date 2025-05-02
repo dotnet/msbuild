@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging.TerminalLogger;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging.SimpleErrorLogger
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Logging.SimpleErrorLogger
             set { }
         }
 
-        public string Parameters
+        public string? Parameters
         {
             get => string.Empty;
             set { }

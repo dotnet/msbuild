@@ -15,7 +15,9 @@
     <ImportDirectoryPackagesProps>false</ImportDirectoryPackagesProps>
 
     <IsShipping>false</IsShipping>
-    <ExcludeFromSourceBuild>true</ExcludeFromSourceBuild>
+    <ExcludeFromSourceOnlyBuild>true</ExcludeFromSourceOnlyBuild>
+
+    <UseFrozenMaintenancePackageVersions>false</UseFrozenMaintenancePackageVersions>
   </PropertyGroup>
 
 </Project>

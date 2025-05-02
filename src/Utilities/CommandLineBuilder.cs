@@ -154,14 +154,14 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Use a private property so that we can lazy initialize the regex
         /// </summary>
-        private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes
-            ?? (_definitelyNeedQuotes = new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant));
+        private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes ??=
+            new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Use a private getter property to we can lazy initialize the regex
         /// </summary>
-        private Regex AllowedUnquoted => _allowedUnquoted
-            ?? (_allowedUnquoted = new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+        private Regex AllowedUnquoted => _allowedUnquoted ??=
+            new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Checks the given switch parameter to see if it must/can be quoted.
@@ -247,7 +247,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="unquotedTextToAppend"></param>
         protected void AppendQuotedTextToBuffer(StringBuilder buffer, string unquotedTextToAppend)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buffer, nameof(buffer));
+            ErrorUtilities.VerifyThrowArgumentNull(buffer);
 
             if (unquotedTextToAppend != null)
             {
@@ -259,6 +259,9 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // Count the number of quotes
+#if NET
+                int literalQuotes = unquotedTextToAppend.AsSpan().Count('"');
+#else
                 int literalQuotes = 0;
                 for (int i = 0; i < unquotedTextToAppend.Length; i++)
                 {
@@ -267,6 +270,8 @@ namespace Microsoft.Build.Utilities
                         literalQuotes++;
                     }
                 }
+#endif
+
                 if (literalQuotes > 0)
                 {
                     // Replace any \" sequences with \\"
@@ -399,7 +404,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">The delimiter between file names</param>
         public void AppendFileNamesIfNotNull(string[] fileNames, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (fileNames?.Length > 0)
             {
@@ -434,7 +439,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between items in the command line</param>
         public void AppendFileNamesIfNotNull(ITaskItem[] fileItems, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (fileItems?.Length > 0)
             {
@@ -478,7 +483,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="switchName">The switch to append to the command line, may not be null</param>
         public void AppendSwitch(string switchName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             AppendSpaceIfNotEmpty();
             AppendTextUnquoted(switchName);
@@ -495,7 +500,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, quoted if necessary. If null, this method has no effect.</param>
         public void AppendSwitchIfNotNull(string switchName, string parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -544,7 +549,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, quoted if necessary. If null, this method has no effect.</param>
         public void AppendSwitchIfNotNull(string switchName, ITaskItem parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -565,8 +570,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchIfNotNull(string switchName, string[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -597,8 +602,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchIfNotNull(string switchName, ITaskItem[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -635,7 +640,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, not quoted. If null, this method has no effect.</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, string parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -656,7 +661,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="parameter">Switch parameter to append, not quoted. If null, this method has no effect.</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, ITaskItem parameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
 
             if (parameter != null)
             {
@@ -676,8 +681,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, string[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {
@@ -707,8 +712,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="delimiter">Delimiter to put between individual parameters, may not be null (may be empty)</param>
         public void AppendSwitchUnquotedIfNotNull(string switchName, ITaskItem[] parameters, string delimiter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(switchName, nameof(switchName));
-            ErrorUtilities.VerifyThrowArgumentNull(delimiter, nameof(delimiter));
+            ErrorUtilities.VerifyThrowArgumentNull(switchName);
+            ErrorUtilities.VerifyThrowArgumentNull(delimiter);
 
             if (parameters?.Length > 0)
             {

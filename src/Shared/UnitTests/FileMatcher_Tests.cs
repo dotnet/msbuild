@@ -14,7 +14,6 @@ using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -649,7 +648,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 Console.WriteLine("GetFileSystemEntries('{0}', '{1}')", path, pattern);
-                Assert.True(false, "Unexpected input into GetFileSystemEntries");
+                Assert.Fail("Unexpected input into GetFileSystemEntries");
             }
             return new string[] { "<undefined>" };
         }
@@ -1353,7 +1352,7 @@ namespace Microsoft.Build.UnitTests
                     // Set env var to fail on drive enumerating wildcard detection
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "1");
 
-                    (string[] fileList, FileMatcher.SearchAction action, string excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (string[] fileList, FileMatcher.SearchAction action, string excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         driveEnumeratingWildcard);
 
@@ -1362,7 +1361,7 @@ namespace Microsoft.Build.UnitTests
                     excludeFileSpec.ShouldBe(string.Empty);
 
                     // Handle failing with drive enumerating exclude
-                    (fileList, action, excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (fileList, action, excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         @"/*/*.cs",
                         new List<string> { driveEnumeratingWildcard });
@@ -1394,7 +1393,7 @@ namespace Microsoft.Build.UnitTests
                     // Set env var to log on drive enumerating wildcard detection
                     Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
 
-                    (_, FileMatcher.SearchAction action, string excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (_, FileMatcher.SearchAction action, string excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         driveEnumeratingWildcard);
 
@@ -1402,7 +1401,7 @@ namespace Microsoft.Build.UnitTests
                     excludeFileSpec.ShouldBe(string.Empty);
 
                     // Handle logging with drive enumerating exclude
-                    (_, action, excludeFileSpec) = FileMatcher.Default.GetFiles(
+                    (_, action, excludeFileSpec, _) = FileMatcher.Default.GetFiles(
                         string.Empty,
                         @"/*/*.cs",
                         new List<string> { driveEnumeratingWildcard });
@@ -2116,7 +2115,7 @@ namespace Microsoft.Build.UnitTests
                             }
                             else
                             {
-                                Assert.True(false, String.Format("Unhandled case in GetMatchingFiles: {0}", pattern));
+                                Assert.Fail(String.Format("Unhandled case in GetMatchingFiles: {0}", pattern));
                             }
                         }
                     }
@@ -2173,7 +2172,7 @@ namespace Microsoft.Build.UnitTests
                                 }
                                 else
                                 {
-                                    Assert.True(false, String.Format("Unhandled case in GetMatchingDirectories: {0}", pattern));
+                                    Assert.Fail(String.Format("Unhandled case in GetMatchingDirectories: {0}", pattern));
                                 }
                             }
                         }
@@ -2496,7 +2495,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("Expect Fixed '{0}' got '{1}'", expectedFixedDirectoryPart, fixedDirectoryPart);
                 Console.WriteLine("Expect Wildcard '{0}' got '{1}'", expectedWildcardDirectoryPart, wildcardDirectoryPart);
                 Console.WriteLine("Expect Filename '{0}' got '{1}'", expectedFilenamePart, filenamePart);
-                Assert.True(false, "FileMatcher Regression: Failure while validating SplitFileSpec.");
+                Assert.Fail("FileMatcher Regression: Failure while validating SplitFileSpec.");
             }
         }
 
@@ -2524,7 +2523,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (!IsFileMatchAssertIfIllegal(filespec, fileToMatch, shouldBeRecursive))
             {
-                Assert.True(false, "FileMatcher Regression: Failure while validating that files match.");
+                Assert.Fail("FileMatcher Regression: Failure while validating that files match.");
             }
 
             // Now, simulate a filesystem with only fileToMatch. Make sure the file exists that way.
@@ -2549,7 +2548,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (IsFileMatchAssertIfIllegal(filespec, fileToMatch, shouldBeRecursive))
             {
-                Assert.True(false, "FileMatcher Regression: Failure while validating that files don't match.");
+                Assert.Fail("FileMatcher Regression: Failure while validating that files don't match.");
             }
 
             // Now, simulate a filesystem with only fileToMatch. Make sure the file doesn't exist that way.
@@ -2577,7 +2576,7 @@ namespace Microsoft.Build.UnitTests
 
             if (isLegalFileSpec)
             {
-                Assert.True(false, "FileMatcher Regression: Expected an illegal filespec, but got a legal one.");
+                Assert.Fail("FileMatcher Regression: Expected an illegal filespec, but got a legal one.");
             }
 
             // Now, FileMatcher is supposed to take any legal file name and just return it immediately.
@@ -2602,7 +2601,7 @@ namespace Microsoft.Build.UnitTests
             if (!match.isLegalFileSpec)
             {
                 Console.WriteLine("Checking FileSpec: '{0}' against '{1}'", filespec, fileToMatch);
-                Assert.True(false, "FileMatcher Regression: Invalid filespec.");
+                Assert.Fail("FileMatcher Regression: Invalid filespec.");
             }
             if (shouldBeRecursive != match.isFileSpecRecursive)
             {

@@ -9,11 +9,13 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.FileAccesses;
+#endif
 
 #nullable disable
 
@@ -139,7 +141,7 @@ namespace Microsoft.Build.BackEnd
             )
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType, nameof(taskType));
+            ErrorUtilities.VerifyThrowInternalNull(taskType);
 
             _taskLocation = taskLocation;
             _taskLoggingContext = taskLoggingContext;
@@ -373,6 +375,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes the specified packet
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
@@ -483,9 +495,9 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    exceptionMessageArgs = new string[] { _taskType.Type.Name,
+                    exceptionMessageArgs = [_taskType.Type.Name,
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
-                        string.Empty };
+                        string.Empty];
                 }
 
                 _taskLoggingContext.LogFatalError(taskHostTaskComplete.TaskException, new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);

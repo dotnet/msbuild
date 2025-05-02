@@ -3,19 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
-using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -134,7 +128,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.SetMetadata("m1", "v1");
             item.SetMetadata("m2", "v0");
 
-            ((IMetadataContainer) item).ImportMetadata(new Dictionary<string, string>
+            ((IMetadataContainer)item).ImportMetadata(new Dictionary<string, string>
             {
                 { "m2", "v2" },
                 { "m3", "v3" },
@@ -1167,7 +1161,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// </summary>
         private static IList<ProjectItemInstance> GetItems(string content)
         {
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             ProjectInstance project = new ProjectInstance(xml);
 
             return Helpers.MakeList(project.GetItems("i"));

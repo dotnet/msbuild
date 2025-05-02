@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 
 using Microsoft.Build.Framework;
 using Shouldly;
@@ -48,30 +47,6 @@ namespace Microsoft.Build.UnitTests
             projectStartedEvent = new ProjectStartedEventArgs(null, null, null, null, null, null, DateTime.Now);
             projectStartedEvent = new ProjectStartedEventArgs(1, null, null, null, null, null, null, null);
             projectStartedEvent = new ProjectStartedEventArgs(1, null, null, null, null, null, null, null, DateTime.Now);
-        }
-
-        /// <summary>
-        /// Verify different Items and properties are not taken into account in the equals comparison. They should
-        /// not be considered as part of the equals evaluation
-        /// </summary>
-        [Fact]
-        public void ItemsAndPropertiesDifferentEquals()
-        {
-            ArrayList itemsList = new ArrayList();
-            ArrayList propertiesList = new ArrayList();
-            ProjectStartedEventArgs differentItemsAndProperties = new ProjectStartedEventArgs(
-                  s_baseProjectStartedEvent.ProjectId,
-                  s_baseProjectStartedEvent.Message,
-                  s_baseProjectStartedEvent.HelpKeyword,
-                  s_baseProjectStartedEvent.ProjectFile,
-                  s_baseProjectStartedEvent.TargetNames,
-                  propertiesList,
-                  itemsList,
-                  s_baseProjectStartedEvent.ParentProjectBuildEventContext,
-                  s_baseProjectStartedEvent.Timestamp);
-
-            s_baseProjectStartedEvent.Properties.ShouldNotBe(propertiesList);
-            s_baseProjectStartedEvent.Items.ShouldNotBe(itemsList);
         }
 
         /// <summary>

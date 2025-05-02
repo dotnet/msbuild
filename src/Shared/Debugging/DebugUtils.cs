@@ -22,6 +22,13 @@ namespace Microsoft.Build.Shared.Debugging
 
         static DebugUtils()
         {
+            SetDebugPath();
+        }
+
+        // DebugUtils are initialized early on by the test runner - during preparing data for DataMemeberAttribute of some test,
+        //  for that reason it is not easily possible to inject the DebugPath in tests via env var (unless we want to run expensive exec style test).
+        internal static void SetDebugPath()
+        {
             string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
             string debugDirectory = environmentDebugPath;
 
@@ -85,17 +92,17 @@ namespace Microsoft.Build.Shared.Debugging
         {
             var processNameToBreakInto = Environment.GetEnvironmentVariable("MSBuildDebugProcessName");
             var thisProcessMatchesName = string.IsNullOrWhiteSpace(processNameToBreakInto) ||
-                                         Process.GetCurrentProcess().ProcessName.Contains(processNameToBreakInto);
+                                         EnvironmentUtilities.ProcessName.Contains(processNameToBreakInto);
 
             return thisProcessMatchesName;
         }
 
         public static readonly string ProcessInfoString =
-            $"{ProcessNodeMode.Value}_{Process.GetCurrentProcess().ProcessName}_PID={Process.GetCurrentProcess().Id}_x{(Environment.Is64BitProcess ? "64" : "86")}";
+            $"{ProcessNodeMode.Value}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
 
         public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
 
-        public static string DebugPath { get; }
+        public static string DebugPath { get; private set; }
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {

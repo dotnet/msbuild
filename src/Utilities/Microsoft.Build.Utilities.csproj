@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -23,18 +23,18 @@
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Collections.Immutable" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' and '$(DotNetBuildFromSource)' != 'true'">
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Text.Encoding.CodePages" />
   </ItemGroup>
-  
+
   <ItemGroup Label="Shared Code">
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>Shared\AssemblyFolders\AssemblyFoldersEx.cs</Link>
@@ -47,9 +47,6 @@
     </Compile>
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>Shared\EnvironmentUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>

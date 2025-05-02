@@ -11,7 +11,6 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -70,7 +69,7 @@ namespace Microsoft.Build.Graph.UnitTests
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
             _logger.FullLog.ShouldContain("MSB4256:");
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(6);
             _logger.ErrorCount.ShouldBe(1);
         }
 
@@ -356,13 +355,13 @@ namespace Microsoft.Build.Graph.UnitTests
 
             deserializationInfo.exception.ShouldBeNull();
 
-            var buildResults = deserializationInfo.ResultsCache.GetEnumerator().ToArray();
+            var buildResults = deserializationInfo.ResultsCache.ToArray();
             buildResults.ShouldHaveSingleItem();
 
             var rootNodeBuildResult = buildResults.First();
             rootNodeBuildResult.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ToArray().ShouldBe(expectedOutput[rootNode]);
 
-            var configEntries = deserializationInfo.ConfigCache.GetEnumerator().ToArray();
+            var configEntries = deserializationInfo.ConfigCache.ToArray();
             configEntries.ShouldHaveSingleItem();
 
             configEntries.First().ConfigurationId.ShouldBe(rootNodeBuildResult.ConfigurationId);
@@ -566,7 +565,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(6);
             _logger.Errors.First().Message.ShouldContain("MSB4255:");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist1");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist2");

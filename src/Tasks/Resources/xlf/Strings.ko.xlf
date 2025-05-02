@@ -2,6 +2,16 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ko" original="../Strings.resx">
     <body>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpened">
+        <source>The manifest file either does not exist or can not be read. Please make sure it exists and has relevant content.</source>
+        <target state="translated">매니페스트 파일이 없거나 읽을 수 없습니다. 해당 콘텐츠가 존재하고 관련 콘텐츠가 있는지 확인하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.ManifestCanNotBeOpenedWithException">
+        <source>The manifest file opening has failed with exception: '{0}'. Please make sure it exists and has relevant content.</source>
+        <target state="translated">'{0}' 예외로 인해 매니페스트 파일을 열지 못했습니다. 해당 콘텐츠가 존재하고 관련 콘텐츠가 있는지 확인하세요.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AppConfig.BindingRedirectMissingOldVersion">
         <source>BindingRedirect is missing required field 'oldVersion'.</source>
         <target state="translated">BindingRedirect에 필수 필드인 'oldVersion'이 없습니다.</target>
@@ -26,6 +36,14 @@
         <source>There was a problem parsing the newVersion attribute. {0}</source>
         <target state="translated">newVersion 특성을 구문 분석하는 동안 문제가 발생했습니다. {0}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="AssignCulture.CultureOverwritten">
+        <source>MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set.</source>
+        <target state="translated">MSB3002: 'RespectAlreadyAssignedItemCulture' 속성이 설정되지 않았기 때문에 항목 "{1}"에 대해 명시적으로 설정된 문화권 "{0}"을(를) 유추된 문화권 "{2}"(으)로 덮어썼습니다.</target>
+        <note>
+	{StrBegin="MSB3002: "}
+	'RespectAlreadyAssignedItemCulture' should not be translated
+	</note>
       </trans-unit>
       <trans-unit id="AssignProjectConfiguration.IllegalMappingString">
         <source>The platform mapping "{0}" in the platform mapping list "{1}" is malformed.  Please only pass in a semicolon-delimited list of constant string values separated by "=", e.g., "foo=bar;foo2=bar2".</source>
@@ -121,6 +139,11 @@
         <target state="translated">MSB3654: 서명을 연기하려면 적어도 공개 키를 지정해야 합니다.  KeyFile 또는 KeyContainer 속성을 사용하여 공개 키를 제공하거나 서명 연기를 비활성화하세요.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
+        <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
+        <target state="translated">MSB3752: "{2}" 작업에서 &lt;{1}&gt; 요소의 "{0}" 특성이 설정되었지만 비어 있습니다. 특성에 적절한 값이 있는지 확인합니다.</target>
+        <note>{StrBegin="MSB3752: "}</note>
+      </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
         <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
         <target state="translated">MSB3991: '{0}'이(가) 설정되지 않았거나 비어 있습니다. {1}이(가) false인 경우 '{0}'에 비어 있지 않은 값을 설정해야 합니다.</target>
@@ -130,6 +153,91 @@
         <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
         <target state="translated">MSB3992: '{0}'이(가) 설정되지 않았습니다. {1}이(가) true인 경우 '{0}'에 값을 설정해야 합니다.</target>
         <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.BaseIntermediateOutputPathMismatchWarning">
+        <source>MSB3539: The value of the property "BaseIntermediateOutputPath" was modified after it was used by MSBuild which can lead to unexpected build results. Tools such as NuGet will write outputs to the path specified by the "MSBuildProjectExtensionsPath" instead. To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650"</source>
+        <target state="translated">MSB3539: "BaseIntermediateOutputPath" 속성의 값이 MSBuild에서 사용된 후 수정되었으며, 이로 인해 예기치 않은 빌드 결과가 발생할 수 있습니다. NuGet과 같은 도구는 대신 "MSBuildProjectExtensionsPath"로 지정된 경로에 출력을 씁니다. 이 속성을 설정하려면 Microsoft.Common.props를 가져오기 전에 먼저 설정해야 합니다(예: Directory.Build.props 사용).  자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869650"를 참조하세요.</target>
+        <note>{StrBegin="MSB3539: "} </note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.CrossTargetingGetTargetFrameworks">
+        <source>Internal MSBuild error: Non-CrossTargeting GetTargetFrameworks target should not be used in cross targeting (outer) build</source>
+        <target state="translated">내부 MSBuild 오류: 교차 대상(외부) 빌드에 CrossTargeting이 아닌 GetTargetFrameworks 대상을 사용하면 안 됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.DeploymentUnpublishable">
+        <source>Skipping unpublishable project.</source>
+        <target state="translated">게시할 수 없는 프로젝트를 건너뛰는 중입니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.GenerateManifestsOnlyForExe">
+        <source>Publish is only valid for 'Windows Application' or 'Console Application' project types.</source>
+        <target state="translated">게시는 'Windows 응용 프로그램' 또는 '콘솔 응용 프로그램' 프로젝트 형식에 대해서만 유효합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.InvalidConfigurationTextWhenBuildingInsideVisualStudio">
+        <source>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. This error may also appear if some other project is trying to follow a project-to-project reference to this project, this project has been unloaded or is not included in the solution, and the referencing project does not build using the same or an equivalent Configuration or Platform.</source>
+        <target state="translated">프로젝트 '{0}' BaseOutputPath/OutputPath 속성이 설정되지 않았습니다.  검사 이 프로젝트에 대해 올바른 구성 및 플랫폼 조합을 지정했는지 확인하세요.  구성='{1}' 플랫폼='{2}'. 이 오류는 다른 프로젝트에서 이 프로젝트에 대한 프로젝트 간 참조를 따르려고 하거나, 이 프로젝트가 언로드되었거나 솔루션에 포함되지 않았으며, 참조하는 프로젝트가 동일하거나 동등한 구성 또는 플랫폼을 사용하여 빌드되지 않는 경우에도 나타날 수 있습니다.</target>
+        <note>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.InvalidConfigurationTextWhenBuildingOutsideVisualStudio">
+        <source>The BaseOutputPath/OutputPath property is not set for project '{0}'.  Please check to make sure that you have specified a valid combination of Configuration and Platform for this project.  Configuration='{1}'  Platform='{2}'. You may be seeing this message because you are trying to build a project without a solution file, and have specified a non-default Configuration or Platform that doesn't exist for this project.</source>
+        <target state="translated">프로젝트 '{0}' BaseOutputPath/OutputPath 속성이 설정되지 않았습니다.  검사 이 프로젝트에 대해 올바른 구성 및 플랫폼 조합을 지정했는지 확인하세요.  구성='{1}' 플랫폼='{2}'. 솔루션 파일 없이 프로젝트를 빌드하려고 하는데 이 프로젝트에 대해 존재하지 않는 기본값이 아닌 구성 또는 플랫폼을 지정했기 때문에 이 메시지가 표시될 수 있습니다.</target>
+        <note>LOCALIZATION:  Do not localize the words "BaseOutputPath/OutputPath", "Configuration" and "Platform"</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.MSBuildProjectExtensionsPathModifiedAfterUse">
+        <source>MSB3540: The value of the property "MSBuildProjectExtensionsPath" was modified after it was used by MSBuild which can lead to unexpected build results.  To set this property, you must do so before Microsoft.Common.props is imported, for example by using Directory.Build.props.  For more information, please visit https://go.microsoft.com/fwlink/?linkid=869650</source>
+        <target state="translated">MSB3540: "MSBuildProjectExtensionsPath" 속성의 값이 MSBuild에서 사용된 후 수정되어 예기치 않은 빌드 결과가 발생할 수 있습니다.  이 속성을 설정하려면 Microsoft.Common.props를 가져오기 전에 먼저 설정해야 합니다(예: Directory.Build.props 사용).  자세한 내용은 https://go.microsoft.com/fwlink/?linkid=869650 참조하세요.</target>
+        <note>{StrBegin="MSB3540: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.ManifestResourceWithNoCultureWarning">
+        <source>{0}: {1} item type is deprecated. Emit EmbeddedResource items instead, with metadata WithCulture='{2}', Type='{3}', and optional LogicalName.</source>
+        <target state="translated">{0}: {1} 항목 형식은 사용되지 않습니다. Metadata WithCulture='{2}', Type='{3}' 및 선택적 LogicalName을 사용하여 EmbeddedResource 항목을 내보내세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.NoWin32ManifestAndPreferNativeArm64Enabled">
+        <source>MSB9903: PreferNativeArm64 requires a Win32 application manifest and is mutually exclusive with NoWin32Manifest.</source>
+        <target state="translated">MSB9903: PreferNativeArm64에는 Win32 애플리케이션 매니페스트가 필요하며 NoWin32Manifest와 함께 사용할 수 없습니다.</target>
+        <note>{StrBegin="MSB9903: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.NonExistentProjectReference">
+        <source>MSB9008: The referenced project {0} does not exist.</source>
+        <target state="translated">MSB9008: 참조된 프로젝트 {0} 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.PlatformIsAnyCPUAndPreferNativeArm64Enabled">
+        <source>MSB9904: When PreferNativeArm64 is enabled, ensure that the Platform is set to AnyCPU. Current Platform: {0}.</source>
+        <target state="translated">MSB9904: PreferNativeArm64를 사용하도록 설정한 경우 플랫폼이 AnyCPU로 설정되어 있는지 확인합니다. 현재 플랫폼: {0}.</target>
+        <note>{StrBegin="MSB9904: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.Prefer32BitAndPreferNativeArm64Enabled">
+        <source>MSB9902: Prefer32Bit and PreferNativeArm64 options are mutually exclusive. Please enable only one.</source>
+        <target state="translated">MSB9902: Prefer32Bit 및 PreferNativeArm64 옵션은 함께 사용할 수 없습니다. 하나만 사용하도록 설정하세요.</target>
+        <note>{StrBegin="MSB9902: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.PropertyWithTrailingSlash">
+        <source>The {0} must end with a trailing slash.</source>
+        <target state="translated">{0} 후행 슬래시로 끝나야 합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.RunTargetDependsOnMessage">
+        <source>Cannot run '{0}' because project output type is not '.exe'</source>
+        <target state="translated">프로젝트 출력 형식이 '.exe' 않으므로 '{0}' 실행할 수 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.SigningKeyRequired">
+        <source>A signing key is required in order to publish this project. Please specify a ManifestKeyFile or ManifestCertificateThumbprint value. Publishing from Visual Studio will automatically configure a signing key for this project.</source>
+        <target state="translated">이 프로젝트를 게시하려면 서명 키가 필요합니다. ManifestKeyFile 또는 ManifestCertificateThumbprint 값을 지정하십시오. Visual Studio 게시하면 이 프로젝트에 대한 서명 키가 자동으로 구성됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CommonSdk.SpecifiedSeverityDoesNotExist">
+        <source>MSB9901: The specified severity is not relevant: '{0}' for the message: '{1}'.</source>
+        <target state="translated">MSB9901: 지정한 심각도가 관련되지 않습니다. '{1}' 메시지의 '{0}'.</target>
+        <note>{StrBegin="MSB9901: "}</note>
+      </trans-unit>
+      <trans-unit id="CommonSdk.SplitResourcesByCultureEmbeddedResourceMessage">
+        <source>{0}: {1} item type is deprecated. Use EmbeddedResource items instead.</source>
+        <target state="translated">{0}: {1} 항목 형식은 사용되지 않습니다. EmbeddedResource 항목을 대신 사용합니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
@@ -244,12 +352,12 @@
       <trans-unit id="Copy.Retrying">
         <source>MSB3026: Could not copy "{0}" to "{1}". Beginning retry {2} in {3}ms. {4} {5}</source>
         <target state="translated">MSB3026: "{0}"을(를) "{1}"(으)로 복사할 수 없습니다. {3}ms 안에 재시도 {2}을(를) 시작합니다. {4} {5}</target>
-        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3026: "} LOCALIZATION: {0} and {1} are paths. {2} and {3} are numbers. {4} is an optional localized message. {5} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.ExceededRetries">
         <source>MSB3027: Could not copy "{0}" to "{1}". Exceeded retry count of {2}. Failed. {3}</source>
         <target state="translated">MSB3027: "{0}"을(를) "{1}"(으)로 복사할 수 없습니다. 재시도 횟수({2})를 초과하여 작업을 수행하지 못했습니다. {3}</target>
-        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Copy.FileLocked ("The file is locked by: "{0}"")</note>
+        <note>{StrBegin="MSB3027: "} LOCALIZATION: {0} and {1} are paths. {2} is a number. {3} is either empty or a string from Utilities LockCheck.FileLocked ("The file is locked by: "{0}"")</note>
       </trans-unit>
       <trans-unit id="Copy.InvalidRetryCount">
         <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
@@ -327,8 +435,8 @@
         <note />
       </trans-unit>
       <trans-unit id="Delete.Error">
-        <source>MSB3061: Unable to delete file "{0}". {1}</source>
-        <target state="translated">MSB3061: "{0}" 파일을 삭제할 수 없습니다. {1}</target>
+        <source>MSB3061: Unable to delete file "{0}". {1} {2}</source>
+        <target state="translated">MSB3061: 파일 "{0}"을(를) 삭제할 수 없습니다. {1} {2}</target>
         <note>{StrBegin="MSB3061: "}</note>
       </trans-unit>
       <trans-unit id="Delete.InvalidRetryCount">
@@ -342,9 +450,9 @@
         <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
       </trans-unit>
       <trans-unit id="Delete.Retrying">
-        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
-        <target state="translated">MSB3062: "{0}" 파일을 삭제할 수 없습니다. {2} ms에서 다시 시도 {1}을(를) 시작합니다. {3}</target>
-        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
+        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3} {4}</source>
+        <target state="translated">MSB3062: 파일 "{0}"을(를) 삭제할 수 없습니다. {2}ms 후 {1} 재시도를 시작하세요. {3} {4}</target>
+        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message, {4} is message from LockCheck.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
@@ -1070,10 +1178,10 @@
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.BinaryFormatterUse">
-        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
-           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
-        <target state="translated">MSB3825: "{1}" 유형의 "{0}" 리소스가 런타임 시 BinaryFormatter를 통해 역직렬화됩니다. BinaryFormatter는 가능한 보안 위험으로 인해 사용되지 않으며 .NET 9에서 제거됩니다. 계속 사용하려면 "GenerateResourceWarnOnBinaryFormatterUse" 속성을 false로 설정하세요.
-            추가 정보: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/binaryformatter-migration-guide</source>
+        <target state="translated">MSB3825: 리소스 "{0}"은(는) 런타임 시 BinaryFormatter를 통해 역직렬화됩니다. BinaryFormatter는 알려진 보안 위험으로 인해 사용되지 않으며 .NET 9 이상에서 제거됩니다. 계속 사용하려면 "GenerateResourceWarnOnBinaryFormatterUse" 속성을 false로 설정하세요.
+           추가 정보: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -1489,8 +1597,8 @@
         <note>{StrBegin="MSB3676: "}</note>
       </trans-unit>
       <trans-unit id="Move.Error">
-        <source>MSB3677: Unable to move file "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB3677: "{0}" 파일을 "{1}"(으)로 이동할 수 없습니다. {2}</target>
+        <source>MSB3677: Unable to move file "{0}" to "{1}". {2} {3}</source>
+        <target state="translated">MSB3677: 파일 "{0}"을(를) "{1}"(으)로 이동할 수 없습니다. {2} {3}</target>
         <note>{StrBegin="MSB3677: "}</note>
       </trans-unit>
       <trans-unit id="Move.ExactlyOneTypeOfDestination">
@@ -1563,6 +1671,21 @@
         <source>StopOnFirstFailure will have no effect when the following conditions are all present: 1) The system is running in multiple process mode 2) The BuildInParallel property is true. 3) The RunEachTargetSeparately property is false.</source>
         <target state="translated">다음 조건이 모두 충족되면 StopOnFirstFailure가 효과가 없습니다. 1) 시스템이 다중 프로세스 모드에서 실행 중입니다. 2) BuildInParallel 속성이 true입니다. 3) RunEachTargetSeparately 속성이 false입니다.</target>
         <note>LOCALIZATION:  Do not localize the words "RunEachTargetSeparately", "BuildingInParallel", or "StopOnFirstFailure".</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.AssemblyNodeIsMissed">
+        <source>The assembly element is missing from the application manifest.</source>
+        <target state="translated">어셈블리 요소가 애플리케이션 매니페스트에 없습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.InvalidValueInSupportedArchitectures">
+        <source>MSB4300: The specified value '{0}' for the supportedArchitectures element is invalid. Either remove it from the manifest or set it to 'amd64 arm64'.</source>
+        <target state="translated">MSB4300: supportedArchitectures 요소에 대해 지정된 값 '{0}'이(가) 잘못되었습니다. 매니페스트에서 제거하거나 'amd64 arm64'로 설정합니다.</target>
+        <note>{StrBegin="MSB4300: "}</note>
+      </trans-unit>
+      <trans-unit id="AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound">
+        <source>The application manifest file cannot be found. Please make sure it exists.</source>
+        <target state="translated">애플리케이션 매니페스트 파일을 찾을 수 없습니다. 존재하는지 확인하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ReadLinesFromFile.ErrorOrWarning">
         <source>MSB3501: Could not read lines from file "{0}". {1}</source>
@@ -2519,11 +2642,6 @@
         <target state="translated">MSB3353: 서명 연기에 필요한 공개 키를 지정하지 않았습니다.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
-      <trans-unit id="Task.FileLocked">
-        <source>The file is locked by: "{0}"</source>
-        <target state="translated">파일이 "{0}"에 의해 잠겨 있습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: "{0}" 작업은 MSBuild의 .NET Core 버전에서 지원되지 않습니다. MSBuild의 .NET Framework 버전을 사용하세요. 자세한 내용은 https://aka.ms/msbuild/MSB4803을 참조하세요.</target>
@@ -2545,8 +2663,8 @@
         <note>{StrBegin="MSB3371: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotMakeFileWritable">
-        <source>MSB3372: The file "{0}" cannot be made writable. {1}</source>
-        <target state="translated">MSB3372: "{0}" 파일을 쓰기 가능하게 만들 수 없습니다. {1}</target>
+        <source>MSB3372: The file "{0}" cannot be made writable. {1} {2}</source>
+        <target state="translated">MSB3372: "{0}" 파일을 쓰기 가능하게 만들 수 없습니다. {1} {2}</target>
         <note>{StrBegin="MSB3372: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotRestoreAttributes">
@@ -2555,8 +2673,8 @@
         <note>{StrBegin="MSB3373: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CannotTouch">
-        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1}</source>
-        <target state="translated">MSB3374: "{0}" 파일에 마지막으로 액세스한 시간 및 마지막으로 쓴 시간을 설정할 수 없습니다. {1}</target>
+        <source>MSB3374: The last access/last write time on file "{0}" cannot be set. {1} {2}</source>
+        <target state="translated">MSB3374: "{0}" 파일에 마지막으로 액세스한 시간 및 마지막으로 쓴 시간을 설정할 수 없습니다. {1} {2}</target>
         <note>{StrBegin="MSB3374: "}</note>
       </trans-unit>
       <trans-unit id="Touch.CreatingFile">
@@ -2650,8 +2768,8 @@
         <note>{StrBegin="MSB3936: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotMakeFileWriteable">
-        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2}</source>
-        <target state="translated">MSB3935: 대상 파일 "{1}"이(가) 읽기 전용이고 쓰기 가능하도록 만들 수 없기 때문에 파일 "{0}"의 압축을 풀지 못했습니다.  {2}</target>
+        <source>MSB3935: Failed to unzip file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB3935: 대상 파일 "{0}"이(가) 읽기 전용이고 쓰기 가능하도록 만들 수 없기 때문에 파일 "{1}"의 압축을 풀지 못했습니다.  {2} {3}</target>
         <note>{StrBegin="MSB3935: "}</note>
       </trans-unit>
       <trans-unit id="Unzip.ErrorCouldNotOpenFile">
@@ -2735,8 +2853,8 @@
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
-        <source>MSB3491: Could not write lines to file "{0}". {1}</source>
-        <target state="translated">MSB3491: "{0}" 파일에 줄을 쓸 수 없습니다. {1}</target>
+        <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
+        <target state="translated">MSB3491: "{0}" 파일에 줄을 쓸 수 없습니다. {1} {2}</target>
         <note>{StrBegin="MSB3491: "}</note>
       </trans-unit>
       <trans-unit id="GetReferenceAssemblyPaths.InvalidTargetFrameworkMoniker">
@@ -3005,8 +3123,8 @@
         <note>{StrBegin="MSB3712: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotWriteOutput">
-        <source>MSB3713: The file "{0}" could not be created. {1}</source>
-        <target state="translated">MSB3713: "{0}" 파일을 만들 수 없습니다. {1}</target>
+        <source>MSB3713: The file "{0}" could not be created. {1} {2}</source>
+        <target state="translated">MSB3713: "{0}" 파일을 만들 수 없습니다. {1} {2}</target>
         <note>{StrBegin="MSB3713: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.SkippedNumberedParameter">
@@ -3455,8 +3573,8 @@
         <note>{StrBegin="MSB3941: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFailed">
-        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2}</source>
-        <target state="translated">MSB3943: 디렉터리 "{0}"의 압축을 "{1}" 파일에 풀지 못했습니다.  {2}</target>
+        <source>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB3943: 디렉터리 "{0}"의 압축을 "{1}" 파일에 풀지 못했습니다.  {2} {3}</target>
         <note>{StrBegin="MSB3943: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorFileExists">

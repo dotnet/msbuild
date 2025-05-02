@@ -288,6 +288,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _localPacketFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes the specified packet
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
@@ -527,7 +537,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool CreateNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowArgumentNull(factory);
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             if (AvailableNodes <= 0)

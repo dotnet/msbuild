@@ -7,6 +7,11 @@
     <Description Condition="'$(Description)' == ''">$(TargetFileName)</Description>
   </PropertyGroup>
 
+  <!-- Disable package validation as source build filters out target frameworks. -->
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
+    <EnablePackageValidation>false</EnablePackageValidation>
+  </PropertyGroup>
+
   <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" />
     <None Include="README.md" Pack="true" PackagePath="\" />
@@ -36,14 +41,6 @@
 
     <RemoveDir Directories="$(_PackageFolderInGlobalPackages)"
                Condition="Exists('$(_PackageFolderInGlobalPackages)')" />
-  </Target>
-
-  <!-- Make APICompat use roslyn from the toolset SDK instead of from the toolset package. This avoids unification issues on desktop msbuild.
-       TODO: Remove when a 8.0.200 or 9.0 SDK is consumed. -->
-  <Target Name="FixAPICompatWorkAroundRoslynMove" AfterTargets="CollectApiCompatInputs">
-    <PropertyGroup>
-      <RoslynAssembliesPath>$(RoslynTargetsPath)</RoslynAssembliesPath>
-    </PropertyGroup>
   </Target>
 
 </Project>

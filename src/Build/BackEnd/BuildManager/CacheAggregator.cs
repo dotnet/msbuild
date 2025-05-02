@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -29,8 +29,8 @@ namespace Microsoft.Build.Execution
 
         public void Add(IConfigCache configCache, IResultsCache resultsCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(configCache, nameof(configCache));
-            ErrorUtilities.VerifyThrowInternalNull(resultsCache, nameof(resultsCache));
+            ErrorUtilities.VerifyThrowInternalNull(configCache);
+            ErrorUtilities.VerifyThrowInternalNull(resultsCache);
             ErrorUtilities.VerifyThrow(!_aggregated, "Cannot add after aggregation");
 
             _inputCaches.Add((configCache, resultsCache));
@@ -55,8 +55,8 @@ namespace Microsoft.Build.Execution
 
         private void InsertCaches(IConfigCache configCache, IResultsCache resultsCache)
         {
-            var configs = configCache.GetEnumerator().ToArray();
-            var results = resultsCache.GetEnumerator().ToArray();
+            var configs = configCache.ToArray();
+            var results = resultsCache.ToArray();
 
             ErrorUtilities.VerifyThrow(configs.Length == results.Length, "Assuming 1-to-1 mapping between configs and results. Otherwise it means the caches are either not minimal or incomplete");
 

@@ -79,11 +79,12 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of information of how a project file built.
         /// <param name="projectPath">Filename of the project being built.</param>
+        /// <param name="targets">Names of the targets that built.</param>
         /// </summary>
-        [Event(5, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void BuildProjectStart(string projectPath)
+        [Event(5, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void BuildProjectStart(string projectPath, string targets)
         {
-            WriteEvent(5, projectPath);
+            WriteEvent(5, projectPath, targets);
         }
 
         /// <param name="projectPath">Filename of the project being built.</param>
@@ -362,10 +363,11 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void TargetStop(string targetName)
+        /// <param name="result">Target stop result.</param>
+        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void TargetStop(string targetName, string result)
         {
-            WriteEvent(44, targetName);
+            WriteEvent(44, targetName, result);
         }
 
         /// <summary>
@@ -476,13 +478,13 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(62, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStart()
+        public void SdkResolverLoadAllResolversStart()
         {
             WriteEvent(62);
         }
 
         [Event(63, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStop(int resolverCount)
+        public void SdkResolverLoadAllResolversStop(int resolverCount)
         {
             WriteEvent(63, resolverCount);
         }
@@ -601,25 +603,25 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(81, Keywords = Keywords.All)]
-        public void SdkResolverServiceFindResolversManifestsStart()
+        public void SdkResolverFindResolversManifestsStart()
         {
             WriteEvent(81);
         }
 
         [Event(82, Keywords = Keywords.All)]
-        public void SdkResolverServiceFindResolversManifestsStop(int resolverManifestCount)
+        public void SdkResolverFindResolversManifestsStop(int resolverManifestCount)
         {
             WriteEvent(82, resolverManifestCount);
         }
 
         [Event(83, Keywords = Keywords.All)]
-        public void SdkResolverServiceLoadResolversStart()
+        public void SdkResolverLoadResolversStart()
         {
             WriteEvent(83);
         }
 
         [Event(84, Keywords = Keywords.All)]
-        public void SdkResolverServiceLoadResolversStop(string manifestName, int resolverCount)
+        public void SdkResolverLoadResolversStop(string manifestName, int resolverCount)
         {
             WriteEvent(84, manifestName, resolverCount);
         }
@@ -670,6 +672,12 @@ namespace Microsoft.Build.Eventing
         public void ProjectCacheHandleBuildResultStop(string pluginTypeName, string projectPath, string targets)
         {
             WriteEvent(92, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(93, Keywords = Keywords.All)]
+        public void CancelSubmissionsStart()
+        {
+            WriteEvent(93);
         }
         #endregion
     }

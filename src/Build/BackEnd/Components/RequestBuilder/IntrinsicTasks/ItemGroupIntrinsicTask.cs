@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -58,7 +59,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     List<string> parameterValues = new List<string>();
                     GetBatchableValuesFromBuildItemGroupChild(parameterValues, child);
-                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location);
+                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location, LoggingContext);
 
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
@@ -70,9 +71,8 @@ namespace Microsoft.Build.BackEnd
                             ExpanderOptions.ExpandAll,
                             Project.Directory,
                             child.ConditionLocation,
-                            LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext,
-                            FileSystems.Default);
+                            FileSystems.Default,
+                            LoggingContext);
 
                         if (condition)
                         {
@@ -83,7 +83,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.KeepMetadata))
                             {
-                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation, LoggingContext).ToList();
+                                var keepMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.KeepMetadata, ExpanderOptions.ExpandAll, child.KeepMetadataLocation).ToList();
                                 if (keepMetadataEvaluated.Count > 0)
                                 {
                                     keepMetadata = new HashSet<string>(keepMetadataEvaluated);
@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.RemoveMetadata))
                             {
-                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation, LoggingContext).ToList();
+                                var removeMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.RemoveMetadata, ExpanderOptions.ExpandAll, child.RemoveMetadataLocation).ToList();
                                 if (removeMetadataEvaluated.Count > 0)
                                 {
                                     removeMetadata = new HashSet<string>(removeMetadataEvaluated);
@@ -101,7 +101,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (!String.IsNullOrEmpty(child.MatchOnMetadata))
                             {
-                                var matchOnMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation, LoggingContext).ToList();
+                                var matchOnMetadataEvaluated = bucket.Expander.ExpandIntoStringListLeaveEscaped(child.MatchOnMetadata, ExpanderOptions.ExpandAll, child.MatchOnMetadataLocation).ToList();
                                 if (matchOnMetadataEvaluated.Count > 0)
                                 {
                                     matchOnMetadata = new HashSet<string>(matchOnMetadataEvaluated);
@@ -177,24 +177,21 @@ namespace Microsoft.Build.BackEnd
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.Location,
-                    LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext,
                     FileSystems.Default,
                     loggingContext: loggingContext);
 
                 if (condition)
                 {
                     ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) &&
-                        // If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
+                    if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
                         bucket.BucketSequenceNumber == 0 &&
                         // Referring to unqualified metadata of other item (transform) is fine.
-                        child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
+                        !child.Include.Contains("@("))
                     {
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                     }
 
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location, loggingContext);
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location);
 
                     // This both stores the metadata so we can add it to all the items we just created later, and
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
@@ -216,23 +213,30 @@ namespace Microsoft.Build.BackEnd
                 ExpanderOptions.ExpandAll,
                 Project.Directory,
                 child.KeepDuplicatesLocation,
-                LoggingContext.LoggingService,
-                LoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                LoggingContext);
+
+            Action<IList> logFunction = null;
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
-                ItemGroupLoggingHelper.LogTaskParameter(
-                    LoggingContext,
-                    TaskParameterMessageKind.AddItem,
-                    child.ItemType,
-                    itemsToAdd,
-                    logItemMetadata: true,
-                    child.Location);
+                logFunction = (itemList) =>
+                {
+                    ItemGroupLoggingHelper.LogTaskParameter(
+                        LoggingContext,
+                        TaskParameterMessageKind.AddItem,
+                        parameterName: null,
+                        propertyName: null,
+                        child.ItemType,
+                        itemList,
+                        logItemMetadata: true,
+                        child.Location);
+                };
             }
 
             // Now add the items we created to the lookup.
-            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates); // Add in one operation for potential copy-on-write
+            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, logFunction);
+            // Add in one operation for potential copy-on-write
         }
 
         /// <summary>
@@ -255,7 +259,7 @@ namespace Microsoft.Build.BackEnd
             List<ProjectItemInstance> itemsToRemove;
             if (matchOnMetadata == null)
             {
-                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander, LoggingContext);
+                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
             }
             else
             {
@@ -269,6 +273,8 @@ namespace Microsoft.Build.BackEnd
                     ItemGroupLoggingHelper.LogTaskParameter(
                         LoggingContext,
                         TaskParameterMessageKind.RemoveItem,
+                        parameterName: null,
+                        propertyName: null,
                         child.ItemType,
                         itemsToRemove,
                         logItemMetadata: true,
@@ -325,14 +331,12 @@ namespace Microsoft.Build.BackEnd
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.ConditionLocation,
-                    LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext,
                     FileSystems.Default,
                     loggingContext: loggingContext);
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location, loggingContext);
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location);
                     metadataToSet[metadataInstance.Name] = Lookup.MetadataModification.CreateFromNewValue(evaluatedValue);
                 }
             }
@@ -387,7 +391,7 @@ namespace Microsoft.Build.BackEnd
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
             // Expand properties and metadata in Include
-            string evaluatedInclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Include, ExpanderOptions.ExpandPropertiesAndMetadata, originalItem.IncludeLocation, loggingContext);
+            string evaluatedInclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Include, ExpanderOptions.ExpandPropertiesAndMetadata, originalItem.IncludeLocation);
 
             if (evaluatedInclude.Length == 0)
             {
@@ -398,7 +402,7 @@ namespace Microsoft.Build.BackEnd
             var excludes = ImmutableList<string>.Empty.ToBuilder();
             if (originalItem.Exclude.Length > 0)
             {
-                string evaluatedExclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Exclude, ExpanderOptions.ExpandAll, originalItem.ExcludeLocation, loggingContext);
+                string evaluatedExclude = expander.ExpandIntoStringLeaveEscaped(originalItem.Exclude, ExpanderOptions.ExpandAll, originalItem.ExcludeLocation);
 
                 if (evaluatedExclude.Length > 0)
                 {
@@ -459,7 +463,8 @@ namespace Microsoft.Build.BackEnd
                             includeSplit /* before wildcard expansion */,
                             null,
                             null,
-                            originalItem.Location.File));
+                            originalItem.Location.File,
+                            useItemDefinitionsWithoutModification: false));
                     }
                 }
             }
@@ -537,14 +542,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="specification">The specification to match against the items.</param>
         /// <param name="specificationLocation">The specification to match against the provided items</param>
         /// <param name="expander">The expander to use</param>
-        /// <param name="loggingContext">Context for logging</param>
         /// <returns>A list of matching items</returns>
         private List<ProjectItemInstance> FindItemsMatchingSpecification(
             ICollection<ProjectItemInstance> items,
             string specification,
             ElementLocation specificationLocation,
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
-            LoggingContext loggingContext = null)
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
             if (items.Count == 0 || specification.Length == 0)
             {
@@ -556,7 +559,7 @@ namespace Microsoft.Build.BackEnd
             HashSet<string> specificationsToFind = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             // Split by semicolons
-            var specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation, loggingContext);
+            var specificationPieces = expander.ExpandIntoStringListLeaveEscaped(specification, ExpanderOptions.ExpandAll, specificationLocation);
 
             foreach (string piece in specificationPieces)
             {

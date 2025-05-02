@@ -124,6 +124,11 @@ namespace Microsoft.Build.UnitTests
         public List<TaskFinishedEventArgs> TaskFinishedEvents { get; } = new List<TaskFinishedEventArgs>();
 
         /// <summary>
+        /// List of TaskParameter events
+        /// </summary>
+        public List<TaskParameterEventArgs> TaskParameterEvents { get; } = new List<TaskParameterEventArgs>();
+
+        /// <summary>
         /// List of BuildMessage events
         /// </summary>
         public List<BuildMessageEventArgs> BuildMessageEvents { get; } = new List<BuildMessageEventArgs>();
@@ -207,6 +212,11 @@ namespace Microsoft.Build.UnitTests
             if (Parameters?.IndexOf("reporttelemetry", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 _reportTelemetry = true;
+            }
+
+            if (eventSource is IEventSource4 eventSource4)
+            {
+                eventSource4.IncludeEvaluationPropertiesAndItems();
             }
         }
 
@@ -297,7 +307,7 @@ namespace Microsoft.Build.UnitTests
                             bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
                             if (logMessage)
                             {
-                                string msg = eventArgs.Message;
+                                string msg = eventArgs.Message ?? $"(null message in {eventArgs.GetType().Name} event)";
                                 if (eventArgs is BuildMessageEventArgs m && m.LineNumber != 0)
                                 {
                                     msg = $"{m.File}({m.LineNumber},{m.ColumnNumber}): {msg}";
@@ -360,6 +370,11 @@ namespace Microsoft.Build.UnitTests
                     case TaskFinishedEventArgs taskFinishedEventArgs:
                         {
                             TaskFinishedEvents.Add(taskFinishedEventArgs);
+                            break;
+                        }
+                    case TaskParameterEventArgs taskParameterEventArgs:
+                        {
+                            TaskParameterEvents.Add(taskParameterEventArgs);
                             break;
                         }
                     case BuildMessageEventArgs buildMessageEventArgs:
@@ -523,7 +538,7 @@ namespace Microsoft.Build.UnitTests
                         PrintFullLog();
                     }
 
-                    Assert.True(false, $"Log was not expected to contain '{contains}', but did.");
+                    Assert.Fail($"Log was not expected to contain '{contains}', but did.");
                 }
             }
         }

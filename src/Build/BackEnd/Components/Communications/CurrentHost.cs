@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if RUNTIME_TYPE_NETCORE
-using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Shared;
 #endif
@@ -35,10 +34,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    using (Process currentProcess = Process.GetCurrentProcess())
-                    {
-                        s_currentHost = currentProcess.MainModule.FileName;
-                    }
+                    s_currentHost = EnvironmentUtilities.ProcessPath;
                 }
             }
 
