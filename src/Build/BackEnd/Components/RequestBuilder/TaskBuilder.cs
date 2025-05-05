@@ -428,7 +428,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                        if (_componentHost?.BuildParameters?.IsTelemetryEnabled)
+                        if (_componentHost.BuildParameters.IsTelemetryEnabled)
                         {
                             taskFactoryWrapper?.Statistics?.ExecutionStarted();
                         }
@@ -481,7 +481,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
-                            if (_componentHost?.BuildParameters?.IsTelemetryEnabled)
+                            if (_componentHost.BuildParameters.IsTelemetryEnabled)
                             {
                                 taskFactoryWrapper?.Statistics?.ExecutionStopped();
                             }
