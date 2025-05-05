@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">El proyecto {0} especifica la propiedad de "TargetFramework(s)" "{1}", que no usa el SDK de .NET. Los proyectos que importan destinos de C# directamente no entienden esas propiedades.</target>
+        <target state="translated">El {0} de proyecto especifica la propiedad "TargetFramework(s)" '{1}', que no usa el SDK de .NET. Los proyectos que importan destinos de C# no entienden esas propiedades directamente.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Las propiedades "TargetFramework" y "TargetFrameworks" no se respetan, y no deben especificarse en proyectos que no usan el SDK de .NET.</target>
+        <target state="translated">Las propiedades "TargetFramework" y "TargetFrameworks" no se respetan y no deben especificarse en proyectos que no usen el SDK de .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Ubicación: "{0}" no puede ser de plena confianza; coloque los proyectos fuera de esa carpeta (Proyecto: {1}).</target>
+        <target state="translated">Ubicación: '{0}' no puede ser de plena confianza, coloque los proyectos fuera de esa carpeta (proyecto: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">La carpeta Descargas no es de confianza para la compilación de proyectos.</target>
+        <target state="translated">La carpeta descargas no es de confianza para la compilación de proyectos.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -423,7 +423,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">No se pudo cargar el tipo de comprobación personalizada: "{0}" desde el ensamblado: "{1}". Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.Check. Si no se pretende que sea una comprobación personalizada, no debe exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">No se pudo cargar el tipo de comprobación personalizado: "{0}" desde el ensamblado: "{1}". Asegúrese de que hereda la clase base Microsoft.Build.Experimental.BuildCheck.Check. Si no está pensado para ser una comprobación personalizada, no debe exponerse. Más información: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
@@ -512,7 +512,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Se produjo una excepción al expandir un fileSpec con globs: fileSpec: "{0}"; suponiendo que es un nombre de archivo. Excepción: {1}</target>
+        <target state="translated">Se produjo una excepción al expandir fileSpec con globs: fileSpec: "{0}", suponiendo que es un nombre de archivo. Excepción: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -522,7 +522,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">Hay caracteres no válidos en "{0}" en el elemento {1}.</target>
+        <target state="translated">Hay caracteres no válidos en '{0}' en el elemento {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
@@ -831,7 +831,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">El solucionador "{0}" intentó resolver el SDK "{1}".
+        <target state="translated">El resolvedor "{0}" intentó resolver el SDK "{1}".
 Advertencias: {2}
 Errores: {3}</target>
         <note>
@@ -862,7 +862,7 @@ Errores: {3}</target>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">El SDK '{0}' no se pudo resolver mediante la resolución de SDK '{1}'. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1026,7 +1026,7 @@ Errores: {3}</target>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">El tipo de registro {0} no se entiende mediante {1}.</target>
+        <target state="translated">{1} no entiende el tipo de registro {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

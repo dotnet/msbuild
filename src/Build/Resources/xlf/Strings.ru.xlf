@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Проект {0} указывает свойство "TargetFramework(s)" "{1}", которое не использует пакет SDK для .NET. Эти свойства непонятны проектам, которые импортируют целевые объекты C# напрямую.</target>
+        <target state="translated">В {0} проекта указано свойство "TargetFramework(s)", '{1}', который не использует пакет SDK для .NET. Эти свойства не распознаются проектами, которые импортют целевые объекты C# напрямую.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Свойства "TargetFramework" и "TargetFrameworks" не учитываются и не должны указываться в проектах, которые не используют пакет SDK для .NET.</target>
+        <target state="translated">Свойства TargetFramework и TargetFrameworks не учитываются и не должны указываться в проектах, не использующих пакет SDK для .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Расположение "{0}" не может быть полностью доверенным, разместите свои проекты за пределами этой папки (проект: {1}).</target>
+        <target state="translated">Расположение: '{0}' быть полностью доверенным. Поместите проекты за пределы этой папки (проект: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">Папка "Загрузки" не является доверенной для создания проектов.</target>
+        <target state="translated">Папка "Загрузки" недоверена для сборки проектов.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -458,7 +458,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}с)</target>
+        <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -512,7 +512,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Возникло исключение при расширении fileSpec со стандартными масками: fileSpec: "{0}", предполагая, что это имя файла. Исключение: {1}</target>
+        <target state="translated">Возникло исключение при развертывании fileSpec с globs: fileSpec: "{0}", предполагая, что это имя файла. Исключение: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -862,7 +862,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">Не удалось разрешить SDK "{0}" с помощью сопоставителя SDK "{1}". {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1015,7 +1015,7 @@ Errors: {3}</source>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Это необработанное исключение в MSBuild. ПРОГОЛОСУЙТЕ ЗА СУЩЕСТВУЮЩУЮ ПРОБЛЕМУ ИЛИ СООБЩИТЕ О НОВУЙ НА https://aka.ms/msbuild/unhandled
+        <target state="translated">Это необработанное исключение в MSBuild. Проголосуйте за существующую проблему или сообщите о новой по адресу https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>
@@ -1026,7 +1026,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">Тип ведения журнала {0} не понятен для {1}.</target>
+        <target state="translated">Тип {0} не распознан {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

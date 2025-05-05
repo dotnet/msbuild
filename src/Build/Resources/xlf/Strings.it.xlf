@@ -148,7 +148,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="translated">Le attività {0} e {1} dai progetti {2} e {3} scrivono lo stesso file: {4}.</target>
+        <target state="translated">Le attività {0} e {1} dai progetti {2} e {3} scrivere lo stesso file: {4}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Il progetto {0} specifica la proprietà “TargetFramework(s)” “{1}”, che non utilizza il SDK di .NET. Queste proprietà non vengono riconosciute dai progetti che importano direttamente destinazioni C#.</target>
+        <target state="translated">Project {0} specifica la proprietà 'TargetFramework(s)' '{1}', che non usa .NET SDK. Queste proprietà non sono comprese dai progetti che importano direttamente destinazioni C#.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Le proprietà “TargetFramework” e “TargetFrameworks” non vengono rispettate e non devono essere specificate nei progetti che non utilizzano il SDK di.NET.</target>
+        <target state="translated">Le proprietà 'TargetFramework' e 'TargetFrameworks' non vengono rispettate e non devono essere specificate nei progetti che non usano .NET SDK.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Percorso: '{0}' non può essere completamente attendibile. Posizionare i progetti all'esterno di tale cartella (Progetto: {1}).</target>
+        <target state="translated">Percorso: '{0}' non può essere considerato completamente attendibile. Inserire i progetti all'esterno di tale cartella (Progetto: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">La cartella Download non è attendibile per la creazione di progetti.</target>
+        <target state="translated">La cartella Dei download non è attendibile per la compilazione di progetti.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -413,7 +413,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">Non è possibile trovare l'assembly del controllo personalizzato specificato: '{0}'. Verificare se esiste.</target>
+        <target state="translated">Impossibile trovare l'assembly di controllo personalizzato specificato: “{0}”. Verificare se esiste.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
@@ -423,27 +423,27 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Non è possibile caricare il tipo di controllo personalizzato '{0}' dall'assembly '{1}'. Assicurarsi che erediti la classe di base Microsoft.Build.Experimental.BuildCheck.Check. Se non è destinato a essere un controllo personalizzato, non deve essere esposto. Altre informazioni: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Non è stato possibile caricare il tipo di controllo personalizzato: “{0}” dall'assembly: “{1}”. Assicurarsi che erediti la classe di base Microsoft.Build.Experimental.BuildCheck.Check. Se non è destinato a essere un controllo personalizzato, non deve essere esposto. Per altre informazioni: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="translated">Non è possibile registrare il controllo personalizzato: '{0}'.</target>
+        <target state="translated">Impossibile registrare il controllo personalizzato: “{0}”.</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="translated">Non è possibile creare un'istanza della regola del controllo personalizzato con l'eccezione seguente: '{0}'.</target>
+        <target state="translated">Non è stato possibile creare un'istanza della regola di controllo personalizzata con l'eccezione seguente: “{0}”.</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">Il controllo personalizzato '{0}' è registrato per la compilazione dal percorso '{1}'.</target>
+        <target state="translated">Il controllo personalizzato “{0}” è registrato per la compilazione dal percorso “{1}”.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="translated">La regola del controllo personalizzato '{0}' è stata registrata correttamente.</target>
+        <target state="translated">La regola di controllo personalizzata “{0}” è stata registrata correttamente.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -831,7 +831,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">Il resolver "{0}" ha tentato di risolvere l'SDK "{1}".
+        <target state="translated">Il resolver "{0}" ha provato a risolvere l'SDK "{1}".
 Avvisi: {2}
 Errori: {3}</target>
         <note>
@@ -862,7 +862,7 @@ Errori: {3}</target>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">Il resolver SDK '{0}' non è riuscito a risolvere l'SDK '{1}'. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

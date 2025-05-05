@@ -4,7 +4,7 @@
     <body>
       <trans-unit id="AbortingBuild">
         <source>Attempting to cancel the build...</source>
-        <target state="translated">Tentative d'annulation de la build en cours...</target>
+        <target state="translated">Tentative d'annulation de la génération en cours...</target>
         <note />
       </trans-unit>
       <trans-unit id="AmbiguousTaskParameterError">
@@ -133,7 +133,7 @@
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
-        <target state="translated">Le BuildCheck est activé pour cette build.</target>
+        <target state="translated">BuildCheck est activé pour cette build.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0101_MessageFmt">
@@ -148,7 +148,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="translated">Tâches {0} et {1} des projets {2} et {3} écrivent le même fichier : {4}.</target>
+        <target state="translated">Tâches {0} et {1} de projets {2} et {3} écrivez le même fichier : {4}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
@@ -158,7 +158,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="translated">« {0} » avec la valeur « {1} »</target>
+        <target state="translated">'{0}' avec valeur : '{1}'</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
@@ -168,7 +168,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="translated">Aucune propriété implicite dérivée d'une variable d'environnement ne doit être utilisée pendant la build.</target>
+        <target state="translated">Aucune propriété implicite dérivée d'une variable d'environnement ne doit être utilisée pendant la construction.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_MessageFmt">
@@ -183,7 +183,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0105_MessageFmt">
         <source>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</source>
-        <target state="translated">Project {0} spécifie l’élément « EmbeddedResource » '{1}', qui a peut-être une extension de création de culture ('{2}'), mais les métadonnées explicites « Culture » et « WithCulture=false » ne sont pas spécifiées.</target>
+        <target state="translated">Project {0} spécifie l’élément « EmbeddedResource »{1}« qui a éventuellement une extension de culture indiquant ( »{2}« ), mais les métadonnées explicites « Culture » et « WithCulture=false » ne sont pas spécifiées.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0105_Title">
@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Le projet {0} spécifie la propriété 'TargetFramework(s)' '{1}', qui n’utilise pas le kit de développement logiciel (SDK) .NET. Ces propriétés ne sont pas comprises par les projets qui importent directement des cibles C#.</target>
+        <target state="translated">Project {0} spécifie la propriété « TargetFramework(s) » '{1}', qui n’utilise pas le SDK .NET. Ces propriétés ne sont pas comprises par les projets qui importent directement des cibles C#.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Les propriétés 'TargetFramework' et 'TargetFrameworks' ne sont pas respectées et ne doivent pas être spécifiées dans les projets qui n’utilisent pas le kit de développement logiciel (SDK) .NET.</target>
+        <target state="translated">Les propriétés 'TargetFramework' et 'TargetFrameworks' ne sont pas respectées et ne doivent pas être spécifiées dans les projets qui n’utilisent pas le SDK .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -233,7 +233,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="translated">La propriété « {0} » a été consultée, mais elle n'a jamais été initialisée.</target>
+        <target state="translated">Propriété : « {0} » a été consultée, mais elle n'a jamais été initialisée.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
@@ -243,7 +243,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="translated">La propriété « {0} » a été déclarée/initialisée pour la première fois à l'utilisation de {1} avant d'être initialisée.</target>
+        <target state="translated">Propriété : '{0}' déclarée/initialisée pour la première fois à l'utilisation de {1} avant d'être initialisée.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
@@ -253,7 +253,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="translated">La propriété « {0} » a été déclarée/initialisée, mais elle n'a jamais été utilisée.</target>
+        <target state="translated">Propriété : '{0}' a été déclarée/initialisée, mais elle n'a jamais été utilisée.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Emplacement : '{0}' ne peut pas être entièrement approuvé, placez vos projets en dehors de ce dossier (Projet : {1}).</target>
+        <target state="translated">Emplacement : '{0}' ne peut pas être entièrement fiable. Placez vos projets en dehors de ce dossier (Projet : {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">Le dossier Téléchargements n’est pas approuvé pour la génération de projets.</target>
+        <target state="translated">Le dossier des téléchargements n’est pas approuvé pour la génération de projets.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -413,7 +413,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">Impossible de trouver l’assembly de vérification personnalisé spécifié : « {0} ». Veuillez vérifier s’il existe.</target>
+        <target state="translated">Impossible de trouver l’assembly de vérification personnalisé spécifié : «{0}». Veuillez vérifier s’il existe.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
@@ -423,27 +423,27 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Échec du chargement du type de vérification personnalisé « {0} » à partir de l’assembly « {1} ». Assurez-vous qu’il hérite de la classe de base Microsoft.Build.Experimental.BuildCheck.Check. S’il ne s’agit pas d’une vérification personnalisée, elle ne doit pas être exposée. Plus d’informations : https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Échec du chargement du type de vérification personnalisé «{0}» à partir de l’assembly : «{1}». Assurez-vous qu’il hérite de la classe de base Microsoft.Build.Experimental.BuildCheck.Check. S’il ne s’agit pas d’une vérification personnalisée, elle ne doit pas être exposée. Plus d’informations : https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="translated">Échec de l’inscription de la vérification personnalisée : « {0} ».</target>
+        <target state="translated">Échec de l’inscription de la vérification personnalisée : «{0}».</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="translated">Échec de l’instanciation de la règle de vérification personnalisée avec l’exception suivante : « {0} ».</target>
+        <target state="translated">Échec de l’instanciation de la règle de vérification personnalisée avec l’exception suivante : «{0}».</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">La vérification personnalisée « {0} » est inscrite pour la build à partir de l’emplacement : « {1} ».</target>
+        <target state="translated">La vérification personnalisée «{0}» est inscrite pour la build à partir de l’emplacement : «{1}».</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="translated">Règle de vérification personnalisée : « {0} » a été correctement inscrite.</target>
+        <target state="translated">Règle de vérification personnalisée : «{0}» a été correctement inscrite.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -512,7 +512,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Une exception s’est produite lors du développement d’un fileSpec avec globs: fileSpec: '{0}', en supposant qu’il s’agit d’un nom de fichier. Exception : {1}</target>
+        <target state="translated">Une exception s’est produite lors du développement d’un fileSpec avec globs : fileSpec : "{0}", en supposant qu’il s’agit d’un nom de fichier. Exception : {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -862,7 +862,7 @@ Erreurs : {3}</target>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">Le Kit de développement logiciel (SDK) « {0} » n’a pas pu être résolu par le résolveur de SDK « {1} ». {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1015,7 +1015,7 @@ Erreurs : {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Il s’agit d’une exception non prise en charge dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU CRÉEZ-EN UN SUR https://aka.ms/msbuild/unhandled
+        <target state="translated">Il s’agit d’une exception non gérée dans MSBuild –– VOTEZ POUR UN PROBLÈME EXISTANT OU ENTREZ UN NOUVEAU FICHIER À https://aka.ms/msbuild/unhandled.
     {0}</target>
         <note />
       </trans-unit>

@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Projekt {0} určuje vlastnost TargetFramework/TargetFrameworks {1}, která nepoužívá sadu .NET SDK. Tyto vlastnosti nejsou srozumitelné projektům, které přímo importují cíle jazyka C#.</target>
+        <target state="translated">Project {0} určuje vlastnost TargetFramework(s) '{1}', která nepoužívá sadu .NET SDK. Tyto vlastnosti nejsou srozumitelné pro projekty, které přímo importují cíle jazyka C#.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Vlastnosti TargetFramework a TargetFrameworks se nezohledňují a neměly by být zadané v projektech, které nepoužívají sadu .NET SDK.</target>
+        <target state="translated">Vlastnosti TargetFramework a TargetFrameworks se nedodržují a neměly by se zadává v projektech, které nepoužívají sadu .NET SDK.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Umístění {0}nemůže být plně důvěryhodné. Umístěte projekty mimo danou složku (projekt: {1}).</target>
+        <target state="translated">Umístění: '{0}' nelze plně považovat za důvěryhodné, umístěte projekty mimo danou složku (Projekt: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">Složka Stažené soubory není pro sestavování projektů důvěryhodná.</target>
+        <target state="translated">Složka Stažené soubory není důvěryhodná pro sestavování projektů.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -512,7 +512,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Při rozbalování fileSpec s globs: fileSpec došlo k výjimce: {0}, za předpokladu, že se jedná o název souboru. Výjimka: {1}</target>
+        <target state="translated">Při rozbalování specifikace fileSpec o globs došlo k výjimce: fileSpec: "{0}", předpokládá se, že se jedná o název souboru. Výjimka: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -862,7 +862,7 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">Sadu SDK {0} se nepodařilo vyřešit pomocí překladače sady SDK {1}. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1026,7 +1026,7 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">Typ protokolování {0} není pro {1}srozumitelný.</target>
+        <target state="translated">{1} nerozumí {0} typu protokolování.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
@@ -2028,7 +2028,7 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Vynecháno, protože konfigurace "$(AspNetConfiguration)" není pro tento webový projekt podporována. Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration=&lt;hodnota&gt; do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
+        <target state="translated">Vynecháno, protože konfigurace $(AspNetConfiguration) není pro tento webový projekt podporována. Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration=&lt;hodnota&gt; do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".

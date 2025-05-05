@@ -173,12 +173,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_MessageFmt">
         <source>Project {0} references output of a project {1}. Referenced path: {2}. ProjectReference should be used instead.</source>
-        <target state="translated">O {0} faz referência à saída de um projeto {1}. Caminho referenciado: {2}. ProjectReference deve ser usado em vez disso.</target>
+        <target state="translated">O projeto {0} faz referência à saída de um projeto {1}. Caminho referenciado: {2}. Em vez disso, ProjectReference deve ser usado.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_Title">
         <source>A project should not be referenced via 'Reference' to its output, but rather directly via 'ProjectReference'.</source>
-        <target state="translated">Um projeto não deve ser referenciado via 'Reference' para sua saída, mas diretamente via 'ProjectReference'.</target>
+        <target state="translated">Um projeto não deve ser referenciado por meio de "Referência" à sua saída, mas diretamente por meio de "ProjectReference".</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0105_MessageFmt">
@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">O Projeto {0} especifica a propriedade 'TargetFramework(s)' '{1}', que não usa o SDK do .NET. Essas propriedades não são compreendidas por projetos que importam diretamente os destinos do C#.</target>
+        <target state="translated">O {0} especifica a propriedade 'TargetFramework(s)' '{1}', que não usa o SDK do .NET. Essas propriedades não são compreendidas pelos projetos que importam diretamente os destinos C#.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">As propriedades 'TargetFramework' e 'TargetFrameworks' não são respeitadas e não devem ser especificadas em projetos que não usam o SDK do .NET.</target>
+        <target state="translated">As propriedades 'TargetFramework' e 'TargetFrameworks' não são respeitadas e não devem ser especificadas em projetos que não usam o SDK do .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -233,7 +233,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="translated">Propriedade: '{0}' foi acessada, mas nunca foi inicializada.</target>
+        <target state="translated">Propriedade: "{0}" foi acessada, mas nunca foi inicializada.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Localização: '{0}' não pode ser totalmente confiável, coloque seus projetos fora dessa pasta (Projeto: {1}).</target>
+        <target state="translated">Local: '{0}' não é totalmente confiável, coloque seus projetos fora dessa pasta (Projeto: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">A pasta Downloads não é confiável para a criação de projetos.</target>
+        <target state="translated">A pasta Downloads não é confiável para a compilação de projetos.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -413,7 +413,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">Falha ao localizar o assembly de verificação personalizada especificado: '{0}'. Verifique se existe.</target>
+        <target state="translated">Falha ao localizar o assembly de verificação personalizado especificado: '{0}'. Verifique se existe.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
@@ -423,7 +423,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Falha ao carregar o tipo de verificação personalizado: '{0}' do assembly: '{1}'. Verifique se ele herda a classe base Microsoft.Build.Experimental.BuildCheck.Check. Se não se destina a ser uma verificação personalizada, ela não deve ser exposta. Mais informações: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Falha ao carregar o tipo de verificação personalizada: '{0}' do assembly: '{1}'. Certifique-se de que ele herda a classe base Microsoft.Build.Experimental.BuildCheck.Check. Se não for destinado a ser uma verificação personalizada, então não deve ser exposto. Mais informações: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
@@ -438,12 +438,12 @@
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">A verificação personalizada: '{0}' está registrada para a compilação do local: '{1}'.</target>
+        <target state="translated">A verificação personalizada: '{0}' está registrada para a compilação a partir do local: '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="translated">Regra de verificação personalizada: '{0}' foi registrada com êxito.</target>
+        <target state="translated">Regra de verificação personalizada: '{0}' foi registrada com sucesso.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -499,7 +499,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: a compilação parou inesperadamente devido a uma falha do agente.
+        <target state="translated">MSB4017: A compilação parou inesperadamente devido a uma falha do agente de log.
     {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -512,7 +512,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Ocorreu uma exceção ao expandir um fileSpec com globs: fileSpec: "{0}", presumindo que seja um nome de arquivo. Exceção: {1}</target>
+        <target state="translated">Exceção ao expandir um fileSpec com globs: fileSpec: "{0}", presumindo que seja um nome de arquivo. Exceção: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -862,7 +862,7 @@ Erros: {3}</target>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">O SDK '{0}' não pôde ser resolvido pelo resolvedor de SDK '{1}'. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1015,7 +1015,7 @@ Erros: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Essa é uma exceção não tratada no MSBuild -- POR FAVOR, ATUALIZE UMA QUESTÃO EXISTENTE OU ENCAMINHE UMA NOVA EM https://aka.ms/msbuild/unhandled
+        <target state="translated">Esta é uma exceção não tratada no MSBuild -- POR FAVOR, APOIE UM PROBLEMA EXISTENTE OU ARQUIVE UM NOVO EM https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>
@@ -1026,7 +1026,7 @@ Erros: {3}</target>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">O tipo de log {0} não é compreendido por {1}.</target>
+        <target state="translated">O tipo {0} registro em log não é compreendido por {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

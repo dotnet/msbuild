@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Proje {0}, .NET SDK'yı kullanmayan 'TargetFramework(s)' özelliği şunu belirtir: '{1}'. Bu özellikler, C# hedeflerini doğrudan içe aktaran projeler tarafından anlaşılmıyor..</target>
+        <target state="translated">Project {0}, .NET SDK'sını '{1}' 'TargetFramework(s)' özelliğini belirtir. Bu özellikler doğrudan C# hedeflerini içeri aktaran projeler tarafından anlaşılmaz.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">.NET SDK kullanmayan projelerde 'TargetFramework' ve 'TargetFrameworks' özellikleri dikkate alınmaz ve belirtilmemelidir.</target>
+        <target state="translated">'TargetFramework' ve 'TargetFrameworks' özellikleri dikkate alınmaz ve .NET SDK kullanmayan projelerde belirtilmeli.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -268,7 +268,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">İndirmeler klasörü, proje oluşturma için güvenilmiyor.</target>
+        <target state="translated">İndirmeler klasörü, proje oluşturma için güvenilir değil.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -458,7 +458,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1} sn)</target>
+        <target state="translated">({0:F1}s)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -512,7 +512,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">globs: fileSpec: "{0}" ile bir fileSpec genişletilirken özel bir durum oluştu, bunun bir dosya adı olduğu varsayıldı. Özel Durum: {1}</target>
+        <target state="translated">bir fileSpec globs ile genişletilirken özel durum oluştu: fileSpec: "{0}", dosya adı olduğu varsayılıyor. Özel durum: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -862,7 +862,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">SDK '{0}', SDK çözümleyici '{1}' tarafından çözümlenemedi. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1015,7 +1015,7 @@ Hatalar: {3}</target>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Bu, MSBuild'de işlenmeyen bir istisnadır -- LÜTFEN MEVCUT BİR SORUNU OYLAYIN VEYA https://aka.ms/msbuild/unhandled ADRESİNDE YENİ BİR SORUN OLUŞTURUN
+        <target state="translated">Bu, MSBuild'de işlenmeyen bir istisnadır -- LÜTFEN MEVCUT BİR SORUNU OYLAYIN VEYA https://aka.ms/msbuild/unhandled ADRESİNDE YENİ BİR SORUN DOSYALAYIN
     {0}</target>
         <note />
       </trans-unit>
@@ -1026,7 +1026,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">{0} günlüğe kaydetme türü, {1} tarafından anlaşılmıyor.</target>
+        <target state="translated">Günlük kaydı {0} günlük kaydı türü {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

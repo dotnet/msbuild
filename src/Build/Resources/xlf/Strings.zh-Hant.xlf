@@ -213,12 +213,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">專案 {0} 指定 'TargetFramework(s)' 屬性 '{1}'，該屬性未使用 .NET SDK。這些屬性無法被直接匯入 C# 目標的專案理解。</target>
+        <target state="translated">Project {0} 指定未使用 .NET SDK 的 'TargetFramework(s)' 属性 '{1}'。直接匯入 C# 目標的項目無法瞭解這些屬性。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">未遵守 'TargetFramework' 和 'TargetFrameworks' 屬性，且不應在未使用 .NET SDK 的專案中指定。</target>
+        <target state="translated">未遵守 『TargetFramework』 和 『TargetFrameworks』 屬性，且不應在未使用 .NET SDK 的專案中指定。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">位置: '{0}' 無法完全信任，請將您的專案放在該資料夾之外 (專案: {1})。</target>
+        <target state="translated">位置： '{0}' 無法完全信任，請將您的專案放在該資料夾之外 (Project： {1})。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">下載資料夾對於建置專案來說不受信任。</target>
+        <target state="translated">專案建置不受信任的下載資料夾。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -499,7 +499,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: 由於發生未預期的記錄器失敗，因此已中止組建。
+        <target state="translated">MSB4017: 因為未預期的記錄器失敗，建置未預期停止。
    {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -512,7 +512,7 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">展開具有 glob 的 fileSpec 時發生例外狀況: fileSpec: "{0}" (假設它是檔案名稱)。例外狀況: {1}</target>
+        <target state="translated">展開具有 glob： fileSpec： "{0}" 的 fileSpec 時發生例外狀況，假設它是檔名。例外狀況： {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -862,7 +862,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">SDK 解析程式 '{1}' 無法解析 SDK '{0}'。{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -1026,7 +1026,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">{1} 無法理解記錄類型 {0}。</target>
+        <target state="translated">{1} 無法了解記錄類型 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
