@@ -550,7 +550,9 @@ namespace Microsoft.Build.BackEnd
         /// Given a set of task parameters from the UsingTask and from the task invocation, generate a dictionary that combines the two, or throws if the merge
         /// is impossible (we shouldn't ever get to this point if it is ...)
         /// </summary>
-        private static IDictionary<string, string> MergeTaskFactoryParameterSets(IDictionary<string, string> factoryIdentityParameters, IDictionary<string, string> taskIdentityParameters)
+        private static IDictionary<string, string> MergeTaskFactoryParameterSets(
+            IDictionary<string, string> factoryIdentityParameters,
+            IDictionary<string, string> taskIdentityParameters)
         {
             IDictionary<string, string> mergedParameters = null;
             if (factoryIdentityParameters == null || factoryIdentityParameters.Count == 0)
@@ -598,6 +600,18 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     mergedParameters.Add(XMakeAttributes.architecture, mergedArchitecture);
+                }
+            }
+
+            // Add rest of the entries from taskIdentityParameters
+            if (taskIdentityParameters != null && mergedParameters != null)
+            {
+                foreach (KeyValuePair<string, string> kvp in taskIdentityParameters)
+                {
+                    if (!mergedParameters.ContainsKey(kvp.Key))
+                    {
+                        mergedParameters[kvp.Key] = kvp.Value;
+                    }
                 }
             }
 

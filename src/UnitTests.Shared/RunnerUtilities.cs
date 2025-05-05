@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Xunit.Abstractions;
 
@@ -19,6 +20,7 @@ namespace Microsoft.Build.UnitTests.Shared
 
         public static ArtifactsLocationAttribute ArtifactsLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<ArtifactsLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the ArtifactsLocationAttribute");
+
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
 
@@ -68,9 +70,9 @@ namespace Microsoft.Build.UnitTests.Shared
             string binaryFolder = attribute.BootstrapMsBuildBinaryLocation;
 #if NET
             string pathToExecutable = EnvironmentProvider.GetDotnetExePathFromFolder(binaryFolder);
-            msbuildParameters = Path.Combine(binaryFolder, "sdk", attribute.BootstrapSdkVersion, "MSBuild.dll") + " " + msbuildParameters;
+            msbuildParameters = Path.Combine(binaryFolder, "sdk", attribute.BootstrapSdkVersion, Constants.MSBuildAssemblyName) + " " + msbuildParameters;
 #else
-            string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
+            string pathToExecutable = Path.Combine(binaryFolder, Constants.MSBuildExecutableName);
 #endif
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
         }
