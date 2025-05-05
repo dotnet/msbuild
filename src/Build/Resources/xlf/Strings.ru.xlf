@@ -862,7 +862,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
+        <target state="translated">Не удалось разрешить SDK "{0}" с помощью сопоставителя SDK "{1}". {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
