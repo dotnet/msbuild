@@ -1182,13 +1182,17 @@ namespace Microsoft.Build.Execution
                 public short ExecutedCount { get; private set; } = 0;
                 public long TotalMemoryConsumption { get; private set; } = 0;
                 private readonly Stopwatch _executedSw  = new Stopwatch();
+#if NET
                 private long _memoryConsumptionOnStart;
+#endif
 
                 public TimeSpan ExecutedTime => _executedSw.Elapsed;
 
                 public void ExecutionStarted()
                 {
-                    _memoryConsumptionOnStart = GC.GetTotalMemory(false);
+#if NET
+                    _memoryConsumptionOnStart = GC.GetTotalAllocatedBytes(false);
+#endif
                     _executedSw.Start();
                     ExecutedCount++;
                 }
@@ -1196,7 +1200,9 @@ namespace Microsoft.Build.Execution
                 public void ExecutionStopped()
                 {
                     _executedSw.Stop();
-                    TotalMemoryConsumption += GC.GetTotalMemory(false) - _memoryConsumptionOnStart;
+#if NET
+                    TotalMemoryConsumption += GC.GetTotalAllocatedBytes(false) - _memoryConsumptionOnStart;
+#endif
                 }
 
                 public void Reset()
