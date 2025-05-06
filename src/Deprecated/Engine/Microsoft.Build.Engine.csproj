@@ -15,6 +15,7 @@
     <NoWarn>$(NoWarn);1570;1572;1573;1587</NoWarn>
     <Nullable>disable</Nullable>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <ChecksumAlgorithm>SHA256</ChecksumAlgorithm>
   </PropertyGroup>
 
   <ItemGroup>
