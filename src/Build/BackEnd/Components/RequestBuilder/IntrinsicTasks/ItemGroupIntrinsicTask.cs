@@ -482,29 +482,58 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Filter the metadata as appropriate
+            List<string> metadataToRemove = null;
             if (keepMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    foreach (var metadataName in item.MetadataNames)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMeatadataNames)
                     {
                         if (!keepMetadata.Contains(metadataName))
                         {
-                            item.RemoveMetadata(metadataName);
+                            metadataToRemove.Add(metadataName);
                         }
+                    }
+
+                    foreach(string metadataName in metadataToRemove)
+                    {
+                        item.RemoveMetadata(metadataName);
                     }
                 }
             }
             else if (removeMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    foreach (var metadataName in item.MetadataNames)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMeatadataNames)
                     {
                         if (removeMetadata.Contains(metadataName))
                         {
-                            item.RemoveMetadata(metadataName);
+                            metadataToRemove.Add(metadataName);
                         }
+                    }
+
+                    foreach (string metadataName in metadataToRemove)
+                    {
+                        item.RemoveMetadata(metadataName);
                     }
                 }
             }
