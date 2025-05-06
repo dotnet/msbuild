@@ -366,5 +366,59 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The type of object to test.</typeparam>
         /// <returns>True if the object should be written, false otherwise.</returns>
         bool TranslateNullable<T>(T value);
+
+        /// <summary>
+        /// Creates a scope which activates string interning / deduplication for any Intern_xx method.
+        /// This should generally be called from the root level packet.
+        /// </summary>
+        /// <param name="comparer">The string comparer to use when populating the intern cache.</param>
+        /// <param name="initialCapacity">The initial capacity of the intern cache.</param>
+        /// <param name="internBlock">A delegate providing a translator, in which all Intern_xx calls will go through the intern cache.</param>
+        /// <remarks>
+        /// Packet interning is implemented via a header with an array of all interned strings, followed by the body in
+        /// which any interned / duplicated strings are replaced by their ID.
+        /// <see cref="TranslationDirection"/> modes have different ordering requirements, so it would not be
+        /// possible to implement direction-agnostic serialization via the Intern_xx methods alone:
+        /// - Write: Because we don't know the full list of strings ahead of time, we need to create a temporary buffer
+        ///   for the packet body, which we can later offset when flushing to the real stream.
+        /// - Read: The intern header needs to be deserialized before the packet body, otherwise we won't know what
+        ///   string each ID maps to.
+        /// This method abstracts these requirements to the caller, such that the underlying translator will
+        /// automatically handle the appropriate IO ordering when entering / exiting the delegate scope.
+        /// </remarks>
+        void WithInterning(IEqualityComparer<string> comparer, int initialCapacity, Action<ITranslator> internBlock);
+
+        /// <summary>
+        /// Interns the string if the translator is currently within an intern block.
+        /// Otherwise, this forwards to the regular Translate method.
+        /// </summary>
+        /// <param name="str">The value to be translated.</param>
+        /// <param name="nullable">
+        /// Whether to null check and translate the nullable marker.
+        /// Setting this to false can reduce packet sizes when interning large numbers of strings
+        /// which are validated to always be non-null, such as dictionary keys.
+        /// </param>
+        void Intern(ref string str, bool nullable = true);
+
+        /// <summary>
+        /// Interns each string in the array if the translator is currently within an intern block.
+        /// Otherwise, this forwards to the regular Translate method. To match behavior, all strings
+        /// assumed to be non-null.
+        /// </summary>
+        /// <param name="array">The array to be translated.</param>
+        void Intern(ref string[] array);
+
+        /// <summary>
+        /// Interns the string if the translator is currently within an intern block.
+        /// Otherwise, this forwards to the regular Translate method.
+        /// If the string is determined to be path-like, the path components will be interned separately.
+        /// </summary>
+        /// <param name="str">The value to be translated.</param>
+        /// <param name="nullable">
+        /// Whether to null check and translate the nullable marker.
+        /// Setting this to false can reduce packet sizes when interning large numbers of strings
+        /// which are validated to always be non-null, such as dictionary keys.
+        /// </param>
+        void InternPath(ref string str, bool nullable = true);
     }
 }
