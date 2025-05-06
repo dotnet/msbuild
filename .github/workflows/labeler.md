@@ -18,7 +18,7 @@ Across these workflows, the following changes were made to configure the issue l
     - `labeler-predict-issues.yml`
     - `labeler-predict-pulls.yml`
     - `labeler-train.yml`
-2. Remove `DEFAULT_LABEL` to value as we do not apply a default label when a prediction is not made:
+2. Remove the `DEFAULT_LABEL` setting since no default label is applied when prediction is not made:
     - `labeler-predict-issues.yml`
     - `labeler-predict-pulls.yml`
 3. Remove the `EXCLUDED_AUTHORS` value as we do not bypass labeling for any authors' issues/pulls in this repository:
