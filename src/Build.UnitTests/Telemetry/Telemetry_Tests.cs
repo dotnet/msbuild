@@ -309,6 +309,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Verify task execution summary metrics based on TasksSummaryConverter.Write structure
                 tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("ExecutionsCount").GetInt32().ShouldBe(4);
                 tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
+                // Allowing 0 for TotalMemoryBytes as it is possible for tasks to allocate no memory in certain scenarios.
                 tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThanOrEqualTo(0);
             }
         }
