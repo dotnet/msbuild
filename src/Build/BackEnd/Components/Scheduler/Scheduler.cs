@@ -698,7 +698,7 @@ namespace Microsoft.Build.BackEnd
 
             // Resume any work available which has already been assigned to specific nodes.
             ResumeRequiredWork(responses);
-            HashSet<int> idleNodes = new HashSet<int>();
+            HashSet<int> idleNodes = new HashSet<int>(_availableNodes.Count);
             foreach (int availableNodeId in _availableNodes.Keys)
             {
                 if (!_schedulingData.IsNodeWorking(availableNodeId))
@@ -991,7 +991,8 @@ namespace Microsoft.Build.BackEnd
         {
             if (idleNodes.Contains(InProcNodeId))
             {
-                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
+                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsCount);
+                unscheduledRequests.AddRange(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
                 foreach (SchedulableRequest request in unscheduledRequests)
                 {
                     if (CanScheduleRequestToNode(request, InProcNodeId) && shouldBeScheduled(request))
@@ -1246,7 +1247,7 @@ namespace Microsoft.Build.BackEnd
         private void AssignUnscheduledRequestsFIFO(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
             // Assign requests on a first-come/first-serve basis
-            foreach (int nodeId in idleNodes)
+            foreach (SchedulableRequest unscheduledRequest in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
             {
                 // Don't overload the system.
                 if (AtSchedulingLimit())
@@ -1255,7 +1256,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                foreach (SchedulableRequest unscheduledRequest in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
+                foreach (int nodeId in idleNodes)
                 {
                     if (CanScheduleRequestToNode(unscheduledRequest, nodeId))
                     {
@@ -1956,33 +1957,25 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if caches misses are allowed, false otherwise</returns>
         private bool CheckIfCacheMissOnReferencedProjectIsAllowedAndErrorIfNot(int nodeForResults, BuildRequest request, List<ScheduleResponse> responses, out Action<ILoggingService> emitNonErrorLogs)
         {
-            emitNonErrorLogs = _ => { };
+            emitNonErrorLogs = static _ => { };
 
             ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
             var configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
 
             // do not check root requests as nothing depends on them
             if (isolateProjects == ProjectIsolationMode.False || request.IsRootRequest || request.SkipStaticGraphIsolationConstraints
-                || SkipNonexistentTargetsIfExistentTargetsHaveResults(request))
+                || SkipNonexistentTargetsIfExistentTargetsHaveResults(request, _configCache, _resultsCache))
             {
                 bool logComment = ((isolateProjects == ProjectIsolationMode.True || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation) && request.SkipStaticGraphIsolationConstraints);
                 if (logComment)
                 {
-                    // retrieving the configs is not quite free, so avoid computing them eagerly
-                    var configs = GetConfigurations();
-
-                    emitNonErrorLogs = ls => ls.LogComment(
-                            NewBuildEventContext(),
-                            MessageImportance.Normal,
-                            "SkippedConstraintsOnRequest",
-                            configs.ParentConfig.ProjectFullPath,
-                            configs.RequestConfig.ProjectFullPath);
+                    emitNonErrorLogs = GetLoggingServiceAction(configCache, request, _schedulingData);
                 }
 
                 return true;
             }
 
-            (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) = GetConfigurations();
+            (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) = GetConfigurations(configCache, request, _schedulingData);
 
             // allow self references (project calling the msbuild task on itself, potentially with different global properties)
             if (parentConfig.ProjectFullPath.Equals(requestConfig.ProjectFullPath, StringComparison.OrdinalIgnoreCase))
@@ -2010,7 +2003,7 @@ namespace Microsoft.Build.BackEnd
 
             return false;
 
-            BuildEventContext NewBuildEventContext()
+            static BuildEventContext NewBuildEventContext(BuildRequest request)
             {
                 return new BuildEventContext(
                     request.SubmissionId,
@@ -2021,13 +2014,33 @@ namespace Microsoft.Build.BackEnd
                     BuildEventContext.InvalidTaskId);
             }
 
-            (BuildRequestConfiguration RequestConfig, BuildRequestConfiguration ParentConfig) GetConfigurations()
+            static (BuildRequestConfiguration RequestConfig, BuildRequestConfiguration ParentConfig) GetConfigurations(IConfigCache configCache, BuildRequest request, SchedulingData schedulingData)
             {
                 BuildRequestConfiguration buildRequestConfiguration = configCache[request.ConfigurationId];
 
                 // Need the parent request. It might be blocked or executing; check both.
-                SchedulableRequest parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
-                    ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
+                SchedulableRequest parentRequest = null;
+
+                foreach (var r in schedulingData.BlockedRequests)
+                {
+                    if (r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
+                    {
+                        parentRequest = r;
+                        break;
+                    }
+                }
+
+                if (parentRequest is null)
+                {
+                    foreach (var r in schedulingData.ExecutingRequests)
+                    {
+                        if (r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
+                        {
+                            parentRequest = r;
+                            break;
+                        }
+                    }
+                }
 
                 ErrorUtilities.VerifyThrowInternalNull(parentRequest);
                 ErrorUtilities.VerifyThrow(
@@ -2038,12 +2051,12 @@ namespace Microsoft.Build.BackEnd
                 return (buildRequestConfiguration, parentConfiguration);
             }
 
-            string ConcatenateGlobalProperties(BuildRequestConfiguration configuration)
+            static string ConcatenateGlobalProperties(BuildRequestConfiguration configuration)
             {
-                return string.Join("; ", configuration.GlobalProperties.Select<ProjectPropertyInstance, string>(p => $"{p.Name}={p.EvaluatedValue}"));
+                return string.Join("; ", configuration.GlobalProperties.Select<ProjectPropertyInstance, string>(static p => $"{p.Name}={p.EvaluatedValue}"));
             }
 
-            bool SkipNonexistentTargetsIfExistentTargetsHaveResults(BuildRequest buildRequest)
+            static bool SkipNonexistentTargetsIfExistentTargetsHaveResults(BuildRequest buildRequest, IConfigCache configCache, IResultsCache resultsCache)
             {
                 // Return early if the top-level target(s) of this build request weren't requested to be skipped if nonexistent.
                 if ((buildRequest.BuildRequestDataFlags & BuildRequestDataFlags.SkipNonexistentTargets) != BuildRequestDataFlags.SkipNonexistentTargets)
@@ -2051,7 +2064,7 @@ namespace Microsoft.Build.BackEnd
                     return false;
                 }
 
-                BuildResult requestResults = _resultsCache.GetResultsForConfiguration(buildRequest.ConfigurationId);
+                BuildResult requestResults = resultsCache.GetResultsForConfiguration(buildRequest.ConfigurationId);
 
                 // On a self-referenced build, cache misses are allowed.
                 if (requestResults == null)
@@ -2061,9 +2074,9 @@ namespace Microsoft.Build.BackEnd
 
                 // A cache miss on at least one existing target without results is disallowed,
                 // as it violates isolation constraints.
-                foreach (string target in request.Targets)
+                foreach (string target in buildRequest.Targets)
                 {
-                    if (_configCache[buildRequest.ConfigurationId]
+                    if (configCache[buildRequest.ConfigurationId]
                         .ProjectTargets
                         .Contains(target) &&
                         !requestResults.HasResultsForTarget(target))
@@ -2075,6 +2088,21 @@ namespace Microsoft.Build.BackEnd
                 // A cache miss on nonexistent targets on the reference is allowed, given the request
                 // to skip nonexistent targets.
                 return true;
+            }
+
+            static Action<ILoggingService> GetLoggingServiceAction(IConfigCache configCache, BuildRequest request, SchedulingData schedulingData)
+            {
+                // retrieving the configs is not quite free, so avoid computing them eagerly
+                (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) = GetConfigurations(configCache, request, schedulingData);
+
+                Action<ILoggingService> emitNonErrorLogs = ls => ls.LogComment(
+                        NewBuildEventContext(request),
+                        MessageImportance.Normal,
+                        "SkippedConstraintsOnRequest",
+                        parentConfig.ProjectFullPath,
+                        requestConfig.ProjectFullPath);
+
+                return emitNonErrorLogs;
             }
         }
 
