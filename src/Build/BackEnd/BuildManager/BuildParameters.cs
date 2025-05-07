@@ -903,9 +903,8 @@ namespace Microsoft.Build.Execution
 
         internal bool SkippedResultsDoNotCauseCacheMiss()
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+            if (Traits.Instance.SkippedResultsDoNotCauseCacheMiss)
             {
-                // By default skipped results should not cause cache miss. See https://github.com/dotnet/msbuild/issues/11753
                 return true;
             }
 
