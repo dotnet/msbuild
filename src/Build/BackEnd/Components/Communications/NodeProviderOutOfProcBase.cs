@@ -634,17 +634,12 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void BeginAsyncPacketRead()
             {
-#if FEATURE_APM
-                _clientToServerStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
-#else
                 ThreadPool.QueueUserWorkItem(delegate
                 {
                     var ignored = RunPacketReadLoopAsync();
                 });
-#endif
             }
 
-#if !FEATURE_APM
             public async Task RunPacketReadLoopAsync()
             {
                 while (true)
@@ -667,6 +662,9 @@ namespace Microsoft.Build.BackEnd
 
                     NodePacketType packetType = (NodePacketType)_headerByte[0];
                     int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
+#if NETFRAMEWORK
+                    MSBuildEventSource.Log.PacketReadSize(packetLength);
+#endif
 
                     _readBufferMemoryStream.SetLength(packetLength);
                     byte[] packetData = _readBufferMemoryStream.GetBuffer();
@@ -700,7 +698,6 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
-#endif
 
             /// <summary>
             /// Sends the specified packet to this node asynchronously.
@@ -910,53 +907,6 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-#if FEATURE_APM
-            /// <summary>
-            /// Callback invoked by the completion of a read of a header byte on one of the named pipes.
-            /// </summary>
-            private void HeaderReadComplete(IAsyncResult result)
-            {
-                int bytesRead;
-                try
-                {
-                    try
-                    {
-                        bytesRead = _clientToServerStream.EndRead(result);
-                    }
-
-                    // Workaround for CLR stress bug; it sporadically calls us twice on the same async
-                    // result, and EndRead will throw on the second one. Pretend the second one never happened.
-                    catch (ArgumentException)
-                    {
-                        CommunicationsUtilities.Trace(_nodeId, "Hit CLR bug #825607: called back twice on same async result; ignoring");
-                        return;
-                    }
-
-                    if (!ProcessHeaderBytesRead(bytesRead))
-                    {
-                        return;
-                    }
-                }
-                catch (IOException e)
-                {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in HeaderReadComplete: {0}", e);
-                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                    Close();
-                    return;
-                }
-
-                int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
-                MSBuildEventSource.Log.PacketReadSize(packetLength);
-
-                // Ensures the buffer is at least this length.
-                // It avoids reallocations if the buffer is already large enough.
-                _readBufferMemoryStream.SetLength(packetLength);
-                byte[] packetData = _readBufferMemoryStream.GetBuffer();
-
-                _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
-            }
-#endif
-
             private bool ProcessBodyBytesRead(int bytesRead, int packetLength, NodePacketType packetType)
             {
                 if (bytesRead != packetLength)
@@ -990,64 +940,6 @@ namespace Microsoft.Build.BackEnd
                 }
                 return true;
             }
-
-#if FEATURE_APM
-            /// <summary>
-            /// Method called when the body of a packet has been read.
-            /// </summary>
-            private void BodyReadComplete(IAsyncResult result)
-            {
-                NodePacketType packetType = (NodePacketType)_headerByte[0];
-                var state = (Tuple<byte[], int>)result.AsyncState;
-                byte[] packetData = state.Item1;
-                int packetLength = state.Item2;
-                int bytesRead;
-
-                try
-                {
-                    try
-                    {
-                        bytesRead = _clientToServerStream.EndRead(result);
-                    }
-
-                    // Workaround for CLR stress bug; it sporadically calls us twice on the same async
-                    // result, and EndRead will throw on the second one. Pretend the second one never happened.
-                    catch (ArgumentException)
-                    {
-                        CommunicationsUtilities.Trace(_nodeId, "Hit CLR bug #825607: called back twice on same async result; ignoring");
-                        return;
-                    }
-
-                    if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
-                    {
-                        return;
-                    }
-                }
-                catch (IOException e)
-                {
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in BodyReadComplete (Reading): {0}", e);
-                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                    Close();
-                    return;
-                }
-
-                // Read and route the packet.
-                if (!ReadAndRoutePacket(packetType, packetData, packetLength))
-                {
-                    return;
-                }
-
-                if (packetType != NodePacketType.NodeShutdown)
-                {
-                    // Read the next packet.
-                    BeginAsyncPacketRead();
-                }
-                else
-                {
-                    Close();
-                }
-            }
-#endif
         }
     }
 }
