@@ -21,7 +21,7 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 
 #endif
-#if NET451_OR_GREATER || NETCOREAPP
+#if !TASKHOST
 using System.Threading.Tasks;
 #endif
 
@@ -368,7 +368,7 @@ namespace Microsoft.Build.BackEnd
                 try
                 {
                     // Wait for a connection
-#if FEATURE_APM
+#if TASKHOST
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
                     CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
@@ -385,7 +385,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     CommunicationsUtilities.Trace("Parent started connecting. Reading handshake from parent");
-#if FEATURE_APM
+#if TASKHOST
                     localPipeServer.EndWaitForConnection(resultForConnection);
 #endif
 
@@ -521,9 +521,7 @@ namespace Microsoft.Build.BackEnd
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
-#if NET451_OR_GREATER
-            Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
-#elif NETCOREAPP
+#if !TASKHOST
             Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
 #else
             IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
@@ -533,7 +531,7 @@ namespace Microsoft.Build.BackEnd
             // packets to be sent by other threads which are shutting down, such as the logging thread.
             WaitHandle[] handles = new WaitHandle[]
             {
-#if NET451_OR_GREATER || NETCOREAPP
+#if !TASKHOST
                 ((IAsyncResult)readTask).AsyncWaitHandle,
 #else
                 result.AsyncWaitHandle,
@@ -553,7 +551,7 @@ namespace Microsoft.Build.BackEnd
                             int bytesRead = 0;
                             try
                             {
-#if NET451_OR_GREATER || NETCOREAPP
+#if !TASKHOST
                                 bytesRead = readTask.Result;
 #else
                                 bytesRead = localReadPipe.EndRead(result);
@@ -613,17 +611,11 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-#if NET451_OR_GREATER
-                            readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
-#elif NETCOREAPP
+#if !TASKHOST
                             readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
-#else
-                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
-#endif
-
-#if NET451_OR_GREATER || NETCOREAPP
                             handles[0] = ((IAsyncResult)readTask).AsyncWaitHandle;
 #else
+                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
                             handles[0] = result.AsyncWaitHandle;
 #endif
                         }

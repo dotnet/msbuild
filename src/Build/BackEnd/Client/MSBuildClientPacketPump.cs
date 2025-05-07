@@ -6,11 +6,7 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-
-#if NET
 using System.Threading.Tasks;
-#endif
-
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -204,11 +200,7 @@ namespace Microsoft.Build.BackEnd.Client
             try
             {
                 byte[] headerByte = new byte[5];
-#if FEATURE_APM
-                IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
-#else
                 Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
-#endif
 
                 bool continueReading = true;
                 do
@@ -220,11 +212,7 @@ namespace Microsoft.Build.BackEnd.Client
                     WaitHandle[] handles =
                     [
                         localPacketPumpShutdownEvent,
-#if FEATURE_APM
-                        result.AsyncWaitHandle
-#else
                         ((IAsyncResult)readTask).AsyncWaitHandle
-#endif
                     ];
                     int waitId = WaitHandle.WaitAny(handles);
                     switch (waitId)
@@ -239,11 +227,7 @@ namespace Microsoft.Build.BackEnd.Client
                             {
                                 // Client recieved a packet header. Read the rest of it.
                                 int headerBytesRead = 0;
-#if FEATURE_APM
-                                headerBytesRead = localStream.EndRead(result);
-#else
                                 headerBytesRead = readTask.Result;
-#endif
 
                                 if ((headerBytesRead != headerByte.Length) && !localPacketPumpShutdownEvent.WaitOne(0))
                                 {
@@ -303,11 +287,7 @@ namespace Microsoft.Build.BackEnd.Client
                                 else
                                 {
                                     // Start reading the next package header.
-#if FEATURE_APM
-                                    result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
-#else
                                     readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
-#endif
                                 }
                             }
                             break;

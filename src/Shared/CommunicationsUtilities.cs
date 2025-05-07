@@ -23,8 +23,6 @@ using System.Text;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
-#endif
-#if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
 
@@ -588,13 +586,17 @@ namespace Microsoft.Build.Internal
         }
 #nullable disable
 
-#if !FEATURE_APM
+#if !TASKHOST
         internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
         {
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
             {
-                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), CancellationToken.None);
+#if NET
+                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead)).ConfigureAwait(false);
+#else
+                int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead).ConfigureAwait(false);
+#endif
                 if (bytesRead == 0)
                 {
                     return totalBytesRead;
