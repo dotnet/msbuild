@@ -482,6 +482,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (allAdds == null)
                         {
+                            // Use the List<T>(IEnumerable<T>) constructor to avoid an intermediate array allocation.
                             allAdds = new List<ProjectItemInstance>(adds);
                         }
                         else
