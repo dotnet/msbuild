@@ -551,19 +551,36 @@ namespace Microsoft.Build.Collections
 
         internal IEnumerable<TResult> Filter<TResult>(Func<T, bool> filter, Func<T, TResult> selector)
         {
-            List<TResult> result = new();
             lock (_properties)
             {
-                foreach (T property in (ICollection<T>)_properties)
+                ICollection<T> propertiesCollection = (ICollection<T>)_properties;
+                List<TResult> result = new(propertiesCollection.Count);
+
+                // PERF: Prefer using struct enumerators from the concrete types to avoid allocations.
+                // RetrievableValuedEntryHashSet implements a struct enumerator.
+                if (_properties is RetrievableValuedEntryHashSet<T> hashSet)
                 {
-                    if (filter(property))
+                    foreach (T property in hashSet)
                     {
-                        result.Add(selector(property));
+                        if (filter(property))
+                        {
+                            result.Add(selector(property));
+                        }
                     }
                 }
-            }
+                else
+                {
+                    foreach (T property in propertiesCollection)
+                    {
+                        if (filter(property))
+                        {
+                            result.Add(selector(property));
+                        }
+                    }
+                }
 
-            return result;
+                return result;
+            }
         }
     }
 }
