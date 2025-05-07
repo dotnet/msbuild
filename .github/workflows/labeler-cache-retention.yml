@@ -1,3 +1,8 @@
+# Workflow template imported and updated from:
+# https://github.com/dotnet/issue-labeler/wiki/Onboarding
+#
+# See labeler.md for more information
+#
 # Regularly restore the prediction models from cache to prevent cache eviction
 name: "Labeler: Cache Retention"
 
@@ -26,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        type: ["issues", "pulls"]
+        type: ["issues"] # Pulls are disabled in this repository, so "pulls" is removed from the matrix
     steps:
       - uses: dotnet/issue-labeler/restore@46125e85e6a568dc712f358c39f35317366f5eed # v2.0.0
         with:
