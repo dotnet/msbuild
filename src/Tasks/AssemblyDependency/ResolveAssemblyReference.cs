@@ -922,9 +922,9 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
-        /// Executes the task in an out-of-proc RAR node if enabled by the BuildEngine.
+        /// Forces the task to run in-proc, regardless of BuildEngine flags.
         /// </summary>
-        public bool ExecuteOutOfProcess { get; set; }
+        public bool DisableOutOfProcNode { get; set; }
 
         /// <summary>
         /// This is a list of all primary references resolved to full paths.
@@ -3249,7 +3249,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
-            if (ExecuteOutOfProcess
+            if (!DisableOutOfProcNode
                 && BuildEngine is IBuildEngine10 buildEngine10
                 && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
             {
