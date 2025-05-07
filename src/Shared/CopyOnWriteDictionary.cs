@@ -294,21 +294,26 @@ namespace Microsoft.Build.Collections
             return initial != _backing; // whether the removal occured
         }
 
+#if NET472_OR_GREATER || NETCOREAPP
         /// <summary>
         /// Implementation of generic IEnumerable.GetEnumerator()
         /// </summary>
-        public IEnumerator<KeyValuePair<string, V>> GetEnumerator()
+        public ImmutableDictionary<string, V>.Enumerator GetEnumerator()
         {
             return _backing.GetEnumerator();
         }
 
-        /// <summary>
-        /// Implementation of IEnumerable.GetEnumerator()
-        /// </summary>
-        IEnumerator IEnumerable.GetEnumerator()
+        IEnumerator<KeyValuePair<string, V>> IEnumerable<KeyValuePair<string, V>>.GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<string, V>>)this).GetEnumerator();
+            ImmutableDictionary<string, V>.Enumerator enumerator = _backing.GetEnumerator();
+            return _backing.GetEnumerator();
         }
+#else
+        public IEnumerator<KeyValuePair<string, V>> GetEnumerator()
+        {
+            return _backing.GetEnumerator();
+        }
+#endif
 
 #nullable disable
         /// <summary>
