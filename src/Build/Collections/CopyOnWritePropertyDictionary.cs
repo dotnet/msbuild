@@ -135,7 +135,8 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Gets an enumerator over all the properties in the collection
-        /// Enumeration is in undefined order
+        /// Enumeration is in undefined order. This overload exposes the struct enumerator
+        /// directly to avoid an allocation due to boxing.
         /// </summary>
         public ImmutableDictionary<string, T>.Enumerator GetEnumerator() => _backing.GetEnumerator();
 
@@ -388,6 +389,10 @@ namespace Microsoft.Build.Collections
             return new CopyOnWritePropertyDictionary<T>(this);
         }
 
+        /// <summary>
+        /// Struct based enumerator to expose the values of the backing collection.
+        /// This avoids the allocation when accessing the Values property directly.
+        /// </summary>
         public struct Enumerator : IEnumerator<T>
         {
             private ImmutableDictionary<string, T>.Enumerator _dictionaryEnumerator;
@@ -401,8 +406,6 @@ namespace Microsoft.Build.Collections
             readonly object IEnumerator.Current => Current;
 
             public void Dispose() => _dictionaryEnumerator.Dispose();
-
-            public readonly Enumerator GetEnumerator() => this;
 
             public bool MoveNext()
             {
