@@ -16,6 +16,7 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <EnableAotAnalyzer Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">true</EnableAotAnalyzer>
   </PropertyGroup>
 
   <ItemGroup>
@@ -36,18 +37,6 @@
   </ItemGroup>
 
   <ItemGroup Label="Shared Code">
-    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
-      <Link>Shared\AssemblyFolders\AssemblyFoldersEx.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs">
-      <Link>Shared\AssemblyFolders\AssemblyFoldersFromConfig.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs">
-      <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
-      <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>
     </Compile>

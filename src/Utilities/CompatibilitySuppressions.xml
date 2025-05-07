@@ -2,6 +2,76 @@
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersExInfo(System.String,System.String,System.String,System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>lib/net472/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>lib/net472/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersFromConfigInfo(System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>lib/net472/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>lib/net472/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersExInfo(System.String,System.String,System.String,System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>lib/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>lib/net9.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersFromConfigInfo(System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>lib/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>lib/net9.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersExInfo(System.String,System.String,System.String,System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>ref/net472/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersFromConfigInfo(System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>ref/net472/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/net472/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersExInfo(System.String,System.String,System.String,System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersFromConfigInfo(System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersExInfo(System.String,System.String,System.String,System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Utilities.ToolLocationHelper.GetAssemblyFoldersFromConfigInfo(System.String,System.String,System.Reflection.ProcessorArchitecture)</Target>
+    <Left>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>.NETCoreApp,Version=v2.0</Target>
   </Suppression>

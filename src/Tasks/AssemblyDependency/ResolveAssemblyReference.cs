@@ -439,7 +439,7 @@ namespace Microsoft.Build.Tasks
         public bool EnableCustomCulture
         {
             get { return _enableCustomCulture; }
-            set { _enableCustomCulture = value; }     
+            set { _enableCustomCulture = value; }
         }
 
         /// <summary>
@@ -1294,29 +1294,6 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-
-#if FEATURE_WIN32_REGISTRY
-            MessageImportance messageImportance = MessageImportance.Low;
-            if (dependencyTable.Resolvers != null && Log.LogsMessagesOfImportance(messageImportance))
-            {
-                foreach (Resolver r in dependencyTable.Resolvers)
-                {
-                    if (r is AssemblyFoldersExResolver assemblyFoldersExResolver)
-                    {
-                        AssemblyFoldersEx assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
-
-                        if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
-                        {
-                            Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.AssemblyFoldersExSearchLocations", r.SearchPath);
-                            foreach (var path in assemblyFoldersEx.UniqueDirectoryPaths)
-                            {
-                                Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.EightSpaceIndent", path);
-                            }
-                        }
-                    }
-                }
-            }
-#endif
 
             MSBuildEventSource.Log.RarLogResultsStop();
 

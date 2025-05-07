@@ -387,20 +387,27 @@ namespace Microsoft.Build.Shared
 
             lock (_runningTestsLock)
             {
-                if (_runningTests != null)
+                try
                 {
+                    if (_runningTests != null)
+                    {
+                        return _runningTests.Value;
+                    }
+
+                    // Check if running tests via the TestInfo class in Microsoft.Build.Framework.
+                    //  See the comments on the TestInfo class for an explanation of why it works this way.
+                    var frameworkAssembly = typeof(Framework.ITask).Assembly;
+                    var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
+                    var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+
+                    _runningTests = (bool)runningTestsField.GetValue(null);
+
                     return _runningTests.Value;
                 }
-
-                // Check if running tests via the TestInfo class in Microsoft.Build.Framework.
-                //  See the comments on the TestInfo class for an explanation of why it works this way.
-                var frameworkAssembly = typeof(Framework.ITask).Assembly;
-                var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
-                var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-
-                _runningTests = (bool)runningTestsField.GetValue(null);
-
-                return _runningTests.Value;
+                catch
+                {
+                    return false;
+                }
             }
         }
 
