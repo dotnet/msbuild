@@ -135,14 +135,21 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Gets an enumerator over all the properties in the collection
+        /// Enumeration is in undefined order. This overload exposes the struct enumerator
+        /// directly to avoid an allocation due to boxing.
+        /// </summary>
+        public ImmutableDictionary<string, T>.Enumerator GetEnumerator() => _backing.GetEnumerator();
+
+        /// <summary>
+        /// Gets an enumerator over all the properties in the collection
         /// Enumeration is in undefined order
         /// </summary>
-        public IEnumerator<T> GetEnumerator() => _backing.Values.GetEnumerator();
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => new Enumerator(this);
 
         /// <summary>
         /// Get an enumerator over entries
         /// </summary>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => new Enumerator(this);
 
         #region IEquatable<CopyOnWritePropertyDictionary<T>> Members
 
@@ -347,9 +354,24 @@ namespace Microsoft.Build.Collections
         /// <param name="other">An enumerator over the properties to add.</param>
         public void ImportProperties(IEnumerable<T> other)
         {
-            _backing = _backing.SetItems(Items());
+            if (other is CopyOnWritePropertyDictionary<T> copyOnWriteDictionary)
+            {
+                _backing = _backing.SetItems(DictionaryItems(copyOnWriteDictionary));
+            }
+            else
+            {
+                _backing = _backing.SetItems(Items(other));
+            }
 
-            IEnumerable<KeyValuePair<string, T>> Items()
+            static IEnumerable<KeyValuePair<string, T>> DictionaryItems(CopyOnWritePropertyDictionary<T> copyOnWriteDictionary)
+            {
+                foreach (KeyValuePair<string, T> kvp in copyOnWriteDictionary)
+                {
+                    yield return new(kvp.Value.Key, kvp.Value);
+                }
+            }
+
+            static IEnumerable<KeyValuePair<string, T>> Items(IEnumerable<T> other)
             {
                 foreach (T property in other)
                 {
@@ -365,6 +387,39 @@ namespace Microsoft.Build.Collections
         public ICopyOnWritePropertyDictionary<T> DeepClone()
         {
             return new CopyOnWritePropertyDictionary<T>(this);
+        }
+
+        /// <summary>
+        /// Struct based enumerator to expose the values of the backing collection.
+        /// This avoids the allocation when accessing the Values property directly.
+        /// </summary>
+        public struct Enumerator : IEnumerator<T>
+        {
+            private ImmutableDictionary<string, T>.Enumerator _dictionaryEnumerator;
+            public Enumerator(CopyOnWritePropertyDictionary<T> dictionary)
+            {
+                _dictionaryEnumerator = dictionary._backing.GetEnumerator();
+            }
+
+            public T Current { get; private set; }
+
+            readonly object IEnumerator.Current => Current;
+
+            public void Dispose() => _dictionaryEnumerator.Dispose();
+
+            public bool MoveNext()
+            {
+                if (_dictionaryEnumerator.MoveNext())
+                {
+                    Current = _dictionaryEnumerator.Current.Value;
+
+                    return true;
+                }
+
+                return false;
+            }
+
+            public void Reset() => _dictionaryEnumerator.Reset();
         }
     }
 }
