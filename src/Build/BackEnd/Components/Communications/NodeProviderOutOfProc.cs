@@ -118,6 +118,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Start the asynchronous read.
                 context.BeginAsyncPacketRead();
+                context.StartDrainingQueue();
 
                 // Configure the node.
                 context.SendData(configurationFactory(nodeInfo));

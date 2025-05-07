@@ -50,6 +50,11 @@ namespace Microsoft.Build.BackEnd
             return new BinaryWriteTranslator(stream);
         }
 
+        internal static ITranslator GetWriteTranslator(UnmanagedMemoryStream stream)
+        {
+            return new BinaryWriteTranslator(stream);
+        }
+
         /// <summary>
         /// Implementation of ITranslator for reading from a stream.
         /// </summary>
