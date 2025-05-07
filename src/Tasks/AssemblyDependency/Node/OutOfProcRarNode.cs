@@ -134,12 +134,20 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         private async Task RunNodeEndpointsAsync(CancellationToken cancellationToken)
         {
             OutOfProcRarNodeEndpoint[] endpoints = new OutOfProcRarNodeEndpoint[_maxNumberOfConcurrentTasks];
+
+            // Validate all endpoint pipe handles successfully initialize before running any read loops.
+            // This allows us to bail out in the event where we can't control every pipe instance. 
+            for (int i = 0; i < endpoints.Length; i++)
+            {
+                endpoints[i] = new OutOfProcRarNodeEndpoint(endpointId: i + 1, _handshake, _maxNumberOfConcurrentTasks);
+            }
+
             Task[] endpointTasks = new Task[endpoints.Length];
 
             for (int i = 0; i < endpoints.Length; i++)
             {
-                OutOfProcRarNodeEndpoint endpoint = new(endpointId: i + 1, _handshake, _maxNumberOfConcurrentTasks);
-                endpoints[i] = endpoint;
+                // Avoid capturing the indexer in the closure.
+                OutOfProcRarNodeEndpoint endpoint = endpoints[i];
                 endpointTasks[i] = Task.Run(() => endpoint.RunAsync(cancellationToken), cancellationToken);
             }
 
