@@ -13,7 +13,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     /// <summary>
     /// Implements a single instance of a pipe server which executes the ResolveAssemblyReference task.
     /// </summary>
-    internal class OutOfProcRarNodeEndpoint : IDisposable
+    internal sealed class OutOfProcRarNodeEndpoint : IDisposable
     {
         private readonly int _endpointId;
 

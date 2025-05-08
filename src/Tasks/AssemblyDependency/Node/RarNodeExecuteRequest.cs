@@ -5,7 +5,7 @@ using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Tasks.AssemblyDependency
 {
-    internal class RarNodeExecuteRequest : INodePacket
+    internal sealed class RarNodeExecuteRequest : INodePacket
     {
         public NodePacketType Type => NodePacketType.RarNodeExecuteRequest;
 

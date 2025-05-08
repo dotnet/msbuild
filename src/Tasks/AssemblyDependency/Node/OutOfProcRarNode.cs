@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     /// This manages the lifecycle of the multi-instance pipe server which executes RAR requests
     /// and does not invoke the task itself.
     /// </summary>
-    public class OutOfProcRarNode
+    public sealed class OutOfProcRarNode
     {
         private readonly ServerNodeHandshake _handshake = new(HandshakeOptions.None);
 

@@ -13,7 +13,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     /// Implements a client for sending the ResolveAssemblyReference task to an out-of-proc node.
     /// This is intended to be reused for all RAR tasks across a single build.
     /// </summary>
-    internal class OutOfProcRarClient : IDisposable
+    internal sealed class OutOfProcRarClient : IDisposable
     {
         private readonly NodePipeClient _pipeClient;
 
