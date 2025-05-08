@@ -566,7 +566,6 @@ namespace Microsoft.Build.Execution
                     NodeLauncher nodeLauncher = ((IBuildComponentHost)this).GetComponent<NodeLauncher>(BuildComponentType.NodeLauncher);
                     RarNodeLauncher rarNodeLauncher = new(nodeLauncher);
 
-                    // TODO: Evaluate making this fire-and-forget so we can continue with the build.
                     if (!rarNodeLauncher.Start())
                     {
                         _buildParameters.EnableRarNode = false;
