@@ -564,12 +564,15 @@ namespace Microsoft.Build.Execution
                 if (_buildParameters.EnableRarNode)
                 {
                     NodeLauncher nodeLauncher = ((IBuildComponentHost)this).GetComponent<NodeLauncher>(BuildComponentType.NodeLauncher);
-                    RarNodeLauncher rarNodeLauncher = new(nodeLauncher);
-
-                    if (!rarNodeLauncher.Start())
+                    _ = Task.Run(() =>
                     {
-                        _buildParameters.EnableRarNode = false;
-                    }
+                        RarNodeLauncher rarNodeLauncher = new(nodeLauncher);
+
+                        if (!rarNodeLauncher.Start())
+                        {
+                            _buildParameters.EnableRarNode = false;
+                        }
+                    });
                 }
 
 #if FEATURE_REPORTFILEACCESSES

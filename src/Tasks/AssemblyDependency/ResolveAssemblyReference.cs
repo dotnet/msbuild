@@ -3263,6 +3263,7 @@ namespace Microsoft.Build.Tasks
                 catch (Exception ex)
                 {
                     // If the out-of-proc connection failed, fall back to in-proc.
+                    // TODO: Disable out-of-proc for the remainder of the build if any connection fails.
                     CommunicationsUtilities.Trace("RAR out-of-proc connection failed, failing back to in-proc. Exception: {0}", ex);
                 }
             }
