@@ -8,7 +8,6 @@ using System.IO;
 #endif
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.Build.Framework;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 
 #nullable disable
@@ -25,7 +24,7 @@ namespace Microsoft.Build.Shared.Debugging
         private static readonly Lazy<PropertyInfo> CommonWriterProperty = new Lazy<PropertyInfo>(
             () =>
             {
-                var commonWriterType = typeof(ITask).Assembly.GetType("Microsoft.Build.Shared.Debugging.CommonWriter", true, false);
+                var commonWriterType = Type.GetType("Microsoft.Build.Shared.Debugging.CommonWriter");
 
                 var propertyInfo = commonWriterType.GetProperty("Writer", BindingFlags.Public | BindingFlags.Static);
 

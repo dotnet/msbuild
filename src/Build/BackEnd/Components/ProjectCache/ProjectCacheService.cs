@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+#pragma warning disable IDE0005 // Using directive is unnecessary.
+using System.Diagnostics.CodeAnalysis;
+#pragma warning restore IDE0005 // Using directive is unnecessary.
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -336,7 +339,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         return globalProperties;
                     });
 
-        private static ProjectCachePluginBase GetPluginInstanceFromType(Type pluginType)
+        internal static ProjectCachePluginBase GetPluginInstanceFromType(
+#if NET9_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
+            Type pluginType)
         {
             try
             {

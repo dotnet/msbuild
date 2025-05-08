@@ -12,7 +12,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 /// <param name="telemetryData"></param>
 /// <param name="infrastructureTracingData"></param>
-internal sealed class BuildCheckTracingData(
+public sealed class BuildCheckTracingData(
     Dictionary<string, BuildCheckRuleTelemetryData> telemetryData,
     Dictionary<string, TimeSpan> infrastructureTracingData)
 {
@@ -24,7 +24,7 @@ internal sealed class BuildCheckTracingData(
         : this(new Dictionary<string, BuildCheckRuleTelemetryData>(), [])
     { }
 
-    internal BuildCheckTracingData(Dictionary<string, TimeSpan> executionData)
+    public BuildCheckTracingData(Dictionary<string, TimeSpan> executionData)
         : this(new Dictionary<string, BuildCheckRuleTelemetryData>(), executionData)
     { }
 

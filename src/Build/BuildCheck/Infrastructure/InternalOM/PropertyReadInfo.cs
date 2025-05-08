@@ -15,7 +15,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// <param name="ElementLocation">The xml element location in which the property expansion happened.</param>
 /// <param name="IsUninitialized">Indicates whether the property was uninitialized when being expanded.</param>
 /// <param name="PropertyReadContext">Evaluation context in which the property was expanded.</param>
-internal readonly record struct PropertyReadInfo(
+public readonly record struct PropertyReadInfo(
     string PropertyName,
     int StartIndex,
     int EndIndex,
@@ -23,7 +23,7 @@ internal readonly record struct PropertyReadInfo(
     bool IsUninitialized,
     PropertyReadContext PropertyReadContext)
 {
-    internal PropertyReadInfo(
+    public PropertyReadInfo(
         string PropertyName,
         IMSBuildElementLocation ElementLocation,
         bool IsUninitialized,

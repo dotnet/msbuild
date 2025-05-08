@@ -23,7 +23,7 @@
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
     <EnablePackageValidation>true</EnablePackageValidation>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <EnableAotAnalyzer Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">true</EnableAotAnalyzer>
+    <!-- <IsAotCompatible Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">true</IsAotCompatible> -->
 
     <!-- Do not generate a warning that our 'stable' package should not have a prerelease dependency. -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
@@ -40,6 +40,7 @@
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
+    <PackageReference Include="Nuget.Frameworks" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
@@ -196,7 +197,7 @@
     <Compile Include="Logging\InProcessConsoleConfiguration.cs" />
     <Compile Include="Logging\TargetConsoleConfiguration.cs" />
     <Compile Include="Utilities\ImmutableCollectionsExtensions.cs" />
-    <Compile Include="Utilities\NuGetFrameworkWrapper.cs" />
+    <!-- <Compile Include="Utilities\NuGetFrameworkWrapper.cs" /> -->
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectUsingTaskParameterElementLink.cs" />
     <Compile Include="ObjectModelRemoting\ExternalProjectsProvider.cs" />
     <Compile Include="ObjectModelRemoting\LinkedObjectFactory.cs" />

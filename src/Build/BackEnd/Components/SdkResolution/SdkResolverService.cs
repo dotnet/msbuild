@@ -55,6 +55,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// </summary>
         protected IReadOnlyList<SdkResolverManifest> _generalResolversManifestsRegistry;
 
+
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
         /// </summary>
@@ -178,7 +179,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolverManifest> matchingResolversManifests = new();
             foreach (SdkResolverManifest manifest in _specificResolversManifestsRegistry)
             {
-                WaitIfTestRequires(); 
+                WaitIfTestRequires();
                 try
                 {
                     if (manifest.ResolvableSdkRegex.IsMatch(sdk.Name))

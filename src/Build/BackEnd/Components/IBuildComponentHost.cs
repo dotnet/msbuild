@@ -14,12 +14,12 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     /// <param name="type">The type of component to be instantiated.</param>
     /// <returns>An instance of the component.</returns>
-    internal delegate IBuildComponent BuildComponentFactoryDelegate(BuildComponentType type);
+    public delegate IBuildComponent BuildComponentFactoryDelegate(BuildComponentType type);
 
     /// <summary>
     /// An enumeration of all component types recognized by the system
     /// </summary>
-    internal enum BuildComponentType
+    public enum BuildComponentType
     {
         /// <summary>
         /// Request Manager
@@ -157,7 +157,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This interface is implemented by objects which host build components.
     /// </summary>
-    internal interface IBuildComponentHost
+    public interface IBuildComponentHost
     {
         #region Methods
 

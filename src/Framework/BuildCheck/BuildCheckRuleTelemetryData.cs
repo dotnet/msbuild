@@ -14,7 +14,7 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// <param name="checkFriendlyName"></param>
 /// <param name="isBuiltIn"></param>
 /// <param name="defaultSeverity"></param>
-internal sealed class BuildCheckRuleTelemetryData(
+public sealed class BuildCheckRuleTelemetryData(
     string ruleId,
     string checkFriendlyName,
     bool isBuiltIn,

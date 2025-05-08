@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// <summary>
     /// An internal implementation of <see cref="Microsoft.Build.Framework.SdkResult"/>.
     /// </summary>
-    internal sealed class SdkResult : SdkResultBase, INodePacket
+    public sealed class SdkResult : SdkResultBase, INodePacket
     {
         public SdkResult(ITranslator translator)
         {

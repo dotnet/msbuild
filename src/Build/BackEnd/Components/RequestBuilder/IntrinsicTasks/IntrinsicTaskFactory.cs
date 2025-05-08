@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#pragma warning disable IDE0005 // Using directive is unnecessary.
+using System.Diagnostics.CodeAnalysis;
+#pragma warning restore IDE0005 // Using directive is unnecessary.
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -20,7 +23,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public IntrinsicTaskFactory(Type intrinsicType)
+        public IntrinsicTaskFactory(
+#if NET9_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.All)]
+#endif
+            Type intrinsicType)
         {
             this.TaskType = intrinsicType;
         }
@@ -36,6 +43,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the task type.
         /// </summary>
+#if NET9_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
         public Type TaskType
         {
             get;

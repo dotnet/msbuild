@@ -8,7 +8,7 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 /// Typically, it is the BuildCheck (in case of in-node check) or LoggingService
 ///  (in case of centralized check, where the data will first be wrapped to BuildEventArgs and sent to central node).
 /// </summary>
-internal interface IBuildEngineDataRouter
+public interface IBuildEngineDataRouter
 {
     void ProcessPropertyRead(
         PropertyReadInfo propertyReadInfo,

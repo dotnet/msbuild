@@ -16,7 +16,7 @@ namespace Microsoft.Build.Execution
     /// <summary>
     /// This class represents the data which is used for legacy threading semantics for the build
     /// </summary>
-    internal class LegacyThreadingData
+    public class LegacyThreadingData
     {
         #region Fields
         /// <summary>

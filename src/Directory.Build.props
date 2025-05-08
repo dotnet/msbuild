@@ -18,6 +18,7 @@
 
     <!-- https://github.com/NuGet/Home/issues/8684 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
+    <NoWarn>$(NoWarn);CS0436</NoWarn>
 
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>

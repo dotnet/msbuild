@@ -16,7 +16,7 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <EnableAotAnalyzer Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">true</EnableAotAnalyzer>
+    <!-- <IsAotCompatible Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">true</IsAotCompatible> -->
   </PropertyGroup>
 
   <ItemGroup>

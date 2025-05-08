@@ -26,7 +26,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// processing the buildEvents and raising them on the filters and sinks
     /// or should they be done synchronously
     /// </summary>
-    internal enum LoggerMode
+    public enum LoggerMode
     {
         /// <summary>
         /// Events are processed synchronously
@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// What is the current state of the logging service
     /// </summary>
-    internal enum LoggingServiceState
+    public enum LoggingServiceState
     {
         /// <summary>
         /// When the logging service has been instantiated but not yet initialized through a call
@@ -255,7 +255,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private AutoResetEvent _dequeueEvent;
 
         /// <summary>
-        /// Event set when queue become empty. 
+        /// Event set when queue become empty.
         /// </summary>
         private ManualResetEvent _emptyQueueEvent;
 

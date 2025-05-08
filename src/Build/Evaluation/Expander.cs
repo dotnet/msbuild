@@ -493,7 +493,7 @@ namespace Microsoft.Build.Evaluation
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
-            result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
+            result = ItemExpander.ExpandItemVectorsIntoString(this, result, _items, options, elementLocation);
             result = FileUtilities.MaybeAdjustFilePath(result);
 
             return result;
@@ -575,7 +575,7 @@ namespace Microsoft.Build.Evaluation
             foreach (string split in splits)
             {
                 bool isTransformExpression;
-                IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems<I, T>(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
+                IList<T> itemsToAdd = ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, split, _items, itemFactory, options, false /* do not include null items */, out isTransformExpression, elementLocation);
 
                 if ((itemsToAdd == null /* broke out early non empty */ || (itemsToAdd.Count > 0)) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                 {
@@ -649,7 +649,7 @@ namespace Microsoft.Build.Evaluation
             where S : class, IItem
             where T : class, IItem
         {
-            return ItemExpander.ExpandExpressionCaptureIntoItems<S, T>(expressionCapture, this, items, itemFactory, options,
+            return ItemExpander.ExpandExpressionCaptureIntoItems(expressionCapture, this, items, itemFactory, options,
                 includeNullEntries, out isTransformExpression, elementLocation);
         }
 
@@ -3243,6 +3243,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// The type of this function's receiver.
             /// </summary>
+#if NET9_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
             private Type _receiverType;
 
             /// <summary>
@@ -3288,6 +3291,9 @@ namespace Microsoft.Build.Evaluation
             /// Construct a function that will be executed during property evaluation.
             /// </summary>
             internal Function(
+#if NET9_0_OR_GREATER
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+#endif
                 Type receiverType,
                 string expression,
                 string receiver,

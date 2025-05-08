@@ -22,7 +22,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     ///         3) Outside of Visual Studio (MSBuild Root)\Sdks\
     /// </remarks>
     /// </summary>
-    internal class DefaultSdkResolver : SdkResolverBase
+    public class DefaultSdkResolver : SdkResolverBase
     {
         public override string Name => "DefaultSdkResolver";
 

@@ -16,7 +16,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// hides the requirement to pass BuildEventContexts to the logging service or query the
     /// host for the logging service all of the time.
     /// </summary>
-    internal class LoggingContext : IBuildEngineDataConsumer
+    public class LoggingContext : IBuildEngineDataConsumer
     {
         /// <summary>
         /// The logging service to which this context is attached
@@ -33,7 +33,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private bool _isValid;
 
+#pragma warning disable CS3008 // Identifier is not CLS-compliant
         protected bool _hasLoggedErrors;
+#pragma warning restore CS3008 // Identifier is not CLS-compliant
 
         /// <summary>
         /// Constructs the logging context from a logging service and an event context.

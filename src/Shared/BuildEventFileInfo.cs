@@ -12,7 +12,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// This class encapsulates information about a file that is associated with a build event.
     /// </summary>
-    internal sealed class BuildEventFileInfo
+    public sealed class BuildEventFileInfo
     {
         internal static BuildEventFileInfo Empty = new BuildEventFileInfo(ElementLocation.EmptyLocation);
 

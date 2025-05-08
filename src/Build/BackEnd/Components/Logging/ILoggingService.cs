@@ -21,14 +21,14 @@ namespace Microsoft.Build.BackEnd.Logging
     /// Delegate for an event which will take an exception and raise it on the registered event handlers.
     /// </summary>
     /// <param name="e">Exception to be raised with registered event handlers</param>
-    internal delegate void LoggingExceptionDelegate(Exception e);
+    public delegate void LoggingExceptionDelegate(Exception e);
     #endregion
 
     /// <summary>
     /// Interface representing logging services in the build system.
     /// Implementations should be thread-safe.
     /// </summary>
-    internal interface ILoggingService : IBuildComponent, IBuildEngineDataRouter
+    public interface ILoggingService : IBuildComponent, IBuildEngineDataRouter
     {
         #region Events
         /// <summary>
@@ -657,7 +657,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Acts as an endpoint for a buildEventArg. The objects which implement this interface are intended to consume the BuildEventArg.
     /// </summary>
-    internal interface IBuildEventSink
+    public interface IBuildEventSink
     {
         #region Properties
         /// <summary>

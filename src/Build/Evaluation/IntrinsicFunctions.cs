@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-#if NETFRAMEWORK
 using System.Linq;
-#endif
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -22,6 +20,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
+using NuGet.Frameworks;
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
 
@@ -50,7 +49,7 @@ namespace Microsoft.Build.Evaluation
         private static Regex RegistrySdkRegex => s_registrySdkRegex ??= new Regex(RegistrySdkSpecification, RegexOptions.IgnoreCase);
 #endif
 
-        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
+        // private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
 
         /// <summary>
         /// Add two doubles
@@ -609,32 +608,70 @@ namespace Microsoft.Build.Evaluation
 
         internal static string GetTargetFrameworkIdentifier(string tfm)
         {
-            return NuGetFramework.Value.GetTargetFrameworkIdentifier(tfm);
+            return NuGetFramework.Parse(tfm).Framework;
         }
 
         internal static string GetTargetFrameworkVersion(string tfm, int versionPartCount = 2)
         {
-            return NuGetFramework.Value.GetTargetFrameworkVersion(tfm, versionPartCount);
+            var version = NuGetFramework.Parse(tfm).Version;
+            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
+            return version.ToString(Math.Max(nonZeroVersionParts, versionPartCount));
         }
 
         internal static bool IsTargetFrameworkCompatible(string target, string candidate)
         {
-            return NuGetFramework.Value.IsCompatible(target, candidate);
+            var target2 = NuGetFramework.Parse(target);
+            var candidate2 = NuGetFramework.Parse(candidate);
+            return DefaultCompatibilityProvider.Instance.IsCompatible(target2, candidate2);
         }
 
         internal static string GetTargetPlatformIdentifier(string tfm)
         {
-            return NuGetFramework.Value.GetTargetPlatformIdentifier(tfm);
+            return NuGetFramework.Parse(tfm).Platform;
         }
 
         internal static string GetTargetPlatformVersion(string tfm, int versionPartCount = 2)
         {
-            return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
+            var version = NuGetFramework.Parse(tfm).PlatformVersion;
+            var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
+            return version.ToString(Math.Max(nonZeroVersionParts, versionPartCount));
         }
 
         internal static string FilterTargetFrameworks(string incoming, string filter)
         {
-            return NuGetFramework.Value.FilterTargetFrameworks(incoming, filter);
+            IEnumerable<(string originalTfm, NuGetFramework parsedTfm)> incomingFrameworks = ParseTfms(incoming);
+            IEnumerable<(string originalTfm, NuGetFramework parsedTfm)> filterFrameworks = ParseTfms(filter);
+            StringBuilder tfmList = new StringBuilder();
+
+            // An incoming target framework from 'incoming' is kept if it is compatible with any of the desired target frameworks on 'filter'
+            foreach (var l in incomingFrameworks)
+            {
+                if (filterFrameworks.Any(r =>
+                        l.parsedTfm.Framework.Equals(r.parsedTfm.Framework, StringComparison.OrdinalIgnoreCase) &&
+                        ((l.parsedTfm.AllFrameworkVersions && r.parsedTfm.AllFrameworkVersions) ||
+                         l.parsedTfm.Version == r.parsedTfm.Version)))
+                {
+                    if (tfmList.Length == 0)
+                    {
+                        tfmList.Append(l.originalTfm);
+                    }
+                    else
+                    {
+                        tfmList.Append($";{l.originalTfm}");
+                    }
+                }
+            }
+
+            return tfmList.ToString();
+
+            IEnumerable<(string originalTfm, NuGetFramework parsedTfm)> ParseTfms(string desiredTargetFrameworks)
+            {
+                return desiredTargetFrameworks.Split([';'], StringSplitOptions.RemoveEmptyEntries).Select(tfm =>
+                {
+                    (string originalTfm, NuGetFramework parsedTfm) parsed = (tfm, NuGetFramework.Parse(tfm));
+                    return parsed;
+                });
+            }
         }
 
         internal static bool AreFeaturesEnabled(Version wave)

@@ -3,7 +3,7 @@
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
-internal enum DiagnosticSeverity
+public enum DiagnosticSeverity
 {
     /// <summary>
     /// When set, the default value of the BuildCheck rule will be used.

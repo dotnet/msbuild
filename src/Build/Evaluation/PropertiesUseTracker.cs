@@ -170,7 +170,7 @@ internal sealed class PropertiesUseTracker
 /// <summary>
 /// Type of the context in which a property is read.
 /// </summary>
-internal enum PropertyReadContext
+public enum PropertyReadContext
 {
     // we are not interested in distinguishing the item read etc.
     Other,

@@ -9,7 +9,7 @@ namespace Microsoft.Build.BackEnd
     ///
     /// REFACTOR: Maybe these could all implement IDisposable.
     /// </summary>
-    internal interface IBuildComponent
+    public interface IBuildComponent
     {
         /// <summary>
         /// Called by the build component host when a component is first initialized

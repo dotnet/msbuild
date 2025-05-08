@@ -748,7 +748,7 @@ namespace Microsoft.Build.Execution
         /// An item without an item type. Cast to an ITaskItem, this is
         /// what is given to tasks. It is also used for target outputs.
         /// </summary>
-        internal sealed class TaskItem :
+        public sealed class TaskItem :
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
 #endif

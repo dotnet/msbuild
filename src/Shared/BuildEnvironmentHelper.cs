@@ -397,7 +397,7 @@ namespace Microsoft.Build.Shared
                     // Check if running tests via the TestInfo class in Microsoft.Build.Framework.
                     //  See the comments on the TestInfo class for an explanation of why it works this way.
                     var frameworkAssembly = typeof(Framework.ITask).Assembly;
-                    var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
+                    var testInfoType = Type.GetType("Microsoft.Build.Framework.TestInfo");
                     var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
 
                     _runningTests = (bool)runningTestsField.GetValue(null);

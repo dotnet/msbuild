@@ -9,7 +9,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// Enumeration of all of the packet types used for communication.
     /// </summary>
-    internal enum NodePacketType : byte
+    public enum NodePacketType : byte
     {
         /// <summary>
         /// Notifies the Node to set a configuration for a particular build.  This is sent before
@@ -230,7 +230,7 @@ namespace Microsoft.Build.BackEnd
     /// This interface represents a packet which may be transmitted using an INodeEndpoint.
     /// Implementations define the serialized form of the data.
     /// </summary>
-    internal interface INodePacket : ITranslatable
+    public interface INodePacket : ITranslatable
     {
         #region Properties
         /// <summary>
