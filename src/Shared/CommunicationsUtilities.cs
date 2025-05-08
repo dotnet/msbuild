@@ -83,13 +83,13 @@ namespace Microsoft.Build.Internal
 
     internal class Handshake
     {
-        protected int options;
-        protected int salt;
-        protected int fileVersionMajor;
-        protected int fileVersionMinor;
-        protected int fileVersionBuild;
-        protected int fileVersionPrivate;
-        protected int sessionId;
+        protected readonly int options;
+        protected readonly int salt;
+        protected readonly int fileVersionMajor;
+        protected readonly int fileVersionMinor;
+        protected readonly int fileVersionBuild;
+        protected readonly int fileVersionPrivate;
+        private readonly int sessionId;
 
         internal Handshake(HandshakeOptions nodeType)
             : this(nodeType, includeSessionId: true)
