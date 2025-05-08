@@ -83,15 +83,20 @@ namespace Microsoft.Build.Internal
 
     internal class Handshake
     {
-        protected readonly int options;
-        protected readonly int salt;
-        protected readonly int fileVersionMajor;
-        protected readonly int fileVersionMinor;
-        protected readonly int fileVersionBuild;
-        protected readonly int fileVersionPrivate;
-        private readonly int sessionId;
+        protected int options;
+        protected int salt;
+        protected int fileVersionMajor;
+        protected int fileVersionMinor;
+        protected int fileVersionBuild;
+        protected int fileVersionPrivate;
+        protected int sessionId;
 
-        protected internal Handshake(HandshakeOptions nodeType)
+        internal Handshake(HandshakeOptions nodeType)
+            : this(nodeType, includeSessionId: true)
+        {
+        }
+
+        protected Handshake(HandshakeOptions nodeType, bool includeSessionId)
         {
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
 
@@ -110,8 +115,13 @@ namespace Microsoft.Build.Internal
             fileVersionMinor = fileVersion.Minor;
             fileVersionBuild = fileVersion.Build;
             fileVersionPrivate = fileVersion.Revision;
-            using Process currentProcess = Process.GetCurrentProcess();
-            sessionId = currentProcess.SessionId;
+
+            // This reaches out to NtQuerySystemInformation. Due to latency, allow skipping for derived handshake if unused.
+            if (includeSessionId)
+            {
+                using Process currentProcess = Process.GetCurrentProcess();
+                sessionId = currentProcess.SessionId;
+            }
         }
 
         // This is used as a key, so it does not need to be human readable.
@@ -149,7 +159,7 @@ namespace Microsoft.Build.Internal
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType)
+            : base(nodeType, includeSessionId: false)
         {
         }
 
