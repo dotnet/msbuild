@@ -47,7 +47,14 @@ namespace Microsoft.Build.Internal
             // SIDs or the client will reject this server.  This is used to avoid attacks where a
             // hacked server creates a less restricted pipe in an attempt to lure us into using it and
             // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-            PipeAccessRule rule = new(WindowsIdentity.GetCurrent().Owner, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+            PipeAccessRights pipeAccessRights = PipeAccessRights.ReadWrite;
+            if (maxNumberOfServerInstances > 1)
+            {
+                // Multi-instance pipes will fail without this flag.
+                pipeAccessRights |= PipeAccessRights.CreateNewInstance;
+            }
+
+            PipeAccessRule rule = new(WindowsIdentity.GetCurrent().Owner, pipeAccessRights, AccessControlType.Allow);
             PipeSecurity security = new();
             security.AddAccessRule(rule);
             security.SetOwner(rule.IdentityReference);
