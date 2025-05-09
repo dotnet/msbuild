@@ -1445,6 +1445,7 @@ namespace Microsoft.Build.BackEnd
                                                 yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
                                             }
                                         }
+                                    }
                                 }
                             }
 
