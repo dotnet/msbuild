@@ -285,7 +285,7 @@ namespace Microsoft.Build.Execution
             get { return new ReadOnlyCollection<string>(_taskItem.MetadataNames.Cast<string>()); }
         }
 
-        internal TaskItem.MetadatanamesEnumerable EnumerableMeatadataNames => _taskItem.EnumerableMetadatNames;
+        internal TaskItem.MetadataNamesEnumerable EnumerableMetadataNames => _taskItem.EnumerableMetadatNames;
 
         /// <summary>
         /// ITaskItem implementation
@@ -959,7 +959,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            public MetadatanamesEnumerable EnumerableMetadatNames => new MetadatanamesEnumerable(this);
+            public MetadataNamesEnumerable EnumerableMetadataNames => new MetadataNamesEnumerable(this);
 
             /// <summary>
             /// Gets the number of metadata set on the item.
@@ -1965,11 +1965,11 @@ namespace Microsoft.Build.Execution
                 return null;
             }
 
-            internal readonly struct MetadatanamesEnumerable
+            internal readonly struct MetadataNamesEnumerable
             {
                 private readonly TaskItem _item;
 
-                public MetadatanamesEnumerable(TaskItem taskItem) => _item = taskItem;
+                public MetadataNamesEnumerable(TaskItem taskItem) => _item = taskItem;
 
                 public readonly MetadataNamesEnumerator GetEnumerator() => new MetadataNamesEnumerator(_item.MetadataCollection);
             }

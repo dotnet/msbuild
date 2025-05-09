@@ -496,7 +496,7 @@ namespace Microsoft.Build.BackEnd
                         metadataToRemove.Clear();
                     }
 
-                    foreach (string metadataName in item.EnumerableMeatadataNames)
+                    foreach (string metadataName in item.EnumerableMetadataNames)
                     {
                         if (!keepMetadata.Contains(metadataName))
                         {
@@ -523,7 +523,7 @@ namespace Microsoft.Build.BackEnd
                         metadataToRemove.Clear();
                     }
 
-                    foreach (string metadataName in item.EnumerableMeatadataNames)
+                    foreach (string metadataName in item.EnumerableMetadataNames)
                     {
                         if (removeMetadata.Contains(metadataName))
                         {
