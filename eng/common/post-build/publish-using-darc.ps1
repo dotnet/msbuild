@@ -51,7 +51,9 @@ try {
 	@optionalParams
 
   if ($LastExitCode -ne 0) {
-    Write-Host "Problems using Darc to promote build ${buildId} to default channels. Stopping execution..."
+    Write-Host "Problems using Darc to promote build ${buildId} to default channels. Stopping execution..."    
+    Write-Host "Error details:"
+    $Error[0] | Format-List * -Force
     exit 1
   }
 
