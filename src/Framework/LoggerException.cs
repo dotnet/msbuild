@@ -3,13 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Serialization;
 using Microsoft.Build.Framework.BuildException;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions; // for SecurityPermissionAttribute
 #endif
-
-#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -40,7 +39,7 @@ namespace Microsoft.Build.Framework
         /// Creates an instance of this exception using the specified error message.
         /// </summary>
         /// <param name="message">Message string</param>
-        public LoggerException(string message)
+        public LoggerException(string? message)
             : base(message, null)
         {
             // We do no verification of these parameters.
@@ -52,7 +51,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="message">Message string</param>
         /// <param name="innerException">Inner exception. Can be null</param>
-        public LoggerException(string message, Exception innerException)
+        public LoggerException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             // We do no verification of these parameters. Any can be null;
@@ -66,7 +65,7 @@ namespace Microsoft.Build.Framework
         /// <param name="innerException">Inner exception. Can be null</param>
         /// <param name="errorCode">Error code</param>
         /// <param name="helpKeyword">Help keyword for host IDE. Can be null</param>
-        public LoggerException(string message, Exception innerException, string errorCode, string helpKeyword)
+        public LoggerException(string? message, Exception? innerException, string? errorCode, string? helpKeyword)
             : this(message, innerException)
         {
             // We do no verification of these parameters. Any can be null.
@@ -112,18 +111,20 @@ namespace Microsoft.Build.Framework
             info.AddValue("helpKeyword", helpKeyword);
         }
 
-        protected override IDictionary<string, string> FlushCustomState()
+        protected override IDictionary<string, string?> FlushCustomState()
         {
-            return new Dictionary<string, string>()
+            return new Dictionary<string, string?>()
             {
                 { nameof(errorCode), errorCode },
                 { nameof(helpKeyword), helpKeyword },
             };
         }
 
-        protected override void InitializeCustomState(IDictionary<string, string> state)
+        protected override void InitializeCustomState(IDictionary<string, string?>? state)
         {
-            errorCode = state[nameof(errorCode)];
+            Debug.Assert(state is not null, "state cannot be null");
+
+            errorCode =  state![nameof(errorCode)];
             helpKeyword = state[nameof(helpKeyword)];
         }
 
@@ -135,7 +136,7 @@ namespace Microsoft.Build.Framework
         /// Gets the error code associated with this exception's message (not the inner exception).
         /// </summary>
         /// <value>The error code string.</value>
-        public string ErrorCode
+        public string? ErrorCode
         {
             get
             {
@@ -147,7 +148,7 @@ namespace Microsoft.Build.Framework
         /// Gets the F1-help keyword associated with this error, for the host IDE.
         /// </summary>
         /// <value>The keyword string.</value>
-        public string HelpKeyword
+        public string? HelpKeyword
         {
             get
             {
@@ -158,8 +159,8 @@ namespace Microsoft.Build.Framework
         #endregion
 
         // the error code for this exception's message (not the inner exception)
-        private string errorCode;
+        private string? errorCode;
         // the F1-help keyword for the host IDE
-        private string helpKeyword;
+        private string? helpKeyword;
     }
 }
