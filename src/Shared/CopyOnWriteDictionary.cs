@@ -315,6 +315,14 @@ namespace Microsoft.Build.Collections
         }
 #endif
 
+        /// <summary>
+        /// Implementation of IEnumerable.GetEnumerator()
+        /// </summary>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable<KeyValuePair<string, V>>)this).GetEnumerator();
+        }
+
 #nullable disable
         /// <summary>
         /// IDictionary implementation.
