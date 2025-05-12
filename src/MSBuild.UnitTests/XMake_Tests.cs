@@ -2514,10 +2514,10 @@ $@"<Project>
         }
 
         [Theory]
-        [InlineData("-logger:,\"{0}\\BadFile1.dll", "{0}\\BadFile1.dll")]
-        [InlineData("-logger:,\"{0}\\BadFile2.dll", "{0}\\BadFile2.dll")]
-        [InlineData("-distributedlogger:,\"{0}\\BadFile3.dll", "{0}\\BadFile3.dll")]
-        [InlineData("-distributedlogger:,\"{0}\\BadFile4.dll", "{0}\\BadFile4.dll")]
+        [InlineData("-logger:,{0}\\BadFile1.dll", "{0}\\BadFile1.dll")]
+        [InlineData("-logger:,{0}\\BadFile2.dll", "{0}\\BadFile2.dll")]
+        [InlineData("-distributedlogger:,{0}\\BadFile3.dll", "{0}\\BadFile3.dll")]
+        [InlineData("-distributedlogger:,{0}\\BadFile4.dll", "{0}\\BadFile4.dll")]
         public void LoggerThrowsBadImageFormatExceptionWhenFileIsInvalid(string loggerTemplate, string expectedLoggerName)
         {
             string projectString =
@@ -2640,7 +2640,9 @@ namespace CustomLoggerProj
 
             expectedLoggerName = string.Format(expectedLoggerName, tempDir.Path);
             // Execute MSBuild on MainProj and redirect output to file
-            var mainBuildOutput = RunnerUtilities.ExecMSBuild(mainBuildParameters, out bool mainBuildSuccessful, _output);
+            var mainBuildOutput = RunnerUtilities.ExecMSBuild(mainBuildParameters, out bool successfulExit, _output);
+            successfulExit.ShouldBe(false);
+
             mainBuildOutput.ShouldNotContain("Hello", customMessage: mainBuildOutput); // Build should fail before reaching the Message task
             mainBuildOutput.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: mainBuildOutput);
         }
@@ -2746,10 +2748,10 @@ namespace FaultyLoggerProj
             expectedLoggerName = string.Format(expectedLoggerName, tempDir.Path);
 
             // Act
-            var mainBuildOutput = RunnerUtilities.ExecMSBuild(mainBuildParameters, out bool mainBuildSuccessful, _output);
+            var mainBuildOutput = RunnerUtilities.ExecMSBuild(mainBuildParameters, out bool successfulExit, _output);
+            successfulExit.ShouldBe(false);
 
             // Assert
-            mainBuildSuccessful.ShouldBeFalse(customMessage: mainBuildOutput);
             mainBuildOutput.ShouldNotContain("Hello", customMessage: mainBuildOutput);
             mainBuildOutput.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: mainBuildOutput);
         }
