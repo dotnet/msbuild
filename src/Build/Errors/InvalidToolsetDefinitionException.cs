@@ -18,7 +18,7 @@ namespace Microsoft.Build.Exceptions
     /// Exception subclass that ToolsetReaders should throw.
     /// </summary>
     [Serializable]
-    public class InvalidToolsetDefinitionException : BuildExceptionBase
+    public class InvalidToolsetDefinitionException : BuildExceptionBase // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// The MSBuild error code corresponding with this exception.

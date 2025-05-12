@@ -339,7 +339,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     internal sealed class TestTargetBuilder : ITargetBuilder, IBuildComponent
     {
-        private IBuildComponentHost _host;
         private IResultsCache _cache;
         private FullyQualifiedBuildRequest[] _newRequests;
         private IRequestBuilderCallback _requestBuilderCallback;
@@ -405,13 +404,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         public void InitializeComponent(IBuildComponentHost host)
         {
-            _host = host;
             _cache = new ResultsCache();
         }
 
         public void ShutdownComponent()
         {
-            _host = null;
             _cache = null;
         }
         #endregion

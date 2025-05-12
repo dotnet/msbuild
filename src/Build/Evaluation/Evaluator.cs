@@ -345,6 +345,11 @@ namespace Microsoft.Build.Evaluation
             {
                 evaluator.Evaluate();
             }
+            catch (PathTooLongException ex)
+            {
+                evaluator._evaluationLoggingContext.LogErrorFromText(null, null, null, new BuildEventFileInfo(root.ProjectFileLocation.File),
+                    ex.Message);
+            }
             finally
             {
                 IEnumerable globalProperties = null;
@@ -1924,8 +1929,13 @@ namespace Microsoft.Build.Evaluation
             int propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            // Generate a unique filename for the generated project for each unique set of properties and items.
-            string projectPath = $"{_projectRootElement.FullPath}.SdkResolver.{propertiesAndItemsHash}.proj";
+            // Generate a unique filename for the generated project for each unique set of properties and items that ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            // _projectRootElement.FullPath can be null. This can be in the case when Project is created from XmlReader. For that case we generate filename like "{Guid}.SdkResolver.{propertiesAndItemsHash}.proj in the current directory.
+            // Otherwise the project is in the same directory as _projectRootElement and has a name of the same project and ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            string projectNameEnding = $".SdkResolver.{propertiesAndItemsHash}.proj";
+            string projectPath = _projectRootElement.FullPath != null ?
+             _projectRootElement.FullPath + projectNameEnding :
+             FileUtilities.NormalizePath(Guid.NewGuid() + projectNameEnding);
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {

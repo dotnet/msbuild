@@ -677,19 +677,16 @@ namespace Microsoft.Build.UnitTests
 
     public class TransientTestFile : TransientTestState
     {
-        private readonly bool _createFile;
         private readonly bool _expectedAsOutput;
 
         public TransientTestFile(string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(null, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(rootPath, null, extension, createFile);
         }

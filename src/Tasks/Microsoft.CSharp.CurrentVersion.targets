@@ -100,6 +100,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <CreateCSharpManifestResourceName
               ResourceFiles="@(EmbeddedResource)"
               RootNamespace="$(RootNamespace)"
+              EnableCustomCulture="$(EnableCustomCulture)"
               UseDependentUponConvention="$(EmbeddedResourceUseDependentUponConvention)"
               Condition="'%(EmbeddedResource.ManifestResourceName)' == '' and ('%(EmbeddedResource.WithCulture)' == 'false' or '%(EmbeddedResource.Type)' == 'Resx')">
             <Output TaskParameter="ResourceFilesWithManifestResourceNames" ItemName="_Temporary" />
@@ -247,6 +248,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          ChecksumAlgorithm="$(ChecksumAlgorithm)"
          CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
          CodePage="$(CodePage)"
+         CompilerType="$(RoslynCompilerType)"
          DebugType="none"
          DefineConstants="$(DefineConstants)"
          DelaySign="$(DelaySign)"
@@ -261,6 +263,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          ErrorLog="$(ErrorLog)"
          ErrorReport="$(ErrorReport)"
          Features="$(Features)"
+         InterceptorsNamespaces="$(InterceptorsNamespaces)"
          InterceptorsPreviewNamespaces="$(InterceptorsPreviewNamespaces)"
          FileAlignment="$(FileAlignment)"
          GeneratedFilesOutputPath="$(CompilerGeneratedFilesOutputPath)"
