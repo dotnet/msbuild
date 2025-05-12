@@ -532,7 +532,6 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Clears all the caches used during the build.
         /// </summary>
-        [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "Required because when calling this method, we want the memory back NOW.")]
         private void CleanupCaches()
         {
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
