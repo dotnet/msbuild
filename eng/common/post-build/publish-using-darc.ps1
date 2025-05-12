@@ -53,7 +53,7 @@ try {
   if ($LastExitCode -ne 0) {
     Write-Host "Problems using Darc to promote build ${buildId} to default channels. Stopping execution..."
     Write-Host "Error details:"
-    Write-Host $darcOutput
+    Write-Host $darcOutput
     exit 1
   }
 
