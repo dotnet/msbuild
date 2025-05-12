@@ -553,13 +553,11 @@ namespace Microsoft.Build.Collections
         {
             lock (_properties)
             {
-                ICollection<T> propertiesCollection = (ICollection<T>)_properties;
-                List<TResult> result = new(propertiesCollection.Count);
-
                 // PERF: Prefer using struct enumerators from the concrete types to avoid allocations.
                 // RetrievableValuedEntryHashSet implements a struct enumerator.
                 if (_properties is RetrievableValuedEntryHashSet<T> hashSet)
                 {
+                    List<TResult> result = new(hashSet.Count);
                     foreach (T property in hashSet)
                     {
                         if (filter(property))
@@ -567,9 +565,13 @@ namespace Microsoft.Build.Collections
                             result.Add(selector(property));
                         }
                     }
+
+                    return result;
                 }
                 else
                 {
+                    ICollection<T> propertiesCollection = _properties;
+                    List<TResult> result = new(propertiesCollection.Count);
                     foreach (T property in propertiesCollection)
                     {
                         if (filter(property))
@@ -577,9 +579,9 @@ namespace Microsoft.Build.Collections
                             result.Add(selector(property));
                         }
                     }
-                }
 
-                return result;
+                    return result;
+                }
             }
         }
     }
