@@ -264,11 +264,11 @@ namespace Microsoft.Build.Evaluation
             _sdkResolverService = sdkResolverService;
             _submissionId = submissionId;
             _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
-            _isRunningInVisualStudio = String.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
+            _isRunningInVisualStudio = string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
             // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
             // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
-            _interactive = interactive || String.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
+            _interactive = interactive || string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
 
             // The last modified project is the project itself unless its an in-memory project
             if (projectRootElement.FullPath != null)
@@ -626,7 +626,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void Evaluate()
         {
-            string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
+            string projectFile = string.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
@@ -812,7 +812,7 @@ namespace Microsoft.Build.Evaluation
 
                             foreach (var entry in _data.GlobalPropertiesDictionary)
                             {
-                                if (!String.Equals(entry.Name, "currentsolutionconfigurationcontents", StringComparison.OrdinalIgnoreCase))
+                                if (!string.Equals(entry.Name, "currentsolutionconfigurationcontents", StringComparison.OrdinalIgnoreCase))
                                 {
                                     propertyDump += $"{entry.Name}={entry.EvaluatedValue}\n";
                                 }
@@ -820,7 +820,7 @@ namespace Microsoft.Build.Evaluation
 
                             string line = new string('#', 100) + "\n";
 
-                            string output = String.Format(CultureInfo.CurrentUICulture, "###: MSBUILD: Evaluating or reevaluating project {0} with {1} global properties and {2} tools version, child count {3}, CurrentSolutionConfigurationContents hash {4} other properties:\n{5}", _projectRootElement.FullPath, globalPropertiesCount, _data.Toolset.ToolsVersion, _projectRootElement.Count, hash, propertyDump);
+                            string output = string.Format(CultureInfo.CurrentUICulture, "###: MSBUILD: Evaluating or reevaluating project {0} with {1} global properties and {2} tools version, child count {3}, CurrentSolutionConfigurationContents hash {4} other properties:\n{5}", _projectRootElement.FullPath, globalPropertiesCount, _data.Toolset.ToolsVersion, _projectRootElement.Count, hash, propertyDump);
 
                             Trace.WriteLine(line + output + line);
                         }
@@ -1123,10 +1123,10 @@ namespace Microsoft.Build.Evaluation
             switch (ChangeWaves.ConversionState)
             {
                 case ChangeWaveConversionState.InvalidFormat:
-                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{String.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_InvalidFormat", Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
                     break;
                 case ChangeWaveConversionState.OutOfRotation:
-                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{String.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
+                    _evaluationLoggingContext.LogWarning("", new BuildEventFileInfo(""), "ChangeWave_OutOfRotation", ChangeWaves.DisabledWave, Traits.Instance.MSBuildDisableFeaturesFromVersion, $"[{string.Join(", ", ChangeWaves.AllWaves.Select(x => x.ToString()))}]");
                     break;
             }
         }
@@ -1169,9 +1169,9 @@ namespace Microsoft.Build.Evaluation
             SetBuiltInProperty(ReservedPropertyNames.msbuildRuntimeType, "Full");
 #endif
 
-            if (String.IsNullOrEmpty(_projectRootElement.FullPath))
+            if (string.IsNullOrEmpty(_projectRootElement.FullPath))
             {
-                SetBuiltInProperty(ReservedPropertyNames.projectDirectory, String.IsNullOrEmpty(_projectRootElement.DirectoryPath) ?
+                SetBuiltInProperty(ReservedPropertyNames.projectDirectory, string.IsNullOrEmpty(_projectRootElement.DirectoryPath) ?
                     // If this is an un-saved project, this is as far as we can go
                     startupDirectory :
                     // Solution files based on the old OM end up here.  But they do have a location, which is where the solution was loaded from.
@@ -1579,7 +1579,7 @@ namespace Microsoft.Build.Evaluation
 
             _evaluationLoggingContext.LogComment(MessageImportance.Low, "SearchPathsForMSBuildExtensionsPath",
                                         extensionPropertyRefAsString,
-                                        String.Join(";", pathsToSearch));
+                                        string.Join(";", pathsToSearch));
 
             bool atleastOneExactFilePathWasLookedAtAndNotFound = false;
 
@@ -1995,7 +1995,7 @@ namespace Microsoft.Build.Evaluation
             string importExpressionEscaped = _expander.ExpandIntoStringLeaveEscaped(unescapedExpression, ExpanderOptions.ExpandProperties, importElement.ProjectLocation);
             ElementLocation importLocationInProject = importElement.Location;
 
-            if (String.IsNullOrWhiteSpace(importExpressionEscaped))
+            if (string.IsNullOrWhiteSpace(importExpressionEscaped))
             {
                 if ((_loadSettings & ProjectLoadSettings.IgnoreInvalidImports) != 0)
                 {
@@ -2021,7 +2021,7 @@ namespace Microsoft.Build.Evaluation
                     return LoadImportsResult.ImportExpressionResolvedToNothing;
                 }
 
-                ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValue", String.Empty, XMakeAttributes.project, XMakeElements.import);
+                ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "InvalidAttributeValue", string.Empty, XMakeAttributes.project, XMakeElements.import);
             }
 
             bool atleastOneImportIgnored = false;
@@ -2101,7 +2101,7 @@ namespace Microsoft.Build.Evaluation
 
                     // If a file is included twice, or there is a cycle of imports, we ignore all but the first import
                     // and issue a warning to that effect.
-                    if (String.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
+                    if (string.Equals(_projectRootElement.FullPath, importFileUnescaped, StringComparison.OrdinalIgnoreCase) /* We are trying to import ourselves */)
                     {
                         _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "SelfImport", importFileUnescaped);
                         atleastOneImportIgnored = true;
@@ -2118,7 +2118,7 @@ namespace Microsoft.Build.Evaluation
                         if (IntroducesCircularity(importFileUnescaped, importElement))
                         {
                             // Get the full path of the MSBuild file that has this import.
-                            string importedBy = importElement.ContainingProject.FullPath ?? String.Empty;
+                            string importedBy = importElement.ContainingProject.FullPath ?? string.Empty;
 
                             _evaluationLoggingContext.LogWarning(null, new BuildEventFileInfo(importLocationInProject), "ImportIntroducesCircularity", importFileUnescaped, importedBy);
 
@@ -2139,7 +2139,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (_importsSeen.TryGetValue(importFileUnescaped, out previouslyImportedAt))
                     {
-                        string parenthesizedProjectLocation = String.Empty;
+                        string parenthesizedProjectLocation = string.Empty;
 
                         // If neither file involved is the project itself, append its path in square brackets
                         if (previouslyImportedAt.ContainingProject != _projectRootElement && importElement.ContainingProject != _projectRootElement)
@@ -2371,14 +2371,14 @@ namespace Microsoft.Build.Evaluation
                 // Get the full path of the MSBuild file that imports this file.
                 string importedBy = importElement.ContainingProject.FullPath;
 
-                if (String.Equals(importFileUnescaped, importedBy, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(importFileUnescaped, importedBy, StringComparison.OrdinalIgnoreCase))
                 {
                     // Circular dependency found!
                     foundMatchingAncestor = true;
                     break;
                 }
 
-                if (!String.IsNullOrEmpty(importedBy)) // The full path of a project loaded from memory can be null.
+                if (!string.IsNullOrEmpty(importedBy)) // The full path of a project loaded from memory can be null.
                 {
                     // Set the "counter" to the importing project.
                     _importsSeen.TryGetValue(importedBy, out importElement);
