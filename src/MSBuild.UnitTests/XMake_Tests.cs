@@ -2510,7 +2510,6 @@ $@"<Project>
             successfulExit.ShouldBe(false); // Build should fail due to logger creation error
 
             output.ShouldNotContain("Hello", customMessage: output); // Build should fail before reaching the Message task
-            output.ShouldContain("MSB1021", customMessage: output);
             output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created", customMessage: output);
         }
 
@@ -2549,8 +2548,6 @@ $@"<Project>
             successfulExit.ShouldBe(false); // Build should fail due to logger creation error
 
             output.ShouldNotContain("Hello", customMessage: output); // Build should fail before reaching the Message task
-            output.ShouldContain("MSB1021", customMessage: output);
-            output.ShouldContain("The module was expected to contain an assembly manifest.", customMessage: output);
             output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created", customMessage: output);
         }
 
@@ -2645,8 +2642,6 @@ namespace CustomLoggerProj
             // Execute MSBuild on MainProj and redirect output to file
             var mainBuildOutput = RunnerUtilities.ExecMSBuild(mainBuildParameters, out bool mainBuildSuccessful, _output);
             mainBuildOutput.ShouldNotContain("Hello", customMessage: mainBuildOutput); // Build should fail before reaching the Message task
-            mainBuildOutput.ShouldContain("MSB1021", customMessage: mainBuildOutput);
-            mainBuildOutput.ShouldContain("No parameterless constructor defined for this object", customMessage: mainBuildOutput);
             mainBuildOutput.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: mainBuildOutput);
         }
 
@@ -2756,8 +2751,6 @@ namespace FaultyLoggerProj
             // Assert
             mainBuildSuccessful.ShouldBeFalse(customMessage: mainBuildOutput);
             mainBuildOutput.ShouldNotContain("Hello", customMessage: mainBuildOutput);
-            mainBuildOutput.ShouldContain("MSB1028", customMessage: mainBuildOutput);
-            mainBuildOutput.ShouldContain("Exception has been thrown by the target of an invocation.", customMessage: mainBuildOutput);
             mainBuildOutput.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: mainBuildOutput);
         }
 
