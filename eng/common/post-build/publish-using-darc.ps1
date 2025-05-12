@@ -39,7 +39,7 @@ try {
     $optionalParams.Add("--default-channels-required") | Out-Null
   }
 
-  & $darc add-build-to-channel `
+  $darcOutput = & $darc add-build-to-channel `
     --id $buildId `
     --publishing-infra-version $PublishingInfraVersion `
     --default-channels `
@@ -48,12 +48,12 @@ try {
     --bar-uri "$MaestroApiEndPoint" `
     --ci `
     --verbose `
-	@optionalParams
+	@optionalParams 2>&1
 
   if ($LastExitCode -ne 0) {
-    Write-Host "Problems using Darc to promote build ${buildId} to default channels. Stopping execution..."    
+    Write-Host "Problems using Darc to promote build ${buildId} to default channels. Stopping execution..."
     Write-Host "Error details:"
-    $Error[0] | Format-List * -Force
+    Write-Host $darcOutput
     exit 1
   }
 
