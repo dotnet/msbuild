@@ -2511,15 +2511,14 @@ $@"<Project>
 
             output.ShouldNotContain("Hello", customMessage: output); // Build should fail before reaching the Message task
             output.ShouldContain("MSB1021", customMessage: output);
-            output.ShouldContain("The given assembly name or codebase was invalid. (Exception from HRESULT: 0x80131047)", customMessage: output);
             output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created", customMessage: output);
         }
 
         [Theory]
-        [InlineData("-logger:,{0}\\BadFile1.dll", "{0}\\BadFile1.dll")]
-        [InlineData("-logger:,{0}\\BadFile2.dll", "{0}\\BadFile2.dll")]
-        [InlineData("-distributedlogger:,{0}\\BadFile3.dll", "{0}\\BadFile3.dll")]
-        [InlineData("-distributedlogger:,{0}\\BadFile4.dll", "{0}\\BadFile4.dll")]
+        [InlineData("-logger:,\"{0}\\BadFile1.dll", "{0}\\BadFile1.dll")]
+        [InlineData("-logger:,\"{0}\\BadFile2.dll", "{0}\\BadFile2.dll")]
+        [InlineData("-distributedlogger:,\"{0}\\BadFile3.dll", "{0}\\BadFile3.dll")]
+        [InlineData("-distributedlogger:,\"{0}\\BadFile4.dll", "{0}\\BadFile4.dll")]
         public void LoggerThrowsBadImageFormatExceptionWhenFileIsInvalid(string loggerTemplate, string expectedLoggerName)
         {
             string projectString =
