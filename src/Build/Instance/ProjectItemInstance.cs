@@ -285,7 +285,7 @@ namespace Microsoft.Build.Execution
             get { return new ReadOnlyCollection<string>(_taskItem.MetadataNames.Cast<string>()); }
         }
 
-        internal TaskItem.MetadataNamesEnumerable EnumerableMetadataNames => _taskItem.EnumerableMetadatNames;
+        internal TaskItem.MetadataNamesEnumerable EnumerableMetadataNames => _taskItem.EnumerableMetadataNames;
 
         /// <summary>
         /// ITaskItem implementation
