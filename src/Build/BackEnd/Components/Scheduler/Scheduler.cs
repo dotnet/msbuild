@@ -2092,7 +2092,6 @@ namespace Microsoft.Build.BackEnd
 
             static Action<ILoggingService> GetLoggingServiceAction(IConfigCache configCache, BuildRequest request, SchedulingData schedulingData)
             {
-                // retrieving the configs is not quite free, so avoid computing them eagerly
                 (BuildRequestConfiguration requestConfig, BuildRequestConfiguration parentConfig) = GetConfigurations(configCache, request, schedulingData);
 
                 Action<ILoggingService> emitNonErrorLogs = ls => ls.LogComment(
