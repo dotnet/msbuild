@@ -295,7 +295,7 @@ namespace Microsoft.Build.BackEnd.Client
                                 else
                                 {
                                     // Start reading the next package header.
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
                                 }
                             }
                             break;
