@@ -200,20 +200,24 @@ namespace Microsoft.Build.BackEnd.Client
             try
             {
                 byte[] headerByte = new byte[5];
-                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+
+                // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
+                using AutoResetEvent readTaskEvent = new(false);
+                ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
+
+                // Ordering of the wait handles is important. The first signalled wait handle in the array
+                // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
+                // terminate event triggered so that we cannot get into a situation where packets are being
+                // spammed to the client and it never gets an opportunity to shutdown.
+                WaitHandle[] handles =
+                [
+                    localPacketPumpShutdownEvent,
+                    readTaskEvent,
+                ];
 
                 bool continueReading = true;
                 do
                 {
-                    // Ordering of the wait handles is important. The first signalled wait handle in the array
-                    // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
-                    // terminate event triggered so that we cannot get into a situation where packets are being
-                    // spammed to the client and it never gets an opportunity to shutdown.
-                    WaitHandle[] handles =
-                    [
-                        localPacketPumpShutdownEvent,
-                        ((IAsyncResult)readTask).AsyncWaitHandle
-                    ];
                     int waitId = WaitHandle.WaitAny(handles);
                     switch (waitId)
                     {
@@ -227,7 +231,11 @@ namespace Microsoft.Build.BackEnd.Client
                             {
                                 // Client recieved a packet header. Read the rest of it.
                                 int headerBytesRead = 0;
-                                headerBytesRead = readTask.Result;
+
+                                // Avoid allocating an additional task instance when possible.
+                                // However if a ValueTask runs asynchronously, it must be converted to a Task before consuming the result.
+                                // Otherwise, the result will be undefined when not using async/await.
+                                headerBytesRead = readTask.IsCompleted ? readTask.Result : readTask.AsTask().Result;
 
                                 if ((headerBytesRead != headerByte.Length) && !localPacketPumpShutdownEvent.WaitOne(0))
                                 {
@@ -287,7 +295,7 @@ namespace Microsoft.Build.BackEnd.Client
                                 else
                                 {
                                     // Start reading the next package header.
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
                                 }
                             }
                             break;

@@ -587,6 +587,19 @@ namespace Microsoft.Build.Internal
 #nullable disable
 
 #if !TASKHOST
+        /// <summary>
+        /// Allow interop with EAP / Event-based wait handles without additional allocations.
+        /// </summary>
+        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead, AutoResetEvent autoResetEvent)
+        {
+            int result = await ReadAsync(stream, buffer, bytesToRead).ConfigureAwait(false);
+
+            // Signal to the caller that the read is complete.
+            _ = autoResetEvent.Set();
+
+            return result;
+        }
+
         internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
         {
             int totalBytesRead = 0;

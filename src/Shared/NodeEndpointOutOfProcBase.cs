@@ -522,7 +522,9 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
 #if !TASKHOST
-            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
+            // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
+            AutoResetEvent readTaskEvent = new(false);
+            ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
             IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
@@ -532,7 +534,7 @@ namespace Microsoft.Build.BackEnd
             WaitHandle[] handles = new WaitHandle[]
             {
 #if !TASKHOST
-                ((IAsyncResult)readTask).AsyncWaitHandle,
+                readTaskEvent,
 #else
                 result.AsyncWaitHandle,
 #endif
@@ -552,7 +554,10 @@ namespace Microsoft.Build.BackEnd
                             try
                             {
 #if !TASKHOST
-                                bytesRead = readTask.Result;
+                                // Avoid allocating an additional task instance when possible.
+                                // However if a ValueTask runs asynchronously, it must be converted to a Task before consuming the result.
+                                // Otherwise, the result will be undefined when not using async/await.
+                                bytesRead = readTask.IsCompleted ? readTask.Result : readTask.AsTask().Result;
 #else
                                 bytesRead = localReadPipe.EndRead(result);
 #endif
@@ -612,8 +617,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
 #if !TASKHOST
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
-                            handles[0] = ((IAsyncResult)readTask).AsyncWaitHandle;
+                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
                             result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
                             handles[0] = result.AsyncWaitHandle;
@@ -679,8 +683,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }
