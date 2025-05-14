@@ -59,14 +59,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         private readonly ProjectCollection _projectCollection;
 
         private readonly TestEnvironment _env;
-        private readonly ITestOutputHelper _output;
 
         /// <summary>
         /// SetUp
         /// </summary>
         public BuildManager_Logging_Tests(ITestOutputHelper output)
         {
-            _output = output;
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
 

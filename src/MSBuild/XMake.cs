@@ -1045,6 +1045,13 @@ namespace Microsoft.Build.CommandLine
 
                 exitType = ExitType.Unexpected;
             }
+            catch (PathTooLongException e)
+            {
+                Console.WriteLine(
+                    $"{e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
+
+                exitType = ExitType.Unexpected;
+            }
             // handle fatal errors
             catch (Exception e)
             {
@@ -4526,6 +4533,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
+#if FEATURE_XML_SCHEMA_VALIDATION
         /// <summary>
         /// Figures out if the project needs to be validated against a schema.
         /// </summary>
@@ -4546,6 +4554,7 @@ namespace Microsoft.Build.CommandLine
 
             return schemaFile;
         }
+#endif
 
         /// <summary>
         /// Given an invalid ToolsVersion string and the collection of valid toolsets,
