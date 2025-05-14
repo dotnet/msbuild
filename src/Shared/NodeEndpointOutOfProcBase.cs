@@ -523,7 +523,7 @@ namespace Microsoft.Build.BackEnd
             byte[] headerByte = new byte[5];
 #if !TASKHOST
             // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
-            AutoResetEvent readTaskEvent = new(false);
+            using AutoResetEvent readTaskEvent = new(false);
             ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
             IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
