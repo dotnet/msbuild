@@ -203,7 +203,7 @@ namespace Microsoft.Build.BackEnd.Client
 
                 // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
                 using AutoResetEvent readTaskEvent = new(false);
-                ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
+                ValueTask<int> readTask = CommunicationsUtilities.ReadExactlyAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
 
                 // Ordering of the wait handles is important. The first signalled wait handle in the array
                 // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
@@ -295,7 +295,7 @@ namespace Microsoft.Build.BackEnd.Client
                                 else
                                 {
                                     // Start reading the next package header.
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
+                                    readTask = CommunicationsUtilities.ReadExactlyAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
                                 }
                             }
                             break;
