@@ -589,12 +589,12 @@ namespace Microsoft.Build.Internal
 #if !TASKHOST
         /// <summary>
         /// Allow interop with EAP / Event-based wait handles without additional allocations.
+        /// By signalling an external reset event, this allows use of WaitHandle.WaitAny() in non-async/await contexts.
         /// </summary>
         internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead, AutoResetEvent autoResetEvent)
         {
+            // Signal to the caller only after the read is complete.
             int result = await ReadAsync(stream, buffer, bytesToRead).ConfigureAwait(false);
-
-            // Signal to the caller that the read is complete.
             _ = autoResetEvent.Set();
 
             return result;
