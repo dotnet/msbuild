@@ -646,7 +646,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+                        int bytesRead = await CommunicationsUtilities.ReadExactlyAsync(_clientToServerStream, _headerByte, _headerByte.Length);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;

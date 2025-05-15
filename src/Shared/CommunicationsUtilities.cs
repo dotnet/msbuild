@@ -588,16 +588,30 @@ namespace Microsoft.Build.Internal
 
 #if !TASKHOST
         /// <summary>
-        /// Allow interop with EAP / Event-based wait handles without additional allocations.
-        /// By signalling an external reset event, this allows use of WaitHandle.WaitAny() in non-async/await contexts.
+        /// This is intended to get around state-machine and wait handle allocations on .NET Framework for async reads.
+        /// Prefer ReadAsync() when the read is expected to complete synchronously, or if the bytes to read are greater
+        /// than the stream's buffer and will require multiple reads (e.g. the packet body).
+        /// By signalling an external reset event, this also allows use of WaitHandle.WaitAny() in non-async/await contexts.
         /// </summary>
-        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead, AutoResetEvent autoResetEvent)
+        internal static ValueTask<int> ReadExactlyAsync(Stream stream, byte[] buffer, int bytesToRead, AutoResetEvent autoResetEvent = null)
         {
-            // Signal to the caller only after the read is complete.
-            int result = await ReadAsync(stream, buffer, bytesToRead).ConfigureAwait(false);
-            _ = autoResetEvent.Set();
+            Task<int> readTask = stream.ReadAsync(buffer, 0, bytesToRead);
 
-            return result;
+            // If the task completed synchronously, directly return the result.
+            if (readTask.IsCompleted)
+            {
+                _ = autoResetEvent?.Set();
+                return new ValueTask<int>(readTask.Result);
+            }
+
+            // Otherwise, a Task has been allocated and we'll need to set a callback.
+            readTask = readTask.ContinueWith(static (completedTask, state) =>
+            {
+                _ = ((AutoResetEvent)state)?.Set();
+                return completedTask.Result;
+            }, autoResetEvent, TaskContinuationOptions.ExecuteSynchronously);
+
+            return new ValueTask<int>(readTask);
         }
 
         internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)

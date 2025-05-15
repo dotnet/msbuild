@@ -524,7 +524,7 @@ namespace Microsoft.Build.BackEnd
 #if !TASKHOST
             // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
             using AutoResetEvent readTaskEvent = new(false);
-            ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
+            ValueTask<int> readTask = CommunicationsUtilities.ReadExactlyAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
             IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
@@ -617,7 +617,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
 #if !TASKHOST
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
+                            readTask = CommunicationsUtilities.ReadExactlyAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
                             result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
                             handles[0] = result.AsyncWaitHandle;
