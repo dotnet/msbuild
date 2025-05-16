@@ -67,5 +67,18 @@
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
+  
+  <ItemGroup>
+   <Content Include="TestAssets\**" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="TestAssets\TargetInvocationException\LoggerProject\FaultyLogger.cs" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="TestAssets\MemberAccessException\MainProject\" />
+    <Folder Include="TestAssets\TargetInvocationException\MainProject\" />
+  </ItemGroup>
 
 </Project>
