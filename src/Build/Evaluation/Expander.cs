@@ -1862,7 +1862,12 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 List<ExpressionShredder.ItemExpressionCapture> matches;
-                if (!expression.Contains('@'))
+
+                // PERF: you migh be tempted to switch this to call Contains(), but there is no string.Contains(char) overload
+                // in framework. Instead, you'll call the LINQ overload and allocate an enumerator. We could use the
+                // string.Contains(string) overload instead, but it's slighly slower and you'll get a suggestion in
+                // newer .NET to use string.Contains(char) where that overload actually exists.
+                if (expression.IndexOf('@') < 0)
                 {
                     return null;
                 }
