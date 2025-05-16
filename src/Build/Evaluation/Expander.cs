@@ -779,37 +779,34 @@ namespace Microsoft.Build.Evaluation
             // we reached the end of an argument, add the builder's final result
             // to our arguments.
             argumentBuilder.Trim();
-            string argValue = argumentBuilder.ToString();
 
             // We support passing of null through the argument constant value null
-            if (String.Equals("null", argValue, StringComparison.OrdinalIgnoreCase))
+            if (argumentBuilder.Equals("null", StringComparison.OrdinalIgnoreCase))
             {
                 arguments.Add(null);
             }
             else
             {
-                if (argValue.Length > 0)
+                if (argumentBuilder.Length > 0)
                 {
-                    if (argValue[0] == '\'' && argValue[argValue.Length - 1] == '\'')
+                    if (argumentBuilder[0] == '\'' && argumentBuilder[argumentBuilder.Length - 1] == '\'')
                     {
-                        arguments.Add(argValue.Trim(s_singleQuoteChar));
+                        argumentBuilder.Trim('\'');
                     }
-                    else if (argValue[0] == '`' && argValue[argValue.Length - 1] == '`')
+                    else if (argumentBuilder[0] == '`' && argumentBuilder[argumentBuilder.Length - 1] == '`')
                     {
-                        arguments.Add(argValue.Trim(s_backtickChar));
+                        argumentBuilder.Trim('`');
                     }
-                    else if (argValue[0] == '"' && argValue[argValue.Length - 1] == '"')
+                    else if (argumentBuilder[0] == '"' && argumentBuilder[argumentBuilder.Length - 1] == '"')
                     {
-                        arguments.Add(argValue.Trim(s_doubleQuoteChar));
+                        argumentBuilder.Trim('"');
                     }
-                    else
-                    {
-                        arguments.Add(argValue);
-                    }
+
+                    arguments.Add(argumentBuilder.ToString());
                 }
                 else
                 {
-                    arguments.Add(argValue);
+                    arguments.Add(string.Empty);
                 }
             }
         }
