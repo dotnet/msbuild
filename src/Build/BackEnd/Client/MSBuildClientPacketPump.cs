@@ -274,22 +274,27 @@ namespace Microsoft.Build.BackEnd.Client
                                 NodePacketType packetType = (NodePacketType)headerByte[0];
 
                                 int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
+                                int packetBytesRead = 0;
 
                                 _readBufferMemoryStream.Position = 0;
                                 _readBufferMemoryStream.SetLength(packetLength);
                                 byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-#if FEATURE_APM
-                                IAsyncResult packetReadResult = localStream.BeginRead(packetData, 0, packetLength, null, null);
-                                int packetBytesRead = localStream.EndRead(packetReadResult);
-#else
-                                ValueTask<int> packetReadTask = CommunicationsUtilities.ReadAsync(localStream, packetData, packetLength);
-                                int packetBytesRead = packetReadTask.IsCompleted ? packetReadTask.Result : packetReadTask.AsTask().Result;
-#endif
-                                if (packetBytesRead < packetLength)
+                                while (packetBytesRead < packetLength)
                                 {
-                                    // Incomplete read.  Abort.
-                                    ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
+#if NET
+                                    ValueTask<int> bytesReadTask = localStream.ReadAsync(packetData.AsMemory(packetBytesRead, packetLength - packetBytesRead));
+                                    int bytesRead = readTask.IsCompleted ? readTask.Result : readTask.AsTask().Result;
+#else
+                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
+#endif
+                                    if (bytesRead == 0)
+                                    {
+                                        // Incomplete read.  Abort.
+                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
+                                    }
+
+                                    packetBytesRead += bytesRead;
                                 }
 
                                 try

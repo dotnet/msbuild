@@ -627,8 +627,7 @@ namespace Microsoft.Build.BackEnd
                                 ValueTask<int> packetReadTask = CommunicationsUtilities.ReadAsync(localReadPipe, packetData, packetLength);
                                 int packetBytesRead = packetReadTask.IsCompleted ? packetReadTask.Result : packetReadTask.AsTask().Result;
 #else
-                                IAsyncResult packetReadResult = localReadPipe.BeginRead(packetData, 0, packetLength, null, null);
-                                int packetBytesRead = localReadPipe.EndRead(packetReadResult);
+                                int packetBytesRead = localReadPipe.Read(packetData, 0, packetLength);
 #endif
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, _readTranslator);
                             }

@@ -689,11 +689,10 @@ namespace Microsoft.Build.BackEnd
                     {
 #if FEATURE_APM
                         MSBuildEventSource.Log.PacketReadSize(packetLength);
-                        IAsyncResult packetReadResult = _clientToServerStream.BeginRead(packetData, 0, packetLength, null, null);
                         int bytesRead;
                         try
                         {
-                            bytesRead = _clientToServerStream.EndRead(packetReadResult);
+                            bytesRead = _clientToServerStream.Read(packetData, 0, packetLength);
                         }
                         catch (ArgumentException)
                         {
