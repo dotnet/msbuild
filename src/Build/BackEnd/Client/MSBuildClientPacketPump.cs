@@ -317,6 +317,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     // Start reading the next package header.
 #if FEATURE_APM
                                     result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
+                                    handles[1] = result.AsyncWaitHandle;
 #else
                                     readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
 #endif
