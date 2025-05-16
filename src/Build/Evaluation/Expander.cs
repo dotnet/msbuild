@@ -7,7 +7,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
