@@ -69,6 +69,14 @@ namespace Microsoft.Build.Internal
             _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBuffer);
         }
 
+        /// <summary>
+        /// Gets a value indicating whether the pipe is in the connected state. Note that this is not real-time and
+        /// will only be updated when an operation on the pipe fails.
+        /// When a pipe is broken, Disconnect() must be called for the pipe to be reused - otherwise any attempts to
+        /// connect to a new client will throw.
+        /// </summary>
+        internal bool IsConnected => NodeStream.IsConnected;
+
         protected abstract PipeStream NodeStream { get; }
 
         protected string PipeName { get; }
