@@ -495,9 +495,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            RunReadLoop(
-                new BufferedReadStream(_pipeServer),
-                _pipeServer,
+            RunReadLoop(_pipeServer,
                 localPacketQueue, localPacketAvailable, localTerminatePacketPump);
 
             CommunicationsUtilities.Trace("Ending read loop");
@@ -522,7 +520,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void RunReadLoop(BufferedReadStream localReadPipe, NamedPipeServerStream localWritePipe,
+        private void RunReadLoop(NamedPipeServerStream localPipe,
             ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
         {
             // Ordering of the wait handles is important.  The first signalled wait handle in the array
@@ -534,9 +532,9 @@ namespace Microsoft.Build.BackEnd
 #if NET
             // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
             using AutoResetEvent readTaskEvent = new(false);
-            ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
+            ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
-            IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+            IAsyncResult result = localPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
 
             // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
@@ -569,7 +567,7 @@ namespace Microsoft.Build.BackEnd
                                 // Otherwise, the result will be undefined when not using async/await.
                                 bytesRead = readTask.IsCompleted ? readTask.Result : readTask.AsTask().Result;
 #else
-                                bytesRead = localReadPipe.EndRead(result);
+                                bytesRead = localPipe.EndRead(result);
 #endif
                             }
                             catch (Exception e)
@@ -624,10 +622,10 @@ namespace Microsoft.Build.BackEnd
                             try
                             {
 #if NET
-                                ValueTask<int> packetReadTask = CommunicationsUtilities.ReadAsync(localReadPipe, packetData, packetLength);
+                                ValueTask<int> packetReadTask = CommunicationsUtilities.ReadAsync(localPipe, packetData, packetLength);
                                 int packetBytesRead = packetReadTask.IsCompleted ? packetReadTask.Result : packetReadTask.AsTask().Result;
 #else
-                                int packetBytesRead = localReadPipe.Read(packetData, 0, packetLength);
+                                int packetBytesRead = localPipe.Read(packetData, 0, packetLength);
 #endif
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, _readTranslator);
                             }
@@ -642,9 +640,9 @@ namespace Microsoft.Build.BackEnd
                             }
 
 #if NET
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
+                            readTask = CommunicationsUtilities.ReadAsync(localPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
-                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+                            result = localPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
                             handles[0] = result.AsyncWaitHandle;
 #endif
                         }
@@ -678,7 +676,7 @@ namespace Microsoft.Build.BackEnd
                                 packetStream.Position = 1;
                                 _binaryWriter.Write(packetStreamLength - 5);
 
-                                localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
                             }
                         }
                         catch (Exception e)
