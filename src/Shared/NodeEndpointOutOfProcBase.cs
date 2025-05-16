@@ -21,8 +21,11 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 
 #endif
-#if !TASKHOST
+#if NET
 using System.Threading.Tasks;
+#endif
+#if !TASKHOST
+using System.Buffers.Binary;
 #endif
 
 #nullable disable
@@ -103,17 +106,22 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentQueue<INodePacket> _packetQueue;
 
         /// <summary>
-        /// Per-node shared read buffer.
+        /// The binary translator for reading packets.
         /// </summary>
-        private BinaryReaderFactory _sharedReadBuffer;
+        private ITranslator _readTranslator;
+
+        /// <summary>
+        /// A way to cache a byte array when reading packets.
+        /// </summary>
+        private MemoryStream _readPacketStream;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets
         /// </summary>
-        private MemoryStream _packetStream;
+        private MemoryStream _writePacketStream;
 
         /// <summary>
-        /// A binary writer to help write into <see cref="_packetStream"/>
+        /// A binary writer to help write into <see cref="_writePacketStream"/>
         /// </summary>
         private BinaryWriter _binaryWriter;
 
@@ -208,10 +216,12 @@ namespace Microsoft.Build.BackEnd
         {
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
-            _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
-            _packetStream = new MemoryStream();
-            _binaryWriter = new BinaryWriter(_packetStream);
+            _readPacketStream = new MemoryStream();
+            _readTranslator = BinaryTranslator.GetReadTranslator(_readPacketStream, InterningBinaryReader.CreateSharedBuffer());
+
+            _writePacketStream = new MemoryStream();
+            _binaryWriter = new BinaryWriter(_writePacketStream);
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
@@ -368,7 +378,7 @@ namespace Microsoft.Build.BackEnd
                 try
                 {
                     // Wait for a connection
-#if TASKHOST
+#if FEATURE_APM
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
                     CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
@@ -385,7 +395,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     CommunicationsUtilities.Trace("Parent started connecting. Reading handshake from parent");
-#if TASKHOST
+#if FEATURE_APM
                     localPipeServer.EndWaitForConnection(resultForConnection);
 #endif
 
@@ -521,10 +531,10 @@ namespace Microsoft.Build.BackEnd
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
-#if !TASKHOST
+#if NET
             // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
             using AutoResetEvent readTaskEvent = new(false);
-            ValueTask<int> readTask = CommunicationsUtilities.ReadExactlyAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
+            ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
             IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
@@ -533,7 +543,7 @@ namespace Microsoft.Build.BackEnd
             // packets to be sent by other threads which are shutting down, such as the logging thread.
             WaitHandle[] handles = new WaitHandle[]
             {
-#if !TASKHOST
+#if NET
                 readTaskEvent,
 #else
                 result.AsyncWaitHandle,
@@ -553,7 +563,7 @@ namespace Microsoft.Build.BackEnd
                             int bytesRead = 0;
                             try
                             {
-#if !TASKHOST
+#if NET
                                 // Avoid allocating an additional task instance when possible.
                                 // However if a ValueTask runs asynchronously, it must be converted to a Task before consuming the result.
                                 // Otherwise, the result will be undefined when not using async/await.
@@ -602,9 +612,25 @@ namespace Microsoft.Build.BackEnd
 
                             NodePacketType packetType = (NodePacketType)headerByte[0];
 
+#if TASKHOST
+                            int packetLength = BitConverter.ToInt32(headerByte, 1);
+#else
+                            int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
+#endif
+                            _readPacketStream.Position = 0;
+                            _readPacketStream.SetLength(packetLength);
+                            byte[] packetData = _readPacketStream.GetBuffer();
+
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+#if NET
+                                ValueTask<int> packetReadTask = CommunicationsUtilities.ReadAsync(localReadPipe, packetData, packetLength);
+                                int packetBytesRead = packetReadTask.IsCompleted ? packetReadTask.Result : packetReadTask.AsTask().Result;
+#else
+                                IAsyncResult packetReadResult = localReadPipe.BeginRead(packetData, 0, packetLength, null, null);
+                                int packetBytesRead = localReadPipe.EndRead(packetReadResult);
+#endif
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, _readTranslator);
                             }
                             catch (Exception e)
                             {
@@ -616,8 +642,8 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-#if !TASKHOST
-                            readTask = CommunicationsUtilities.ReadExactlyAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
+#if NET
+                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length, readTaskEvent);
 #else
                             result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
                             handles[0] = result.AsyncWaitHandle;
@@ -634,7 +660,7 @@ namespace Microsoft.Build.BackEnd
                             INodePacket packet;
                             while (localPacketQueue.TryDequeue(out packet))
                             {
-                                var packetStream = _packetStream;
+                                var packetStream = _writePacketStream;
                                 packetStream.SetLength(0);
 
                                 ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);

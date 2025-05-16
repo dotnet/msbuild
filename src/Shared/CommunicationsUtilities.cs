@@ -23,6 +23,8 @@ using System.Text;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
+#endif
+#if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
 
@@ -586,32 +588,15 @@ namespace Microsoft.Build.Internal
         }
 #nullable disable
 
-#if !TASKHOST
+#if NET
         /// <summary>
-        /// This is intended to get around state-machine and wait handle allocations on .NET Framework for async reads.
-        /// Prefer ReadAsync() when the read is expected to complete synchronously, or if the bytes to read are greater
-        /// than the stream's buffer and will require multiple reads (e.g. the packet body).
-        /// By signalling an external reset event, this also allows use of WaitHandle.WaitAny() in non-async/await contexts.
+        /// By signalling an external reset event, this allows allocation-free use of WaitHandle.WaitAny() in non-async/await contexts.
         /// </summary>
-        internal static ValueTask<int> ReadExactlyAsync(Stream stream, byte[] buffer, int bytesToRead, AutoResetEvent autoResetEvent = null)
+        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead, AutoResetEvent autoResetEvent)
         {
-            Task<int> readTask = stream.ReadAsync(buffer, 0, bytesToRead);
-
-            // If the task completed synchronously, directly return the result.
-            if (readTask.IsCompleted)
-            {
-                _ = autoResetEvent?.Set();
-                return new ValueTask<int>(readTask.Result);
-            }
-
-            // Otherwise, a Task has been allocated and we'll need to set a callback.
-            readTask = readTask.ContinueWith(static (completedTask, state) =>
-            {
-                _ = ((AutoResetEvent)state)?.Set();
-                return completedTask.Result;
-            }, autoResetEvent, TaskContinuationOptions.ExecuteSynchronously);
-
-            return new ValueTask<int>(readTask);
+            int bytesRead = await ReadAsync(stream, buffer, bytesToRead).ConfigureAwait(false);
+            _ = autoResetEvent.Set();
+            return bytesRead;
         }
 
         internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
@@ -619,11 +604,7 @@ namespace Microsoft.Build.Internal
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
             {
-#if NET
                 int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead)).ConfigureAwait(false);
-#else
-                int bytesRead = await stream.ReadAsync(buffer, totalBytesRead, bytesToRead - totalBytesRead).ConfigureAwait(false);
-#endif
                 if (bytesRead == 0)
                 {
                     return totalBytesRead;

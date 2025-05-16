@@ -6,7 +6,11 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
+
+#if NET
 using System.Threading.Tasks;
+#endif
+
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -200,10 +204,15 @@ namespace Microsoft.Build.BackEnd.Client
             try
             {
                 byte[] headerByte = new byte[5];
-
+#if FEATURE_APM
+                IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#else
                 // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
                 using AutoResetEvent readTaskEvent = new(false);
-                ValueTask<int> readTask = CommunicationsUtilities.ReadExactlyAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
+                ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
+#endif
+
+                bool continueReading = true;
 
                 // Ordering of the wait handles is important. The first signalled wait handle in the array
                 // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
@@ -212,10 +221,13 @@ namespace Microsoft.Build.BackEnd.Client
                 WaitHandle[] handles =
                 [
                     localPacketPumpShutdownEvent,
+#if FEATURE_APM
+                    result.AsyncWaitHandle
+#else
                     readTaskEvent,
+#endif
                 ];
 
-                bool continueReading = true;
                 do
                 {
                     int waitId = WaitHandle.WaitAny(handles);
@@ -231,11 +243,14 @@ namespace Microsoft.Build.BackEnd.Client
                             {
                                 // Client recieved a packet header. Read the rest of it.
                                 int headerBytesRead = 0;
-
+#if FEATURE_APM
+                                headerBytesRead = localStream.EndRead(result);
+#else
                                 // Avoid allocating an additional task instance when possible.
                                 // However if a ValueTask runs asynchronously, it must be converted to a Task before consuming the result.
                                 // Otherwise, the result will be undefined when not using async/await.
                                 headerBytesRead = readTask.IsCompleted ? readTask.Result : readTask.AsTask().Result;
+#endif
 
                                 if ((headerBytesRead != headerByte.Length) && !localPacketPumpShutdownEvent.WaitOne(0))
                                 {
@@ -256,25 +271,25 @@ namespace Microsoft.Build.BackEnd.Client
                                     }
                                 }
 
-                                NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
+                                NodePacketType packetType = (NodePacketType)headerByte[0];
 
                                 int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
-                                int packetBytesRead = 0;
 
                                 _readBufferMemoryStream.Position = 0;
                                 _readBufferMemoryStream.SetLength(packetLength);
                                 byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-                                while (packetBytesRead < packetLength)
+#if FEATURE_APM
+                                IAsyncResult packetReadResult = localStream.BeginRead(packetData, 0, packetLength, null, null);
+                                int packetBytesRead = localStream.EndRead(packetReadResult);
+#else
+                                ValueTask<int> packetReadTask = CommunicationsUtilities.ReadAsync(localStream, packetData, packetLength);
+                                int packetBytesRead = packetReadTask.IsCompleted ? packetReadTask.Result : packetReadTask.AsTask().Result;
+#endif
+                                if (packetBytesRead < packetLength)
                                 {
-                                    int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
-                                    if (bytesRead == 0)
-                                    {
-                                        // Incomplete read.  Abort.
-                                        ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
-                                    }
-
-                                    packetBytesRead += bytesRead;
+                                    // Incomplete read.  Abort.
+                                    ErrorUtilities.ThrowInternalError("Incomplete packet read. {0} of {1} bytes read", packetBytesRead, packetLength);
                                 }
 
                                 try
@@ -295,7 +310,11 @@ namespace Microsoft.Build.BackEnd.Client
                                 else
                                 {
                                     // Start reading the next package header.
-                                    readTask = CommunicationsUtilities.ReadExactlyAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
+#if FEATURE_APM
+                                    result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#else
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
+#endif
                                 }
                             }
                             break;

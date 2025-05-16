@@ -531,7 +531,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Class which wraps up the communications infrastructure for a given node.
         /// </summary>
-        internal class NodeContext
+        internal sealed class NodeContext
         {
             private enum ExitPacketState
             {
@@ -634,27 +634,46 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public void BeginAsyncPacketRead()
             {
-                ThreadPool.QueueUserWorkItem(delegate
-                {
-                    var ignored = RunPacketReadLoopAsync();
-                });
+#if FEATURE_APM
+                _clientToServerStream.BeginRead(_headerByte, 0, _headerByte.Length, static result =>
+                    ((NodeContext)result.AsyncState).RunPacketReadLoopAsync(result), this);
+#else
+                ThreadPool.QueueUserWorkItem(static async context =>
+                    await context.RunPacketReadLoopAsync(), state: this, preferLocal: false);
+#endif
             }
 
+#if FEATURE_APM
+            public void RunPacketReadLoopAsync(IAsyncResult headerReadResult)
+            {
+#else
             public async Task RunPacketReadLoopAsync()
             {
                 while (true)
+#endif
                 {
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadExactlyAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+#if FEATURE_APM
+                        int bytesRead = _clientToServerStream.EndRead(headerReadResult);
+#else
+                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+#endif
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
                         }
                     }
+                    catch (ArgumentException)
+                    {
+                        // Workaround for CLR stress bug; it sporadically calls us twice on the same async
+                        // result, and EndRead will throw on the second one. Pretend the second one never happened.
+                        CommunicationsUtilities.Trace(_nodeId, "Hit CLR bug #825607: called back twice on same async result; ignoring");
+                        return;
+                    }
                     catch (IOException e)
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync: {0}", e);
+                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in {0}: {1}", nameof(RunPacketReadLoopAsync), e);
                         _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                         Close();
                         return;
@@ -662,16 +681,30 @@ namespace Microsoft.Build.BackEnd
 
                     NodePacketType packetType = (NodePacketType)_headerByte[0];
                     int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
-#if NETFRAMEWORK
-                    MSBuildEventSource.Log.PacketReadSize(packetLength);
-#endif
 
                     _readBufferMemoryStream.SetLength(packetLength);
                     byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
                     try
                     {
+#if FEATURE_APM
+                        MSBuildEventSource.Log.PacketReadSize(packetLength);
+                        IAsyncResult packetReadResult = _clientToServerStream.BeginRead(packetData, 0, packetLength, null, null);
+                        int bytesRead;
+                        try
+                        {
+                            bytesRead = _clientToServerStream.EndRead(packetReadResult);
+                        }
+                        catch (ArgumentException)
+                        {
+                            // Workaround for CLR stress bug; it sporadically calls us twice on the same async
+                            // result, and EndRead will throw on the second one. Pretend the second one never happened.
+                            CommunicationsUtilities.Trace(_nodeId, "Hit CLR bug #825607: called back twice on same async result; ignoring");
+                            return;
+                        }
+#else
                         int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, packetData, packetLength);
+#endif
                         if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
                         {
                             return;
@@ -679,7 +712,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (IOException e)
                     {
-                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in RunPacketReadLoopAsync (Reading): {0}", e);
+                        CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in {0} (Reading): {1}", nameof(RunPacketReadLoopAsync), e);
                         _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                         Close();
                         return;
@@ -696,6 +729,9 @@ namespace Microsoft.Build.BackEnd
                         Close();
                         return;
                     }
+#if FEATURE_APM
+                    BeginAsyncPacketRead();
+#endif
                 }
             }
 
