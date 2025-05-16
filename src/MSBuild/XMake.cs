@@ -4435,6 +4435,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
                 InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
