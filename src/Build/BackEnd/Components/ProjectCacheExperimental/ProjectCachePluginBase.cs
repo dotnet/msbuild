@@ -7,12 +7,14 @@ using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
+#pragma warning disable CS0618  // suppress “obsolete” warnings in this file due to this referencing other Experimental.ProjectCache types
     /// <summary>
     ///     Only one plugin instance can exist for a given BuildManager BeginBuild / EndBuild session.
     ///     Any exceptions thrown by the plugin will cause MSBuild to fail the build.
     /// </summary>
+    [Obsolete("This class is moved to Microsoft.Build.ProjectCache namespace.", false)]
     public abstract class ProjectCachePluginBase
     {
         /// <summary>
