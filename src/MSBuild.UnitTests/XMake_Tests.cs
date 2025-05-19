@@ -37,8 +37,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         private readonly ITestOutputHelper _output;
-        private readonly TestEnvironment _env;
-        
+        private readonly TestEnvironment _env;        
         public XMakeAppTests(ITestOutputHelper output)
         {
             _output = output;
