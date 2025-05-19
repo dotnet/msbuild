@@ -11,9 +11,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Build.CommandLine.UnitTests.TestAssets.MemberAccessException.LoggerProject
 {
-    public class CustomLoggerAdapter : ILogger
+    public class CustomLogger : ILogger
     {
-        private CustomLoggerAdapter()
+        private CustomLogger()
         {
             Console.WriteLine("Private constructor");
         }

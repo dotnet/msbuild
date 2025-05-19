@@ -2535,24 +2535,36 @@ $@"<Project>
         }
 
         [Theory]
-        [InlineData("MemberAccessException", "-logger:,", "CustomLoggerDescription.dll")]
-        [InlineData("MemberAccessException", "-distributedlogger:,", "CustomLoggerDescription.dll")]
+        [InlineData("MemberAccessException", "-logger:,", "CustomLogger.dll")]
+        [InlineData("MemberAccessException", "-distributedlogger:,", "CustomLogger.dll")]
         public void LoggerThrowsMemberAccessExceptionWhenClassIsInvalid(string memberAccess, string loggerTemplate, string expectedLoggerName)
         {
             using (var env = TestEnvironment.Create())
             {
+                string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+                var tempDir = _env.CreateFolder();
                 var memberAccessPath = Path.Combine(TestAssetsRootPath, memberAccess);
-                var mainProjDir = Path.Combine(memberAccessPath, "MainProject");
                 var loggerProjDir = Path.Combine(memberAccessPath, "LoggerProject");
 
-                var mainProjPath = Path.Combine(mainProjDir, "MainProject.csproj");
+                var projectFile = tempDir.CreateFile("memberaccesstest.proj", projectString);
+
+                var tempLoggerProjDir = Path.Combine(tempDir.Path, "LoggerProject");
+                Directory.CreateDirectory(tempLoggerProjDir);
+
+                foreach (var file in Directory.GetFiles(loggerProjDir, "*.*", SearchOption.AllDirectories))
+                {
+                    var relativePath = file.Substring(loggerProjDir.Length + 1);
+                    var destPath = Path.Combine(tempLoggerProjDir, relativePath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                    File.Copy(file, destPath, true);
+                }
 
                 string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(loggerProjDir, $"CustomLoggerDescription.csproj")} -restore -verbosity:n", out bool success);
+                $"{Path.Combine(tempLoggerProjDir, $"CustomLogger.csproj")} -restore -verbosity:n", out bool success);
 
-                var loggerDllPath = Path.Combine(loggerProjDir, "bin", "netstandard2.0", expectedLoggerName);
+                var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
                 var loggerSwitch = $"{loggerTemplate}{loggerDllPath}";
-                var mainBuildParameters = $"{mainProjPath} -restore {loggerSwitch} -verbosity:diagnostic";
+                var mainBuildParameters = $"{projectFile.Path} -restore {loggerSwitch} -verbosity:diagnostic";
 
                 string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                     mainBuildParameters,
@@ -2564,24 +2576,36 @@ $@"<Project>
         }
 
         [Theory]
-        [InlineData("TargetInvocationException", "-logger:,", "CustomLoggerDescription.dll")]
-        [InlineData("TargetInvocationException", "-distributedlogger:,", "CustomLoggerDescription.dll")]
+        [InlineData("TargetInvocationException", "-logger:,", "CustomLogger.dll")]
+        [InlineData("TargetInvocationException", "-distributedlogger:,", "CustomLogger.dll")]
         public void LoggerThrowsTargetInvocationException(string targetInvocation, string loggerTemplate, string expectedLoggerName)
         {
             using (var env = TestEnvironment.Create())
             {
+                string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+                var tempDir = _env.CreateFolder();
                 var targetInvocationPath = Path.Combine(TestAssetsRootPath, targetInvocation);
-                var mainProjDir = Path.Combine(targetInvocationPath, "MainProject");
                 var loggerProjDir = Path.Combine(targetInvocationPath, "LoggerProject");
 
-                var mainProjPath = Path.Combine(mainProjDir, "MainProject.csproj");
+                var projectFile = tempDir.CreateFile("targetinvocationtest.proj", projectString);
+
+                var tempLoggerProjDir = Path.Combine(tempDir.Path, "LoggerProject");
+                Directory.CreateDirectory(tempLoggerProjDir);
+
+                foreach (var file in Directory.GetFiles(loggerProjDir, "*.*", SearchOption.AllDirectories))
+                {
+                    var relativePath = file.Substring(loggerProjDir.Length + 1);
+                    var destPath = Path.Combine(tempLoggerProjDir, relativePath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                    File.Copy(file, destPath, true);
+                }
 
                 string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(loggerProjDir, $"FaultyLogger.csproj")} -restore -verbosity:n", out bool success);
 
-                var loggerDllPath = Path.Combine(loggerProjDir, "bin", "netstandard2.0", expectedLoggerName);
+                var loggerDllPath = Path.Combine(loggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
                 var loggerSwitch = $"{loggerTemplate}{loggerDllPath}";
-                var mainBuildParameters = $"{mainProjPath} -restore {loggerSwitch} -verbosity:diagnostic";
+                var mainBuildParameters = $"{projectFile.Path} -restore {loggerSwitch} -verbosity:diagnostic";
 
                 string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                     mainBuildParameters,

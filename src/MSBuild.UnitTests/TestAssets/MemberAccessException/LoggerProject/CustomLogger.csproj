@@ -2,8 +2,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
-    <AssemblyName>CustomLoggerDescription</AssemblyName>
-    <OutputPath>bin</OutputPath>
+    <AssemblyName>CustomLogger</AssemblyName>
+    <OutputPath>artifacts/bin</OutputPath>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
