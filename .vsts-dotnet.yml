@@ -117,7 +117,7 @@ extends:
         - name: TeamName
           value: MSBuild
         - name: VisualStudio.MajorVersion
-          value: 17
+          value: 18
         - name: VisualStudio.ChannelName
           value: 'int.main'
         - name: VisualStudio.DropName

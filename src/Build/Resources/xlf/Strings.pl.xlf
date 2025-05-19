@@ -632,7 +632,7 @@
       </trans-unit>
       <trans-unit id="OpenTelemetryLoadFailed">
         <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="new">Loading telemetry libraries failed with exception: {0}.</target>
+        <target state="translated">Ładowanie bibliotek telemetrii nie powiodło się. Wyjątek: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -858,6 +858,11 @@ Błędy: {3}</target>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">Narzędzie Resolver zestawu SDK „{0}” zwróciło wartość null.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">Nie można rozpoznać zestawu SDK „{0}” przez program rozpoznawania nazw zestawu SDK „{1}”. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

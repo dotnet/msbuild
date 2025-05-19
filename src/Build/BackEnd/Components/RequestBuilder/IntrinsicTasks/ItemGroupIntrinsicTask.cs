@@ -482,12 +482,29 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Filter the metadata as appropriate
+            List<string> metadataToRemove = null;
             if (keepMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => !keepMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMetadataNames)
+                    {
+                        if (!keepMetadata.Contains(metadataName))
+                        {
+                            metadataToRemove.Add(metadataName);
+                        }
+                    }
+
+                    foreach(string metadataName in metadataToRemove)
                     {
                         item.RemoveMetadata(metadataName);
                     }
@@ -495,10 +512,26 @@ namespace Microsoft.Build.BackEnd
             }
             else if (removeMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => removeMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMetadataNames)
+                    {
+                        if (removeMetadata.Contains(metadataName))
+                        {
+                            metadataToRemove.Add(metadataName);
+                        }
+                    }
+
+                    foreach (string metadataName in metadataToRemove)
                     {
                         item.RemoveMetadata(metadataName);
                     }
@@ -517,7 +550,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A list of matching items</returns>
         private HashSet<string> EvaluateExcludePaths(IReadOnlyList<string> excludes, ElementLocation excludeLocation)
         {
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(excludes.Count, StringComparer.OrdinalIgnoreCase);
             foreach (string excludeSplit in excludes)
             {
                 string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(

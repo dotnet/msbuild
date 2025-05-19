@@ -280,7 +280,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 tasksData.TryGetProperty("Microsoft.Build.Tasks.Message", out var messageTask).ShouldBe(true);
                 messageTask.GetProperty("ExecutionsCount").GetInt32().ShouldBe(3);
                 messageTask.GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
-                messageTask.GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThan(0);
+                messageTask.GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThanOrEqualTo(0);
                 messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsCustom)).GetBoolean().ShouldBe(false);
                 messageTask.GetProperty(nameof(TaskOrTargetTelemetryKey.IsCustom)).GetBoolean().ShouldBe(false);
 
@@ -288,7 +288,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 tasksData.TryGetProperty("Microsoft.Build.Tasks.CreateItem", out var createItemTask).ShouldBe(true);
                 createItemTask.GetProperty("ExecutionsCount").GetInt32().ShouldBe(1);
                 createItemTask.GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
-                createItemTask.GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThan(0);
+                createItemTask.GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThanOrEqualTo(0);
 
                 // Verify Targets summary information
                 tags.ShouldContainKey("VS.MSBuild.TargetsSummary");
@@ -309,7 +309,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Verify task execution summary metrics based on TasksSummaryConverter.Write structure
                 tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("ExecutionsCount").GetInt32().ShouldBe(4);
                 tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
-                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThan(0);
+                // Allowing 0 for TotalMemoryBytes as it is possible for tasks to allocate no memory in certain scenarios.
+                tasksSummary.GetProperty("Microsoft").GetProperty("Total").GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThanOrEqualTo(0);
             }
         }
 

@@ -379,7 +379,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
         else
         {
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, "InvalidVerbosity", parameterValue);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string? errorCode, out string? helpKeyword, "InvalidVerbosity", parameterValue);
             throw new LoggerException(message, null, errorCode, helpKeyword);
         }
     }
