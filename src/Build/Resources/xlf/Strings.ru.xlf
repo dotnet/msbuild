@@ -221,12 +221,12 @@
         <target state="translated">Свойства TargetFramework и TargetFrameworks не учитываются и не должны указываться в проектах, не использующих пакет SDK для .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_MessageFmt">
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
         <target state="translated">Задача {0} из проекта {1} создает проект с помощью CLI {2}. Вместо этого следует использовать задачу MSBuild.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_Title">
+      <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
         <target state="translated">Задачу "Exec" не следует использовать для создания проекта.</target>
         <note />
@@ -630,6 +630,11 @@
         <target state="translated">Метод {0} не может быть вызван с коллекцией, содержащей целевые имена, которые пусты или равны NULL.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Не удалось загрузить библиотеки телеметрии с исключением: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Выходное свойство: </target>
@@ -853,6 +858,11 @@ Errors: {3}</source>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">Сопоставитель пакетов SDK "{0}" вернул значение null.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">Не удалось разрешить SDK "{0}" с помощью сопоставителя SDK "{1}". {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

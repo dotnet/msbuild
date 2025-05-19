@@ -221,12 +221,12 @@
         <target state="translated">未遵守 『TargetFramework』 和 『TargetFrameworks』 屬性，且不應在未使用 .NET SDK 的專案中指定。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_MessageFmt">
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
         <target state="translated">來自專案 {1} 的工作 {0} 使用 {2} CLI 建置專案。建議改用 MSBuild 工作。</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_Title">
+      <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
         <target state="translated">不應該使用 'Exec' 工作來建置專案。</target>
         <note />
@@ -630,6 +630,11 @@
         <target state="translated">無法使用內含 null 或空白目標名稱的集合呼叫方法 {0}。</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">載入遙測程式庫時發生例外狀況: {0}。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">輸出屬性: </target>
@@ -853,6 +858,11 @@ Errors: {3}</source>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">SDK 解析程式 "{0}" 傳回 Null。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">SDK 解析程式 '{1}' 無法解析 SDK '{0}'。{2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

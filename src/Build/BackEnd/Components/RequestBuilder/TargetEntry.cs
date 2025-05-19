@@ -149,11 +149,6 @@ namespace Microsoft.Build.BackEnd
         private bool _isExecuting;
 
         /// <summary>
-        /// The current task builder.
-        /// </summary>
-        private ITaskBuilder _currentTaskBuilder;
-
-        /// <summary>
         /// The constructor.
         /// </summary>
         /// <param name="requestEntry">The build request entry for the target.</param>
@@ -816,46 +811,36 @@ namespace Microsoft.Build.BackEnd
             WorkUnitActionCode finalActionCode = WorkUnitActionCode.Continue;
             WorkUnitResult lastResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
 
-            try
+            int currentTask = 0;
+
+            // Walk through all of the tasks and execute them in order.
+            for (; (currentTask < _target.Children.Count) && !_cancellationToken.IsCancellationRequested; ++currentTask)
             {
-                // Grab the task builder so if cancel is called it will have something to operate on.
-                _currentTaskBuilder = taskBuilder;
+                ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
 
-                int currentTask = 0;
+                // Execute the task.
+                lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
 
-                // Walk through all of the tasks and execute them in order.
-                for (; (currentTask < _target.Children.Count) && !_cancellationToken.IsCancellationRequested; ++currentTask)
+                if (lastResult.ResultCode == WorkUnitResultCode.Failed)
                 {
-                    ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
-
-                    // Execute the task.
-                    lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
-
-                    if (lastResult.ResultCode == WorkUnitResultCode.Failed)
-                    {
-                        aggregatedTaskResult = WorkUnitResultCode.Failed;
-                    }
-                    else if (lastResult.ResultCode == WorkUnitResultCode.Success && aggregatedTaskResult != WorkUnitResultCode.Failed)
-                    {
-                        aggregatedTaskResult = WorkUnitResultCode.Success;
-                    }
-
-                    if (lastResult.ActionCode == WorkUnitActionCode.Stop)
-                    {
-                        finalActionCode = WorkUnitActionCode.Stop;
-                        break;
-                    }
+                    aggregatedTaskResult = WorkUnitResultCode.Failed;
+                }
+                else if (lastResult.ResultCode == WorkUnitResultCode.Success && aggregatedTaskResult != WorkUnitResultCode.Failed)
+                {
+                    aggregatedTaskResult = WorkUnitResultCode.Success;
                 }
 
-                if (_cancellationToken.IsCancellationRequested)
+                if (lastResult.ActionCode == WorkUnitActionCode.Stop)
                 {
-                    aggregatedTaskResult = WorkUnitResultCode.Canceled;
                     finalActionCode = WorkUnitActionCode.Stop;
+                    break;
                 }
             }
-            finally
+
+            if (_cancellationToken.IsCancellationRequested)
             {
-                _currentTaskBuilder = null;
+                aggregatedTaskResult = WorkUnitResultCode.Canceled;
+                finalActionCode = WorkUnitActionCode.Stop;
             }
 
             return new WorkUnitResult(aggregatedTaskResult, finalActionCode, lastResult.Exception);

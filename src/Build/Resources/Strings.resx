@@ -1340,6 +1340,9 @@
   <data name="SDKResolverFailed" xml:space="preserve">
     <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
   </data>
+  <data name="SingleResolverFailedToResolveSDK" xml:space="preserve">
+    <value>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</value>
+  </data>
   <data name="FailedToResolveSDK" xml:space="preserve">
     <value>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
   {1}</value>
@@ -2206,10 +2209,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</value>
     <comment>Terms in quotes are not to be translated.</comment>
   </data>
-  <data name="BuildCheck_BC0109_Title" xml:space="preserve">
+  <data name="BuildCheck_BC0302_Title" xml:space="preserve">
     <value>The 'Exec' task should not be used to build a project.</value>
   </data>
-  <data name="BuildCheck_BC0109_MessageFmt" xml:space="preserve">
+  <data name="BuildCheck_BC0302_MessageFmt" xml:space="preserve">
     <value>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</value>
   </data>
   <data name="BuildCheck_BC0201_Title" xml:space="preserve">
@@ -2391,6 +2394,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="TestSummary_Succeeded" xml:space="preserve">
     <value>succeeded: {0}</value>
     <comment>{0} whole number</comment>
+  </data>
+  <data name="OpenTelemetryLoadFailed" xml:space="preserve">
+    <value>Loading telemetry libraries failed with exception: {0}.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

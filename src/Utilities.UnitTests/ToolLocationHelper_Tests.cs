@@ -30,7 +30,9 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolLocationHelper_Tests
     {
+#if FEATURE_CODETASKFACTORY
         private readonly ITestOutputHelper _output;
+#endif
 
 #if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
@@ -40,7 +42,9 @@ namespace Microsoft.Build.UnitTests
 
         public ToolLocationHelper_Tests(ITestOutputHelper output)
         {
+#if FEATURE_CODETASKFACTORY
             _output = output;
+#endif
             ToolLocationHelper.ClearStaticCaches();
         }
 
@@ -2922,15 +2926,12 @@ namespace Microsoft.Build.UnitTests
         // Path to the fake SDk directory structure created under the temp directory.
         private readonly string _fakeStructureRoot;
         private readonly string _fakeStructureRoot2;
-        private readonly ITestOutputHelper _output;
 
         public GetPlatformExtensionSDKLocationsTestFixture(ITestOutputHelper output)
         {
 #if FEATURE_WIN32_REGISTRY
             getRegistrySubKeyDefaultValue = GetRegistrySubKeyDefaultValue;
 #endif
-
-            _output = output;
 
             _fakeStructureRoot = MakeFakeSDKStructure();
             _fakeStructureRoot2 = MakeFakeSDKStructure2();

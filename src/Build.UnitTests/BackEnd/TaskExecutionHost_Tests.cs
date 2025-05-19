@@ -1305,18 +1305,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Helper method for tests
         /// </summary>
-        private void ValidateOutputItem(string outputName, ITaskItem value)
-        {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
-
-            Assert.Single(_bucket.Lookup.GetItems("output"));
-            Assert.Equal(0, TaskItemComparer.Instance.Compare(value, new TaskItem(_bucket.Lookup.GetItems("output").First())));
-        }
-
-        /// <summary>
-        /// Helper method for tests
-        /// </summary>
         private void ValidateOutputItems(string outputName, string[] values)
         {
             Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));

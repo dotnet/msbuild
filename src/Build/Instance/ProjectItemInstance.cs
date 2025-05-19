@@ -285,6 +285,8 @@ namespace Microsoft.Build.Execution
             get { return new ReadOnlyCollection<string>(_taskItem.MetadataNames.Cast<string>()); }
         }
 
+        internal TaskItem.MetadataNamesEnumerable EnumerableMetadataNames => _taskItem.EnumerableMetadataNames;
+
         /// <summary>
         /// ITaskItem implementation
         /// </summary>
@@ -957,6 +959,8 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            public MetadataNamesEnumerable EnumerableMetadataNames => new MetadataNamesEnumerable(this);
+
             /// <summary>
             /// Gets the number of metadata set on the item.
             /// Computed, not necessarily fast.
@@ -1085,6 +1089,7 @@ namespace Microsoft.Build.Execution
                 _directMetadata.ImportProperties(metadata.Select(kvp => new ProjectMetadataInstance(kvp.Key, kvp.Value, allowItemSpecModifiers: true)));
             }
 
+#if FEATURE_APPDOMAIN
             /// <summary>
             /// Used to return metadata from another AppDomain. Can't use yield return because the
             /// generated state machine is not marked as [Serializable], so we need to allocate.
@@ -1106,6 +1111,7 @@ namespace Microsoft.Build.Execution
                 // Probably better to send the raw array across the wire even if it's another allocation.
                 return result.ToArray();
             }
+#endif
 
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> list)
             {
@@ -1957,6 +1963,58 @@ namespace Microsoft.Build.Execution
                 }
 
                 return null;
+            }
+
+            internal readonly struct MetadataNamesEnumerable
+            {
+                private readonly TaskItem _item;
+
+                public MetadataNamesEnumerable(TaskItem taskItem) => _item = taskItem;
+
+                public readonly MetadataNamesEnumerator GetEnumerator() => new MetadataNamesEnumerator(_item.MetadataCollection);
+            }
+
+            internal struct MetadataNamesEnumerator
+            {
+                private readonly IEnumerator<ProjectMetadataInstance> _metadataCollectionEnumerator;
+                private bool _metadataNamesEnumerated;
+                private int _itemSpecModifiersIndex;
+
+                internal MetadataNamesEnumerator(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadataCollection)
+                {
+                    _metadataCollectionEnumerator = ((IEnumerable<ProjectMetadataInstance>)metadataCollection).GetEnumerator();
+                    _metadataNamesEnumerated = false;
+                    _itemSpecModifiersIndex = 0;
+                }
+
+                public string Current { get; private set; }
+
+                public bool MoveNext()
+                {
+                    if (!_metadataNamesEnumerated)
+                    {
+                        if (_metadataCollectionEnumerator.MoveNext())
+                        {
+                            Current = _metadataCollectionEnumerator.Current.Name;
+
+                            return true;
+                        }
+                        else
+                        {
+                            _metadataNamesEnumerated = true;
+                        }
+                    }
+
+                    if (_itemSpecModifiersIndex < FileUtilities.ItemSpecModifiers.All.Length)
+                    {
+                        Current = FileUtilities.ItemSpecModifiers.All[_itemSpecModifiersIndex];
+                        ++_itemSpecModifiersIndex;
+
+                        return true;
+                    }
+
+                    return false;
+                }
             }
 
             /// <summary>

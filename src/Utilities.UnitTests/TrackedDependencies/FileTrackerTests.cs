@@ -1735,9 +1735,7 @@ class X
                 var buffer = new byte[10];
                 using (FileStream fs = File.Open(readFile, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
                 {
-#pragma warning disable CA2022
-                    fs.Read(buffer, 0, 10);
-#pragma warning restore CA2022
+                    fs.ReadExactly(buffer, 0, 10);
                 }
 
                 FileTracker.WriteContextTLogs(testDir, tlogRootName);
