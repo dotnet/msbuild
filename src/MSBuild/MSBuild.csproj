@@ -5,6 +5,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <!-- MSBuild.exe needs to be architecture specific, the rest of the .dlls can be AnyCPU. -->
