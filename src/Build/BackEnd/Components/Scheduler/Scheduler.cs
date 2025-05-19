@@ -431,7 +431,7 @@ namespace Microsoft.Build.BackEnd
 
                 // This result may apply to a number of other unscheduled requests which are blocking active requests.  Report to them as well.
                 List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequests);
-                foreach (SchedulableRequest unscheduledRequest in unscheduledRequests)
+               foreach (SchedulableRequest unscheduledRequest in unscheduledRequests)
                 {
                     if (unscheduledRequest.BuildRequest.GlobalRequestId == result.GlobalRequestId)
                     {
@@ -444,30 +444,32 @@ namespace Microsoft.Build.BackEnd
                         // There are other requests which we can satisfy based on this result, lets pull the result out of the cache
                         // and satisfy those requests.  Normally a skipped result would lead to the cache refusing to satisfy the
                         // request, because the correct response in that case would be to attempt to rebuild the target in case there
-                        // are state changes that would cause it to now excute.  At this point, however, we already know that the parent
+                        // are state changes that would cause it to now execute.  At this point, however, we already know that the parent
                         // request has completed, and we already know that this request has the same global request ID, which means that
                         // its configuration and set of targets are identical -- from MSBuild's perspective, it's the same.  So since
                         // we're not going to attempt to re-execute it, if there are skipped targets in the result, that's fine. We just
                         // need to know what the target results are so that we can log them.
                         ScheduleResponse response = TrySatisfyRequestFromCache(parentNode, unscheduledRequest.BuildRequest, skippedResultsDoNotCauseCacheMiss: true);
 
-                        // If we have a response we need to tell the loggers that we satisified that request from the cache.
+                        // If we have a response we need to tell the loggers that we satisfied that request from the cache.
                         if (response != null)
                         {
                             LogRequestHandledFromCache(unscheduledRequest.BuildRequest, response.BuildResult);
+
+                            // Mark the request as complete (and the parent is no longer blocked by this request.)
+                            unscheduledRequest.Complete(newResult);
                         }
                         else
                         {
-                            // Response may be null if the result was never added to the cache. This can happen if the result has
-                            // an exception in it. If that is the case, we should report the result directly so that the
-                            // build manager knows that it needs to shut down logging manually.
-                            response = GetResponseForResult(parentNode, unscheduledRequest.BuildRequest, newResult.Clone());
+                            // IF WE HIT IT, WE ARE IN TROUBLE WITH OUR CACHE.
+                            // Response may be null if the result was never added to the cache. This can happen if the result has an exception in it.
+
+                            // We attempt to reschedule the request on the node that was assigned to it.
+                            bool mustSendConfigurationToNode = _availableNodes[nodeId].AssignConfiguration(unscheduledRequest.BuildRequest.ConfigurationId);
+                            response = ScheduleResponse.CreateScheduleResponse(unscheduledRequest.AssignedNode, unscheduledRequest.BuildRequest, mustSendConfigurationToNode);
                         }
 
                         responses.Add(response);
-
-                        // Mark the request as complete (and the parent is no longer blocked by this request.)
-                        unscheduledRequest.Complete(newResult);
                     }
                 }
             }
@@ -674,7 +676,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="responses">The list which should be populated with responses from the scheduling.</param>
         private void ScheduleUnassignedRequests(List<ScheduleResponse> responses)
         {
-            DateTime schedulingTime = DateTime.UtcNow;
+         DateTime schedulingTime = DateTime.UtcNow;
 
             // See if we are done.  We are done if there are no unassigned requests and no requests assigned to nodes.
             if (_schedulingData.UnscheduledRequestsCount == 0 &&
