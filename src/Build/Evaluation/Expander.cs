@@ -1373,7 +1373,7 @@ namespace Microsoft.Build.Evaluation
                 // if what we have is a function
                 if (!IsValidPropertyName(propertyBody))
                 {
-                    if (propertyBody.Contains(".") || propertyBody[0] == '[')
+                    if (propertyBody.Contains('.') || propertyBody[0] == '[')
                     {
                         if (BuildParameters.DebugExpansion)
                         {
@@ -1404,7 +1404,7 @@ namespace Microsoft.Build.Evaluation
                             return null;
                         }
                     }
-                    else if (propertyValue == null && propertyBody.Contains("[")) // a single property indexer
+                    else if (propertyValue == null && propertyBody.Contains('[')) // a single property indexer
                     {
                         int indexerStart = propertyBody.IndexOf('[');
                         int indexerEnd = propertyBody.IndexOf(']');
@@ -4096,7 +4096,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             coercedArguments[n] = args[n].ToString().ToCharArray();
                         }
-                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string v && v.Contains("."))
+                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string v && v.Contains('.'))
                         {
                             Type enumType = parameters[n].ParameterType;
                             string typeLeafName = $"{enumType.Name}.";
