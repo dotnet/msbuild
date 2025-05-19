@@ -6,7 +6,11 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !NETFRAMEWORK
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
