@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
-using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Build.CommandLine.UnitTests.TestAssets.TargetInvocationException.LoggerProject
 {
