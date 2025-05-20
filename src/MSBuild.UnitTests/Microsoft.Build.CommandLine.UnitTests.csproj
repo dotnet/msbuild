@@ -69,10 +69,7 @@
   </ItemGroup>
   
   <ItemGroup>
-   <Content Include="TestAssets\**" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-  
-  <ItemGroup>
+    <None Include="TestAssets\**" CopyToOutputDirectory="PreserveNewest" />
     <Compile Remove="TestAssets\TargetInvocationException\LoggerProject\FaultyLogger.cs" />
   </ItemGroup>
 
