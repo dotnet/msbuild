@@ -64,7 +64,7 @@ When a parent request determines it needs results from a child request, the foll
 
 ![MSBuild Scheduler Schema](./schedulableRequest_parent_relationships.png)
 
-If parent is absent = a schedulable request doesn't have any dependencies, the request will have `parentRequest = null`.
+If parent is absent = a schedulable request will have `parentRequest = null`.
 
 ### Scheduler
 Central controller that manages build requests:
@@ -137,7 +137,7 @@ A scheduling plan contains information about:
 2) Project References: Which projects reference other projects
 3) Configuration Maps: How project paths map to configuration IDs
 
-This data is saved at the end of a successful build, typically in a file with extension `.buildplan`, so it can be used to make better scheduling decisions in future builds.
+This data is saved at the end of a successful build, typically in a file with extension `.buildplan`, so it can be used to make better scheduling decisions in future builds. To have this build plan generated, environment variable `MSBUILDENABLEBUILDPLAN` should be set with `true` value.
 
 MSBuild supports multiple scheduling algorithms that can be selected via the `MSBUILDCUSTOMSCHEDULER` environment variable:
 
