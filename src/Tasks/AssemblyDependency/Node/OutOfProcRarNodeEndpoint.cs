@@ -44,6 +44,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 // Swallow cancellation excpetions for now. We're using this as a simple way to gracefully shutdown the
                 // endpoint, instead of having to implement separate Start / Stop methods and deferring to the caller.
                 // Can reevaluate if we need more granular control over cancellation vs shutdown.
+                CommunicationsUtilities.Trace("({0}) RAR endpoint stopped due to cancellation.", _endpointId);
             }
         }
 
