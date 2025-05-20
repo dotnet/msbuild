@@ -773,7 +773,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Creates a build result for a request
+        /// Creates a build result for a request.
         /// </summary>
         private BuildResult CreateBuildResult(BuildRequest request, string target, WorkUnitResult workUnitResult)
         {
@@ -866,7 +866,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// The test checks how scheduler handles the duplicated requests and cache MISS for this case.
-        /// It's expected to have it rescheduled for the execution.
+        /// It's expected to have the duplicated request rescheduled for the execution.
         /// </summary>
         [Fact]
         public void ReportResultTest_NoCacheHitForDupes()
@@ -875,35 +875,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest duplicateRequest = CreateBuildRequest(2, configId: DefaultConfigId, Array.Empty<string>(), parentRequest: null, BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild);
 
             // Schedule the duplicate request -> it goes to unscheduled request due to duplicated configId
-            List<ScheduleResponse> responses = [.. _scheduler.ReportRequestBlocked(2, new BuildRequestBlocker(-1, Array.Empty<string>(), [duplicateRequest]))];
+            _scheduler.ReportRequestBlocked(2, new BuildRequestBlocker(-1, Array.Empty<string>(), [duplicateRequest]));
 
             // try to get a result for the parent request and see if we get a result for the duplicate request
             var results = _scheduler.ReportResult(1, CreateBuildResult(_defaultParentRequest, "", BuildResultUtilities.GetSuccessResult()))
                 .ToList();
 
             results.ShouldNotBeNull();
-            results.Count.ShouldBe(3);
+            results.Count.ShouldBe(2);
 
             // Completed _defaultParentRequest
             results[0].BuildResult.ShouldNotBeNull();
             results[0].BuildResult.BuildRequestDataFlags.ShouldBe(BuildRequestDataFlags.None);
             results[0].Action.ShouldBe(ScheduleActionType.SubmissionComplete);
 
-            // After cache miss, the candidate for rescheduling
+            // The automatically scheduled duplicated request.
             results[1].BuildResult.ShouldBeNull();
-            results[1].NodeId.Should().Be(-1);
+            results[1].NodeId.Should().Be(1);
             results[1].Action.ShouldBe(ScheduleActionType.Schedule);
             results[1].BuildRequest.BuildRequestDataFlags.ShouldBe(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild);
-
-            // The candidate for rescheduling has a node assignment for the execution.
-            results[2].BuildResult.ShouldBeNull();
-            results[2].NodeId.Should().Be(1);
-            results[2].Action.ShouldBe(ScheduleActionType.Schedule);
-            results[2].BuildRequest.BuildRequestDataFlags.ShouldBe(BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild);
         }
 
         /// <summary>
         /// The test checks how scheduler handles the duplicated requests and cache HIT for this case.
+        /// It's expected to have an immediate result for the duplicated request.
         /// </summary>
         [Fact]
         public void ReportResultTest_CacheHitForDupes()
@@ -912,7 +907,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest duplicateRequest = CreateBuildRequest(2, configId: DefaultConfigId, Array.Empty<string>(), parentRequest: null, BuildRequestDataFlags.None);
 
             // Schedule the duplicate request -> it goes to unscheduled request due to duplicated configId
-            List<ScheduleResponse> responses = [.. _scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, Array.Empty<string>(), [duplicateRequest]))];
+            _scheduler.ReportRequestBlocked(1, new BuildRequestBlocker(-1, Array.Empty<string>(), [duplicateRequest]));
 
             // try to get a result for the parent request and see if we get a result for the duplicate request.
             var results = _scheduler.ReportResult(1, CreateBuildResult(duplicateRequest, "", BuildResultUtilities.GetSuccessResult()))

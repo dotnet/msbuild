@@ -431,7 +431,7 @@ namespace Microsoft.Build.BackEnd
 
                 // This result may apply to a number of other unscheduled requests which are blocking active requests.  Report to them as well.
                 List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequests);
-               foreach (SchedulableRequest unscheduledRequest in unscheduledRequests)
+                foreach (SchedulableRequest unscheduledRequest in unscheduledRequests)
                 {
                     if (unscheduledRequest.BuildRequest.GlobalRequestId == result.GlobalRequestId)
                     {
@@ -458,18 +458,24 @@ namespace Microsoft.Build.BackEnd
 
                             // Mark the request as complete (and the parent is no longer blocked by this request.)
                             unscheduledRequest.Complete(newResult);
+                            responses.Add(response);
                         }
                         else
                         {
-                            // IF WE HIT IT, WE ARE IN TROUBLE WITH OUR CACHE.
-                            // Response may be null if the result was never added to the cache. This can happen if the result has an exception in it.
+                            // This is a critical error case where a result should be in the cache but isn't.
+                            // The result might be missing from the cache if:
+                            // 1. The result contained an exception that prevented it from being cached properly
+                            // 2. The result was for a skipped target that couldn't satisfy all dependencies
 
-                            // We attempt to reschedule the request on the node that was assigned to it.
-                            bool mustSendConfigurationToNode = _availableNodes[nodeId].AssignConfiguration(unscheduledRequest.BuildRequest.ConfigurationId);
-                            response = ScheduleResponse.CreateScheduleResponse(unscheduledRequest.AssignedNode, unscheduledRequest.BuildRequest, mustSendConfigurationToNode);
+                            // Now scheduler will handle this situation automatically - the unscheduled request remains
+                            // in the unscheduled queue (_schedulingData.UnscheduledRequests) and will be picked up
+                            // in the next ScheduleUnassignedRequests execution to be properly rebuilt.
+
+                            // IMPORTANT: In earlier versions, we would hit this code path and did not handle it properly,
+                            // which caused deadlocks/hangs in Visual Studio. Without completing the request's
+                            // logging lifecycle, VS would never receive the completion callback and would wait
+                            // indefinitely, freezing the UI.
                         }
-
-                        responses.Add(response);
                     }
                 }
             }
@@ -676,7 +682,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="responses">The list which should be populated with responses from the scheduling.</param>
         private void ScheduleUnassignedRequests(List<ScheduleResponse> responses)
         {
-         DateTime schedulingTime = DateTime.UtcNow;
+            DateTime schedulingTime = DateTime.UtcNow;
 
             // See if we are done.  We are done if there are no unassigned requests and no requests assigned to nodes.
             if (_schedulingData.UnscheduledRequestsCount == 0 &&
