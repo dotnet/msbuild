@@ -48,10 +48,10 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 // Consider cancellation as an intentional shutdown of the node.
                 shutdownReason = RarNodeShutdownReason.Complete;
             }
-            catch (UnauthorizedAccessException)
+            catch (UnauthorizedAccessException ex)
             {
-                // Access to the path is denied if the named pipe already exists.
-                shutdownException = new InvalidOperationException("RAR node is already running.");
+                // Access to the path is denied if the named pipe already exists or is owned by a different user.
+                shutdownException = new InvalidOperationException("RAR node is already running.", ex);
                 shutdownReason = RarNodeShutdownReason.AlreadyRunning;
             }
             catch (Exception ex)
