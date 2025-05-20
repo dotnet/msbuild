@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1620,6 +1620,11 @@ namespace Microsoft.Build.CommandLine
 
                             if (!restoreOnly)
                             {
+                                // Reset buildComplete after restore to ensure Ctrl+C will be respected in the build phase.
+                                // This fixes an issue where Ctrl+C doesn't cancel the build when --framework is used,
+                                // because the restore operation has already set s_buildComplete.
+                                s_buildComplete.Reset();
+
                                 if (graphBuildOptions != null)
                                 {
                                     graphResult = ExecuteGraphBuild(buildManager, graphBuildRequest);
