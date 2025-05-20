@@ -2253,6 +2253,9 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
+            // Double-check with full comparison only when hash matches
+            HashSet<string> requestTargetsSet = new(request.Targets, StringComparer.OrdinalIgnoreCase);
+
             // Look for matching requests in the configuration
             foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
             {
@@ -2261,8 +2264,7 @@ namespace Microsoft.Build.BackEnd
                     // Check if the hash matches before doing expensive comparisons
                     if (ComputeTargetsHash(request.Targets) == ComputeTargetsHash(existingRequest.BuildRequest.Targets))
                     {
-                        // Double-check with full comparison only when hash matches
-                        if (TargetsMatch(request.Targets, existingRequest.BuildRequest.Targets))
+                        if (TargetsMatch(requestTargetsSet, existingRequest.BuildRequest.Targets))
                         {
                             request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
                             return;
@@ -2292,16 +2294,14 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Determines if two target collections contain the same targets, ignoring order and case.
         /// </summary>
-        private bool TargetsMatch(List<string> firstTargetsList, List<string> secondTargetsList)
+        private static bool TargetsMatch(HashSet<string> firstTargetsSet, List<string> secondTargetsList)
         {
-            if (firstTargetsList.Count != secondTargetsList.Count)
+            if (firstTargetsSet.Count != secondTargetsList.Count)
             {
                 return false;
             }
 
-            HashSet<string> set = new HashSet<string>(firstTargetsList, StringComparer.OrdinalIgnoreCase);
-
-            return set.SetEquals(secondTargetsList);
+            return firstTargetsSet.SetEquals(secondTargetsList);
         }
 
         /// <summary>
