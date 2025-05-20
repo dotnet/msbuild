@@ -45,9 +45,7 @@ namespace Microsoft.Build.UnitTests
             _env = UnitTests.TestEnvironment.Create(_output);
         }
 
-        private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(XMakeAppTests).Assembly.Location) ?? AppContext.BaseDirectory);
-
-        private static string TestAssetsRootPath { get; } = Path.Combine(AssemblyLocation, "TestAssets");
+        private static string TestAssetsRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(XMakeAppTests).Assembly.Location) ?? AppContext.BaseDirectory), "TestAssets");
 
         private const string AutoResponseFileName = "MSBuild.rsp";
 

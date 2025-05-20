@@ -4,7 +4,6 @@
     <OutputType>Library</OutputType>
     <AssemblyName>CustomLogger</AssemblyName>
     <OutputPath>artifacts/bin</OutputPath>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
