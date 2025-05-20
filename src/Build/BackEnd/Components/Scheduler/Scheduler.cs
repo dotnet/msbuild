@@ -2239,39 +2239,30 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Determines if we have a matching request somewhere, and if so, assigns the same request ID.  Otherwise
-        /// assigns a new request id.
+        /// Determines if we have a matching request somewhere, and if so, assigns the same request ID.
+        /// Otherwise assigns a new request id.
         /// </summary>
-        /// <remarks>
-        /// UNDONE: (Performance) This algorithm should be modified so we don't have to iterate over all of the
-        /// requests to find a matching one.  A HashSet with proper equality semantics and a good hash code for the BuildRequest
-        /// would speed this considerably, especially for large numbers of projects in a build.
-        /// </remarks>
         /// <param name="request">The request whose ID should be assigned</param>
         private void AssignGlobalRequestId(BuildRequest request)
         {
-            bool assignNewId = false;
-            if (request.GlobalRequestId == BuildRequest.InvalidGlobalRequestId && _schedulingData.GetRequestsAssignedToConfigurationCount(request.ConfigurationId) > 0)
+            // Quick exit if already assigned or if there are no requests for this configuration
+            if (request.GlobalRequestId != BuildRequest.InvalidGlobalRequestId
+                || _schedulingData.GetRequestsAssignedToConfigurationCount(request.ConfigurationId) == 0)
             {
-                foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
+                request.GlobalRequestId = _nextGlobalRequestId++;
+                return;
+            }
+
+            // Look for matching requests in the configuration
+            foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
+            {
+                if (existingRequest.BuildRequest.Targets.Count == request.Targets.Count)
                 {
-                    if (existingRequest.BuildRequest.Targets.Count == request.Targets.Count)
+                    // Check if the hash matches before doing expensive comparisons
+                    if (ComputeTargetsHash(request.Targets) == ComputeTargetsHash(existingRequest.BuildRequest.Targets))
                     {
-                        List<string> leftTargets = new List<string>(existingRequest.BuildRequest.Targets);
-                        List<string> rightTargets = new List<string>(request.Targets);
-
-                        leftTargets.Sort(StringComparer.OrdinalIgnoreCase);
-                        rightTargets.Sort(StringComparer.OrdinalIgnoreCase);
-                        for (int i = 0; i < leftTargets.Count; i++)
-                        {
-                            if (!leftTargets[i].Equals(rightTargets[i], StringComparison.OrdinalIgnoreCase))
-                            {
-                                assignNewId = true;
-                                break;
-                            }
-                        }
-
-                        if (!assignNewId)
+                        // Double-check with full comparison only when hash matches
+                        if (TargetsMatch(request.Targets, existingRequest.BuildRequest.Targets))
                         {
                             request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
                             return;
@@ -2280,8 +2271,37 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            request.GlobalRequestId = _nextGlobalRequestId;
-            _nextGlobalRequestId++;
+            // No matching request found, assign a new ID
+            request.GlobalRequestId = _nextGlobalRequestId++;
+        }
+
+        /// <summary>
+        /// Computes a hash code for a collection of targets, ignoring order and case.
+        /// </summary>
+        private int ComputeTargetsHash(List<string> targets)
+        {
+            int hash = 0;
+            foreach (string target in targets)
+            {
+                hash ^= StringComparer.OrdinalIgnoreCase.GetHashCode(target);
+            }
+
+            return hash;
+        }
+
+        /// <summary>
+        /// Determines if two target collections contain the same targets, ignoring order and case.
+        /// </summary>
+        private bool TargetsMatch(List<string> firstTargetsList, List<string> secondTargetsList)
+        {
+            if (firstTargetsList.Count != secondTargetsList.Count)
+            {
+                return false;
+            }
+
+            HashSet<string> set = new HashSet<string>(firstTargetsList, StringComparer.OrdinalIgnoreCase);
+
+            return set.SetEquals(secondTargetsList);
         }
 
         /// <summary>
