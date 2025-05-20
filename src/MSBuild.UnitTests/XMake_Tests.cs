@@ -2546,7 +2546,7 @@ $@"<Project>
 
                 (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, memberAccess);
 
-                string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(tempLoggerProjDir, $"CustomLogger.csproj")} -restore -verbosity:n", out bool success);
 
                 var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
