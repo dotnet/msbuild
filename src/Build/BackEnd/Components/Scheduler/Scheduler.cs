@@ -2253,23 +2253,15 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            // Double-check with full comparison only when hash matches
             HashSet<string> requestTargetsSet = new(request.Targets, StringComparer.OrdinalIgnoreCase);
 
             // Look for matching requests in the configuration
             foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
             {
-                if (existingRequest.BuildRequest.Targets.Count == request.Targets.Count)
+                if (TargetsMatch(requestTargetsSet, existingRequest.BuildRequest.Targets))
                 {
-                    // Check if the hash matches before doing expensive comparisons
-                    if (ComputeTargetsHash(request.Targets) == ComputeTargetsHash(existingRequest.BuildRequest.Targets))
-                    {
-                        if (TargetsMatch(requestTargetsSet, existingRequest.BuildRequest.Targets))
-                        {
-                            request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
-                            return;
-                        }
-                    }
+                    request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
+                    return;
                 }
             }
 
@@ -2278,30 +2270,24 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Computes a hash code for a collection of targets, ignoring order and case.
-        /// </summary>
-        private int ComputeTargetsHash(List<string> targets)
-        {
-            int hash = 17; // Start with a non-zero seed
-            foreach (string target in targets)
-            {
-                hash = hash * 31 + StringComparer.OrdinalIgnoreCase.GetHashCode(target);
-            }
-
-            return hash;
-        }
-
-        /// <summary>
         /// Determines if two target collections contain the same targets, ignoring order and case.
         /// </summary>
-        private static bool TargetsMatch(HashSet<string> firstTargetsSet, List<string> secondTargetsList)
+        private bool TargetsMatch(HashSet<string> firstTargetsSet, List<string> secondTargetsList)
         {
             if (firstTargetsSet.Count != secondTargetsList.Count)
             {
                 return false;
             }
 
-            return firstTargetsSet.SetEquals(secondTargetsList);
+            foreach (string target in secondTargetsList)
+            {
+                if (!firstTargetsSet.Contains(target))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
