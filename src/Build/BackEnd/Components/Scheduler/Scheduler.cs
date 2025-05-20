@@ -2280,10 +2280,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int ComputeTargetsHash(List<string> targets)
         {
-            int hash = 0;
+            int hash = 17; // Start with a non-zero seed
             foreach (string target in targets)
             {
-                hash ^= StringComparer.OrdinalIgnoreCase.GetHashCode(target);
+                hash = hash * 31 + StringComparer.OrdinalIgnoreCase.GetHashCode(target);
             }
 
             return hash;
