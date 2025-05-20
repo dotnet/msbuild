@@ -19,6 +19,7 @@ namespace Microsoft.Build.UnitTests.Shared
 
         public static ArtifactsLocationAttribute ArtifactsLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<ArtifactsLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the ArtifactsLocationAttribute");
+
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
 
