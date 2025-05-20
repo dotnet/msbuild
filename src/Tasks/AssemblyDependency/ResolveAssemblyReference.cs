@@ -3255,7 +3255,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-#pragma warning disable CA2000 // Dispose objects before losing scope
+#pragma warning disable CA2000 // The OutOfProcRarClient is disposable but its disposal is handled by RegisterTaskObject.
                     _ = OutOfProcRarClient.GetInstance(buildEngine10).Execute(this);
 #pragma warning restore CA2000 // Dispose objects before losing scope
                     CommunicationsUtilities.Trace("RAR out-of-proc test connection completed. Executing task in-proc.");
