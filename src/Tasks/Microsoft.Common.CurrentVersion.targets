@@ -2386,7 +2386,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </PropertyGroup>
 
     <PropertyGroup>
-      <DisableResolveAssemblyReferencesOutOfProcNode Condition="'$(DisableResolveAssemblyReferencesOutOfProcNode)' == ''">false</DisableResolveAssemblyReferencesOutOfProcNode>
+      <AllowResolveAssemblyReferencesOutOfProcNode Condition="'$(AllowResolveAssemblyReferencesOutOfProcNode)' == ''">false</AllowResolveAssemblyReferencesOutOfProcNode>
     </PropertyGroup>
 
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
@@ -2480,7 +2480,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
         NonCultureResourceDirectories="@(NonCultureResourceDirectory)"
         EnableCustomCulture="$(EnableCustomCulture)"
-        DisableOutOfProcNode="$(DisableResolveAssemblyReferencesOutOfProcNode)"
+        AllowOutOfProcNode="$(AllowResolveAssemblyReferencesOutOfProcNode)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
