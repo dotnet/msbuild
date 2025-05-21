@@ -2412,8 +2412,8 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            IEnumerable<ScheduleResponse> response = _scheduler!.ReportRequestBlocked(node, blocker);
-            PerformSchedulingActions(response);
+            IEnumerable<ScheduleResponse> responses = _scheduler!.ReportRequestBlocked(node, blocker);
+            PerformSchedulingActions(responses);
         }
 
         /// <summary>
