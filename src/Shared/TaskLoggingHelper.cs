@@ -975,6 +975,97 @@ namespace Microsoft.Build.Utilities
             LogError(null, null, null, file, 0, 0, 0, 0, message);
         }
 
+        /// <summary>
+        /// Logs an error using both the specified resource string (with error code) and exception details.
+        /// The error code is extracted from the resource string. Inner exceptions are not included unless the
+        /// MSBUILDDIAGNOSTICS environment variable is set.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="exception">Exception to log.</param>
+        /// <param name="messageResourceName">The name of the string resource containing the error message.</param>
+        /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <c>exception</c> or <c>messageResourceName</c> is null.</exception>
+        public void LogErrorWithCodeFromException(Exception exception, string messageResourceName, params object[] messageArgs)
+        {
+            LogErrorWithCodeFromException(exception, false, false, null, messageResourceName, messageArgs);
+        }
+
+        /// <summary>
+        /// Logs an error using both the specified resource string (with error code) and exception details.
+        /// The error code is extracted from the resource string. Inner exceptions are included if 
+        /// showDetail is true or if the MSBUILDDIAGNOSTICS environment variable is set.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="exception">Exception to log.</param>
+        /// <param name="showStackTrace">If true, callstack will be appended to message.</param>
+        /// <param name="showDetail">Whether to log exception types and any inner exceptions.</param>
+        /// <param name="file">File related to the exception, or null if the project file should be logged</param>
+        /// <param name="messageResourceName">The name of the string resource containing the error message.</param>
+        /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
+        /// <exception cref="ArgumentNullException">Thrown when <c>exception</c> or <c>messageResourceName</c> is null.</exception>
+        public void LogErrorWithCodeFromException(Exception exception, bool showStackTrace, bool showDetail, string file, string messageResourceName, params object[] messageArgs)
+        {
+            // No lock needed, as the logging methods are thread safe and the rest does not modify
+            // global state.
+            ErrorUtilities.VerifyThrowArgumentNull(exception);
+            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+
+            // For an AggregateException call LogErrorWithCodeFromException on each inner exception
+            if (exception is AggregateException aggregateException)
+            {
+                foreach (Exception innerException in aggregateException.Flatten().InnerExceptions)
+                {
+                    LogErrorWithCodeFromException(innerException, showStackTrace, showDetail, file, messageResourceName, messageArgs);
+                }
+
+                return;
+            }
+
+            string formattedResourceMessage = FormatResourceString(messageResourceName, messageArgs);
+            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, formattedResourceMessage, out string errorCode);
+            
+            string helpKeyword = null;
+            if (HelpKeywordPrefix != null)
+            {
+                helpKeyword = HelpKeywordPrefix + messageResourceName;
+            }
+
+            // Format the full message with exception details
+            if (!showDetail && (Environment.GetEnvironmentVariable("MSBUILDDIAGNOSTICS") == null)) // This env var is also used in ToolTask
+            {
+                message += Environment.NewLine + exception.Message;
+
+                if (showStackTrace)
+                {
+                    message += Environment.NewLine + exception.StackTrace;
+                }
+            }
+            else
+            {
+                // The more comprehensive output, showing exception types
+                // and inner exceptions
+                var builder = new StringBuilder(200);
+                builder.AppendLine(message);
+                
+                Exception currentException = exception;
+                do
+                {
+                    builder.Append(currentException.GetType().Name);
+                    builder.Append(": ");
+                    builder.AppendLine(currentException.Message);
+                    if (showStackTrace)
+                    {
+                        builder.AppendLine(currentException.StackTrace);
+                    }
+                    currentException = currentException.InnerException;
+                } while (currentException != null);
+
+                message = builder.ToString();
+            }
+
+            LogError(null, errorCode, helpKeyword, file, 0, 0, 0, 0, message);
+        }
+
         #endregion
 
         #region Warning logging methods
