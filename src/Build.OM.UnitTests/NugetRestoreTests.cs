@@ -23,8 +23,19 @@ namespace Microsoft.Build.Engine.OM.UnitTests
         [WindowsFullFrameworkOnlyFact]
         public void TestOldNuget()
         {
+            TestNugetRestore(string.Empty);
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void TestOldNugetWithMsBuild64bit()
+        {
+            TestNugetRestore("amd64");
+        }
+
+        private void TestNugetRestore(string msbuildSubFolder)
+        {
             string currentAssemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-            string bootstrapMsBuildBinaryDir = RunnerUtilities.BootstrapMsBuildBinaryLocation;
+            string bootstrapMsBuildBinaryDir = Path.Combine(RunnerUtilities.BootstrapMsBuildBinaryLocation, msbuildSubFolder);
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
             // The content of the solution isn't known to matter, but having a custom solution makes it easier to add requirements should they become evident.
