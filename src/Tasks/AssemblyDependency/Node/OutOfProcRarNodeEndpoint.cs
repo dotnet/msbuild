@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks.AssemblyDependency
 {
@@ -19,13 +18,15 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         private readonly NodePipeServer _pipeServer;
 
-        internal OutOfProcRarNodeEndpoint(int endpointId, ServerNodeHandshake handshake, int maxNumberOfServerInstances)
+        internal OutOfProcRarNodeEndpoint(
+            int endpointId,
+            string pipeName,
+            ServerNodeHandshake handshake,
+            int maxNumberOfServerInstances,
+            NodePacketFactory packetFactory)
         {
             _endpointId = endpointId;
-            _pipeServer = new NodePipeServer(NamedPipeUtil.GetRarNodeEndpointPipeName(handshake), handshake, maxNumberOfServerInstances);
-
-            NodePacketFactory packetFactory = new();
-            packetFactory.RegisterPacketHandler(NodePacketType.RarNodeExecuteRequest, RarNodeExecuteRequest.FactoryForDeserialization, null);
+            _pipeServer = new NodePipeServer(pipeName, handshake, maxNumberOfServerInstances);
             _pipeServer.RegisterPacketFactory(packetFactory);
         }
 

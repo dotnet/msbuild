@@ -136,13 +136,23 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         private async Task RunNodeEndpointsAsync(CancellationToken cancellationToken)
         {
+            // Setup data shared between all endpoints.
+            string pipeName = NamedPipeUtil.GetRarNodeEndpointPipeName(_handshake);
+            NodePacketFactory packetFactory = new();
+            packetFactory.RegisterPacketHandler(NodePacketType.RarNodeExecuteRequest, RarNodeExecuteRequest.FactoryForDeserialization, null);
+
             OutOfProcRarNodeEndpoint[] endpoints = new OutOfProcRarNodeEndpoint[_maxNumberOfConcurrentTasks];
 
             // Validate all endpoint pipe handles successfully initialize before running any read loops.
-            // This allows us to bail out in the event where we can't control every pipe instance. 
+            // This allows us to bail out in the event where we can't control every pipe instance.
             for (int i = 0; i < endpoints.Length; i++)
             {
-                endpoints[i] = new OutOfProcRarNodeEndpoint(endpointId: i + 1, _handshake, _maxNumberOfConcurrentTasks);
+                endpoints[i] = new OutOfProcRarNodeEndpoint(
+                        endpointId: i + 1,
+                        pipeName,
+                        _handshake,
+                        _maxNumberOfConcurrentTasks,
+                        packetFactory);
             }
 
             Task[] endpointTasks = new Task[endpoints.Length];
