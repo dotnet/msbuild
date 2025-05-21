@@ -94,6 +94,9 @@ function InstallDotNetCli {
   $SdkInstallDir = Join-Path $DotNetRoot "sdk\$DotNetCliVersion"
 
   if (!(Test-Path $SdkInstallDir)) {
+    # Initialize LASTEXITCODE before the command to avoid the "not set" error
+    $global:LASTEXITCODE = 0
+    
     # Use Invoke-Expression so that $DotNetInstallVerbosity is not positionally bound when empty
     Invoke-Expression -Command "& '$DotNetInstallScript' -Version $DotNetCliVersion $DotNetInstallVerbosity"
 

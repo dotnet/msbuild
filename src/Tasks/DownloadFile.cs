@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Tasks
@@ -70,42 +71,58 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            return ExecuteAsync().GetAwaiter().GetResult();
+        }
+
+        private async Task<bool> ExecuteAsync()
+        {
             if (!Uri.TryCreate(SourceUrl, UriKind.Absolute, out Uri uri))
             {
-                Log.LogErrorFromResources("DownloadFile.ErrorInvalidUrl", SourceUrl);
+                Log.LogErrorWithCodeFromResources("DownloadFile.ErrorInvalidUrl", SourceUrl);
                 return false;
             }
 
             int retryAttemptCount = 0;
-            bool canRetry = false;
+            
+            CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-            do
+            while(true)
             {
                 try
                 {
-                    Download(uri);
+                    await DownloadAsync(uri, cancellationToken);
                     break;
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException e) when (e.CancellationToken == cancellationToken)
                 {
+                    // This task is being cancelled. Exit the loop.
+                    break;
                 }
                 catch (Exception e)
                 {
-                    canRetry = IsRetriable(e, out Exception actualException) && retryAttemptCount++ < Retries;
+                    bool canRetry = IsRetriable(e, out Exception actualException) && retryAttemptCount++ < Retries;
 
                     if (canRetry)
                     {
                         Log.LogWarningWithCodeFromResources("DownloadFile.Retrying", SourceUrl, retryAttemptCount + 1, RetryDelayMilliseconds, actualException.Message);
 
-                        Thread.Sleep(RetryDelayMilliseconds);
+                        try
+                        {
+                            await Task.Delay(RetryDelayMilliseconds, cancellationToken).ConfigureAwait(false);
+                        }
+                        catch (OperationCanceledException delayException) when (delayException.CancellationToken == cancellationToken)
+                        {
+                            // This task is being cancelled, exit the loop
+                            break;
+                        }
                     }
                     else
                     {
-                        Log.LogErrorFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        break;
                     }
                 }
             }
-            while (canRetry);
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
         }
@@ -114,16 +131,14 @@ namespace Microsoft.Build.Tasks
         /// Attempts to download the file.
         /// </summary>
         /// <param name="uri">The parsed <see cref="Uri"/> of the request.</param>
-        private void Download(Uri uri)
+        /// <param name="cancellationToken">The cancellation token for the task.</param>
+        private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
             using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date
-                using (HttpResponseMessage response = client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, _cancellationTokenSource.Token)
-                                                            .ConfigureAwait(continueOnCapturedContext: false)
-                                                            .GetAwaiter()
-                                                            .GetResult())
+                using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
                 {
                     try
                     {
@@ -136,9 +151,9 @@ namespace Microsoft.Build.Tasks
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
                     }
 
-                    if (!TryGetFileName(response, out string filename))
+                    if (!TryGetFileName(uri, out string filename))
                     {
-                        Log.LogErrorFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
                         return;
                     }
 
@@ -158,15 +173,16 @@ namespace Microsoft.Build.Tasks
 
                     try
                     {
+                        cancellationToken.ThrowIfCancellationRequested();
+
                         using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 
-                            Task task = response.Content.CopyToAsync(target);
-
-                            task.ConfigureAwait(continueOnCapturedContext: false);
-
-                            task.Wait(_cancellationTokenSource.Token);
+                            using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                            {
+                                await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
+                            }
 
                             DownloadedFile = new TaskItem(destinationFile.FullName);
                         }
@@ -248,25 +264,24 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Attempts to get the file name to use when downloading the file.
         /// </summary>
-        /// <param name="response">The <see cref="HttpResponseMessage"/> with information about the response.</param>
+        /// <param name="requestUri">The uri we sent request to.</param>
         /// <param name="filename">Receives the name of the file.</param>
         /// <returns><code>true</code> if a file name could be determined, otherwise <code>false</code>.</returns>
-        private bool TryGetFileName(HttpResponseMessage response, out string filename)
+        private bool TryGetFileName(Uri requestUri, out string filename)
         {
-            if (response == null)
+            if (requestUri == null)
             {
-                throw new ArgumentNullException(nameof(response));
+                throw new ArgumentNullException(nameof(requestUri));
             }
 
             // Not all URIs contain a file name so users will have to specify one
             // Example: http://www.download.com/file/1/
 
-            filename = !String.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
+            filename = !string.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
                 ? DestinationFileName.ItemSpec // Get the file name from what the user specified
-                : response.Content?.Headers?.ContentDisposition?.FileName // Attempt to get the file name from the content-disposition header value
-                  ?? Path.GetFileName(response.RequestMessage.RequestUri.LocalPath); // Otherwise attempt to get a file name from the URI
+                : Path.GetFileName(requestUri.LocalPath); // Otherwise attempt to get a file name from the URI
 
-            return !String.IsNullOrWhiteSpace(filename);
+            return !string.IsNullOrWhiteSpace(filename);
         }
 
         /// <summary>
@@ -289,7 +304,7 @@ namespace Microsoft.Build.Tasks
                    && destinationFile.Exists
                    && destinationFile.Length == response.Content.Headers.ContentLength
                    && response.Content.Headers.LastModified.HasValue
-                   && destinationFile.LastWriteTimeUtc < response.Content.Headers.LastModified.Value.UtcDateTime;
+                   && destinationFile.LastWriteTimeUtc > response.Content.Headers.LastModified.Value.UtcDateTime;
         }
     }
 }
