@@ -90,6 +90,9 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
             Task nodeEndpointTasks = Task.Run(() => RunNodeEndpointsAsync(linkedCts.Token), linkedCts.Token);
 
+            // Run any static initializers which will add latency to the first task run.
+            _ = new ResolveAssemblyReference();
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 LinkStatus linkStatus = await WaitForConnection(pipeServer, cancellationToken);
