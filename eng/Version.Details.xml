@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="d60c3fe894af16cd15dc86420af0fc9d02be4997" BarId="268973" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="a4d6fdc935d5da12efb00a0b3b693ff1439e0b41" BarId="269082" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="Microsoft.Bcl.Cryptography" Version="9.0.0">
