@@ -35,10 +35,9 @@ It's an out-in feature that can be disabled with change wave `17.12`. See more d
 
 Here's how some important flags interact with caching:
 
-*   **Flags Affecting Build Behavior:**
+*   **Flags Affecting Build Behavior:** - if any of the flags is presented only in request or cache - cache miss is returned:
     *   `IgnoreMissingEmptyAndInvalidImports`: This flag changes how MSBuild handles project imports. If a cached outcome was generated with a different setting for this flag than the current request, the cache will consider it a mismatch.
     *   `FailOnUnresolvedSdk`: Similar to the imports flag, this affects SDK resolution.
-    *   The `ResultsCache` stores the flags used when a `BuildResult` was created. When checking for a cache hit, it compares these stored flags with the flags of the incoming request.
 
 *   **Flags Affecting What's Returned (`ProjectInstance` State):**
     *   `ProvideProjectStateAfterBuild`: If a build request includes this flag, it means the caller wants the complete `ProjectInstance` (all evaluated properties, items, etc.) along with the target outcomes.
