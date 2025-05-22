@@ -31,12 +31,13 @@ MSBuild uses caching to speed up builds. It does this by remembering the outcome
 ### How `BuildRequestDataFlags` Affect Caching
 
 When MSBuild decides to build something, the request (`BuildRequest`) carries special instructions called `BuildRequestDataFlags`. These flags tell MSBuild *how* to perform the build and *what kind of result* is expected. The `ResultsCache` pays close attention to these flags because they are crucial for determining if a cached outcome is truly a match for a new request.
+It's an out-in feature that can be disabled with change wave `17.12`. See more details in [ChangeWaves.md](ChangeWaves.md)
 
 Here's how some important flags interact with caching:
 
 *   **Flags Affecting Build Behavior:**
-    *   `IgnoreMissingEmptyAndInvalidImports`: This flag changes how MSBuild handles project imports. If a cached outcome was generated with a different setting for this flag than the current request, the cache might consider it a mismatch because the project evaluation could have been different.
-    *   `FailOnUnresolvedSdk`: Similar to the imports flag, this affects SDK resolution. A cached outcome from a build with a different SDK resolution strategy might not be reusable.
+    *   `IgnoreMissingEmptyAndInvalidImports`: This flag changes how MSBuild handles project imports. If a cached outcome was generated with a different setting for this flag than the current request, the cache will consider it a mismatch.
+    *   `FailOnUnresolvedSdk`: Similar to the imports flag, this affects SDK resolution.
     *   The `ResultsCache` stores the flags used when a `BuildResult` was created. When checking for a cache hit, it compares these stored flags with the flags of the incoming request.
 
 *   **Flags Affecting What's Returned (`ProjectInstance` State):**
