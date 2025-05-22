@@ -1062,10 +1062,8 @@ namespace Microsoft.Build.UnitTests
         public void MessageDisplayPositionalParameterNameWhenAttributeNotFound()
         {
             WriteCodeFragment task = new WriteCodeFragment();
-
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
-
             TaskItem attribute = new TaskItem("System.TheAttributeCannotFound");
             attribute.SetMetadata("_Parameter1", "true");
             task.AssemblyAttributes = new TaskItem[] { attribute };
