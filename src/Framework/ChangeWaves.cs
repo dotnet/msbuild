@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 
 #nullable disable

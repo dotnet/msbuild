@@ -221,6 +221,16 @@
         <target state="translated">As propriedades 'TargetFramework' e 'TargetFrameworks' não são respeitadas e não devem ser especificadas em projetos que não usam o SDK do .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
+        <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
+        <target state="translated">A tarefa {0} do projeto {1} cria um projeto usando a CLI {2}. Em vez disso, a tarefa do MSBuild deve ser usada.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_Title">
+        <source>The 'Exec' task should not be used to build a project.</source>
+        <target state="translated">A tarefa "Exec" não deve ser usada para criar um projeto.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">Propriedade: "{0}" foi acessada, mas nunca foi inicializada.</target>
@@ -620,6 +630,11 @@
         <target state="translated">O método {0} não pode ser chamado com uma coleção que contém nomes de destino nulos ou vazios.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Falha ao carregar as bibliotecas de telemetria com a exceção: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Propriedade de Saída: </target>
@@ -796,7 +811,7 @@
       </trans-unit>
       <trans-unit id="RestoreComplete">
         <source>Restore complete ({0}s)</source>
-        <target state="new">Restore complete ({0}s)</target>
+        <target state="translated">Restauração concluída ({0}s)</target>
         <note>
       {0}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
@@ -804,7 +819,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="new">Restore {0} in {1}s</target>
+        <target state="translated">Restaurar {0} em {1}s</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -843,6 +858,11 @@ Erros: {3}</target>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">O resolvedor do SDK "{0}" retornou nulo.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">O SDK '{0}' não pôde ser resolvido pelo resolvedor de SDK '{1}'. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

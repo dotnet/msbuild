@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Shouldly;
 using Xunit;

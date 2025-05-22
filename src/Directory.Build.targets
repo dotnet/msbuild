@@ -47,10 +47,6 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- Force updated reference to this package because xunit and shouldly
-         are netstandard1.6 and transitively bring in an old reference -->
-    <PackageReference Include="System.Security.Cryptography.X509Certificates" />
-
     <!-- As of 17.3, one TF of Microsoft.NET.Test.Sdk depends on Newtonsoft.Json
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
@@ -141,6 +137,52 @@
   </Target>
 
   <Import Project="$(BUILD_STAGINGDIRECTORY)\MicroBuild\Plugins\MicroBuild.Plugins.IBCMerge.*\**\build\MicroBuild.Plugins.*.targets" Condition="'$(BUILD_STAGINGDIRECTORY)' != '' and $(TargetFramework.StartsWith('net4')) and '$(MicroBuild_EnablePGO)' != 'false'" />
+
+  <PropertyGroup>
+    <UseFrozenMaintenancePackageVersions Condition="'$(UseFrozenMaintenancePackageVersions)' == '' AND '$(IsUnitTestProject)' != 'true' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net472')) AND '$(OutputType)' != 'exe'">true</UseFrozenMaintenancePackageVersions>
+
+    <FrozenMicrosoftIORedistVersion>6.0.1</FrozenMicrosoftIORedistVersion>
+    <FrozenSystemMemoryVersion>4.5.5</FrozenSystemMemoryVersion>
+    <FrozenSystemRuntimeCompilerServicesUnsafeVersion>6.0.0</FrozenSystemRuntimeCompilerServicesUnsafeVersion>
+    <FrozenSystemThreadingTasksExtensionsVersion>4.5.4</FrozenSystemThreadingTasksExtensionsVersion>
+    <FrozenSystemBuffersVersion>4.5.1</FrozenSystemBuffersVersion>
+    <FrozenSystemNumericsVectorsVersion>4.5.0</FrozenSystemNumericsVectorsVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseFrozenMaintenancePackageVersions)' == 'true'">
+    <PackageDownload Include="Microsoft.IO.Redist" Version="[$(FrozenMicrosoftIORedistVersion)]" />
+    <PackageDownload Include="System.Memory" Version="[$(FrozenSystemMemoryVersion)]" />
+    <PackageDownload Include="System.Runtime.CompilerServices.Unsafe" Version="[$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)]" />
+    <PackageDownload Include="System.Threading.Tasks.Extensions" Version="[$(FrozenSystemThreadingTasksExtensionsVersion)]" />
+    <PackageDownload Include="System.Buffers" Version="[$(FrozenSystemBuffersVersion)]" />
+    <PackageDownload Include="System.Numerics.Vectors" Version="[$(FrozenSystemNumericsVectorsVersion)]" />
+  </ItemGroup>
+
+  <!-- Work around maintenance-packages updates breaking stuff -->
+  <Target Name="ReplaceCompileReferencesWithOlderMaintenancePackagesVersions"
+          BeforeTargets="ResolveAssemblyReferences"
+          Condition="$(UseFrozenMaintenancePackageVersions) == 'true'">
+
+    <ItemGroup>
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'Microsoft.IO.Redist' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenMicrosoftIORedistVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)microsoft.io.redist\$(FrozenMicrosoftIORedistVersion)\lib\net472\Microsoft.IO.Redist.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Buffers' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemBuffersVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.buffers\$(FrozenSystemBuffersVersion)\lib\net461\System.Buffers.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Memory' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemMemoryVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.memory\$(FrozenSystemMemoryVersion)\lib\net461\System.Memory.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Numerics.Vectors' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemNumericsVectorsVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.numerics.vectors\$(FrozenSystemNumericsVectorsVersion)\lib\net46\System.Numerics.Vectors.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Runtime.CompilerServices.Unsafe' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.runtime.compilerservices.unsafe\$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)\lib\net461\System.Runtime.CompilerServices.Unsafe.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Threading.Tasks.Extensions' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemThreadingTasksExtensionsVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.threading.tasks.extensions\$(FrozenSystemThreadingTasksExtensionsVersion)\lib\net461\System.Threading.Tasks.Extensions.dll" />
+    </ItemGroup>
+  </Target>
 
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>

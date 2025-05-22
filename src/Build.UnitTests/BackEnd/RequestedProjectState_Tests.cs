@@ -4,9 +4,7 @@
 using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.Build.Execution;
-using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {

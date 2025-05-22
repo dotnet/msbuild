@@ -6,11 +6,13 @@ using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
-#if !FEATURE_APM
+
+#if NET
 using System.Threading.Tasks;
 #endif
+
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Client
 {
@@ -124,6 +126,16 @@ namespace Microsoft.Build.BackEnd.Client
         }
 
         /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes a packet to the appropriate handler.
         /// </summary>
         /// <param name="nodeId">The node id from which the packet was received.</param>
@@ -195,7 +207,7 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                 IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
 #endif
 
                 bool continueReading = true;
@@ -294,7 +306,7 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                                     result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length);
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
 #endif
                                 }
                             }

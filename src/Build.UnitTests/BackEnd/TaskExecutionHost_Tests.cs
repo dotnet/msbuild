@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -1301,18 +1300,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Single(_bucket.Lookup.GetItems("output"));
             Assert.Equal(value, _bucket.Lookup.GetItems("output").First().EvaluatedInclude);
-        }
-
-        /// <summary>
-        /// Helper method for tests
-        /// </summary>
-        private void ValidateOutputItem(string outputName, ITaskItem value)
-        {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
-
-            Assert.Single(_bucket.Lookup.GetItems("output"));
-            Assert.Equal(0, TaskItemComparer.Instance.Compare(value, new TaskItem(_bucket.Lookup.GetItems("output").First())));
         }
 
         /// <summary>

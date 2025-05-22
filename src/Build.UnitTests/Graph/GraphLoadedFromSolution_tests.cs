@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Exceptions;
@@ -59,7 +58,8 @@ namespace Microsoft.Build.Graph.UnitTests
                     new ProjectGraph("nonExistent.sln");
                 });
 
-            exception.Message.ShouldContain("The project file could not be loaded. Could not find file");
+            exception.Message.ShouldContain("The project file could not be loaded.");
+            exception.Message.ShouldContain("Could not find file");
         }
 
         [Fact]
@@ -644,28 +644,6 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 return edgeInfos.Where(e => e.Key.Item2.Equals(node.ToConfigurationMetadata())).Select(e => e.Value);
             }
-        }
-
-        [Fact]
-        public void GraphConstructionShouldThrowOnMissingSolutionDependencies()
-        {
-            var solutionContents = SolutionFileBuilder.FromGraphEdges(
-                _env,
-                new Dictionary<int, int[]> { { 1, null }, { 2, null } },
-                new[] { ("1", new[] { Guid.NewGuid().ToString("B") }) }).BuildSolution();
-
-            var solutionFile = _env.CreateFile(
-                "solution.sln",
-                solutionContents)
-                .Path;
-
-            var exception = Should.Throw<InvalidProjectFileException>(
-                () =>
-                {
-                    new ProjectGraph(solutionFile);
-                });
-
-            exception.Message.ShouldContain("but a project with this GUID was not found in the .SLN file");
         }
 
         private static bool IsSolutionItemReference(ProjectItemInstance edgeItem)
