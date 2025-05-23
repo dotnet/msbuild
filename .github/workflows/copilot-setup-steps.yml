@@ -16,10 +16,17 @@ jobs:
     # If you do not check out your code, Copilot will do this for you.
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      
+      - name: Extract SDK version from global.json
+        id: sdk-version
+        run: |
+          SDK_VERSION=$(jq -r '.tools.dotnet' global.json)
+          echo "SDK_VERSION=$SDK_VERSION" >> $GITHUB_ENV
+          echo "Extracted .NET SDK version: $SDK_VERSION"
 
       - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # 4.3.1
         with:
-          global-json-file: global.json
+          dotnet-version: ${{ env.SDK_VERSION }}
 
       - name: Restore MSBuild
         run: ./eng/common/build.sh --restore
