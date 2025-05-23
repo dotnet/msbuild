@@ -3,8 +3,9 @@
 
 using System;
 using System.Globalization;
+
 #if NETFRAMEWORK
-using System.Linq;
+using Microsoft.IO;
 #endif
 
 namespace Microsoft.Build.Evaluation.Expander
