@@ -1,9 +1,10 @@
 {
   "sdk": {
+    "version": "9.0.300",
     "allowPrerelease": true
   },
   "tools": {
-    "dotnet": "9.0.106",
+    "dotnet": "9.0.300",
     "vs": {
       "version": "17.12.0"
     },
