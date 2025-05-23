@@ -2590,7 +2590,7 @@ namespace Microsoft.Build.UnitTests
                 string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
 
                 CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, null,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
+                                                    (frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths)
                                                          => ToolLocationHelper.GetPathToReferenceAssemblies(frameworkName, "v" + frameworkVersion, frameworkProfile, customFrameworkDir));
             }
         }
@@ -2605,7 +2605,7 @@ namespace Microsoft.Build.UnitTests
                 string rootDir = env.CreateFolder().Path;
 
                 CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
+                                                    (frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths)
                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                                 frameworkName, "v" + frameworkVersion, frameworkProfile,
                                                                                 rootDir, fallbackSearchPaths));
@@ -2621,7 +2621,7 @@ namespace Microsoft.Build.UnitTests
                 string searchPaths = $"/foo/bar;{customFrameworkDirToUse}";
 
                 CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
+                                                    (frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths)
                                                         => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                             frameworkName, "v" + frameworkVersion, frameworkProfile,
                                                                             targetFrameworkRootPath: null, targetFrameworkFallbackSearchPaths: fallbackSearchPaths));
@@ -2636,7 +2636,7 @@ namespace Microsoft.Build.UnitTests
             {
                 string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
                 CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, null,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
+                                                    (frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths)
                                                          => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                             customFrameworkDir, fallbackSearchPaths,
                                                                             new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
@@ -2654,7 +2654,7 @@ namespace Microsoft.Build.UnitTests
                 string rootDir = env.CreateFolder().Path;
 
                 CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
+                                                    (frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths)
                                                          => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                             rootDir, fallbackSearchPaths,
                                                                             new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));
@@ -2669,7 +2669,7 @@ namespace Microsoft.Build.UnitTests
                 string customFrameworkDirToUse = Path.Combine(env.CreateFolder().Path, "framework-root");
                 string searchPaths = $"{customFrameworkDirToUse};/a/b";
                 CheckGetPathToReferenceAssemblies(env, customFrameworkDirToUse, searchPaths,
-                                                    (string frameworkName, string frameworkVersion, string frameworkProfile, string customFrameworkDir, string fallbackSearchPaths)
+                                                    (frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths)
                                                          => ToolLocationHelper.GetPathToReferenceAssemblies(
                                                                             null, fallbackSearchPaths,
                                                                             new FrameworkNameVersioning(frameworkName, new Version(frameworkVersion), frameworkProfile)));

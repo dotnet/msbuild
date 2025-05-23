@@ -684,12 +684,12 @@ namespace Microsoft.Build.UnitTests
             MemoryStream serializationStream = new MemoryStream();
             ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(serializationStream);
 
-            writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
+            writeTranslator.Translate(ref assemblyNameOriginal, t => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
             ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
-            readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
+            readTranslator.Translate(ref assemblyNameDeserialized, t => new AssemblyNameExtension(t));
 
             assemblyNameDeserialized.ShouldBe(assemblyNameOriginal);
         }
@@ -708,12 +708,12 @@ namespace Microsoft.Build.UnitTests
             MemoryStream serializationStream = new MemoryStream();
             ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(serializationStream);
 
-            writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
+            writeTranslator.Translate(ref assemblyNameOriginal, t => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
             ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
-            readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
+            readTranslator.Translate(ref assemblyNameDeserialized, t => new AssemblyNameExtension(t));
 
             assemblyNameDeserialized.Equals(assemblyNameOriginal).ShouldBeTrue();
             assemblyNameDeserialized.RemappedFromEnumerator.Count().ShouldBe(1);
