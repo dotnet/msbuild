@@ -2637,13 +2637,13 @@ namespace Microsoft.Build.Shared
 
             // Ensure that the prefix match wasn't to a distinct directory, so that
             // x\y\prefix doesn't falsely match x\y\prefixmatch.
-            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length - 1]))
+            if (Array.IndexOf(directorySeparatorCharacters, possibleParent[possibleParent.Length - 1]) >= 0)
             {
                 return true;
             }
             else
             {
-                return directorySeparatorCharacters.Contains(possibleChild[possibleParent.Length]);
+                return Array.IndexOf(directorySeparatorCharacters, possibleChild[possibleParent.Length]) >= 0;
             }
         }
 
