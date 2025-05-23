@@ -207,25 +207,29 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                 IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+                // Use a separate reuseable wait handle to avoid allocating on Task.AsyncWaitHandle.
+                using AutoResetEvent readTaskEvent = new(false);
+                ValueTask<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
 #endif
 
                 bool continueReading = true;
+
+                // Ordering of the wait handles is important. The first signalled wait handle in the array
+                // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
+                // terminate event triggered so that we cannot get into a situation where packets are being
+                // spammed to the client and it never gets an opportunity to shutdown.
+                WaitHandle[] handles =
+                [
+                    localPacketPumpShutdownEvent,
+#if FEATURE_APM
+                    result.AsyncWaitHandle
+#else
+                    readTaskEvent,
+#endif
+                ];
+
                 do
                 {
-                    // Ordering of the wait handles is important. The first signalled wait handle in the array
-                    // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
-                    // terminate event triggered so that we cannot get into a situation where packets are being
-                    // spammed to the client and it never gets an opportunity to shutdown.
-                    WaitHandle[] handles =
-                    [
-                        localPacketPumpShutdownEvent,
-#if FEATURE_APM
-                        result.AsyncWaitHandle
-#else
-                        ((IAsyncResult)readTask).AsyncWaitHandle
-#endif
-                    ];
                     int waitId = WaitHandle.WaitAny(handles);
                     switch (waitId)
                     {
@@ -242,7 +246,10 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                                 headerBytesRead = localStream.EndRead(result);
 #else
-                                headerBytesRead = readTask.Result;
+                                // Avoid allocating an additional task instance when possible.
+                                // However if a ValueTask runs asynchronously, it must be converted to a Task before consuming the result.
+                                // Otherwise, the result will be undefined when not using async/await.
+                                headerBytesRead = readTask.IsCompleted ? readTask.Result : readTask.AsTask().Result;
 #endif
 
                                 if ((headerBytesRead != headerByte.Length) && !localPacketPumpShutdownEvent.WaitOne(0))
@@ -264,7 +271,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     }
                                 }
 
-                                NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
+                                NodePacketType packetType = (NodePacketType)headerByte[0];
 
                                 int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
                                 int packetBytesRead = 0;
@@ -275,7 +282,12 @@ namespace Microsoft.Build.BackEnd.Client
 
                                 while (packetBytesRead < packetLength)
                                 {
+#if NET
+                                    ValueTask<int> bytesReadTask = localStream.ReadAsync(packetData.AsMemory(packetBytesRead, packetLength - packetBytesRead));
+                                    int bytesRead = bytesReadTask.IsCompleted ? bytesReadTask.Result : bytesReadTask.AsTask().Result;
+#else
                                     int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
+#endif
                                     if (bytesRead == 0)
                                     {
                                         // Incomplete read.  Abort.
@@ -305,8 +317,9 @@ namespace Microsoft.Build.BackEnd.Client
                                     // Start reading the next package header.
 #if FEATURE_APM
                                     result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
+                                    handles[1] = result.AsyncWaitHandle;
 #else
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length, readTaskEvent);
 #endif
                                 }
                             }

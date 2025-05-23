@@ -588,13 +588,23 @@ namespace Microsoft.Build.Internal
         }
 #nullable disable
 
-#if !FEATURE_APM
+#if NET
+        /// <summary>
+        /// By signalling an external reset event, this allows allocation-free use of WaitHandle.WaitAny() in non-async/await contexts.
+        /// </summary>
+        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead, AutoResetEvent autoResetEvent)
+        {
+            int bytesRead = await ReadAsync(stream, buffer, bytesToRead).ConfigureAwait(false);
+            _ = autoResetEvent.Set();
+            return bytesRead;
+        }
+
         internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
         {
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
             {
-                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), CancellationToken.None);
+                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead)).ConfigureAwait(false);
                 if (bytesRead == 0)
                 {
                     return totalBytesRead;
