@@ -55,7 +55,7 @@ fi
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
+	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --test --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties || exit $?
 fi
 
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
@@ -93,9 +93,3 @@ export DOTNET_PERFLOG_DIR=$PerfLogDir
 # Prior to 3.0, the Csc task uses this environment variable to decide whether to run
 # a CLI host or directly execute the compiler.
 export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
-
-# When using bootstrapped MSBuild:
-# - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-# - Do run tests
-# - Don't try to create a bootstrap deployment
-. "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties
