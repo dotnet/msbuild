@@ -16,6 +16,7 @@ using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -919,6 +920,11 @@ namespace Microsoft.Build.Tasks
         }
 
         public bool FailIfNotIncremental { get; set; }
+
+        /// <summary>
+        /// Allow the task to run on the out-of-proc node if enabled for this build.
+        /// </summary>
+        public bool AllowOutOfProcNode { get; set; }
 
         /// <summary>
         /// This is a list of all primary references resolved to full paths.
@@ -3243,6 +3249,25 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (AllowOutOfProcNode
+                && BuildEngine is IBuildEngine10 buildEngine10
+                && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
+            {
+                try
+                {
+#pragma warning disable CA2000 // The OutOfProcRarClient is disposable but its disposal is handled by RegisterTaskObject.
+                    _ = OutOfProcRarClient.GetInstance(buildEngine10).Execute(this);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                    CommunicationsUtilities.Trace("RAR out-of-proc test connection completed. Executing task in-proc.");
+                }
+                catch (Exception ex)
+                {
+                    // If the out-of-proc connection failed, fall back to in-proc.
+                    // TODO: Disable out-of-proc for the remainder of the build if any connection fails.
+                    CommunicationsUtilities.Trace("RAR out-of-proc connection failed, failing back to in-proc. Exception: {0}", ex);
+                }
+            }
+
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
@@ -3265,7 +3290,6 @@ namespace Microsoft.Build.Tasks
                     => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
-
         #endregion
     }
 }
