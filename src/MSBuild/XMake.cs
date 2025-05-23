@@ -4420,28 +4420,23 @@ namespace Microsoft.Build.CommandLine
             }
             catch (IOException e) when (!loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
             }
             catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
             }
             catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
             }
             catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {
@@ -4477,6 +4472,12 @@ namespace Microsoft.Build.CommandLine
             }
 
             return true;
+        }
+
+        private static void ReportOptionalLoggerCreation(string loggerName, string unquotedParameter, Exception e)
+        {
+            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerName, e.Message));
+            InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
         }
 
         private static void ReplayBinaryLog(
