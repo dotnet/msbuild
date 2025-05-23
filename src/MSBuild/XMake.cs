@@ -251,9 +251,6 @@ namespace Microsoft.Build.CommandLine
             // Initialize OpenTelemetry infrastructure
             OpenTelemetryManager.Instance.Initialize(isStandalone: true);
 
-            // Resets the build completion event, signaling that a new build process is starting.
-            s_buildComplete.Reset();
-
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -657,6 +654,9 @@ namespace Microsoft.Build.CommandLine
 #endif
         {
             DebuggerLaunchCheck();
+
+            // Resets the build completion event, signaling that a new build process is starting.
+            s_buildComplete.Reset();
 
             // Initialize new build telemetry and record start of this build, if not initialized already
             KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
