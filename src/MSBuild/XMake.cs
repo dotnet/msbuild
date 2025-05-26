@@ -656,6 +656,9 @@ namespace Microsoft.Build.CommandLine
         {
             DebuggerLaunchCheck();
 
+            // Resets the build completion event, signaling that a new build process is starting.
+            s_buildComplete.Reset();
+
             // Initialize new build telemetry and record start of this build, if not initialized already
             KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
 
