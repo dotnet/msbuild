@@ -449,7 +449,7 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 constructorParameterTypes[i],
                                 parameter.Value,
-                                parameter.PositionalParameterName); /* back to 1 based */
+                                parameter.PositionalParameterName); 
                         }
                         else
                         {
