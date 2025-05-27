@@ -119,7 +119,7 @@ extends:
         - name: VisualStudio.MajorVersion
           value: 18
         - name: VisualStudio.ChannelName
-          value: 'int.main'
+          value: 'int.main'  # Keeping this as 'int.main' for main branch
         - name: VisualStudio.DropName
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
