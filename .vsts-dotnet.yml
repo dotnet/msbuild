@@ -119,7 +119,7 @@ extends:
         - name: VisualStudio.MajorVersion
           value: 18
         - name: VisualStudio.ChannelName
-          value: 'int.d17.14' # MSBuild's vs17.14 branch corresponds to this VS channel
+          value: 'int.main'
         - name: VisualStudio.DropName
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
