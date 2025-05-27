@@ -2003,6 +2003,14 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2036,7 +2044,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]wyjście.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje wszystkie zdarzenia kompilacji do skompresowanego pliku binarnego.
                      Domyślnie plik znajduje się w bieżącym katalogu i ma nazwę
                      „msbuild.binlog”. Dziennik binarny to szczegółowy opis procesu
