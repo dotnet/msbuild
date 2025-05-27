@@ -3267,7 +3267,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   -->
   <Target Name="AssignEmbeddedResourceOutputPaths">
     <ItemGroup>
-      <EmbeddedResource Update="@(EmbeddedResource)">
+      <EmbeddedResource>
         <OutputResource>$(IntermediateOutputPath)%(EmbeddedResource.ManifestResourceName).resources</OutputResource>
       </EmbeddedResource>
     </ItemGroup>
