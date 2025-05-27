@@ -35,6 +35,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -655,6 +656,9 @@ namespace Microsoft.Build.CommandLine
         {
             DebuggerLaunchCheck();
 
+            // Resets the build completion event, signaling that a new build process is starting.
+            s_buildComplete.Reset();
+
             // Initialize new build telemetry and record start of this build, if not initialized already
             KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
 
@@ -1042,6 +1046,13 @@ namespace Microsoft.Build.CommandLine
             {
                 Console.WriteLine(
                     $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
+
+                exitType = ExitType.Unexpected;
+            }
+            catch (PathTooLongException e)
+            {
+                Console.WriteLine(
+                    $"{e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
             }
@@ -1529,6 +1540,11 @@ namespace Microsoft.Build.CommandLine
                         }
                     }
 
+                    if (Traits.Instance.EnableRarNode)
+                    {
+                        parameters.EnableRarNode = true;
+                    }
+
                     List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
@@ -1777,7 +1793,7 @@ namespace Microsoft.Build.CommandLine
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                             "LongPaths",
                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                                "LongPaths_" + longPaths.ToString())),
+                                $"LongPaths_{longPaths}")),
                         MessageImportance.Low));
             }
 
@@ -1789,7 +1805,7 @@ namespace Microsoft.Build.CommandLine
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                             "SAC",
                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                                "SAC_" + SAC_State.ToString())),
+                                $"SAC_{SAC_State}")),
                         MessageImportance.Low));
             }
 
@@ -3094,7 +3110,7 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
-            int indexOfColon = val.IndexOf(":");
+            int indexOfColon = val.IndexOf(':');
             return indexOfColon < 0 || indexOfColon == val.Length - 1;
         }
 
@@ -3432,6 +3448,21 @@ namespace Microsoft.Build.CommandLine
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
                 }
+                else if (nodeModeNumber == 3)
+                {
+                    // The RAR service persists between builds, and will continue to process requests until terminated.
+                    OutOfProcRarNode rarNode = new();
+                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+
+                    shutdownReason = rarShutdownReason switch
+                    {
+                        RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
+                        RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
+                        RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
+                        RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
+                        _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
+                    };
+                }
                 else if (nodeModeNumber == 8)
                 {
                     // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
@@ -3663,13 +3694,13 @@ namespace Microsoft.Build.CommandLine
                     InitializationException.VerifyThrow(extension?.Length >= 2, "InvalidExtensionToIgnore", extension);
 
                     // There is an invalid char in the extensionToIgnore.
-                    InitializationException.VerifyThrow(extension.IndexOfAny(Path.GetInvalidPathChars()) == -1, "InvalidExtensionToIgnore", extension, null, false);
+                    InitializationException.VerifyThrow(extension.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) < 0, "InvalidExtensionToIgnore", extension, null, false);
 
                     // There were characters before the extension.
                     InitializationException.VerifyThrow(string.Equals(extension, Path.GetExtension(extension), StringComparison.OrdinalIgnoreCase), "InvalidExtensionToIgnore", extension, null, false);
 
                     // Make sure that no wild cards are in the string because for now we don't allow wild card extensions.
-                    InitializationException.VerifyThrow(extension.IndexOfAny(s_wildcards) == -1, "InvalidExtensionToIgnore", extension, null, false);
+                    InitializationException.VerifyThrow(extension.IndexOfAny(MSBuildConstants.WildcardChars) == -1, "InvalidExtensionToIgnore", extension, null, false);
                 }
             }
         }
@@ -3723,7 +3754,7 @@ namespace Microsoft.Build.CommandLine
         {
             foreach (string parameter in parameters)
             {
-                int indexOfSpecialCharacter = parameter.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
+                int indexOfSpecialCharacter = parameter.AsSpan().IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
                 if (indexOfSpecialCharacter >= 0)
                 {
                     CommandLineSwitchException.Throw("NameInvalid", nameof(XMakeElements.target), parameter, parameter[indexOfSpecialCharacter].ToString());
@@ -3736,11 +3767,6 @@ namespace Microsoft.Build.CommandLine
         /// The = sign is used to pair properties with their values on the command line.
         /// </summary>
         private static readonly char[] s_propertyValueSeparator = MSBuildConstants.EqualsChar;
-
-        /// <summary>
-        /// This is a set of wildcard chars which can cause a file extension to be invalid
-        /// </summary>
-        private static readonly char[] s_wildcards = MSBuildConstants.WildcardChars;
 
         /// <summary>
         /// Determines which ToolsVersion was specified on the command line.  If more than
@@ -4531,6 +4557,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
+#if FEATURE_XML_SCHEMA_VALIDATION
         /// <summary>
         /// Figures out if the project needs to be validated against a schema.
         /// </summary>
@@ -4551,6 +4578,7 @@ namespace Microsoft.Build.CommandLine
 
             return schemaFile;
         }
+#endif
 
         /// <summary>
         /// Given an invalid ToolsVersion string and the collection of valid toolsets,

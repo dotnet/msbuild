@@ -10,8 +10,6 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Experimental;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
@@ -125,6 +123,8 @@ namespace Microsoft.Build.Execution
 #else
         private bool _enableNodeReuse = false;
 #endif
+
+        private bool _enableRarNode;
 
         /// <summary>
         /// The original process environment.
@@ -279,6 +279,7 @@ namespace Microsoft.Build.Execution
             _culture = other._culture;
             _defaultToolsVersion = other._defaultToolsVersion;
             _enableNodeReuse = other._enableNodeReuse;
+            _enableRarNode = other._enableRarNode;
             _buildProcessEnvironment = resetEnvironment
                 ? CommunicationsUtilities.GetEnvironmentVariables()
                 : other._buildProcessEnvironment != null
@@ -424,6 +425,15 @@ namespace Microsoft.Build.Execution
         {
             get => _enableNodeReuse;
             set => _enableNodeReuse = Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1" ? false : value;
+        }
+
+        /// <summary>
+        /// When true, the ResolveAssemblyReferences task executes in an out-of-proc node which persists across builds.
+        /// </summary>
+        public bool EnableRarNode
+        {
+            get => _enableRarNode;
+            set => _enableRarNode = value;
         }
 
         /// <summary>
@@ -917,6 +927,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _defaultToolsVersion);
             translator.Translate(ref _disableInProcNode);
             translator.Translate(ref _enableNodeReuse);
+            translator.Translate(ref _enableRarNode);
             translator.TranslateProjectPropertyInstanceDictionary(ref _environmentProperties);
             /* No forwarding logger information sent here - that goes with the node configuration */
             translator.TranslateProjectPropertyInstanceDictionary(ref _globalProperties);

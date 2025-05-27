@@ -584,7 +584,7 @@ namespace Microsoft.Build.Construction
 
             var leadingWhiteSpace = xmlElement.PreviousSibling.Value;
 
-            var lastIndexOfNewLine = leadingWhiteSpace.LastIndexOf("\n", StringComparison.Ordinal);
+            var lastIndexOfNewLine = leadingWhiteSpace.LastIndexOf('\n');
 
             if (lastIndexOfNewLine == -1)
             {
@@ -858,7 +858,9 @@ namespace Microsoft.Build.Construction
                 return false;
             }
 
-            public IEnumerator<T> GetEnumerator() => new Enumerator(_initial, _forwards);
+            public Enumerator GetEnumerator() => new Enumerator(_initial, _forwards);
+
+            IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -948,12 +950,17 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Get enumerator
             /// </summary>
-            public readonly IEnumerator<ProjectElement> GetEnumerator() => _enumerator;
+            public readonly Enumerator GetEnumerator() => _enumerator;
 
             /// <summary>
             /// Get non generic enumerator
             /// </summary>
             IEnumerator IEnumerable.GetEnumerator() => _enumerator;
+
+            /// <summary>
+            /// Get enumerator
+            /// </summary>
+            IEnumerator<ProjectElement> IEnumerable<ProjectElement>.GetEnumerator() => _enumerator;
 
             /// <summary>
             /// Enumerator over a series of sibling ProjectElement objects

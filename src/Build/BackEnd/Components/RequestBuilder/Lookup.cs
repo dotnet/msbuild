@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -481,8 +480,15 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> adds = scope.Adds[itemType];
                     if (adds.Count != 0)
                     {
-                        allAdds ??= new List<ProjectItemInstance>(adds.Count);
-                        allAdds.AddRange(adds);
+                        if (allAdds == null)
+                        {
+                            // Use the List<T>(IEnumerable<T>) constructor to avoid an intermediate array allocation.
+                            allAdds = new List<ProjectItemInstance>(adds);
+                        }
+                        else
+                        {
+                            allAdds.AddRange(adds);
+                        }
                     }
                 }
 
@@ -492,8 +498,14 @@ namespace Microsoft.Build.BackEnd
                     ICollection<ProjectItemInstance> removes = scope.Removes[itemType];
                     if (removes.Count != 0)
                     {
-                        allRemoves ??= new List<ProjectItemInstance>(removes.Count);
-                        allRemoves.AddRange(removes);
+                        if (allRemoves == null)
+                        {
+                            allRemoves = new List<ProjectItemInstance>(removes);
+                        }
+                        else
+                        {
+                            allRemoves.AddRange(removes);
+                        }
                     }
                 }
 
@@ -1373,7 +1385,7 @@ namespace Microsoft.Build.BackEnd
                 _modifies = null;
                 _properties = properties;
                 _propertySets = null;
-                _threadIdThatEnteredScope = Thread.CurrentThread.ManagedThreadId;
+                _threadIdThatEnteredScope = Environment.CurrentManagedThreadId;
                 _truncateLookupsAtThisScope = false;
             }
 

@@ -7,6 +7,11 @@
     <Description Condition="'$(Description)' == ''">$(TargetFileName)</Description>
   </PropertyGroup>
 
+  <!-- Disable package validation as source build filters out target frameworks. -->
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
+    <EnablePackageValidation>false</EnablePackageValidation>
+  </PropertyGroup>
+
   <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" />
     <None Include="README.md" Pack="true" PackagePath="\" />

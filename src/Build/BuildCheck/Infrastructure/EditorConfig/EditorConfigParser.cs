@@ -12,6 +12,10 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 
 internal sealed class EditorConfigParser
 {
+    // static property for embedding resolved `.editorconfig`s in binlog
+    private static ConcurrentBag<string> editorConfigFilePaths = new ConcurrentBag<string>();
+    public static IEnumerable<string> EditorConfigFilePaths => editorConfigFilePaths;
+
     private const string EditorconfigFile = ".editorconfig";
 
     /// <summary>
@@ -26,6 +30,13 @@ internal sealed class EditorConfigParser
     }
 
     /// <summary>
+    /// Clears the editorConfigFilePaths collection after embedding in the binlog.
+    /// </summary>
+    public static void ClearEditorConfigFilePaths()
+    {
+        editorConfigFilePaths = new ConcurrentBag<string>();
+    }
+    /// <summary>
     /// Fetches the list of EditorconfigFile ordered from the nearest to the filePath.
     /// </summary>
     /// <param name="filePath"></param>
@@ -34,21 +45,15 @@ internal sealed class EditorConfigParser
         var editorConfigDataFromFilesList = new List<EditorConfigFile>();
 
         var directoryOfTheProject = Path.GetDirectoryName(filePath);
-        // The method will look for the file in parent directory if not found in current until found or the directory is root. 
+        // The method will look for the file in parent directory if not found in current until found or the directory is root.
         var editorConfigFilePath = FileUtilities.GetPathOfFileAbove(EditorconfigFile, directoryOfTheProject);
-
         while (editorConfigFilePath != string.Empty)
         {
             var editorConfig = _editorConfigFileCache.GetOrAdd(editorConfigFilePath, (key) =>
             {
-                using (FileStream stream = new FileStream(editorConfigFilePath, FileMode.Open, System.IO.FileAccess.Read, FileShare.Read))
-                {
-                    using StreamReader sr = new StreamReader(editorConfigFilePath);
-                    var editorConfigfileContent = sr.ReadToEnd();
-                    return EditorConfigFile.Parse(editorConfigfileContent);
-                }
+                return EditorConfigFile.Parse(File.ReadAllText(editorConfigFilePath));
             });
-
+            editorConfigFilePaths.Add(editorConfigFilePath);
             editorConfigDataFromFilesList.Add(editorConfig);
 
             if (editorConfig.IsRoot)
@@ -66,7 +71,7 @@ internal sealed class EditorConfigParser
     }
 
     /// <summary>
-    /// Retrieves the config dictionary from the sections that matched the filePath. 
+    /// Retrieves the config dictionary from the sections that matched the filePath.
     /// </summary>
     /// <param name="editorConfigFiles"></param>
     /// <param name="filePath"></param>
