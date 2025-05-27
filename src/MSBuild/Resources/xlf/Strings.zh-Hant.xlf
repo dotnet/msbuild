@@ -1993,6 +1993,14 @@
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2026,7 +2034,7 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                     將所有建置事件序列化成壓縮的二進位檔案。
                      根據預設，此檔案存放在目前的目錄下，並會命名為
                      「msbuild.binlog」。此二進位記錄檔是

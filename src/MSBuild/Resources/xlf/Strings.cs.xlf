@@ -2005,6 +2005,14 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2038,7 +2046,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje všechny události sestavení do komprimovaného binárního souboru.
                      Tento soubor se standardně nachází v aktuálním adresáři a má název msbuild.binlog.
                      Binární protokol je podrobný popis procesu sestavení, který se
