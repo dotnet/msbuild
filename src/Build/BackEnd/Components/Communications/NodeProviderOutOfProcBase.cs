@@ -600,6 +600,8 @@ namespace Microsoft.Build.BackEnd
 
             private AutoResetEvent _packetEnqueued;
 
+            private CancellationTokenSource _packetQueueDrainDelayCancellation;
+
             private Thread drainPacketQueueThread;
 
             /// <summary>
@@ -621,6 +623,8 @@ namespace Microsoft.Build.BackEnd
                 _binaryReaderFactory = InterningBinaryReader.CreateSharedBuffer();
 
                 _packetEnqueued = new AutoResetEvent(false);
+                _packetQueueDrainDelayCancellation = new CancellationTokenSource();
+
                 // specify the smallest stack size - 256kb
                 drainPacketQueueThread = new Thread(DrainPacketQueue, 256 * 1024);
                 drainPacketQueueThread.IsBackground = true;
@@ -773,6 +777,7 @@ namespace Microsoft.Build.BackEnd
                             if (IsExitPacket(packet))
                             {
                                 context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                context._packetQueueDrainDelayCancellation.Cancel();
                             }
                         }
                         catch (IOException e)
@@ -827,16 +832,13 @@ namespace Microsoft.Build.BackEnd
                     // Wait up to 100ms until all remaining packets are sent.
                     // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
 #if NET
-                    // await _packetWriteDrainTask.WaitAsync(TimeSpan.FromMilliseconds(100)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
-                    await Task.Delay(100);
+                    await Task.Delay(100, _packetQueueDrainDelayCancellation.Token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 #else
-                    using (var cts = new CancellationTokenSource(100))
-                    {
-                        await Task.Delay(100, cts.Token);
-                        cts.Cancel();
-                    }
+                    await Task.WhenAny(Task.Delay(100, _packetQueueDrainDelayCancellation.Token));
 #endif
                 }
+
+                _packetQueueDrainDelayCancellation?.Dispose();
 
                 if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {
