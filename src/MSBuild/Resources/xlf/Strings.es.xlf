@@ -1999,6 +1999,14 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2032,49 +2040,57 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializa todos los eventos de compilación en un archivo                     binario comprimido.
- De manera predeterminada, el archivo se encuentra en el directorio actual y tiene
-                     el nombre "msbuild.binlog". El registro binario es una
-                     descripción detallada del proceso de compilación que
-                     se puede utilizar más adelante para reconstruir registros
-                     de texto y que otras herramientas de análisis pueden emplear. Un registro binario suele ser de 10 a 20 veces
-                     más pequeño que el registro de nivel de diagnóstico de texto más detallado, pero contiene más información
-                    (Forma corta: -bl).
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     De manera predeterminada, el registrador binario recopila
-                     el texto de origen de los archivos del proyecto, incluidos
-                     todos los proyectos y archivos de destino importados que se encuentren durante la compilación. El modificador
-                     opcional ProjectImports controla este comportamiento:
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
 
-                      ProjectImports=None     - No recopilar importaciones
-                                                de proyecto.
-                      ProjectImports=Embed    - Insertar importaciones de
-                                                proyecto en el archivo de registro.
-                      ProjectImports=ZipFile  - Guardar los archivos del
-                                                proyecto en salida.projectimports.zip,
-                                                donde "salida" es el mismo nombre que
-                                                el del archivo de registro binario.
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                     La configuración predeterminada de ProjectImports es Embed.
-                     Nota: El registrador no recopila archivos de código fuente
-                     que no sean de MSBuild, como .cs, .cpp, etc.
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
+                                                output.projectimports.zip
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     Un archivo .binlog se puede "reproducir" pasándolo a
-                     msbuild.exe como argumento en lugar de proyecto o                     solución.
- Otros registradores recibirán la información
-                     que contiene el archivo de registro como si se estuviera
-                     ejecutando la compilación original. Encontrará más información sobre el registro binario y su uso en:
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
+
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     Ejemplos:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
-                      -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:output.binlog;ProjectImports=ZipFile
                        -bl:..\..\custom.binlog
-                     -binaryLogger
-   </target>
+                       -binaryLogger
+    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"

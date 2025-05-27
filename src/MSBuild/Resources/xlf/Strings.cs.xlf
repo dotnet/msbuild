@@ -2005,6 +2005,14 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2038,42 +2046,50 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializuje všechny události sestavení do komprimovaného binárního souboru.
-                     Tento soubor se standardně nachází v aktuálním adresáři a má název msbuild.binlog.
-                     Binární protokol je podrobný popis procesu sestavení, který se
-                     dá později použít k rekonstrukci textových protokolů
-                     a který můžou používat jiné nástroje pro analýzu.
-                     Binární protokol má obvykle 10–20krát menší velikost než
-                     nejpodrobnější textový protokol na úrovni diagnostiky, ale obsahuje více informací.
-                     (Krátký tvar: -bl)
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     Binární protokolovací nástroj standardně shromažďuje
-                     zdrojový text projektových souborů včetně všech
-                     importovaných projektů a cílových souborů zjištěných
-                     při sestavování. Toto chování řídí volitelný parametr ProjectImports:
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
 
-                     ProjectImports=None     - Neshromažďovat importované
-                                                 projekty.
-                      ProjectImports=Embed    - Vložit importované projekty
-                     do souboru protokolu.
-                      ProjectImports=ZipFile  - Uložit projektové soubory
-                                                do output.projectimports.zip,
-                                                kde output je stejný název
-                                                jako název souboru binárního protokolu.
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                     Výchozí nastavení pro ProjectImports je Embed.
-                     Poznámka: Protokolovací nástroj neshromažďuje zdrojové
-                     soubory nepatřící pod MSBuild, jako .cs, .cpp atd.
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
+                                                output.projectimports.zip
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     Soubor .binlog se dá znovu přehrát“ tak, že se předá
-                     souboru msbuild.exe jako argument místo projektu/řešení.
-                     Jiné protokolovací nástroje obdrží informace obsažené
-                     v souboru protokolu, jako by šlo o původní sestavení.
-                     Více o binárním protokolu a jeho použití si můžete přečíst na stránce:
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
+
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     Příklady:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
