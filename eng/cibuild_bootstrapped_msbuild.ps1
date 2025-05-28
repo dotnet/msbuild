@@ -122,7 +122,18 @@ try {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties
+
+    $testAssemblies = Get-ChildItem -Path $artifactsBinDir -Recurse -Include "*.UnitTests.dll" | Where-Object {$_.FullName -Match ($_.BaseName + '\\' + $configuration + '\\[^\\]*\\' + $_.Name)}
+
+    if ($testAssemblies.Count -gt 0) {
+      Write-Host "Running tests..."
+      foreach ($testAssembly in $testAssemblies) {
+        $testAssemblyPath = $testAssembly.FullName
+        Write-Host "Running tests in $testAssemblyPath"
+        dotnet test $testAssemblyPath --collect "Code Coverage"
+      }
+    }
   }
 
   exit $lastExitCode
