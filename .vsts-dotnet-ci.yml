@@ -177,8 +177,8 @@ jobs:
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-Core Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
+      testRunner: VSTest
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.trx'
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -187,10 +187,10 @@ jobs:
     displayName: Publish .NET Test Results
     inputs:
       testRunTitle: 'Windows-on-Core .NET'
-      testRunner: XUnit
+      testRunner: VSTest
       testResultsFiles: |
-        artifacts/TestResults/**/*.xml
-        !**/*UnitTests_net472*.xml
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -247,8 +247,8 @@ jobs:
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-full Release Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
+      testRunner: VSTest
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.trx'
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -257,10 +257,10 @@ jobs:
     displayName: Publish .NET Test Results
     inputs:
       testRunTitle: 'Windows-on-full Release .NET'
-      testRunner: XUnit
+      testRunner: VSTest
       testResultsFiles: |
-        artifacts/TestResults/**/*.xml
-        !**/*UnitTests_net472*.xml
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true

@@ -124,6 +124,7 @@ try {
   else {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties
 
+
     $testAssemblies = Get-ChildItem -Path $ArtifactsDir -Recurse -Include "*.UnitTests.dll" | Where-Object {$_.FullName -Match ($_.BaseName + '\\' + $configuration + '\\[^\\]*\\' + $_.Name)}
 
     if ($testAssemblies.Count -gt 0) {
@@ -131,7 +132,7 @@ try {
       foreach ($testAssembly in $testAssemblies) {
         $testAssemblyPath = $testAssembly.FullName
         Write-Host "Running tests in $testAssemblyPath"
-        dotnet test $testAssemblyPath --collect "Code Coverage"
+        & $dotnetExePath test $testAssemblyPath --logger "trx" --collect "Code Coverage" --results-directory "$ArtifactsDir/TestResults/$configuration"
       }
     }
   }
