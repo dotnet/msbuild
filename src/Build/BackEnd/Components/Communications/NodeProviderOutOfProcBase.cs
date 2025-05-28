@@ -625,8 +625,8 @@ namespace Microsoft.Build.BackEnd
                 _packetEnqueued = new AutoResetEvent(false);
                 _packetQueueDrainDelayCancellation = new CancellationTokenSource();
 
-                // specify the smallest stack size - 256kb
-                drainPacketQueueThread = new Thread(DrainPacketQueue, 256 * 1024);
+                // specify the smallest stack size - 64kb
+                drainPacketQueueThread = new Thread(DrainPacketQueue, 64 * 1024);
                 drainPacketQueueThread.IsBackground = true;
                 drainPacketQueueThread.Start(this);
             }
@@ -728,30 +728,25 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Schedule a task to drain the packet write queue. We could have had a
-            /// dedicated thread that would pump the queue constantly, but
-            /// we don't want to allocate a dedicated thread per node (1MB stack)
+            /// We use a dedicated thread to
             /// </summary>
             /// <remarks>Usually there'll be a single packet in the queue, but sometimes
-            /// a burst of SendData comes in, with 10-20 packets scheduled. In this case
-            /// the first scheduled task will drain all of them, and subsequent tasks
-            /// will run on an empty queue. I tried to write logic that avoids queueing
-            /// a new task if the queue is already being drained, but it didn't show any
-            /// improvement and made things more complicated.</remarks>
+            /// a burst of SendData comes in, with 10-20 packets scheduled.</remarks>
             private void DrainPacketQueue(object state)
             {
                 NodeContext context = (NodeContext)state;
+                MemoryStream writeStream = context._writeBufferMemoryStream;
+                Stream serverToClientStream = context._serverToClientStream;
+                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+
                 while (true)
                 {
                     context._packetEnqueued.WaitOne();
                     while (context._packetWriteQueue.TryDequeue(out var packet))
                     {
-                        MemoryStream writeStream = context._writeBufferMemoryStream;
-
                         // clear the buffer but keep the underlying capacity to avoid reallocations
                         writeStream.SetLength(0);
 
-                        ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
                         try
                         {
                             writeStream.WriteByte((byte)packet.Type);
@@ -771,7 +766,8 @@ namespace Microsoft.Build.BackEnd
                             for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
                             {
                                 int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
-                                context._serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
+
+                                serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                             }
 
                             if (IsExitPacket(packet))
