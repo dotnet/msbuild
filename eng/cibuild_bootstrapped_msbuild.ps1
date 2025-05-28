@@ -124,7 +124,7 @@ try {
   else {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties
 
-    $testAssemblies = Get-ChildItem -Path $artifactsBinDir -Recurse -Include "*.UnitTests.dll" | Where-Object {$_.FullName -Match ($_.BaseName + '\\' + $configuration + '\\[^\\]*\\' + $_.Name)}
+    $testAssemblies = Get-ChildItem -Path $ArtifactsDir -Recurse -Include "*.UnitTests.dll" | Where-Object {$_.FullName -Match ($_.BaseName + '\\' + $configuration + '\\[^\\]*\\' + $_.Name)}
 
     if ($testAssemblies.Count -gt 0) {
       Write-Host "Running tests..."
