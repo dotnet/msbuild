@@ -2566,7 +2566,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             _output = output;
         }
 
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/11888")]
         // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
@@ -2743,7 +2743,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
         /// Assembly.LoadFile on that relative path, which fails (LoadFile requires an
         /// absolute path).  The fix was to use Assembly.LoadFrom instead.
         /// </summary>
-        [Fact]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/11888")]
         // FIXME: mono: looks for csc.exe
         // https://github.com/dotnet/msbuild/issues/677
         public void ReferencedAssemblySpecifiedUsingRelativePath()
