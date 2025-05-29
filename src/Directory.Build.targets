@@ -37,7 +37,7 @@
 
     <XunitOptions>$(XunitOptions)&amp;Traits=failing" /Diag:$(TargetName).log</XunitOptions>
     <!-- Enable code coverage -->
-    <XunitOptions>$(XunitOptions) --collect "Code Coverage" --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/17.14.0/build/netstandard2.0</XunitOptions>
+    <XunitOptions>$(XunitOptions) --collect "Code Coverage;Format=Cobertura;CoverageFileName=$(TargetName).cobertura.xml" --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/17.14.0/build/netstandard2.0</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
