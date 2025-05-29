@@ -88,6 +88,21 @@ jobs:
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: -onlyDocChanged $(onlyDocChanged)
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      artifact: 'WindowsFull_coverage'
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -173,6 +188,21 @@ jobs:
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
     env:
       MSBUILDUSESERVER: "1"
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      artifact: 'WindowsCore_coverage'
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -194,14 +224,6 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: PublishCodeCoverageResults@2
-    displayName: Publish Code Coverage
-    inputs:
-      summaryFileLocation: artifacts/TestResults/**/*.cobertura.xml
-      pathToSources: $(Build.SourcesDirectory)
-      failIfCoverageEmpty: true
-      continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -251,6 +273,21 @@ jobs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release'
     condition: eq(variables.onlyDocChanged, 1)
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      artifact: 'WindowsRelease_coverage'
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -272,14 +309,6 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: PublishCodeCoverageResults@2
-    displayName: Publish Code Coverage
-    inputs:
-      summaryFileLocation: artifacts/TestResults/**/*.cobertura.xml
-      pathToSources: $(Build.SourcesDirectory)
-      failIfCoverageEmpty: true
-      continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -316,6 +345,21 @@ jobs:
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      artifact: 'LinuxCore_coverage'
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -327,14 +371,6 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: PublishCodeCoverageResults@2
-    displayName: Publish Code Coverage
-    inputs:
-      summaryFileLocation: artifacts/TestResults/**/*.cobertura.xml
-      pathToSources: $(Build.SourcesDirectory)
-      failIfCoverageEmpty: true
-      continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
   - task: PowerShell@2
     inputs:
@@ -395,6 +431,21 @@ jobs:
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      artifact: 'MacCore_coverage'
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -406,14 +457,6 @@ jobs:
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
-  - task: PublishCodeCoverageResults@2
-    displayName: Publish Code Coverage
-    inputs:
-      summaryFileLocation: artifacts/TestResults/**/*.cobertura.xml
-      pathToSources: $(Build.SourcesDirectory)
-      failIfCoverageEmpty: true
-      continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
   - task: PowerShell@2
     inputs:
@@ -454,4 +497,67 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
       ArtifactName: 'macOS Verify $(System.JobAttempt)'
 
+- job: CodeCoverage
+  displayName: "Code Coverage"
+  dependsOn:
+  - BootstrapMSBuildOnFullFrameworkWindows
+  - BootstrapMSBuildOnCoreWindows
+  - FullReleaseOnWindows
+  - CoreBootstrappedOnLinux
+  - CoreOnMac
+  pool:
+    vmImage: 'windows-2022'
+  steps:
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'WindowsFull_coverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/WindowsFull'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'WindowsCore_coverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/WindowsCore'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'WindowsRelease_coverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/WindowsRelease'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'LinuxCore_coverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/LinuxCore'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'MacCore_coverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/MacCore'
+
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      pwsh: true
+  - task: CopyFiles@2
+    displayName: Copy Files to $(Build.ArtifactStagingDirectory)\Artifacts
+    inputs:
+      SourceFolder: 'artifacts'
+      Contents: |
+        CoverageResults\**
+      TargetFolder: '$(Build.ArtifactStagingDirectory)\Artifacts'
+    condition: succeededOrFailed()
+  - task: PublishCodeCoverageResults@2
+    inputs:
+      summaryFileLocation: $(Build.SourcesDirectory)\artifacts\CoverageResults\merged.cobertura.xml
+      pathToSources: $(Build.SourcesDirectory)
+      failIfCoverageEmpty: true
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact $(Build.BuildNumber)
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)\Artifacts\'
+      ArtifactName: '$(Build.BuildNumber)'
+      publishLocation: Container
+    condition: succeededOrFailed()
 - template: /eng/common/templates/jobs/source-build.yml
