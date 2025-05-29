@@ -30,12 +30,12 @@
     <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) /TestCaseFilter:"TestCategory!=nonosxtests</XunitOptions>
     <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">/TestCaseFilter:"TestCategory!=nonosxtests /TestCaseFilter:"TestCategory!=netcore-osx-failing</XunitOptions>
     <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) -notrait category=nonfreebsdtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) /TestCaseFilter:"TestCategory!=nonfreebsdtests</XunitOptions>
 
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) -notrait category=nonnetcoreapptests</XunitOptions>
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions) -notrait category=nonnetfxtests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) /TestCaseFilter:"TestCategory!=nonnetcoreapptests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions) /TestCaseFilter:"TestCategory!=nonnetfxtests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions) -notrait category=failing</XunitOptions>
+    <XunitOptions>$(XunitOptions) /TestCaseFilter:"TestCategory!=failing</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
