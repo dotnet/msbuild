@@ -74,7 +74,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
         internal ItemBucket(
-            ICollection<string> itemNames,
+            Dictionary<string, ICollection<ProjectItemInstance>>.KeyCollection itemNames, // PERF: directly use the KeyCollection to avoid boxing the enumerator.
             Dictionary<string, string> metadata,
             Lookup lookup,
             int bucketSequenceNumber)
