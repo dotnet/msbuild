@@ -6,6 +6,7 @@
                 <Configuration>
                     <DeterministicReport>True</DeterministicReport>
                     <IncludeTestAssembly>true</IncludeTestAssembly>
+                    <ExcludeAssembliesWithoutSources>MissingAll</ExcludeAssembliesWithoutSources>
                     <CodeCoverage>
                         <CommunicationTimeout>120000</CommunicationTimeout>
                         <PipeClientsCount>1270</PipeClientsCount>
