@@ -345,14 +345,13 @@ jobs:
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
-  - task: PowerShell@2
+  - task: Bash@3
     displayName: Process coverage reports
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
       arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
-      pwsh: true
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
@@ -431,14 +430,12 @@ jobs:
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
-  - task: PowerShell@2
+  - task: Bash@3
     displayName: Process coverage reports
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      filePath: $(Build.SourcesDirectory)/eng/process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
-      pwsh: true
+      filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
