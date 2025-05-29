@@ -35,7 +35,7 @@
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions)&amp;TestCategory!=nonnetcoreapptests</XunitOptions>
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions)&amp;TestCategory!=nonnetfxtests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions)&amp;TestCategory!=failing" /EnableCodeCoverage /Diag:$(TargetName).log</XunitOptions>
+    <XunitOptions>$(XunitOptions)&amp;TestCategory!=failing" --collect "Code Coverage" --test-adapter-path $(NuGetPackageRoot)/microsoft.codecoverage/$(MicrosoftCodeCoverageVersion)/build/netstandard2.0 /Diag:$(TargetName).log</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
@@ -52,7 +52,6 @@
     <PackageReference Include="Newtonsoft.Json" />
 
     <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
-    <PackageReference Include="Microsoft.CodeCoverage" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />

@@ -19,7 +19,7 @@
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 
-    <PackageVersion Include="Microsoft.CodeCoverage" Version="17.12.0" />
+    <PackageVersion Include="Microsoft.CodeCoverage" Version="17.14.0" />
     <PackageVersion Update="Microsoft.CodeCoverage" Condition="'$(MicrosoftCodeCoverageVersion)' != ''" Version="$(MicrosoftCodeCoverageVersion)" />
 
     <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20241105.3" />
