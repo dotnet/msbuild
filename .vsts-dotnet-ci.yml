@@ -350,7 +350,7 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
       arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
       pwsh: true
   - task: PublishPipelineArtifact@1
@@ -436,7 +436,7 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      filePath: $(Build.SourcesDirectory)/eng/process-coverage.ps1
       arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
       pwsh: true
   - task: PublishPipelineArtifact@1
