@@ -2035,50 +2035,50 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
-                     By default the file is in the current directory and named
-                     "msbuild.binlog". The binary log is a detailed description
-                     of the build process that can later be used to reconstruct
-                     text logs and used by other analysis tools. A binary log
-                     is usually 10-20x smaller than the most detailed text
-                     diagnostic-level log, but it contains more information.
-                     (Short form: -bl)
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Sérialise tous les événements de génération dans un fichier binaire compressé.
+                     Par défaut, le fichier se trouve dans le répertoire actuel et son nom est 
+                     "msbuild.binlog". Le journal binaire est une description détaillée
+                     du processus de génération que vous pouvez utiliser plus tard pour reconstruire
+                     des journaux texte et être utilisé par d’autres outils d’analyse. Un journal binaire
+                     est généralement 10 à 20 fois plus petit que le journal au niveau du diagnostic
+                     du texte le plus détaillé, mais il contient d’autres informations.
+                     (Forme abrégée : -bl)
 
-                     The optional LogFile specifies the path where the
-                     binary log is saved. To generate a distinct log file
-                     for each build, the token "{}" can be added into the
-                     path, for example: LogFile=output-{}-log.binlog. Each 
-                     "{}" in the log path is replaced with a unique string
-                     using the timestamp, running process Id and random
-                     string stamp.
+                     Le LogFile facultatif spécifie le chemin d’accès où le
+                     journal binaire est enregistré. Pour générer un fichier journal distinct
+                     pour chaque génération, vous pouvez ajouter le jeton « {} » dans le
+                     chemin d’accès, par exemple : LogFile=output-{}-log.binlog. Chaque 
+                     « {} » dans le chemin d’accès du journal est remplacé par une chaîne unique
+                     en utilisant un timestamp, ce qui exécute l’ID de processus et une
+                     empreinte de chaîne aléatoire.
 
-                     The binary logger by default collects the source text of
-                     project files, including all imported projects and target
-                     files encountered during the build. The optional
-                     ProjectImports switch controls this behavior:
+                     L’enregistreur binaire collecte par défaut le texte source des
+                     fichiers de projet, notamment tous les projets importés et les
+                     fichiers cibles rencontrés pendant la génération. Le commutateur
+                     ProjectImports facultatif contrôle ce comportement :
 
-                      ProjectImports=None     - Don't collect the project
-                                                imports.
-                      ProjectImports=Embed    - Embed project imports in the
-                                                log file.
-                      ProjectImports=ZipFile  - Save project files to
+                      ProjectImports=None     – Ne collectez pas les
+                                                importations du projet.
+                      ProjectImports=Embed    – Importations du projet incorporées dans le
+                                                fichier journal.
+                      ProjectImports=ZipFile  – Enregistrez les fichiers du projet dans
                                                 output.projectimports.zip
-                                                where output is the same name
-                                                as the binary log file name.
+                                                où la sortie est le même nom
+                                                que le nom du fichier journal binaire.
 
-                     The default setting for ProjectImports is Embed.
-                     Note: the logger does not collect non-MSBuild source files
-                     such as .cs, .cpp etc.
+                     Le paramètre par défaut pour ProjectImports est Incorporé.
+                     Remarque : l’enregistreur ne collecte pas les fichiers sources non-MSBuild
+                     tels que .cs, .cpp etc.
 
-                     A .binlog file can be "played back" by passing it to
-                     msbuild.exe as an argument instead of a project/solution.
-                     Other loggers will receive the information contained
-                     in the log file as if the original build was happening.
-                     You can read more about the binary log and its usages at:
+                     Vous pouvez « lire » un fichier .binlog en le passant à
+                     msbuild.exe en tant qu’argument au lieu d’une solution/d’un projet.
+                     D’autres enregistreurs reçoivent les informations contenues
+                     dans le fichier journal comme si la génération d’origine se produisait.
+                     Vous pouvez lire plus d’informations sur le journal binaire et ses utilisations sur :
                      https://aka.ms/msbuild/binlog
 
-                     Examples:
+                     Exemples :
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None

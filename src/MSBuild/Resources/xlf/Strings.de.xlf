@@ -2034,50 +2034,50 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
-                     By default the file is in the current directory and named
-                     "msbuild.binlog". The binary log is a detailed description
-                     of the build process that can later be used to reconstruct
-                     text logs and used by other analysis tools. A binary log
-                     is usually 10-20x smaller than the most detailed text
-                     diagnostic-level log, but it contains more information.
-                     (Short form: -bl)
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serialisiert alle Buildereignisse in eine komprimierte Binärdatei.
+                     Standardmäßig befindet sich die Datei im aktuellen Verzeichnis und hat den Namen
+                     „msbuild.binlog“. Das binäre Protokoll ist eine detaillierte Beschreibung
+                     des Buildprozesses, der später zum Rekonstruieren von
+                     Textprotokollen dient und der von anderen Analysetools verwendet wird. Detaillierte
+                     Textprotokolle auf Diagnoseebene sind in der Regel 10–20-mal so groß wie
+                     binäre Protokolle, letztere enthalten jedoch mehr Informationen.
+                     (Kurzform: -bl)
 
-                     The optional LogFile specifies the path where the
-                     binary log is saved. To generate a distinct log file
-                     for each build, the token "{}" can be added into the
-                     path, for example: LogFile=output-{}-log.binlog. Each 
-                     "{}" in the log path is replaced with a unique string
-                     using the timestamp, running process Id and random
-                     string stamp.
+                     Die optionale LogFile gibt den Pfad an, in dem das
+                     Binärprotokoll gespeichert wird. Um eine eigene Protokolldatei
+                     für jeden Build zu generieren, kann das Token "{}" zum
+                     Pfad hinzugefügt werden, z. B.: LogFile=output-{}-log.binlog. Jedes 
+                     "{}" im Protokollpfad wird durch eine eindeutige Zeichenfolge ersetzt,
+                     indem Zeitstempel, ID des ausgeführten Prozesses und ein zufälliger
+                     Zeichenfolgenstempel verwendet werden.
 
-                     The binary logger by default collects the source text of
-                     project files, including all imported projects and target
-                     files encountered during the build. The optional
-                     ProjectImports switch controls this behavior:
+                     Die binäre Protokollierung erfasst standardmäßig den Quelltext von
+                     Projektdateien, einschließlich aller beim Buildvorgang aufgetretenen
+                     importierten Projekte und Zieldateien. Der optionale Schalter
+                     ProjectImports steuert dieses Verhalten:
 
-                      ProjectImports=None     - Don't collect the project
-                                                imports.
-                      ProjectImports=Embed    - Embed project imports in the
-                                                log file.
-                      ProjectImports=ZipFile  - Save project files to
+                      ProjectImports=None:      – Projektimporte nicht
+                                                erfassen
+                      ProjectImports=Embed:     – Projektimporte in die
+                                                Protokolldatei einbetten
+                      ProjectImports=ZipFile:   – Projektdateien in
                                                 output.projectimports.zip
-                                                where output is the same name
-                                                as the binary log file name.
+                                                speichern, wobei „output“ dem Namen
+                                                der binären Protokolldatei entspricht.
 
-                     The default setting for ProjectImports is Embed.
-                     Note: the logger does not collect non-MSBuild source files
-                     such as .cs, .cpp etc.
+                     Die Standardeinstellung für „ProjectImports“ ist „Embed“.
+                     Hinweis: Die Protokollierung erfasst nur MSBuild-Quelldateien.
+                     Andere Dateien wie etwa CS, CPP usw. werden nicht erfasst.
 
-                     A .binlog file can be "played back" by passing it to
-                     msbuild.exe as an argument instead of a project/solution.
-                     Other loggers will receive the information contained
-                     in the log file as if the original build was happening.
-                     You can read more about the binary log and its usages at:
+                     Eine BINLOG-Datei kann „wiedergegeben“ werden, indem sie an
+                     „msbuild.exe“ als Argument und nicht als Projekt/Lösung übergeben wird.
+                     Andere Protokollierungen erhalten die Informationen, die
+                     wie beim ursprünglichen Buildvorgang in der Protokolldatei enthalten sind.
+                     Weitere Informationen zu binären Protokollen und ihrer Verwendung erhalten Sie unter:
                      https://aka.ms/msbuild/binlog
 
-                     Examples:
+                     Beispiele:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
