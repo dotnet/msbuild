@@ -324,6 +324,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastAccessTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastWriteTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetParent", directoryType);
+                        availableStaticMethods.TryAdd("System.IO.Directory::Exists", directoryType);
                         availableStaticMethods.TryAdd("System.IO.File::Exists", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetCreationTime", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetAttributes", fileType);
