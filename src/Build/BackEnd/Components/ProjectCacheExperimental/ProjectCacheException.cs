@@ -7,12 +7,14 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
+#pragma warning disable CS0618  // suppress “obsolete” warnings in this file due to this referencing other Experimental.ProjectCache types
     /// <summary>
     /// This exception is used to wrap an unhandled exception from a project cache plugin. This exception aborts the build, and it can only be
     /// thrown by the MSBuild engine.
     /// </summary>
+    [Obsolete("This class is moved to Microsoft.Build.ProjectCache namespace.", false)]
     public sealed class ProjectCacheException : BuildExceptionBase
     {
         private ProjectCacheException()
