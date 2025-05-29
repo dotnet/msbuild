@@ -18,6 +18,44 @@ jobs:
   displayName: "Check Version Bump On Release Branches"
   steps:
   - powershell: |
+      $message = @"
+      ## 🔧 Servicing Branch Guidelines
+      
+      This PR targets a servicing branch (\`$(System.PullRequest.TargetBranch)\`).
+      
+      **Required Actions:**
+      - ✅ Check the wiki page before completing any product insertions in the connected products (Visual Studio or DOTNET sdk)
+      
+      The automated check will verify the version bump before allowing merge.
+      "@
+      
+      $headers = @{
+        'Authorization' = "Bearer $(System.AccessToken)"
+        'Content-Type' = 'application/json'
+      }
+      
+      $body = @{
+        content = @{
+          content = $message
+        }
+        commentType = 1
+      } | ConvertTo-Json -Depth 3
+      
+      $uri = "$(System.CollectionUri)$(System.TeamProject)/_apis/git/repositories/$(Build.Repository.ID)/pullRequests/$(System.PullRequest.PullRequestId)/threads?api-version=6.0"
+      
+      try {
+        Invoke-RestMethod -Uri $uri -Method Post -Body $body -Headers $headers
+        Write-Host "PR comment posted successfully"
+      } catch {
+        Write-Host "Failed to post PR comment: $_"
+        Write-Host "Error details: $($_.Exception.Message)"
+      }
+    condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
+    displayName: "Post servicing branch guidelines"
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+  - powershell: |
       $versionsFile = "eng/Versions.props"
       $changedFiles = git diff --name-only HEAD HEAD~1
       $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
@@ -42,13 +80,11 @@ jobs:
           }
         }
       }
-
       if (!($isInitialCommit -or $isVersionBumped)) {
         throw "Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
       }
     condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
     displayName: "Check if patch version is bumped up"
-
 - job: IfOnlyDocumentionChanged
   displayName: "Check whether Test Results need to be executed"
   steps:
