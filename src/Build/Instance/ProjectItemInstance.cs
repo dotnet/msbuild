@@ -1479,6 +1479,7 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            // PERF: Keep this method extracted to avoid unconditionally allocating a closure object
             private void BulkImportMetadata(ITaskItem destinationItem, IMetadataContainer destinationItemAsMetadataContainer)
             {
                 IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
