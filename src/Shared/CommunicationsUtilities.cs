@@ -41,48 +41,50 @@ namespace Microsoft.Build.Internal
         None = 0,
 
         /// <summary>
-        /// Process is a TaskHost
+        /// Process is a TaskHost.
         /// </summary>
         TaskHost = 1,
 
         /// <summary>
-        /// Using the 2.0 CLR
+        /// Using the 2.0 CLR.
         /// </summary>
         CLR2 = 2,
 
         /// <summary>
-        /// 64-bit Intel process
+        /// 64-bit Intel process.
         /// </summary>
         X64 = 4,
 
         /// <summary>
-        /// Node reuse enabled
+        /// Node reuse enabled.
         /// </summary>
         NodeReuse = 8,
 
         /// <summary>
-        /// Building with BelowNormal priority
+        /// Building with BelowNormal priority.
         /// </summary>
         LowPriority = 16,
 
         /// <summary>
-        /// Building with administrator privileges
+        /// Building with administrator privileges.
         /// </summary>
         Administrator = 32,
 
         /// <summary>
-        /// Using the .NET Core/.NET 5.0+ runtime
+        /// Using the .NET Core/.NET 5.0+ runtime.
         /// </summary>
         NET = 64,
 
         /// <summary>
-        /// ARM64 process
+        /// ARM64 process.
         /// </summary>
         Arm64 = 128,
     }
 
     internal class Handshake
     {
+        public static int NetTaskHostHandshakeVersion = 99;
+
         protected readonly int options;
         protected readonly int salt;
         protected readonly int fileVersionMajor;
@@ -106,15 +108,29 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
-            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+            CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
+            bool isNetTaskHost = (nodeType & HandshakeOptions.NET) == HandshakeOptions.NET;
+            string toolsDirectory = isNetTaskHost
+                ? BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory
+                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
             CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
             salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
-            Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-            fileVersionMajor = fileVersion.Major;
-            fileVersionMinor = fileVersion.Minor;
-            fileVersionBuild = fileVersion.Build;
-            fileVersionPrivate = fileVersion.Revision;
+            if (isNetTaskHost)
+            {
+                // hardcode version to activate json protocol that allows to have more version flexibility
+                fileVersionMajor = NetTaskHostHandshakeVersion;
+                fileVersionMinor = NetTaskHostHandshakeVersion;
+                fileVersionBuild = NetTaskHostHandshakeVersion;
+                fileVersionPrivate = NetTaskHostHandshakeVersion;
+            }
+            else
+            {
+                Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+                fileVersionMajor = fileVersion.Major;
+                fileVersionMinor = fileVersion.Minor;
+                fileVersionBuild = fileVersion.Build;
+                fileVersionPrivate = fileVersion.Revision;
+            }
 
             // This reaches out to NtQuerySystemInformation. Due to latency, allow skipping for derived handshake if unused.
             if (includeSessionId)
@@ -125,24 +141,18 @@ namespace Microsoft.Build.Internal
         }
 
         // This is used as a key, so it does not need to be human readable.
-        public override string ToString()
-        {
-            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
-        }
+        public override string ToString() => String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
 
-        public virtual int[] RetrieveHandshakeComponents()
-        {
-            return
-            [
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
-            ];
-        }
+        public virtual KeyValuePair<string, int>[] RetrieveHandshakeComponents() =>
+        [
+            new KeyValuePair<string, int>(nameof(options), CommunicationsUtilities.AvoidEndOfHandshakeSignal(options)),
+            new KeyValuePair<string, int>(nameof(salt), CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt)),
+            new KeyValuePair<string, int>(nameof(fileVersionMajor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor)),
+            new KeyValuePair<string, int>(nameof(fileVersionMinor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor)),
+            new KeyValuePair<string, int>(nameof(fileVersionBuild), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild)),
+            new KeyValuePair<string, int>(nameof(fileVersionPrivate), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate)),
+            new KeyValuePair<string, int>(nameof(sessionId), CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId))
+        ];
 
         public virtual string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
 
@@ -163,24 +173,18 @@ namespace Microsoft.Build.Internal
         {
         }
 
-        public override int[] RetrieveHandshakeComponents()
-        {
-            return
-            [
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
-            ];
-        }
+        public override KeyValuePair<string, int>[] RetrieveHandshakeComponents() =>
+        [
+            new KeyValuePair<string, int>(nameof(options), CommunicationsUtilities.AvoidEndOfHandshakeSignal(options)),
+            new KeyValuePair<string, int>(nameof(salt), CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt)),
+            new KeyValuePair<string, int>(nameof(fileVersionMajor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor)),
+            new KeyValuePair<string, int>(nameof(fileVersionMinor), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor)),
+            new KeyValuePair<string, int>(nameof(fileVersionBuild), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild)),
+            new KeyValuePair<string, int>(nameof(fileVersionPrivate), CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate))
+        ];
 
-        public override string GetKey()
-        {
-            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate}"
+        public override string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate}"
                 .ToString(CultureInfo.InvariantCulture);
-        }
 
         /// <summary>
         /// Computes Handshake stable hash string representing whole state of handshake.
@@ -514,6 +518,7 @@ namespace Microsoft.Build.Internal
                 {
                     CommunicationsUtilities.Trace("Expected end of handshake signal but received {0}. Probably the host is a different MSBuild build.", valueRead);
                 }
+
                 throw new InvalidOperationException();
             }
         }
@@ -618,7 +623,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, string architectureFlagToSet = null, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(
+            bool taskHost,
+            string architectureFlagToSet = null,
+            bool nodeReuse = false,
+            bool lowPriority = false,
+            IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
@@ -870,7 +880,7 @@ namespace Microsoft.Build.Internal
         /// they will return the same hash code.
         /// This is as implemented in CLR String.GetHashCode() [ndp\clr\src\BCL\system\String.cs]
         /// but stripped out architecture specific defines
-        /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking
+        /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking.
         /// </summary>
         internal static int GetHashCode(string fileVersion)
         {
@@ -901,9 +911,6 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        internal static int AvoidEndOfHandshakeSignal(int x)
-        {
-            return x == EndOfHandshakeSignal ? ~x : x;
-        }
+        internal static int AvoidEndOfHandshakeSignal(int x) => x == EndOfHandshakeSignal ? ~x : x;
     }
 }

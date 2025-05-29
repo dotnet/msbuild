@@ -7,6 +7,8 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using System.Collections.Generic;
+
 
 #if !TASKHOST
 using System.Buffers.Binary;
@@ -81,7 +83,7 @@ namespace Microsoft.Build.Internal
 
         protected string PipeName { get; }
 
-        protected int[] HandshakeComponents { get; }
+        protected KeyValuePair<string, int>[] HandshakeComponents { get; }
 
         public void Dispose()
         {
