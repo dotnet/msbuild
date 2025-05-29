@@ -52,6 +52,7 @@
     <PackageReference Include="Newtonsoft.Json" />
 
     <PackageReference Include="Microsoft.DotNet.XUnitExtensions" />
+    <PackageReference Include="Microsoft.CodeCoverage" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
