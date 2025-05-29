@@ -194,7 +194,7 @@ namespace Microsoft.Build.Internal
                 int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: i == 0 ? CommunicationsUtilities.handshakeVersion : null);
 #endif
 
-                if (handshakePart != HandshakeComponents[i])
+                if (handshakePart != HandshakeComponents[i].Value)
                 {
                     CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, HandshakeComponents[i]);
                     _pipeServer.WriteIntForHandshake(i + 1);

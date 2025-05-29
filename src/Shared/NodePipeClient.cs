@@ -77,7 +77,7 @@ namespace Microsoft.Build.Internal
             for (int i = 0; i < HandshakeComponents.Length; i++)
             {
                 CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, HandshakeComponents[i], PipeName);
-                _pipeClient.WriteIntForHandshake(HandshakeComponents[i]);
+                _pipeClient.WriteIntForHandshake(HandshakeComponents[i].Value);
             }
 
             // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
