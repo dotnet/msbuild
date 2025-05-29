@@ -22,7 +22,6 @@
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
 
-    <TestRunSettingsFile Condition="'$(IsTestProject)' == 'true'">..\Coverage.runsettings</TestRunSettingsFile>
     <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
 
     <ProduceReferenceAssembly Condition="'$(IsTestProject)' != 'true'">true</ProduceReferenceAssembly>
