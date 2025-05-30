@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
@@ -14,11 +15,16 @@ using Microsoft.Build.Shared;
 using System.IO.Pipes;
 using System.IO;
 
+#if RUNTIME_TYPE_NETCORE
+using System.Collections.Immutable;
+#endif
+
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
+
 
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
@@ -117,7 +123,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
-        #endregion
+#if RUNTIME_TYPE_NETCORE
+        /// <summary>
+        /// The set of property names from handshake responsible for node version./>.
+        /// </summary>
+        private readonly ImmutableHashSet<string> _versionHandshakeGroup = ["fileVersionMajor", "fileVersionMinor", "fileVersionBuild", "fileVersionPrivate"];
+#endif
+
+#endregion
 
         #region INodeEndpoint Events
 
@@ -261,7 +274,7 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
-        /// Returns the host handshake for this node endpoint
+        /// Returns the host handshake for this node endpoint.
         /// </summary>
         protected abstract Handshake GetHandshake();
 
@@ -395,7 +408,7 @@ namespace Microsoft.Build.BackEnd
                     Handshake handshake = GetHandshake();
                     try
                     {
-                        int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+                        KeyValuePair<string, int>[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -406,14 +419,24 @@ namespace Microsoft.Build.BackEnd
 #endif
                             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-
-                            if (handshakePart != handshakeComponents[i])
+#if RUNTIME_TYPE_NETCORE
+                            if (handshakePart != handshakeComponents[i].Value)
                             {
-                                CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
-                                _pipeServer.WriteIntForHandshake(i + 1);
-                                gotValidConnection = false;
-                                break;
+                                // NET Task host allows to connect to MSBuild.dll with the different handshake version.
+                                // We agreed to hardcode a value of 99 to bypass the protection for this scenario.
+                                if (_versionHandshakeGroup.Contains(handshakeComponents[i].Key) && handshakeComponents[i].Value == Handshake.NetTaskHostHandshakeVersion)
+                                {
+                                    CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, handshakeComponents[i].Key);
+                                }
+                                else
+                                {
+                                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
+                                    _pipeServer.WriteIntForHandshake(i + 1);
+                                    gotValidConnection = false;
+                                    break;
+                                }
                             }
+#endif
                         }
 
                         if (gotValidConnection)
@@ -515,8 +538,8 @@ namespace Microsoft.Build.BackEnd
         private void RunReadLoop(BufferedReadStream localReadPipe, NamedPipeServerStream localWritePipe,
             ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
         {
-            // Ordering of the wait handles is important.  The first signalled wait handle in the array
-            // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
+            // Ordering of the wait handles is important.  The first signaled wait handle in the array
+            // will be returned by WaitAny if multiple wait handles are signaled.  We prefer to have the
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
@@ -597,11 +620,22 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            NodePacketType packetType = (NodePacketType)headerByte[0];
+                            // Check if this packet has an extended header that includes a version part.
+                            byte rawType = headerByte[0];
+
+                            bool hasExtendedHeader = PacketTypeExtensions.HasExtendedHeader(rawType);
+
+                            byte version = 0;
+                            if (hasExtendedHeader)
+                            {
+                                version = PacketTypeExtensions.ReadVersion(localReadPipe);
+                            }
+
+                            NodePacketType packetType = hasExtendedHeader ? PacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer, version));
                             }
                             catch (Exception e)
                             {
@@ -687,8 +721,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }
