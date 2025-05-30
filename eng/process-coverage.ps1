@@ -1,14 +1,15 @@
 param (
     $repoRoot = $null,
+    $coverageArtifactsDir = $null,
     $verbosity = 'minimal'
     )
 
-. $PSScriptRoot\restore-toolset.ps1 -skipVcpkg
+. $PSScriptRoot\restore-toolset.ps1
 
 try {
   Set-Location $repoRoot
 
-  $coverageResultsDir = Join-Path $repoRoot "artifacts\CoverageResults"
+  $coverageResultsDir = Join-Path $repoRoot $coverageArtifactsDir
   $testResultsDir = Join-Path $repoRoot "artifacts\TestResults"
   Remove-Item -Force -Recurse $coverageResultsDir -ErrorAction SilentlyContinue
 
