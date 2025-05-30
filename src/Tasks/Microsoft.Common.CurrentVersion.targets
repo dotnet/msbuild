@@ -2385,6 +2385,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesStateFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectFile).AssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <AllowResolveAssemblyReferencesOutOfProcNode Condition="'$(AllowResolveAssemblyReferencesOutOfProcNode)' == ''">false</AllowResolveAssemblyReferencesOutOfProcNode>
+    </PropertyGroup>
+
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
     <ItemGroup>
       <_ResolveAssemblyReferencesApplicationConfigFileForExes Include="@(AppConfigWithTargetPath)" Condition="'$(AutoGenerateBindingRedirects)'=='true' or '$(AutoUnifyAssemblyReferences)'=='false'"/>
@@ -2476,6 +2480,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
         NonCultureResourceDirectories="@(NonCultureResourceDirectory)"
         EnableCustomCulture="$(EnableCustomCulture)"
+        AllowOutOfProcNode="$(AllowResolveAssemblyReferencesOutOfProcNode)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
@@ -2579,24 +2584,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_NewGenerateBindingRedirectsIntermediateAppConfig Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">true</_NewGenerateBindingRedirectsIntermediateAppConfig>
       <AppConfig Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
-
-    <PropertyGroup>
-      <ConfigFileExists Condition="Exists('@(AppConfigWithTargetPath->'$(OutDir)%(TargetPath)')')">true</ConfigFileExists>
-      <HasNoBindingRedirects Condition="'@(SuggestedBindingRedirects)' == ''">true</HasNoBindingRedirects>
-    </PropertyGroup>
-
-    <!-- Overwrites .config file with a App.config content if RAR returned empty @(SuggestedBindingRedirects). -->
-    <Copy
-      SourceFiles="@(AppConfigWithTargetPath->'%(FullPath)')"
-      DestinationFiles="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      SkipUnchangedFiles="true"
-      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true' and '$(DesignTimeBuild)' != 'true'">
-      <Output TaskParameter="CopiedFiles" ItemName="FileWrites"/>
-    </Copy>
-    <Touch
-      Files="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      AlwaysCreate="true"
-      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true' and '$(DesignTimeBuild)' != 'true'"/>
 
     <ItemGroup Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
