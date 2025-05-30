@@ -1,6 +1,6 @@
 param (
     $repoRoot = $null,
-    $coverageArtifactsDir = 'coverageStaging',
+    $coverageArtifactsDir = $null,
     $coverageReportName = 'merged',
     $verbosity = 'minimal'
     )
@@ -10,7 +10,7 @@ param (
 try {
   Set-Location $repoRoot
 
-  $coverageResultsDir = Join-Path $repoRoot $coverageArtifactsDir
+  $coverageResultsDir = $coverageArtifactsDir
   $testResultsDir = Join-Path $repoRoot "artifacts\TestResults"
   Remove-Item -Force -Recurse $coverageResultsDir -ErrorAction SilentlyContinue
 
