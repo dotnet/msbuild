@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd.Client
                                     int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
 #else
                                     ValueTask<int> bytesReadTask = localStream.ReadAsync(packetData.AsMemory(packetBytesRead, packetLength - packetBytesRead));
-                                    int bytesRead = bytesReadTask.IsCompleted ? bytesReadTask.Result : bytesReadTask.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();;
+                                    int bytesRead = bytesReadTask.IsCompleted ? bytesReadTask.Result : bytesReadTask.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
                                     if (bytesRead == 0)
                                     {
