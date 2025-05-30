@@ -37,21 +37,13 @@ coverageResultsDir="$artifacts_dir/CoverageResults"
 rm -rf $coverageResultsDir || true
 
 dotnetCoverageTool=$tools_dir/dotnet-coverage/dotnet-coverage
-reportGeneratorTool=$tools_dir/reportgenerator/reportgenerator
 
 mergedCoverage=$artifacts_dir/CoverageResults/merged.coverage
 mergedCobertura=$artifacts_dir/CoverageResults/merged.cobertura.xml
-coverageReportZip=$artifacts_dir/CoverageResults/coverage-report.zip
-coverageReportDir=$artifacts_dir/CoverageResults/coverage-report
 
 mkdir -p $coverageResultsDir
 
 $dotnetCoverageTool merge -o $mergedCoverage $artifacts_dir/TestResults/**/*.coverage
 $dotnetCoverageTool merge -o $mergedCobertura -f cobertura $mergedCoverage
-$reportGeneratorTool -reports:$mergedCobertura -targetDir:$coverageReportDir -reporttypes:HtmlInline
 
-cd $coverageReportDir
-zip -r $coverageReportZip *
 cd $repoRoot
-
-rm -rf $coverageReportDir || true

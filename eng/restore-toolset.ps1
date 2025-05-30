@@ -21,16 +21,10 @@ $Env:DOTNET_ROOT = $dotnetRoot
 $repoRoot = Join-Path $PSScriptRoot ".."
 $toolsDir = Join-Path $repoRoot ".tools"
 $dotnetCoverageDir = Join-Path $toolsDir "dotnet-coverage"
-$reportGeneratorDir = Join-Path $toolsDir "reportgenerator"
 
 if (!(Test-Path -Path $dotnetCoverageDir))
 {
   InstallGlobalTool $dotnetRoot dotnet-coverage $dotnetCoverageDir
-}
-
-if (!(Test-Path -Path $reportGeneratorDir))
-{
-  InstallGlobalTool $dotnetRoot dotnet-reportgenerator-globaltool $reportGeneratorDir
 }
 
 if (!($skipVcpkg))

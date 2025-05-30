@@ -26,16 +26,9 @@ function InstallGlobalToolWithVersion {
 
 coverageToolsDir=$eng_root/../.tools
 dotnetCoverageDir=$coverageToolsDir/dotnet-coverage
-reportGeneratorDir=$coverageToolsDir/reportgenerator
 
 export DOTNET_ROOT=$dotnet_root
 
 if [ ! -d "$dotnetCoverageDir" ]; then
   InstallGlobalTool "dotnet-coverage" "$dotnetCoverageDir"
 fi
-
-if [ ! -d "$reportGeneratorDir" ]; then
-  InstallGlobalTool "dotnet-reportgenerator-globaltool" "$reportGeneratorDir"
-fi
-
-

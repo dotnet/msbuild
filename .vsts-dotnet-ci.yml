@@ -94,7 +94,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      arguments: -repoRoot $(Build.SourcesDirectory)
       pwsh: true
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
@@ -194,7 +194,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      arguments: -repoRoot $(Build.SourcesDirectory)
       pwsh: true
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
@@ -279,7 +279,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      arguments: -repoRoot $(Build.SourcesDirectory)
       pwsh: true
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
@@ -351,7 +351,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
-      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      arguments: --repoRoot $(Build.SourcesDirectory)
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
@@ -436,6 +436,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
+      arguments: --repoRoot $(Build.SourcesDirectory)
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
@@ -535,7 +536,7 @@ jobs:
     displayName: Process coverage reports
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -deleteCoverageReportDir
+      arguments: -repoRoot $(Build.SourcesDirectory)
       pwsh: true
   - task: CopyFiles@2
     displayName: Copy Files to $(Build.ArtifactStagingDirectory)\Artifacts
