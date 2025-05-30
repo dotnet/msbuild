@@ -8,6 +8,12 @@
                     <IncludeTestAssembly>true</IncludeTestAssembly>
                     <ExcludeAssembliesWithoutSources>MissingAll</ExcludeAssembliesWithoutSources>
                     <CodeCoverage>
+                        <Sources>
+                            <Exclude>
+                                <Source>.*\.g\.cs$</Source>
+                                <Source>.*\.sr\.cs$</Source>
+                            </Exclude>
+                        </Sources>
                         <CommunicationTimeout>120000</CommunicationTimeout>
                         <PipeClientsCount>1270</PipeClientsCount>
                         <UseVerifiableInstrumentation>False</UseVerifiableInstrumentation>
