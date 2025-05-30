@@ -24,6 +24,7 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -156,6 +157,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
 
+        private readonly PropertyTrackingSetting _propertyTrackingSettings;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -172,6 +175,8 @@ namespace Microsoft.Build.BackEnd
             {
                 LogTaskInputs = Traits.Instance.EscapeHatches.LogTaskInputs;
             }
+
+            _propertyTrackingSettings = (PropertyTrackingSetting)Traits.Instance.LogPropertyTracking;
         }
 
         /// <summary>
@@ -1223,15 +1228,18 @@ namespace Microsoft.Build.BackEnd
 
             string taskAndParameterName = _taskName + "_" + parameter.Name;
             string key = "DisableLogTaskParameter_" + taskAndParameterName;
-            string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
 
             if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
                 parameter.Log = false;
             }
-            else if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+            else
             {
-                parameter.LogItemMetadata = false;
+                string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
+                if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+                {
+                    parameter.LogItemMetadata = false;
+                }
             }
         }
 
@@ -1416,9 +1424,26 @@ namespace Microsoft.Build.BackEnd
 
                                     static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
                                     {
-                                        foreach (DictionaryEntry de in customMetadata)
+                                        if (customMetadata is CopyOnWriteDictionary<string> copyOnWriteDictionary)
                                         {
-                                            yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                            foreach (KeyValuePair<string, string> kvp in copyOnWriteDictionary)
+                                            {
+                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                            }
+                                        }
+                                        else if (customMetadata is Dictionary<string, string> dictionary)
+                                        {
+                                            foreach (KeyValuePair<string, string> kvp in dictionary)
+                                            {
+                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (DictionaryEntry de in customMetadata)
+                                            {
+                                                yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                            }
                                         }
                                     }
                                 }
@@ -1581,6 +1606,14 @@ namespace Microsoft.Build.BackEnd
                                 _taskLoggingContext.LogComment(MessageImportance.Low, "OutputPropertyLogMessage", outputTargetName, outputString);
                             }
                         }
+
+                        PropertyTrackingUtils.LogPropertyAssignment(
+                            _propertyTrackingSettings,
+                            outputTargetName,
+                            outputString,
+                            parameterLocation,
+                            _projectInstance.GetProperty(outputTargetName)?.EvaluatedValue ?? null,
+                            _taskLoggingContext);
 
                         _batchBucket.Lookup.SetProperty(ProjectPropertyInstance.Create(outputTargetName, outputString, parameterLocation, _projectInstance.IsImmutable));
                     }

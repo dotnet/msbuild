@@ -13,8 +13,8 @@
     <PackageVersion Include="BenchmarkDotNet" Version="0.13.10" />
     <PackageVersion Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
 
-    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Update="FluentAssertions" Condition="'$(FluentAssertionsVersion)' != ''" Version="$(FluentAssertionsVersion)" />
+    <PackageVersion Include="AwesomeAssertions" Version="8.0.2" />
+    <PackageVersion Update="AwesomeAssertions" Condition="'$(AwesomeAssertionsVersion)' != ''" Version="$(AwesomeAssertionsVersion)" />
 
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
@@ -40,33 +40,30 @@
     <PackageVersion Include="FakeItEasy" Version="8.1.0" />
     <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
 
-    <PackageVersion Include="System.CodeDom" Version="8.0.0" />
+    <PackageVersion Include="System.CodeDom" Version="9.0.0" />
     <PackageVersion Update="System.CodeDom" Condition="'$(SystemCodeDomVersion)' != ''" Version="$(SystemCodeDomVersion)" />
 
-    <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
-    <PackageVersion Update="System.Private.Uri" Condition="'$(SystemPrivateUriVersion)' != ''" Version="$(SystemPrivateUriVersion)" />
-
-    <PackageVersion Include="System.Runtime" Version="4.3.1" />
-    <PackageVersion Update="System.Runtime" Condition="'$(SystemRuntimeVersion)' != ''" Version="$(SystemRuntimeVersion)" />
-
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="8.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.0" />
     <PackageVersion Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
 
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="8.0.0" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.0" />
     <PackageVersion Update="System.Security.Cryptography.Xml" Condition="'$(SystemSecurityCryptographyXmlVersion)' != ''" Version="$(SystemSecurityCryptographyXmlVersion)" />
 
-    <PackageVersion Include="System.Security.Cryptography.X509Certificates" Version="4.3.2" />
-    <PackageVersion Update="System.Security.Cryptography.X509Certificates" Condition="'$(SystemSecurityCryptographyX509CertificatesVersion)' != ''" Version="$(SystemSecurityCryptographyX509CertificatesVersion)" />
+    <PackageVersion Include="Microsoft.Bcl.Cryptography.Xml" Version="9.0.0" />
+    <PackageVersion Update="Microsoft.Bcl.Cryptography.Xml" Condition="'$(MicrosoftBclCryptographyVersion)' != ''" Version="$(MicrosoftBclCryptographyVersion)" />
+
+    <!-- when this is bumped the submodule in https://github.com/dotnet/source-build-externals needs to be bumped in sync -->
+    <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
+    <PackageVersion Update="Microsoft.VisualStudio.SolutionPersistence" Condition="'$(MicrosoftVisualStudioSolutionPersistenceVersion)' != ''" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
 
     <PackageVersion Include="Verify.Xunit" Version="19.14.1" />
     <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
-	
-	<PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
+
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true' AND $(ProjectIsDeprecated) != 'true'">
     <GlobalPackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4" />
-    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507" PrivateAssets="all"/>
+    <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" PrivateAssets="all"/>
     <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.36" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 

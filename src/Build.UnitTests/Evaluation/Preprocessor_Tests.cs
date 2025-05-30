@@ -933,6 +933,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/11498")]
         public void SdkResolverItemsAndPropertiesAreInPreprocessedOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())

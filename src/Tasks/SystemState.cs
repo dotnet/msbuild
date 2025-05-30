@@ -70,7 +70,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Additional level of caching kept at the process level.
         /// </summary>
-        private static ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
+        private static readonly ConcurrentDictionary<string, FileState> s_processWideFileStateCache = new ConcurrentDictionary<string, FileState>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// XML tables of installed assemblies.
@@ -171,10 +171,8 @@ namespace Microsoft.Build.Tasks
                 ErrorUtilities.VerifyThrowArgumentNull(translator);
 
                 translator.Translate(ref lastModified);
-                translator.Translate(ref assemblyName,
-                    (ITranslator t) => new AssemblyNameExtension(t));
-                translator.TranslateArray(ref dependencies,
-                    (ITranslator t) => new AssemblyNameExtension(t));
+                translator.Translate(ref assemblyName, (t) => new AssemblyNameExtension(t));
+                translator.TranslateArray(ref dependencies, (t) => new AssemblyNameExtension(t));
                 translator.Translate(ref scatterFiles);
                 translator.Translate(ref runtimeVersion);
                 translator.Translate(ref frameworkName);
@@ -268,7 +266,7 @@ namespace Microsoft.Build.Tasks
             translator.TranslateDictionary(
                 ref (translator.Mode == TranslationDirection.WriteToStream) ? ref instanceLocalOutgoingFileStateCache : ref instanceLocalFileStateCache,
                 StringComparer.OrdinalIgnoreCase,
-                (ITranslator t) => new FileState(t));
+                (t) => new FileState(t));
 
             // IsDirty should be false for either direction. Either this cache was brought
             // up-to-date with the on-disk cache or vice versa. Either way, they agree.
@@ -456,9 +454,7 @@ namespace Microsoft.Build.Tasks
             // then we can short-circuit the File IO involved with GetAssemblyName()
             if (redistList != null)
             {
-                string extension = Path.GetExtension(path);
-
-                if (string.Equals(extension, ".dll", StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(path) && path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
                 {
                     IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName(
                             Path.GetFileNameWithoutExtension(path));

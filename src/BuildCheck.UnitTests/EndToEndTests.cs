@@ -12,7 +12,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -169,7 +168,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -363,6 +362,10 @@ public class EndToEndTests : IDisposable
     [InlineData("""<TargetFramework>net9.0</TargetFramework>""", "", false)]
     [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
     [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", " /p:TargetFramework=net9.0", false)]
+    [InlineData("""<TargetFramework></TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
+    [InlineData("""<TargetFramework /><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
+    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false)]
+    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks />""", "", false)]
     [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", true)]
     public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
     {
@@ -399,6 +402,75 @@ public class EndToEndTests : IDisposable
             text = text.Replace(original, replacement);
             File.WriteAllText(filePath, text);
         }
+    }
+
+    // Windows only - due to targeting NetFx
+    [WindowsOnlyTheory]
+    [InlineData(
+        """
+        <Project ToolsVersion="msbuilddefaulttoolsversion">
+            <PropertyGroup>
+              <TargetFramework>net48</TargetFramework>
+            </PropertyGroup>
+            <Target Name="Build">
+                <Message Text="Build done"/>
+            </Target>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>net9.0</TargetFramework>
+          </PropertyGroup>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <TargetFramework>v4.8</TargetFramework>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        true)]
+    public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
+    {
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        workFolder.CreateFile("testproj.csproj", projectContent);
+
+        _env.SetCurrentDirectory(workFolder.Path);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        string expectedDiagnostic = "warning BC0108: .* specifies 'TargetFramework\\(s\\)' property";
+        Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(expectCheckTrigger ? 2 : 0);
+
+        GetWarningsCount(output).ShouldBe(expectCheckTrigger ? 1 : 0);
     }
 
 

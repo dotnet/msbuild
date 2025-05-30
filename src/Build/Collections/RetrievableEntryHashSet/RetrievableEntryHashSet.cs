@@ -82,7 +82,7 @@ namespace Microsoft.Build.Collections
 #if FEATURE_SECURITY_PERMISSIONS
     [System.Security.Permissions.HostProtection(MayLeakOnAbort = true)]
 #endif
-    internal class RetrievableEntryHashSet<T> : IRetrievableEntryHashSet<T>
+    internal class RetrievableEntryHashSet<T> : IRetrievableEntryHashSet<T> // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
         where T : class, IKeyed
     {
         // store lower 31 bits of hash code

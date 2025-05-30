@@ -136,7 +136,6 @@
     <Compile Include="CommandLineSwitchException.cs" />
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Compile Include="DistributedLoggerRecord.cs" />
-    <Compile Include="TerminalLogger\*.cs" />
     <Compile Include="InitializationException.cs" />
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
@@ -174,6 +173,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
+    <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
+         or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
+    <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
+
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
@@ -190,11 +193,9 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework' AND '$(DotNetBuildSourceOnly)' != 'true'">
-    <!-- Bump these to the latest version despite transitive references to older -->
-    <PackageReference Include="System.Private.Uri" PrivateAssets="all" />
-  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" PrivateAssets="All" />
@@ -204,6 +205,12 @@
   <!-- Xsds are not TF or arch-specific so copy once them in the outer build -->
   <Target Name="CopyXsds" BeforeTargets="Build" Condition="'$(IsInnerBuild)' != 'true'">
     <Copy SourceFiles="@(XsdsForVS)" DestinationFiles="@(XsdsForVS-&gt;'$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'xsd'))%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="AvoidValueTupleConflict" BeforeTargets="ResolveAssemblyReferences">
+    <ItemGroup>
+      <Reference Remove="@(Reference->WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
+    </ItemGroup>
   </Target>
 
   <!-- Include MSBuild.deps.json and MSBuild.runtimeconfig.json in ContentWithTargetPath so they will be copied to the output folder of projects
@@ -267,9 +274,6 @@
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.CrossTargeting.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.CurrentVersion.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualBasic.targets" TargetFramework="%(_TargetFrameworks.Identity)" />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v11.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v12.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
-      <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\Microsoft.VisualStudioVersion.v14.Common.props" TargetFramework="%(_TargetFrameworks.Identity)" />
       <_OurFiles Include="$(OutputPath)%(_TargetFrameworks.Identity)\ref\**" TargetFramework="%(_TargetFrameworks.Identity)" Subdirectory="ref\" />
     </ItemGroup>
 

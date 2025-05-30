@@ -5,11 +5,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Execution
 {
@@ -601,6 +602,16 @@ namespace Microsoft.Build.Execution
             return _resultsByTarget?.ContainsKey(target) ?? false;
         }
 
+        public bool TryGetResultsForTarget(string target, [NotNullWhen(true)] out TargetResult? value)
+        {
+            if (_resultsByTarget is null)
+            {
+                value = default;
+                return false;
+            }
+
+            return _resultsByTarget.TryGetValue(target, out value);
+        }
         #region INodePacket Members
 
         /// <summary>

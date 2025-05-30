@@ -10,15 +10,11 @@
         "vs17.0": {
             "MergeToBranch": "vs17.3"
         },
-        // Automate opening PRs to merge msbuild's vs17.3 (SDK 6.0.4xx) into vs17.6 (VS until 1/2025)
+        // Automate opening PRs to merge msbuild's vs17.3 (SDK 6.0.4xx) into vs17.8 (SDK 8.0.1xx, VS until 7/2025)
         "vs17.3": {
-            "MergeToBranch": "vs17.6"
-        },
-        // Automate opening PRs to merge msbuild's vs17.6 into vs17.8 (VS until 7/2025)
-        "vs17.6": {
             "MergeToBranch": "vs17.8"
         },
-        // Automate opening PRs to merge msbuild's vs17.8 (SDK 8.0.1xx) into vs17.10 (SDK 8.0.3xx)
+        // Automate opening PRs to merge msbuild's vs17.8 (SDK 8.0.1xx) into vs17.10 (SDK 8.0.3xx, VS until 1/2026)
         "vs17.8": {
             "MergeToBranch": "vs17.10"
         },
@@ -26,7 +22,7 @@
         "vs17.10": {
             "MergeToBranch": "vs17.11"
         },
-        // Automate opening PRs to merge msbuild's vs17.11 (SDK 8.0.4xx) into vs17.12 (SDK 9.0.1xx)
+        // Automate opening PRs to merge msbuild's vs17.11 (SDK 8.0.4xx) into vs17.12 (SDK 9.0.1xx, VS until 7/2026)
         "vs17.11": {
             "MergeToBranch": "vs17.12"
         },
@@ -34,8 +30,12 @@
         "vs17.12": {
             "MergeToBranch": "vs17.13"
         },
-        // MSBuild latest release to main
+        // Automate opening PRs to merge msbuild's vs17.13 (SDK 9.0.2xx) into vs17.14 (SDK 9.0.3xx)
         "vs17.13": {
+            "MergeToBranch": "vs17.14"
+        },
+        // MSBuild latest release to main
+        "vs17.14": {
             "MergeToBranch": "main"
         }
     }

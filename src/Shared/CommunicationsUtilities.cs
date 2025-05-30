@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+#if NETFRAMEWORK
 using System.Runtime.InteropServices;
+#endif
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
 using System.Security.Principal;
 #endif
@@ -89,7 +91,12 @@ namespace Microsoft.Build.Internal
         protected readonly int fileVersionPrivate;
         private readonly int sessionId;
 
-        protected internal Handshake(HandshakeOptions nodeType)
+        internal Handshake(HandshakeOptions nodeType)
+            : this(nodeType, includeSessionId: true)
+        {
+        }
+
+        protected Handshake(HandshakeOptions nodeType, bool includeSessionId)
         {
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
 
@@ -99,22 +106,28 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
+            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
             string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-            CommunicationsUtilities.Trace("Tools directory root is " + toolsDirectory);
-            salt = CommunicationsUtilities.GetHashCode(handshakeSalt + toolsDirectory);
+            CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
+            salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
             Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
             fileVersionMajor = fileVersion.Major;
             fileVersionMinor = fileVersion.Minor;
             fileVersionBuild = fileVersion.Build;
             fileVersionPrivate = fileVersion.Revision;
-            sessionId = Process.GetCurrentProcess().SessionId;
+
+            // This reaches out to NtQuerySystemInformation. Due to latency, allow skipping for derived handshake if unused.
+            if (includeSessionId)
+            {
+                using Process currentProcess = Process.GetCurrentProcess();
+                sessionId = currentProcess.SessionId;
+            }
         }
 
         // This is used as a key, so it does not need to be human readable.
         public override string ToString()
         {
-            return String.Format("{0} {1} {2} {3} {4} {5} {6}", options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, sessionId);
+            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
         }
 
         public virtual int[] RetrieveHandshakeComponents()
@@ -146,7 +159,7 @@ namespace Microsoft.Build.Internal
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType)
+            : base(nodeType, includeSessionId: false)
         {
         }
 
@@ -177,8 +190,14 @@ namespace Microsoft.Build.Internal
             if (_computedHash == null)
             {
                 var input = GetKey();
+                byte[] utf8 = Encoding.UTF8.GetBytes(input);
+#if NET
+                Span<byte> bytes = stackalloc byte[SHA256.HashSizeInBytes];
+                SHA256.HashData(utf8, bytes);
+#else
                 using var sha = SHA256.Create();
-                var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(input));
+                var bytes = sha.ComputeHash(utf8);
+#endif
                 _computedHash = Convert.ToBase64String(bytes)
                     .Replace("/", "_")
                     .Replace("=", string.Empty);
@@ -210,7 +229,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Whether to trace communications
         /// </summary>
-        private static bool s_trace = Traits.Instance.DebugNodeCommunication;
+        private static readonly bool s_trace = Traits.Instance.DebugNodeCommunication;
 
         /// <summary>
         /// Lock trace to ensure we are logging in serial fashion.
@@ -539,26 +558,21 @@ namespace Microsoft.Build.Internal
             else
 #endif
             {
-                // Legacy approach with an early-abort for connection attempts from ancient MSBuild.exes
-                for (int i = 0; i < bytes.Length; i++)
+                int bytesRead = stream.Read(bytes, 0, bytes.Length);
+
+                // Abort for connection attempts from ancient MSBuild.exes
+                if (byteToAccept != null && bytesRead > 0 && byteToAccept != bytes[0])
                 {
-                    int read = stream.ReadByte();
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                }
 
-                    if (read == -1)
-                    {
-                        // We've unexpectly reached end of stream.
-                        // We are now in a bad state, disconnect on our end
-                        throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
-                    }
-
-                    bytes[i] = Convert.ToByte(read);
-
-                    if (i == 0 && byteToAccept != null && byteToAccept != bytes[0])
-                    {
-                        stream.WriteIntForHandshake(0x0F0F0F0F);
-                        stream.WriteIntForHandshake(0x0F0F0F0F);
-                        throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
-                    }
+                if (bytesRead != bytes.Length)
+                {
+                    // We've unexpectly reached end of stream.
+                    // We are now in a bad state, disconnect on our end
+                    throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
                 }
             }
 
@@ -585,7 +599,7 @@ namespace Microsoft.Build.Internal
 #nullable disable
 
 #if !FEATURE_APM
-        internal static async Task<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
+        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
         {
             int totalBytesRead = 0;
             while (totalBytesRead < bytesToRead)
@@ -836,7 +850,7 @@ namespace Microsoft.Build.Internal
                     fileName += ".txt";
 
                     using (StreamWriter file = FileUtilities.OpenWrite(
-                        String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
+                        string.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), EnvironmentUtilities.CurrentProcessId, nodeId), append: true))
                     {
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;

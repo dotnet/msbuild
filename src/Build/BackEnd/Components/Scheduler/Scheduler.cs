@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -580,7 +579,7 @@ namespace Microsoft.Build.BackEnd
                 return Task.FromResult(0);
             }
 
-            Func<int, int> grantCores = (int availableCores) =>
+            Func<int, int> grantCores = (availableCores) =>
             {
                 int grantedCores = Math.Min(requestedCores, availableCores);
                 if (grantedCores > 0)
@@ -600,7 +599,7 @@ namespace Microsoft.Build.BackEnd
                 // We have no cores to grant at the moment, queue up the request.
                 TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
                 _pendingRequestCoresCallbacks.Enqueue(completionSource);
-                return completionSource.Task.ContinueWith((Task<int> task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
+                return completionSource.Task.ContinueWith((task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 
@@ -1019,11 +1018,8 @@ namespace Microsoft.Build.BackEnd
         private void AssignUnscheduledRequestsWithConfigurationCountLevelling(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
             // Assign requests but try to keep the same number of configurations on each node
-            List<int> nodesByConfigurationCountAscending = new List<int>(_availableNodes.Keys);
-            nodesByConfigurationCountAscending.Sort(delegate (int left, int right)
-            {
-                return Comparer<int>.Default.Compare(_schedulingData.GetConfigurationsCountByNode(left, true /* excludeTraversals */, _configCache), _schedulingData.GetConfigurationsCountByNode(right, true /* excludeTraversals */, _configCache));
-            });
+            // Use OrderBy to sort since it will cache the lookup in configCache which. This reduces the number of times we have to acquire the lock.
+            IEnumerable<int> nodesByConfigurationCountAscending = _availableNodes.Keys.OrderBy(x => _schedulingData.GetConfigurationsCountByNode(x, excludeTraversals: true, _configCache));
 
             // Assign projects to nodes, preferring to assign work to nodes with the fewest configurations first.
             foreach (int nodeId in nodesByConfigurationCountAscending)
@@ -2243,49 +2239,55 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Determines if we have a matching request somewhere, and if so, assigns the same request ID.  Otherwise
-        /// assigns a new request id.
+        /// Determines if we have a matching request somewhere, and if so, assigns the same request ID.
+        /// Otherwise assigns a new request id.
         /// </summary>
-        /// <remarks>
-        /// UNDONE: (Performance) This algorithm should be modified so we don't have to iterate over all of the
-        /// requests to find a matching one.  A HashSet with proper equality semantics and a good hash code for the BuildRequest
-        /// would speed this considerably, especially for large numbers of projects in a build.
-        /// </remarks>
         /// <param name="request">The request whose ID should be assigned</param>
         private void AssignGlobalRequestId(BuildRequest request)
         {
-            bool assignNewId = false;
-            if (request.GlobalRequestId == BuildRequest.InvalidGlobalRequestId && _schedulingData.GetRequestsAssignedToConfigurationCount(request.ConfigurationId) > 0)
+            // Quick exit if already assigned or if there are no requests for this configuration
+            if (request.GlobalRequestId != BuildRequest.InvalidGlobalRequestId
+                || _schedulingData.GetRequestsAssignedToConfigurationCount(request.ConfigurationId) == 0)
             {
-                foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
+                request.GlobalRequestId = _nextGlobalRequestId++;
+                return;
+            }
+
+            HashSet<string> requestTargetsSet = new(request.Targets, StringComparer.OrdinalIgnoreCase);
+
+            // Look for matching requests in the configuration
+            foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
+            {
+                if (TargetsMatch(requestTargetsSet, existingRequest.BuildRequest.Targets))
                 {
-                    if (existingRequest.BuildRequest.Targets.Count == request.Targets.Count)
-                    {
-                        List<string> leftTargets = new List<string>(existingRequest.BuildRequest.Targets);
-                        List<string> rightTargets = new List<string>(request.Targets);
-
-                        leftTargets.Sort(StringComparer.OrdinalIgnoreCase);
-                        rightTargets.Sort(StringComparer.OrdinalIgnoreCase);
-                        for (int i = 0; i < leftTargets.Count; i++)
-                        {
-                            if (!leftTargets[i].Equals(rightTargets[i], StringComparison.OrdinalIgnoreCase))
-                            {
-                                assignNewId = true;
-                                break;
-                            }
-                        }
-
-                        if (!assignNewId)
-                        {
-                            request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
-                            return;
-                        }
-                    }
+                    request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
+                    return;
                 }
             }
 
-            request.GlobalRequestId = _nextGlobalRequestId;
-            _nextGlobalRequestId++;
+            // No matching request found, assign a new ID
+            request.GlobalRequestId = _nextGlobalRequestId++;
+        }
+
+        /// <summary>
+        /// Determines if two target collections contain the same targets, ignoring order and case.
+        /// </summary>
+        private bool TargetsMatch(HashSet<string> firstTargetsSet, List<string> secondTargetsList)
+        {
+            if (firstTargetsSet.Count != secondTargetsList.Count)
+            {
+                return false;
+            }
+
+            foreach (string target in secondTargetsList)
+            {
+                if (!firstTargetsSet.Contains(target))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -2434,7 +2436,7 @@ namespace Microsoft.Build.BackEnd
 
             bool haveNonIdleNode = false;
             StringBuilder stringBuilder = new StringBuilder(64);
-            stringBuilder.AppendFormat("{0}:   ", previousEventTime.Ticks);
+            stringBuilder.Append(previousEventTime.Ticks).Append(":   ");
             for (int i = 0; i < currentWork.Length; i++)
             {
                 if (currentWork[i] == invalidWorkId)
@@ -2569,8 +2571,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                    using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
-                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
+                    using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+                    file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, _schedulingData.EventTime.Ticks);
                     file.WriteLine(format, stuff);
                     file.Flush();
                 }
@@ -2593,7 +2595,7 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------");
@@ -2707,7 +2709,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
                         file.WriteLine("Configurations used during this build");
                         file.WriteLine("-------------------------------------");
@@ -2747,7 +2749,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
                         file.WriteLine("Requests used during the build:");
                         file.WriteLine("-------------------------------");
@@ -2817,7 +2819,7 @@ namespace Microsoft.Build.BackEnd
                 request.State,
                 buildRequest.ConfigurationId,
                 _configCache[buildRequest.ConfigurationId].ProjectFullPath,
-                string.Join(", ", buildRequest.Targets.ToArray()));
+                string.Join(", ", buildRequest.Targets));
         }
 
         /// <summary>

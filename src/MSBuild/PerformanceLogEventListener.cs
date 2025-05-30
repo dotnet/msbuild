@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Text;
@@ -22,7 +21,7 @@ namespace Microsoft.Build.CommandLine
             internal EventLevel Level { get; set; }
         }
 
-        private static ProviderConfiguration[] s_config =
+        private static readonly ProviderConfiguration[] s_config =
         [
             new ProviderConfiguration()
             {
@@ -79,10 +78,10 @@ namespace Microsoft.Build.CommandLine
 
         internal void Initialize(string logDirectory)
         {
-            _processIDStr = Process.GetCurrentProcess().Id.ToString();
+            _processIDStr = EnvironmentUtilities.CurrentProcessId.ToString();
 
             // Use a GUID disambiguator to make sure that we have a unique file name.
-            string logFilePath = Path.Combine(logDirectory, $"perf-{_processIDStr}-{Guid.NewGuid().ToString("N")}.log");
+            string logFilePath = Path.Combine(logDirectory, $"perf-{_processIDStr}-{Guid.NewGuid():N}.log");
 
             Stream outputStream = new FileStream(
                 logFilePath,
@@ -143,7 +142,7 @@ namespace Microsoft.Build.CommandLine
                     s_builder.Clear();
                 }
 
-                s_builder.Append($"[{DateTime.UtcNow.ToString("o")}] Event={eventData.EventSource.Name}/{eventData.EventName} ProcessID={_processIDStr} ThreadID={System.Threading.Thread.CurrentThread.ManagedThreadId}\t ");
+                s_builder.Append($"[{DateTime.UtcNow:o}] Event={eventData.EventSource.Name}/{eventData.EventName} ProcessID={_processIDStr} ThreadID={Environment.CurrentManagedThreadId}\t ");
                 for (int i = 0; i < eventData.PayloadNames.Count; i++)
                 {
                     s_builder.Append($"{eventData.PayloadNames[i]}=\"{eventData.Payload[i]}\" ");

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -18,7 +17,7 @@ namespace Microsoft.Build.Shared
     {
         // Since this class is added as 'link' to shared source in multiple projects,
         // MSBuildConstants.CurrentVisualStudioVersion is not available in all of them.
-        private const string CurrentVisualStudioVersion = "17.0";
+        private const string CurrentVisualStudioVersion = "18.0";
 
         // MSBuildConstants.CurrentToolsVersion
         private const string CurrentToolsVersion = "Current";
@@ -431,12 +430,13 @@ namespace Microsoft.Build.Shared
             // an unmanaged application (for example, using custom CLR hosting).
             if (AssemblyUtilities.EntryAssembly == null)
             {
-                return Process.GetCurrentProcess().MainModule.FileName;
+                return EnvironmentUtilities.ProcessPath;
             }
 
             return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
 #else
-            return Process.GetCurrentProcess().MainModule.FileName;
+
+            return EnvironmentUtilities.ProcessPath;
 #endif
         }
 

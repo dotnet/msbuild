@@ -1,13 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Shared;
 using Microsoft.VisualStudio.SolutionPersistence;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
@@ -129,23 +126,22 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Helper method to create a SolutionFile object, and call it to parse the SLN file
         /// represented by the string contents passed in. Optionally can convert the SLN to SLNX and then parse the solution.
         /// </summary>
-        internal static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
+        private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool convertToSlnx = false)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
-
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
+                solutionFileContents = solutionFileContents.Replace('\'', '"');
+                testEnvironment.SetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE", "1");
                 TransientTestFile sln = testEnvironment.CreateFile(FileUtilities.GetTemporaryFileName(".sln"), solutionFileContents);
-
                 string solutionPath = convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path;
-
                 SolutionFile solutionFile = new SolutionFile { FullPath = solutionPath };
                 solutionFile.ParseUsingNewParser();
                 return solutionFile;
             }
         }
 
-        private static string ConvertToSlnx(string slnPath)
+        internal static string ConvertToSlnx(string slnPath)
         {
             string slnxPath = slnPath + "x";
             ISolutionSerializer serializer = SolutionSerializers.GetSerializerByMoniker(slnPath).ShouldNotBeNull();

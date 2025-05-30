@@ -63,14 +63,27 @@
     </ItemGroup>
   </Target>
 
+  <!-- The task allows to find VS bits on machine. These files will be used as a source for patching on the top of them. -->
+  <UsingTask TaskName="LocateVisualStudioTask"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+             TaskFactory="RoslynCodeTaskFactory">
+    <Task>
+      <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\LocateVisualStudioTask.cs" Language="cs" />
+    </Task>
+  </UsingTask>
   <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
+
+      <LocateVisualStudioTask>
+        <Output TaskParameter="VsInstallPath" PropertyName="AvailableVsInstallPath" />
+      </LocateVisualStudioTask>
+
     <ItemGroup>
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.props" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.dll" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\Tracker*.exe" />
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
-      <SdkResolverFiles Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
+      <SdkResolverFiles Include="$(AvailableVsInstallPath)\MSBuild\Current\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
       <NuGetSdkResolverManifest Include="$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
       <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
 
@@ -105,6 +118,7 @@
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
+      <FreshlyBuiltBinariesx64 Remove="$(X64BinPath)**\Microsoft.VisualStudio.SolutionPersistence.dll" />
 
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />

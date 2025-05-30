@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<RespectAlreadyAssignedItemCulture>True</RespectAlreadyAssignedItemCulture>
+	</PropertyGroup>
+	<ItemGroup>
+		<EmbeddedResource Update="Test.resx">
+			<Generator>ResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Test.yue.resx">
+			<Culture>yue</Culture>
+			<LogicalName>Test.yue.resources</LogicalName>
+		</EmbeddedResource>
+    <EmbeddedResource Update="Test.euy.resx">
+      <Culture>euy</Culture>
+      <LogicalName>Test.euy.resources</LogicalName>
+    </EmbeddedResource>
+	</ItemGroup>
+
+</Project>
