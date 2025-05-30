@@ -651,7 +651,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+                        int bytesRead = await _clientToServerStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -673,8 +673,19 @@ namespace Microsoft.Build.BackEnd
 
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, packetData, packetLength);
-                        if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
+                        int totalBytesRead = 0;
+                        while (totalBytesRead < packetLength)
+                        {
+                            int bytesRead = await _clientToServerStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            if (bytesRead == 0)
+                            {
+                                break;
+                            }
+
+                            totalBytesRead += bytesRead;
+                        }
+
+                        if (!ProcessBodyBytesRead(totalBytesRead, packetLength, packetType))
                         {
                             return;
                         }
