@@ -39,7 +39,6 @@ namespace Microsoft.Build.Evaluation
             {
                 ImmutableArray<I>.Builder? itemsToAdd = null;
 
-                Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (_excludes != null)
                 {
@@ -50,14 +49,10 @@ namespace Microsoft.Build.Evaluation
                         var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
                         excludePatterns.AddRange(excludeSplits);
                     }
-
-                    if (excludePatterns.Count > 0)
-                    {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
-                    }
                 }
 
                 ISet<string>? excludePatternsForGlobs = null;
+                Func<string, bool>? excludeTester = excludePatterns.Count > 0 ? EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory) : null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -74,16 +69,27 @@ namespace Microsoft.Build.Evaluation
                             elementLocation: _itemElement.IncludeLocation);
 
                         itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-                        itemsToAdd.AddRange(
-                            excludeTester != null
-                                ? itemsFromExpression.Where(item => !excludeTester.Value(item.EvaluatedInclude))
-                                : itemsFromExpression);
+
+                        if (excludeTester is not null)
+                        {
+                            foreach (var item in itemsFromExpression)
+                            {
+                                if (!excludeTester(item.EvaluatedInclude))
+                                {
+                                    itemsToAdd.Add(item);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            itemsToAdd.AddRange(itemsFromExpression);
+                        }
                     }
                     else if (fragment is ValueFragment valueFragment)
                     {
                         string value = valueFragment.TextFragment;
 
-                        if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
+                        if (excludeTester is null || !excludeTester(EscapingUtilities.UnescapeAll(value)))
                         {
                             itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                             itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
