@@ -1,6 +1,7 @@
 param (
     $repoRoot = $null,
-    $coverageArtifactsDir = $null,
+    $coverageArtifactsDir = 'coverageStaging',
+    $coverageReportName = 'merged',
     $verbosity = 'minimal'
     )
 
@@ -14,9 +15,9 @@ try {
   Remove-Item -Force -Recurse $coverageResultsDir -ErrorAction SilentlyContinue
 
   $dotnetCoverageTool = Join-Path $repoRoot ".tools\dotnet-coverage\dotnet-coverage.exe"
-  
-  $mergedCoverage = Join-Path $coverageResultsDir "merged.coverage"
-  $mergedCobertura = Join-Path $coverageResultsDir "merged.cobertura.xml"
+
+  $mergedCoverage = Join-Path $coverageResultsDir $coverageReportName".coverage"
+  $mergedCobertura = Join-Path $coverageResultsDir $coverageReportName".cobertura.xml"
 
   if (!(Test-Path $coverageResultsDir -PathType Container)) {
     New-Item -ItemType Directory -Force -Path $coverageResultsDir

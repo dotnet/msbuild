@@ -72,6 +72,8 @@ jobs:
   dependsOn: IfOnlyDocumentionChanged
   variables:
     onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
+    coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
+    coverageReportName: WindowsFullFrameworkCoverage
   displayName: "Windows Full"
   pool:
     vmImage: 'windows-2022'
@@ -95,14 +97,14 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/WindowsFullFramework/CoverageResults
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
       pwsh: true
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      targetPath: '$(Build.SourcesDirectory)/WindowsFullFramework/CoverageResults/merged.coverage'
-      artifact: 'WindowsFullFramework_coverage'
+      targetPath: $(coverageArtifactsDir)/$(WindowsFullFrameworkCoverage).coverage
+      artifact: $(coverageReportName)
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -170,6 +172,8 @@ jobs:
   dependsOn: IfOnlyDocumentionChanged
   variables:
     onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
+    coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
+    coverageReportName: WindowsCoreCoverage
   pool:
     vmImage: 'windows-2022'
   steps:
@@ -194,14 +198,14 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/WindowsCore/CoverageResults
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
       pwsh: true
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      targetPath: '$(Build.SourcesDirectory)/WindowsCore/CoverageResults/merged.coverage'
-      artifact: 'WindowsCore_coverage'
+      targetPath: $(coverageArtifactsDir)/$(WindowsFullFrameworkCoverage).coverage
+      artifact: $(coverageReportName)
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -245,6 +249,8 @@ jobs:
   dependsOn: IfOnlyDocumentionChanged
   variables:
     onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
+    coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
+    coverageReportName: WindowsFullReleaseCoverage
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
@@ -279,14 +285,14 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/WindowsFullRelease/CoverageResults
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
       pwsh: true
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      targetPath: '$(Build.SourcesDirectory)/WindowsFullRelease/CoverageResults/merged.coverage'
-      artifact: 'WindowsFullRelease_coverage'
+      targetPath: $(coverageArtifactsDir)/$(WindowsFullFrameworkCoverage).coverage
+      artifact: $(coverageReportName)
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -536,7 +542,7 @@ jobs:
     displayName: Process coverage reports
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-      arguments: -repoRoot $(Build.SourcesDirectory) -CoverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
       pwsh: true
   - task: CopyFiles@2
     displayName: Copy Files to $(Build.ArtifactStagingDirectory)\Artifacts
