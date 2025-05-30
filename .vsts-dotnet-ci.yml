@@ -363,7 +363,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      artifact: 'LinuxCore_coverage'
+      artifact: 'LinuxCoreCoverage'
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -448,7 +448,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      artifact: 'MacCore_coverage'
+      artifact: 'MacCoreCoverage'
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -515,27 +515,27 @@ jobs:
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
-      artifactName: 'WindowsFullFramework_coverage'
+      artifactName: 'WindowsFullFrameworkCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/WindowsFullFramework'
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
-      artifactName: 'WindowsCore_coverage'
+      artifactName: 'WindowsCoreCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/WindowsCore'
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
-      artifactName: 'WindowsFullRelease_coverage'
+      artifactName: 'WindowsFullReleaseCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/WindowsFullRelease'
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
-      artifactName: 'LinuxCore_coverage'
+      artifactName: 'LinuxCoreCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/LinuxCore'
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
-      artifactName: 'MacCore_coverage'
+      artifactName: 'MacCoreCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/MacCore'
 
   - task: PowerShell@2

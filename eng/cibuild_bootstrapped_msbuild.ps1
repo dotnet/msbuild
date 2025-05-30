@@ -122,7 +122,7 @@ try {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -test /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties
   }
 
   exit $lastExitCode
