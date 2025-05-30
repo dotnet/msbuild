@@ -24,18 +24,18 @@
     <XunitOptions>$(XunitOptions)</XunitOptions>
 
     <!-- Respect the traits set up by PlatformSpecific attribute. -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) /TestCaseFilter:"Traits=nonwindowstests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux'))">$(XunitOptions) /TestCaseFilter:"Traits=nonlinuxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">/TestCaseFilter:"Traits=nonlinuxtests&amp;Traits=netcore-linux-failing</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) /TestCaseFilter:"Traits=nonosxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">/TestCaseFilter:"Traits=nonosxtests&amp;Traits=netcore-osx-failing</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --filter "Traits!=nonwindowstests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux'))">$(XunitOptions) --filter "Traits!=nonlinuxtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">--filter "Traits!=nonlinuxtests&amp;Traits=netcore-linux-failing</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) --filter "Traits!=nonosxtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">--filter "Traits!=nonosxtests&amp;Traits=netcore-osx-failing</XunitOptions>
     <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) /TestCaseFilter:"Traits=nonfreebsdtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) --filter "Traits=nonfreebsdtests</XunitOptions>
 
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions)&amp;Traits=nonnetcoreapptests</XunitOptions>
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions)&amp;Traits=nonnetfxtests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions)&amp;Traits!=nonnetcoreapptests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions)&amp;Traits!=nonnetfxtests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions)&amp;Traits=failing" /Diag:$(TargetName).log</XunitOptions>
+    <XunitOptions>$(XunitOptions)&amp;Traits!=failing" --Diag $(TargetName).log</XunitOptions>
     <!-- Enable code coverage -->
     <XunitOptions>$(XunitOptions) --settings $(RepoRoot)Coverage.runsettings --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/17.14.0/build/netstandard2.0</XunitOptions>
 
