@@ -103,7 +103,7 @@ jobs:
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      targetPath: $(coverageArtifactsDir)/$(WindowsFullFrameworkCoverage).coverage
+      targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
       artifact: $(coverageReportName)
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
@@ -204,7 +204,7 @@ jobs:
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      targetPath: $(coverageArtifactsDir)/$(WindowsFullFrameworkCoverage).coverage
+      targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
       artifact: $(coverageReportName)
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
@@ -291,7 +291,7 @@ jobs:
     displayName: Publish Code Coverage Results
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      targetPath: $(coverageArtifactsDir)/$(WindowsFullFrameworkCoverage).coverage
+      targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
       artifact: $(coverageReportName)
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
