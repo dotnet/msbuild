@@ -21,6 +21,10 @@ jobs:
         id: sdk-version
         run: |
           SDK_VERSION=$(jq -r '.tools.dotnet' global.json)
+          if [ -z "$SDK_VERSION" ]; then
+            echo "Error: .NET SDK version is missing or malformed in global.json" >&2
+            exit 1
+          fi
           echo "SDK_VERSION=$SDK_VERSION" >> $GITHUB_ENV
           echo "Extracted .NET SDK version: $SDK_VERSION"
 
