@@ -108,6 +108,7 @@ jobs:
       publishLocation: 'pipeline'
   # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
   - task: PublishCodeCoverageResults@2
+    continueOnError: true
     inputs:
       summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
       pathToSources: $(Build.SourcesDirectory)
@@ -215,6 +216,7 @@ jobs:
       publishLocation: 'pipeline'
   # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
   - task: PublishCodeCoverageResults@2
+    continueOnError: true
     inputs:
       summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
       pathToSources: $(Build.SourcesDirectory)
@@ -308,6 +310,7 @@ jobs:
       publishLocation: 'pipeline'
   # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
   - task: PublishCodeCoverageResults@2
+    continueOnError: true
     inputs:
       summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
       pathToSources: $(Build.SourcesDirectory)
@@ -387,6 +390,7 @@ jobs:
       publishLocation: 'pipeline'
   # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
   - task: PublishCodeCoverageResults@2
+    continueOnError: true
     inputs:
       summaryFileLocation: $(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml
       pathToSources: $(Build.SourcesDirectory)
@@ -478,6 +482,7 @@ jobs:
       publishLocation: 'pipeline'
   # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
   - task: PublishCodeCoverageResults@2
+    continueOnError: true
     inputs:
       summaryFileLocation: $(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml
       pathToSources: $(Build.SourcesDirectory)
