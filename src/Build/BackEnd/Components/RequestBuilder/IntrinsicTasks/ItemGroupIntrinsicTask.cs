@@ -1,20 +1,24 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared.FileSystem;
-using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
+using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -55,22 +59,20 @@ namespace Microsoft.Build.BackEnd
                 {
                     List<string> parameterValues = new List<string>();
                     GetBatchableValuesFromBuildItemGroupChild(parameterValues, child);
-                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location);
+                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location, LoggingContext);
 
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
                     {
-                        bool condition = ConditionEvaluator.EvaluateCondition
-                            (
+                        bool condition = ConditionEvaluator.EvaluateCondition(
                             child.Condition,
                             ParserOptions.AllowAll,
                             bucket.Expander,
                             ExpanderOptions.ExpandAll,
                             Project.Directory,
                             child.ConditionLocation,
-                            LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext,
-                            FileSystems.Default);
+                            FileSystems.Default,
+                            LoggingContext);
 
                         if (condition)
                         {
@@ -112,7 +114,7 @@ namespace Microsoft.Build.BackEnd
                                 (child.Exclude.Length != 0))
                             {
                                 // It's an item -- we're "adding" items to the world
-                                ExecuteAdd(child, bucket, keepMetadata, removeMetadata);
+                                ExecuteAdd(child, bucket, keepMetadata, removeMetadata, LoggingContext);
                             }
                             else if (child.Remove.Length != 0)
                             {
@@ -122,7 +124,7 @@ namespace Microsoft.Build.BackEnd
                             else
                             {
                                 // It's a modify -- changing existing items
-                                ExecuteModify(child, bucket, keepMetadata, removeMetadata);
+                                ExecuteModify(child, bucket, keepMetadata, removeMetadata, LoggingContext);
                             }
                         }
                     }
@@ -148,7 +150,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket.</param>
         /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
         /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
-        private void ExecuteAdd(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata)
+        /// <param name="loggingContext">Context for logging</param>
+        private void ExecuteAdd(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata, LoggingContext loggingContext = null)
         {
             // First, collect up the appropriate metadata collections.  We need the one from the item definition, if any, and
             // the one we are using for this batching bucket.
@@ -162,28 +165,35 @@ namespace Microsoft.Build.BackEnd
             bucket.Expander.Metadata = metadataTable;
 
             // Second, expand the item include and exclude, and filter existing metadata as appropriate.
-            List<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata);
+            List<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata, loggingContext);
 
-            // Third, expand the metadata.           
+            // Third, expand the metadata.
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
             {
-                bool condition = ConditionEvaluator.EvaluateCondition
-                    (
+                bool condition = ConditionEvaluator.EvaluateCondition(
                     metadataInstance.Condition,
                     ParserOptions.AllowAll,
                     bucket.Expander,
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.Location,
-                    LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext,
-                    FileSystems.Default);
+                    FileSystems.Default,
+                    loggingContext: loggingContext);
 
                 if (condition)
                 {
-                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, ExpanderOptions.ExpandAll, metadataInstance.Location);
+                    ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
+                    if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
+                        bucket.BucketSequenceNumber == 0 &&
+                        // Referring to unqualified metadata of other item (transform) is fine.
+                        !child.Include.Contains("@("))
+                    {
+                        expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
+                    }
 
-                    // This both stores the metadata so we can add it to all the items we just created later, and 
+                    string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location);
+
+                    // This both stores the metadata so we can add it to all the items we just created later, and
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
                     metadataTable.SetValue(metadataInstance.Name, evaluatedValue);
                 }
@@ -196,35 +206,41 @@ namespace Microsoft.Build.BackEnd
             bucket.Expander.Metadata = originalMetadataTable;
 
             // Determine if we should NOT add duplicate entries
-            bool keepDuplicates = ConditionEvaluator.EvaluateCondition
-                (
+            bool keepDuplicates = ConditionEvaluator.EvaluateCondition(
                 child.KeepDuplicates,
                 ParserOptions.AllowAll,
                 bucket.Expander,
                 ExpanderOptions.ExpandAll,
                 Project.Directory,
                 child.KeepDuplicatesLocation,
-                LoggingContext.LoggingService,
-                LoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                LoggingContext);
+
+            Action<IList> logFunction = null;
 
             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents && itemsToAdd?.Count > 0)
             {
-                ItemGroupLoggingHelper.LogTaskParameter(
-                    LoggingContext,
-                    TaskParameterMessageKind.AddItem,
-                    child.ItemType,
-                    itemsToAdd,
-                    logItemMetadata: true,
-                    child.Location);
+                logFunction = (itemList) =>
+                {
+                    ItemGroupLoggingHelper.LogTaskParameter(
+                        LoggingContext,
+                        TaskParameterMessageKind.AddItem,
+                        parameterName: null,
+                        propertyName: null,
+                        child.ItemType,
+                        itemList,
+                        logItemMetadata: true,
+                        child.Location);
+                };
             }
 
             // Now add the items we created to the lookup.
-            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates); // Add in one operation for potential copy-on-write
+            bucket.Lookup.AddNewItemsOfItemType(child.ItemType, itemsToAdd, !keepDuplicates, logFunction);
+            // Add in one operation for potential copy-on-write
         }
 
         /// <summary>
-        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so 
+        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
@@ -257,6 +273,8 @@ namespace Microsoft.Build.BackEnd
                     ItemGroupLoggingHelper.LogTaskParameter(
                         LoggingContext,
                         TaskParameterMessageKind.RemoveItem,
+                        parameterName: null,
+                        propertyName: null,
                         child.ItemType,
                         itemsToRemove,
                         logItemMetadata: true,
@@ -268,14 +286,15 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so 
+        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and modify.</param>
         /// <param name="bucket">The batching bucket.</param>
         /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
         /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
-        private void ExecuteModify(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata)
+        /// <param name="loggingContext">Context for this operation.</param>
+        private void ExecuteModify(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata, LoggingContext loggingContext = null)
         {
             ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
             if (group == null || group.Count == 0)
@@ -305,17 +324,15 @@ namespace Microsoft.Build.BackEnd
 
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
             {
-                bool condition = ConditionEvaluator.EvaluateCondition
-                    (
+                bool condition = ConditionEvaluator.EvaluateCondition(
                     metadataInstance.Condition,
                     ParserOptions.AllowAll,
                     bucket.Expander,
                     ExpanderOptions.ExpandAll,
                     Project.Directory,
                     metadataInstance.ConditionLocation,
-                    LoggingContext.LoggingService,
-                    LoggingContext.BuildEventContext,
-                    FileSystems.Default);
+                    FileSystems.Default,
+                    loggingContext: loggingContext);
 
                 if (condition)
                 {
@@ -355,22 +372,21 @@ namespace Microsoft.Build.BackEnd
         /// <param name="expander">The expander to use.</param>
         /// <param name="keepMetadata">An <see cref="ISet{String}"/> of metadata names to keep.</param>
         /// <param name="removeMetadata">An <see cref="ISet{String}"/> of metadata names to remove.</param>
+        /// <param name="loggingContext">Context for logging</param>
         /// <remarks>
         /// This code is very close to that which exists in the Evaluator.EvaluateItemXml method.  However, because
         /// it invokes type constructors, and those constructors take arguments of fundamentally different types, it has not
         /// been refactored.
         /// </remarks>
         /// <returns>A list of items.</returns>
-        private List<ProjectItemInstance> ExpandItemIntoItems
-        (
+        private List<ProjectItemInstance> ExpandItemIntoItems(
             ProjectItemGroupTaskItemInstance originalItem,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
             ISet<string> keepMetadata,
-            ISet<string> removeMetadata
-        )
+            ISet<string> removeMetadata,
+            LoggingContext loggingContext = null)
         {
-            //todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
-
+            // todo this is duplicated logic with the item computation logic from evaluation (in LazyIncludeOperation.SelectItems)
             ProjectErrorUtilities.VerifyThrowInvalidProject(!(keepMetadata != null && removeMetadata != null), originalItem.KeepMetadataLocation, "KeepAndRemoveMetadataMutuallyExclusive");
             List<ProjectItemInstance> items = new List<ProjectItemInstance>();
 
@@ -401,27 +417,28 @@ namespace Microsoft.Build.BackEnd
 
             // Split Include on any semicolons, and take each split in turn
             var includeSplits = ExpressionShredder.SplitSemiColonSeparatedList(evaluatedInclude);
-            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(this.Project, originalItem.ItemType);
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(Project, originalItem.ItemType);
+
+            // EngineFileUtilities.GetFileListEscaped api invocation evaluates excludes by default.
+            // If the code process any expression like "@(x)", we need to handle excludes explicitly using EvaluateExcludePaths().
+            bool anyTransformExprProceeded = false;
 
             foreach (string includeSplit in includeSplits)
             {
                 // If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
-                bool throwaway;
-
-                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(includeSplit,
+                IList<ProjectItemInstance> itemsFromSplit = expander.ExpandSingleItemVectorExpressionIntoItems(
+                    includeSplit,
                     itemFactory,
                     ExpanderOptions.ExpandItems,
                     false /* do not include null expansion results */,
-                    out throwaway,
+                    out _,
                     originalItem.IncludeLocation);
 
                 if (itemsFromSplit != null)
                 {
                     // Expression is in form "@(X)", so add these items directly.
-                    foreach (ProjectItemInstance item in itemsFromSplit)
-                    {
-                        items.Add(item);
-                    }
+                    items.AddRange(itemsFromSplit);
+                    anyTransformExprProceeded = true;
                 }
                 else
                 {
@@ -431,7 +448,11 @@ namespace Microsoft.Build.BackEnd
                     string[] includeSplitFiles = EngineFileUtilities.GetFileListEscaped(
                         Project.Directory,
                         includeSplit,
-                        excludes);
+                        excludes,
+                        loggingMechanism: LoggingContext,
+                        includeLocation: originalItem.IncludeLocation,
+                        excludeLocation: originalItem.ExcludeLocation,
+                        disableExcludeDriveEnumerationWarning: true);
 
                     foreach (string includeSplitFile in includeSplitFiles)
                     {
@@ -442,43 +463,48 @@ namespace Microsoft.Build.BackEnd
                             includeSplit /* before wildcard expansion */,
                             null,
                             null,
-                            originalItem.Location.File));
+                            originalItem.Location.File,
+                            useItemDefinitionsWithoutModification: false));
                     }
                 }
             }
 
-            // Evaluate, split, expand and subtract any Exclude
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (string excludeSplit in excludes)
+            // There is a need to Evaluate Exclude part explicitly because of of the expressions had the form "@(X)".
+            if (anyTransformExprProceeded)
             {
-                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(Project.Directory, excludeSplit);
+                // Calculate all Exclude
+                var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
-                foreach (string excludeSplitFile in excludeSplitFiles)
-                {
-                    excludesUnescapedForComparison.Add(excludeSplitFile);
-                }
+                // Subtract any Exclude
+                items = items
+                    .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
+                    .ToList();
             }
-
-            List<ProjectItemInstance> remainingItems = new List<ProjectItemInstance>();
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                if (!excludesUnescapedForComparison.Contains(((IItem)items[i]).EvaluatedInclude))
-                {
-                    remainingItems.Add(items[i]);
-                }
-            }
-
-            items = remainingItems;
 
             // Filter the metadata as appropriate
+            List<string> metadataToRemove = null;
             if (keepMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => !keepMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMetadataNames)
+                    {
+                        if (!keepMetadata.Contains(metadataName))
+                        {
+                            metadataToRemove.Add(metadataName);
+                        }
+                    }
+
+                    foreach(string metadataName in metadataToRemove)
                     {
                         item.RemoveMetadata(metadataName);
                     }
@@ -486,10 +512,26 @@ namespace Microsoft.Build.BackEnd
             }
             else if (removeMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => removeMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMetadataNames)
+                    {
+                        if (removeMetadata.Contains(metadataName))
+                        {
+                            metadataToRemove.Add(metadataName);
+                        }
+                    }
+
+                    foreach (string metadataName in metadataToRemove)
                     {
                         item.RemoveMetadata(metadataName);
                     }
@@ -497,6 +539,32 @@ namespace Microsoft.Build.BackEnd
             }
 
             return items;
+        }
+
+        /// <summary>
+        /// Returns a list of all items specified in Exclude parameter.
+        /// If no items match, returns empty list.
+        /// </summary>
+        /// <param name="excludes">The items to match</param>
+        /// <param name="excludeLocation">The specification to match against the items.</param>
+        /// <returns>A list of matching items</returns>
+        private HashSet<string> EvaluateExcludePaths(IReadOnlyList<string> excludes, ElementLocation excludeLocation)
+        {
+            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(excludes.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (string excludeSplit in excludes)
+            {
+                string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(
+                    Project.Directory,
+                    excludeSplit,
+                    loggingMechanism: LoggingContext,
+                    excludeLocation: excludeLocation);
+                foreach (string excludeSplitFile in excludeSplitFiles)
+                {
+                    excludesUnescapedForComparison.Add(excludeSplitFile.NormalizeForPathComparison());
+                }
+            }
+
+            return excludesUnescapedForComparison;
         }
 
         /// <summary>
@@ -508,13 +576,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="specificationLocation">The specification to match against the provided items</param>
         /// <param name="expander">The expander to use</param>
         /// <returns>A list of matching items</returns>
-        private List<ProjectItemInstance> FindItemsMatchingSpecification
-            (
+        private List<ProjectItemInstance> FindItemsMatchingSpecification(
             ICollection<ProjectItemInstance> items,
             string specification,
             ElementLocation specificationLocation,
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander
-            )
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
             if (items.Count == 0 || specification.Length == 0)
             {
@@ -537,7 +603,12 @@ namespace Microsoft.Build.BackEnd
                 // Don't unescape wildcards just yet - if there were any escaped, the caller wants to treat them
                 // as literals. Everything else is safe to unescape at this point, since we're only matching
                 // against the file system.
-                string[] fileList = EngineFileUtilities.GetFileListEscaped(Project.Directory, piece);
+                string[] fileList = EngineFileUtilities.GetFileListEscaped(
+                    Project.Directory,
+                    piece,
+                    loggingMechanism: LoggingContext,
+                    includeLocation: specificationLocation,
+                    excludeLocation: specificationLocation);
 
                 foreach (string file in fileList)
                 {
@@ -597,7 +668,7 @@ namespace Microsoft.Build.BackEnd
         /// 1. The metadata table created for the bucket, may be null.
         /// 2. The metadata table derived from the item definition group, may be null.
         /// </summary>
-        private class NestedMetadataTable : IMetadataTable
+        private class NestedMetadataTable : IMetadataTable, IItemTypeDefinition
         {
             /// <summary>
             /// The table for all metadata added during expansion
@@ -646,7 +717,7 @@ namespace Microsoft.Build.BackEnd
             #region IMetadataTable Members
             // NOTE:  Leaving these methods public so as to avoid having to explicitly define them
             // through the IMetadataTable interface and then cast everywhere they're used.  This class
-            // is private, so it ultimately doesn't matter. 
+            // is private, so it ultimately doesn't matter.
 
             /// <summary>
             /// Gets the specified metadata value.  Returns an empty string if none is set.
@@ -707,6 +778,8 @@ namespace Microsoft.Build.BackEnd
             {
                 _addTable[name] = value;
             }
+
+            string IItemTypeDefinition.ItemType => _itemType;
         }
     }
 }

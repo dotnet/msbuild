@@ -1,14 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -43,7 +46,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Task classes and locations known to this project. 
+        /// Task classes and locations known to this project.
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
         /// </summary>
@@ -62,8 +65,8 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// The sub-toolset version that should be used with this toolset to determine 
-        /// the full set of properties to be used by the build. 
+        /// The sub-toolset version that should be used with this toolset to determine
+        /// the full set of properties to be used by the build.
         /// </summary>
         string SubToolsetVersion
         {
@@ -90,7 +93,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// List of names of the properties that, while global, are still treated as overridable 
+        /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>
         ISet<string> GlobalPropertiesToTreatAsLocal
         {
@@ -172,7 +175,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Enumerator over all item definitions.
         /// Exposed for debugging display.
-        /// Ideally the dictionary would be exposed, but there are 
+        /// Ideally the dictionary would be exposed, but there are
         /// covariance problems. (A dictionary of Key, Value cannot be upcast
         /// to a Dictionary of Key, IValue).
         /// </summary>
@@ -184,11 +187,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Enumerator over all items.
         /// Exposed for debugging display.
-        /// Ideally the dictionary would be exposed, but there are 
+        /// Ideally the dictionary would be exposed, but there are
         /// covariance problems. (A dictionary of Key, Value cannot be upcast
         /// to a Dictionary of Key, IValue).
         /// </summary>
-        ItemDictionary<I> Items
+        IItemDictionary<I> Items
         {
             get;
         }
@@ -210,7 +213,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
-        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext);
+        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext);
 
         /// <summary>
         /// Indicates to the data block that evaluation has completed,
@@ -236,7 +239,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Properties encountered during evaluation. These are read during the first evaluation pass.
         /// Unlike those returned by the Properties property, these are ordered, and include any properties that
-        /// were subsequently overridden by others with the same name. It does not include any 
+        /// were subsequently overridden by others with the same name. It does not include any
         /// properties whose conditions did not evaluate to true.
         /// </summary>
         void AddToAllEvaluatedPropertiesList(P property);
@@ -244,7 +247,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Item definition metadata encountered during evaluation. These are read during the second evaluation pass.
         /// Unlike those returned by the ItemDefinitions property, these are ordered, and include any metadata that
-        /// were subsequently overridden by others with the same name and item type. It does not include any 
+        /// were subsequently overridden by others with the same name and item type. It does not include any
         /// elements whose conditions did not evaluate to true.
         /// </summary>
         void AddToAllEvaluatedItemDefinitionMetadataList(M itemDefinitionMetadatum);
@@ -265,12 +268,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false);
+        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, BackEnd.Logging.LoggingContext loggingContext, bool isEnvironmentVariable = false, bool isCommandLineProperty = false);
 
         /// <summary>
         /// Sets a property which comes from the Xml.
         /// </summary>
-        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped);
+        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, BackEnd.Logging.LoggingContext loggingContext);
 
         /// <summary>
         /// Retrieves an existing target, if any.

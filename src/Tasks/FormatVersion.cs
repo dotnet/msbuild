@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -17,7 +19,11 @@ namespace Microsoft.Build.Tasks
     /// </comment>
     public sealed class FormatVersion : TaskExtension
     {
-        private enum _FormatType { Version, Path }
+        private enum _FormatType
+        {
+            Version,
+            Path,
+        }
 
         private _FormatType _formatType = _FormatType.Version;
 
@@ -41,9 +47,14 @@ namespace Microsoft.Build.Tasks
             {
                 OutputVersion = "1.0.0.0";
             }
-            else if (Version.EndsWith("*", StringComparison.Ordinal))
+            else if (Version[Version.Length - 1] == '*')
             {
-                OutputVersion = Version.Substring(0, Version.Length - 1) + Revision.ToString("G", CultureInfo.InvariantCulture);
+                OutputVersion =
+#if NET
+                    string.Create(CultureInfo.InvariantCulture, $"{Version.AsSpan(0, Version.Length - 1)}{Revision:G}");
+#else
+                    Version.Substring(0, Version.Length - 1) + Revision.ToString("G", CultureInfo.InvariantCulture);
+#endif
             }
             else
             {

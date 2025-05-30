@@ -1,17 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Construction;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Shared;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
-using System;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Xunit;
-using Microsoft.Build.Framework;
-using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Preprocessor
 {
@@ -52,7 +54,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             Project project = new Project();
             project.SetProperty("p", "v1");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -81,7 +83,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -125,7 +127,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -169,7 +171,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -213,7 +215,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -261,7 +263,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -295,7 +297,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -354,7 +356,8 @@ namespace Microsoft.Build.UnitTests.Preprocessor
     <p>v1</p>
   </PropertyGroup>
 </Project>");
-            ProjectRootElement twoXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(two)));
+            using ProjectRootElementFromString projectRootElementFromString = new(two);
+            ProjectRootElement twoXml = projectRootElementFromString.Project;
             twoXml.FullPath = "p2";
 
             Project project;
@@ -366,7 +369,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 }
             }
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -415,7 +418,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -473,7 +476,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -546,7 +549,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -607,7 +610,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -667,7 +670,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -721,7 +724,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
                 Project project = new Project(xml0);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
@@ -788,7 +791,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         {
             Project project = new Project();
             project.SetProperty("p", "<![CDATA[<sender>John Smith</sender>]]>");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -818,10 +821,11 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -872,11 +876,12 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </PropertyGroup>
 </Project>";
 
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
                 Project project = Project.FromProjectRootElement(
-                    ProjectRootElement.Create(XmlReader.Create(new StringReader(content))),
+                    projectRootElementFromString.Project,
                     projectOptions);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
@@ -928,6 +933,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
         }
 
         [Fact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/11498")]
         public void SdkResolverItemsAndPropertiesAreInPreprocessedOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -952,12 +958,11 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver(
                     new Build.BackEnd.SdkResolution.SdkResult(
                         new SdkReference("TestPropsAndItemsFromResolverSdk", null, null),
-                        new [] { testDirectory},
+                        new[] { testDirectory },
                         version: null,
                         propertiesToAdd,
                         itemsToAdd,
-                        warnings: null
-                        )));
+                        warnings: null)));
 
                 string content = @"<Project>
 <Import Project='Import.props' Sdk='TestPropsAndItemsFromResolverSdk' />
@@ -978,13 +983,13 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
                 var project = Project.FromFile(projectPath, projectOptions);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
                 string actual = writer.ToString();
 
-                //  File names for the projects including the properties and items from the SDK resolvers are based on a hash of
+                // File names for the projects including the properties and items from the SDK resolvers are based on a hash of
                 //  the values, so look up the filename here.
                 //  Sample filename: projectPath + ".SdkResolver.-171948414.proj"
                 var virtualImport = project.Imports.First(i => i.ImportedProject.FullPath.StartsWith(projectPath + ".SdkResolver"));
@@ -1099,11 +1104,12 @@ namespace Microsoft.Build.UnitTests.Preprocessor
   </PropertyGroup>
 </Project>";
 
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
                 Project project = Project.FromProjectRootElement(
-                    ProjectRootElement.Create(XmlReader.Create(new StringReader(content))),
+                    projectRootElementFromString.Project,
                     projectOptions);
 
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
 
                 project.SaveLogicalProject(writer);
 
@@ -1210,7 +1216,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
 
         /// <summary>
-        /// Verifies that the Preprocessor works when the import graph contains unevaluated duplicates.  This can occur if two projects in 
+        /// Verifies that the Preprocessor works when the import graph contains unevaluated duplicates.  This can occur if two projects in
         /// two different folders both import "..\dir.props" or "$(Property)".  Those values will evaluate to different paths at run time
         /// but the preprocessor builds a map of the imports.
         /// </summary>
@@ -1232,7 +1238,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
             Project project = new Project(xml1);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
         }

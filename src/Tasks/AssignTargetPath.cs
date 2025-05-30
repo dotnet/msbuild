@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -75,7 +77,7 @@ namespace Microsoft.Build.Tasks
 
                     // If TargetPath is already set, it takes priority.
                     // https://github.com/dotnet/msbuild/issues/2795
-                    string targetPath =  ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10) ? Files[i].GetMetadata(ItemMetadataNames.targetPath) : null;
+                    string targetPath = Files[i].GetMetadata(ItemMetadataNames.targetPath);
 
                     // If TargetPath not already set, fall back to default behavior.
                     if (string.IsNullOrEmpty(targetPath))

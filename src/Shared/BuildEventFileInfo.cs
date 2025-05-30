@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Xml;
 using Microsoft.Build.Construction;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -21,7 +23,7 @@ namespace Microsoft.Build.Shared
         /// Filename may be an empty string, if there is truly no file associated.
         /// This overload may also be used if there is a file but truly no line/column,
         /// for example when failing to load a project file.
-        /// 
+        ///
         /// IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.
         /// </summary>
         /// <param name="file"></param>
@@ -44,7 +46,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Creates an instance of this class using the given filename/path and a line/column of interest in the file.
-        /// 
+        ///
         /// IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.
         /// </summary>
         /// <param name="file"></param>
@@ -58,7 +60,7 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Creates an instance of this class using the given filename/path and a range of lines/columns of interest in the file.
-        /// 
+        ///
         /// IF AN IELEMENTLOCATION IS AVAILABLE, USE THE OVERLOAD ACCEPTING THAT INSTEAD.
         /// </summary>
         /// <param name="file"></param>
@@ -83,11 +85,7 @@ namespace Microsoft.Build.Shared
         internal BuildEventFileInfo(XmlException e)
         {
             ErrorUtilities.VerifyThrow(e != null, "Need exception context.");
-#if FEATURE_XML_SOURCE_URI
             _file = (e.SourceUri.Length == 0) ? String.Empty : new Uri(e.SourceUri).LocalPath;
-#else
-            _file = String.Empty;
-#endif
             _line = e.LineNumber;
             _column = e.LinePosition;
             _endLine = 0;
@@ -99,7 +97,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal BuildEventFileInfo(string file, XmlException e) : this(e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(file, nameof(file));
+            ErrorUtilities.VerifyThrowArgumentNull(file);
 
             _file = file;
         }

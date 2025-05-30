@@ -1,23 +1,27 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Globalization;
+using System.IO;
 using System.Threading;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Internal;
-using Microsoft.Build.BackEnd.Components.Caching;
-using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Shared;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.FileAccesses;
+#endif
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -142,6 +146,7 @@ namespace Microsoft.Build.Execution
 
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+            SerializationContractInitializer.Initialize();
             _packetFactory = new NodePacketFactory();
 
             _buildRequestEngine = (this as IBuildComponentHost).GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
@@ -150,10 +155,14 @@ namespace Microsoft.Build.Execution
 
             // Create a factory for the out-of-proc SDK resolver service which can pass our SendPacket delegate to be used for sending packets to the main node
             OutOfProcNodeSdkResolverServiceFactory sdkResolverServiceFactory = new OutOfProcNodeSdkResolverServiceFactory(SendPacket);
-
-            ((IBuildComponentHost) this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
-
+            ((IBuildComponentHost)this).RegisterFactory(BuildComponentType.SdkResolverService, sdkResolverServiceFactory.CreateInstance);
             _sdkResolverService = (this as IBuildComponentHost).GetComponent(BuildComponentType.SdkResolverService) as ISdkResolverService;
+
+#if FEATURE_REPORTFILEACCESSES
+            ((IBuildComponentHost)this).RegisterFactory(
+                BuildComponentType.FileAccessManager,
+                (componentType) => OutOfProcNodeFileAccessManager.CreateComponent(componentType, SendPacket));
+#endif
 
             if (s_projectRootElementCacheBase == null)
             {
@@ -238,13 +247,11 @@ namespace Microsoft.Build.Execution
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception shutdownException)
         {
-            // Console.WriteLine("Run called at {0}", DateTime.Now);
-
-            _nodeEndpoint = new NodeEndpointOutOfProc(this, enableReuse, lowPriority);
+            _nodeEndpoint = new NodeEndpointOutOfProc(enableReuse, lowPriority);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
-            var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
+            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
             // Get the current directory before doing any work. We need this so we can restore the directory when the node shutsdown.
             while (true)
@@ -297,6 +304,9 @@ namespace Microsoft.Build.Execution
             return _componentFactories.GetComponent(type);
         }
 
+        TComponent IBuildComponentHost.GetComponent<TComponent>(BuildComponentType type)
+            => (TComponent)((IBuildComponentHost)this).GetComponent(type);
+
         #endregion
 
         #region INodePacketFactory Members
@@ -330,6 +340,16 @@ namespace Microsoft.Build.Execution
         void INodePacketFactory.DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+        }
+
+        /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>
@@ -368,6 +388,13 @@ namespace Microsoft.Build.Execution
             {
                 _nodeEndpoint.SendData(result);
             }
+
+#if FEATURE_REPORTFILEACCESSES
+            if (_buildParameters.ReportFileAccesses)
+            {
+                FileAccessManager.NotifyFileAccessCompletion(result.GlobalRequestId);
+            }
+#endif
         }
 
         /// <summary>
@@ -459,24 +486,20 @@ namespace Microsoft.Build.Execution
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            // Restore the original environment.
+            // Restore the original environment, best effort.
             // If the node was never configured, this will be null.
             if (_savedEnvironment != null)
             {
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
+                try
                 {
-                    if (!_savedEnvironment.ContainsKey(entry.Key))
-                    {
-                        Environment.SetEnvironmentVariable(entry.Key, null);
-                    }
+                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
-
-                foreach (KeyValuePair<string, string> entry in _savedEnvironment)
+                catch (Exception ex)
                 {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    CommunicationsUtilities.Trace("Failed to restore the original environment: {0}.", ex);
                 }
+                Traits.UpdateFromEnvironment();
             }
-
             try
             {
                 // Shut down logging, which will cause all queued logging messages to be sent.
@@ -518,7 +541,6 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Clears all the caches used during the build.
         /// </summary>
-        [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "Required because when calling this method, we want the memory back NOW.")]
         private void CleanupCaches()
         {
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
@@ -538,9 +560,6 @@ namespace Microsoft.Build.Execution
                 // We'll experiment here and ship with the best default.
                 s_projectRootElementCacheBase = null;
             }
-
-            // Since we aren't going to be doing any more work, lets clean up all our memory usage.
-            GC.Collect();
         }
 
         /// <summary>
@@ -571,7 +590,27 @@ namespace Microsoft.Build.Execution
         {
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-                _nodeEndpoint.SendData(packet);
+                if (packet is LogMessagePacketBase logMessage
+                    && logMessage.EventType == LoggingEventType.CustomEvent)
+                {
+                    BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
+
+                    // Serializing unknown CustomEvent which has to use unsecure BinaryFormatter by TranslateDotNet<T>
+                    // Since BinaryFormatter is deprecated in dotnet 8+, log error so users discover root cause easier
+                    // then by reading CommTrace where it would be otherwise logged as critical infra error.
+#if RUNTIME_TYPE_NETCORE
+                    _loggingService.LogError(
+#else
+                    _loggingService.LogWarning(
+#endif
+                        _loggingContext?.BuildEventContext ?? BuildEventContext.Invalid, null, BuildEventFileInfo.Empty,
+                        "DeprecatedEventSerialization",
+                        buildEvent?.GetType().Name ?? string.Empty);
+                }
+                else
+                {
+                    _nodeEndpoint.SendData(packet);
+                }
             }
         }
 
@@ -687,14 +726,16 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // Now set the new environment
+            // Now set the new environment and update Traits class accordingly
             foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
             {
                 Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
             }
 
+            Traits.UpdateFromEnvironment();
+
             // We want to make sure the global project collection has the toolsets which were defined on the parent
-            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are 
+            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are
             // executed on the child node.
             ICollection<Toolset> parentToolSets = _buildParameters.ToolsetProvider.Toolsets;
             if (parentToolSets != null)
@@ -745,9 +786,12 @@ namespace Microsoft.Build.Execution
                 _loggingService.IncludeTaskInputs = true;
             }
 
-            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItems)
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
             {
-                _loggingService.IncludeEvaluationPropertiesAndItems = true;
+                _loggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(
+                    configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
+                    configuration.LoggingNodeConfiguration
+                        .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             }
 
             try
@@ -758,13 +802,8 @@ namespace Microsoft.Build.Execution
                     _loggingService.InitializeNodeLoggers(configuration.LoggerDescriptions, sink, configuration.NodeId);
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
-                if (ExceptionHandling.IsCriticalException(ex))
-                {
-                    throw;
-                }
-
                 OnEngineException(ex);
             }
 
@@ -813,6 +852,33 @@ namespace Microsoft.Build.Execution
         private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
         {
             _shutdownReason = buildComplete.PrepareForReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            if (_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse)
+            {
+                using Process currentProcess = Process.GetCurrentProcess();
+                ProcessPriorityClass priorityClass = currentProcess.PriorityClass;
+                if (priorityClass != ProcessPriorityClass.Normal && priorityClass != ProcessPriorityClass.BelowNormal)
+                {
+                    // This isn't a priority class known by MSBuild. We should avoid connecting to this node.
+                    _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                }
+                else
+                {
+                    bool lowPriority = priorityClass == ProcessPriorityClass.BelowNormal;
+                    if (_nodeEndpoint.LowPriority != lowPriority)
+                    {
+                        if (!lowPriority || NativeMethodsShared.IsWindows)
+                        {
+                            currentProcess.PriorityClass = lowPriority ? ProcessPriorityClass.Normal : ProcessPriorityClass.BelowNormal;
+                        }
+                        else
+                        {
+                            // On *nix, we can't adjust the priority up, so to avoid using this node at the wrong priority, we should not be reused.
+                            _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+                        }
+                    }
+                }
+            }
+
             _shutdownEvent.Set();
         }
     }

@@ -1,4 +1,9 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -24,6 +29,7 @@ namespace Microsoft.Build.Logging
         EndLineNumber = 1 << 12,
         EndColumnNumber = 1 << 13,
         Arguments = 1 << 14,
-        Importance = 1 << 15
+        Importance = 1 << 15,
+        Extended = 1 << 16,
     }
 }

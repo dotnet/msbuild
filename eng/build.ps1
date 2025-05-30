@@ -150,7 +150,7 @@ function Set-OptProfVariables() {
 
 function Check-EditedFiles() {
   # Log VSTS errors for changed lines
-  git --no-pager diff HEAD --unified=0 --no-color --exit-code | ForEach-Object { "##vso[task.logissue type=error] $_" }
+  git --no-pager diff HEAD --unified=0 --no-color --exit-code -- src/ | ForEach-Object { "##vso[task.logissue type=error] $_" }
   if ($LASTEXITCODE -ne 0) {
     throw "##vso[task.logissue type=error] After building, there are changed files.  Please build locally and include these changes in your pull request."
   }
@@ -169,7 +169,7 @@ function Check-RequiredVersionBumps() {
     if (($LASTEXITCODE -ne 0) -and (-not $versionLineChanged)) {
       throw "##vso[task.logissue type=error] Detected changes in Framework\EngineServices.cs without a version bump.  " +
             "If you are making API changes, please bump the version.  " +
-            "If the changes in the file are cosmetic, please add/change a comment on the Version prop to silence the error."
+            "If the changes in the file are cosmetic, please change an inline comment on the `"int Version =`" line in EngineServices.cs to silence the error."
     }
   }
 }

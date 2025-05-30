@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -29,8 +31,8 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ResolveComAssemblyReference
-         * 
-         * 
+         *
+         *
          */
         /// <summary>
         /// Resolves a COM wrapper assembly reference based on the COM references resolved so far. This method is necessary

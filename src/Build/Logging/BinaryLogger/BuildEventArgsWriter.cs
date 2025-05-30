@@ -1,22 +1,23 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -35,6 +36,13 @@ namespace Microsoft.Build.Logging
         /// and the current record will end up after the string record.
         /// </summary>
         private readonly MemoryStream currentRecordStream;
+
+        /// <summary>
+        /// For NameValueList we need to prefix the storage size
+        ///  (distinct from values count due to variable int encoding)
+        /// So using same technique as with 'currentRecordStream'.
+        /// </summary>
+        private readonly MemoryStream nameValueListStream;
 
         /// <summary>
         /// The binary writer around the originalStream.
@@ -116,11 +124,13 @@ namespace Microsoft.Build.Logging
         /// <param name="binaryWriter">A BinaryWriter to write the BuildEventArgs instances to</param>
         public BuildEventArgsWriter(BinaryWriter binaryWriter)
         {
-            this.originalStream = binaryWriter.BaseStream;
+            originalStream = binaryWriter.BaseStream;
 
             // this doesn't exceed 30K for smaller binlogs so seems like a reasonable
             // starting point to avoid reallocations in the common case
             this.currentRecordStream = new MemoryStream(65536);
+
+            this.nameValueListStream = new MemoryStream(256);
 
             this.originalBinaryWriter = binaryWriter;
             this.currentRecordWriter = new BinaryWriter(currentRecordStream);
@@ -133,90 +143,131 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Write(BuildEventArgs e)
         {
-            WriteCore(e);
+            // reset the temp stream (in case last usage forgot to do so).
+            this.currentRecordStream.SetLength(0);
+            BinaryLogRecordKind eventKind = WriteCore(e);
 
-            // flush the current record and clear the MemoryStream to prepare for next use
-            currentRecordStream.WriteTo(originalStream);
-            currentRecordStream.SetLength(0);
+            FlushRecordToFinalStream(eventKind, currentRecordStream);
         }
 
-/*
-Base types and inheritance ("EventArgs" suffix omitted):
+        private void FlushRecordToFinalStream(BinaryLogRecordKind recordKind, MemoryStream recordStream)
+        {
+            using var redirectionScope = RedirectWritesToOriginalWriter();
+            Write(recordKind);
+            Write((int)recordStream.Length);
+            recordStream.WriteTo(originalStream);
+            recordStream.SetLength(0);
+        }
 
-Build
-    Telemetry
-    LazyFormattedBuild
-        BuildMessage
-            CriticalBuildMessage
-            EnvironmentVariableRead
-            MetaprojectGenerated
-            ProjectImported
-            PropertyInitialValueSet
-            PropertyReassignment
-            TargetSkipped
-            TaskCommandLine
-            TaskParameter
-            UninitializedPropertyRead
-        BuildStatus
-            TaskStarted
-            TaskFinished
-            TargetStarted
-            TargetFinished
-            ProjectStarted
-            ProjectFinished
-            BuildStarted
-            BuildFinished
-            ProjectEvaluationStarted
-            ProjectEvaluationFinished
-        BuildError
-        BuildWarning
-        CustomBuild
-            ExternalProjectStarted
-            ExternalProjectFinished
+        /*
+        Base types and inheritance ("EventArgs" suffix omitted):
 
-*/
+        Build
+            Telemetry
+            LazyFormattedBuild
+                BuildMessage
+                    CriticalBuildMessage
+                    EnvironmentVariableRead
+                    MetaprojectGenerated
+                    ProjectImported
+                    PropertyInitialValueSet
+                    PropertyReassignment
+                    TargetSkipped
+                    TaskCommandLine
+                    TaskParameter
+                    UninitializedPropertyRead
+                    ExtendedMessage
+                BuildStatus
+                    TaskStarted
+                    TaskFinished
+                    TargetStarted
+                    TargetFinished
+                    ProjectStarted
+                    ProjectFinished
+                    BuildSubmissionStarted
+                    BuildStarted
+                    BuildFinished
+                    BuildCanceled
+                    ProjectEvaluationStarted
+                    ProjectEvaluationFinished
+                BuildError
+                    ExtendedBuildError
+                BuildWarning
+                    ExtendedBuildWarning
+                CustomBuild
+                    ExternalProjectStarted
+                    ExternalProjectFinished
+                    ExtendedCustomBuild
+        */
 
-        private void WriteCore(BuildEventArgs e)
+        private BinaryLogRecordKind WriteCore(BuildEventArgs e)
         {
             switch (e)
             {
-                case BuildMessageEventArgs buildMessage: Write(buildMessage); break;
-                case TaskStartedEventArgs taskStarted: Write(taskStarted); break;
-                case TaskFinishedEventArgs taskFinished: Write(taskFinished); break;
-                case TargetStartedEventArgs targetStarted: Write(targetStarted); break;
-                case TargetFinishedEventArgs targetFinished: Write(targetFinished); break;
-                case BuildErrorEventArgs buildError: Write(buildError); break;
-                case BuildWarningEventArgs buildWarning: Write(buildWarning); break;
-                case ProjectStartedEventArgs projectStarted: Write(projectStarted); break;
-                case ProjectFinishedEventArgs projectFinished: Write(projectFinished); break;
-                case BuildStartedEventArgs buildStarted: Write(buildStarted); break;
-                case BuildFinishedEventArgs buildFinished: Write(buildFinished); break;
-                case ProjectEvaluationStartedEventArgs projectEvaluationStarted: Write(projectEvaluationStarted); break;
-                case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: Write(projectEvaluationFinished); break;
+                case BuildMessageEventArgs buildMessage: return Write(buildMessage);
+                case TaskStartedEventArgs taskStarted: return Write(taskStarted);
+                case TaskFinishedEventArgs taskFinished: return Write(taskFinished);
+                case TargetStartedEventArgs targetStarted: return Write(targetStarted);
+                case TargetFinishedEventArgs targetFinished: return Write(targetFinished);
+                case BuildErrorEventArgs buildError: return Write(buildError);
+                case BuildWarningEventArgs buildWarning: return Write(buildWarning);
+                case ProjectStartedEventArgs projectStarted: return Write(projectStarted);
+                case ProjectFinishedEventArgs projectFinished: return Write(projectFinished);
+                case BuildSubmissionStartedEventArgs buildSubmissionStarted: return Write(buildSubmissionStarted);
+                case BuildStartedEventArgs buildStarted: return Write(buildStarted);
+                case BuildFinishedEventArgs buildFinished: return Write(buildFinished);
+                case BuildCanceledEventArgs buildCanceled: return Write(buildCanceled);
+                case ProjectEvaluationStartedEventArgs projectEvaluationStarted: return Write(projectEvaluationStarted);
+                case ProjectEvaluationFinishedEventArgs projectEvaluationFinished: return Write(projectEvaluationFinished);
+                case BuildCheckTracingEventArgs buildCheckTracing: return Write(buildCheckTracing);
+                case BuildCheckAcquisitionEventArgs buildCheckAcquisition: return Write(buildCheckAcquisition);
                 default:
                     // convert all unrecognized objects to message
                     // and just preserve the message
-                    var buildMessageEventArgs = new BuildMessageEventArgs(
-                        e.Message,
-                        e.HelpKeyword,
-                        e.SenderName,
-                        MessageImportance.Normal,
-                        e.Timestamp);
+                    BuildMessageEventArgs buildMessageEventArgs;
+                    if (e is IExtendedBuildEventArgs extendedData)
+                    {
+                        // For Extended events convert to ExtendedBuildMessageEventArgs
+                        buildMessageEventArgs = new ExtendedBuildMessageEventArgs(
+                            extendedData.ExtendedType,
+                            e.Message,
+                            e.HelpKeyword,
+                            e.SenderName,
+                            MessageImportance.Normal,
+                            e.Timestamp)
+                        {
+                            ExtendedData = extendedData.ExtendedData,
+                            ExtendedMetadata = extendedData.ExtendedMetadata,
+                        };
+                    }
+                    else
+                    {
+                        buildMessageEventArgs = new BuildMessageEventArgs(
+                            e.Message,
+                            e.HelpKeyword,
+                            e.SenderName,
+                            MessageImportance.Normal,
+                            e.Timestamp);
+                    }
                     buildMessageEventArgs.BuildEventContext = e.BuildEventContext ?? BuildEventContext.Invalid;
-                    Write(buildMessageEventArgs);
-                    break;
+                    return Write(buildMessageEventArgs);
             }
         }
 
-        public void WriteBlob(BinaryLogRecordKind kind, byte[] bytes)
+        public void WriteBlob(BinaryLogRecordKind kind, Stream stream)
         {
+            if (stream.CanSeek && stream.Length > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(stream));
+            }
+
             // write the blob directly to the underlying writer,
             // bypassing the memory stream
             using var redirection = RedirectWritesToOriginalWriter();
 
             Write(kind);
-            Write(bytes.Length);
-            Write(bytes);
+            Write((int)stream.Length);
+            WriteToOriginalStream(stream);
         }
 
         /// <summary>
@@ -226,62 +277,79 @@ Build
         /// </summary>
         private IDisposable RedirectWritesToOriginalWriter()
         {
-            binaryWriter = originalBinaryWriter;
-            return new RedirectionScope(this);
+            return RedirectWritesToDifferentWriter(originalBinaryWriter, currentRecordWriter);
         }
 
-        private struct RedirectionScope : IDisposable
+        private IDisposable RedirectWritesToDifferentWriter(BinaryWriter inScopeWriter, BinaryWriter afterScopeWriter)
         {
-            private readonly BuildEventArgsWriter _writer;
-
-            public RedirectionScope(BuildEventArgsWriter buildEventArgsWriter)
-            {
-                _writer = buildEventArgsWriter;
-            }
-
-            public void Dispose()
-            {
-                _writer.binaryWriter = _writer.currentRecordWriter;
-            }
+            binaryWriter = inScopeWriter;
+            return new CleanupScope(() => binaryWriter = afterScopeWriter);
         }
 
-        private void Write(BuildStartedEventArgs e)
+        private BinaryLogRecordKind Write(BuildStartedEventArgs e)
         {
-            Write(BinaryLogRecordKind.BuildStarted);
             WriteBuildEventArgsFields(e);
-            Write(e.BuildEnvironment);
-        }
-
-        private void Write(BuildFinishedEventArgs e)
-        {
-            Write(BinaryLogRecordKind.BuildFinished);
-            WriteBuildEventArgsFields(e);
-            Write(e.Succeeded);
-        }
-
-        private void Write(ProjectEvaluationStartedEventArgs e)
-        {
-            Write(BinaryLogRecordKind.ProjectEvaluationStarted);
-            WriteBuildEventArgsFields(e, writeMessage: false);
-            WriteDeduplicatedString(e.ProjectFile);
-        }
-
-        private void Write(ProjectEvaluationFinishedEventArgs e)
-        {
-            Write(BinaryLogRecordKind.ProjectEvaluationFinished);
-
-            WriteBuildEventArgsFields(e, writeMessage: false);
-            WriteDeduplicatedString(e.ProjectFile);
-
-            if (e.GlobalProperties == null)
+            if (Traits.LogAllEnvironmentVariables)
             {
-                Write(false);
+                Write(e.BuildEnvironment);
             }
             else
             {
-                Write(true);
-                WriteProperties(e.GlobalProperties);
+                Write(e.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)));
             }
+
+            return BinaryLogRecordKind.BuildStarted;
+        }
+
+        private BinaryLogRecordKind Write(BuildFinishedEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+            Write(e.Succeeded);
+
+            return BinaryLogRecordKind.BuildFinished;
+        }
+
+        private BinaryLogRecordKind Write(BuildCanceledEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+
+            return BinaryLogRecordKind.BuildCanceled;
+        }
+
+        private BinaryLogRecordKind Write(ProjectEvaluationStartedEventArgs e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            WriteDeduplicatedString(e.ProjectFile);
+            return BinaryLogRecordKind.ProjectEvaluationStarted;
+        }
+
+        private BinaryLogRecordKind Write(BuildCheckTracingEventArgs e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: false);
+
+            Dictionary<string, TimeSpan> stats = e.TracingData.ExtractCheckStats();
+            stats.Merge(e.TracingData.InfrastructureTracingData, (span1, span2) => span1 + span2);
+
+            WriteProperties(stats);
+
+            return BinaryLogRecordKind.BuildCheckTracing;
+        }
+
+        private BinaryLogRecordKind Write(BuildCheckAcquisitionEventArgs e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            WriteDeduplicatedString(e.AcquisitionPath);
+            WriteDeduplicatedString(e.ProjectPath);
+
+            return BinaryLogRecordKind.BuildCheckAcquisition;
+        }
+
+        private BinaryLogRecordKind Write(ProjectEvaluationFinishedEventArgs e)
+        {
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            WriteDeduplicatedString(e.ProjectFile);
+
+            WriteProperties(e.GlobalProperties);
 
             WriteProperties(e.Properties);
 
@@ -299,11 +367,24 @@ Build
                     Write(item.Value);
                 }
             }
+
+            return BinaryLogRecordKind.ProjectEvaluationFinished;
         }
 
-        private void Write(ProjectStartedEventArgs e)
+        private BinaryLogRecordKind Write(BuildSubmissionStartedEventArgs e)
         {
-            Write(BinaryLogRecordKind.ProjectStarted);
+            WriteBuildEventArgsFields(e, writeMessage: false);
+            Write(e.GlobalProperties);
+            WriteStringList(e.EntryProjectsFullPath);
+            WriteStringList(e.TargetNames);
+            Write((int)e.Flags);
+            Write(e.SubmissionId);
+
+            return BinaryLogRecordKind.BuildSubmissionStarted;
+        }
+
+        private BinaryLogRecordKind Write(ProjectStartedEventArgs e)
+        {
             WriteBuildEventArgsFields(e, writeMessage: false);
 
             if (e.ParentProjectBuildEventContext == null)
@@ -322,75 +403,74 @@ Build
             WriteDeduplicatedString(e.TargetNames);
             WriteDeduplicatedString(e.ToolsVersion);
 
-            if (e.GlobalProperties == null)
-            {
-                Write(false);
-            }
-            else
-            {
-                Write(true);
-                Write(e.GlobalProperties);
-            }
+            Write(e.GlobalProperties);
 
             WriteProperties(e.Properties);
 
             WriteProjectItems(e.Items);
+
+            return BinaryLogRecordKind.ProjectStarted;
         }
 
-        private void Write(ProjectFinishedEventArgs e)
+        private BinaryLogRecordKind Write(ProjectFinishedEventArgs e)
         {
-            Write(BinaryLogRecordKind.ProjectFinished);
             WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.ProjectFile);
             Write(e.Succeeded);
+
+            return BinaryLogRecordKind.ProjectFinished;
         }
 
-        private void Write(TargetStartedEventArgs e)
+        private BinaryLogRecordKind Write(TargetStartedEventArgs e)
         {
-            Write(BinaryLogRecordKind.TargetStarted);
             WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.TargetName);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TargetFile);
             WriteDeduplicatedString(e.ParentTarget);
             Write((int)e.BuildReason);
+
+            return BinaryLogRecordKind.TargetStarted;
         }
 
-        private void Write(TargetFinishedEventArgs e)
+        private BinaryLogRecordKind Write(TargetFinishedEventArgs e)
         {
-            Write(BinaryLogRecordKind.TargetFinished);
             WriteBuildEventArgsFields(e, writeMessage: false);
             Write(e.Succeeded);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TargetFile);
             WriteDeduplicatedString(e.TargetName);
             WriteTaskItemList(e.TargetOutputs);
+
+            return BinaryLogRecordKind.TargetFinished;
         }
 
-        private void Write(TaskStartedEventArgs e)
+        private BinaryLogRecordKind Write(TaskStartedEventArgs e)
         {
-            Write(BinaryLogRecordKind.TaskStarted);
             WriteBuildEventArgsFields(e, writeMessage: false, writeLineAndColumn: true);
             Write(e.LineNumber);
             Write(e.ColumnNumber);
             WriteDeduplicatedString(e.TaskName);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TaskFile);
+            WriteDeduplicatedString(e.TaskAssemblyLocation);
+
+            return BinaryLogRecordKind.TaskStarted;
         }
 
-        private void Write(TaskFinishedEventArgs e)
+        private BinaryLogRecordKind Write(TaskFinishedEventArgs e)
         {
-            Write(BinaryLogRecordKind.TaskFinished);
             WriteBuildEventArgsFields(e, writeMessage: false);
             Write(e.Succeeded);
             WriteDeduplicatedString(e.TaskName);
             WriteDeduplicatedString(e.ProjectFile);
             WriteDeduplicatedString(e.TaskFile);
+
+            return BinaryLogRecordKind.TaskFinished;
         }
 
-        private void Write(BuildErrorEventArgs e)
+        private BinaryLogRecordKind Write(BuildErrorEventArgs e)
         {
-            Write(BinaryLogRecordKind.Error);
             WriteBuildEventArgsFields(e);
             WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);
@@ -401,11 +481,12 @@ Build
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
+
+            return BinaryLogRecordKind.Error;
         }
 
-        private void Write(BuildWarningEventArgs e)
+        private BinaryLogRecordKind Write(BuildWarningEventArgs e)
         {
-            Write(BinaryLogRecordKind.Warning);
             WriteBuildEventArgsFields(e);
             WriteArguments(e.RawArguments);
             WriteDeduplicatedString(e.Subcategory);
@@ -416,40 +497,43 @@ Build
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
+
+            return BinaryLogRecordKind.Warning;
         }
 
-        private void Write(BuildMessageEventArgs e)
+        private BinaryLogRecordKind Write(BuildMessageEventArgs e)
         {
             switch (e)
             {
-                case TaskParameterEventArgs taskParameter: Write(taskParameter); break;
-                case ProjectImportedEventArgs projectImported: Write(projectImported); break;
-                case TargetSkippedEventArgs targetSkipped: Write(targetSkipped); break;
-                case PropertyReassignmentEventArgs propertyReassignment: Write(propertyReassignment); break;
-                case TaskCommandLineEventArgs taskCommandLine: Write(taskCommandLine); break;
-                case UninitializedPropertyReadEventArgs uninitializedPropertyRead: Write(uninitializedPropertyRead); break;
-                case EnvironmentVariableReadEventArgs environmentVariableRead: Write(environmentVariableRead); break;
-                case PropertyInitialValueSetEventArgs propertyInitialValueSet: Write(propertyInitialValueSet); break;
-                case CriticalBuildMessageEventArgs criticalBuildMessage: Write(criticalBuildMessage); break;
+                case ResponseFileUsedEventArgs responseFileUsed: return Write(responseFileUsed);
+                case TaskParameterEventArgs taskParameter: return Write(taskParameter);
+                case ProjectImportedEventArgs projectImported: return Write(projectImported);
+                case TargetSkippedEventArgs targetSkipped: return Write(targetSkipped);
+                case PropertyReassignmentEventArgs propertyReassignment: return Write(propertyReassignment);
+                case TaskCommandLineEventArgs taskCommandLine: return Write(taskCommandLine);
+                case UninitializedPropertyReadEventArgs uninitializedPropertyRead: return Write(uninitializedPropertyRead);
+                case EnvironmentVariableReadEventArgs environmentVariableRead: return Write(environmentVariableRead);
+                case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
+                case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
+                case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
+
                 default: // actual BuildMessageEventArgs
-                    Write(BinaryLogRecordKind.Message);
                     WriteMessageFields(e, writeImportance: true);
-                    break;
+                    return BinaryLogRecordKind.Message;
             }
         }
 
-        private void Write(ProjectImportedEventArgs e)
+        private BinaryLogRecordKind Write(ProjectImportedEventArgs e)
         {
-            Write(BinaryLogRecordKind.ProjectImported);
             WriteMessageFields(e);
             Write(e.ImportIgnored);
             WriteDeduplicatedString(e.ImportedProjectFile);
             WriteDeduplicatedString(e.UnexpandedProject);
+            return BinaryLogRecordKind.ProjectImported;
         }
 
-        private void Write(TargetSkippedEventArgs e)
+        private BinaryLogRecordKind Write(TargetSkippedEventArgs e)
         {
-            Write(BinaryLogRecordKind.TargetSkipped);
             WriteMessageFields(e, writeMessage: false);
             WriteDeduplicatedString(e.TargetFile);
             WriteDeduplicatedString(e.TargetName);
@@ -460,62 +544,95 @@ Build
             Write((int)e.BuildReason);
             Write((int)e.SkipReason);
             binaryWriter.WriteOptionalBuildEventContext(e.OriginalBuildEventContext);
+            return BinaryLogRecordKind.TargetSkipped;
         }
 
-        private void Write(CriticalBuildMessageEventArgs e)
+        private BinaryLogRecordKind Write(AssemblyLoadBuildEventArgs e)
         {
-            Write(BinaryLogRecordKind.CriticalBuildMessage);
+            WriteMessageFields(e, writeMessage: false, writeImportance: false);
+            Write((int)e.LoadingContext);
+            WriteDeduplicatedString(e.LoadingInitiator);
+            WriteDeduplicatedString(e.AssemblyName);
+            WriteDeduplicatedString(e.AssemblyPath);
+            Write(e.MVID);
+            WriteDeduplicatedString(e.AppDomainDescriptor);
+            return BinaryLogRecordKind.AssemblyLoad;
+        }
+
+        private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)
+        {
             WriteMessageFields(e);
+            return BinaryLogRecordKind.CriticalBuildMessage;
         }
 
-        private void Write(PropertyReassignmentEventArgs e)
+        private BinaryLogRecordKind Write(PropertyReassignmentEventArgs e)
         {
-            Write(BinaryLogRecordKind.PropertyReassignment);
             WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
             WriteDeduplicatedString(e.PreviousValue);
             WriteDeduplicatedString(e.NewValue);
             WriteDeduplicatedString(e.Location);
+
+            return BinaryLogRecordKind.PropertyReassignment;
         }
 
-        private void Write(UninitializedPropertyReadEventArgs e)
+        private BinaryLogRecordKind Write(UninitializedPropertyReadEventArgs e)
         {
-            Write(BinaryLogRecordKind.UninitializedPropertyRead);
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
+
+            return BinaryLogRecordKind.UninitializedPropertyRead;
         }
 
-        private void Write(PropertyInitialValueSetEventArgs e)
+        private BinaryLogRecordKind Write(PropertyInitialValueSetEventArgs e)
         {
-            Write(BinaryLogRecordKind.PropertyInitialValueSet);
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.PropertyName);
             WriteDeduplicatedString(e.PropertyValue);
             WriteDeduplicatedString(e.PropertySource);
+            return BinaryLogRecordKind.PropertyInitialValueSet;
         }
 
-        private void Write(EnvironmentVariableReadEventArgs e)
+        private BinaryLogRecordKind Write(EnvironmentVariableReadEventArgs e)
         {
-            Write(BinaryLogRecordKind.EnvironmentVariableRead);
-            WriteMessageFields(e, writeImportance: true);
+            WriteMessageFields(e, writeImportance: false);
             WriteDeduplicatedString(e.EnvironmentVariableName);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
+            WriteDeduplicatedString(e.File);
+
+            return BinaryLogRecordKind.EnvironmentVariableRead;
         }
 
-        private void Write(TaskCommandLineEventArgs e)
+        private BinaryLogRecordKind Write(ResponseFileUsedEventArgs e)
         {
-            Write(BinaryLogRecordKind.TaskCommandLine);
+            WriteMessageFields(e);
+            WriteDeduplicatedString(e.ResponseFilePath);
+            return BinaryLogRecordKind.ResponseFileUsed;
+        }
+
+        private BinaryLogRecordKind Write(TaskCommandLineEventArgs e)
+        {
             WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteDeduplicatedString(e.CommandLine);
             WriteDeduplicatedString(e.TaskName);
+            return BinaryLogRecordKind.TaskCommandLine;
         }
 
-        private void Write(TaskParameterEventArgs e)
+        private BinaryLogRecordKind Write(TaskParameterEventArgs e)
         {
-            Write(BinaryLogRecordKind.TaskParameter);
             WriteMessageFields(e, writeMessage: false);
             Write((int)e.Kind);
             WriteDeduplicatedString(e.ItemType);
             WriteTaskItemList(e.Items, e.LogItemMetadata);
+            WriteDeduplicatedString(e.ParameterName);
+            WriteDeduplicatedString(e.PropertyName);
+            if (e.Kind == TaskParameterMessageKind.AddItem
+               || e.Kind == TaskParameterMessageKind.TaskOutput)
+            {
+                CheckForFilesToEmbed(e.ItemType, e.Items);
+            }
+            return BinaryLogRecordKind.TaskParameter;
         }
 
         private void WriteBuildEventArgsFields(BuildEventArgs e, bool writeMessage = true, bool writeLineAndColumn = false)
@@ -560,6 +677,11 @@ Build
             if ((flags & BuildEventArgsFieldFlags.Timestamp) != 0)
             {
                 Write(e.Timestamp);
+            }
+
+            if ((flags & BuildEventArgsFieldFlags.Extended) != 0)
+            {
+                Write(e as IExtendedBuildEventArgs);
             }
         }
 
@@ -724,6 +846,11 @@ Build
             if (e.Timestamp != default(DateTime))
             {
                 flags |= BuildEventArgsFieldFlags.Timestamp;
+            }
+
+            if (e is IExtendedBuildEventArgs extendedData)
+            {
+                flags |= BuildEventArgsFieldFlags.Extended;
             }
 
             return flags;
@@ -917,10 +1044,10 @@ Build
 
             // Don't sort metadata because we want the binary log to be fully roundtrippable
             // and we need to preserve the original order.
-            //if (nameValueListBuffer.Count > 1)
-            //{
+            // if (nameValueListBuffer.Count > 1)
+            // {
             //    nameValueListBuffer.Sort((l, r) => StringComparer.OrdinalIgnoreCase.Compare(l.Key, r.Key));
-            //}
+            // }
 
             WriteNameValueList();
 
@@ -935,7 +1062,7 @@ Build
                 return;
             }
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => nameValueListBuffer.Add(kvp));
+            Internal.Utilities.EnumerateProperties(properties, nameValueListBuffer, static (list, kvp) => list.Add(kvp));
 
             WriteNameValueList();
 
@@ -966,6 +1093,16 @@ Build
             WriteNameValueList();
 
             nameValueListBuffer.Clear();
+        }
+
+        private void WriteStringList(IEnumerable<string> items)
+        {
+            int length = items.Count();
+            Write(length);
+            foreach (string entry in items)
+            {
+                WriteDeduplicatedString(entry);
+            }
         }
 
         private void WriteNameValueList()
@@ -1000,19 +1137,27 @@ Build
         /// </summary>
         private void WriteNameValueListRecord()
         {
-            // Switch the binaryWriter used by the Write* methods to the direct underlying stream writer.
             // We want this record to precede the record we're currently writing to currentRecordWriter
-            // which is backed by a MemoryStream buffer
-            using var redirectionScope = RedirectWritesToOriginalWriter();
+            // We as well want to know the storage size (differs from nameValueIndexListBuffer.Count as
+            //  we use variable integer encoding).
+            // So we redirect the writes to a MemoryStream and then flush the record to the final stream.
+            // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
-            Write(BinaryLogRecordKind.NameValueList);
-            Write(nameValueIndexListBuffer.Count);
-            for (int i = 0; i < nameValueListBuffer.Count; i++)
+            nameValueListStream.SetLength(0);
+            var nameValueListBw = new BinaryWriter(nameValueListStream);
+
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
             {
-                var kvp = nameValueIndexListBuffer[i];
-                Write(kvp.Key);
-                Write(kvp.Value);
+                Write(nameValueIndexListBuffer.Count);
+                for (int i = 0; i < nameValueListBuffer.Count; i++)
+                {
+                    var kvp = nameValueIndexListBuffer[i];
+                    Write(kvp.Key);
+                    Write(kvp.Value);
+                }
             }
+
+            FlushRecordToFinalStream(BinaryLogRecordKind.NameValueList, nameValueListStream);
         }
 
         /// <summary>
@@ -1046,7 +1191,7 @@ Build
             Write((int)kind);
         }
 
-        private void Write(int value)
+        internal void Write(int value)
         {
             BinaryWriterExtensions.Write7BitEncodedInt(binaryWriter, value);
         }
@@ -1061,6 +1206,14 @@ Build
             binaryWriter.Write(bytes);
         }
 
+        private void WriteToOriginalStream(Stream stream)
+        {
+            // WARNING: avoid calling binaryWriter.BaseStream here
+            // as it will flush the underlying stream - since that is a
+            // BufferedStream it will make buffering nearly useless
+            stream.CopyTo(originalStream);
+        }
+
         private void Write(byte b)
         {
             binaryWriter.Write(b);
@@ -1069,6 +1222,15 @@ Build
         private void Write(bool boolean)
         {
             binaryWriter.Write(boolean);
+        }
+
+        private unsafe void Write(Guid guid)
+        {
+            byte* ptr = (byte*)&guid;
+            for (int i = 0; i < sizeof(Guid); i++, ptr++)
+            {
+                binaryWriter.Write(*ptr);
+            }
         }
 
         private void WriteDeduplicatedString(string text)
@@ -1106,7 +1268,7 @@ Build
             return (recordId, hash);
         }
 
-        private void WriteStringRecord(string text)
+        internal void WriteStringRecord(string text)
         {
             using var redirectionScope = RedirectWritesToOriginalWriter();
 
@@ -1155,11 +1317,21 @@ Build
             Write(e.InclusiveTime);
         }
 
+        private void Write(IExtendedBuildEventArgs extendedData)
+        {
+            if (extendedData?.ExtendedType != null)
+            {
+                WriteDeduplicatedString(extendedData.ExtendedType);
+                Write(extendedData.ExtendedMetadata);
+                WriteDeduplicatedString(extendedData.ExtendedData);
+            }
+        }
+
         internal readonly struct HashKey : IEquatable<HashKey>
         {
-            private readonly ulong value;
+            private readonly long value;
 
-            private HashKey(ulong i)
+            private HashKey(long i)
             {
                 value = i;
             }
@@ -1172,13 +1344,13 @@ Build
                 }
                 else
                 {
-                    value = FnvHash64.GetHashCode(text);
+                    value = FowlerNollVo1aHash.ComputeHash64Fast(text);
                 }
             }
 
             public static HashKey Combine(HashKey left, HashKey right)
             {
-                return new HashKey(FnvHash64.Combine(left.value, right.value));
+                return new HashKey(FowlerNollVo1aHash.Combine64(left.value, right.value));
             }
 
             public HashKey Add(HashKey other) => Combine(this, other);
@@ -1206,36 +1378,6 @@ Build
             public override string ToString()
             {
                 return value.ToString();
-            }
-        }
-
-        internal static class FnvHash64
-        {
-            public const ulong Offset = 14695981039346656037;
-            public const ulong Prime = 1099511628211;
-
-            public static ulong GetHashCode(string text)
-            {
-                ulong hash = Offset;
-
-                unchecked
-                {
-                    for (int i = 0; i < text.Length; i++)
-                    {
-                        char ch = text[i];
-                        hash = (hash ^ ch) * Prime;
-                    }
-                }
-
-                return hash;
-            }
-
-            public static ulong Combine(ulong left, ulong right)
-            {
-                unchecked
-                {
-                    return (left ^ right) * Prime;
-                }
             }
         }
     }

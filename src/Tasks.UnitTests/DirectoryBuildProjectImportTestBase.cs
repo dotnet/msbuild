@@ -1,20 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Evaluation;
 using System;
 using System.IO;
+using Microsoft.Build.Evaluation;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// A base class for testing the directory build project import functionality in Microsoft.Common.props and Microsoft.Common.targets.
     /// </summary>
-    abstract public class DirectoryBuildProjectImportTestBase : IDisposable
+    public abstract class DirectoryBuildProjectImportTestBase : IDisposable
     {
         private const string BasicDirectoryBuildProjectContents = @"
-                <Project xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project>
                     <PropertyGroup>
                         <WasDirectoryBuildProjectImported>true</WasDirectoryBuildProjectImported>
                     </PropertyGroup>
@@ -73,7 +75,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
@@ -102,7 +104,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, $@"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <{ImportDirectoryBuildProjectPropertyName}>false</{ImportDirectoryBuildProjectPropertyName}>
                     </PropertyGroup>
@@ -133,7 +135,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, $@"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <{DirectoryBuildProjectPathPropertyName}>{customFilePath}</{DirectoryBuildProjectPathPropertyName}>
                     </PropertyGroup>
@@ -161,7 +163,7 @@ namespace Microsoft.Build.UnitTests
             // ---------------------
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(ObjectModelHelpers.CreateFileInTempProjectDirectory(_projectRelativePath, @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
 
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />

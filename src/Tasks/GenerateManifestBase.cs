@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -16,8 +17,19 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public abstract class GenerateManifestBase : Task
     {
-        private enum AssemblyType { Unspecified, Managed, Native, Satellite };
-        private enum DependencyType { Install, Prerequisite };
+        private enum AssemblyType
+        {
+            Unspecified,
+            Managed,
+            Native,
+            Satellite,
+        }
+
+        private enum DependencyType
+        {
+            Install,
+            Prerequisite,
+        }
 
         private string _processorArchitecture;
         private int _startTime;
@@ -235,9 +247,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Fixup for non-ClickOnce case...
-            if (_manifest is ApplicationManifest)
+            if (_manifest is ApplicationManifest applicationManifest)
             {
-                var applicationManifest = _manifest as ApplicationManifest;
                 if (!applicationManifest.IsClickOnceManifest)
                 {
                     // Don't need publicKeyToken attribute for non-ClickOnce case
@@ -260,6 +271,12 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateManifestBase));
+                return false;
+            }
+
             bool success = true;
 
             Type manifestType = GetObjectType();
@@ -501,7 +518,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifestBase.ResolveFiles t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"GenerateManifestBase.ResolveFiles t={Environment.TickCount - t1}");
             return true;
         }
 
@@ -601,12 +618,14 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(OutputManifest.ItemSpec);
+                Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message, lockedFileMessage);
+
                 return false;
             }
 
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "GenerateManifestBase.WriteManifest t={0}", Environment.TickCount - t1));
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "Total time to generate manifest '{1}': t={0}", Environment.TickCount - _startTime, Path.GetFileName(OutputManifest.ItemSpec)));
+            Util.WriteLog($"GenerateManifestBase.WriteManifest t={Environment.TickCount - t1}");
+            Util.WriteLog($"Total time to generate manifest '{Path.GetFileName(OutputManifest.ItemSpec)}': t={Environment.TickCount - _startTime}");
             return true;
         }
     }

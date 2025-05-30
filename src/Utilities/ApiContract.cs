@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Collections.Generic;
+using System.Xml;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
@@ -32,14 +34,14 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns true if this element is a "ContainedApiContracts" element. 
+        /// Returns true if this element is a "ContainedApiContracts" element.
         /// </summary>
         internal static bool IsContainedApiContractsElement(string elementName) => string.Equals(elementName, Elements.ContainedApiContracts, StringComparison.Ordinal);
 
         internal static bool IsVersionedContentElement(string elementName) => string.Equals(elementName, Elements.VersionedContent, StringComparison.Ordinal);
 
         /// <summary>
-        /// Given an XML element containing API contracts, read out all contracts within that element. 
+        /// Given an XML element containing API contracts, read out all contracts within that element.
         /// </summary>
         internal static void ReadContractsElement(XmlElement element, ICollection<ApiContract> apiContracts)
         {
@@ -54,8 +56,7 @@ namespace Microsoft.Build.Utilities
                     {
                         apiContracts.Add(new ApiContract(
                             contractElement.GetAttribute(Attributes.Name),
-                            contractElement.GetAttribute(Attributes.Version)
-                        ));
+                            contractElement.GetAttribute(Attributes.Version)));
                     }
                 }
             }

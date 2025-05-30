@@ -1,4 +1,7 @@
-﻿/*
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+/*
 using System;
 using System.Collections;
 using System.IO;
@@ -8,6 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks;
 
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -27,9 +32,9 @@ namespace Microsoft.Build.UnitTests
             if (useOverride)
             {
                 string overrideContents = @"<?xml version=`1.0`?>
-                <VisualStudioPropertySheet 
-	                ProjectType=`Visual C++` 
-	                Version=`8.00` 
+                <VisualStudioPropertySheet
+	                ProjectType=`Visual C++`
+	                Version=`8.00`
 	                Name=`VCOverride` OutputDirectory=`Outputs\$(ConfigurationName)`
 	                >
                 </VisualStudioPropertySheet>";
@@ -74,7 +79,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void OverrideOutputDirectory()
         {
-            string vcProjectContents =  
+            string vcProjectContents =
             #region VC project contents
             @"<?xml version=`1.0` encoding=`Windows-1252`?>
                 <VisualStudioProject
@@ -340,7 +345,7 @@ namespace Microsoft.Build.UnitTests
                 </VisualStudioProject>";
             #endregion
 
-            VerifyVCProjectOutputs(vcProjectContents, true, "Debug|Win32", 
+            VerifyVCProjectOutputs(vcProjectContents, true, "Debug|Win32",
                 @"Outputs\Debug\CppProj.dll", null);
         }
 

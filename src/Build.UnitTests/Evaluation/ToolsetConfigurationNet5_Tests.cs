@@ -1,16 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if !FEATURE_SYSTEM_CONFIGURATION
 /*  This test is designed especially to test Configuration parsing in net5.0
  *  which means it WON'T work in net472 and thus we don't run it in net472 */
 
+using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
-using Xunit;
-using System.Collections.Generic;
 using Shouldly;
+using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -24,7 +25,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         // paths such as SDK path and RoslynTargetPath and nothing else. This behavior is expected and the exact same as before.
         public void ToolsetDefinitionLocationsIsDefault()
         {
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
             IDictionary<string, string> toolsetProperties
                 = new Dictionary<string, string>();
 
@@ -47,11 +48,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        // With ToolsetDefintionLocations set to ConfigurationFile (Which would only happen in net5.0 if the user decides to set it). 
+        // With ToolsetDefintionLocations set to ConfigurationFile (Which would only happen in net5.0 if the user decides to set it).
         // Most toolsets are available and the MsBuildTools and SDK paths are all in the net5.0 runtime.
         public void ToolsetDefinitionLocationsIsConfiguration()
         {
-            var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
+            using var projectCollection = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
             IDictionary<string, string> toolsetProperties
                 = new Dictionary<string, string>();
 

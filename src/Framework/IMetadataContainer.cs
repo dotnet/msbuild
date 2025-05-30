@@ -1,7 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -18,5 +20,17 @@ namespace Microsoft.Build.Framework
         /// in the binary logger.
         /// </summary>
         IEnumerable<KeyValuePair<string, string>> EnumerateMetadata();
+
+        /// <summary>
+        /// Sets the given metadata. The operation is equivalent to calling
+        /// <see cref="ITaskItem.SetMetadata"/> on all metadata, but takes
+        /// advantage of a faster bulk-set operation where applicable. The
+        /// implementation may not perform the same parameter validation
+        /// as SetMetadata.
+        /// </summary>
+        /// <param name="metadata">The metadata to set. The keys are assumed
+        /// to be unique and values are assumed to be escaped.
+        /// </param>
+        void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata);
     }
 }

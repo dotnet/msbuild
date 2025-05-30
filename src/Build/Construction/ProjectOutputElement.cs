@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Diagnostics;
+using System.Xml;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -29,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectOutputElement(XmlElement xmlElement, ProjectTaskElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -41,7 +43,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the TaskParameter value. 
+        /// Gets or sets the TaskParameter value.
         /// Returns empty string if it is not present.
         /// </summary>
         public string TaskParameter
@@ -55,7 +57,7 @@ namespace Microsoft.Build.Construction
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
+                ErrorUtilities.VerifyThrowArgumentLength(value);
                 SetOrRemoveAttribute(XMakeAttributes.taskParameter, value, "Set Output TaskParameter {0}", value);
             }
         }
@@ -71,7 +73,7 @@ namespace Microsoft.Build.Construction
         public bool IsOutputProperty => PropertyName.Length > 0;
 
         /// <summary>
-        /// Gets or sets the ItemType value. 
+        /// Gets or sets the ItemType value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -94,7 +96,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the PropertyName value. 
+        /// Gets or sets the PropertyName value.
         /// Returns empty string if it is not present.
         /// Removes the attribute if the value to set is empty.
         /// </summary>
@@ -136,14 +138,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static ProjectOutputElement CreateDisconnected(string taskParameter, string itemType, string propertyName, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgument
-                (
+            ErrorUtilities.VerifyThrowArgument(
                 String.IsNullOrEmpty(itemType) ^ String.IsNullOrEmpty(propertyName),
                 "OM_EitherAttributeButNotBoth",
                 XMakeElements.output,
                 XMakeAttributes.propertyName,
-                XMakeAttributes.itemName
-                );
+                XMakeAttributes.itemName);
 
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.output);
 

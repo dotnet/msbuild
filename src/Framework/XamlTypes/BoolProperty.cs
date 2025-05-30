@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.Framework.XamlTypes
 {
@@ -11,9 +13,9 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// Represents the logical negation of a boolean switch. 
+        /// Represents the logical negation of a boolean switch.
         /// </summary>
-        /// <example> 
+        /// <example>
         /// <para>
         /// For the VC++ CL task, <c>WholeProgramOptimization</c> is a boolean parameter. It's switch is <c>GL</c>. To
         /// disable whole program optimization, you need to pass the ReverseSwitch, which is <c>GL-</c>.

@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -77,7 +79,12 @@ namespace Microsoft.Build.Tasks
         {
             if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             {
-                return new Version(version.Substring(1));
+                return Version.Parse(
+#if NET
+                    version.AsSpan(1));
+#else
+                    version.Substring(1));
+#endif
             }
             return new Version(version);
         }
@@ -143,7 +150,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Is this file's IncludeHash set to false?
         /// Is this file System.Data.Entity.dll?
-        /// Is this file Client Sentinel Assembly? 
+        /// Is this file Client Sentinel Assembly?
         /// </summary>
         private static bool IsExcludedFileOrSP1File(ITaskItem candidateFile)
         {

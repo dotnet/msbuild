@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -53,7 +55,22 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packetType);
             }
 
-            record.DeserializeAndRoutePacket(nodeId, translator);
+            INodePacket packet = record.DeserializePacket(translator);
+            record.RoutePacket(nodeId, packet);
+        }
+
+        /// <summary>
+        /// Creates a packet with data from a binary stream.
+        /// </summary>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
+            if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record))
+            {
+                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packetType);
+            }
+
+            return record.DeserializePacket(translator);
         }
 
         /// <summary>
@@ -61,7 +78,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            PacketFactoryRecord record = _packetFactories[packet.Type];
+            // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
+            if (!_packetFactories.TryGetValue(packet.Type, out PacketFactoryRecord record))
+            {
+                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packet.Type);
+            }
+
             record.RoutePacket(nodeId, packet);
         }
 
@@ -75,12 +97,12 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The handler to invoke when the packet is deserialized.
             /// </summary>
-            private INodePacketHandler _handler;
+            private readonly INodePacketHandler _handler;
 
             /// <summary>
             /// The method used to construct a packet from a translator stream.
             /// </summary>
-            private NodePacketFactoryMethod _factoryMethod;
+            private readonly NodePacketFactoryMethod _factoryMethod;
 
             /// <summary>
             /// Constructor.
@@ -92,21 +114,14 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Creates a packet from a binary stream and sends it to the registered handler.
+            /// Creates a packet from a binary stream.
             /// </summary>
-            public void DeserializeAndRoutePacket(int nodeId, ITranslator translator)
-            {
-                INodePacket packet = _factoryMethod(translator);
-                RoutePacket(nodeId, packet);
-            }
+            public INodePacket DeserializePacket(ITranslator translator) => _factoryMethod(translator);
 
             /// <summary>
             /// Routes the packet to the correct destination.
             /// </summary>
-            public void RoutePacket(int nodeId, INodePacket packet)
-            {
-                _handler.PacketReceived(nodeId, packet);
-            }
+            public void RoutePacket(int nodeId, INodePacket packet) => _handler.PacketReceived(nodeId, packet);
         }
     }
 }

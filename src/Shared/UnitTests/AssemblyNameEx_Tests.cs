@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,15 +7,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssemblyNameEx_Tests
+    public sealed class AssemblyNameEx_Tests
     {
         /// <summary>
         /// Delegate defines a function that produces an AssemblyNameExtension from a string.
@@ -173,8 +174,7 @@ namespace Microsoft.Build.UnitTests
                             if
                                 (
                                     a1.CompareBaseNameTo(a2) == 0   // Only check version if basenames match
-                                    && a1.Version != a2.Version
-                                )
+                                    && a1.Version != a2.Version)
                             {
                                 if (a1.Version == null)
                                 {
@@ -318,20 +318,15 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verify an exception is thrown when the simple name is not in the itemspec.
-        /// 
+        ///
         /// </summary>
         [Fact]
         public void CreateAssemblyNameExtensionWithNoSimpleName()
         {
-            // Mono does not throw on this string
-            if (!NativeMethodsShared.IsMono)
+            Assert.Throws<FileLoadException>(() =>
             {
-                Assert.Throws<FileLoadException>(() =>
-                {
-                    AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
-                }
-               );
-            }
+                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a", true);
+            });
         }
 
         /// <summary>
@@ -340,17 +335,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CreateAssemblyNameExtensionWithNoSimpleName2()
         {
-            // Mono does not throw on this string
-            if (!NativeMethodsShared.IsMono)
+            Assert.Throws<FileLoadException>(() =>
             {
-                Assert.Throws<FileLoadException>(() =>
-                {
-                    AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-                    AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-                    extension2.PartialNameCompare(extension);
-                }
-                                                 );
-            }
+                AssemblyNameExtension extension = new AssemblyNameExtension("Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                AssemblyNameExtension extension2 = new AssemblyNameExtension("A, Version=2.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
+                extension2.PartialNameCompare(extension);
+            });
         }
 
         /// <summary>
@@ -649,7 +639,7 @@ namespace Microsoft.Build.UnitTests
 
 
         /// <summary>
-        /// Make sure the reverse version comparer will compare the version in a way that would sort them in reverse order. 
+        /// Make sure the reverse version comparer will compare the version in a way that would sort them in reverse order.
         /// </summary>
         [Fact]
         public void VerifyReverseVersionComparer()
@@ -686,68 +676,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("System.Xml, Culture=de-DE")]
         [InlineData("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes")]
         [InlineData("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
-        public void VerifyAssemblyNameExSerialization(string assemblyName)
-        {
-            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension(assemblyName);
-            AssemblyNameExtension assemblyNameDeserialized;
-
-            byte[] bytes;
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(ms, assemblyNameOriginal);
-
-                bytes = ms.ToArray();
-            }
-
-            using (MemoryStream ms = new MemoryStream(bytes))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                assemblyNameDeserialized = (AssemblyNameExtension) formatter.Deserialize(ms);
-            }
-
-            assemblyNameDeserialized.ShouldBe(assemblyNameOriginal);
-        }
-
-        [Fact]
-        public void VerifyAssemblyNameExSerializationWithRemappedFrom()
-        {
-            AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            AssemblyNameExtension assemblyRemappedFrom = new AssemblyNameExtension("System.Xml, Version=9.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a");
-            assemblyRemappedFrom.MarkImmutable();
-            assemblyNameOriginal.AddRemappedAssemblyName(assemblyRemappedFrom);
-            assemblyNameOriginal.RemappedFromEnumerator.Count().ShouldBe(1);
-
-            AssemblyNameExtension assemblyNameDeserialized;
-
-            byte[] bytes;
-
-            using (MemoryStream ms = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(ms, assemblyNameOriginal);
-
-                bytes = ms.ToArray();
-            }
-
-            using (MemoryStream ms = new MemoryStream(bytes))
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-                assemblyNameDeserialized = (AssemblyNameExtension)formatter.Deserialize(ms);
-            }
-
-            assemblyNameDeserialized.Equals(assemblyNameOriginal).ShouldBeTrue();
-            assemblyNameDeserialized.RemappedFromEnumerator.Count().ShouldBe(1);
-            assemblyNameDeserialized.RemappedFromEnumerator.First().ShouldBe(assemblyRemappedFrom);
-        }
-
-        [Theory]
-        [InlineData("System.Xml")]
-        [InlineData("System.XML, Version=2.0.0.0")]
-        [InlineData("System.Xml, Culture=de-DE")]
-        [InlineData("System.Xml, Version=10.0.0.0, Culture=en, PublicKeyToken=b03f5f7f11d50a3a, Retargetable=Yes")]
-        [InlineData("System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a")]
         public void VerifyAssemblyNameExSerializationByTranslator(string assemblyName)
         {
             AssemblyNameExtension assemblyNameOriginal = new AssemblyNameExtension(assemblyName);
@@ -759,7 +687,7 @@ namespace Microsoft.Build.UnitTests
             writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
-            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, null);
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
             readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
 
@@ -783,7 +711,7 @@ namespace Microsoft.Build.UnitTests
             writeTranslator.Translate(ref assemblyNameOriginal, (ITranslator t) => new AssemblyNameExtension(t));
 
             serializationStream.Seek(0, SeekOrigin.Begin);
-            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, null);
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
 
             readTranslator.Translate(ref assemblyNameDeserialized, (ITranslator t) => new AssemblyNameExtension(t));
 

@@ -1,14 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
 using System.IO;
-using System.Threading;
 using System.Linq;
+using System.Threading;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -18,7 +20,6 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GetItemSpecModifier()
@@ -142,37 +143,30 @@ namespace Microsoft.Build.UnitTests
                 Assert.Equal(@"../", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/"));
                 Assert.Equal(@"../ghi/", FileUtilities.MakeRelative(@"/abc/def/xyz", @"/abc/def/ghi/"));
                 Assert.Equal(@".", FileUtilities.MakeRelative(@"/abc/def", @"/abc/def/"));
-
             }
         }
 
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void GetItemSpecModifierOnBadPath()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
                 TestGetItemSpecModifierOnBadPath(Directory.GetCurrentDirectory());
-            }
-           );
+            });
         }
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void GetItemSpecModifierOnBadPath2()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
                 TestGetItemSpecModifierOnBadPath(null);
-            }
-           );
+            });
         }
 
         private static void TestGetItemSpecModifierOnBadPath(string currentDirectory)
@@ -202,7 +196,10 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                if (file != null) File.Delete(file);
+                if (file != null)
+                {
+                    File.Delete(file);
+                }
             }
         }
 
@@ -217,7 +214,6 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.EndsWithSlash
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EndsWithSlash()
@@ -242,7 +238,6 @@ namespace Microsoft.Build.UnitTests
         /// Exercises FileUtilities.GetDirectory
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GetDirectoryWithTrailingSlash()
@@ -264,9 +259,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("foo.txt",      new[] { ".txt" })]
-        [InlineData("foo.txt",      new[] { ".TXT" })]
-        [InlineData("foo.txt",      new[] { ".EXE", ".TXT" })]
+        [InlineData("foo.txt", new[] { ".txt" })]
+        [InlineData("foo.txt", new[] { ".TXT" })]
+        [InlineData("foo.txt", new[] { ".EXE", ".TXT" })]
         public void HasExtension_WhenFileNameHasExtension_ReturnsTrue(string fileName, string[] allowedExtensions)
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
@@ -278,13 +273,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("foo.txt",      new[] { ".DLL" })]
-        [InlineData("foo.txt",      new[] { ".EXE", ".DLL" })]
-        [InlineData("foo.exec",     new[] { ".exe", })]
-        [InlineData("foo.exe",      new[] { ".exec", })]
-        [InlineData("foo",          new[] { ".exe", })]
-        [InlineData("",             new[] { ".exe" })]
-        [InlineData(null,           new[] { ".exe" })]
+        [InlineData("foo.txt", new[] { ".DLL" })]
+        [InlineData("foo.txt", new[] { ".EXE", ".DLL" })]
+        [InlineData("foo.exec", new[] { ".exe", })]
+        [InlineData("foo.exe", new[] { ".exec", })]
+        [InlineData("foo", new[] { ".exe", })]
+        [InlineData("", new[] { ".exe" })]
+        [InlineData(null, new[] { ".exe" })]
         public void HasExtension_WhenFileNameDoesNotHaveExtension_ReturnsFalse(string fileName, string[] allowedExtensions)
         {
             var result = FileUtilities.HasExtension(fileName, allowedExtensions);
@@ -292,9 +287,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact]
         public void HasExtension_WhenInvalidFileName_ThrowsArgumentException()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -332,10 +325,10 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar")); // "test 2"
 
             // Already has a trailing slash to start with.
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); //test 3"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); //test 4"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); //test 5"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); //"test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); // test 3"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); // test 4"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); // test 5"
+            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
         }
 
         /// <summary>
@@ -415,8 +408,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("recursivedir"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void NormalizePathThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -426,9 +418,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/4363")]
+        [LongPathSupportDisabledFact(fullFrameworkOnly: true, additionalMessage: "https://github.com/dotnet/msbuild/issues/4363")]
         public void NormalizePathThatDoesntFitIntoMaxPath()
         {
             Assert.Throws<PathTooLongException>(() =>
@@ -440,12 +430,10 @@ namespace Microsoft.Build.UnitTests
                 string fullPath = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\a.cs";
 
                 Assert.Equal(fullPath, FileUtilities.NormalizePath(Path.Combine(currentDirectory, filePath)));
-            }
-           );
+            });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void GetItemSpecModifierRootDirThatFitsIntoMaxPath()
         {
             string currentDirectory = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890";
@@ -461,8 +449,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(null, null));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -471,55 +458,43 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(String.Empty));
-            }
-           );
+            });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathBadUNC1()
         {
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(@"\\"));
-            }
-           );
+            });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathBadUNC2()
         {
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
-            }
-           );
+            });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathBadUNC3()
         {
             Assert.Throws<ArgumentException>(() =>
             {
                 Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
-            }
-           );
+            });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void NormalizePathGoodUNC()
         {
             Assert.Equal(@"\\localhost\share", FileUtilities.NormalizePath(@"\\localhost\share"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void NormalizePathTooLongWithDots()
         {
             string longPart = new string('x', 300);
@@ -527,8 +502,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [Fact(Skip="https://github.com/dotnet/msbuild/issues/4205")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/4205")]
         public void NormalizePathBadGlobalroot()
         {
             Assert.Throws<ArgumentException>(() =>
@@ -542,14 +516,11 @@ namespace Microsoft.Build.UnitTests
                    // with this for security reasons.
                  * */
                 Assert.Null(FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
-            }
-           );
+            });
         }
 #endif
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathInvalid()
         {
             string filePath = @"c:\aardvark\|||";
@@ -560,8 +531,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void CannotNormalizePathWithNewLineAndSpace()
         {
             string filePath = "\r\n      C:\\work\\sdk3\\artifacts\\tmp\\Debug\\SimpleNamesWi---6143883E\\NETFrameworkLibrary\\bin\\Debug\\net462\\NETFrameworkLibrary.dll\r\n      ";
@@ -600,7 +570,6 @@ namespace Microsoft.Build.UnitTests
         // These tests will need to be redesigned for Linux
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileOrDirectoryExistsNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -616,7 +585,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileOrDirectoryExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -670,7 +638,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void DirectoryExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -707,7 +674,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileExistsNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -723,7 +689,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
-        [Trait("Category", "mono-osx-failing")]
         public void FileExistsNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -751,7 +716,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetFileInfoNoThrowTooLongWithDots()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -767,7 +731,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetFileInfoNoThrowTooLongWithDotsRelative()
         {
             int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -850,7 +813,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                path = FileUtilities.GetTemporaryFile(directory, ".bat");
+                path = FileUtilities.GetTemporaryFile(directory, null, ".bat");
 
                 Assert.EndsWith(".bat", path);
                 Assert.True(File.Exists(path));
@@ -889,7 +852,6 @@ namespace Microsoft.Build.UnitTests
         /// Extension is invalid
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GenerateTempBatchFileWithBadExtension()
@@ -897,39 +859,24 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<IOException>(() =>
             {
                 FileUtilities.GetTemporaryFile("|");
-            }
-           );
+            });
         }
-        /// <summary>
-        /// No extension is given
-        /// </summary>
-        [Fact]
-        public void GenerateTempBatchFileWithEmptyExtension()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                FileUtilities.GetTemporaryFile(String.Empty);
-            }
-           );
-        }
+
         /// <summary>
         /// Directory is invalid
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void GenerateTempBatchFileWithBadDirectory()
         {
             Assert.Throws<IOException>(() =>
             {
-                FileUtilities.GetTemporaryFile("|", ".tmp");
-            }
-           );
+                FileUtilities.GetTemporaryFile("|", null, ".tmp");
+            });
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void AbsolutePathLooksLikeUnixPathOnUnix()
         {
             var secondSlash = SystemSpecificAbsolutePath.Substring(1).IndexOf(Path.DirectorySeparatorChar) + 1;
@@ -939,8 +886,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(FileUtilities.LooksLikeUnixFilePath(rootLevelPath));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void PathDoesNotLookLikeUnixPathOnWindows()
         {
             Assert.False(FileUtilities.LooksLikeUnixFilePath(SystemSpecificAbsolutePath));
@@ -948,8 +894,7 @@ namespace Microsoft.Build.UnitTests
             Assert.False(FileUtilities.LooksLikeUnixFilePath("/root"));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void RelativePathLooksLikeUnixPathOnUnixWithBaseDirectory()
         {
             string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("first/second/file.txt", String.Empty);
@@ -979,8 +924,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void RelativePathMaybeAdjustFilePathWithBaseDirectory()
         {
             // <tmp_dir>/first/second/file.txt
@@ -1087,6 +1031,46 @@ namespace Microsoft.Build.UnitTests
             expectedTruncatedPath = expectedTruncatedPath.Replace('/', Path.DirectorySeparatorChar);
 
             FileUtilities.TruncatePathToTrailingSegments(path, trailingSegments).ShouldBe(expectedTruncatedPath);
+        }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureSingleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @"' '")] // One character which is a space
+        [InlineData(@"'", @"'''")] // One character which is a single quote
+        [InlineData(@"""", @"'""'")] // One character which is a double quote
+        [InlineData(@"example", @"'example'")] // Unquoted string
+        [InlineData(@"'example'", @"'example'")] // Single quoted string
+        [InlineData(@"""example""", @"'example'")] // Double quoted string
+        [InlineData(@"'example""", @"''example""'")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"'""example''")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"'ex""am'ple'")] // Interior Quotes
+        public void EnsureSingleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureSingleQuotes(path).ShouldBe(expectedResult);
+        }
+
+        /// <summary>
+        /// Exercises FileUtilities.EnsureDoubleQuotes
+        /// </summary>
+        [Theory]
+        [InlineData(null, null)] // Null test
+        [InlineData("", "")] // Empty string test
+        [InlineData(@" ", @""" """)] // One character which is a space
+        [InlineData(@"'", @"""'""")] // One character which is a single quote
+        [InlineData(@"""", @"""""""")] // One character which is a double quote
+        [InlineData(@"example", @"""example""")] // Unquoted string
+        [InlineData(@"'example'", @"""example""")] // Single quoted string
+        [InlineData(@"""example""", @"""example""")] // Double quoted string
+        [InlineData(@"'example""", @"""'example""""")] // Mixed Quotes - Leading Single
+        [InlineData(@"""example'", @"""""example'""")] // Mixed Quotes - Leading Double
+        [InlineData(@"ex""am'ple", @"""ex""am'ple""")] // Interior Quotes
+        public void EnsureDoubleQuotesTest(string path, string expectedResult)
+        {
+            FileUtilities.EnsureDoubleQuotes(path).ShouldBe(expectedResult);
         }
     }
 }

@@ -1,21 +1,23 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
     /*
      * Class:   TokenCharReader
      *
-     * Reads over the contents of a source file (in the form of a string). 
+     * Reads over the contents of a source file (in the form of a string).
      * Provides utility functions for skipping and checking the value of characters.
      *
      */
     internal class TokenCharReader
     {
-        // The sources 
+        // The sources
         private StreamMappedString _sources;
         // Current character offset within sources.
         private int _position;
@@ -24,7 +26,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  TokenCharReader
-         * 
+         *
          * Construct
          */
         internal TokenCharReader(Stream binaryStream, bool forceANSI)
@@ -35,7 +37,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  Reset
-         * 
+         *
          * Reset to the top of the sources.
          */
         internal void Reset()
@@ -46,8 +48,8 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  CurrentLine
-         * 
-         * The current line number   
+         *
+         * The current line number
          */
         internal int CurrentLine
         {
@@ -56,7 +58,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  Position
-         * 
+         *
          * The character offset within the sources.
          */
         internal int Position
@@ -72,7 +74,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  Skip
-         * 
+         *
          * Skip to the next character.
          */
         protected void Skip()
@@ -84,9 +86,9 @@ namespace Microsoft.Build.Shared.LanguageParser
             ++_position;
         }
 
-        /* 
+        /*
          * Method:  Skip (overload)
-         * 
+         *
          * Skip the next n characters.
          */
         protected void Skip(int n)
@@ -99,7 +101,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  CurrentCharacter
-         * 
+         *
          * Get the current character.
          */
         internal char CurrentCharacter
@@ -109,7 +111,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  EndOfLines
-         * 
+         *
          * Return true if we've reached the end of sources.
          */
         internal bool EndOfLines
@@ -119,7 +121,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  GetCurrentMatchedString
-         * 
+         *
          * Get the string that starts with the given start position and ends with this.position.
          */
         internal string GetCurrentMatchedString(int startPosition)
@@ -129,7 +131,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  Sink
-         * 
+         *
          * See if the next characters match the given string. If they do,
          * sink this string.
          */
@@ -156,13 +158,10 @@ namespace Microsoft.Build.Shared.LanguageParser
 
             if
             (
-                String.Equals
-                (
+                String.Equals(
                     match,
                     compare,
-                    (ignoreCase /* ignore case */) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal
-                )
-            )
+                    (ignoreCase /* ignore case */) ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
             {
                 Skip(match.Length);
                 return true;
@@ -173,7 +172,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkCharacter
-         * 
+         *
          * Sink and return one character.
          */
         internal char SinkCharacter()
@@ -185,7 +184,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkIgnoreCase
-         * 
+         *
          * See if the next characters match the given string without case.
          */
         internal bool SinkIgnoreCase(string match)
@@ -195,7 +194,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  MatchNextIdentifierStart
-         * 
+         *
          * Determine whether a given character is a C# or VB identifier start character.
          * Both languages agree on this format.
          */
@@ -212,7 +211,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkIdentifierStart
-         * 
+         *
          * Determine whether a given character is a C# or VB identifier start character.
          * Both languages agree on this format.
          */
@@ -228,7 +227,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkIdentifierPart
-         * 
+         *
          * Determine whether a given character is a C# or VB identifier part character
          * Both languages agree on this format.
          */
@@ -241,8 +240,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     || TokenChar.IsDecimalDigit(CurrentCharacter)
                     || TokenChar.IsConnecting(CurrentCharacter)
                     || TokenChar.IsCombining(CurrentCharacter)
-                    || TokenChar.IsFormatting(CurrentCharacter)
-                )
+                    || TokenChar.IsFormatting(CurrentCharacter))
             {
                 Skip();
                 return true;
@@ -252,7 +250,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkNewLine
-         * 
+         *
          * Sink a newline.
          */
         internal bool SinkNewLine()
@@ -283,7 +281,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkToEndOfLine
-         * 
+         *
          * Sink from the current position to the first end-of-line.
          */
         internal bool SinkToEndOfLine()
@@ -292,12 +290,12 @@ namespace Microsoft.Build.Shared.LanguageParser
             {
                 Skip();
             }
-            return true;    // Matching zero characters is ok.        
+            return true;    // Matching zero characters is ok.
         }
 
         /*
          * Method:  SinkUntil
-         * 
+         *
          * Sink until the given string is found. Match including the given string.
          */
         internal bool SinkUntil(string find)
@@ -320,7 +318,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkMultipleHexDigits
-         * 
+         *
          * Sink multiple hex digits.
          */
         internal bool SinkMultipleHexDigits()
@@ -331,12 +329,12 @@ namespace Microsoft.Build.Shared.LanguageParser
                 ++count;
                 Skip();
             }
-            return count > 0;     // Must match at least one  
+            return count > 0;     // Must match at least one
         }
 
         /*
          * Method:  SinkMultipleDecimalDigits
-         * 
+         *
          * Sink multiple decimal digits.
          */
         internal bool SinkMultipleDecimalDigits()
@@ -347,8 +345,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 ++count;
                 Skip();
             }
-            return count > 0;     // Must match at least one 
+            return count > 0;     // Must match at least one
         }
     }
 }
-

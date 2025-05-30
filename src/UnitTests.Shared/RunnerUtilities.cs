@@ -1,8 +1,15 @@
-﻿using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Reflection;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Shared
 {
@@ -10,13 +17,25 @@ namespace Microsoft.Build.UnitTests.Shared
     {
         public static string PathToCurrentlyRunningMsBuildExe => BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
+        public static ArtifactsLocationAttribute ArtifactsLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<ArtifactsLocationAttribute>()
+                                                   ?? throw new InvalidOperationException("This test assembly does not have the ArtifactsLocationAttribute");
+#if !FEATURE_RUN_EXE_IN_TESTS
+        private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
+
+        public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
+        {
+            // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
+            testEnvironment.SetEnvironmentVariable("DOTNET_HOST_PATH", s_dotnetExePath);
+        }
+#endif
+
         /// <summary>
         /// Invoke the currently running msbuild and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
         public static string ExecMSBuild(string msbuildParameters, out bool successfulExit, ITestOutputHelper outputHelper = null)
         {
-            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, false, outputHelper);
+            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, outputHelper: outputHelper);
         }
 
         /// <summary>
@@ -28,11 +47,32 @@ namespace Microsoft.Build.UnitTests.Shared
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
 #else
-            var pathToExecutable = ResolveRuntimeExecutableName();
-            msbuildParameters = "\"" + pathToMsBuildExe + "\"" + " " + msbuildParameters;
+            var pathToExecutable = s_dotnetExePath;
+            msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
 #endif
 
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+        }
+
+        public static string ExecBootstrapedMSBuild(
+            string msbuildParameters,
+            out bool successfulExit,
+            bool shellExecute = false,
+            ITestOutputHelper outputHelper = null,
+            bool attachProcessId = true,
+            int timeoutMilliseconds = 30_000)
+        {
+            BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
+                                                   ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
+
+            string binaryFolder = attribute.BootstrapMsBuildBinaryLocation;
+#if NET
+            string pathToExecutable = EnvironmentProvider.GetDotnetExePathFromFolder(binaryFolder);
+            msbuildParameters = Path.Combine(binaryFolder, "sdk", attribute.BootstrapSdkVersion, "MSBuild.dll") + " " + msbuildParameters;
+#else
+            string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
+#endif
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -51,24 +91,17 @@ namespace Microsoft.Build.UnitTests.Shared
             }
         }
 
-#if !FEATURE_RUN_EXE_IN_TESTS
         /// <summary>
-        /// Resolve the platform specific path to the runtime executable that msbuild.exe needs to be run in (unix-mono, {unix, windows}-corerun).
+        /// Run the process and get stdout and stderr.
         /// </summary>
-        private static string ResolveRuntimeExecutableName()
-        {
-            // Run the child process with the same host as the currently-running process.
-            using (Process currentProcess = Process.GetCurrentProcess())
-            {
-                return currentProcess.MainModule.FileName;
-            }
-        }
-#endif
-
-        /// <summary>
-        /// Run the process and get stdout and stderr
-        /// </summary>
-        public static string RunProcessAndGetOutput(string process, string parameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
+        public static string RunProcessAndGetOutput(
+            string process,
+            string parameters,
+            out bool successfulExit,
+            bool shellExecute = false,
+            ITestOutputHelper outputHelper = null,
+            bool attachProcessId = true,
+            int timeoutMilliseconds = 30_000)
         {
             if (shellExecute)
             {
@@ -85,47 +118,66 @@ namespace Microsoft.Build.UnitTests.Shared
                 UseShellExecute = false,
                 Arguments = parameters
             };
-            var output = string.Empty;
+            string output = string.Empty;
+            int pid = -1;
 
             using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
             {
-                p.OutputDataReceived += delegate (object sender, DataReceivedEventArgs args)
+                DataReceivedEventHandler handler = delegate (object sender, DataReceivedEventArgs args)
                 {
-                    if (args != null)
+                    if (args != null && args.Data != null)
                     {
+                        WriteOutput(args.Data);
                         output += args.Data + "\r\n";
                     }
                 };
 
-                p.ErrorDataReceived += delegate (object sender, DataReceivedEventArgs args)
-                {
-                    if (args != null)
-                    {
-                        output += args.Data + "\r\n";
-                    }
-                };
+                p.OutputDataReceived += handler;
+                p.ErrorDataReceived += handler;
 
-                outputHelper?.WriteLine("Executing [{0} {1}]", process, parameters);
-                Console.WriteLine("Executing [{0} {1}]", process, parameters);
-
+                WriteOutput($"Executing [{process} {parameters}]");
+                WriteOutput("==== OUTPUT ====");
                 p.Start();
                 p.BeginOutputReadLine();
                 p.BeginErrorReadLine();
                 p.StandardInput.Dispose();
+
+                TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
+                if (Traits.Instance.DebugUnitTests)
+                {
+                    p.WaitForExit();
+                }
+                else if (!p.WaitForExit(timeoutMilliseconds))
+                {
+                    // Let's not create a unit test for which we need more than requested timeout to execute.
+                    // Please consider carefully if you would like to increase the timeout.
+                    p.KillTree(1000);
+                    throw new TimeoutException($"Test failed due to timeout: process {p.Id} is active for more than {timeout.TotalSeconds} sec.");
+                }
+
+                // We need the WaitForExit call without parameters because our processing of output/error streams is not synchronous.
+                // See https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.process.waitforexit?view=net-6.0#system-diagnostics-process-waitforexit(system-int32).
+                // The overload WaitForExit() waits for the error and output to be handled. The WaitForExit(int timeout) overload does not, so we could lose the data.
                 p.WaitForExit();
 
+                pid = p.Id;
                 successfulExit = p.ExitCode == 0;
             }
 
-            outputHelper?.WriteLine("==== OUTPUT ====");
-            outputHelper?.WriteLine(output);
-            outputHelper?.WriteLine("==============");
-
-            Console.WriteLine("==== OUTPUT ====");
-            Console.WriteLine(output);
-            Console.WriteLine("==============");
+            if (attachProcessId)
+            {
+                output += "Process ID is " + pid + "\r\n";
+                WriteOutput("Process ID is " + pid + "\r\n");
+                WriteOutput("==============");
+            }
 
             return output;
+
+            void WriteOutput(string data)
+            {
+                outputHelper?.WriteLine(data);
+                Console.WriteLine(data);
+            }
         }
     }
 }

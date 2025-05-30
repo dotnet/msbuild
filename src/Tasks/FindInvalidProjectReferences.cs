@@ -1,29 +1,34 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Returns the reference assembly paths to the various frameworks
     /// </summary>
-    public class FindInvalidProjectReferences : TaskExtension
+    public partial class FindInvalidProjectReferences : TaskExtension
     {
         #region Fields
 
-        ///<summary>
+        private const string PlatformMonikerFormatPattern = @"(?<PLATFORMIDENTITY>^[^,]*),\s*Version=(?<PLATFORMVERSION>.*)";
+
+        /// <summary>
         /// Regex for breaking up the platform moniker
         /// Example: XNA, Version=8.0
         /// </summary>
-        private static readonly Regex s_platformMonikerFormat = new Regex
-        (
-             @"(?<PLATFORMIDENTITY>^[^,]*),\s*Version=(?<PLATFORMVERSION>.*)",
-            RegexOptions.IgnoreCase
-        );
+#if NET
+        [GeneratedRegex(PlatformMonikerFormatPattern, RegexOptions.IgnoreCase)]
+        private static partial Regex PlatformMonikerRegex { get; }
+#else
+        private static Regex PlatformMonikerRegex { get; } = new Regex(PlatformMonikerFormatPattern, RegexOptions.IgnoreCase);
+#endif
 
         /// <summary>
         /// Reference moniker metadata
@@ -62,7 +67,7 @@ namespace Microsoft.Build.Tasks
         public string TargetPlatformIdentifier { get; set; }
 
         /// <summary>
-        /// Invalid references to be unresolved 
+        /// Invalid references to be unresolved
         /// </summary>
         [Output]
         public ITaskItem[] InvalidReferences { get; private set; }
@@ -87,7 +92,7 @@ namespace Microsoft.Build.Tasks
                     string referenceIdentity = item.ItemSpec;
                     string referencePlatformMoniker = item.GetMetadata(ReferencePlatformMonikerMetadata);
 
-                    // For each moniker, compare version, issue localized message if the referenced project targets 
+                    // For each moniker, compare version, issue localized message if the referenced project targets
                     // a platform with version higher than the current project and make the reference invalid by adding it to
                     // an invalid reference list output
                     if (ParseMoniker(referencePlatformMoniker, out _, out Version version))
@@ -111,7 +116,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static bool ParseMoniker(string reference, out string platformIdentity, out Version platformVersion)
         {
-            Match match = s_platformMonikerFormat.Match(reference);
+            Match match = PlatformMonikerRegex.Match(reference);
 
             platformIdentity = String.Empty;
             bool parsedVersion = false;

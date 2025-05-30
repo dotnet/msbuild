@@ -1,16 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Globalization;
+using System.IO;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Collections;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -63,8 +65,8 @@ namespace Microsoft.Build.Execution
         /// </param>
         internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(items);
+            ErrorUtilities.VerifyThrowArgumentNull(result);
             _items = items;
             _result = result;
             _originalBuildEventContext = originalBuildEventContext;
@@ -134,6 +136,22 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        public string TargetResultCodeToString()
+        {
+            switch (ResultCode)
+            {
+                case TargetResultCode.Failure:
+                    return nameof(TargetResultCode.Failure);
+                case TargetResultCode.Skipped:
+                    return nameof(TargetResultCode.Skipped);
+                case TargetResultCode.Success:
+                    return nameof(TargetResultCode.Success);
+                default:
+                    Debug.Fail($"Unknown enum value: {ResultCode}");
+                    return ResultCode.ToString();
+            }
+        }
+
         /// <summary>
         /// Returns the internal result for the target.
         /// </summary>
@@ -172,6 +190,13 @@ namespace Microsoft.Build.Execution
             set => _afterTargetsHaveFailed = value;
         }
 
+        /// <summary>
+        /// The defining location of the target for which this is a result.
+        /// This is not intended to be remoted via node-2-node remoting - it's intended only for in-node telemetry.
+        /// Warning!: This data is not guaranteed to be populated when Telemetry is not being collected (e.g. this is "sampled out")
+        /// </summary>
+        internal IElementLocation TargetLocation { get; set; }
+
         #region INodePacketTranslatable Members
 
         /// <summary>
@@ -183,7 +208,7 @@ namespace Microsoft.Build.Execution
             {
                 lock (_result)
                 {
-                    // Should we have cached these items but now want to send them to another node, we need to 
+                    // Should we have cached these items but now want to send them to another node, we need to
                     // ensure they are loaded before doing so.
                     RetrieveItemsFromCache();
                     InternalTranslate(translator);
@@ -243,15 +268,23 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                using ITranslator translator = GetResultsCacheTranslator(configId, targetName, TranslationDirection.WriteToStream);
+                string cacheFile = GetCacheFile(configId, targetName);
+                Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
 
-                // If the translator is null, it means these results were cached once before.  Since target results are immutable once they
-                // have been created, there is no point in writing them again.
-                if (translator != null)
+                // If the file doesn't already exists, then we haven't cached this once before. We need to cache it again since it could have changed.
+                if (!FileSystems.Default.FileExists(cacheFile))
                 {
-                    TranslateItems(translator);
-                    _items = null;
-                    _cacheInfo = new CacheInfo(configId, targetName);
+                    using Stream stream = File.Create(cacheFile);
+                    using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.WriteToStream, stream);
+
+                    // If the translator is null, it means these results were cached once before.  Since target results are immutable once they
+                    // have been created, there is no point in writing them again.
+                    if (translator != null)
+                    {
+                        TranslateItems(translator);
+                        _items = null;
+                        _cacheInfo = new CacheInfo(configId, targetName);
+                    }
                 }
             }
         }
@@ -277,7 +310,9 @@ namespace Microsoft.Build.Execution
             {
                 if (_items == null)
                 {
-                    using ITranslator translator = GetResultsCacheTranslator(_cacheInfo.ConfigId, _cacheInfo.TargetName, TranslationDirection.ReadFromStream);
+                    string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
+                    using Stream stream = File.OpenRead(cacheFile);
+                    using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream);
 
                     TranslateItems(translator);
                     _cacheInfo = new CacheInfo();
@@ -296,14 +331,14 @@ namespace Microsoft.Build.Execution
                 // rough guess for an average number of bytes needed to store them.  This doesn't have to be accurate, just
                 // big enough to avoid unnecessary buffer reallocations in most cases.
                 var defaultBufferCapacity = _items.Length * 128;
-                
+
                 using var itemsStream = new MemoryStream(defaultBufferCapacity);
                 var itemTranslator = BinaryTranslator.GetWriteTranslator(itemsStream);
 
                 // When creating the interner, we use the number of items as the initial size of the collections since the
                 // number of strings will be of the order of the number of items in the collection.  This assumes basically
                 // one unique string per item (frequently a path related to the item) with most of the rest of the metadata
-                // being the same (and thus interning.)  This is a hueristic meant to get us in the ballpark to avoid 
+                // being the same (and thus interning.)  This is a hueristic meant to get us in the ballpark to avoid
                 // too many reallocations when growing the collections.
                 var interner = new LookasideStringInterner(StringComparer.Ordinal, _items.Length);
                 foreach (TaskItem t in _items)
@@ -325,7 +360,7 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrow(buffer != null, "Unexpected null items buffer during translation.");
 
                 using MemoryStream itemsStream = new MemoryStream(buffer, 0, buffer.Length, writable: false, publiclyVisible: true);
-                using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, null);
+                using var itemTranslator = BinaryTranslator.GetReadTranslator(itemsStream, InterningBinaryReader.PoolingBuffer);
                 _items = new TaskItem[itemsCount];
                 for (int i = 0; i < _items.Length; i++)
                 {
@@ -337,25 +372,10 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private static ITranslator GetResultsCacheTranslator(int configId, string targetToCache, TranslationDirection direction)
-        {
-            string cacheFile = GetCacheFile(configId, targetToCache);
-            if (direction == TranslationDirection.WriteToStream)
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                if (FileSystems.Default.FileExists(cacheFile))
-                {
-                    // If the file already exists, then we have cached this once before.  No need to cache it again since it cannot have changed.
-                    return null;
-                }
-
-                return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
-            }
-            else
-            {
-                return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), null);
-            }
-        }
+        private static ITranslator GetResultsCacheTranslator(TranslationDirection direction, Stream stream) =>
+            direction == TranslationDirection.WriteToStream
+                    ? BinaryTranslator.GetWriteTranslator(stream)
+                    : BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
 
         /// <summary>
         /// Information about where the cache for the items in this result are stored.

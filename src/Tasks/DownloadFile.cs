@@ -1,22 +1,24 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 using Task = System.Threading.Tasks.Task;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Represents a task that can download a file.
     /// </summary>
-    public sealed class DownloadFile : TaskExtension, ICancelableTask
+    public sealed class DownloadFile : TaskExtension, ICancelableTask, IIncrementalTask
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
@@ -59,6 +61,13 @@ namespace Microsoft.Build.Tasks
         public string SourceUrl { get; set; }
 
         /// <summary>
+        /// Gets or sets the number of milliseconds to wait before the request times out.
+        /// </summary>
+        public int Timeout { get; set; } = 100_000;
+
+        public bool FailIfNotIncremental { get; set; }
+
+        /// <summary>
         /// Gets or sets a <see cref="HttpMessageHandler"/> to use.  This is used by unit tests to mock a connection to a remote server.
         /// </summary>
         internal HttpMessageHandler HttpMessageHandler { get; set; }
@@ -83,10 +92,10 @@ namespace Microsoft.Build.Tasks
             }
 
             int retryAttemptCount = 0;
-            
+
             CancellationToken cancellationToken = _cancellationTokenSource.Token;
 
-            while(true)
+            while (true)
             {
                 try
                 {
@@ -118,7 +127,9 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, actualException.Message);
+                        string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
+                        Log.LogErrorWithCodeFromResources("DownloadFile.ErrorDownloading", SourceUrl, flattenedMessage);
+                        Log.LogMessage(MessageImportance.Low, actualException.ToString());
                         break;
                     }
                 }
@@ -135,7 +146,8 @@ namespace Microsoft.Build.Tasks
         private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
-            using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true))
+#pragma warning disable CA2000 // Dispose objects before losing scope because HttpClientHandler is disposed by HTTPClient.Dispose()
+            using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true) { Timeout = TimeSpan.FromMilliseconds(Timeout) })
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date
                 using (HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false))
@@ -144,11 +156,17 @@ namespace Microsoft.Build.Tasks
                     {
                         response.EnsureSuccessStatusCode();
                     }
+#if NET
+                    catch (HttpRequestException)
+                    {
+                        throw;
+#else
                     catch (HttpRequestException e)
                     {
-                        // HttpRequestException does not have the status code so its wrapped and thrown here so that later on we can determine
-                        // if a retry is possible based on the status code
+                        // MSBuild History: CustomHttpRequestException was created as a wrapper over HttpRequestException
+                        // so it could include the StatusCode. As of net5.0, the statuscode is now in HttpRequestException.
                         throw new CustomHttpRequestException(e.Message, e.InnerException, response.StatusCode);
+#endif
                     }
 
                     if (!TryGetFileName(response, out string filename))
@@ -170,6 +188,11 @@ namespace Microsoft.Build.Tasks
 
                         return;
                     }
+                    else if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorFromResources("DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
+                        return;
+                    }
 
                     try
                     {
@@ -178,8 +201,13 @@ namespace Microsoft.Build.Tasks
                         using (var target = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                         {
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
-
-                            using (Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                            using (Stream responseStream = await response.Content.ReadAsStreamAsync(
+#if NET
+                            cancellationToken
+#endif
+                            ).ConfigureAwait(false))
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             {
                                 await responseStream.CopyToAsync(target, 1024, cancellationToken).ConfigureAwait(false);
                             }
@@ -199,6 +227,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+#pragma warning restore CA2000 // Dispose objects before losing scope
         }
 
         /// <summary>
@@ -218,20 +247,34 @@ namespace Microsoft.Build.Tasks
             }
 
             // Some HttpRequestException have an inner exception that has the real error
-            if (actualException is HttpRequestException httpRequestException && httpRequestException.InnerException != null)
+            if (actualException is HttpRequestException httpRequestException)
             {
-                actualException = httpRequestException.InnerException;
-
-                // An IOException inside of a HttpRequestException means that something went wrong while downloading
-                if (actualException is IOException)
+                if (httpRequestException.InnerException != null)
                 {
-                    return true;
+                    actualException = httpRequestException.InnerException;
+
+                    // An IOException inside of a HttpRequestException means that something went wrong while downloading
+                    if (actualException is IOException)
+                    {
+                        return true;
+                    }
+                }
+
+#if NET
+                // net5.0 included StatusCode in the HttpRequestException.
+                switch (httpRequestException.StatusCode)
+                {
+                    case HttpStatusCode.InternalServerError:
+                    case HttpStatusCode.RequestTimeout:
+                        return true;
                 }
             }
+#else
+            }
 
+            // framework workaround for HttpRequestException not containing StatusCode
             if (actualException is CustomHttpRequestException customHttpRequestException)
             {
-                // A wrapped CustomHttpRequestException has the status code from the error
                 switch (customHttpRequestException.StatusCode)
                 {
                     case HttpStatusCode.InternalServerError:
@@ -239,6 +282,7 @@ namespace Microsoft.Build.Tasks
                         return true;
                 }
             }
+#endif
 
             if (actualException is WebException webException)
             {
@@ -285,8 +329,10 @@ namespace Microsoft.Build.Tasks
             return !String.IsNullOrWhiteSpace(filename);
         }
 
+#if !NET
         /// <summary>
         /// Represents a wrapper around the <see cref="HttpRequestException"/> that also contains the <see cref="HttpStatusCode"/>.
+        /// DEPRECATED as of net5.0, which included the StatusCode in the HttpRequestException class.
         /// </summary>
         private sealed class CustomHttpRequestException : HttpRequestException
         {
@@ -298,6 +344,7 @@ namespace Microsoft.Build.Tasks
 
             public HttpStatusCode StatusCode { get; }
         }
+#endif
 
         private bool ShouldSkip(HttpResponseMessage response, FileInfo destinationFile)
         {

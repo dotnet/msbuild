@@ -1,29 +1,29 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-using System.Linq;
-
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /*
      * Class:   TlbReference
-     * 
+     *
      * COM reference wrapper class for the tlbimp tool.
      *
      */
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// directory we should write the wrapper to
         /// </summary>
-        protected override string OutputDirectory => (HasTemporaryWrapper) ? Path.GetTempPath() : base.OutputDirectory;
+        protected override string OutputDirectory => (HasTemporaryWrapper) ? FileUtilities.TempFileDirectory : base.OutputDirectory;
 
         private readonly bool _noClassMembers;
         private readonly string _targetProcessorArchitecture;
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  GetWrapperFileName
-         * 
+         *
          * Constructs the wrapper file name from a type library name.
          */
         protected override string GetWrapperFileNameInternal(string typeLibName)
@@ -122,7 +122,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  FindExistingWrapper
-         * 
+         *
          * Checks if there's a preexisting wrapper for this reference.
          */
         internal override bool FindExistingWrapper(out ComReferenceWrapperInfo wrapperInfo, DateTime componentTimestamp)
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  GenerateWrapper
-         * 
+         *
          * Generates a wrapper for this reference.
          */
         internal bool GenerateWrapper(out ComReferenceWrapperInfo wrapperInfo)
@@ -254,11 +254,9 @@ namespace Microsoft.Build.Tasks
                         case UtilitiesProcessorArchitecture.X86:
                             flags |= TypeLibImporterFlags.ImportAsX86;
                             break;
-#if !MONO
                         case UtilitiesProcessorArchitecture.ARM:
                             flags |= TypeLibImporterFlags.ImportAsArm;
                             break;
-#endif
                         default:
                             // Let the type importer decide.
                             break;
@@ -298,7 +296,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  WriteWrapperToDisk
-         * 
+         *
          * Writes the generated wrapper out to disk. Should only be called for permanent wrappers.
          */
         private void WriteWrapperToDisk(AssemblyBuilder assemblyBuilder, string wrapperPath)
@@ -315,46 +313,38 @@ namespace Microsoft.Build.Tasks
                 switch (_targetProcessorArchitecture)
                 {
                     case UtilitiesProcessorArchitecture.X86:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.Required32Bit,
-                                ImageFileMachine.I386
-                            );
+                                ImageFileMachine.I386);
                         break;
                     case UtilitiesProcessorArchitecture.AMD64:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.PE32Plus,
-                                ImageFileMachine.AMD64
-                            );
+                                ImageFileMachine.AMD64);
                         break;
                     case UtilitiesProcessorArchitecture.IA64:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.PE32Plus,
-                                ImageFileMachine.IA64
-                            );
+                                ImageFileMachine.IA64);
                         break;
                     case UtilitiesProcessorArchitecture.ARM:
-                        assemblyBuilder.Save
-                            (
+                        assemblyBuilder.Save(
                                 wrapperFile.Name,
                                 PortableExecutableKinds.ILOnly | PortableExecutableKinds.Required32Bit,
-                                ImageFileMachine.ARM
-                            );
+                                ImageFileMachine.ARM);
                         break;
                     case UtilitiesProcessorArchitecture.MSIL:
                     default:
                         // If no target processor architecture was passed, we assume MSIL; calling Save
-                        // with no parameters should be equivalent to saving as ILOnly.  
+                        // with no parameters should be equivalent to saving as ILOnly.
                         assemblyBuilder.Save(wrapperFile.Name);
                         break;
                 }
 
-                // AssemblyBuilder doesn't always throw when it's supposed to write stuff to a non-writable 
+                // AssemblyBuilder doesn't always throw when it's supposed to write stuff to a non-writable
                 // network path. Make sure that the assembly actually got written to where we wanted it to.
                 File.GetLastWriteTime(wrapperPath);
             }
@@ -375,8 +365,8 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ITypeLibImporterNotifySink.ResolveRef
-         * 
-         * Implementation of ITypeLibImporterNotifySink.ResolveRef - this method is called by the NDP type lib converter 
+         *
+         * Implementation of ITypeLibImporterNotifySink.ResolveRef - this method is called by the NDP type lib converter
          * to resolve dependencies.
          * We should never return null here - it's not documented as the proper way of failing dependency resolution.
          * Instead, we use an exception to abort the conversion process.
@@ -416,7 +406,7 @@ namespace Microsoft.Build.Tasks
 
         /*
          * Method:  ITypeLibImporterNotifySink.ReportEvent
-         * 
+         *
          * Implementation of ITypeLibImporterNotifySink.ReportEvent - this method gets called by NDP type lib converter
          * to report various messages (like "type blahblah converted" or "failed to convert type blahblah").
          */

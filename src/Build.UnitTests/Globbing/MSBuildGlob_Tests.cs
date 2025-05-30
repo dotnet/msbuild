@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
@@ -68,9 +70,12 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [Fact]
         public void GlobFromRootWithInvalidPathThrows()
         {
-            foreach (var invalidPathChar in FileUtilities.InvalidPathChars)
+            for (int i = 0; i < 128; i++)
             {
-                Assert.Throws<ArgumentException>(() => MSBuildGlob.Parse(invalidPathChar.ToString(), "*"));
+                if (FileUtilities.InvalidPathChars.Contains((char)i))
+                {
+                    Assert.Throws<ArgumentException>(() => MSBuildGlob.Parse(((char)i).ToString(), "*"));
+                }
             }
         }
 
@@ -78,18 +83,15 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [InlineData(
             "a/b/c",
             "**",
-            "a/b/c"
-            )]
+            "a/b/c")]
         [InlineData(
             "a/b/c",
             "../../**",
-            "a"
-            )]
+            "a")]
         [InlineData(
             "a/b/c",
             "../d/e/**",
-            "a/b/d/e"
-            )]
+            "a/b/d/e")]
         public void GlobWithRelativeFixedDirectoryPartShouldMismatchTheGlobRoot(string globRoot, string filespec, string expectedFixedDirectoryPart)
         {
             var glob = MSBuildGlob.Parse(globRoot, filespec);
@@ -183,12 +185,15 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         {
             var glob = MSBuildGlob.Parse("*");
 
-            foreach (var invalidPathChar in FileUtilities.InvalidPathChars)
+            for (int i = 0; i < 128; i++)
             {
-                Assert.False(glob.IsMatch(invalidPathChar.ToString()));
+                if (FileUtilities.InvalidPathChars.Contains((char)i))
+                {
+                    Assert.False(glob.IsMatch(((char)i).ToString()));
+                }
             }
 
-            foreach (var invalidFileChar in FileUtilities.InvalidFileNameChars)
+            foreach (var invalidFileChar in FileUtilities.InvalidFileNameCharsArray)
             {
                 if (invalidFileChar == '\\' || invalidFileChar == '/')
                 {

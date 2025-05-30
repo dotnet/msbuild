@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Diagnostics;
+using System.Xml;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -33,7 +35,7 @@ namespace Microsoft.Build.Construction
         internal ProjectExtensionsElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -92,14 +94,14 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Get or set the content of the first sub-element 
+        /// Get or set the content of the first sub-element
         /// with the provided name.
         /// </summary>
         public string this[string name]
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentLength(name);
 
                 if (Link != null)
                 {
@@ -114,7 +116,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentLength(name);
                 ErrorUtilities.VerifyThrowArgumentNull(value, "value");
 
                 if (Link != null)
@@ -159,8 +161,8 @@ namespace Microsoft.Build.Construction
         /// <inheritdoc/>
         public override void CopyFrom(ProjectElement element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
-            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), nameof(element));
+            ErrorUtilities.VerifyThrowArgumentNull(element);
+            ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
             {

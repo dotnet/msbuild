@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -13,6 +13,8 @@ using Shouldly;
 using Xunit;
 
 #pragma warning disable 0219
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -30,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem to = new TaskItem((ITaskItem)from);
             to.ItemSpec.ShouldBe("Monkey.txt");
             ((string)to).ShouldBe("Monkey.txt");
-            
+
             to.GetMetadata("Dog").ShouldBe("Bingo");
             to.GetMetadata("Cat").ShouldBe("Morris");
 
@@ -77,8 +79,7 @@ namespace Microsoft.Build.UnitTests
                 TaskItem taskItem = new TaskItem(item);
 
                 // no NullReferenceException
-            }
-           );
+            });
         }
 
         [Fact]
@@ -106,8 +107,7 @@ namespace Microsoft.Build.UnitTests
                 string result = (string)item;
 
                 // no NullReferenceException
-            }
-           );
+            });
         }
         [Fact]
         public void ConstructFromDictionary()
@@ -142,8 +142,7 @@ namespace Microsoft.Build.UnitTests
                     Console.WriteLine(e.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
 
         [Fact]
@@ -163,8 +162,7 @@ namespace Microsoft.Build.UnitTests
                     Console.WriteLine(e.Message);
                     throw;
                 }
-            }
-           );
+            });
         }
         [Fact]
         public void CheckMetadataCount()
@@ -184,12 +182,9 @@ namespace Microsoft.Build.UnitTests
             TaskItem from = new TaskItem();
             from.ItemSpec = "Monkey.txt";
             from.GetMetadata(FileUtilities.ItemSpecModifiers.FullPath).ShouldBe(
-                Path.Combine
-                (
+                Path.Combine(
                     Directory.GetCurrentDirectory(),
-                    "Monkey.txt"
-                )
-            );
+                    "Monkey.txt"));
         }
 
         [Fact]
@@ -232,14 +227,9 @@ namespace Microsoft.Build.UnitTests
             from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(NativeMethodsShared.IsWindows ? @"subdir\" : "subdir/");
         }
 
-        [Fact]
+        [WindowsOnlyFact("UNC is not implemented except under Windows.")]
         public void NonexistentRequestDirectoryUNC()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "UNC is not implemented except under Windows"
-            }
-
             TaskItem from = new TaskItem();
             from.ItemSpec = @"\\local\share\subdir\Monkey.txt";
             from.GetMetadata(FileUtilities.ItemSpecModifiers.Directory).ShouldBe(@"subdir\");
@@ -293,8 +283,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TaskItem item = new TaskItem("foo");
                 item.SetMetadata(null, "x");
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify metadata cannot be created with empty name
@@ -306,12 +295,11 @@ namespace Microsoft.Build.UnitTests
             {
                 TaskItem item = new TaskItem("foo");
                 item.SetMetadata("", "x");
-            }
-           );
+            });
         }
         /// <summary>
-        /// Create a TaskItem with a null metadata value -- this is allowed, but 
-        /// internally converted to the empty string. 
+        /// Create a TaskItem with a null metadata value -- this is allowed, but
+        /// internally converted to the empty string.
         /// </summary>
         [Fact]
         public void CreateTaskItemWithNullMetadata()
@@ -324,8 +312,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Set metadata value to null value -- this is allowed, but 
-        /// internally converted to the empty string. 
+        /// Set metadata value to null value -- this is allowed, but
+        /// internally converted to the empty string.
         /// </summary>
         [Fact]
         public void SetNullMetadataValue()
@@ -335,30 +323,43 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadata("m").ShouldBe(string.Empty);
         }
 
+        [Fact]
+        public void ImplementsIMetadataContainer()
+        {
+            Dictionary<string, string> metadata = new()
+            {
+                { "a", "a1" },
+                { "b", "b1" },
+            };
+
+            TaskItem item = new TaskItem("foo");
+            IMetadataContainer metadataContainer = (IMetadataContainer)item;
+
+            metadataContainer.ImportMetadata(metadata);
+
+            var actualMetadata = metadataContainer.EnumerateMetadata().OrderBy(metadata => metadata.Key).ToList();
+            var expectedMetadata = metadata.OrderBy(metadata => metadata.Value).ToList();
+            Assert.True(actualMetadata.SequenceEqual(expectedMetadata));
+        }
+
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// Test that task items can be successfully constructed based on a task item from another appdomain.  
+        /// Test that task items can be successfully constructed based on a task item from another appdomain.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void RemoteTaskItem()
         {
             AppDomain appDomain = null;
             try
             {
-                appDomain = AppDomain.CreateDomain
-                            (
+                appDomain = AppDomain.CreateDomain(
                                 "generateResourceAppDomain",
                                 null,
-                                AppDomain.CurrentDomain.SetupInformation
-                            );
+                                AppDomain.CurrentDomain.SetupInformation);
 
-                object obj = appDomain.CreateInstanceFromAndUnwrap
-                   (
+                object obj = appDomain.CreateInstanceFromAndUnwrap(
                        typeof(TaskItemCreator).Module.FullyQualifiedName,
-                       typeof(TaskItemCreator).FullName
-                   );
+                       typeof(TaskItemCreator).FullName);
 
                 TaskItemCreator creator = (TaskItemCreator)obj;
 
@@ -405,7 +406,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Miniature class to be remoted to another appdomain that just creates some TaskItems and makes them available for returning. 
+        /// Miniature class to be remoted to another appdomain that just creates some TaskItems and makes them available for returning.
         /// </summary>
         private sealed class TaskItemCreator
 #if FEATURE_APPDOMAIN
@@ -422,11 +423,11 @@ namespace Microsoft.Build.UnitTests
             }
 
             /// <summary>
-            /// Creates task items 
+            /// Creates task items
             /// </summary>
             public void Run(string[] includes, IDictionary<string, string> metadataToAdd)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(includes, nameof(includes));
+                ErrorUtilities.VerifyThrowArgumentNull(includes);
 
                 CreatedTaskItems = new TaskItem[includes.Length];
 

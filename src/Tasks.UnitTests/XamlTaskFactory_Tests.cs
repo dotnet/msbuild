@@ -1,20 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Build.Framework;
-using System.IO;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using Microsoft.CSharp;
-using System.Reflection;
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
 using System.Globalization;
-using Microsoft.Build.Tasks.Xaml;
+using System.IO;
+using System.Reflection;
 using System.Xaml;
-using Xunit;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.CSharp;
 using Shouldly;
+using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 {
@@ -23,7 +25,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     /// The text fixture to unit test the task generator.
     /// Creates a new TaskGenerator object and tests the various methods
     /// </summary>
-    [Trait("Category", "mono-osx-failing")]
     public sealed class LoadAndParseTests
     {
         /// <summary>
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests the TaskName property. 
+        /// Tests the TaskName property.
         /// Should get "CL" back for this specific case.
         /// </summary>
         [Fact]
@@ -234,7 +235,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a basic non-reversible booleans switch that has a default value set. 
+        /// Tests a basic non-reversible booleans switch that has a default value set.
         /// </summary>
         [Fact]
         public void TestBasicNonReversibleBooleanSwitch_WithDefault()
@@ -285,8 +286,8 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests XamlTaskFactory support for DynamicEnumProperties.  These are primarily of use as a visualization in the property pages; as far as the 
-        /// XamlTaskFactory and XamlDataDrivenToolTask are concerned, they are treated as StringProperties.  
+        /// Tests XamlTaskFactory support for DynamicEnumProperties.  These are primarily of use as a visualization in the property pages; as far as the
+        /// XamlTaskFactory and XamlDataDrivenToolTask are concerned, they are treated as StringProperties.
         /// </summary>
         [Fact]
         public void TestDynamicEnumProperty()
@@ -307,7 +308,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a simple string property. 
+        /// Tests a simple string property.
         /// </summary>
         [Fact]
         public void TestBasicStringProperty()
@@ -336,7 +337,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                                        <StringProperty Name=`TargetAssembly` Switch=`/target:&quot;[value]&quot;` />
                                      </Rule>
                                    </ProjectSchemaDefinitions>";
-            string tmpXamlFile = FileUtilities.GetTemporaryFile();
+            string tmpXamlFile = FileUtilities.GetTemporaryFileName();
             try
             {
                 File.WriteAllText(tmpXamlFile, xmlContents.Replace("`", "\""));
@@ -354,13 +355,13 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             finally
             {
                 // This throws because the file is still in use!
-                //if (File.Exists(tmpXamlFile))
+                // if (File.Exists(tmpXamlFile))
                 //    File.Delete(tmpXamlFile);
             }
         }
 
         /// <summary>
-        /// Tests a simple string array property. 
+        /// Tests a simple string array property.
         /// </summary>
         [Fact]
         public void TestBasicStringArrayProperty()
@@ -383,7 +384,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a simple string array property. 
+        /// Tests a simple string array property.
         /// </summary>
         [Fact]
         public void TestStringArrayPropertyWithDataSource()
@@ -410,7 +411,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Tests a simple string array property. 
+        /// Tests a simple string array property.
         /// </summary>
         [Fact]
         public void TestStringArrayPropertyWithDataSource_DataSourceIsItem()
@@ -448,7 +449,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// Code must be compilable on its own.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGenerateCodeToStream()
         {
             string xmlContents = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             TaskParser tp = XamlTestHelpers.LoadAndParse(xmlContents, "CL");
             TaskGenerator tg = new TaskGenerator(tp);
             CodeCompileUnit compileUnit = tg.GenerateCode();
-            CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
+            using CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
 
             using (StringWriter sw = new StringWriter(CultureInfo.CurrentCulture))
             {
@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
                 codeGenerator.GenerateCodeFromCompileUnit(compileUnit, sw, options);
 
-                CSharpCodeProvider provider = new CSharpCodeProvider();
+                using CSharpCodeProvider provider = new CSharpCodeProvider();
                 // Build the parameters for source compilation.
                 CompilerParameters cp = new CompilerParameters();
 
@@ -485,7 +485,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Framework.dll"));
                 cp.ReferencedAssemblies.Add("System.Data.dll");
 
-                // Generate an executable instead of 
+                // Generate an executable instead of
                 // a class library.
                 cp.GenerateExecutable = false;
                 // Set the assembly file name to generate.
@@ -501,7 +501,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         /// Tests to make sure the file generated compiles
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestGenerateToFile()
         {
             string xml = @"<ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
@@ -517,7 +516,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             TaskParser tp = XamlTestHelpers.LoadAndParse(xml, "CL");
             TaskGenerator tg = new TaskGenerator(tp);
             CodeCompileUnit compileUnit = tg.GenerateCode();
-            CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
+            using CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
 
             try
             {
@@ -530,7 +529,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                     codeGenerator.GenerateCodeFromCompileUnit(compileUnit, sw, options);
                 }
 
-                CSharpCodeProvider provider = new CSharpCodeProvider();
+                using CSharpCodeProvider provider = new CSharpCodeProvider();
                 // Build the parameters for source compilation.
                 CompilerParameters cp = new CompilerParameters();
 
@@ -542,7 +541,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
                 cp.ReferencedAssemblies.Add(Path.Combine(XamlTestHelpers.PathToMSBuildBinaries, "Microsoft.Build.Framework.dll"));
                 cp.ReferencedAssemblies.Add("System.Data.dll");
 
-                // Generate an executable instead of 
+                // Generate an executable instead of
                 // a class library.
                 cp.GenerateExecutable = false;
                 // Set the assembly file name to generate.
@@ -563,7 +562,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     #endregion
 
     #region Tests Generated code based on one xml file
-    [Trait("Category", "mono-osx-failing")]
     public sealed class GeneratedTaskTests
     {
         private Assembly _fakeTaskDll;

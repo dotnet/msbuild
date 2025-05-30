@@ -1,17 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework;
+using System.Globalization;
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    ///     Represents toggleable features of the MSBuild engine
+    ///     Represents toggleable features of the MSBuild engine.
     /// </summary>
     internal class Traits
     {
-        private static readonly Traits _instance = new Traits();
+        private static Traits _instance = new Traits();
+
         public static Traits Instance
         {
             get
@@ -28,19 +29,20 @@ namespace Microsoft.Build.Framework
         {
             EscapeHatches = new EscapeHatches();
 
-            DebugScheduler = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
+            DebugScheduler = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGSCHEDULER"));
             DebugNodeCommunication = DebugEngine || !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM"));
         }
 
         public EscapeHatches EscapeHatches { get; }
 
-        internal readonly string MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
+        internal readonly string? MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
+        public readonly bool ThrowOnDriveEnumeratingWildcard = Environment.GetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD") == "1";
 
         /// <summary>
         /// Cache file existence for the entire process
@@ -64,7 +66,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Allow the user to specify that two processes should not be communicating via an environment variable.
         /// </summary>
-        public static readonly string MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+        public static readonly string? MSBuildNodeHandshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
+
+        /// <summary>
+        /// Override property "MSBuildRuntimeType" to "Full", ignoring the actual runtime type of MSBuild.
+        /// </summary>
+        public readonly bool ForceEvaluateAsFullFramework = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildForceEvaluateAsFullFramework"));
 
         /// <summary>
         /// Setting the associated environment variable to 1 restores the pre-15.8 single
@@ -80,9 +87,29 @@ namespace Microsoft.Build.Framework
         public readonly bool EmitSolutionMetaproj = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildEmitSolution"));
 
         /// <summary>
+        /// Modifies Solution Generator to generate a metaproj that batches multiple Targets into one MSBuild task invoke.
+        /// </summary>
+        /// <remarks>
+        /// For example, a run of Clean;Build target will first run Clean on all projects,
+        /// then run Build on all projects.  When enabled, it will run Clean;Build on all
+        /// Projects at the back to back.  Allowing the second target to start sooner than before.
+        /// </remarks>
+        public readonly bool SolutionBatchTargets = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildSolutionBatchTargets"));
+
+        /// <summary>
         /// Log statistics about property functions which require reflection
         /// </summary>
         public readonly bool LogPropertyFunctionsRequiringReflection = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection"));
+
+        /// <summary>
+        /// Log all assembly loads including those that come from known MSBuild and .NET SDK sources in the binary log.
+        /// </summary>
+        public readonly bool LogAllAssemblyLoads = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLASSEMBLYLOADS"));
+
+        /// <summary>
+        /// Log all environment variables whether or not they are used in a build in the binary log.
+        /// </summary>
+        public static bool LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"));
 
         /// <summary>
         /// Log property tracking information.
@@ -94,15 +121,68 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
 
+        /// <summary>
+        /// Name of environment variables used to enable MSBuild server.
+        /// </summary>
+        public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
+
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
+        public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));
+
+        public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+
+        /// <summary>
+        /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
+        /// mirroring
+        /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry
+        /// </summary>
+        public bool SdkTelemetryOptOut = IsEnvVarOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
+        public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
+        public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
+        public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
+        public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
+
+        // for VS17.14
+        public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
+        public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
+
+        public static void UpdateFromEnvironment()
+        {
+            // Re-create Traits instance to update values in Traits according to current environment.
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                _instance = new Traits();
+            }
+        }
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
             return int.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out int result)
                 ? result
                 : defaultValue;
+        }
+
+        /// <summary>
+        /// Parse a double from an environment variable with invariant culture.
+        /// </summary>
+        private static double? ParseDoubleFromEnvironmentVariable(string environmentVariable)
+        {
+            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable),
+                                  NumberStyles.Float,
+                                  CultureInfo.InvariantCulture,
+                                  out double result)
+                ? result
+                : null;
+        }
+
+        internal static bool IsEnvVarOneOrTrue(string name)
+        {
+            string? value = Environment.GetEnvironmentVariable(name);
+            return value != null &&
+                   (value.Equals("1", StringComparison.OrdinalIgnoreCase) ||
+                    value.Equals("true", StringComparison.OrdinalIgnoreCase));
         }
     }
 
@@ -149,6 +229,11 @@ namespace Microsoft.Build.Framework
         /// Disables skipping full up to date check for immutable files. See FileClassifier class.
         /// </summary>
         public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHEMODIFICATIONTIME") == "1";
+
+        /// <summary>
+        /// When copying over an existing file, copy directly into the existing file rather than deleting and recreating.
+        /// </summary>
+        public readonly bool CopyWithoutDelete = Environment.GetEnvironmentVariable("MSBUILDCOPYWITHOUTDELETE") == "1";
 
         /// <summary>
         /// Emit events for project imports.
@@ -274,11 +359,6 @@ namespace Microsoft.Build.Framework
         public readonly bool DisableSdkResolutionCache = Environment.GetEnvironmentVariable("MSBUILDDISABLESDKCACHE") == "1";
 
         /// <summary>
-        /// Disable the NuGet-based SDK resolver.
-        /// </summary>
-        public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
-
-        /// <summary>
         /// Don't delete TargetPath metadata from associated files found by RAR.
         /// </summary>
         public readonly bool TargetPathForRelatedFiles = Environment.GetEnvironmentVariable("MSBUILDTARGETPATHFORRELATEDFILES") == "1";
@@ -311,6 +391,19 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         public readonly bool UseMinimalResxParsingInCoreScenarios = Environment.GetEnvironmentVariable("MSBUILDUSEMINIMALRESX") == "1";
 
+        /// <summary>
+        /// Escape hatch to ensure msbuild produces the compatible build results cache without versioning.
+        /// </summary>
+        /// <remarks>
+        /// Escape hatch for problems arising from https://github.com/dotnet/msbuild/issues/10208.
+        /// </remarks>
+        public readonly bool DoNotVersionBuildResult = Environment.GetEnvironmentVariable("MSBUILDDONOTVERSIONBUILDRESULT") == "1";
+
+        /// <summary>
+        /// Escape hatch to ensure build check does not limit amount of results.
+        /// </summary>
+        public readonly bool DoNotLimitBuildCheckResultsNumber = Environment.GetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER") == "1";
+
         private bool _sdkReferencePropertyExpansionInitialized;
         private SdkReferencePropertyExpansionMode? _sdkReferencePropertyExpansionValue;
 
@@ -331,6 +424,14 @@ namespace Microsoft.Build.Framework
                 }
 
                 return _sdkReferencePropertyExpansionValue;
+            }
+        }
+
+        public bool UnquoteTargetSwitchParameters
+        {
+            get
+            {
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
             }
         }
 
@@ -432,28 +533,72 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Emergency escape hatch. If a customer hits a bug in the shipped product causing an internal exception,
-        /// and fortuitously it happens that ignoring the VerifyThrow allows execution to continue in a reasonable way,
-        /// then we can give them this undocumented environment variable as an immediate workaround.
-        /// </summary>
-        /// <remarks>
-        /// Clone from ErrorUtilities which isn't (yet?) available in Framework.
-        /// </remarks>
-
-        private static readonly bool s_throwExceptions = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDONOTTHROWINTERNAL"));
-
-        /// <summary>
         /// Throws InternalErrorException.
         /// </summary>
         /// <remarks>
-        /// Clone of ErrorUtilities.ThrowInternalError which isn't (yet?) available in Framework.
+        /// Clone of ErrorUtilities.ThrowInternalError which isn't available in Framework.
         /// </remarks>
         internal static void ThrowInternalError(string message)
         {
-            if (s_throwExceptions)
+            throw new InternalErrorException(message);
+        }
+
+        /// <summary>
+        /// Throws InternalErrorException.
+        /// This is only for situations that would mean that there is a bug in MSBuild itself.
+        /// </summary>
+        /// <remarks>
+        /// Clone from ErrorUtilities which isn't available in Framework.
+        /// </remarks>
+        internal static void ThrowInternalError(string message, params object?[] args)
+        {
+            throw new InternalErrorException(FormatString(message, args));
+        }
+
+        /// <summary>
+        /// Formats the given string using the variable arguments passed in.
+        ///
+        /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
+        /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
+        ///
+        /// Thread safe.
+        /// </summary>
+        /// <param name="unformatted">The string to format.</param>
+        /// <param name="args">Optional arguments for formatting the given string.</param>
+        /// <returns>The formatted string.</returns>
+        /// <remarks>
+        /// Clone from ResourceUtilities which isn't available in Framework.
+        /// </remarks>
+        internal static string FormatString(string unformatted, params object?[] args)
+        {
+            string formatted = unformatted;
+
+            // NOTE: String.Format() does not allow a null arguments array
+            if ((args?.Length > 0))
             {
-                throw new InternalErrorException(message);
+#if DEBUG
+                // If you accidentally pass some random type in that can't be converted to a string,
+                // FormatResourceString calls ToString() which returns the full name of the type!
+                foreach (object? param in args)
+                {
+                    // Check it has a real implementation of ToString() and the type is not actually System.String
+                    if (param != null)
+                    {
+                        if (string.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal) &&
+                            param.GetType() != typeof(string))
+                        {
+                            ThrowInternalError("Invalid resource parameter type, was {0}",
+                                param.GetType().FullName);
+                        }
+                    }
+                }
+#endif
+                // Format the string, using the variable arguments passed in.
+                // NOTE: all String methods are thread-safe
+                formatted = String.Format(CultureInfo.CurrentCulture, unformatted, args);
             }
+
+            return formatted;
         }
     }
 }

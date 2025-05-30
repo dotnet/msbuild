@@ -17,10 +17,20 @@
         <target state="translated">已經開始建置。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="translated">集合中的元素數大於目標陣列中的可用空間 (從指定索引開始時)。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
         <target state="translated">MSB4008: 已在 "{1}" 中發現工作組件 "{0}" 的衝突組件。</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
+      </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">不支援自定義事件類型 '{0}'，因為所有自定義事件類型都已過時。請改用 Extended*EventArgs。更多資訊： https://aka.ms/msbuild/eventargs</target>
+        <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
@@ -31,6 +41,11 @@
         <source>{0} ({1},{2})</source>
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
+      </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="translated">MSB6005: 工作在初始化之前就嘗試記錄。訊息為: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
         <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
@@ -111,8 +126,8 @@
         <note>{StrBegin="MSB5003: "}</note>
       </trans-unit>
       <trans-unit id="Shared.FailedDeletingTempFile">
-        <source>MSB5018: Failed to delete the temporary file "{0}". {1}</source>
-        <target state="translated">MSB5018: 無法刪除暫存檔 "{0}"。{1}</target>
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: 無法刪除暫存檔 "{0}"。{1}{2}</target>
         <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
       <trans-unit id="Shared.InvalidFilespecForTransform">
@@ -307,6 +322,12 @@
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
         <target state="translated">指派值為 "{1}" 的參數 "{0}" 不得具有無效的路徑或檔案字元。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WildcardResultsInDriveEnumeration">
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
+        <target state="translated">MSB5029: 檔案「{3}」元素 &lt;{2}&gt; 中屬性「{1}」的值「{0}」是萬用字元，導致列舉磁碟機上的所有檔案，這很可能不是預期的結果。檢查參考的屬性是否一直定義，以及專案與目前的工作目錄是否不在磁碟機根目錄中。</target>
+        <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
+      attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>
     </body>
   </file>

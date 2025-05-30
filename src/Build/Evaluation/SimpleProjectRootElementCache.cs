@@ -1,10 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -33,16 +35,16 @@ namespace Microsoft.Build.Evaluation
 
         internal override ProjectRootElement Get(
             string projectFile,
-            OpenProjectRootElement openProjectRootElement,
+            OpenProjectRootElement loadProjectRootElement,
             bool isExplicitlyLoaded,
             bool? preserveFormatting)
         {
             // Should already have been canonicalized
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
 
-            return openProjectRootElement == null
+            return loadProjectRootElement == null
                 ? GetFromCache(projectFile)
-                : GetFromOrAddToCache(projectFile, openProjectRootElement);
+                : GetFromOrAddToCache(projectFile, loadProjectRootElement);
         }
 
         private ProjectRootElement GetFromCache(string projectFile)
@@ -55,14 +57,17 @@ namespace Microsoft.Build.Evaluation
             return null;
         }
 
-        private ProjectRootElement GetFromOrAddToCache(string projectFile, OpenProjectRootElement openFunc)
+        private ProjectRootElement GetFromOrAddToCache(string projectFile, OpenProjectRootElement loadFunc)
         {
             return _cache.GetOrAdd(projectFile, key =>
             {
-                ProjectRootElement rootElement = openFunc(key, this);
+                ProjectRootElement rootElement = loadFunc(key, this);
                 ErrorUtilities.VerifyThrowInternalNull(rootElement, "projectRootElement");
-                ErrorUtilities.VerifyThrow(rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
-                    "Got project back with incorrect path");
+                ErrorUtilities.VerifyThrow(
+                    rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
+                    "Got project back with incorrect path. Expected path: {0}, received path: {1}.",
+                    key,
+                    rootElement.FullPath);
 
                 AddEntry(rootElement);
 
@@ -116,7 +121,7 @@ namespace Microsoft.Build.Evaluation
 
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)
@@ -133,11 +138,6 @@ namespace Microsoft.Build.Evaluation
         internal override void OnProjectDirtied(Project sender, ProjectChangedEventArgs e)
         {
             throw new NotImplementedException();
-        }
-
-        protected override void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
-        {
-             throw new NotImplementedException();
         }
     }
 }

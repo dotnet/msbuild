@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,12 +8,12 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -69,7 +69,7 @@ namespace Microsoft.Build.Evaluation
         internal ToolsetConfigurationReader(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, Func<Configuration> readApplicationConfiguration)
             : base(environmentProperties, globalProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration, nameof(readApplicationConfiguration));
+            ErrorUtilities.VerifyThrowArgumentNull(readApplicationConfiguration);
             _readApplicationConfiguration = readApplicationConfiguration;
             _projectImportSearchPathsCache = new Dictionary<string, Dictionary<string, ProjectImportPathMatch>>(StringComparer.OrdinalIgnoreCase);
         }
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Evaluation
         protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
         {
             Dictionary<string, ProjectImportPathMatch> kindToPathsCache;
-            var key = toolsVersion + ":" + os;
+            var key = $"{toolsVersion}:{os}";
             if (_projectImportSearchPathsCache.TryGetValue(key, out kindToPathsCache))
             {
                 return kindToPathsCache;
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Evaluation
                     continue;
                 }
 
-                //FIXME: handle ; in path on Unix
+                // FIXME: handle ; in path on Unix
                 var paths = property.Value
                     .Split(s_separatorForExtensionsPathSearchPaths, StringSplitOptions.RemoveEmptyEntries)
                     .Distinct()
@@ -260,22 +260,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static Configuration ReadApplicationConfiguration()
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
-            {
-                return s_configurationCache.Value;
-            }
-            else
-            {
-                return ReadOpenMappedExeConfiguration();
-            }
+            return s_configurationCache.Value;
         }
 
         private static Configuration ReadOpenMappedExeConfiguration()
         {
             // When running from the command-line or from VS, use the msbuild.exe.config file.
             if (BuildEnvironmentHelper.Instance.Mode != BuildEnvironmentMode.None &&
- // This FEATURE_SYSTEM_CONFIGURATION is needed as OpenExeConfiguration for net5.0 works differently, without this condition unit tests won't pass.
- // ConfigurationManager.OpenExeConfiguration in net5.0 will find testhost.exe instead which does not contain any configuration and therefore fail.
+                // This FEATURE_SYSTEM_CONFIGURATION is needed as OpenExeConfiguration for net5.0 works differently, without this condition unit tests won't pass.
+                // ConfigurationManager.OpenExeConfiguration in net5.0 will find testhost.exe instead which does not contain any configuration and therefore fail.
 #if FEATURE_SYSTEM_CONFIGURATION
                 !BuildEnvironmentHelper.Instance.RunningTests &&
 #endif

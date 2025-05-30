@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -12,6 +12,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -40,7 +42,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TargetAppConfigShouldContainsBindingRedirects()
         {
             // Arrange
@@ -66,7 +67,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TargetAppConfigShouldContainsBindingRedirectsFromAppConfig()
         {
             // Arrange
@@ -101,7 +101,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   should respect that.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GenerateBindingRedirectsFromTwoDependentAssemblySections()
         {
             // Arrange
@@ -152,7 +151,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         /// <summary>
         /// In this case,
-        /// - An app.config is passed in that has dependentAssembly section with probing element but without 
+        /// - An app.config is passed in that has dependentAssembly section with probing element but without
         ///   assemblyIdentity or bindingRedirect elements.
         /// Expected:
         /// - No warning
@@ -161,13 +160,12 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void AppConfigWithProbingPathAndWithoutDependentAssemblyShouldNotProduceWarningsBug1161241()
         {
             // Arrange
             string appConfigFile = WriteAppConfigRuntimeSection(
 @"<assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"">
-   <probing privatePath = 'bin;bin2\subbin;bin3'/>  
+   <probing privatePath = 'bin;bin2\subbin;bin3'/>
 </assemblyBinding>");
             TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
@@ -189,12 +187,11 @@ namespace Microsoft.Build.Tasks.UnitTests
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void AppConfigWithEmptyAssemblyBindingShouldNotProduceWarnings()
         {
             // Arrange
             string appConfigFile = WriteAppConfigRuntimeSection(
-@"<assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"" appliesTo=""v1.0.3705""> 
+@"<assemblyBinding xmlns=""urn:schemas-microsoft-com:asm.v1"" appliesTo=""v1.0.3705"">
 </assemblyBinding>");
             TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
 
@@ -215,7 +212,6 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - Due to app.config xsd schema this is a valid configuration.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DependentAssemblySectionWithoutBindingRedirectShouldNotProduceWarnings()
         {
             // Arrange
@@ -264,6 +260,22 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void AppConfigWhenFilePlacedInLocationWithGB18030Characters()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder rootTestFolder = env.CreateFolder();
+                TransientTestFolder testFolder = env.CreateFolder(Path.Combine(rootTestFolder.Path, "\uD873\uDD02\u9FA8\u82D8\u722B\u9EA4\u03C5\u33D1\uE038\u486B\u0033"));
+                string appConfigContents = WriteAppConfigRuntimeSection(string.Empty, testFolder);
+                string outputAppConfigFile = env.ExpectFile(".config").Path;
+
+                TaskItemMock redirect = new TaskItemMock("System, Version=10.0.0.0, Culture=Neutral, PublicKeyToken='b77a5c561934e089'", "40.0.0.0");
+
+                _ = Should.NotThrow(() => GenerateBindingRedirects(appConfigContents, outputAppConfigFile, redirect));
+            }
+        }
+
+        [Fact]
         public void AppConfigFileNotSavedWhenIdentical()
         {
             string appConfigFile = WriteAppConfigRuntimeSection(string.Empty);
@@ -279,7 +291,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
 
             var oldTimestamp = DateTime.Now.Subtract(TimeSpan.FromDays(30));
-            
+
             File.SetCreationTime(outputAppConfigFile, oldTimestamp);
             File.SetLastWriteTime(outputAppConfigFile, oldTimestamp);
 
@@ -293,7 +305,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Verify it ran correctly and that it's still old
             redirectResults2.ExecuteResult.ShouldBeTrue();
             redirectResults2.TargetAppConfigContent.ShouldContain("<assemblyIdentity name=\"System\" publicKeyToken=\"b77a5c561934e089\" culture=\"neutral\" />");
-            redirectResults.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
+            redirectResults2.TargetAppConfigContent.ShouldContain("newVersion=\"40.0.0.0\"");
 
             File.GetCreationTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
             File.GetLastWriteTime(outputAppConfigFile).ShouldBe(oldTimestamp, TimeSpan.FromSeconds(5));
@@ -310,11 +322,10 @@ namespace Microsoft.Build.Tasks.UnitTests
             GenerateBindingRedirects bindingRedirects = new GenerateBindingRedirects
             {
                 BuildEngine = engine,
-                SuggestedRedirects = suggestedRedirects ?? new ITaskItem[] { },
+                SuggestedRedirects = suggestedRedirects ?? Array.Empty<ITaskItem>(),
                 AppConfigFile = new TaskItem(appConfigFile),
                 OutputAppConfigFile = new TaskItem(outputAppConfig)
             };
-
 
             bool executionResult = bindingRedirects.Execute();
 
@@ -328,7 +339,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             };
         }
 
-        private string WriteAppConfigRuntimeSection(string runtimeSection)
+        private string WriteAppConfigRuntimeSection(
+            string runtimeSection,
+            TransientTestFolder transientTestFolder = null)
         {
             string formatString =
 @"<configuration>
@@ -338,7 +351,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 </configuration>";
             string appConfigContents = string.Format(formatString, runtimeSection);
 
-            string appConfigFile = _env.CreateFile(".config").Path;
+            string appConfigFile = _env.CreateFile(transientTestFolder ?? new TransientTestFolder(), ".config").Path;
             File.WriteAllText(appConfigFile, appConfigContents);
             return appConfigFile;
         }
@@ -346,7 +359,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Helper class that contains execution results for <see cref="GenerateBindingRedirects"/>.
         /// </summary>
-        private class BindingRedirectsExecutionResult
+        private sealed class BindingRedirectsExecutionResult
         {
             public MockEngine Engine { get; set; }
 
@@ -362,7 +375,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Mock implementation of the <see cref="ITaskItem"/>.
         /// </summary>
-        private class TaskItemMock : ITaskItem
+        private sealed class TaskItemMock : ITaskItem
         {
             public TaskItemMock(string assemblyName, string maxVersion)
             {

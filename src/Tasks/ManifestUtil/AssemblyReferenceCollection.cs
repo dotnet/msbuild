@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -106,12 +108,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 AssemblyIdentity listItemIdentity = a.AssemblyIdentity;
 
-                // if the item in our list doesn't have an identity but is a managed assembly, 
+                // if the item in our list doesn't have an identity but is a managed assembly,
                 //  we calculate it by reading the file from disk to find its identity.
                 //
                 // note that this is here specifically to deal with the scenario when we are being
-                //  asked to find a reference to one of our sentinel assemblies which are known to 
-                //  be managed assemblies. doing this ensures that our sentinel assemblies do not 
+                //  asked to find a reference to one of our sentinel assemblies which are known to
+                //  be managed assemblies. doing this ensures that our sentinel assemblies do not
                 //  show up twice in the manifest.
                 //
                 // we are assuming the incoming identity for the sentinel assembly really is the

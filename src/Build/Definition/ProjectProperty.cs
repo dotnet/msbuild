@@ -1,13 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -29,9 +33,14 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private string _evaluatedValueEscaped;
 
+        /// <summary>
+        /// Property location in xml file. Can be empty.
+        /// </summary>
+        private (string File, int Line, int Column) _location;
+
         internal ProjectProperty(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentNull(project);
             _project = project;
         }
 
@@ -40,8 +49,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectProperty(Project project, string evaluatedValueEscaped)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped, nameof(evaluatedValueEscaped));
+            ErrorUtilities.VerifyThrowArgumentNull(project);
+            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped);
 
             _project = project;
             _evaluatedValueEscaped = evaluatedValueEscaped;
@@ -92,7 +101,39 @@ namespace Microsoft.Build.Evaluation
         string IProperty.EvaluatedValueEscaped
         {
             [DebuggerStepThrough]
-            get => EvaluatedValueEscapedInternal;
+            get
+            {
+                if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
+                {
+                    EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal, string.Empty, 0, 0);
+                    args.BuildEventContext = loggingContext.BuildEventContext;
+                    loggingContext.LogBuildEvent(args);
+                    environmentProperty._loggedEnvProperty = true;
+                }
+
+                return EvaluatedValueEscapedInternal;
+            }
+        }
+
+        /// <summary>
+        /// Gets object's location in xml file.
+        /// </summary>
+        public (string File, int Line, int Column) Location { get => _location; }
+
+        string IProperty.GetEvaluatedValueEscaped(IElementLocation location)
+        {
+            if (this is EnvironmentDerivedProjectProperty environmentProperty && environmentProperty.loggingContext is { IsValid: true } loggingContext && !environmentProperty._loggedEnvProperty && !Traits.LogAllEnvironmentVariables)
+            {
+                EnvironmentVariableReadEventArgs args = new(Name, EvaluatedValueEscapedInternal, location.File, location.Line, location.Column);
+                args.BuildEventContext = loggingContext.BuildEventContext;
+                loggingContext.LogBuildEvent(args);
+                environmentProperty._loggedEnvProperty = true;
+            }
+
+            // the location is handy in BuildCheck messages.
+            _location = (location.File, location.Line, location.Column);
+
+            return EvaluatedValueEscapedInternal;
         }
 
         /// <summary>
@@ -235,9 +276,10 @@ namespace Microsoft.Build.Evaluation
         /// This is ONLY to be used by the Evaluator (and Project.SetGlobalProperty) and ONLY for Global, Environment, and Built-in properties.
         /// All other properties originate in XML, and should have a backing XML object.
         /// </summary>
-        internal static ProjectProperty Create(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
+        internal static ProjectProperty Create(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext = null)
         {
-            return new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+            return !isGlobalProperty && !mayBeReserved ? new EnvironmentDerivedProjectProperty(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext) :
+                new ProjectPropertyNotXmlBacked(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
         }
 
         /// <summary>
@@ -317,7 +359,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyXmlBacked(Project project, ProjectPropertyElement xml, string evaluatedValueEscaped)
                 : base(project, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
+                ErrorUtilities.VerifyThrowArgumentNull(xml);
                 ErrorUtilities.VerifyThrowInvalidOperation(!ProjectHasMatchingGlobalProperty(project, xml.Name), "OM_GlobalProperty", xml.Name);
 
                 _xml = xml;
@@ -462,7 +504,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyXmlBackedWithPredecessor(Project project, ProjectPropertyElement xml, string evaluatedValueEscaped, ProjectProperty predecessor)
                 : base(project, xml, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(predecessor, nameof(predecessor));
+                ErrorUtilities.VerifyThrowArgumentNull(predecessor);
 
                 _predecessor = predecessor;
             }
@@ -502,7 +544,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyNotXmlBacked(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
                 : base(project, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+                ErrorUtilities.VerifyThrowArgumentLength(name);
                 ErrorUtilities.VerifyThrowInvalidOperation(isGlobalProperty || !ProjectHasMatchingGlobalProperty(project, name), "OM_GlobalProperty", name);
                 ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
                 ErrorUtilities.VerifyThrowArgument(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), "OM_ReservedName", name);
@@ -580,7 +622,7 @@ namespace Microsoft.Build.Evaluation
             {
                 [DebuggerStepThrough]
                 get
-                { return _project.GlobalProperties.ContainsKey(Name); }
+                { return _project.GlobalPropertiesContains(Name); }
             }
 
             /// <summary>
@@ -624,6 +666,19 @@ namespace Microsoft.Build.Evaluation
             public override bool IsImported
             {
                 get { return false; }
+            }
+        }
+
+        private class EnvironmentDerivedProjectProperty : ProjectPropertyNotXmlBacked
+        {
+            internal bool _loggedEnvProperty = false;
+            internal LoggingContext loggingContext;
+
+            internal EnvironmentDerivedProjectProperty(
+                Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, LoggingContext loggingContext)
+                : base(project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved)
+            {
+                this.loggingContext = loggingContext;
             }
         }
     }

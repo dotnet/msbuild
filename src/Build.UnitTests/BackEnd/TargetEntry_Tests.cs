@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
@@ -19,6 +18,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -38,7 +39,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
-        #pragma warning disable xUnit1013
+#pragma warning disable xUnit1013
 
         /// <summary>
         /// Handles exceptions from the logging system.
@@ -48,7 +49,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        #pragma warning restore xUnit1013
+#pragma warning restore xUnit1013
 
         /// <summary>
         /// Called prior to each test.
@@ -78,12 +79,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
-                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
-                TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, TargetBuiltReason.None, _host, false);
-            }
-           );
+                TargetEntry entry = new TargetEntry(requestEntry, this, null, lookup, null, TargetBuiltReason.None, _host, null, false);
+            });
         }
         /// <summary>
         /// Tests a constructor with a null lookup.
@@ -94,11 +94,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
-                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
-                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, TargetBuiltReason.None, _host, false);
-            }
-           );
+                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), null, null, TargetBuiltReason.None, _host, null, false);
+            });
         }
         /// <summary>
         /// Tests a constructor with a null host.
@@ -109,13 +108,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
-                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+                BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
                 BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
 
                 Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
-                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, TargetBuiltReason.None, null, false);
-            }
-           );
+                TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification("Empty", null), lookup, null, TargetBuiltReason.None, null, null, false);
+            });
         }
         /// <summary>
         /// Tests a valid constructor call.
@@ -140,8 +138,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
                 Assert.Equal(TargetEntryState.Dependencies, entry.State);
                 ExecuteEntry(project, entry);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests incorrect invocation of GatherResults.
@@ -155,8 +152,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
                 Assert.Equal(TargetEntryState.Dependencies, entry.State);
                 entry.GatherResults();
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that the dependencies specified for a target are returned by the GetDependencies call.
@@ -379,8 +375,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (returnsEnabledForThisProject)
                 {
-                    // If returns are enabled, since this is a target with "Outputs", they won't 
-                    // be returned. 
+                    // If returns are enabled, since this is a target with "Outputs", they won't
+                    // be returned.
                     Assert.Empty(results.Items);
                 }
                 else
@@ -472,8 +468,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (returnsEnabledForThisProject)
                 {
-                    // If returns are enabled, since this is a target with "Outputs", they won't 
-                    // be returned. 
+                    // If returns are enabled, since this is a target with "Outputs", they won't
+                    // be returned.
                     Assert.Empty(results.Items);
                 }
                 else
@@ -634,7 +630,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             foreach (bool returnsEnabledForThisProject in returnsEnabled)
             {
                 string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
         <SomeItem1 Include=`item1.cs`/>
         <SomeItem2 Include=`item2.cs`/>
@@ -681,7 +677,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 foreach (bool returnsEnabledForThisProject in returnsEnabled)
                 {
                     string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
         <SomeItem1 Include=`item1.cs`/>
         <SomeItem2 Include=`item2.cs`/>
@@ -778,7 +774,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 foreach (bool returnsEnabledForThisProject in returnsEnabled)
                 {
                     string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
         <SomeItem1 Include=`item1.cs`/>
         <SomeItem2 Include=`item2.cs`/>
@@ -833,13 +829,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
         public void AfterTargetsShouldReportFailedBuild()
         {
-            // Since we're creating our own BuildManager, we need to make sure that the default 
+            // Since we're creating our own BuildManager, we need to make sure that the default
             // one has properly relinquished the inproc node
             NodeProviderInProc nodeProviderInProc = ((IBuildComponentHost)BuildManager.DefaultBuildManager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
             nodeProviderInProc?.Dispose();
 
             string content = @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build'>
 <Target Name='Build'>
  <Message Text='Hello'/>
 </Target>
@@ -856,13 +852,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 List<ILogger> loggers = new List<ILogger>();
                 loggers.Add(logger);
 
-                ProjectCollection collection = new ProjectCollection();
-                Project project = new Project(
-                    XmlReader.Create(new StringReader(content)),
+                using ProjectCollection collection = new ProjectCollection();
+                using ProjectFromString projectFromString = new(
+                    content,
                     (IDictionary<string, string>)null,
                     ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                    collection)
-                { FullPath = FileUtilities.GetTemporaryFile() };
+                    collection);
+                Project project = projectFromString.Project;
+
+                project.FullPath = FileUtilities.GetTemporaryFile();
                 project.Save();
                 File.Delete(project.FullPath);
 
@@ -876,7 +874,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     project.FullPath,
                     new Dictionary<string, string>(),
                     ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                    new string[] { },
+                    Array.Empty<string>(),
                     null);
                 manager = new BuildManager();
                 BuildResult result = manager.Build(parameters, data);
@@ -889,12 +887,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
             finally
             {
-                // and we should clean up after ourselves, too. 
+                // and we should clean up after ourselves, too.
                 if (manager != null)
                 {
                     NodeProviderInProc inProcNodeProvider = ((IBuildComponentHost)manager).GetComponent(BuildComponentType.InProcNodeProvider) as NodeProviderInProc;
 
                     inProcNodeProvider?.Dispose();
+                    manager.Dispose();
                 }
             }
         }
@@ -907,7 +906,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestTargetFinishedRaisedOnInvalidTarget()
         {
             string content = @"
-<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+<Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <Target Name=`OnlyInputs` Inputs=`foo`>
         <Message Text=`This is an invalid target -- this text should never show.` />
     </Target>
@@ -1023,12 +1022,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>The new target entry</returns>
         private TargetEntry CreateStandardTargetEntry(ProjectInstance project, string targetName)
         {
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             config.Project = project;
             BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[] { "foo" }), config);
 
             Lookup lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(project.Items), new PropertyDictionary<ProjectPropertyInstance>(project.Properties));
-            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(targetName, project.Targets[targetName].Location), lookup, null, TargetBuiltReason.None, _host, false);
+            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(targetName, project.Targets[targetName].Location), lookup, null, TargetBuiltReason.None, _host, null, false);
             return entry;
         }
 
@@ -1041,10 +1040,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>The new target entry</returns>
         private TargetEntry CreateStandardTargetEntry(ProjectInstance project, string target, TargetEntry baseEntry)
         {
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
             config.Project = project;
             BuildRequestEntry requestEntry = new BuildRequestEntry(CreateNewBuildRequest(1, new string[1] { "foo" }), config);
-            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(target, project.Targets[target].Location), baseEntry.Lookup, baseEntry, TargetBuiltReason.None, _host, false);
+            TargetEntry entry = new TargetEntry(requestEntry, this, new TargetSpecification(target, project.Targets[target].Location), baseEntry.Lookup, baseEntry, TargetBuiltReason.None, _host, null, false);
             return entry;
         }
 
@@ -1057,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string returnsAttributeName = returnsAttributeEnabled ? "Returns" : "Outputs";
 
             string projectFileContents = @"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
                     <ItemGroup>
                         <Compile Include='b.cs' />
@@ -1109,11 +1108,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='SkipCondition' Condition=""'true' == 'false'"" />
 
                     <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
+                        <ErrorTask1 ContinueOnError='True'/>
+                        <ErrorTask2 ContinueOnError='False'/>
+                        <ErrorTask3 />
+                        <OnError ExecuteTargets='Foo'/>
+                        <OnError ExecuteTargets='Bar'/>
                     </Target>
 
                     <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
@@ -1178,8 +1177,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             FileStream stream = File.Create("testProject.proj");
             stream.Dispose();
-
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             return project.CreateProjectInstance();
         }
 
@@ -1196,7 +1195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The mock component host.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 
@@ -1327,32 +1326,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             }
 
+            public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+                => (TComponent)GetComponent(type);
+
             /// <summary>
             /// Register a component factory.
             /// </summary>
             public void RegisterFactory(BuildComponentType type, BuildComponentFactoryDelegate factory)
             {
-            }
-
-            #endregion
-
-            #region IBuildComponent Members
-
-            /// <summary>
-            /// Sets the component host
-            /// </summary>
-            /// <param name="host">The component host</param>
-            public void InitializeComponent(IBuildComponentHost host)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <summary>
-            /// Shuts down the component
-            /// </summary>
-            public void ShutdownComponent()
-            {
-                throw new NotImplementedException();
             }
 
             #endregion

@@ -1,18 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Collections;
-using Xunit;
 using Shouldly;
+using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
-    /// Tests for the CopyOnWriteDictionary 
+    /// Tests for the CopyOnWriteDictionary
     /// </summary>
     public class CopyOnWriteDictionary_Tests
     {
@@ -45,8 +45,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             {
                 var dictionary = new CopyOnWriteDictionary<object>();
                 object value = dictionary[string.Empty];
-            }
-           );
+            });
         }
         /// <summary>
         /// Find with the same key inserted using TryGetValue
@@ -108,7 +107,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Cloning sees the same values 
+        /// Cloning sees the same values
         /// </summary>
         [Fact]
         public void CloneVisibility()
@@ -124,7 +123,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Clone uses same comparer 
+        /// Clone uses same comparer
         /// </summary>
         [Fact]
         public void CloneComparer()
@@ -190,54 +189,6 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             Assert.Equal("1", dictionary["test"]);
             Assert.Equal("2", clone["test"]);
-        }
-
-        /// <summary>
-        /// Serialize basic case
-        /// </summary>
-        [Fact]
-        public void SerializeDeserialize()
-        {
-            CopyOnWriteDictionary<string> dictionary = new CopyOnWriteDictionary<string>();
-            dictionary.Add("Key1", "1");
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-
-                formatter.Serialize(stream, dictionary);
-                stream.Position = 0;
-
-                var dictionary2 = (CopyOnWriteDictionary<string>)formatter.Deserialize(stream);
-
-                Assert.Equal(dictionary.Count, dictionary2.Count);
-                Assert.Equal(dictionary.Comparer, dictionary2.Comparer);
-                Assert.Equal("1", dictionary2["Key1"]);
-
-                dictionary2.Add("key2", "2");
-            }
-        }
-
-        /// <summary>
-        /// Serialize custom comparer
-        /// </summary>
-        [Fact]
-        public void SerializeDeserialize2()
-        {
-            CopyOnWriteDictionary<string> dictionary = new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                BinaryFormatter formatter = new BinaryFormatter();
-
-                formatter.Serialize(stream, dictionary);
-                stream.Position = 0;
-
-                CopyOnWriteDictionary<string> deserialized = (CopyOnWriteDictionary<string>)formatter.Deserialize(stream);
-
-                deserialized.Count.ShouldBe(dictionary.Count);
-                deserialized.Comparer.ShouldBeOfType<MSBuildNameIgnoreCaseComparer>();
-            }
         }
     }
 }

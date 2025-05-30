@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-
 using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests.Globbing;
 using Microsoft.Build.Evaluation;
@@ -16,17 +15,18 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
-
-using Task = System.Threading.Tasks.Task;
-// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
-using ProvenanceResultTupleList = System.Collections.Generic.List<(string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int)>;
-using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
-using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+// can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.
+using ProvenanceResultTupleList = System.Collections.Generic.List<(string, Microsoft.Build.Evaluation.Operation, Microsoft.Build.Evaluation.Provenance, int)>;
+using TargetDotNetFrameworkVersion = Microsoft.Build.Utilities.TargetDotNetFrameworkVersion;
+using Task = System.Threading.Tasks.Task;
+using ToolLocationHelper = Microsoft.Build.Utilities.ToolLocationHelper;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectCollection.GlobalProjectCollection.GlobalProperties.ShouldBeEmpty();
         }
 
-        private static readonly string ProjectWithItemGroup =
+        private const string ProjectWithItemGroup =
 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
 {0}
@@ -105,7 +105,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                        </Target>
                     </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             bool result = project.Build(new ILogger[] { mockLogger });
             result.ShouldBeTrue();
@@ -130,8 +131,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                        </Target>
                     </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
-            ProjectCollection collection = new ProjectCollection();
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+            using ProjectCollection collection = new ProjectCollection();
             collection.RegisterLogger(mockLogger);
             Project project = new Project(xml, null, null, collection);
 
@@ -157,8 +159,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                        </Target>
                     </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
-            ProjectCollection collection = new ProjectCollection();
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+            using ProjectCollection collection = new ProjectCollection();
             collection.RegisterLogger(mockLogger2);
             Project project = new Project(xml, null, null, collection);
 
@@ -178,7 +181,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 string content = GetSampleProjectContent();
                 File.WriteAllText(file, content);
@@ -242,8 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 ProjectRootElement.Create(reader);
-            }
-           );
+            });
         }
         /// <summary>
         /// Reading from an XMLReader that has no content should throw the correct
@@ -256,8 +258,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 Project project = new Project(reader);
-            }
-           );
+            });
         }
         /// <summary>
         /// Reading from an XMLReader that has no content should throw the correct
@@ -276,8 +277,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 }
 
                 Project project = (new ProjectCollection()).LoadProject(reader);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -292,8 +292,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 XmlReader reader = XmlReader.Create(new StringReader(String.Empty));
                 reader.Dispose();
                 Project project = new Project(reader);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -304,7 +303,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ReadFromReaderTwoDocs()
         {
             string emptyProject = ObjectModelHelpers.CleanupFileContents(@"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace""/>");
-            XmlReader reader = XmlReader.Create(new StringReader(emptyProject + emptyProject), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
+            using XmlReader reader = XmlReader.Create(new StringReader(emptyProject + emptyProject), new XmlReaderSettings { ConformanceLevel = ConformanceLevel.Fragment });
 
             reader.ReadToFollowing("Project");
             reader.Read();
@@ -326,8 +325,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 xml.AddImport("__nonexistent__");
 
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// Import gives invalid uri exception
@@ -341,8 +339,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 xml.AddImport(@"//MSBuildExtensionsPath32)\4.0\Microsoft.VisualStudioVersion.v11.Common.props");
 
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// Necessary but not sufficient for MSBuild evaluation to be thread safe.
@@ -372,7 +369,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             xml.AddImport("__nonexistent__");
             xml.AddProperty("q", "$(p)");
 
-            Project project = new Project(xml, null, null, new ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
+            using var collection = new ProjectCollection();
+            Project project = new Project(xml, null, null, collection, ProjectLoadSettings.IgnoreMissingImports);
 
             // Make sure some evaluation did occur
             project.GetPropertyValue("q").ShouldBe("1");
@@ -391,8 +389,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml, null, null, new ProjectCollection(), ProjectLoadSettings.IgnoreMissingImports);
                 IList<ResolvedImport> imports = project.ImportsIncludingDuplicates;
                 imports.ShouldBeEmpty();
-            }
-           );
+            });
         }
         /// <summary>
         /// Import self ignored
@@ -404,14 +401,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
                 collection.RegisterLogger(logger);
 
                 Project project = new Project(collection);
                 project.Xml.AddImport("$(MSBuildProjectFullPath)");
 
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 project.Save(file);
                 project.ReevaluateIfNecessary();
 
@@ -434,12 +431,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
                 collection.RegisterLogger(logger);
 
-                file = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
                 Project project = new Project(collection);
                 project.Xml.AddImport(file2);
                 project.Save(file);
@@ -470,12 +467,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
                 collection.RegisterLogger(logger);
 
-                file = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
                 Project project = new Project(collection);
                 project.Xml.AddImport(file2);
                 project.Xml.AddImport(file2);
@@ -507,13 +504,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 MockLogger logger = new MockLogger();
                 collection.RegisterLogger(logger);
 
-                file = FileUtilities.GetTemporaryFile();
-                file2 = FileUtilities.GetTemporaryFile();
-                file3 = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
+                file2 = FileUtilities.GetTemporaryFileName();
+                file3 = FileUtilities.GetTemporaryFileName();
 
                 Project project = new Project(collection);
                 project.Xml.AddImport(file2);
@@ -597,7 +594,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             projectFileContent = string.Format(projectFileContent, importPath);
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
 
             project.GetPropertyValue("p2").ShouldBe("v3");
@@ -641,20 +639,19 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                          </ItemGroup>
                      </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 project.Save(file);
                 project.ReevaluateIfNecessary();
 
                 project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(
-                    NativeMethodsShared.IsWindows
-                        ? Path.Combine(Path.GetTempPath(), @"obj\i386\foo.dll")
-                        : Path.Combine(Path.GetTempPath(), @"obj/i386/foo.dll"));
+                    Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386", "foo.dll"));
             }
             finally
             {
@@ -677,7 +674,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             ProjectInstance projectInstance = new ProjectInstance(xml);
@@ -709,7 +707,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             try
             {
@@ -719,8 +718,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
-                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
             }
             finally
             {
@@ -744,7 +743,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             try
             {
@@ -754,8 +754,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(xml);
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
-                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
-                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath(), "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory, "obj", "i386").Substring(RootPrefixLength) + Path.DirectorySeparatorChar);
             }
             finally
             {
@@ -781,7 +781,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                         </ItemGroup>
                     </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             try
             {
@@ -792,8 +793,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectInstance projectInstance = new ProjectInstance(xml);
 
                 // Should be the full path to the directory
-                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"));
-                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(Path.GetTempPath() /* remove c:\ */, "obj" + Path.DirectorySeparatorChar + "i386"));
+                project.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj", "i386"));
+                projectInstance.GetItems("BuiltProjectOutputGroupKeyOutput").First().EvaluatedInclude.ShouldBe(Path.Combine(FileUtilities.TempFileDirectory /* remove c:\ */, "obj", "i386"));
             }
             finally
             {
@@ -919,8 +920,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.SetGlobalProperty("p", "v1");
                 project.ReevaluateIfNecessary();
                 project.SetProperty("p", "v2");
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting environment property should create a real property
@@ -949,8 +949,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Project project = new Project();
                 project.SetProperty("msbuildprojectdirectory", "v1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Changing global properties with some preexisting.
@@ -984,13 +983,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 #else
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
 #endif
-        [Trait("Category", "mono-osx-failing")]
         public void ChangeGlobalPropertiesInitiallyFromProjectCollection()
         {
             Dictionary<string, string> initial = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             initial.Add("p0", "v0");
             initial.Add("p1", "v1");
-            ProjectCollection collection = new ProjectCollection(initial, null, ToolsetDefinitionLocations.ConfigurationFile);
+            using ProjectCollection collection = new ProjectCollection(initial, null, ToolsetDefinitionLocations.ConfigurationFile);
             Project project = new Project(collection);
             ProjectPropertyElement propertyElement = project.Xml.AddProperty("pp", "vv");
             propertyElement.Condition = "'$(p0)'=='v0' and '$(p1)'=='v1b'";
@@ -1231,7 +1229,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
-                Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
 
                 p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
@@ -1252,7 +1251,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// environment
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -1261,7 +1259,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", "ABCD");
 
-                Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project p = new Project(GetSampleProjectRootElement(), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
 
                 p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
                 p.SubToolsetVersion.ShouldBe("ABCD");
@@ -1288,7 +1287,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("VisualStudioVersion", "ABCDE");
 
-                Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
+                using var collection = new ProjectCollection();
+                Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
 
                 p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
                 p.SubToolsetVersion.ShouldBe("ABCDE");
@@ -1319,7 +1319,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 IDictionary<string, string> projectCollectionGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 projectCollectionGlobalProperties.Add("VisualStudioVersion", "ABCDE");
 
-                Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties), ProjectLoadSettings.Default);
+                using var collection = new ProjectCollection(projectCollectionGlobalProperties);
+                Project p = new Project(GetSampleProjectRootElement(), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, "ABCDEF", collection, ProjectLoadSettings.Default);
 
                 p.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
                 p.SubToolsetVersion.ShouldBe("ABCDEF");
@@ -1359,7 +1360,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement.Create().Save(path);
 
                 Project project = new Project(path);
@@ -1387,7 +1388,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement import = ProjectRootElement.Create(path);
                 import.Save();
 
@@ -1444,12 +1445,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
-                ProjectRootElement import =
-                    ProjectRootElement.Create(
-                        XmlReader.Create(new StringReader(importProjectContents)),
-                        projectCollection,
-                        // preserve formatting to simulate IDE usage
-                        preserveFormatting: true);
+                using ProjectRootElementFromString projectRootElementFromString = new(
+                importProjectContents,
+                projectCollection,
+                // preserve formatting to simulate IDE usage
+                preserveFormatting: true);
+
+                ProjectRootElement import = projectRootElementFromString.Project;
 
                 // puts the import in the PRE cache
                 import.Save(importFile);
@@ -1509,11 +1511,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "import.proj" });
                 var importFile = projectFiles.CreatedFiles.First();
 
-                var import = ProjectRootElement.Create(
-                    XmlReader.Create(new StringReader(importProjectContents)),
-                    projectCollection,
-                    // preserve formatting to simulate IDE usage
-                    preserveFormatting: true);
+                using ProjectRootElementFromString projectRootElementFromString = new(
+                importProjectContents,
+                projectCollection,
+                // preserve formatting to simulate IDE usage
+                preserveFormatting: true);
+                ProjectRootElement import = projectRootElementFromString.Project;
 
                 // add to cache by saving
                 import.Save(importFile);
@@ -1526,7 +1529,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 assertContents("p1", "i1", "m1", project);
                 project.IsDirty.ShouldBeFalse();
 
-                import.ReloadFrom(XmlReader.Create(new StringReader(changedImportContents)));
+                using var xmlReaderChangedContent = XmlReader.Create(new StringReader(changedImportContents));
+                import.ReloadFrom(xmlReaderChangedContent);
                 import.HasUnsavedChanges.ShouldBeTrue();
 
                 project.IsDirty.ShouldBeTrue();
@@ -1589,15 +1593,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
+            using (var projectRootElementFromString = new ProjectRootElementFromString(projectContents, projectCollection, preserveFormatting: true))
+            using (var xmlReaderChangedContents = XmlReader.Create(new StringReader(changedProjectContents)))
             {
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = projectFiles.CreatedFiles.First();
 
-                var projectRootElement = ProjectRootElement.Create(
-                    XmlReader.Create(new StringReader(projectContents)),
-                    projectCollection,
-                    // preserve formatting to simulate IDE usage
-                    preserveFormatting: true);
+
+                var projectRootElement = projectRootElementFromString.Project;
 
                 // add to cache by saving
                 projectRootElement.Save(projectFile);
@@ -1609,7 +1612,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 assertContents("p1", "i1", "m1", project);
                 project.IsDirty.ShouldBeFalse();
 
-                projectRootElement.ReloadFrom(XmlReader.Create(new StringReader(changedProjectContents)));
+                projectRootElement.ReloadFrom(xmlReaderChangedContents);
                 projectRootElement.HasUnsavedChanges.ShouldBeTrue();
 
                 project.IsDirty.ShouldBeTrue();
@@ -1848,7 +1851,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("v1");
             Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i1");
@@ -1883,7 +1887,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("v2");
             Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i2");
@@ -1918,7 +1923,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("v2");
             Helpers.MakeList(project.GetItems("i"))[0].EvaluatedInclude.ShouldBe("i2");
@@ -1966,7 +1972,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetPropertyValue("p").ShouldBe("@(i);v1");
             project.GetPropertyValue("q").ShouldBe("@(j);v1");
@@ -1999,7 +2006,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetItems("i").ShouldBeEmpty();
         }
@@ -2031,7 +2039,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.GetItems("i").ElementAt(0).GetMetadataValue("m").ShouldBe("m0;m1");
         }
@@ -2052,7 +2061,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             result.ShouldBeFalse();
 
-            mockLogger.Errors[0].Code.ShouldBe("MSB4112"); //                 "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
+            mockLogger.Errors[0].Code.ShouldBe("MSB4112"); // "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
         }
 
         /// <summary>
@@ -2080,7 +2089,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
-            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile() + ".proj";
+            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".proj";
             File.WriteAllText(importFileName, importProjectContent);
 
             string projectContent =
@@ -2093,7 +2102,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     <Target Name=""Build"" />
                 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectContent)));
+            using ProjectFromString projectFromString = new(projectContent);
+            Project project = projectFromString.Project;
             project.MarkDirty();
 
             MockLogger collectionLogger = new MockLogger();
@@ -2107,10 +2117,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 result = project.Build(new ILogger[] { mockLogger });
             }
-            catch
-            {
-                throw;
-            }
             finally
             {
                 project.ProjectCollection.UnregisterAllLoggers();
@@ -2118,9 +2124,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             result.ShouldBeTrue();
 
-            mockLogger.WarningCount.ShouldBe(0); //                 "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
+            mockLogger.WarningCount.ShouldBe(0); // "Log should not contain MSB4011 because the build logger will not receive evaluation messages."
 
-            collectionLogger.Warnings[0].Code.ShouldBe("MSB4011"); //                 "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
+            collectionLogger.Warnings[0].Code.ShouldBe("MSB4011"); // "Log should contain MSB4011 because the project collection logger should have been used for evaluation."
         }
 
         /// <summary>
@@ -2135,8 +2141,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("x", "@(x->'%(x)')", null);
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// UsingTask expansion should throw InvalidProjectFileException
@@ -2150,8 +2155,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("@(x->'%(x)')", "y", null);
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// UsingTask expansion should throw InvalidProjectFileException
@@ -2165,8 +2169,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.AddUsingTask("x", null, "@(x->'%(x)')");
                 Project project = new Project(xml);
-            }
-           );
+            });
         }
         /// <summary>
         /// Saving project should make it "clean" for saving
@@ -2176,7 +2179,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void SavingProjectClearsDirtyBit()
         {
             string contents = ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'/>");
-            Project project = new Project(XmlReader.Create(new StringReader(contents)));
+            using ProjectFromString projectFromString = new(contents);
+            Project project = projectFromString.Project;
 
             project.Xml.HasUnsavedChanges.ShouldBeTrue(); // Not dirty for saving
             project.IsDirty.ShouldBeFalse(); // "1" // was evaluated on load
@@ -2184,7 +2188,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             string file = null;
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 project.Save(file);
             }
             finally
@@ -2212,7 +2216,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
+
             ProjectItem itemToRemove = Helpers.GetFirst(project.GetItems("Compile"));
             project.RemoveItem(itemToRemove);
             project.RemoveItem(itemToRemove); // should not throw
@@ -2233,7 +2239,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
             ProjectItem itemToRemove = Helpers.GetFirst(project.GetItems("Compile"));
             itemToRemove.UnevaluatedInclude = "b.cs";
             project.RemoveItem(itemToRemove); // should not throw
@@ -2255,7 +2262,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
 
             project.RemoveItems(project.GetItems("i"));
 
@@ -2278,13 +2286,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
+
 
             List<ProjectItem> list = new List<ProjectItem>() { project.GetItems("i").FirstOrDefault(), project.GetItems("j").FirstOrDefault() };
 
             project.RemoveItems(list);
 
-            project.Items.Count().ShouldBe(2);
+            project.Items.Count.ShouldBe(2);
         }
 
         /// <summary>
@@ -2301,12 +2311,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
 
             project.RemoveItems(project.GetItems("j").Take(2));
-            project.Items.Count().ShouldBe(3);
+            project.Items.Count.ShouldBe(3);
 
-            StringWriter writer = new EncodingStringWriter();
+            using StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
             string projectExpectedContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -2335,7 +2346,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
 
             project.RemoveItems(project.GetItems("i"));
 
@@ -2352,8 +2364,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 Project project = new Project();
                 project.RemoveItems(new List<ProjectItem>() { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Remove several items where removing the first one
@@ -2372,8 +2383,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project2 = new Project(root2);
 
                 project1.RemoveItems(project2.Items);
-            }
-           );
+            });
         }
         /// <summary>
         /// Remove an item that is no longer attached. For convenience,
@@ -2389,7 +2399,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     </ItemGroup>
                 </Project>
                 ");
-            Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
+            using ProjectFromString projectFromString = new(projectOriginalContents);
+            Project project = projectFromString.Project;
             ProjectItem item = project.GetItems("i").FirstOrDefault();
 
             project.RemoveItems(new List<ProjectItem>() { item });
@@ -2410,8 +2421,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 globalProperties.Add("msbuildprojectdirectory", "x");
 
                 Project project = new Project(globalProperties, null, new ProjectCollection());
-            }
-           );
+            });
         }
         /// <summary>
         /// Reserved property in project collection global properties should log an error then rethrow
@@ -2435,8 +2445,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     logger.AssertLogContains("MSB4177");
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Invalid property (reserved name) in project collection global properties should log an error then rethrow
@@ -2460,8 +2469,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     logger.AssertLogContains("MSB4177");
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Create tree like this
@@ -2531,8 +2539,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     logger.AssertLogContains("MSB4177");
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Create a structure of various imports and verify that project.GetLogicalProject()
@@ -2646,8 +2653,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ");
                 Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -2695,8 +2701,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 </Project>
                 ");
                 Project project = new Project(XmlReader.Create(new StringReader(projectOriginalContents)));
-            }
-           );
+            });
         }
 
         [Fact]
@@ -2963,7 +2968,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             };
 
             AssertProvenanceResult(expected, project, "1.foo", "B");
-            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistant");
+            AssertProvenanceResult(new ProvenanceResultTupleList(), project, "1.foo", "NotExistent");
         }
 
         public static IEnumerable<Object[]> GetItemProvenanceByProjectItemTestData
@@ -3245,7 +3250,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (var env = TestEnvironment.Create())
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], "u/x");
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>(), "u/x");
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 var expected2Foo = new ProvenanceResultTupleList
@@ -3274,7 +3279,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
 
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
@@ -3319,7 +3324,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <ItemGroup>
-                    <A Include=`" + longString +  @"`/>
+                    <A Include=`" + longString + @"`/>
                   </ItemGroup>
                 </Project>
                 ";
@@ -3517,7 +3522,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             AssertProvenanceResult(expected, project, "1.foo");
         }
 
-		[Fact]
+        [Fact]
         public void GetItemProvenanceShouldWorkWithRemoveElements()
         {
             var project =
@@ -3566,12 +3571,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using (var env = TestEnvironment.Create())
             using (var projectCollection = new ProjectCollection())
             {
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0], relativePathOfProjectFile);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>(), relativePathOfProjectFile);
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
                 ProvenanceResultTupleList expectedProvenance = null;
 
-                var provenanceKind = includeGlob.IndexOfAny(new[]{'*', '?'}) != -1  ? Provenance.Glob : Provenance.StringLiteral;
+                var provenanceKind = includeGlob.IndexOfAny(new[] { '*', '?' }) != -1 ? Provenance.Glob : Provenance.StringLiteral;
                 expectedProvenance = provenanceShouldFindAMatch
                     ? new ProvenanceResultTupleList
                     {
@@ -3681,28 +3686,28 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-//        [InlineData(
-//            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//<A Remove=`e*;f*`/>
-//",
-//        new[] {"ba"},
-//        new[] {"a", "ca", "da", "ea", "fa"}
-//        )]
-//        [InlineData(
-//            @"
-//<A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
-//",
-//        new[] {"ba", "ea", "fa"},
-//        new[] {"a", "ca", "da"}
-//        )]
-//        [InlineData(
-//            @"
-//<A Include=`a;b*;c*;d*;e*;f*`/>
-//",
-//        new[] {"ba", "ca", "da", "ea", "fa"},
-//        new[] {"a"}
-//        )]
+        // [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+        // <A Remove=`e*;f*`/>
+        // ",
+        //        new[] {"ba"},
+        //        new[] {"a", "ca", "da", "ea", "fa"}
+        //        )]
+        //        [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*` Exclude=`c*;d*`/>
+        // ",
+        //        new[] {"ba", "ea", "fa"},
+        //        new[] {"a", "ca", "da"}
+        //        )]
+        //        [InlineData(
+        //            @"
+        // <A Include=`a;b*;c*;d*;e*;f*`/>
+        // ",
+        //        new[] {"ba", "ca", "da", "ea", "fa"},
+        //        new[] {"a"}
+        //        )]
         [InlineData(
             @"
 <E Include=`b`/>
@@ -3711,14 +3716,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 <A Include=`a*;b*;c*` Exclude=`@(E)`/>
 <A Remove=`@(R)`/>
 ",
-        new[] {"aa", "bb", "cc"},
-        new[] {"b", "c"}
-        )]
+        new[] { "aa", "bb", "cc" },
+        new[] { "b", "c" })]
         [InlineData(
             @"<A Include=`ab*;b|c*;de*`/>",
-            new[] {"ab", "de"},
-            new[] {"bc", "b|c", "b", "c"}
-            )]
+            new[] { "ab", "de" },
+            new[] { "bc", "b|c", "b", "c" })]
         public void GetAllGlobsShouldProduceGlobThatMatches(string itemContents, string[] stringsThatShouldMatch, string[] stringsThatShouldNotMatch)
         {
             var projectTemplate =
@@ -3762,7 +3765,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var testFiles = env.CreateTestProjectWithFiles(projectContents, new string[0]);
+                var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
 
                 var project = new Project(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection);
 
@@ -3881,8 +3884,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportedEventFalseCondition()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -3926,8 +3927,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportedEventNoMatchingFiles()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -4187,8 +4186,6 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         [Trait("Category", "netcore-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
         [Trait("Category", "netcore-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-osx-failing")] // https://github.com/dotnet/msbuild/issues/2226
-        [Trait("Category", "mono-linux-failing")] // https://github.com/dotnet/msbuild/issues/2226
         public void ProjectImportEvent()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -4247,6 +4244,55 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             project.Targets.Keys.ShouldBe(new[] { "t" });
         }
 
+        /// <summary>
+        /// Test that the ImportedProjectNotFound error message
+        /// contains the unevaluated value of the project attribute.
+        /// </summary>
+        [Fact]
+        public void ImportNotFound()
+        {
+            const string PropertyName = "SomeProperty";
+            const string PropertyValue = "Import";
+            const string ImportValue = $"$({PropertyName})DoesNotExist";
+            const string ErrorCode = "MSB4019"; // ImportedProjectNotFound
+
+            string file = null;
+
+            try
+            {
+                using ProjectCollection collection = new ProjectCollection();
+                MockLogger logger = new MockLogger();
+                collection.RegisterLogger(logger);
+
+                Project project = new Project(collection);
+                project.Xml.AddProperty(PropertyName, PropertyValue);
+                project.Xml.AddImport(ImportValue);
+
+                file = FileUtilities.GetTemporaryFileName();
+                project.Save(file);
+
+                Assert.Throws<InvalidProjectFileException>(() => project.ReevaluateIfNecessary());
+
+                // Find and test the error event record.
+                // logger.AssertLogContains() will find multiple strings but not within the same line
+                bool hasErrorCode = false;
+                foreach (var error in logger.Errors)
+                {
+                    if (error.Code == ErrorCode)
+                    {
+                        hasErrorCode = true;
+                        Assert.Contains(ImportValue, error.Message);
+                        break;
+                    }
+                }
+                Assert.True(hasErrorCode);
+            }
+            finally
+            {
+                File.Delete(file);
+            }
+        }
+
         private static void AssertGlobResult(GlobResultList expected, string project)
         {
             var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();
@@ -4255,7 +4301,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
         private static void AssertGlobResult(GlobResultList expected, string project, string itemType)
         {
-            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType) ;
+            var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs(itemType);
             AssertGlobResultsEqual(expected, globs);
         }
 
@@ -4330,7 +4376,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         {
             string projectFileContent = GetSampleProjectContent();
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
+            using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             return xml;
         }
@@ -4341,7 +4388,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         private string GetSampleProjectContent()
         {
             string projectFileContent = ObjectModelHelpers.CleanupFileContents(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='2.0' InitialTargets='it' DefaultTargets='dt'>
+                    <Project ToolsVersion='2.0' InitialTargets='it' DefaultTargets='dt'>
                         <PropertyGroup Condition=""'$(Configuration)'=='Foo'"">
                             <p>v1</p>
                         </PropertyGroup>

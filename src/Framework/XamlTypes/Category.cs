@@ -1,15 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.ComponentModel;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
     /// Represents a category to which a <see cref="BaseProperty"/> can belong to.
     /// </summary>
-    /// <remarks> 
-    /// Those who manually 
+    /// <remarks>
+    /// Those who manually
     /// instantiate this class should remember to call <see cref="BeginInit"/> before setting the first
     /// property and <see cref="EndInit"/> after setting the last property of the object.
     /// </remarks>
@@ -31,7 +33,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// The name of this <see cref="Category"/>. 
+        /// The name of this <see cref="Category"/>.
         /// </summary>
         /// <remarks>
         /// This field is mandatory and culture invariant.
@@ -44,10 +46,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The name that could be used by a prospective UI client to display this <see cref="Category"/>. 
+        /// The name that could be used by a prospective UI client to display this <see cref="Category"/>.
         /// </summary>
         /// <remarks>
-        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same 
+        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same
         /// value as the <see cref="Name"/> property (and hence, would not be localized).
         /// </remarks>
         [Localizable(true)]
@@ -65,7 +67,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Description of this <see cref="Category"/>. 
+        /// Description of this <see cref="Category"/>.
         /// </summary>
         /// <remarks>
         /// This field is optional and is culture sensitive.
@@ -91,7 +93,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Help information for this <see cref="Category"/>. 
+        /// Help information for this <see cref="Category"/>.
         /// </summary>
         /// <remarks>
         /// Maybe used to specify a help URL. This field
@@ -110,8 +112,8 @@ namespace Microsoft.Build.Framework.XamlTypes
     /// <summary>
     /// Represents a category to which a <see cref="BaseProperty"/> can belong to.
     /// </summary>
-    /// <remarks> 
-    /// Those who manually 
+    /// <remarks>
+    /// Those who manually
     /// instantiate this class should remember to call <see cref="BeginInit"/> before setting the first
     /// property and <see cref="EndInit"/> after setting the last property of the object.
     /// </remarks>

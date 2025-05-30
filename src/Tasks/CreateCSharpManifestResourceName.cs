@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -7,6 +7,8 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -28,14 +30,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .cs file). May be null</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <returns>Returns the manifest name</returns>
-        protected override string CreateManifestName
-        (
+        protected override string CreateManifestName(
             string fileName,
             string linkFileName,
             string rootNamespace,
             string dependentUponFileName,
-            Stream binaryStream
-        )
+            Stream binaryStream)
         {
             string culture = null;
             bool treatAsCultureNeutral = false;
@@ -44,17 +44,16 @@ namespace Microsoft.Build.Tasks
                 culture = item.GetMetadata("Culture");
                 // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                 // https://github.com/dotnet/msbuild/issues/3064
-                treatAsCultureNeutral = item.GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase);
+                treatAsCultureNeutral = ConversionUtilities.ValidBooleanFalse(item.GetMetadata("WithCulture"));
             }
 
             /*
                 Actual implementation is in a static method called CreateManifestNameImpl.
-                The reason is that CreateManifestName can't be static because it is an 
-                override of a method declared in the base class, but its convenient 
-                to expose a static version anyway for unittesting purposes.
+                The reason is that CreateManifestName can't be static because it is an
+                override of a method declared in the base class, but its convenient
+                to expose a static version anyway for unit testing purposes.
             */
-            return CreateManifestNameImpl
-            (
+            return CreateManifestNameImpl(
                 fileName,
                 linkFileName,
                 PrependCultureAsDirectory,
@@ -63,8 +62,8 @@ namespace Microsoft.Build.Tasks
                 culture,
                 binaryStream,
                 Log,
-                treatAsCultureNeutral
-            );
+                treatAsCultureNeutral,
+                EnableCustomCulture);
         }
 
         /// <summary>
@@ -83,19 +82,19 @@ namespace Microsoft.Build.Tasks
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
         /// <param name="treatAsCultureNeutral">Whether to treat the current file as 'culture-neutral' and retain the culture in the name.</param>
+        /// <param name="enableCustomCulture">Whether custom culture handling is expected.</param>
         /// <returns>Returns the manifest name</returns>
-        internal static string CreateManifestNameImpl
-        (
+        internal static string CreateManifestNameImpl(
             string fileName,
             string linkFileName,
             bool prependCultureAsDirectory, // true by default
             string rootNamespace, // May be null
             string dependentUponFileName, // May be null
-            string culture, // may be null 
+            string culture, // may be null
             Stream binaryStream, // File contents binary stream, may be null
             TaskLoggingHelper log,
-            bool treatAsCultureNeutral = false
-        )
+            bool treatAsCultureNeutral = false,
+            bool enableCustomCulture = false)
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
             string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
@@ -105,18 +104,31 @@ namespace Microsoft.Build.Tasks
             }
 
             dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
-            Culture.ItemCultureInfo info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
+            Culture.ItemCultureInfo info;
 
-            // If the item has a culture override, respect that. 
-            if (!string.IsNullOrEmpty(culture))
+            if (!string.IsNullOrEmpty(culture) && enableCustomCulture)
             {
-                info.culture = culture;
+                info = new Culture.ItemCultureInfo()
+                {
+                    culture = culture,
+                    cultureNeutralFilename = embeddedFileName.RemoveLastInstanceOf("." + culture, StringComparison.OrdinalIgnoreCase),
+                };
+            }
+            else
+            {
+                info = Culture.GetItemCultureInfo(embeddedFileName, dependentUponFileName, treatAsCultureNeutral);
+                // If the item has a culture override, respect that.
+                // We need to recheck here due to changewave in condition above - after Wave17_14 removal, this should be unconditional.
+                if (!string.IsNullOrEmpty(culture))
+                {
+                    info.culture = culture;
+                }
             }
 
             var manifestName = StringBuilderCache.Acquire();
             if (binaryStream != null)
             {
-                // Resource depends on a form. Now, get the form's class name fully 
+                // Resource depends on a form. Now, get the form's class name fully
                 // qualified with a namespace.
                 ExtractedClassName result = CSharpParserUtilities.GetFirstClassNameFullyQualified(binaryStream);
 
@@ -129,7 +141,7 @@ namespace Microsoft.Build.Tasks
                 {
                     manifestName.Append(result.Name);
 
-                    // Append the culture if there is one.        
+                    // Append the culture if there is one.
                     if (!string.IsNullOrEmpty(info.culture))
                     {
                         manifestName.Append('.').Append(info.culture);
@@ -138,7 +150,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // If there's no manifest name at this point, then fall back to using the
-            // RootNamespace+Filename_with_slashes_converted_to_dots         
+            // RootNamespace+Filename_with_slashes_converted_to_dots
             if (manifestName.Length == 0)
             {
                 // If Rootnamespace was null, then it wasn't set from the project resourceFile.
@@ -159,8 +171,7 @@ namespace Microsoft.Build.Tasks
                         ||
                         string.Equals(sourceExtension, restextFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase)
-                    )
+                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase))
                 {
                     if (!string.IsNullOrEmpty(directoryName))
                     {
@@ -174,7 +185,7 @@ namespace Microsoft.Build.Tasks
                     manifestName.Replace(Path.DirectorySeparatorChar, '.');
                     manifestName.Replace(Path.AltDirectorySeparatorChar, '.');
 
-                    // Append the culture if there is one.        
+                    // Append the culture if there is one.
                     if (!string.IsNullOrEmpty(info.culture))
                     {
                         manifestName.Append('.').Append(info.culture);
@@ -201,7 +212,7 @@ namespace Microsoft.Build.Tasks
 
                     if (prependCultureAsDirectory)
                     {
-                        // Prepend the culture as a subdirectory if there is one.        
+                        // Prepend the culture as a subdirectory if there is one.
                         if (!string.IsNullOrEmpty(info.culture))
                         {
                             manifestName.Insert(0, Path.DirectorySeparatorChar);

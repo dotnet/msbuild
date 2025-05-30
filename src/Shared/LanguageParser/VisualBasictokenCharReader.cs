@@ -1,23 +1,25 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
     /*
      * Class:   VisualBasicTokenCharReader
      *
-     * Reads over the contents of a vb source file (in the form of a string). 
+     * Reads over the contents of a vb source file (in the form of a string).
      * Provides utility functions for dealing with VB-specific tokens.
      *
      */
-    sealed internal class VisualBasicTokenCharReader : TokenCharReader
+    internal sealed class VisualBasicTokenCharReader : TokenCharReader
     {
         /*
          * Method:  VisualBasicTokenCharReader
-         * 
+         *
          * Construct
          */
         internal VisualBasicTokenCharReader(Stream binaryStream, bool forceANSI)
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkSeparatorCharacter
-         * 
+         *
          * Matches a vb separator character.
          */
         internal bool SinkSeparatorCharacter()
@@ -42,8 +44,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 || CurrentCharacter == '.'
                 || CurrentCharacter == ':'
                 || CurrentCharacter == '{'
-                || CurrentCharacter == '}'
-            )
+                || CurrentCharacter == '}')
             {
                 Skip();
                 return true;
@@ -54,15 +55,14 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkLineContinuationCharacter
-         * 
+         *
          * Matches a vb line continuation character.
          */
         internal bool SinkLineContinuationCharacter()
         {
             if
             (
-                CurrentCharacter == '_'
-            )
+                CurrentCharacter == '_')
             {
                 Skip();
                 return true;
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkLineCommentStart
-         * 
+         *
          * Matches a vb start of comment indicator
          */
         internal bool SinkLineCommentStart()
@@ -103,7 +103,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkHexIntegerPrefix
-         * 
+         *
          * Matches a vb hex integer prefix
          */
         internal bool SinkHexIntegerPrefix()
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkOctalIntegerPrefix
-         * 
+         *
          * Matches a vb octal integer prefix
          */
         internal bool SinkOctalIntegerPrefix()
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkWhiteSpace
-         * 
+         *
          * Sink a single whitespace character.
          * In vb, newlines are not considered whitespace.
          */
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkIntegerSuffix
-         * 
+         *
          * Sink a vb integer suffix.
          */
         internal bool SinkIntegerSuffix()
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkDecimalIntegerSuffix
-         * 
+         *
          * Sink a vb decimal integer suffix.
          * Couldn't find this documented anywhere, but a decimal (as opposed to hex or octal)
          * is also allowed a trailing '@', '!', '#' or '&'
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkOctalDigits
-         * 
+         *
          * Sink multiple octal digits.
          */
         internal bool SinkMultipleOctalDigits()
@@ -211,12 +211,12 @@ namespace Microsoft.Build.Shared.LanguageParser
                 ++count;
                 Skip();
             }
-            return count > 0;     // Must match at least one  
+            return count > 0;     // Must match at least one
         }
 
         /*
          * Method:  SinkOperator
-         * 
+         *
          * Determine whether this is a vb operator.
          */
         internal bool SinkOperator()
@@ -232,7 +232,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkTypeCharacter
-         * 
+         *
          * Identifiers in vb can end with a special character to indicate type:
          *   IntegerTypeCharacter ::= %
          *   LongTypeCharacter ::= &
@@ -253,4 +253,3 @@ namespace Microsoft.Build.Shared.LanguageParser
         }
     }
 }
-

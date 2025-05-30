@@ -1,16 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Internal
 {
@@ -130,17 +132,17 @@ namespace Microsoft.Build.Internal
         internal const string VisualStudioVersionPropertyName = "VisualStudioVersion";
 
         /// <summary>
-        /// Name of the property used to select which sub-toolset to use. 
+        /// Name of the property used to select which sub-toolset to use.
         /// </summary>
         internal const string SubToolsetVersionPropertyName = VisualStudioVersionPropertyName;
 
         /// <summary>
-        /// Value we should be setting VisualStudioVersion as the ultimate fallback when Dev10 is installed. 
+        /// Value we should be setting VisualStudioVersion as the ultimate fallback when Dev10 is installed.
         /// </summary>
         internal const string Dev10SubToolsetValue = "10.0";
 
         /// <summary>
-        /// Current version of this MSBuild Engine assembly in the 
+        /// Current version of this MSBuild Engine assembly in the
         /// form, e.g, "4.0"
         /// </summary>
         internal static string AssemblyVersion
@@ -176,7 +178,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Locker to protect initialization
         /// </summary>
-        private static Object s_locker = new Object();
+        private static readonly Object s_locker = new Object();
 
         static AvailableStaticMethods()
         {
@@ -229,12 +231,12 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Tries to retrieve the type information for a type name / method name combination. 
-        /// 
+        /// Tries to retrieve the type information for a type name / method name combination.
+        ///
         /// It does 2 lookups:
         /// 1st try: 'typeFullName'
         /// 2nd try: 'typeFullName::simpleMethodName'
-        /// 
+        ///
         /// </summary>
         /// <param name="typeFullName">namespace qualified type name</param>
         /// <param name="simpleMethodName">name of the method</param>
@@ -299,39 +301,23 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Environment::GetFolderPath", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::GetLogicalDrives", environmentType);
 
-// All the following properties only have getters
-#if FEATURE_GET_COMMANDLINE
+                        // All the following properties only have getters
                         availableStaticMethods.TryAdd("System.Environment::CommandLine", environmentType);
-#endif
-#if FEATURE_64BIT_ENVIRONMENT_QUERY
                         availableStaticMethods.TryAdd("System.Environment::Is64BitOperatingSystem", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::Is64BitProcess", environmentType);
-#endif
-
                         availableStaticMethods.TryAdd("System.Environment::MachineName", environmentType);
-#if FEATURE_OSVERSION
+                        availableStaticMethods.TryAdd("System.Environment::NewLine", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::OSVersion", environmentType);
-#endif
                         availableStaticMethods.TryAdd("System.Environment::ProcessorCount", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::StackTrace", environmentType);
                         availableStaticMethods.TryAdd("System.Environment::SystemDirectory", environmentType);
-#if FEATURE_SYSTEMPAGESIZE
                         availableStaticMethods.TryAdd("System.Environment::SystemPageSize", environmentType);
-#endif
                         availableStaticMethods.TryAdd("System.Environment::TickCount", environmentType);
-#if FEATURE_USERDOMAINNAME
                         availableStaticMethods.TryAdd("System.Environment::UserDomainName", environmentType);
-#endif
-#if FEATURE_USERINTERACTIVE
                         availableStaticMethods.TryAdd("System.Environment::UserInteractive", environmentType);
-#endif
                         availableStaticMethods.TryAdd("System.Environment::UserName", environmentType);
-#if FEATURE_DOTNETVERSION
                         availableStaticMethods.TryAdd("System.Environment::Version", environmentType);
-#endif
-#if FEATURE_WORKINGSET
                         availableStaticMethods.TryAdd("System.Environment::WorkingSet", environmentType);
-#endif
 
                         availableStaticMethods.TryAdd("System.IO.Directory::GetDirectories", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetFiles", directoryType);
@@ -345,9 +331,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTime", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
 
-#if FEATURE_CULTUREINFO_GETCULTUREINFO
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
-#endif
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::CurrentUICulture", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
 
@@ -357,6 +341,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.Char", new Tuple<string, Type>(null, typeof(Char)));
                         availableStaticMethods.TryAdd("System.Convert", new Tuple<string, Type>(null, typeof(Convert)));
                         availableStaticMethods.TryAdd("System.DateTime", new Tuple<string, Type>(null, typeof(DateTime)));
+                        availableStaticMethods.TryAdd("System.DateTimeOffset", new Tuple<string, Type>(null, typeof(DateTimeOffset)));
                         availableStaticMethods.TryAdd("System.Decimal", new Tuple<string, Type>(null, typeof(Decimal)));
                         availableStaticMethods.TryAdd("System.Double", new Tuple<string, Type>(null, typeof(Double)));
                         availableStaticMethods.TryAdd("System.Enum", new Tuple<string, Type>(null, typeof(Enum)));
@@ -380,6 +365,15 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.RuntimeInformation", runtimeInformationType);
                         availableStaticMethods.TryAdd("System.Runtime.InteropServices.OSPlatform", osPlatformType);
+#if NET
+                        var operatingSystemType = new Tuple<string, Type>(null, typeof(OperatingSystem));
+                        availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+#else
+                        // Add alternate type for System.OperatingSystem static methods which aren't available on .NET Framework.
+                        var operatingSystemType = new Tuple<string, Type>("Microsoft.Build.Framework.OperatingSystem, Microsoft.Build.Framework, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null);
+                        availableStaticMethods.TryAdd("System.OperatingSystem", operatingSystemType);
+                        availableStaticMethods.TryAdd("Microsoft.Build.Framework.OperatingSystem", operatingSystemType);
+#endif
 
                         s_availableStaticMethods = availableStaticMethods;
                     }

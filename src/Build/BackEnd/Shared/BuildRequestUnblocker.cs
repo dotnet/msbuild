@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
 using BuildResult = Microsoft.Build.Execution.BuildResult;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -13,7 +15,7 @@ namespace Microsoft.Build.BackEnd
     /// There are two cases:
     /// 1. The request was blocked waiting on a target in the same project.  In this case this class will contain
     ///    no information other than the request id.
-    /// 2. The request was blocked on some set of build requests.  This class will then contain the build results 
+    /// 2. The request was blocked on some set of build requests.  This class will then contain the build results
     ///    needed to satisfy those requests.
     /// </summary>
     internal class BuildRequestUnblocker : ITranslatable, INodePacket
@@ -50,7 +52,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal BuildRequestUnblocker(BuildResult buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildResult, nameof(buildResult));
+            ErrorUtilities.VerifyThrowArgumentNull(buildResult);
             _buildResult = buildResult;
             _blockedGlobalRequestId = buildResult.ParentGlobalRequestId;
         }
@@ -61,7 +63,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestUnblocker(BuildRequest parentRequest, BuildResult buildResult)
             : this(buildResult)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parentRequest, nameof(parentRequest));
+            ErrorUtilities.VerifyThrowArgumentNull(parentRequest);
             _blockedGlobalRequestId = parentRequest.GlobalRequestId;
         }
 

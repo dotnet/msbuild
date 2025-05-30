@@ -1,24 +1,30 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using System.IO.Pipes;
+using System.Threading;
+
+#if NET451_OR_GREATER || NETCOREAPP
+using System.Threading.Tasks;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
     internal class BufferedReadStream : Stream
     {
-        const int BUFFER_SIZE = 1024;
+        private const int BUFFER_SIZE = 1024;
+        private NamedPipeServerStream _innerStream;
+        private byte[] _buffer;
 
-        Stream _innerStream;
-        byte[] _buffer;
+        // The number of bytes in the buffer that have been read from the underlying stream but not read by consumers of this stream
+        private int _currentlyBufferedByteCount;
+        private int _currentIndexInBuffer;
 
-        //  The number of bytes in the buffer that have been read from the underlying stream but not read by consumers of this stream
-        int _currentlyBufferedByteCount;
-
-        int _currentIndexInBuffer;
-
-        public BufferedReadStream(Stream innerStream)
+        public BufferedReadStream(NamedPipeServerStream innerStream)
         {
             _innerStream = innerStream;
             _buffer = new byte[BUFFER_SIZE];
@@ -56,7 +62,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                //  Let the base class handle it, which will end up calling the Read() method
+                // Let the base class handle it, which will end up calling the Read() method
                 return base.ReadByte();
             }
         }
@@ -65,7 +71,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (count > BUFFER_SIZE)
             {
-                //  Trying to read more data than the buffer can hold
+                // Trying to read more data than the buffer can hold
                 int alreadyCopied = 0;
                 if (_currentlyBufferedByteCount > 0)
                 {
@@ -79,7 +85,7 @@ namespace Microsoft.Build.BackEnd
             }
             else if (count <= _currentlyBufferedByteCount)
             {
-                //  Enough data buffered to satisfy read request
+                // Enough data buffered to satisfy read request
                 Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, count);
                 _currentIndexInBuffer += count;
                 _currentlyBufferedByteCount -= count;
@@ -87,7 +93,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                //  Need to read more data
+                // Need to read more data
                 int alreadyCopied = 0;
                 if (_currentlyBufferedByteCount > 0)
                 {
@@ -120,6 +126,62 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+#if NET451_OR_GREATER || NETCOREAPP
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            if (count > BUFFER_SIZE)
+            {
+                // Trying to read more data than the buffer can hold
+                int alreadyCopied = CopyToBuffer(buffer, offset);
+
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                int innerReadCount = await _innerStream.ReadAsync(buffer, offset + alreadyCopied, count - alreadyCopied, cancellationToken);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                return innerReadCount + alreadyCopied;
+            }
+            else if (count <= _currentlyBufferedByteCount)
+            {
+                // Enough data buffered to satisfy read request
+                Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, count);
+                _currentIndexInBuffer += count;
+                _currentlyBufferedByteCount -= count;
+                return count;
+            }
+            else
+            {
+                // Need to read more data
+                int alreadyCopied = CopyToBuffer(buffer, offset);
+
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                int innerReadCount = await _innerStream.ReadAsync(_buffer, 0, BUFFER_SIZE, cancellationToken);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                _currentIndexInBuffer = 0;
+                _currentlyBufferedByteCount = innerReadCount;
+
+                int remainingCopyCount = alreadyCopied + innerReadCount >= count ? count - alreadyCopied : innerReadCount;
+                Array.Copy(_buffer, 0, buffer, offset + alreadyCopied, remainingCopyCount);
+                _currentIndexInBuffer += remainingCopyCount;
+                _currentlyBufferedByteCount -= remainingCopyCount;
+
+                return alreadyCopied + remainingCopyCount;
+            }
+
+            int CopyToBuffer(byte[] buffer, int offset)
+            {
+                int alreadyCopied = 0;
+                if (_currentlyBufferedByteCount > 0)
+                {
+                    Array.Copy(_buffer, _currentIndexInBuffer, buffer, offset, _currentlyBufferedByteCount);
+                    alreadyCopied = _currentlyBufferedByteCount;
+                    _currentIndexInBuffer = 0;
+                    _currentlyBufferedByteCount = 0;
+                }
+
+                return alreadyCopied;
+            }
+        }
+#endif
+
         public override long Seek(long offset, SeekOrigin origin)
         {
             throw new NotSupportedException();
@@ -144,6 +206,5 @@ namespace Microsoft.Build.BackEnd
 
             base.Dispose(disposing);
         }
-        
     }
 }

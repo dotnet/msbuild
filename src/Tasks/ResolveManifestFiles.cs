@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -13,6 +13,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace Microsoft.Build.Tasks
     /// <comment>
     /// This task executes following steps:
     ///   (1) Filter out Framework assemblies
-    ///   (2) Filter out non-existant files
+    ///   (2) Filter out non-existent files
     ///   (3) Build list of Dependencies from built items with CopyLocal=True
     ///   (4) Build list of Prerequisites from built items with CopyLocal=False
     ///   (5) Build list of Satellites from built items based on TargetCulture
@@ -125,7 +127,7 @@ namespace Microsoft.Build.Tasks
 
         public string AssemblyName { get; set; }
 
-        public bool LauncherBasedDeployment {get; set; } = false;
+        public bool LauncherBasedDeployment { get; set; } = false;
 
         public string TargetFrameworkVersion
         {
@@ -213,7 +215,12 @@ namespace Microsoft.Build.Tasks
         {
             if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             {
-                return new Version(version.Substring(1));
+                return Version.Parse(
+#if NET
+                    version.AsSpan(1));
+#else
+                    version.Substring(1));
+#endif
             }
             return new Version(version);
         }
@@ -283,14 +290,17 @@ namespace Microsoft.Build.Tasks
             {
                 targetPath = Path.GetFileName(item.ItemSpec);
                 //
-                // .NETCore Launcher.exe based deployment: If the file is apphost.exe, we need to set 'TargetPath' metadata
-                // to {assemblyname}.exe so that the file gets published as {assemblyname}.exe and not apphost.exe.
+                // .NET >= 5 ClickOnce: If TargetPath metadata is not present in apphost.exe's metadata, we'll fallback to using AssemblyName
                 //
-                if (LauncherBasedDeployment && 
+                if (LauncherBasedDeployment &&
                     targetPath.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
                     !String.IsNullOrEmpty(AssemblyName))
                 {
-                    targetPath = AssemblyName;
+                    targetPath = item.GetMetadata(ItemMetadataNames.targetPath);
+                    if (String.IsNullOrEmpty(targetPath))
+                    {
+                        targetPath = AssemblyName;
+                    }
                 }
                 else
                 {
@@ -341,7 +351,7 @@ namespace Microsoft.Build.Tasks
                 // Infer culture from path (i.e. "obj\debug\fr\WindowsApplication1.resources.dll" -> "fr")
                 string[] pathSegments = PathUtil.GetPathSegments(item.ItemSpec);
                 itemCulture = pathSegments.Length > 1 ? pathSegments[pathSegments.Length - 2] : null;
-                Debug.Assert(!String.IsNullOrEmpty(itemCulture), String.Format(CultureInfo.CurrentCulture, "Satellite item '{0}' is missing expected attribute '{1}'", item.ItemSpec, "Culture"));
+                Debug.Assert(!String.IsNullOrEmpty(itemCulture), $"Satellite item '{item.ItemSpec}' is missing expected attribute 'Culture'");
                 item.SetMetadata("Culture", itemCulture);
             }
             return new CultureInfo(itemCulture);
@@ -394,7 +404,8 @@ namespace Microsoft.Build.Tasks
                         AssemblyIdentity identity = AssemblyIdentity.FromManagedAssembly(item.ItemSpec);
                         if (identity != null && !String.Equals(identity.Culture, "neutral", StringComparison.Ordinal))
                         {
-                            CultureInfo satelliteCulture = GetItemCulture(item);
+                            CultureInfo satelliteCulture = new CultureInfo(identity.Culture);
+                            item.SetMetadata("Culture", identity.Culture);
                             if (PublishFlags.IsSatelliteIncludedByDefault(satelliteCulture, _targetCulture, _includeAllSatellites))
                             {
                                 _satelliteAssembliesPassedAsReferences.Add(item);
@@ -750,7 +761,7 @@ namespace Microsoft.Build.Tasks
             if (item.ItemSpec.EndsWith(".dll") && identity == null && !isDotNetCore)
             {
                 // It is possible that a native dll gets passed in here that was declared as a content file
-                // in a referenced nuget package, which will yield null here. We just need to ignore those 
+                // in a referenced nuget package, which will yield null here. We just need to ignore those
                 // for .NET FX case since those aren't actually references we care about. For .NET Core, native
                 // dll can be passed as a reference so we won't ignore it if isDotNetCore is true.
                 return true;
@@ -850,13 +861,13 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                       fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
+                        fusionName = Path.GetFileNameWithoutExtension(item.ItemSpec);
                     }
                 }
 
                 // Add to map with full name, for SpecificVersion=true case
                 string key = fusionName.ToLowerInvariant();
-                Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same key '{0}' detected", key));
+                Debug.Assert(!_dictionary.ContainsKey(key), $"Two or more items with same key '{key}' detected");
                 if (!_dictionary.ContainsKey(key))
                 {
                     _dictionary.Add(key, entry);
@@ -866,7 +877,7 @@ namespace Microsoft.Build.Tasks
                 int i = fusionName.IndexOf(',');
                 if (i > 0)
                 {
-                    string simpleName = fusionName.Substring(0, i); //example: "ClassLibrary1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" -> "ClassLibrary1"
+                    string simpleName = fusionName.Substring(0, i); // example: "ClassLibrary1, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" -> "ClassLibrary1"
                     key = simpleName.ToLowerInvariant();
                     // If there are multiple with same simple name then we'll take the first one and ignore the rest, which is not an unreasonable thing to do
                     if (!_simpleNameDictionary.ContainsKey(key))
@@ -875,7 +886,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            
+
             IEnumerator IEnumerable.GetEnumerator()
             {
                 return _dictionary.Values.GetEnumerator();
@@ -915,7 +926,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Use satellite assembly strong name signature as key
                     string key = identity.ToString();
-                    Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same key '{0}' detected", key));
+                    Debug.Assert(!_dictionary.ContainsKey(key), $"Two or more items with same key '{key}' detected");
                     if (!_dictionary.ContainsKey(key))
                     {
                         _dictionary.Add(key, entry);
@@ -950,9 +961,13 @@ namespace Microsoft.Build.Tasks
             {
                 string targetPath = GetItemTargetPath(item);
                 Debug.Assert(!String.IsNullOrEmpty(targetPath));
-                if (String.IsNullOrEmpty(targetPath)) return;
+                if (String.IsNullOrEmpty(targetPath))
+                {
+                    return;
+                }
+
                 string key = targetPath.ToLowerInvariant();
-                Debug.Assert(!_dictionary.ContainsKey(key), String.Format(CultureInfo.CurrentCulture, "Two or more items with same '{0}' attribute detected", ItemMetadataNames.targetPath));
+                Debug.Assert(!_dictionary.ContainsKey(key), $"Two or more items with same '{(object)ItemMetadataNames.targetPath}' attribute detected");
                 var entry = new MapEntry(item, includedByDefault);
                 if (!_dictionary.ContainsKey(key))
                 {
@@ -987,11 +1002,11 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (FormatException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}", value, "PublishState"));
+                    Debug.Fail($"Invalid value '{value}' for PublishState");
                 }
                 catch (ArgumentException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}", value, "PublishState"));
+                    Debug.Fail($"Invalid value '{value}' for PublishState");
                 }
             }
             return PublishState.Auto;
@@ -1026,14 +1041,14 @@ namespace Microsoft.Build.Tasks
                         isPublished = false;
                         break;
                     case PublishState.DataFile:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PublishState.DataFile is invalid for an assembly"));
+                        Debug.Fail("PublishState.DataFile is invalid for an assembly");
                         break;
                     case PublishState.Prerequisite:
                         isPrerequisite = true;
                         isPublished = false;
                         break;
                     default:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Unhandled value PublishFlags.{0}", state.ToString()));
+                        Debug.Fail($"Unhandled value PublishFlags.{state}");
                         break;
                 }
                 return new PublishFlags(isDataFile, isPrerequisite, isPublished);
@@ -1063,10 +1078,10 @@ namespace Microsoft.Build.Tasks
                         isPublished = true;
                         break;
                     case PublishState.Prerequisite:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PublishState.Prerequisite is invalid for a file"));
+                        Debug.Fail("PublishState.Prerequisite is invalid for a file");
                         break;
                     default:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Unhandled value PublishFlags.{0}", state.ToString()));
+                        Debug.Fail($"Unhandled value PublishFlags.{state}");
                         break;
                 }
                 return new PublishFlags(isDataFile, isPrerequisite, isPublished);
@@ -1093,14 +1108,14 @@ namespace Microsoft.Build.Tasks
                         isPublished = false;
                         break;
                     case PublishState.DataFile:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PublishState.DataFile is invalid for an assembly"));
+                        Debug.Fail("PublishState.DataFile is invalid for an assembly");
                         break;
                     case PublishState.Prerequisite:
                         isPrerequisite = true;
                         isPublished = false;
                         break;
                     default:
-                        Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Unhandled value PublishFlags.{0}", state.ToString()));
+                        Debug.Fail($"Unhandled value PublishFlags.{state}");
                         break;
                 }
                 return new PublishFlags(isDataFile, isPrerequisite, isPublished);

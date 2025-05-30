@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if NET35_UNITTEST
 extern alias StringToolsNet35;
@@ -16,6 +16,8 @@ using Xunit;
 #if NET35_UNITTEST
 using StringToolsNet35::Microsoft.NET.StringTools;
 #endif
+
+#nullable disable
 
 namespace Microsoft.NET.StringTools.Tests
 {
@@ -84,7 +86,7 @@ namespace Microsoft.NET.StringTools.Tests
 
             for (int i = 0; i < numberOfStrings; i++)
             {
-                string strPart2 = string.Concat(Enumerable.Repeat("100570862200", i + 2));
+                string strPart2 = string.Concat(Enumerable.Repeat("100570862200", i + 100));
                 hashCodes[i] = AddString(string.Empty, strPart2, (string cachedString) =>
                 {
                     _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
@@ -106,7 +108,7 @@ namespace Microsoft.NET.StringTools.Tests
             for (int i = 0; i < numberOfStrings; i++)
             {
                 InternableString stringCopy = new InternableString(new string(cachedStrings[i].ToCharArray()));
-                string cachedStringFromCache =_cache.GetOrCreateEntry(ref stringCopy, out bool cacheHit);
+                string cachedStringFromCache = _cache.GetOrCreateEntry(ref stringCopy, out bool cacheHit);
                 cacheHit.ShouldBeFalse();
                 cachedStringFromCache.ShouldNotBeSameAs(cachedStrings[i]);
             }
@@ -118,16 +120,11 @@ namespace Microsoft.NET.StringTools.Tests
         /// 2. The string is no longer retrievable after all strong GC refs are gone.
         /// 3. The cache completely removes the handle after calling Scavenge on it.
         /// </summary>
-        /// <remarks>
-        /// Disabled on MacOS Mono because it doesn't play well with conservative GC scanning.
-        /// https://www.mono-project.com/docs/advanced/garbage-collector/sgen/#precise-stack-marking
-        /// </remarks>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void RetainsStringUntilCollected()
         {
             // Add a string to the cache using a non-inlinable method to make sure it's not reachable from a GC root.
-            AddString("Random string ", "test", (string cachedString) =>
+            AddString(new string('r', 500), "test", (string cachedString) =>
             {
                 _cache.GetDebugInfo().ShouldBe(new WeakStringCache.DebugInfo()
                 {
@@ -160,12 +157,7 @@ namespace Microsoft.NET.StringTools.Tests
         /// <summary>
         /// Same as RetainsStringUntilCollected but with multiple strings sharing the same hash code.
         /// </summary>
-        /// <remarks>
-        /// Disabled on MacOS Mono because it doesn't play well with conservative GC scanning.
-        /// https://www.mono-project.com/docs/advanced/garbage-collector/sgen/#precise-stack-marking
-        /// </remarks>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void RetainsLastStringWithGivenHashCode()
         {
             // Add 3 strings with the same hash code.

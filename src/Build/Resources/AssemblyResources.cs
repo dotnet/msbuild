@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Resources;
-using System.Reflection;
 using System.Globalization;
+using System.Reflection;
+using System.Resources;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -18,7 +20,7 @@ namespace Microsoft.Build.Shared
         private static ResourceManager s_msbuildExeResourceManager;
 
         /// <summary>
-        /// The internals of the Engine are exposed to MSBuild.exe, so they must share the same AssemblyResources class and 
+        /// The internals of the Engine are exposed to MSBuild.exe, so they must share the same AssemblyResources class and
         /// ResourceUtilities class that uses it. To make this possible, MSBuild.exe registers its resources here and they are
         /// normally consulted last. This assumes that there are no duplicated resource ID's between the Engine and MSBuild.exe.
         /// (Actually there are currently two: LoggerCreationError and LoggerNotFoundError.

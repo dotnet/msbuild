@@ -1,26 +1,30 @@
-﻿using System.IO;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
-    public  class FixPathOnUnixTests
+    public class FixPathOnUnixTests
     {
-        [Fact]
+        [UnixOnlyFact]
         public void TestPathFixupInMetadata()
         {
             string buildProjectContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='Build'>
                         <MSBuild Projects='projectDirectory/main.proj' />
                     </Target>
                </Project>";
 
             string mainProjectContents = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <UsingTask TaskName='LogTaskPropertiesTask' AssemblyName='Microsoft.Build.Engine.UnitTests' />
                     <ItemGroup>
                         <Item0 Include='xyz'>
@@ -36,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.CreateFileInTempProjectDirectory("projectDirectory/main.proj", mainProjectContents);
             ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("projectDirectory", "lib", "foo.dll"), "just a text file");
 
-            var projColln = new ProjectCollection();
+            using var projColln = new ProjectCollection();
             var logger = new MockLogger();
             projColln.RegisterLogger(logger);
 
@@ -59,10 +63,10 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var item in Items)
                 {
-                    Log.LogMessage ($"Item: {item.ItemSpec}");
+                    Log.LogMessage($"Item: {item.ItemSpec}");
                     foreach (string name in item.MetadataNames)
                     {
-                        Log.LogMessage ($"ItemMetadata: {name} = {item.GetMetadata(name)}");
+                        Log.LogMessage($"ItemMetadata: {name} = {item.GetMetadata(name)}");
                     }
                 }
             }

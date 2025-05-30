@@ -1,12 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using System.Collections.Generic;
-using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -44,7 +45,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override IEnumerable<ToolsetPropertyDefinition> GetSubToolsetPropertyDefinitions(string toolsVersion, string subToolsetVersion)
         {
-            return Enumerable.Empty<ToolsetPropertyDefinition>();
+            return [];
         }
 
         protected override Dictionary<string, ProjectImportPathMatch> GetProjectImportSearchPathsTable(string toolsVersion, string os)
@@ -54,7 +55,7 @@ namespace Microsoft.Build.Evaluation
 
         protected override IEnumerable<string> GetSubToolsetVersions(string toolsVersion)
         {
-            return Enumerable.Empty<string>();
+            return [];
         }
     }
 }

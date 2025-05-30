@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,14 +8,19 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// This class defines the touch task.
     /// </summary>
-    public class Touch : TaskExtension
+    public class Touch : TaskExtension, IIncrementalTask
     {
+        private MessageImportance messageImportance;
+
         /// <summary>
         /// Forces a touch even if the file to be touched is read-only.
         /// </summary>
@@ -44,18 +49,28 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] TouchedFiles { get; set; }
 
         /// <summary>
+        /// Importance: high, normal, low (default normal)
+        /// </summary>
+        public string Importance { get; set; }
+
+        /// <summary>
+        /// Question the incremental nature of this task.
+        /// </summary>
+        /// <remarks>When Question is true, skip touching the disk to avoid causing incremental issue.
+        /// Unless the file doesn't exists, in which case, error out.</remarks>
+        public bool FailIfNotIncremental { get; set; }
+
+        /// <summary>
         /// Implementation of the execute method.
         /// </summary>
         /// <returns></returns>
-        internal bool ExecuteImpl
-        (
+        internal bool ExecuteImpl(
             FileExists fileExists,
             FileCreate fileCreate,
             GetAttributes fileGetAttributes,
             SetAttributes fileSetAttributes,
             SetLastAccessTime fileSetLastAccessTime,
-            SetLastWriteTime fileSetLastWriteTime
-        )
+            SetLastWriteTime fileSetLastWriteTime)
         {
             // See what time we are touching all files to
             DateTime touchDateTime;
@@ -83,12 +98,11 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                // Touch the file.  If the file was touched successfully then add it to our array of 
-                // touched items. 
+                // Touch the file.  If the file was touched successfully then add it to our array of
+                // touched items.
                 if
                 (
-                    TouchFile
-                    (
+                    TouchFile(
                         path,
                         touchDateTime,
                         fileExists,
@@ -96,9 +110,7 @@ namespace Microsoft.Build.Tasks
                         fileGetAttributes,
                         fileSetAttributes,
                         fileSetLastAccessTime,
-                        fileSetLastWriteTime
-                    )
-                )
+                        fileSetLastWriteTime))
                 {
                     touchedItems.Add(file);
                 }
@@ -112,7 +124,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Now, set the property that indicates which items we touched.  Note that we
-            // touch all the items 
+            // touch all the items
             TouchedFiles = touchedItems.ToArray();
             return retVal;
         }
@@ -123,15 +135,26 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            return ExecuteImpl
-            (
+            if (string.IsNullOrEmpty(Importance))
+            {
+                messageImportance = MessageImportance.Normal;
+            }
+            else
+            {
+                if (!Enum.TryParse(Importance, ignoreCase: true, out messageImportance))
+                {
+                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", Importance);
+                    return false;
+                }
+            }
+
+            return ExecuteImpl(
                 File.Exists,
                 File.Create,
                 File.GetAttributes,
                 File.SetAttributes,
                 File.SetLastAccessTime,
-                File.SetLastWriteTime
-            );
+                File.SetLastWriteTime);
         }
 
         /// <summary>
@@ -140,11 +163,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="file"></param>
         /// <param name="fileCreate"></param>
         /// <returns>"true" if the file was created.</returns>
-        private bool CreateFile
-        (
+        private bool CreateFile(
             string file,
-            FileCreate fileCreate
-        )
+            FileCreate fileCreate)
         {
             try
             {
@@ -165,8 +186,7 @@ namespace Microsoft.Build.Tasks
         /// Helper method touches a file.
         /// </summary>
         /// <returns>"True" if the file was touched.</returns>
-        private bool TouchFile
-        (
+        private bool TouchFile(
             string file,
             DateTime dt,
             FileExists fileExists,
@@ -174,8 +194,7 @@ namespace Microsoft.Build.Tasks
             GetAttributes fileGetAttributes,
             SetAttributes fileSetAttributes,
             SetLastAccessTime fileSetLastAccessTime,
-            SetLastWriteTime fileSetLastWriteTime
-        )
+            SetLastWriteTime fileSetLastWriteTime)
         {
             file = MakePath(file);
             if (!fileExists(file))
@@ -183,7 +202,15 @@ namespace Microsoft.Build.Tasks
                 // If the file does not exist then we check if we need to create it.
                 if (AlwaysCreate)
                 {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "Touch.CreatingFile", file, "AlwaysCreate");
+                    if (FailIfNotIncremental)
+                    {
+                        Log.LogWarningFromResources("Touch.CreatingFile", file, "AlwaysCreate");
+                    }
+                    else
+                    {
+                        Log.LogMessageFromResources(messageImportance, "Touch.CreatingFile", file, "AlwaysCreate");
+                    }
+
                     if (!CreateFile(file, fileCreate))
                     {
                         return false;
@@ -195,12 +222,17 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
             }
+
+            if (FailIfNotIncremental)
+            {
+                Log.LogWarningFromResources("Touch.Touching", file);
+            }
             else
             {
-                Log.LogMessageFromResources(MessageImportance.Normal, "Touch.Touching", file);
+                Log.LogMessageFromResources(messageImportance, "Touch.Touching", file);
             }
 
-            // If the file is read only then we must either issue an error, or, if the user so 
+            // If the file is read only then we must either issue an error, or, if the user so
             // specified, make the file temporarily not read only.
             bool needToRestoreAttributes = false;
             FileAttributes faOriginal = fileGetAttributes(file);
@@ -216,7 +248,8 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        Log.LogErrorWithCodeFromResources("Touch.CannotMakeFileWritable", file, e.Message);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
+                        Log.LogErrorWithCodeFromResources("Touch.CannotMakeFileWritable", file, e.Message, lockedFileMessage);
                         return false;
                     }
                 }
@@ -231,14 +264,15 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                Log.LogErrorWithCodeFromResources("Touch.CannotTouch", file, e.Message);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
+                Log.LogErrorWithCodeFromResources("Touch.CannotTouch", file, e.Message, lockedFileMessage);
                 return false;
             }
             finally
             {
                 if (needToRestoreAttributes)
                 {
-                    // Attempt to restore the attributes.  If we fail here, then there is 
+                    // Attempt to restore the attributes.  If we fail here, then there is
                     // not much we can do.
                     try
                     {

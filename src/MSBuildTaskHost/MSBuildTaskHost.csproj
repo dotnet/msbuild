@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
        a .props file that prevents building the project from doing much of anything. -->
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core' or '$(MonoBuild)' == 'true'" />
+  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
 
   <PropertyGroup>
     <TargetFramework>net35</TargetFramework>
@@ -13,7 +13,8 @@
     <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
          versions of this project -->
-    <RuntimeIdentifiers Condition="'$(DotNetBuildFromSource)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers Condition="'$(DotNetBuildSourceOnly)' != 'true'">win7-x86;win7-x64</RuntimeIdentifiers>
+    <UseRidGraph>true</UseRidGraph>
 
     <EnableDefaultItems>false</EnableDefaultItems>
     <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY;TASKHOST;NO_FRAMEWORK_IVT</DefineConstants>
@@ -57,16 +58,25 @@
     <Compile Include="..\Framework\ITaskItem2.cs">
       <Link>ITaskItem2.cs</Link>
     </Compile>
+    <Compile Include="..\Framework\IExtendedBuildEventArgs.cs">
+      <Link>IExtendedBuildEventArgs.cs</Link>
+    </Compile>
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
+    <Compile Include="..\Framework\Polyfills\*.cs" />
+    <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
       <Link>CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\Shared\ErrorUtilities.cs">
+    <Compile Include="..\Framework\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs">
+      <Link>SharedErrorUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EscapingUtilities.cs">
       <Link>EscapingUtilities.cs</Link>
@@ -92,10 +102,10 @@
     <Compile Include="..\Shared\INodePacketHandler.cs">
       <Link>INodePacketHandler.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ITranslatable.cs">
+    <Compile Include="..\Framework\ITranslatable.cs">
       <Link>ITranslatable.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ITranslator.cs">
+    <Compile Include="..\Framework\ITranslator.cs">
       <Link>ITranslator.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
@@ -104,6 +114,15 @@
     </Compile>
     <Compile Include="..\Shared\InterningBinaryReader.cs">
       <Link>InterningBinaryReader.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BinaryReaderFactory.cs">
+      <Link>BinaryReaderFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BinaryReaderExtensions.cs">
+      <Link>BinaryReaderExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs">
+      <Link>BinaryWriterExtensions.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LogMessagePacketBase.cs">
       <Link>LogMessagePacketBase.cs</Link>
@@ -114,6 +133,9 @@
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Framework\NativeMethods.cs">
       <Link>NativeMethodsShared.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\Logging\AnsiDetector.cs">
+      <Link>AnsiDetector.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeBuildComplete.cs">
       <Link>NodeBuildComplete.cs</Link>
@@ -127,8 +149,20 @@
     <Compile Include="..\Shared\NodePacketFactory.cs">
       <Link>NodePacketFactory.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BinaryTranslator.cs">
+    <Compile Include="..\Framework\BinaryTranslator.cs">
       <Link>BinaryTranslator.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\BuildExceptionBase.cs">
+      <Link>BuildExceptionBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\BuildExceptionRemoteState.cs">
+      <Link>BuildExceptionRemoteState.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\BuildExceptionSerializationHelper.cs">
+      <Link>BuildExceptionSerializationHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\BuildException\GenericBuildTransferredException.cs">
+      <Link>GenericBuildTransferredException.cs</Link>
     </Compile>
     <Compile Include="..\Shared\NodeShutdown.cs">
       <Link>NodeShutdown.cs</Link>
@@ -141,6 +175,9 @@
     </Compile>
     <Compile Include="..\Framework\StringBuilderCache.cs">
       <Link>StringBuilderCache.cs</Link>
+    </Compile>
+    <Compile Include="..\Framework\SupportedOSPlatform.cs">
+      <Link>SupportedOSPlatform.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs">
       <Link>TaskEngineAssemblyResolver.cs</Link>
@@ -159,6 +196,9 @@
     </Compile>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
+    <Compile Include="..\Framework\ChangeWaves.cs">
+      <Link>ChangeWaves.cs</Link>
+    </Compile>
     <Compile Include="Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
     <Compile Include="Immutable\ImmutableDictionary.cs" />
@@ -181,6 +221,10 @@
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
 
+    <Compile Include="..\Framework\InterningReadTranslator.cs" />
+    <Compile Include="..\Framework\InterningWriteTranslator.cs" />
+    <Compile Include="..\Framework\InternPathIds.cs" />
+
     <Compile Include="..\Shared\FileSystem\IFileSystem.cs" />
     <Compile Include="..\Shared\FileSystem\FileSystems.cs" />
     <Compile Include="FileSystem\MSBuildTaskHostFileSystem.cs" />
@@ -202,7 +246,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\MSBuild.ico" />
+    <Content Include="..\MSBuild\MSBuild.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
@@ -211,9 +255,5 @@
     <!-- Disabled PdbGit because of warnings; it could/should be brought back.
     <PackageReference Include="PdbGit" /> -->
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-    <!-- Need Win32 API on .NET Core to ping registry to determine long path support -->
-    <PackageReference Include="Microsoft.Win32.Registry" />
   </ItemGroup>
 </Project>

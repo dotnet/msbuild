@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,12 +17,14 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     internal class GraphBuilder
     {
-        internal static readonly string SolutionItemReference = "_SolutionReference";
-        
+        internal const string SolutionItemReference = "_SolutionReference";
+
         /// <summary>
         /// The thread calling BuildGraph() will act as an implicit worker
         /// </summary>
@@ -35,6 +38,8 @@ namespace Microsoft.Build.Graph
 
         public GraphEdges Edges { get; private set; }
 
+        public SolutionFile Solution { get; private set; }
+
         private readonly List<ConfigurationMetadata> _entryPointConfigurationMetadata;
 
         private readonly ParallelWorkSet<ConfigurationMetadata, ParsedProject> _graphWorkSet;
@@ -45,6 +50,7 @@ namespace Microsoft.Build.Graph
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
+        private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -59,7 +65,7 @@ namespace Microsoft.Build.Graph
             _solutionDependencies = solutionDependencies;
 
             _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(actualEntryPoints);
-            
+
             IEqualityComparer<ConfigurationMetadata> configComparer = EqualityComparer<ConfigurationMetadata>.Default;
 
             _graphWorkSet = new ParallelWorkSet<ConfigurationMetadata, ParsedProject>(
@@ -80,7 +86,7 @@ namespace Microsoft.Build.Graph
             }
 
             var allParsedProjects = FindGraphNodes();
-            
+
             AddEdges(allParsedProjects);
 
             EntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
@@ -89,6 +95,9 @@ namespace Microsoft.Build.Graph
 
             RootNodes = GetGraphRoots(EntryPointNodes);
             ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
+
+            // Clean and release some temporary used large memory objects.
+            _platformNegotiationInstancesCache.Clear();
         }
 
         private static IReadOnlyCollection<ProjectGraphNode> GetGraphRoots(IReadOnlyCollection<ProjectGraphNode> entryPointNodes)
@@ -114,7 +123,7 @@ namespace Microsoft.Build.Graph
 
             AddEdgesFromProjectReferenceItems(allParsedProjects, Edges);
 
-            _projectInterpretation.ReparentInnerBuilds(allParsedProjects, this);
+            _projectInterpretation.AddInnerBuildEdges(allParsedProjects, this);
 
             if (_solutionDependencies != null && _solutionDependencies.Count != 0)
             {
@@ -124,13 +133,13 @@ namespace Microsoft.Build.Graph
 
         private void AddEdgesFromProjectReferenceItems(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects, GraphEdges edges)
         {
-            var transitiveReferenceCache = new Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>>(allParsedProjects.Count);
+            Dictionary<ProjectGraphNode, HashSet<ProjectGraphNode>> transitiveReferenceCache = new(allParsedProjects.Count);
 
             foreach (var parsedProject in allParsedProjects)
             {
                 var currentNode = parsedProject.Value.GraphNode;
 
-                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode.ProjectInstance);
+                var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode);
 
                 foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                 {
@@ -152,8 +161,7 @@ namespace Microsoft.Build.Graph
                                     itemType: ProjectInterpretation.TransitiveReferenceItemName,
                                     includeEscaped: referenceInfo.ReferenceConfiguration.ProjectFullPath,
                                     directMetadata: null,
-                                    definingFileEscaped: currentNode.ProjectInstance.FullPath
-                                ),
+                                    definingFileEscaped: currentNode.ProjectInstance.FullPath),
                                 edges);
                         }
                     }
@@ -162,28 +170,30 @@ namespace Microsoft.Build.Graph
 
             HashSet<ProjectGraphNode> GetTransitiveProjectReferencesExcludingSelf(ParsedProject parsedProject)
             {
-                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> cachedTransitiveReferences))
+                if (transitiveReferenceCache.TryGetValue(parsedProject.GraphNode, out HashSet<ProjectGraphNode> transitiveReferences))
                 {
-                    return cachedTransitiveReferences;
-                }
-                else
-                {
-                    var transitiveReferences = new HashSet<ProjectGraphNode>();
-
-                    foreach (var referenceInfo in parsedProject.ReferenceInfos)
-                    {
-                        transitiveReferences.Add(allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode);
-
-                        foreach (var transitiveReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
-                        {
-                            transitiveReferences.Add(transitiveReference);
-                        }
-                    }
-
-                    transitiveReferenceCache.Add(parsedProject.GraphNode, transitiveReferences);
-
                     return transitiveReferences;
                 }
+
+                transitiveReferences = new();
+
+                // Add the results to the cache early, even though it'll be incomplete until the loop below finishes. This helps handle cycles by not allowing them to recurse infinitely.
+                // Note that this makes transitive references incomplete in the case of a cycle, but direct dependencies are always added so a cycle will still be detected and an exception will still be thrown.
+                transitiveReferenceCache[parsedProject.GraphNode] = transitiveReferences;
+
+                foreach (ProjectInterpretation.ReferenceInfo referenceInfo in parsedProject.ReferenceInfos)
+                {
+                    ParsedProject reference = allParsedProjects[referenceInfo.ReferenceConfiguration];
+                    transitiveReferences.Add(reference.GraphNode);
+
+                    // Perf note: avoiding UnionWith to avoid boxing the HashSet enumerator.
+                    foreach (ProjectGraphNode transitiveReference in GetTransitiveProjectReferencesExcludingSelf(reference))
+                    {
+                        transitiveReferences.Add(transitiveReference);
+                    }
+                }
+
+                return transitiveReferences;
             }
         }
 
@@ -195,13 +205,13 @@ namespace Microsoft.Build.Graph
             {
                 var projectPath = project.Value.GraphNode.ProjectInstance.FullPath;
 
-                if (projectsByPath.ContainsKey(projectPath))
+                if (projectsByPath.TryGetValue(projectPath, out List<ProjectGraphNode> value))
                 {
-                    projectsByPath[projectPath].Add(project.Value.GraphNode);
+                    value.Add(project.Value.GraphNode);
                 }
                 else
                 {
-                    projectsByPath[projectPath] = new List<ProjectGraphNode> {project.Value.GraphNode};
+                    projectsByPath[projectPath] = new List<ProjectGraphNode> { project.Value.GraphNode };
                 }
             }
 
@@ -251,67 +261,125 @@ namespace Microsoft.Build.Graph
 
             ErrorUtilities.VerifyThrowArgument(entryPoints.Count == 1, "StaticGraphAcceptsSingleSolutionEntryPoint");
 
-            var solutionEntryPoint = entryPoints.Single();
-            var solutionGlobalProperties = ImmutableDictionary.CreateRange(
+            ProjectGraphEntryPoint solutionEntryPoint = entryPoints.Single();
+            ImmutableDictionary<string, string>.Builder solutionGlobalPropertiesBuilder = ImmutableDictionary.CreateBuilder(
                 keyComparer: StringComparer.OrdinalIgnoreCase,
-                valueComparer: StringComparer.OrdinalIgnoreCase,
-                items: solutionEntryPoint.GlobalProperties ?? ImmutableDictionary<string, string>.Empty);
+                valueComparer: StringComparer.Ordinal);
 
-            var solution = SolutionFile.Parse(FileUtilities.NormalizePath(solutionEntryPoint.ProjectFile));
+            if (solutionEntryPoint.GlobalProperties != null)
+            {
+                solutionGlobalPropertiesBuilder.AddRange(solutionEntryPoint.GlobalProperties);
+            }
 
-            if (solution.SolutionParserWarnings.Count != 0 || solution.SolutionParserErrorCodes.Count != 0)
+            Solution = SolutionFile.Parse(solutionEntryPoint.ProjectFile);
+
+            if (Solution.SolutionParserWarnings.Count != 0 || Solution.SolutionParserErrorCodes.Count != 0)
             {
                 throw new InvalidProjectFileException(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "StaticGraphSolutionLoaderEncounteredSolutionWarningsAndErrors",
                         solutionEntryPoint.ProjectFile,
-                        string.Join(";", solution.SolutionParserWarnings),
-                        string.Join(";", solution.SolutionParserErrorCodes)));
+                        string.Join(";", Solution.SolutionParserWarnings),
+                        string.Join(";", Solution.SolutionParserErrorCodes)));
             }
 
-            var projectsInSolution = GetBuildableProjects(solution);
+            // Mimic behavior of SolutionProjectGenerator
+            SolutionConfigurationInSolution currentSolutionConfiguration = SelectSolutionConfiguration(Solution, solutionEntryPoint.GlobalProperties);
+            solutionGlobalPropertiesBuilder["Configuration"] = currentSolutionConfiguration.ConfigurationName;
+            solutionGlobalPropertiesBuilder["Platform"] = currentSolutionConfiguration.PlatformName;
 
-            var currentSolutionConfiguration = SelectSolutionConfiguration(solution, solutionGlobalProperties);
+            string solutionConfigurationXml = SolutionProjectGenerator.GetSolutionConfiguration(Solution, currentSolutionConfiguration);
+            solutionGlobalPropertiesBuilder["CurrentSolutionConfigurationContents"] = solutionConfigurationXml;
+            solutionGlobalPropertiesBuilder["BuildingSolutionFile"] = "true";
 
-            var newEntryPoints = new List<ProjectGraphEntryPoint>(projectsInSolution.Count);
-
-            foreach (var project in projectsInSolution)
+            string solutionDirectoryName = Solution.SolutionFileDirectory;
+            if (!solutionDirectoryName.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
             {
-                if (project.ProjectConfigurations.Count == 0)
+                solutionDirectoryName += Path.DirectorySeparatorChar;
+            }
+
+            solutionGlobalPropertiesBuilder["SolutionDir"] = EscapingUtilities.Escape(solutionDirectoryName);
+            solutionGlobalPropertiesBuilder["SolutionExt"] = EscapingUtilities.Escape(Path.GetExtension(Solution.FullPath));
+            solutionGlobalPropertiesBuilder["SolutionFileName"] = EscapingUtilities.Escape(Path.GetFileName(Solution.FullPath));
+            solutionGlobalPropertiesBuilder["SolutionName"] = EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(Solution.FullPath));
+            solutionGlobalPropertiesBuilder[SolutionProjectGenerator.SolutionPathPropertyName] = EscapingUtilities.Escape(Path.Combine(Solution.SolutionFileDirectory, Path.GetFileName(Solution.FullPath)));
+
+            // Project configurations are reused heavily, so cache the global properties for each
+            Dictionary<string, ImmutableDictionary<string, string>> globalPropertiesForProjectConfiguration = new(StringComparer.OrdinalIgnoreCase);
+
+            IReadOnlyList<ProjectInSolution> projectsInSolution = Solution.ProjectsInOrder;
+            List<ProjectGraphEntryPoint> newEntryPoints = new(projectsInSolution.Count);
+            Dictionary<string, IReadOnlyCollection<string>> solutionDependencies = new();
+
+            foreach (ProjectInSolution project in projectsInSolution)
+            {
+                if (!SolutionFile.IsBuildableProject(project))
                 {
                     continue;
                 }
 
-                var projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
+                ProjectConfigurationInSolution projectConfiguration = SelectProjectConfiguration(currentSolutionConfiguration, project.ProjectConfigurations);
 
-                if (projectConfiguration.IncludeInBuild)
+                if (!SolutionProjectGenerator.WouldProjectBuild(Solution, currentSolutionConfiguration.FullName, project, projectConfiguration))
                 {
-                    newEntryPoints.Add(
-                        new ProjectGraphEntryPoint(
-                            project.AbsolutePath,
-                            solutionGlobalProperties
-                                .SetItem("Configuration", projectConfiguration.ConfigurationName)
-                                .SetItem("Platform", projectConfiguration.PlatformName)
-                            ));
+                    continue;
+                }
+
+                if (!globalPropertiesForProjectConfiguration.TryGetValue(projectConfiguration.FullName, out ImmutableDictionary<string, string> projectGlobalProperties))
+                {
+                    solutionGlobalPropertiesBuilder["Configuration"] = projectConfiguration.ConfigurationName;
+                    solutionGlobalPropertiesBuilder["Platform"] = projectConfiguration.PlatformName;
+
+                    projectGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
+                    globalPropertiesForProjectConfiguration.Add(projectConfiguration.FullName, projectGlobalProperties);
+                }
+
+                newEntryPoints.Add(new ProjectGraphEntryPoint(project.AbsolutePath, projectGlobalProperties));
+
+                if (project.Dependencies.Count > 0)
+                {
+                    // code snippet cloned from SolutionProjectGenerator.GetSolutionConfiguration
+
+                    List<string> solutionDependenciesForProject = new(project.Dependencies.Count);
+                    foreach (string dependencyProjectGuid in project.Dependencies)
+                    {
+                        if (!Solution.ProjectsByGuid.TryGetValue(dependencyProjectGuid, out ProjectInSolution dependencyProject))
+                        {
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                                "SubCategoryForSolutionParsingErrors",
+                                new BuildEventFileInfo(Solution.FullPath),
+                                "SolutionParseProjectDepNotFoundError",
+                                project.ProjectGuid,
+                                dependencyProjectGuid);
+                        }
+
+                        // Add it to the list of dependencies, but only if it should build in this solution configuration
+                        // (If a project is not selected for build in the solution configuration, it won't build even if it's depended on by something that IS selected for build)
+                        // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise
+                        if (dependencyProject.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat)
+                        {
+                            solutionDependenciesForProject.Add(dependencyProject.AbsolutePath);
+                        }
+                    }
+
+                    if (solutionDependenciesForProject.Count > 0)
+                    {
+                        solutionDependencies.Add(project.AbsolutePath, solutionDependenciesForProject);
+                    }
                 }
             }
 
             newEntryPoints.TrimExcess();
 
-            return (newEntryPoints, GetSolutionDependencies(solution));
+            return (newEntryPoints, solutionDependencies);
 
-            IReadOnlyCollection<ProjectInSolution> GetBuildableProjects(SolutionFile solutionFile)
+            SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, IDictionary<string, string> globalProperties)
             {
-                return solutionFile.ProjectsInOrder.Where(p => p.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat && solutionFile.ProjectShouldBuild(p.RelativePath)).ToImmutableArray();
-            }
-
-            SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, ImmutableDictionary<string, string> globalProperties)
-            {
-                var solutionConfiguration = globalProperties.TryGetValue("Configuration", out string configuration)
+                var solutionConfiguration = globalProperties != null && globalProperties.TryGetValue("Configuration", out string configuration)
                     ? configuration
                     : solutionFile.GetDefaultConfigurationName();
 
-                var solutionPlatform = globalProperties.TryGetValue("Platform", out string platform)
+                var solutionPlatform = globalProperties != null && globalProperties.TryGetValue("Platform", out string platform)
                     ? platform
                     : solutionFile.GetDefaultPlatformName();
 
@@ -334,43 +402,6 @@ namespace Microsoft.Build.Graph
                 var partiallyMarchedConfig = projectConfigs.FirstOrDefault(pc => pc.Value.ConfigurationName.Equals(solutionConfig.ConfigurationName, StringComparison.OrdinalIgnoreCase)).Value;
                 return partiallyMarchedConfig ?? projectConfigs.First().Value;
             }
-
-            IReadOnlyDictionary<string, IReadOnlyCollection<string>> GetSolutionDependencies(SolutionFile solutionFile)
-            {
-                var solutionDependencies = new Dictionary<string, IReadOnlyCollection<string>>();
-
-                foreach (var projectWithDependencies in solutionFile.ProjectsInOrder.Where(p => p.Dependencies.Count != 0))
-                {
-                    solutionDependencies[projectWithDependencies.AbsolutePath] = projectWithDependencies.Dependencies.Select(
-                        dependencyGuid =>
-                        {
-                            // code snippet cloned from SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration
-
-                            if (!solutionFile.ProjectsByGuid.TryGetValue(dependencyGuid, out var dependencyProject))
-                            {
-                                // If it's not itself part of the solution, that's an invalid solution
-                                ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(
-                                    dependencyProject != null,
-                                    "SubCategoryForSolutionParsingErrors",
-                                    new BuildEventFileInfo(solutionFile.FullPath),
-                                    "SolutionParseProjectDepNotFoundError",
-                                    projectWithDependencies.ProjectGuid,
-                                    dependencyGuid);
-                            }
-
-                            // Add it to the list of dependencies, but only if it should build in this solution configuration 
-                            // (If a project is not selected for build in the solution configuration, it won't build even if it's depended on by something that IS selected for build)
-                            // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise 
-                            return dependencyProject?.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat
-                                ? dependencyProject.AbsolutePath
-                                : null;
-                        })
-                        .Where(p => p != null)
-                        .ToArray();
-                }
-
-                return solutionDependencies;
-            }
         }
 
         private static List<ConfigurationMetadata> AddGraphBuildPropertyToEntryPoints(IEnumerable<ProjectGraphEntryPoint> entryPoints)
@@ -384,7 +415,7 @@ namespace Microsoft.Build.Graph
 
                     AddGraphBuildGlobalVariable(globalPropertyDictionary);
 
-                    var configurationMetadata = new ConfigurationMetadata(FileUtilities.NormalizePath(entryPoint.ProjectFile), globalPropertyDictionary);
+                    var configurationMetadata = new ConfigurationMetadata(entryPoint.ProjectFile, globalPropertyDictionary);
                     entryPointConfigurationMetadata.Add(configurationMetadata);
                 }
 
@@ -446,7 +477,7 @@ namespace Microsoft.Build.Graph
                             {
                                 // the project being evaluated has a reference to itself
                                 var selfReferencingProjectString =
-                                    FormatCircularDependencyError(new List<string> {node.ProjectInstance.FullPath, node.ProjectInstance.FullPath});
+                                    FormatCircularDependencyError(new List<string> { node.ProjectInstance.FullPath, node.ProjectInstance.FullPath });
                                 throw new CircularDependencyException(
                                     string.Format(
                                         ResourceUtilities.GetResourceString("CircularDependencyInProjectGraph"),
@@ -454,8 +485,8 @@ namespace Microsoft.Build.Graph
                             }
 
                             // the project being evaluated has a circular dependency involving multiple projects
-                            // add this project to the list of projects involved in cycle 
-                            var projectsInCycle = new List<string> {referenceNode.ProjectInstance.FullPath};
+                            // add this project to the list of projects involved in cycle
+                            var projectsInCycle = new List<string> { referenceNode.ProjectInstance.FullPath };
                             return (false, projectsInCycle);
                         }
                     }
@@ -523,10 +554,10 @@ namespace Microsoft.Build.Graph
             foreach (ConfigurationMetadata projectToEvaluate in _entryPointConfigurationMetadata)
             {
                 SubmitProjectForParsing(projectToEvaluate);
-                                /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
-                             meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
-                             and duplicates the information, leading to wasted work
-                             */
+                /*todo: fix the following double check-then-act concurrency bug: one thread can pass the two checks, loose context,
+             meanwhile another thread passes the same checks with the same data and inserts its reference. The initial thread regains context
+             and duplicates the information, leading to wasted work
+             */
             }
 
             _graphWorkSet.WaitForAllWorkAndComplete();
@@ -543,23 +574,32 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject.ProjectInstance))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {
                     throw new InvalidOperationException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "StaticGraphDoesNotSupportSlnReferences",
                         referenceInfo.ReferenceConfiguration.ProjectFullPath,
-                        referenceInfo.ReferenceConfiguration.ProjectFullPath
-                        ));
+                        referenceInfo.ReferenceConfiguration.ProjectFullPath));
                 }
-                
+
                 SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
 
                 referenceInfos.Add(referenceInfo);
             }
 
             return referenceInfos;
+        }
+
+        private ProjectInstance GetInstanceForPlatformNegotiationWithCaching(
+            string projectPath,
+            Dictionary<string, string> globalProperties,
+            ProjectCollection projectCollection)
+        {
+            return _platformNegotiationInstancesCache.GetOrAdd(
+                new ConfigurationMetadata(projectPath, CreatePropertyDictionary(globalProperties)),
+                new Lazy<ProjectInstance>(() => _projectInstanceFactory(projectPath, globalProperties, projectCollection))).Value;
         }
 
         internal static string FormatCircularDependencyError(List<string> projectsInCycle)
@@ -602,7 +642,7 @@ namespace Microsoft.Build.Graph
             return propertyDictionary;
         }
 
-        internal class GraphEdges
+        internal sealed class GraphEdges
         {
             private ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance> ReferenceItems =
                 new ConcurrentDictionary<(ProjectGraphNode, ProjectGraphNode), ProjectItemInstance>();
@@ -616,9 +656,44 @@ namespace Microsoft.Build.Graph
                     ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
                     return referenceItem;
                 }
+            }
 
-                // First edge wins, in accordance with vanilla msbuild behaviour when multiple msbuild tasks call into the same logical project
-                set => ReferenceItems.TryAdd(key, value);
+            public void AddOrUpdateEdge((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance edge)
+            {
+                ReferenceItems.AddOrUpdate(
+                    key,
+#pragma warning disable IDE0350
+                    addValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance referenceItem) => referenceItem,
+                    updateValueFactory: static ((ProjectGraphNode node, ProjectGraphNode reference) key, ProjectItemInstance existingItem, ProjectItemInstance newItem) =>
+#pragma warning restore IDE0350
+                    {
+                        string existingTargetsMetadata = existingItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+                        string newTargetsMetadata = newItem.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
+
+                        // Bail out if the targets are the same.
+                        if (existingTargetsMetadata.Equals(newTargetsMetadata, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return existingItem;
+                        }
+
+                        existingTargetsMetadata = GetEffectiveTargets(key.reference, existingTargetsMetadata);
+                        newTargetsMetadata = GetEffectiveTargets(key.reference, newTargetsMetadata);
+
+                        ProjectItemInstance mergedItem = existingItem.DeepClone();
+                        mergedItem.SetMetadata(ItemMetadataNames.ProjectReferenceTargetsMetadataName, $"{existingTargetsMetadata};{newTargetsMetadata}");
+                        return mergedItem;
+
+                        static string GetEffectiveTargets(ProjectGraphNode reference, string targetsMetadata)
+                        {
+                            if (string.IsNullOrWhiteSpace(targetsMetadata))
+                            {
+                                return string.Join(";", reference.ProjectInstance.DefaultTargets);
+                            }
+
+                            return targetsMetadata;
+                        }
+                    },
+                    edge);
             }
 
             public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
@@ -627,14 +702,12 @@ namespace Microsoft.Build.Graph
             }
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);
-            internal bool TryGetEdge((ProjectGraphNode node, ProjectGraphNode reference) key, out ProjectItemInstance edge) => ReferenceItems.TryGetValue(key, out edge);
 
             internal IReadOnlyDictionary<(ConfigurationMetadata, ConfigurationMetadata), ProjectItemInstance> TestOnly_AsConfigurationMetadata()
             {
                 return ReferenceItems.ToImmutableDictionary(
                     kvp => (kvp.Key.Item1.ToConfigurationMetadata(), kvp.Key.Item2.ToConfigurationMetadata()),
-                    kvp => kvp.Value
-                    );
+                    kvp => kvp.Value);
             }
         }
 

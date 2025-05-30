@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Resources;
-using System.Reflection;
 using System.Globalization;
+using System.Reflection;
+using System.Resources;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -51,7 +53,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(unformatted, nameof(unformatted));
+            ErrorUtilities.VerifyThrowArgumentNull(unformatted);
 
             return ResourceUtilities.FormatString(unformatted, args);
         }
@@ -70,7 +72,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted string.</returns>
         internal static string FormatResourceString(string resourceName, params object[] args)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(resourceName, nameof(resourceName));
+            ErrorUtilities.VerifyThrowArgumentNull(resourceName);
 
             // NOTE: the ResourceManager.GetString() method is thread-safe
             string resourceString = GetString(resourceName);

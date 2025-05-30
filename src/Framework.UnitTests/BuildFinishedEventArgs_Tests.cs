@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
 using Microsoft.Build.Framework;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -25,14 +27,14 @@ namespace Microsoft.Build.UnitTests
             buildFinishedEvent = new BuildFinishedEventArgs("{0}", "HelpKeyword", true, new DateTime(), "Message");
             buildFinishedEvent = new BuildFinishedEventArgs(null, null, true);
             buildFinishedEvent = new BuildFinishedEventArgs(null, null, true, new DateTime());
-            buildFinishedEvent = new BuildFinishedEventArgs(null, null, true, new DateTime(), null);
+            buildFinishedEvent = new BuildFinishedEventArgs(null, null, true, new DateTime(), messageArgs: null);
         }
 
         /// <summary>
-        /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
+        /// Create a derived class so that we can test the default constructor in order to increase code coverage and
         /// verify this code path does not cause any exceptions.
         /// </summary>
-        private class BuildFinishedEventArgs2 : BuildFinishedEventArgs
+        private sealed class BuildFinishedEventArgs2 : BuildFinishedEventArgs
         {
             /// <summary>
             /// Test constructor

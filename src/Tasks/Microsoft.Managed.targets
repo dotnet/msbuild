@@ -1,16 +1,15 @@
-﻿<!--
+<!--
 ***********************************************************************************************
 This file is deprecated and left here for back compat reasons. It is replaced by Microsoft.Managed.<Before|After>.targets
 
 Copyright (C) Microsoft Corporation. All rights reserved.
 ***********************************************************************************************
 -->
-
 <Project>
 
   <Import Project="$(MSBuildToolsPath)\Microsoft.Managed.Before.targets" />
 
-   <!-- Item copied from Microsoft.Common.Currentversion.targets   -->
+  <!-- Item copied from Microsoft.Common.Currentversion.targets   -->
   <PropertyGroup>
     <_RecursiveTargetForContentCopying>GetCopyToOutputDirectoryItems</_RecursiveTargetForContentCopying>
     <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject</_RecursiveTargetForContentCopying>

@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -19,9 +21,11 @@ using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingCont
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
-#if MSBUILDENABLEVSPROFILING 
+#if MSBUILDENABLEVSPROFILING
 using Microsoft.VisualStudio.Profiler;
 #endif
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -145,11 +149,6 @@ namespace Microsoft.Build.BackEnd
         private bool _isExecuting;
 
         /// <summary>
-        /// The current task builder.
-        /// </summary>
-        private ITaskBuilder _currentTaskBuilder;
-
-        /// <summary>
         /// The constructor.
         /// </summary>
         /// <param name="requestEntry">The build request entry for the target.</param>
@@ -159,21 +158,30 @@ namespace Microsoft.Build.BackEnd
         /// <param name="parentTarget">The parent of this entry, if any.</param>
         /// <param name="buildReason">The reason the parent built this target.</param>
         /// <param name="host">The Build Component Host to use.</param>
+        /// <param name="loggingContext"></param>
         /// <param name="stopProcessingOnCompletion">True if the target builder should stop processing the current target stack when this target is complete.</param>
-        internal TargetEntry(BuildRequestEntry requestEntry, ITargetBuilderCallback targetBuilderCallback, TargetSpecification targetSpecification, Lookup baseLookup, TargetEntry parentTarget, TargetBuiltReason buildReason, IBuildComponentHost host, bool stopProcessingOnCompletion)
+        internal TargetEntry(
+            BuildRequestEntry requestEntry,
+            ITargetBuilderCallback targetBuilderCallback,
+            TargetSpecification targetSpecification,
+            Lookup baseLookup, TargetEntry parentTarget,
+            TargetBuiltReason buildReason,
+            IBuildComponentHost host,
+            LoggingContext loggingContext,
+            bool stopProcessingOnCompletion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestEntry, nameof(requestEntry));
-            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback, nameof(targetBuilderCallback));
+            ErrorUtilities.VerifyThrowArgumentNull(requestEntry);
+            ErrorUtilities.VerifyThrowArgumentNull(targetBuilderCallback);
             ErrorUtilities.VerifyThrowArgumentNull(targetSpecification, "targetName");
             ErrorUtilities.VerifyThrowArgumentNull(baseLookup, "lookup");
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
 
             _requestEntry = requestEntry;
             _targetBuilderCallback = targetBuilderCallback;
             _targetSpecification = targetSpecification;
             _parentTarget = parentTarget;
             _buildReason = buildReason;
-            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup, FileSystems.Default);
+            _expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(baseLookup, baseLookup, FileSystems.Default, loggingContext);
             _state = TargetEntryState.Dependencies;
             _baseLookup = baseLookup;
             _host = host;
@@ -341,17 +349,15 @@ namespace Microsoft.Build.BackEnd
 
             // If condition is false (based on propertyBag), set this target's state to
             // "Skipped" since we won't actually build it.
-            bool condition = ConditionEvaluator.EvaluateCondition
-                (
+            bool condition = ConditionEvaluator.EvaluateCondition(
                 _target.Condition,
                 ParserOptions.AllowPropertiesAndItemLists,
                 _expander,
                 ExpanderOptions.ExpandPropertiesAndItems,
                 _requestEntry.ProjectRootDirectory,
                 _target.ConditionLocation,
-                projectLoggingContext.LoggingService,
-                projectLoggingContext.BuildEventContext,
-                FileSystems.Default);
+                FileSystems.Default,
+                loggingContext: projectLoggingContext);
 
             if (!condition)
             {
@@ -408,13 +414,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal async Task ExecuteTarget(ITaskBuilder taskBuilder, BuildRequestEntry requestEntry, ProjectLoggingContext projectLoggingContext, CancellationToken cancellationToken)
         {
-#if MSBUILDENABLEVSPROFILING 
-            try
-            {
-                string beginTargetBuild = String.Format(CultureInfo.CurrentCulture, "Build Target {0} in Project {1} - Start", this.Name, projectFullPath);
-                DataCollection.CommentMarkProfile(8800, beginTargetBuild);
-#endif 
-
             try
             {
                 VerifyState(_state, TargetEntryState.Execution);
@@ -424,7 +423,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Generate the batching buckets.  Note that each bucket will get a lookup based on the baseLookup.  This lookup will be in its
                 // own scope, which we will collapse back down into the baseLookup at the bottom of the function.
-                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location);
+                List<ItemBucket> buckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location, null);
 
                 WorkUnitResult aggregateResult = new WorkUnitResult();
                 TargetLoggingContext targetLoggingContext = null;
@@ -448,7 +447,15 @@ namespace Microsoft.Build.BackEnd
                         break;
                     }
 
+                    if (i > 0)
+                    {
+                        // Don't log the last target finished event until we can process the target outputs as we want to attach them to the
+                        // last target batch. The following statement logs the event for the bucket processed in the previous iteration.
+                        targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, null);
+                    }
+
                     targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
+                    bucket.Initialize(targetLoggingContext);
                     WorkUnitResult bucketResult = null;
                     targetSuccess = false;
 
@@ -467,7 +474,7 @@ namespace Microsoft.Build.BackEnd
                         // UNDONE: (Refactor) Refactor TargetUpToDateChecker to take a logging context, not a logging service.
                         MSBuildEventSource.Log.TargetUpToDateStart();
                         TargetUpToDateChecker dependencyAnalyzer = new TargetUpToDateChecker(requestEntry.RequestConfiguration.Project, _target, targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext);
-                        DependencyAnalysisResult dependencyResult = dependencyAnalyzer.PerformDependencyAnalysis(bucket, out changedTargetInputs, out upToDateTargetInputs);
+                        DependencyAnalysisResult dependencyResult = dependencyAnalyzer.PerformDependencyAnalysis(bucket, _host.BuildParameters.Question, out changedTargetInputs, out upToDateTargetInputs);
                         MSBuildEventSource.Log.TargetUpToDateStop((int)dependencyResult);
 
                         switch (dependencyResult)
@@ -476,6 +483,13 @@ namespace Microsoft.Build.BackEnd
                             case DependencyAnalysisResult.FullBuild:
                             case DependencyAnalysisResult.IncrementalBuild:
                             case DependencyAnalysisResult.SkipUpToDate:
+                                if (dependencyResult != DependencyAnalysisResult.SkipUpToDate && _host.BuildParameters.Question && !string.IsNullOrEmpty(_target.Inputs) && !string.IsNullOrEmpty(_target.Outputs))
+                                {
+                                    targetSuccess = false;
+                                    aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Canceled, WorkUnitActionCode.Stop, null));
+                                    break;
+                                }
+
                                 // Create the lookups used to hold the current set of properties and items
                                 lookupForInference = bucket.Lookup;
                                 lookupForExecution = bucket.Lookup.Clone();
@@ -505,7 +519,7 @@ namespace Microsoft.Build.BackEnd
                                 // We either have some work to do or at least we need to infer outputs from inputs.
                                 bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
 
-                                // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not 
+                                // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not
                                 // skipped due to being up-to-date:
                                 // 1. If this bucket failed or was cancelled, the aggregate result is failure.
                                 // 2. If this bucket Succeeded and we have not previously failed, the aggregate result is a success.
@@ -523,7 +537,7 @@ namespace Microsoft.Build.BackEnd
                                     }
                                 }
 
-                                // Pop the lookup scopes, causing them to collapse their values back down into the 
+                                // Pop the lookup scopes, causing them to collapse their values back down into the
                                 // bucket's lookup.
                                 // NOTE: this order is important because when we infer outputs, we are trying
                                 // to produce the same results as would be produced from a full build; as such
@@ -553,20 +567,10 @@ namespace Microsoft.Build.BackEnd
                         entryForExecution?.LeaveScope();
                         aggregateResult = aggregateResult.AggregateResult(new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null));
                     }
-                    finally
-                    {
-                        // Don't log the last target finished event until we can process the target outputs as we want to attach them to the 
-                        // last target batch.
-                        if (targetLoggingContext != null && i < numberOfBuckets - 1)
-                        {
-                            targetLoggingContext.LogTargetBatchFinished(projectFullPath, targetSuccess, null);
-                            targetLoggingContext = null;
-                        }
-                    }
                 }
 
                 // Produce the final results.
-                List<TaskItem> targetOutputItems = new List<TaskItem>();
+                TaskItem[] targetOutputItems = Array.Empty<TaskItem>();
 
                 try
                 {
@@ -583,13 +587,13 @@ namespace Microsoft.Build.BackEnd
                     string targetReturns = _target.Returns;
                     ElementLocation targetReturnsLocation = _target.ReturnsLocation;
 
-                    // If there are no targets in the project file that use the "Returns" attribute, that means that we 
+                    // If there are no targets in the project file that use the "Returns" attribute, that means that we
                     // revert to the legacy behavior in the case where Returns is not specified (null, rather
-                    // than the empty string, which indicates no returns).  Legacy behavior is for all 
-                    // of the target's Outputs to be returned. 
-                    // On the other hand, if there is at least one target in the file that uses the Returns attribute, 
+                    // than the empty string, which indicates no returns).  Legacy behavior is for all
+                    // of the target's Outputs to be returned.
+                    // On the other hand, if there is at least one target in the file that uses the Returns attribute,
                     // then all targets in the file are run according to the new behaviour (return nothing unless otherwise
-                    // specified by the Returns attribute). 
+                    // specified by the Returns attribute).
                     if (targetReturns == null)
                     {
                         if (!_target.ParentProjectSupportsReturnsAttribute)
@@ -602,56 +606,68 @@ namespace Microsoft.Build.BackEnd
                     if (!String.IsNullOrEmpty(targetReturns))
                     {
                         // Determine if we should keep duplicates.
-                        bool keepDupes = ConditionEvaluator.EvaluateCondition
-                                 (
+                        bool keepDupes = ConditionEvaluator.EvaluateCondition(
                                  _target.KeepDuplicateOutputs,
                                  ParserOptions.AllowPropertiesAndItemLists,
                                  _expander,
                                  ExpanderOptions.ExpandPropertiesAndItems,
                                  requestEntry.ProjectRootDirectory,
                                  _target.KeepDuplicateOutputsLocation,
-                                 projectLoggingContext.LoggingService,
-                                 projectLoggingContext.BuildEventContext, FileSystems.Default);
+                                 FileSystems.Default,
+                                 projectLoggingContext);
 
                         // NOTE: we need to gather the outputs in batches, because the output specification may reference item metadata
                         // Also, we are using the baseLookup, which has possibly had changes made to it since the project started.  Because of this, the
-                        // set of outputs calculated here may differ from those which would have been calculated at the beginning of the target.  It is 
+                        // set of outputs calculated here may differ from those which would have been calculated at the beginning of the target.  It is
                         // assumed the user intended this.
-                        List<ItemBucket> batchingBuckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location);
+                        List<ItemBucket> batchingBuckets = BatchingEngine.PrepareBatchingBuckets(GetBatchableParametersForTarget(), _baseLookup, _target.Location, targetLoggingContext);
 
                         if (keepDupes)
                         {
+                            List<TaskItem> targetOutputItemsList = new();
                             foreach (ItemBucket bucket in batchingBuckets)
                             {
-                                targetOutputItems.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
+                                if (targetOutputItems is null)
+                                {
+                                    // As an optimization, use the results for the first bucket and if there are no more buckets to process, only a single list is allocated.
+                                    targetOutputItemsList = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation).ToList();
+                                }
+                                else
+                                {
+                                    targetOutputItemsList.AddRange(bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation));
+                                }
                             }
+
+                            targetOutputItems = targetOutputItemsList.ToArray();
                         }
                         else
                         {
-                            HashSet<TaskItem> addedItems = new HashSet<TaskItem>();
-                            foreach (ItemBucket bucket in batchingBuckets)
+                            // Optimize for only one bucket by initializing the HashSet<T> with the first one's items in case there are a lot of items, it won't need to be resized.
+                            if (batchingBuckets.Count == 1)
                             {
-                                IList<TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
-
-                                foreach (TaskItem item in itemsToAdd)
+                                targetOutputItems = new HashSet<TaskItem>(batchingBuckets[0].Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation)).ToArray();
+                            }
+                            else
+                            {
+                                HashSet<TaskItem> addedItems = new HashSet<TaskItem>();
+                                foreach (ItemBucket bucket in batchingBuckets)
                                 {
-                                    if (!addedItems.Contains(item))
-                                    {
-                                        targetOutputItems.Add(item);
-                                        addedItems.Add(item);
-                                    }
+                                    IList<TaskItem> itemsToAdd = bucket.Expander.ExpandIntoTaskItemsLeaveEscaped(targetReturns, ExpanderOptions.ExpandAll, targetReturnsLocation);
+                                    addedItems.UnionWith(itemsToAdd);
                                 }
+
+                                targetOutputItems = addedItems.ToArray();
                             }
                         }
                     }
                 }
                 finally
                 {
-                    // log the last target finished since we now have the target outputs. 
-                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems?.Count > 0 ? targetOutputItems : null);
+                    // log the last target finished since we now have the target outputs.
+                    targetLoggingContext?.LogTargetBatchFinished(projectFullPath, targetSuccess, targetOutputItems.Length > 0 ? targetOutputItems : null);
                 }
 
-                _targetResult = new TargetResult(targetOutputItems.ToArray(), aggregateResult, targetLoggingContext?.BuildEventContext);
+                _targetResult = new TargetResult(targetOutputItems, aggregateResult, targetLoggingContext?.BuildEventContext);
 
                 if (aggregateResult.ResultCode == WorkUnitResultCode.Failed && aggregateResult.ActionCode == WorkUnitActionCode.Stop)
                 {
@@ -666,14 +682,6 @@ namespace Microsoft.Build.BackEnd
             {
                 _isExecuting = false;
             }
-#if MSBUILDENABLEVSPROFILING 
-            }
-            finally
-            {
-                string endTargetBuild = String.Format(CultureInfo.CurrentCulture, "Build Target {0} in Project {1} - End", this.Name, projectFullPath);
-                DataCollection.CommentMarkProfile(8801, endTargetBuild);
-            }
-#endif
         }
 
         /// <summary>
@@ -690,16 +698,15 @@ namespace Microsoft.Build.BackEnd
 
             foreach (ProjectOnErrorInstance errorTargetInstance in _target.OnErrorChildren)
             {
-                bool condition = ConditionEvaluator.EvaluateCondition
-                (
+                bool condition = ConditionEvaluator.EvaluateCondition(
                     errorTargetInstance.Condition,
                     ParserOptions.AllowPropertiesAndItemLists,
                     _expander,
                     ExpanderOptions.ExpandPropertiesAndItems,
                     _requestEntry.ProjectRootDirectory,
                     errorTargetInstance.ConditionLocation,
-                    projectLoggingContext.LoggingService,
-                    projectLoggingContext.BuildEventContext, FileSystems.Default);
+                    FileSystems.Default,
+                    projectLoggingContext);
 
                 if (condition)
                 {
@@ -798,52 +805,42 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// The result of the tasks, based on the last task which ran.
         /// </returns>
-        private async Task<WorkUnitResult> ProcessBucket(ITaskBuilder taskBuilder, TargetLoggingContext targetLoggingContext, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution)
+        private async ValueTask<WorkUnitResult> ProcessBucket(ITaskBuilder taskBuilder, TargetLoggingContext targetLoggingContext, TaskExecutionMode mode, Lookup lookupForInference, Lookup lookupForExecution)
         {
             WorkUnitResultCode aggregatedTaskResult = WorkUnitResultCode.Success;
             WorkUnitActionCode finalActionCode = WorkUnitActionCode.Continue;
             WorkUnitResult lastResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
 
-            try
+            int currentTask = 0;
+
+            // Walk through all of the tasks and execute them in order.
+            for (; (currentTask < _target.Children.Count) && !_cancellationToken.IsCancellationRequested; ++currentTask)
             {
-                // Grab the task builder so if cancel is called it will have something to operate on.
-                _currentTaskBuilder = taskBuilder;
+                ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
 
-                int currentTask = 0;
+                // Execute the task.
+                lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
 
-                // Walk through all of the tasks and execute them in order.
-                for (; (currentTask < _target.Children.Count) && !_cancellationToken.IsCancellationRequested; ++currentTask)
+                if (lastResult.ResultCode == WorkUnitResultCode.Failed)
                 {
-                    ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
-
-                    // Execute the task.
-                    lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
-
-                    if (lastResult.ResultCode == WorkUnitResultCode.Failed)
-                    {
-                        aggregatedTaskResult = WorkUnitResultCode.Failed;
-                    }
-                    else if (lastResult.ResultCode == WorkUnitResultCode.Success && aggregatedTaskResult != WorkUnitResultCode.Failed)
-                    {
-                        aggregatedTaskResult = WorkUnitResultCode.Success;
-                    }
-
-                    if (lastResult.ActionCode == WorkUnitActionCode.Stop)
-                    {
-                        finalActionCode = WorkUnitActionCode.Stop;
-                        break;
-                    }
+                    aggregatedTaskResult = WorkUnitResultCode.Failed;
+                }
+                else if (lastResult.ResultCode == WorkUnitResultCode.Success && aggregatedTaskResult != WorkUnitResultCode.Failed)
+                {
+                    aggregatedTaskResult = WorkUnitResultCode.Success;
                 }
 
-                if (_cancellationToken.IsCancellationRequested)
+                if (lastResult.ActionCode == WorkUnitActionCode.Stop)
                 {
-                    aggregatedTaskResult = WorkUnitResultCode.Canceled;
                     finalActionCode = WorkUnitActionCode.Stop;
+                    break;
                 }
             }
-            finally
+
+            if (_cancellationToken.IsCancellationRequested)
             {
-                _currentTaskBuilder = null;
+                aggregatedTaskResult = WorkUnitResultCode.Canceled;
+                finalActionCode = WorkUnitActionCode.Stop;
             }
 
             return new WorkUnitResult(aggregatedTaskResult, finalActionCode, lastResult.Exception);
@@ -923,13 +920,11 @@ namespace Microsoft.Build.BackEnd
         {
             _requestEntry.RequestConfiguration.Project.Targets.TryGetValue(_targetSpecification.TargetName, out _target);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 _target != null,
                 _targetSpecification.ReferenceLocation ?? _requestEntry.RequestConfiguration.Project.ProjectFileLocation,
                 "TargetDoesNotExist",
-                _targetSpecification.TargetName
-                );
+                _targetSpecification.TargetName);
         }
     }
 }

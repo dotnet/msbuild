@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Logging
 {
@@ -23,11 +24,10 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 EventSourceSink testSink = new EventSourceSink();
                 EventRedirectorToSink eventRedirector = new EventRedirectorToSink(-10, testSink);
-            }
-           );
+            });
         }
         /// <summary>
-        /// Verify the correct exception is thrown when the logger is initialized with a null 
+        /// Verify the correct exception is thrown when the logger is initialized with a null
         /// event source.
         /// </summary>
         [Fact]
@@ -36,8 +36,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 EventRedirectorToSink eventRedirector = new EventRedirectorToSink(0, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify an valid inputs work and do not produce an exception
@@ -61,20 +60,13 @@ namespace Microsoft.Build.UnitTests.Logging
             EventRedirectorToSink eventRedirector = new EventRedirectorToSink(5, testSink);
             BuildMessageEventArgs messageEvent = new BuildMessageEventArgs("My message", "Help me keyword", "Sender", MessageImportance.High);
             bool wentInHandler = false;
-            testSink.AnyEventRaised += new AnyEventHandler
-                (
-                  delegate
-                  (
-                    object sender,
-                    BuildEventArgs buildEvent
-                  )
+            testSink.AnyEventRaised += new AnyEventHandler(
+                  delegate (object sender, BuildEventArgs buildEvent)
                   {
                       wentInHandler = true;
                       BuildMessageEventArgs messageEventFromPacket = buildEvent as BuildMessageEventArgs;
                       Assert.Equal(messageEvent, messageEventFromPacket); // "Expected messageEvent to be forwarded to match actually forwarded event"
-                  }
-
-                );
+                  });
 
             ((IEventRedirector)eventRedirector).ForwardEvent(messageEvent);
             Assert.True(wentInHandler); // "Expected to go into event handler"
@@ -91,8 +83,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 EventSourceSink testSink = new EventSourceSink();
                 EventRedirectorToSink eventRedirector = new EventRedirectorToSink(5, testSink);
                 ((IEventRedirector)eventRedirector).ForwardEvent(null);
-            }
-           );
+            });
         }
     }
 }

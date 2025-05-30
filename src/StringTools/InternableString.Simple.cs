@@ -1,10 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Text;
 
 namespace System
@@ -34,12 +31,12 @@ namespace Microsoft.NET.StringTools
     /// <remarks>
     /// This is a simple and inefficient implementation compatible with .NET Framework 3.5.
     /// </remarks>
-    internal ref struct InternableString
+    internal struct InternableString
     {
         /// <summary>
         /// Enumerator for the top-level struct. Enumerates characters of the string.
         /// </summary>
-        public ref struct Enumerator
+        public struct Enumerator
         {
             /// <summary>
             /// The InternableString being enumerated.
@@ -51,7 +48,7 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             private int _charIndex;
 
-            public Enumerator(ref InternableString spanBuilder)
+            public Enumerator(InternableString spanBuilder)
             {
                 _string = spanBuilder;
                 _charIndex = -1;
@@ -60,7 +57,7 @@ namespace Microsoft.NET.StringTools
             /// <summary>
             /// Returns the current character.
             /// </summary>
-            public char Current => (_string._builder == null ? _string.FirstString[_charIndex] : _string._builder[_charIndex]);
+            public readonly char Current => (_string._builder == null ? _string.FirstString[_charIndex] : _string._builder[_charIndex]);
 
             /// <summary>
             /// Moves to the next character.
@@ -91,7 +88,7 @@ namespace Microsoft.NET.StringTools
         /// <summary>
         /// A convenience getter to ensure that we always operate on a non-null string.
         /// </summary>
-        private string FirstString => _firstString ?? string.Empty;
+        private readonly string FirstString => _firstString ?? string.Empty;
 
         /// <summary>
         /// Constructs a new InternableString wrapping the given string.
@@ -119,15 +116,15 @@ namespace Microsoft.NET.StringTools
         /// <summary>
         /// Gets the length of the string.
         /// </summary>
-        public int Length => (_builder == null ? FirstString.Length : _builder.Length);
+        public readonly int Length => (_builder == null ? FirstString.Length : _builder.Length);
 
         /// <summary>
         /// Creates a new enumerator for enumerating characters in this string. Does not allocate.
         /// </summary>
         /// <returns>The enumerator.</returns>
-        public Enumerator GetEnumerator()
+        public readonly Enumerator GetEnumerator()
         {
-            return new Enumerator(ref this);
+            return new Enumerator(this);
         }
 
         /// <summary>
@@ -135,7 +132,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         /// <param name="other">Another string.</param>
         /// <returns>True if this string is equal to <paramref name="other"/>.</returns>
-        public bool Equals(string other)
+        public readonly bool Equals(string other)
         {
             if (other.Length != Length)
             {
@@ -166,7 +163,7 @@ namespace Microsoft.NET.StringTools
         /// System.String in which case the original string is returned.
         /// </summary>
         /// <returns>The string.</returns>
-        public string ExpensiveConvertToString()
+        public readonly string ExpensiveConvertToString()
         {
             // Special case: if we hold just one string, we can directly return it.
             if (_firstString != null)
@@ -181,9 +178,9 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         /// <param name="str">The string to compare to.</param>
         /// <returns>True is this instance wraps the given string.</returns>
-        public bool ReferenceEquals(string str)
+        public readonly bool ReferenceEquals(string str)
         {
-            return Object.ReferenceEquals(str, _firstString);
+            return ReferenceEquals(str, _firstString);
         }
 
         /// <summary>
@@ -201,31 +198,47 @@ namespace Microsoft.NET.StringTools
         /// Implements the simple yet very decently performing djb2 hash function (xor version).
         /// </summary>
         /// <returns>A stable hashcode of the string represented by this instance.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            int hashCode = 5381;
+            uint hash = (5381 << 16) + 5381;
+            bool isOddIndex = false;
 
             if (_firstString != null)
             {
                 foreach (char ch in _firstString)
                 {
-                    unchecked
-                    {
-                        hashCode = hashCode * 33 ^ ch;
-                    }
+                    hash = HashOneCharacter(hash, ch, isOddIndex);
+                    isOddIndex = !isOddIndex;
                 }
             }
             else if (_builder != null)
             {
                 for (int i = 0; i < _builder.Length; i++)
                 {
-                    unchecked
-                    {
-                        hashCode = hashCode * 33 ^ _builder[i];
-                    }
+                    hash = HashOneCharacter(hash, _builder[i], isOddIndex);
+                    isOddIndex = !isOddIndex;
                 }
             }
-            return hashCode;
+            return (int)hash;
+        }
+
+        /// <summary>
+        /// A helper to hash one character.
+        /// </summary>
+        /// <param name="hash">The running hash code.</param>
+        /// <param name="ch">The character to hash.</param>
+        /// <param name="isOddIndex">True if the index of the character in the string is odd.</param>
+        /// <returns></returns>
+        private static uint HashOneCharacter(uint hash, char ch, bool isOddIndex)
+        {
+            if (isOddIndex)
+            {
+                // The hash code was rotated for the previous character, just xor.
+                return hash ^ ((uint)ch << 16);
+            }
+
+            uint rotatedHash = (hash << 5) | (hash >> (32 - 5));
+            return (rotatedHash + hash) ^ ch;
         }
     }
 }

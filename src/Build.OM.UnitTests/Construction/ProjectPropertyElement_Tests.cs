@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -36,19 +37,20 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadPropertyWithChildren()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p>A<B>C<D/></B>E</p>
                         </PropertyGroup>
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectPropertyGroupElement propertyGroup = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
             ProjectPropertyElement property = Helpers.GetFirst(propertyGroup.Properties);
 
             Assert.Equal("p", property.Name);
-            Assert.Equal(@"A<B xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">C<D /></B>E", property.Value);
+            Assert.Equal(@"A<B>C<D /></B>E", property.Value);
         }
 
         /// <summary>
@@ -60,7 +62,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <" + "\u03A3" + @"/>
                         </PropertyGroup>
@@ -68,8 +70,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read property with invalid reserved name
@@ -80,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <PropertyGroup/>
                         </PropertyGroup>
@@ -88,8 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read property with invalid built in name
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <MSBuildProjectFile/>
                         </PropertyGroup>
@@ -108,8 +108,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read property with invalid attribute
@@ -120,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p XX='YY'/>
                         </PropertyGroup>
@@ -128,8 +127,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read property with child element
@@ -140,7 +138,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p>
                                 <X/>
@@ -150,8 +148,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Set property value
@@ -221,8 +218,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectPropertyElement property = GetPropertyXml();
 
                 property.Name = "ImportGroup";
-            }
-           );
+            });
         }
         /// <summary>
         /// Set property value to empty
@@ -249,8 +245,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectPropertyElement property = GetPropertyXml();
 
                 property.Value = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set condition
@@ -273,14 +268,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectPropertyElement GetPropertyXml()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p Condition='c'>v</p>
                         </PropertyGroup>
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectPropertyGroupElement propertyGroup = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
             ProjectPropertyElement property = Helpers.GetFirst(propertyGroup.Properties);
             return property;

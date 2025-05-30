@@ -17,10 +17,20 @@
         <target state="translated">Oluşturma başlatıldı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
+        <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
+        <target state="translated">Koleksiyondaki öğe sayısı hedef dizideki kullanılabilir boşluğun boyutundan (belirtilen dizinden başlayarak) daha büyük.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
         <target state="translated">MSB4008: "{0}" görev derlemesi için "{1}" konumunda çakışan derleme bulundu.</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
+      </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">Tüm özel '{0}' türleri kullanım dışı bırakıldığinden özel olay türü türü desteklenmiyor. Lütfen bunun yerine Extended*EventArgs kullanın. Daha fazla bilgi: https://aka.ms/msbuild/eventargs</target>
+        <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
@@ -31,6 +41,11 @@
         <source>{0} ({1},{2})</source>
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
+      </trans-unit>
+      <trans-unit id="LoggingBeforeTaskInitialization">
+        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
+        <target state="translated">MSB6005: Görev başlatılmadan önce günlüğe yazmaya çalıştı. İleti: {0}</target>
+        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
         <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
@@ -111,8 +126,8 @@
         <note>{StrBegin="MSB5003: "}</note>
       </trans-unit>
       <trans-unit id="Shared.FailedDeletingTempFile">
-        <source>MSB5018: Failed to delete the temporary file "{0}". {1}</source>
-        <target state="translated">MSB5018: "{0}" geçici dosyası silinemedi. {1}</target>
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: "{0}" geçici dosyası silinemedi. {1} {2}</target>
         <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
       <trans-unit id="Shared.InvalidFilespecForTransform">
@@ -307,6 +322,12 @@
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
         <target state="translated">"{1}" değeri atanan "{0}" parametresinde geçersiz yol veya geçersiz dosya karakterleri bulunamaz.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="WildcardResultsInDriveEnumeration">
+        <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
+        <target state="translated">MSB5029: "{0}" dosyasındaki &lt;{1}&gt; öğesinde "{2}" özniteliğinin "{3}" değeri, sürücüdeki tüm dosyaların numaralandırılmasıyla sonuçlanan (büyük olasılıkla bunun olması amaçlanmıyordu) bir joker karakterdir. Başvurulan özelliklerin her zaman tanımlandığını ve projenin ve geçerli çalışma dizininin sürücü kökünde bulunmadığını kontrol edin.</target>
+        <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
+      attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>
     </body>
   </file>

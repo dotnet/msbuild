@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -55,7 +57,7 @@ namespace Microsoft.Build.Evaluation
         /// Retrieves the toolsets.
         /// </summary>
         /// <comments>
-        /// ValueCollection is already read-only. 
+        /// ValueCollection is already read-only.
         /// </comments>
         public ICollection<Toolset> Toolsets => _toolsets.Values;
 
@@ -64,7 +66,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
             _toolsets.TryGetValue(toolsVersion, out var toolset);
 
             return toolset;
@@ -94,8 +96,8 @@ namespace Microsoft.Build.Evaluation
         #endregion
 
         /// <summary>
-        /// Populate Toolsets with a dictionary of (toolset version, Toolset) 
-        /// using information from the registry and config file, if any.  
+        /// Populate Toolsets with a dictionary of (toolset version, Toolset)
+        /// using information from the registry and config file, if any.
         /// </summary>
         private void InitializeToolsetCollection(PropertyDictionary<ProjectPropertyInstance> environmentProperties, PropertyDictionary<ProjectPropertyInstance> globalProperties, ToolsetDefinitionLocations toolsetDefinitionLocations)
         {

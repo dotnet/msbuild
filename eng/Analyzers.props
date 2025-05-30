@@ -1,7 +1,0 @@
-<Project>
-  <PropertyGroup>
-    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
-    <!-- Disable analyzers in sourcebuild -->
-    <EnableAnalyzers Condition="'$(DotNetBuildFromSource)' == 'true'">false</EnableAnalyzers>
-  </PropertyGroup>
-</Project>

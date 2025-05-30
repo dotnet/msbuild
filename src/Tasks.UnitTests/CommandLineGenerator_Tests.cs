@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,9 +9,11 @@ using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.Build.Tasks.Xaml;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CommandLineGenerator_Tests
+    public sealed class CommandLineGenerator_Tests
     {
         private const string testXamlFile = @"<?xml version='1.0' encoding='utf-8'?>
 <Rule Name='mem' ToolName='mem.exe' PageTemplate='tool' SwitchPrefix='/' Order='10' xmlns='clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' xmlns:sys='clr-namespace:System;assembly=mscorlib'>
@@ -96,8 +98,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests a command line generated from all of the specified switch values.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void BasicCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -109,8 +109,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests a command line generated from a specific template
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void TemplatedCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -123,8 +121,6 @@ namespace Microsoft.Build.UnitTests
         /// Tests a command line generated from a specific template is not case sensitive on the parameter names.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void TemplateParametersAreCaseInsensitive()
         {
             CommandLineGenerator generator = CreateGenerator();
@@ -135,7 +131,6 @@ namespace Microsoft.Build.UnitTests
 
         private CommandLineGenerator CreateGenerator()
         {
-#if !MONO
             Rule rule = XamlReader.Parse(testXamlFile) as Rule;
 
             Dictionary<string, Object> switchValues = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -158,12 +153,9 @@ namespace Microsoft.Build.UnitTests
 
             CommandLineGenerator generator = new CommandLineGenerator(rule, switchValues);
             return generator;
-#else
-            return new CommandLineGenerator(new Rule(), new Dictionary<string, object>());
-#endif
         }
 
-        private class TaskItem : ITaskItem
+        private sealed class TaskItem : ITaskItem
         {
             public TaskItem(string itemSpec)
             {

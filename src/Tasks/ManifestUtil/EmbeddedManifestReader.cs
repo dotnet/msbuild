@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -44,7 +45,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             IntPtr hResInfo = NativeMethods.FindResource(hModule, pName, NativeMethods.RT_MANIFEST);
             if (hResInfo == IntPtr.Zero)
             {
-                return false; //continue looking
+                return false; // continue looking
             }
             IntPtr hResource = NativeMethods.LoadResource(hModule, hResInfo);
             NativeMethods.LockResource(hResource);
@@ -53,12 +54,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             Marshal.Copy(hResource, buffer, 0, buffer.Length);
             _manifest = new MemoryStream(buffer, false);
-            return false; //found what we are looking for
+            return false; // found what we are looking for
         }
 
         public static Stream Read(string path)
         {
-            if (path == null) throw new ArgumentNullException(nameof(path));
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
 
             if (!path.EndsWith(".manifest", StringComparison.Ordinal) && !path.EndsWith(".dll", StringComparison.Ordinal))
             {
@@ -69,7 +73,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
             int t1 = Environment.TickCount;
             EmbeddedManifestReader r = new EmbeddedManifestReader(path);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "EmbeddedManifestReader.Read t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"EmbeddedManifestReader.Read t={Environment.TickCount - t1}");
             return r._manifest;
         }
     }

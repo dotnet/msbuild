@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,6 +9,8 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     public class AssignProjectConfiguration : ResolveProjectBase
@@ -16,7 +18,7 @@ namespace Microsoft.Build.Tasks
         #region Properties
 
         /// <summary>
-        /// A special XML string containing a project configuration for each project - we need to simply 
+        /// A special XML string containing a project configuration for each project - we need to simply
         /// match the projects and assign the appropriate configuration names to them
         /// </summary>
         public string SolutionConfigurationContents { get; set; }
@@ -29,7 +31,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// String containing a semicolon-delimited list of mappings from the platform names used
-        /// by most VS types to those used by .vcxprojs.  
+        /// by most VS types to those used by .vcxprojs.
         /// </summary>
         /// <remarks>
         /// E.g.  "AnyCPU=Win32"
@@ -54,7 +56,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// String containing a semicolon-delimited list of mappings from .vcxproj platform names
-        /// to the platform names use by most other VS project types.  
+        /// to the platform names use by most other VS project types.
         /// </summary>
         /// <remarks>
         /// E.g.  "Win32=AnyCPU"
@@ -113,12 +115,12 @@ namespace Microsoft.Build.Tasks
         public bool OnlyReferenceAndBuildProjectsEnabledInSolutionConfiguration { get; set; } = false;
 
         // Whether to set the project reference's GlobalPropertiesToRemove metadata to contain
-        // Configuration and Platform. 
+        // Configuration and Platform.
 
         /// <summary>
         /// Whether to set the GlobalPropertiesToRemove metadata on the project reference such that
-        /// on an MSBuild call, the Configuration and Platform metadata will be unset, allowing the 
-        /// child project to build in its default configuration / platform. 
+        /// on an MSBuild call, the Configuration and Platform metadata will be unset, allowing the
+        /// child project to build in its default configuration / platform.
         /// </summary>
         public bool ShouldUnsetParentConfigurationAndPlatform { get; set; } = false;
 
@@ -150,13 +152,10 @@ namespace Microsoft.Build.Tasks
         private const string attrFullConfiguration = "FullConfiguration";
         private const string buildReferenceMetadataName = "BuildReference";
         private const string referenceOutputAssemblyMetadataName = "ReferenceOutputAssembly";
-        private const string buildProjectInSolutionAttribute = "BuildProjectInSolution";
         private const string attrConfiguration = "Configuration";
         private const string attrPlatform = "Platform";
         private const string attrSetConfiguration = "SetConfiguration";
         private const string attrSetPlatform = "SetPlatform";
-
-        private static readonly char[] s_configPlatformSeparator = { '|' };
 
         private IDictionary<string, string> _vcxToDefaultMap;
         private IDictionary<string, string> _defaultToVcxMap;
@@ -206,9 +205,9 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        // If the reference was unresolved, we want to undefine the Configuration and Platform 
+                        // If the reference was unresolved, we want to undefine the Configuration and Platform
                         // global properties, so that the project will build using its default Configuration and
-                        // Platform rather than that of its parent. 
+                        // Platform rather than that of its parent.
                         if (ShouldUnsetParentConfigurationAndPlatform)
                         {
                             string globalPropertiesToRemove = projectRef.GetMetadata("GlobalPropertiesToRemove");
@@ -252,9 +251,9 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
-        
+
         /// <summary>
-        /// Given a project reference task item and an XML document containing project configurations, 
+        /// Given a project reference task item and an XML document containing project configurations,
         /// find the configuration for that task item.
         /// </summary>
         /// <returns>true if resolved successfully</returns>
@@ -286,14 +285,14 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_defaultToVcxMap.TryGetValue(CurrentProjectPlatform, out transformedPlatform))
                     {
-                        projectConfiguration = CurrentProjectConfiguration + s_configPlatformSeparator[0] + transformedPlatform;
+                        projectConfiguration = CurrentProjectConfiguration + SolutionConfiguration.ConfigPlatformSeparator[0] + transformedPlatform;
                     }
                 }
                 else
                 {
                     if (_vcxToDefaultMap.TryGetValue(CurrentProjectPlatform, out transformedPlatform))
                     {
-                        projectConfiguration = CurrentProjectConfiguration + s_configPlatformSeparator[0] + transformedPlatform;
+                        projectConfiguration = CurrentProjectConfiguration + SolutionConfiguration.ConfigPlatformSeparator[0] + transformedPlatform;
                     }
                 }
             }
@@ -305,7 +304,7 @@ namespace Microsoft.Build.Tasks
                 resolvedProjectWithConfiguration = projectRef;
                 resolvedProjectWithConfiguration.SetMetadata(attrFullConfiguration, projectConfiguration);
 
-                string[] configurationPlatformParts = projectConfiguration.Split(s_configPlatformSeparator);
+                string[] configurationPlatformParts = projectConfiguration.Split(SolutionConfiguration.ConfigPlatformSeparator);
                 resolvedProjectWithConfiguration.SetMetadata(attrSetConfiguration, "Configuration=" + configurationPlatformParts[0]);
                 resolvedProjectWithConfiguration.SetMetadata(attrConfiguration, configurationPlatformParts[0]);
 
@@ -334,14 +333,14 @@ namespace Microsoft.Build.Tasks
         {
             if (projectConfigurationElement != null && resolvedProjectWithConfiguration != null && onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)
             {
-                // The value of the specified attribute. An empty string is returned if a matching attribute is not found or if the attribute does not have a specified or default value. 
-                string buildProjectInSolution = projectConfigurationElement.GetAttribute(buildProjectInSolutionAttribute);
+                // The value of the specified attribute. An empty string is returned if a matching attribute is not found or if the attribute does not have a specified or default value.
+                string buildProjectInSolution = projectConfigurationElement.GetAttribute(SolutionConfiguration.BuildProjectInSolutionAttribute);
 
-                // We could not parse out what was in the attribute, act as if it was not set in the first place. 
+                // We could not parse out what was in the attribute, act as if it was not set in the first place.
                 if (bool.TryParse(buildProjectInSolution, out bool buildProject))
                 {
-                    // If we do not want to build references disabled in the solution configuration blob   
-                    // and the solution configuration indicates the build for this project is disabled 
+                    // If we do not want to build references disabled in the solution configuration blob
+                    // and the solution configuration indicates the build for this project is disabled
                     // We need to set the BuildReferenceMetadata to false and the ReferenceOutputAssembly to false (if they are not already set to anything)
                     if (!buildProject)
                     {
@@ -363,8 +362,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given the contents of VcxToDefaultPlatformMapping and DefaultToVcxPlatformMapping properties, 
-        /// fill out the maps that will be used to translate between the two.  
+        /// Given the contents of VcxToDefaultPlatformMapping and DefaultToVcxPlatformMapping properties,
+        /// fill out the maps that will be used to translate between the two.
         /// </summary>
         private void SetupDefaultPlatformMappings()
         {
@@ -385,7 +384,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given a dictionary to populate and a string of the format "a=b;c=d", populate the 
+        /// Given a dictionary to populate and a string of the format "a=b;c=d", populate the
         /// dictionary with the given pairs.
         /// </summary>
         private void PopulateMappingDictionary(IDictionary<string, string> map, string mappingList)

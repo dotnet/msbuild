@@ -1,11 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System.IO;
-using System.Xml;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Construction;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -22,7 +21,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Null(project.ItemGroups.GetEnumerator().Current);
+            Assert.Empty(project.ItemGroups);
         }
 
         /// <summary>
@@ -32,12 +31,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadEmptyItemGroup()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup/>
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 
             Assert.Equal(0, Helpers.Count(group.Items));
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadItemGroupTwoItems()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'/>
                             <i Include='i2'/>
@@ -58,7 +58,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectItemGroupElement group = (ProjectItemGroupElement)Helpers.GetFirst(project.Children);
 
             var items = Helpers.MakeList(group.Items);

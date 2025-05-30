@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,10 +11,12 @@ using Microsoft.Build.Shared;
 
 using ObjectModel = System.Collections.ObjectModel;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
-    /// Aggregation of a set of properties that correspond to a particular sub-toolset.  
+    /// Aggregation of a set of properties that correspond to a particular sub-toolset.
     /// </summary>
     [DebuggerDisplay("SubToolsetVersion={SubToolsetVersion} #Properties={_properties.Count}")]
     public class SubToolset : ITranslatable
@@ -26,15 +28,15 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// The properties defined by the subtoolset.
-        /// </summary> 
+        /// </summary>
         private PropertyDictionary<ProjectPropertyInstance> _properties;
 
         /// <summary>
-        /// Constructor that associates a set of properties with a sub-toolset version.  
+        /// Constructor that associates a set of properties with a sub-toolset version.
         /// </summary>
         internal SubToolset(string subToolsetVersion, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion, nameof(subToolsetVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(subToolsetVersion);
 
             _subToolsetVersion = subToolsetVersion;
             _properties = properties;
@@ -60,7 +62,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// The properties that correspond to this particular sub-toolset. 
+        /// The properties that correspond to this particular sub-toolset.
         /// </summary>
         public IDictionary<string, ProjectPropertyInstance> Properties
         {

@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -12,17 +14,13 @@ namespace Microsoft.Build.Tasks
     /// Stores timestamps of COM components processed in the last run. The problem here is that installing/uninstalling
     /// COM components does not update their timestamps with the current time (for a good reason). So if you revert to
     /// an earlier revision of a COM component, its timestamp can go back in time and we still need to regenerate its
-    /// wrapper. So in ResolveComReference we compare the stored timestamp with the current component timestamp, and if 
+    /// wrapper. So in ResolveComReference we compare the stored timestamp with the current component timestamp, and if
     /// they are different, we regenerate the wrapper.
-    /// 
-    /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class ResolveComReferenceCache : StateFileBase, ITranslatable
     {
         /// <summary>
-        /// Component timestamps. 
+        /// Component timestamps.
         /// Key: Component path on disk
         /// Value: DateTime struct
         /// </summary>
@@ -34,7 +32,7 @@ namespace Microsoft.Build.Tasks
         /// indicates whether the cache contents have changed since it's been created
         /// </summary>
         internal bool Dirty => _dirty;
-        
+
         [NonSerialized]
         private bool _dirty;
 
@@ -43,8 +41,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ResolveComReferenceCache(string tlbImpPath, string axImpPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath, nameof(tlbImpPath));
-            ErrorUtilities.VerifyThrowArgumentNull(axImpPath, nameof(axImpPath));
+            ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath);
+            ErrorUtilities.VerifyThrowArgumentNull(axImpPath);
 
             tlbImpLocation = tlbImpPath;
             axImpLocation = axImpPath;

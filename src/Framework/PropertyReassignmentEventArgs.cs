@@ -1,7 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -37,12 +41,47 @@ namespace Microsoft.Build.Framework
             string message,
             string helpKeyword = null,
             string senderName = null,
-            MessageImportance importance = MessageImportance.Low) : base(message, helpKeyword, senderName, importance)
+            MessageImportance importance = MessageImportance.Low)
+            : base(message, helpKeyword, senderName, importance)
         {
-            this.PropertyName = propertyName;
-            this.PreviousValue = previousValue;
-            this.NewValue = newValue;
-            this.Location = location;
+            PropertyName = propertyName;
+            PreviousValue = previousValue;
+            NewValue = newValue;
+            Location = location;
+        }
+
+        /// <summary>
+        /// Creates an instance of the <see cref="PropertyReassignmentEventArgs"/> class.
+        /// </summary>
+        /// <param name="propertyName">The name of the property whose value was reassigned.</param>
+        /// <param name="previousValue">The previous value of the reassigned property.</param>
+        /// <param name="newValue">The new value of the reassigned property.</param>
+        /// <param name="location">The property location (XML, command line, etc).</param>
+        /// <param name="file">The file associated with the event.</param>
+        /// <param name="line">The line number (0 if not applicable).</param>
+        /// <param name="column">The column number (0 if not applicable).</param>
+        /// <param name="message">The message of the property.</param>
+        /// <param name="helpKeyword">The help keyword.</param>
+        /// <param name="senderName">The sender name of the event.</param>
+        /// <param name="importance">The importance of the message.</param>
+        public PropertyReassignmentEventArgs(
+            string propertyName,
+            string previousValue,
+            string newValue,
+            string location,
+            string file,
+            int line,
+            int column,
+            string message,
+            string helpKeyword = null,
+            string senderName = null,
+            MessageImportance importance = MessageImportance.Low)
+            : base(subcategory: null, code: null, file: file, lineNumber: line, columnNumber: column, 0, 0, message, helpKeyword, senderName, importance)
+        {
+            PropertyName = propertyName;
+            PreviousValue = previousValue;
+            NewValue = newValue;
+            Location = location;
         }
 
         /// <summary>
@@ -71,11 +110,32 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, Location);
+                    string formattedLocation = File == null ? Location : $"{File} ({LineNumber},{ColumnNumber})";
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("PropertyReassignment", PropertyName, NewValue, PreviousValue, formattedLocation);
                 }
 
                 return RawMessage;
             }
+        }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+
+            writer.WriteOptionalString(PropertyName);
+            writer.WriteOptionalString(NewValue);
+            writer.WriteOptionalString(PreviousValue);
+            writer.WriteOptionalString(Location);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+
+            PropertyName = reader.ReadOptionalString();
+            NewValue = reader.ReadOptionalString();
+            PreviousValue = reader.ReadOptionalString();
+            Location = reader.ReadOptionalString();
         }
     }
 }

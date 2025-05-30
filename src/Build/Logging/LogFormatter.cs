@@ -1,16 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
 using System.Globalization;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
     /// Utility helper functions for formatting logger output.
     /// </summary>
-    static internal class LogFormatter
+    internal static class LogFormatter
     {
         /// <summary>
         /// Formats the timestamp in the log as  Hours:Minutes:Seconds.Milliseconds
@@ -18,7 +20,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal static string FormatLogTimeStamp(DateTime timeStamp)
         {
             // From http://msdn2.microsoft.com/en-us/library/8kb3ddd4.aspx
-            // Custom DateTime Format Strings  
+            // Custom DateTime Format Strings
             //
             // HH Represents the hour as a number from 00 through 23, that is,
             //    the hour as represented by a zero-based 24-hour clock that counts the hours since midnight.
@@ -49,7 +51,7 @@ namespace Microsoft.Build.BackEnd.Logging
             string rawTime = t.ToString(); // Timespan is a value type and can't be null.
             int rawTimeLength = rawTime.Length;
             int prettyLength = System.Math.Min(11, rawTimeLength);
-            return t.ToString().Substring(0, prettyLength);
+            return rawTime.Substring(0, prettyLength);
         }
     }
 }

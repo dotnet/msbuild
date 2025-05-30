@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,18 +7,19 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_XAMLTASKFACTORY
 
-    using Microsoft.Build.Tasks.Xaml;
-    using System.CodeDom.Compiler;
     using System.CodeDom;
+    using System.CodeDom.Compiler;
     using System.IO;
     using System.Reflection;
     using System.Text;
     using System.Threading;
-    using System.Xml;
+    using Microsoft.Build.Tasks.Xaml;
 
     /// <summary>
     /// The task factory provider for XAML tasks.
@@ -70,7 +71,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (_taskType == null)
                 {
-                    _taskType = _taskAssembly.GetType(String.Concat(XamlTaskNamespace, ".", TaskName), true);
+                    _taskType = _taskAssembly.GetType($"{XamlTaskNamespace}.{TaskName}", true);
                 }
 
                 return _taskType;
@@ -83,8 +84,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowArgumentNull(taskParameters, nameof(taskParameters));
+            ErrorUtilities.VerifyThrowArgumentNull(taskName);
+            ErrorUtilities.VerifyThrowArgumentNull(taskParameters);
 
             var log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
             {
@@ -111,27 +112,25 @@ namespace Microsoft.Build.Tasks
 
             CodeCompileUnit dom = generator.GenerateCode();
 
-            string pathToMSBuildBinaries = ToolLocationHelper.GetPathToBuildTools(ToolLocationHelper.CurrentToolsVersion);
+            // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
+            string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
-            // create the code generator options    
+            // create the code generator options
             // Since we are running msbuild 12.0 these had better load.
-            var compilerParameters = new CompilerParameters
-            (
-                new[]
-                {
+            var compilerParameters = new CompilerParameters(
+                [
                     "System.dll",
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Framework.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"),
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
-                }
-            )
+                ])
             {
                 GenerateInMemory = true,
                 TreatWarningsAsErrors = false
             };
 
             // create the code provider
-            var codegenerator = CodeDomProvider.CreateProvider("cs");
+            using var codegenerator = CodeDomProvider.CreateProvider("cs");
             CompilerResults results;
             bool debugXamlTask = Environment.GetEnvironmentVariable("MSBUILDWRITEXAMLTASK") == "1";
             if (debugXamlTask)
@@ -196,7 +195,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="taskFactoryLoggingHost">The task factory logging host will log messages in the context of the task.</param>
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
-            string fullTaskName = String.Concat(TaskNamespace, ".", TaskName);
+            string fullTaskName = $"{TaskNamespace}.{TaskName}";
             return (ITask)_taskAssembly.CreateInstance(fullTaskName);
         }
 
@@ -211,7 +210,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
         }
 
         /// <summary>
@@ -243,7 +242,7 @@ namespace Microsoft.Build.Tasks
     public sealed class XamlTaskFactory : ITaskFactory
     {
         public string FactoryName => "XamlTaskFactory";
-    
+
         public Type TaskType { get; } = null;
 
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
@@ -253,7 +252,7 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
-            
+
             log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(XamlTaskFactory));
 
             return false;

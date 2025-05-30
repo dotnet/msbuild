@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Xml;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -41,26 +43,25 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (dashPosition != -1)
+                if (dashPosition >= 0)
                 {
                     // This is a version range.
-                    OldVersionLow = new Version(oldVersion.Substring(0, dashPosition));
-                    OldVersionHigh = new Version(oldVersion.Substring(dashPosition + 1));
+#if NET
+                    OldVersionLow = Version.Parse(oldVersion.AsSpan(0, dashPosition));
+                    OldVersionHigh = Version.Parse(oldVersion.AsSpan(dashPosition + 1));
+#else
+                    OldVersionLow = Version.Parse(oldVersion.Substring(0, dashPosition));
+                    OldVersionHigh = Version.Parse(oldVersion.Substring(dashPosition + 1));
+#endif
                 }
                 else
                 {
                     // This is a single version.
-                    OldVersionLow = new Version(oldVersion);
-                    OldVersionHigh = new Version(oldVersion);
+                    OldVersionLow = OldVersionHigh = new Version(oldVersion);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidOldVersionAttribute", e.Message);
             }
 
@@ -73,13 +74,8 @@ namespace Microsoft.Build.Tasks
             {
                 NewVersion = new Version(newVersionAttribute);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ErrorUtilities.ThrowArgument(e, "AppConfig.InvalidNewVersionAttribute", e.Message);
             }
         }

@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using Microsoft.Build.Execution;
 using System.Threading.Tasks;
+using Microsoft.Build.Execution;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -13,14 +15,14 @@ namespace Microsoft.Build.BackEnd
     internal interface ITargetBuilderCallback : IRequestBuilderCallback
     {
         /// <summary>
-        /// Invokes the specified targets using Dev9 behavior.  
+        /// Invokes the specified targets using Dev9 behavior.
         /// </summary>
         /// <param name="targets">The targets to build.</param>
         /// <param name="continueOnError">True to continue building the remaining targets if one fails.</param>
         /// <param name="referenceLocation">The <see cref="ElementLocation"/> of the reference.</param>
         /// <returns>The results for each target.</returns>
         /// <remarks>
-        /// The target is run using the data context of the Project, rather than the data context 
+        /// The target is run using the data context of the Project, rather than the data context
         /// of the current target.  This has the following effects:
         /// 1. Data visible to the CALLING target at the time it was first invoked is the only
         ///    data which the CALLED target can see.  No changes made between the time the CALLING

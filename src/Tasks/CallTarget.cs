@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -25,7 +27,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <value>Array of target names.</value>
         /// <remarks>
-        /// This is a required parameter. If you want to build the 
+        /// This is a required parameter. If you want to build the
         /// default targets, use the &lt;MSBuild&gt; task and pass in Projects=$(MSBuildProjectFile).
         /// </remarks>
         public string[] Targets { get; set; }
@@ -66,16 +68,15 @@ namespace Microsoft.Build.Tasks
             }
 
             // This is a list of string[].  That is, each element in the list is a string[].  Each
-            // string[] represents a set of target names to build.  Depending on the value 
-            // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
+            // string[] represents a set of target names to build.  Depending on the value
+            // of the RunEachTargetSeparately parameter, we each just call the engine to run all
             // the targets together, or we call the engine separately for each target.
             List<string[]> targetLists = MSBuild.CreateTargetLists(Targets, RunEachTargetSeparately);
 
             var singleProject = new List<ITaskItem>(1) { null };
 
             // Build the specified targets in the current project.
-            return MSBuild.ExecuteTargets
-                (
+            return MSBuild.ExecuteTargets(
                 singleProject,  // project = null (current project)
                 null,           // propertiesTable = null
                 null,           // undefineProperties
@@ -87,8 +88,7 @@ namespace Microsoft.Build.Tasks
                 _targetOutputs,
                 false,
                 null,           // toolsVersion = null
-                null            // no need for execution context as this is always in context of current project  
-                );
+                null);            // no need for execution context as this is always in context of current project   
         }
 
         #endregion

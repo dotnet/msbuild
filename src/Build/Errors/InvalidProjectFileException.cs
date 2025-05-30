@@ -1,13 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
+using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
-
+using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Exceptions
 {
@@ -19,7 +22,7 @@ namespace Microsoft.Build.Exceptions
     // promise to never change the type's fields i.e. the type is immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both forward and backward compatibility
     [Serializable]
-    public sealed class InvalidProjectFileException : Exception
+    public sealed class InvalidProjectFileException : BuildExceptionBase
     {
         #region Basic constructors
 
@@ -77,11 +80,14 @@ namespace Microsoft.Build.Exceptions
         #region Serialization (update when adding new class members)
 
         /// <summary>
-        /// Protected constructor used for (de)serialization. 
+        /// Protected constructor used for (de)serialization.
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
         /// <param name="info"></param>
         /// <param name="context"></param>
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
         private InvalidProjectFileException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
@@ -105,7 +111,10 @@ namespace Microsoft.Build.Exceptions
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
 #endif
-        override public void GetObjectData(SerializationInfo info, StreamingContext context)
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
+        public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             base.GetObjectData(info, context);
 
@@ -118,6 +127,35 @@ namespace Microsoft.Build.Exceptions
             info.AddValue("errorCode", errorCode);
             info.AddValue("helpKeyword", helpKeyword);
             info.AddValue("hasBeenLogged", hasBeenLogged);
+        }
+
+        protected override IDictionary<string, string> FlushCustomState()
+        {
+            return new Dictionary<string, string>()
+            {
+                { nameof(file), file },
+                { nameof(lineNumber), lineNumber.ToString() },
+                { nameof(columnNumber), columnNumber.ToString() },
+                { nameof(endLineNumber), endLineNumber.ToString() },
+                { nameof(endColumnNumber), endColumnNumber.ToString() },
+                { nameof(errorSubcategory), errorSubcategory },
+                { nameof(errorCode), errorCode },
+                { nameof(helpKeyword), helpKeyword },
+                { nameof(hasBeenLogged), hasBeenLogged.ToString() },
+            };
+        }
+
+        protected override void InitializeCustomState(IDictionary<string, string> state)
+        {
+            file = state[nameof(file)];
+            lineNumber = int.Parse(state[nameof(lineNumber)]);
+            columnNumber = int.Parse(state[nameof(columnNumber)]);
+            endLineNumber = int.Parse(state[nameof(endLineNumber)]);
+            endColumnNumber = int.Parse(state[nameof(endColumnNumber)]);
+            errorSubcategory = state[nameof(errorSubcategory)];
+            errorCode = state[nameof(errorCode)];
+            helpKeyword = state[nameof(helpKeyword)];
+            hasBeenLogged = bool.Parse(state[nameof(hasBeenLogged)]);
         }
 
         #endregion
@@ -137,8 +175,7 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorSubcategory">Error sub-category that describes the error (can be null).</param>
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
-        public InvalidProjectFileException
-        (
+        public InvalidProjectFileException(
             string projectFile,
             int lineNumber,
             int columnNumber,
@@ -147,8 +184,7 @@ namespace Microsoft.Build.Exceptions
             string message,
             string errorSubcategory,
             string errorCode,
-            string helpKeyword
-        ) :
+            string helpKeyword) :
             this(projectFile, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, errorSubcategory, errorCode, helpKeyword, null)
         {
         }
@@ -167,8 +203,7 @@ namespace Microsoft.Build.Exceptions
         /// <param name="errorCode">The error code (can be null).</param>
         /// <param name="helpKeyword">The F1-help keyword for the host IDE (can be null).</param>
         /// <param name="innerException">Any inner exception. May be null.</param>
-        internal InvalidProjectFileException
-        (
+        internal InvalidProjectFileException(
             string projectFile,
             int lineNumber,
             int columnNumber,
@@ -178,11 +213,10 @@ namespace Microsoft.Build.Exceptions
             string errorSubcategory,
             string errorCode,
             string helpKeyword,
-            Exception innerException
-        ) : base(message, innerException)
+            Exception innerException) : base(message, innerException)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
-            ErrorUtilities.VerifyThrowArgumentLength(message, nameof(message));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile);
+            ErrorUtilities.VerifyThrowArgumentLength(message);
 
             // Try to helpfully provide a full path if possible, but do so robustly.
             // This exception might be because the path was invalid!
@@ -336,7 +370,7 @@ namespace Microsoft.Build.Exceptions
         }
 
         /// <summary>
-        /// Whether the exception has already been logged. Allows the exception to be logged at the 
+        /// Whether the exception has already been logged. Allows the exception to be logged at the
         /// most appropriate location, but continue to be propagated.
         /// </summary>
         public bool HasBeenLogged

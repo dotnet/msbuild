@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Markup;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework.XamlTypes
 {
@@ -42,7 +44,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// The name of this <see cref="EnumValue"/>. 
+        /// The name of this <see cref="EnumValue"/>.
         /// </summary>
         /// <remarks>
         /// This field is mandatory and culture invariant.
@@ -54,10 +56,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// The name that could be used by a prospective UI client to display this <see cref="EnumValue"/>. 
+        /// The name that could be used by a prospective UI client to display this <see cref="EnumValue"/>.
         /// </summary>
         /// <remarks>
-        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same 
+        /// This field is optional and is culture sensitive. When this property is not set, it is assigned the same
         /// value as the <see cref="Name"/> property (and hence, would not be localized).
         /// </remarks>
         [Localizable(true)]
@@ -75,9 +77,9 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Description of this <see cref="BaseProperty"/> for use by a prospective UI client. 
+        /// Description of this <see cref="BaseProperty"/> for use by a prospective UI client.
         /// </summary>
-        /// <remarks> 
+        /// <remarks>
         /// This field is optional and is culture sensitive.
         /// </remarks>
         [Localizable(true)]
@@ -88,7 +90,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Help information for this <see cref="EnumValue"/>. 
+        /// Help information for this <see cref="EnumValue"/>.
         /// </summary>
         /// <remarks>
         /// Maybe used to specify a help URL. This field
@@ -108,7 +110,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// This field is optional and culture invariant.
         /// </remarks>
         /// <example> The VC compiler has an <see cref="EnumProperty"/> named <c>Optimization</c>used to specify the desired optimization type. All the
-        /// admissible values for this property have switches, e.g. <c>Disabled</c> (switch = <c>Od</c>), "MinimumSize" (switch = <c>O1</c>), 
+        /// admissible values for this property have switches, e.g. <c>Disabled</c> (switch = <c>Od</c>), "MinimumSize" (switch = <c>O1</c>),
         /// etc. </example>
         public string Switch
         {
@@ -130,7 +132,7 @@ namespace Microsoft.Build.Framework.XamlTypes
 
         /// <summary>
         /// Tells if this <see cref="EnumValue"/> is the default value for the associated
-        /// <see cref="EnumProperty"/>. 
+        /// <see cref="EnumProperty"/>.
         /// </summary>
         /// <remarks>
         /// This field is optional and the default value for this
@@ -143,7 +145,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Additional attributes of this <see cref="EnumValue"/>. 
+        /// Additional attributes of this <see cref="EnumValue"/>.
         /// </summary>
         /// <remarks>
         /// This can be used as a grab bag of additional metadata of this value that are not
@@ -159,7 +161,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// List of arguments for this <see cref="EnumValue"/>. 
+        /// List of arguments for this <see cref="EnumValue"/>.
         /// </summary>
         /// <remarks>
         /// This field is optional.
@@ -171,6 +173,6 @@ namespace Microsoft.Build.Framework.XamlTypes
             set;
         }
 
-        #endregion 
+        #endregion
     }
 }

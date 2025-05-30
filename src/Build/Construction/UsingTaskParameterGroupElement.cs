@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Build.Collections;
+using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
-
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -33,7 +32,7 @@ namespace Microsoft.Build.Construction
         internal UsingTaskParameterGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
             VerifyCorrectParent(parent);
         }
 
@@ -46,7 +45,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -58,7 +57,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any contained parameters.
         /// </summary>
-        public ICollection<ProjectUsingTaskParameterElement> Parameters => new ReadOnlyCollection<ProjectUsingTaskParameterElement>(Children.OfType<ProjectUsingTaskParameterElement>());
+        public ICollection<ProjectUsingTaskParameterElement> Parameters => GetChildrenOfType<ProjectUsingTaskParameterElement>();
 
         /// <summary>
         /// This does not allow conditions, so it should not be called.
@@ -78,7 +77,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskParameterElement AddParameter(string name, string output, string required, string parameterType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             ProjectUsingTaskParameterElement newParameter = ContainingProject.CreateUsingTaskParameterElement(name, output, required, parameterType);
             AppendChild(newParameter);
@@ -129,7 +128,7 @@ namespace Microsoft.Build.Construction
             ProjectUsingTaskElement parentUsingTask = parent as ProjectUsingTaskElement;
             ErrorUtilities.VerifyThrowInvalidOperation(parentUsingTask != null, "OM_CannotAcceptParent");
 
-            // Now since there is not goign to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and 
+            // Now since there is not goign to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {

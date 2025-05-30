@@ -1,15 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
 using System.Xaml;
-using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using XamlTypes = Microsoft.Build.Framework.XamlTypes;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Xaml
 {
@@ -87,8 +89,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         public bool Parse(string contentOrFile, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile, nameof(contentOrFile));
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
+            ErrorUtilities.VerifyThrowArgumentLength(contentOrFile);
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
 
             bool parseSuccessful = ParseAsContentOrFile(contentOrFile, desiredRule);
             if (!parseSuccessful)
@@ -124,15 +126,12 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 isRootedPath = Path.IsPathRooted(contentOrFile);
                 if (!isRootedPath)
-                    maybeFullPath = Path.GetFullPath(contentOrFile);
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
                 {
-                    throw;
+                    maybeFullPath = Path.GetFullPath(contentOrFile);
                 }
-
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
                 // We will get an exception if the contents are not a path (for instance, they are actual XML.)
             }
 
@@ -141,31 +140,45 @@ namespace Microsoft.Build.Tasks.Xaml
                 // valid *absolute* file path
 
                 if (!FileSystems.Default.FileExists(contentOrFile))
+                {
                     throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", contentOrFile));
+                }
 
-                return ParseXamlDocument(new StreamReader(contentOrFile), desiredRule);
+                using var sr = new StreamReader(contentOrFile);
+
+                return ParseXamlDocument(sr, desiredRule);
             }
 
             // On Windows, xml content string is not a valid path, so, maybeFullPath == null
             // On Unix, xml content string would be a valid path, so, maybeFullPath != null
             if (maybeFullPath == null)
+            {
                 // Unable to convert to a path, parse as XML
                 return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
+            }
 
             if (FileSystems.Default.FileExists(maybeFullPath))
+            {
                 // file found, parse as a file
-                return ParseXamlDocument(new StreamReader(maybeFullPath), desiredRule);
+                using var sr = new StreamReader(maybeFullPath);
+
+                return ParseXamlDocument(sr, desiredRule);
+            }
 
             // @maybeFullPath is either:
             //  - a non-existent fullpath
             //  - or xml content with the current dir prepended (like "/foo/bar/<abc .. />"),
             //    but not on Windows
             //
-            // On Windows, this means that @contentOrFile is really a non-existant file name
+            // On Windows, this means that @contentOrFile is really a non-existent file name
             if (NativeMethodsShared.IsWindows)
+            {
                 throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Xaml.RuleFileNotFound", maybeFullPath));
+            }
             else // On !Windows, try parsing as XML
+            {
                 return ParseXamlDocument(new StringReader(contentOrFile), desiredRule);
+            }
         }
 
         /// <summary>
@@ -173,8 +186,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXamlDocument(TextReader reader, string desiredRule)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(reader, nameof(reader));
-            ErrorUtilities.VerifyThrowArgumentLength(desiredRule, nameof(desiredRule));
+            ErrorUtilities.VerifyThrowArgumentNull(reader);
+            ErrorUtilities.VerifyThrowArgumentLength(desiredRule);
 
             object rootObject = XamlServices.Load(reader);
             if (rootObject != null)
@@ -392,14 +405,14 @@ namespace Microsoft.Build.Tasks.Xaml
                 argumentDependencyLookup.Add(propertyToAdd.Name, propertyToAdd);
             }
 
-            // We've read any enumerated values and any dependencies, so we just 
+            // We've read any enumerated values and any dependencies, so we just
             // have to add the property
             propertyList.AddLast(propertyToAdd);
             return true;
         }
 
         /// <summary>
-        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for 
+        /// Gets all the attributes assigned in the xml file for this parameter or all of the nested switches for
         /// this parameter group
         /// </summary>
         private static Property ObtainAttributes(XamlTypes.BaseProperty baseProperty, Property parameterGroup)

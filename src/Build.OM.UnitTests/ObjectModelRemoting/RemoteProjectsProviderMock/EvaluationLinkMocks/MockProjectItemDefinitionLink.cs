@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
@@ -7,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectItemDefinitionLinkRemoter : MockLinkRemoter<ProjectItemDefinition>
+    internal sealed class MockProjectItemDefinitionLinkRemoter : MockLinkRemoter<ProjectItemDefinition>
     {
         public override ProjectItemDefinition CreateLinkedObject(IImportHolder holder)
         {
@@ -15,8 +17,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return holder.Linker.LinkFactory.Create(link);
         }
 
-
-        ///  ProjectItemDefinitionLink remoting
+        // ProjectItemDefinitionLink remoting
         public MockProjectLinkRemoter Project => this.OwningCollection.Export<Project, MockProjectLinkRemoter>(this.Source.Project);
         public string ItemType => this.Source.ItemType;
         public ICollection<MockProjectMetadataLinkRemoter> Metadata => this.OwningCollection.ExportCollection<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.Metadata);
@@ -27,7 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             => this.OwningCollection.Export<ProjectMetadata, MockProjectMetadataLinkRemoter>(this.Source.SetMetadataValue(name, unevaluatedValue));
     }
 
-    internal class MockProjectItemDefinitionLink : ProjectItemDefinitionLink, ILinkMock
+    internal sealed class MockProjectItemDefinitionLink : ProjectItemDefinitionLink, ILinkMock
     {
         public MockProjectItemDefinitionLink(MockProjectItemDefinitionLinkRemoter proxy, IImportHolder holder)
         {

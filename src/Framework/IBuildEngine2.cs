@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface extends IBuildEngine to provide a method allowing building 
+    /// This interface extends IBuildEngine to provide a method allowing building
     /// project files in parallel.
     /// </summary>
     public interface IBuildEngine2 : IBuildEngine
@@ -38,14 +40,12 @@ namespace Microsoft.Build.Framework
         /// <param name="targetOutputs">The outputs of each specified target (can be null).</param>
         /// <param name="toolsVersion">A tools version recognized by the Engine that will be used during this build (can be null).</param>
         /// <returns>true, if build was successful</returns>
-        bool BuildProjectFile
-            (
+        bool BuildProjectFile(
             string projectFileName,
             string[] targetNames,
             IDictionary globalProperties,
             IDictionary targetOutputs,
-            string toolsVersion
-            );
+            string toolsVersion);
 
         /// <summary>
         /// This method allows tasks to initiate a build on a
@@ -60,25 +60,23 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFileNames">The project to build.</param>
         /// <param name="targetNames">The targets in the project to build (can be null).</param>
         /// <param name="globalProperties">An array of hashtables of additional global properties to apply
-        ///     to the child project (array entries can be null). 
+        ///     to the child project (array entries can be null).
         ///     The key and value in the hashtable should both be strings.</param>
         /// <param name="targetOutputsPerProject">The outputs of each specified target (can be null).</param>
         /// <param name="toolsVersion">A tools version recognized by the Engine that will be used during this build (can be null).</param>
         /// <param name="useResultsCache">If true the operation will only be run if the cache doesn't
         ///                               already contain the result. After the operation the result is
         ///                               stored in the cache </param>
-        /// <param name="unloadProjectsOnCompletion">If true the project will be unloaded once the 
+        /// <param name="unloadProjectsOnCompletion">If true the project will be unloaded once the
         ///                                         operation is completed </param>
         /// <returns>true, if build was successful</returns>
-        bool BuildProjectFilesInParallel
-            (
+        bool BuildProjectFilesInParallel(
             string[] projectFileNames,
             string[] targetNames,
             IDictionary[] globalProperties,
             IDictionary[] targetOutputsPerProject,
             string[] toolsVersion,
             bool useResultsCache,
-            bool unloadProjectsOnCompletion
-            );
+            bool unloadProjectsOnCompletion);
     }
 }

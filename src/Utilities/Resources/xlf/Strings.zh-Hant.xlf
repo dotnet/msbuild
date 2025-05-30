@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
+      <trans-unit id="DebugPathTooLong">
+        <source>MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">MSB6012: 用於偵錯記錄檔 "{0}" 的路徑太長。使用 MSBUILDDEBUGPATH 環境變數將它設定為較短的值，或變更您的系統設定以允許長路徑。</target>
+        <note>{StrBegin="MSB6012: "}</note>
+      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: "{0}" 的命令列參數無效。{1}</target>
@@ -22,10 +27,10 @@
         <target state="translated">命令以返回碼 {0} 結束。</target>
         <note />
       </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: 工作在初始化之前就嘗試記錄。訊息為: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">檔案鎖定者: "{0}"</target>
+        <note />
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
@@ -56,6 +61,16 @@
         <source>MSB6003: The specified task executable "{0}" could not be run. {1}</source>
         <target state="translated">MSB6003: 無法執行指定的工作可執行檔 "{0}"。{1}</target>
         <note>{StrBegin="MSB6003: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="translated">指定的終止逾時 ({0}) 無效 - 必須是大於或等於 -1 的值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolTask.NotUpToDate">
+        <source>Unable to skip task because it is not up-to-date.</source>
+        <target state="translated">無法略過工作，因為它不是最新的。</target>
+        <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>

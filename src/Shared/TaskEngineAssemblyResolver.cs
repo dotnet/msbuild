@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -11,6 +11,8 @@ using System.Runtime.Loader;
 #endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -40,10 +42,10 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Installs an AssemblyResolve handler in the current AppDomain. This class can be created in any AppDomain, 
+        /// Installs an AssemblyResolve handler in the current AppDomain. This class can be created in any AppDomain,
         /// so it's possible to create an AppDomain, create an instance of this class in it and use this method to install
         /// an event handler in that AppDomain. Since the event handler instance is stored internally, this method
-        /// should only be called once before a corresponding call to RemoveHandler (not that it would make sense to do 
+        /// should only be called once before a corresponding call to RemoveHandler (not that it would make sense to do
         /// anything else).
         /// </summary>
         internal void InstallHandler()
@@ -61,7 +63,7 @@ namespace Microsoft.Build.BackEnd.Logging
 #endif
         }
 
-        
+
 
         /// <summary>
         /// Removes the event handler.

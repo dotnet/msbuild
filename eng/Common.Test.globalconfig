@@ -1,0 +1,5 @@
+# Top level entry required to mark this as a global AnalyzerConfig file
+is_global = true
+
+# Element parameter documentation should have text
+dotnet_diagnostic.SA1614.severity = none

@@ -1,17 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Resources;
 using System.Resources.Extensions;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class FileStreamResource : IResource
     {
         public string Name { get; }
+
         public string TypeAssemblyQualifiedName { get; }
+
         public string OriginatingFile { get; }
+
         public string FileName { get; }
 
         public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
@@ -35,7 +40,9 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
+#pragma warning disable CA2000 // Dispose objects before losing scope the stream is expected to be disposed by the PreserializedResourceWriter.ResourceDataRecord
                 FileStream fileStream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
                 preserializedResourceWriter.AddActivatorResource(Name, fileStream, TypeAssemblyQualifiedName, closeAfterWrite: true);
             }

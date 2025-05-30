@@ -1,14 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 
+#if !FEATURE_CULTUREINFO_GETCULTURES
+using System.Linq;
 using Microsoft.Build.Framework;
+#endif
+
 
 // Declare this to get init properties. See https://github.com/dotnet/roslyn/issues/45510#issuecomment-694977239
+#nullable disable
+
 namespace System.Runtime.CompilerServices
 {
     internal static class IsExternalInit { }
@@ -70,7 +75,7 @@ namespace Microsoft.Build.Shared
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
 #if CLR2COMPATIBILITY
-            return (AssemblyName) assemblyNameToClone.Clone();
+            return (AssemblyName)assemblyNameToClone.Clone();
 #else
 
             // NOTE: In large projects, this is called a lot. Avoid calling AssemblyName.Clone
@@ -94,9 +99,8 @@ namespace Microsoft.Build.Shared
             name.CodeBase = assemblyNameToClone.CodeBase;
             name.KeyPair = assemblyNameToClone.KeyPair;
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
-#elif !MONO
+#else
             // Setting the culture name creates a new CultureInfo, leading to many allocations. Only set CultureName when the CultureInfo member is not available.
-            // CultureName not available on Mono
             name.CultureName = assemblyNameToClone.CultureName;
 #endif
 
@@ -134,7 +138,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static void Initialize()
         {
-            if (s_initialized) return;
+            if (s_initialized)
+            {
+                return;
+            }
 
             s_assemblylocationProperty = typeof(Assembly).GetProperty("Location", typeof(string));
             s_cultureInfoGetCultureMethod = typeof(CultureInfo).GetMethod("GetCultures");
@@ -145,15 +152,7 @@ namespace Microsoft.Build.Shared
 
         private static Assembly GetEntryAssembly()
         {
-#if FEATURE_ASSEMBLY_GETENTRYASSEMBLY
             return System.Reflection.Assembly.GetEntryAssembly();
-#else
-            var getEntryAssembly = typeof(Assembly).GetMethod("GetEntryAssembly");
-
-            FrameworkErrorUtilities.VerifyThrowInternalNull(getEntryAssembly, "Assembly does not have the method GetEntryAssembly");
-
-            return (Assembly) getEntryAssembly.Invoke(null, Array.Empty<object>());
-#endif
         }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
@@ -167,9 +166,10 @@ namespace Microsoft.Build.Shared
 
             var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
 
-            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] {allCulturesEnumValue}) as CultureInfo[];
+            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, [allCulturesEnumValue]) as CultureInfo[];
 
-            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
+            // CultureInfo.GetCultures should work if all reflection checks pass
+            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures);
 
             return cultures;
         }

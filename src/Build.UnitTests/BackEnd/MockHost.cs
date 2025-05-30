@@ -1,21 +1,25 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using System;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+using Microsoft.Build.TelemetryInfra;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Mock host which is used during tests which need a host object
     /// </summary>
-    internal class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+    internal sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
     {
         /// <summary>
         /// Configuration cache
@@ -59,29 +63,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private ISdkResolverService _sdkResolverService;
 
+        private IBuildCheckManagerProvider _buildCheckManagerProvider;
+
+        private TelemetryForwarderProvider _telemetryForwarder;
+
         #region SystemParameterFields
 
         #endregion;
 
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="MockHost"/> class.
         /// </summary>
-        public MockHost()
-            : this(new BuildParameters())
+        /// <param name="overrideConfigCache">The override config cache.</param>
+        /// <param name="overrideResultsCache">The override results cache.</param>
+        public MockHost(ConfigCache overrideConfigCache = null, ResultsCache overrideResultsCache = null)
+            : this(new BuildParameters(), overrideConfigCache, overrideResultsCache)
         {
         }
 
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="MockHost"/> class.
         /// </summary>
-        public MockHost(BuildParameters buildParameters)
+        /// <param name="buildParameters">The mock host's build parameters.</param>
+        /// <param name="overrideConfigCache">The override config cache.</param>
+        /// <param name="overrideResultsCache">The override results cache.</param>
+        public MockHost(BuildParameters buildParameters, ConfigCache overrideConfigCache = null, ResultsCache overrideResultsCache = null)
         {
             _buildParameters = buildParameters;
 
             _buildParameters.ProjectRootElementCache = new ProjectRootElementCache(false);
 
-            _configCache = new ConfigCache();
-            ((IBuildComponent)_configCache).InitializeComponent(this);
+            if (overrideConfigCache != null && overrideResultsCache != null)
+            {
+                _configCache = new ConfigCacheWithOverride(overrideConfigCache);
+                _resultsCache = new ResultsCacheWithOverride(overrideResultsCache);
+            }
+            else if (overrideConfigCache == null && overrideResultsCache == null)
+            {
+                _configCache = new ConfigCache();
+                _resultsCache = new ResultsCache();
+            }
+            else if (overrideConfigCache == null)
+            {
+                throw new ArgumentNullException($"Attempted to create an override cache with a null {nameof(overrideConfigCache)}.");
+            }
+            else
+            {
+                throw new ArgumentNullException($"Attempted to create an override cache with a null {nameof(overrideResultsCache)}.");
+            }
+
+            _configCache.InitializeComponent(this);
 
             // We are a logging service
             _loggingService = this;
@@ -91,10 +122,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _requestEngine = new BuildRequestEngine();
             ((IBuildComponent)_requestEngine).InitializeComponent(this);
 
-            _resultsCache = new ResultsCache();
-            ((IBuildComponent)_resultsCache).InitializeComponent(this);
+            _resultsCache.InitializeComponent(this);
 
-            _requestBuilder = new Microsoft.Build.UnitTests.BackEnd.BuildRequestEngine_Tests.MockRequestBuilder();
+            _requestBuilder = new BuildRequestEngine_Tests.MockRequestBuilder();
             ((IBuildComponent)_requestBuilder).InitializeComponent(this);
 
             _targetBuilder = new TestTargetBuilder();
@@ -102,6 +132,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _sdkResolverService = new MockSdkResolverService();
             ((IBuildComponent)_sdkResolverService).InitializeComponent(this);
+
+            _buildCheckManagerProvider = new NullBuildCheckManagerProvider();
+            ((IBuildComponent)_buildCheckManagerProvider).InitializeComponent(this);
+
+            _telemetryForwarder = new TelemetryForwarderProvider();
+            ((IBuildComponent)_telemetryForwarder).InitializeComponent(this);
         }
 
         /// <summary>
@@ -170,9 +206,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.ResultsCache => (IBuildComponent)_resultsCache,
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
+                BuildComponentType.BuildCheckManagerProvider => (IBuildComponent)_buildCheckManagerProvider,
+                BuildComponentType.TelemetryForwarder => (IBuildComponent)_telemetryForwarder,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }
+
+        public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+            => (TComponent)GetComponent(type);
 
         /// <summary>
         /// Register a new build component factory with the host.
@@ -188,26 +229,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Deserialize a packet
         /// </summary>
         public INodePacket DeserializePacket(NodePacketType type, byte[] serializedPacket)
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region IBuildComponent Members
-
-        /// <summary>
-        /// Initialize this component using the provided host
-        /// </summary>
-        public void InitializeComponent(IBuildComponentHost host)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Clean up any state
-        /// </summary>
-        public void ShutdownComponent()
         {
             throw new NotImplementedException();
         }

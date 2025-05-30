@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -17,7 +19,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Synchronizes access to the staScheduler field.
         /// </summary>
-        private static Object s_staSchedulerSync = new Object();
+        private static readonly Object s_staSchedulerSync = new Object();
 
         /// <summary>
         /// The singleton STA scheduler object.
@@ -53,7 +55,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The awaiter.</returns>
         internal static TaskAwaiter GetAwaiter(this WaitHandle handle)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(handle, nameof(handle));
+            ErrorUtilities.VerifyThrowArgumentNull(handle);
             return handle.ToTask().GetAwaiter();
         }
 
@@ -145,7 +147,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// A class which acts as a task scheduler and ensures each scheduled task gets its 
+        /// A class which acts as a task scheduler and ensures each scheduled task gets its
         /// own STA thread.
         /// </summary>
         private class OneSTAThreadPerTaskScheduler : TaskScheduler
@@ -153,7 +155,7 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// The current queue of tasks.
             /// </summary>
-            private ConcurrentQueue<Task> _queuedTasks = new ConcurrentQueue<Task>();
+            private readonly ConcurrentQueue<Task> _queuedTasks = new ConcurrentQueue<Task>();
 
             /// <summary>
             /// Returns the list of queued tasks.

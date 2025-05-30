@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -9,11 +11,15 @@ namespace Microsoft.Build.Framework
     ///     An abstract interface class to indicate SDK resolver success or failure.
     /// </summary>
     /// <remarks>
-    ///   Note: Use <see cref="Microsoft.Build.Framework.SdkResultFactory"/> to create instances of this class. Do not inherit from this class.
+    ///    <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!NOTE]
+    /// > Use <xref:Microsoft.Build.Framework.SdkResultFactory> to create instances of this class. Do not inherit from this class.
+    /// ]]></format>
     /// </remarks>
     public abstract class SdkResult
     {
-        //  Explicit backing fields so that implementation in Microsoft.Build.dll can use them for translation
+        // Explicit backing fields so that implementation in Microsoft.Build.dll can use them for translation
         private protected bool _success;
         private protected string _path;
         private protected string _version;
@@ -29,7 +35,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         ///     Resolved path to the SDK.
-        /// 
+        ///
         ///     Null if <see cref="Success"/> == false
         /// </summary>
         public virtual string Path { get => _path; protected set => _path = value; }
@@ -37,7 +43,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         ///     Resolved version of the SDK.
         ///     Can be null or empty if the resolver did not provide a version (e.g. a path based resolver)
-        /// 
+        ///
         ///     Null if <see cref="Success"/> == false
         /// </summary>
         public virtual string Version { get => _version; protected set => _version = value; }

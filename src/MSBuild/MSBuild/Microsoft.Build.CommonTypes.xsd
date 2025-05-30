@@ -162,6 +162,11 @@ elementFormDefault="qualified">
                     <xs:sequence minOccurs="0" maxOccurs="unbounded">
                         <xs:choice>
                             <xs:element name="WrapperTool"/>
+                            <xs:element name="EmbedInteropTypes" type="msb:boolean">
+                                <xs:annotation>
+                                <xs:documentation><!-- _locID_text="COMReference_EmbedInteropTypes" _locComment="" -->Whether the types in this reference need to embedded into the target assembly - interop assemblies only (optional, boolean)</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
                         </xs:choice>
                     </xs:sequence>
         </xs:extension>
@@ -214,6 +219,13 @@ elementFormDefault="qualified">
                   </xs:documentation>
                 </xs:annotation>
               </xs:element>
+              <xs:element name="VersionOverride">
+                <xs:annotation>
+                  <xs:documentation>
+                    <!-- _locID_text="PackageReference_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this element has no effect.
+                  </xs:documentation>
+                </xs:annotation>
+              </xs:element>
             </xs:choice>
           </xs:sequence>
           <xs:attribute name="Include" type="xs:string">
@@ -262,6 +274,13 @@ elementFormDefault="qualified">
             <xs:annotation>
               <xs:documentation>
                 <!-- _locID_text="PackageReference_Attribute_GeneratePathProperty" _locComment="" -->Set to true to generate a Pkg* property that points to the restored location of the NuGet package contents
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="VersionOverride" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                <!-- _locID_text="PackageReference_Attribute_VersionOverride" _locComment="" -->When using Central Package Management (CPM), overrides the centrally defined version for this package.  If the project is not using CPM, this attribute has no effect.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
@@ -690,21 +709,21 @@ elementFormDefault="qualified">
                             <xs:element name="IncludeAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_IncludeAssets" _locComment="" -->Assets to include from this reference
+                                  <!-- _locID_text="ProjectReference_IncludeAssets" _locComment="" -->Assets to include from this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
                             <xs:element name="ExcludeAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference
+                                  <!-- _locID_text="ProjectReference_ExcludeAssets" _locComment="" -->Assets to exclude from this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
                             <xs:element name="PrivateAssets">
                               <xs:annotation>
                                 <xs:documentation>
-                                  <!-- _locID_text="ProjectReference_PrivateAssets" _locComment="" -->Assets that are private in this reference
+                                  <!-- _locID_text="ProjectReference_PrivateAssets" _locComment="" -->Assets that are private in this reference. Applies to packages referenced transitively by the reference as well.
                                 </xs:documentation>
                               </xs:annotation>
                             </xs:element>
@@ -754,6 +773,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -773,6 +793,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -822,6 +843,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -841,6 +863,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -892,6 +915,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -904,6 +928,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -922,6 +947,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -962,6 +988,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -980,6 +1007,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1020,6 +1048,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1038,6 +1067,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1078,6 +1108,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1090,6 +1121,7 @@ elementFormDefault="qualified">
                                 <xs:enumeration value="Never" />
                                 <xs:enumeration value="Always" />
                                 <xs:enumeration value="PreserveNewest" />
+                                <xs:enumeration value="IfDifferent" />
                             </xs:restriction>
                         </xs:simpleType>
                     </xs:attribute>
@@ -1130,6 +1162,7 @@ elementFormDefault="qualified">
                                         <xs:enumeration value="Never" />
                                         <xs:enumeration value="Always" />
                                         <xs:enumeration value="PreserveNewest" />
+                                        <xs:enumeration value="IfDifferent" />
                                     </xs:restriction>
                                 </xs:simpleType>
                             </xs:element>
@@ -1146,7 +1179,7 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="Folder" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="Folder" _locComment="" -->Folder on disk</xs:documentation>
+            <xs:documentation><!-- _locID_text="Folder" _locComment="" -->Used by Visual Studio to identify an empty folder.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="Import" type="msb:SimpleItemType" substitutionGroup="msb:Item">
@@ -1303,6 +1336,11 @@ elementFormDefault="qualified">
 
     <xs:element name="VisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="MinimumVisualStudioVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="AccelerateBuildsInVisualStudio" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="AccelerateBuildsInVisualStudio" _locComment="" -->Indicates whether to enable acceleration when building in Visual Studio (boolean).</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="AdditionalFileItemNames" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AllowUnsafeBlocks" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="AnalysisMode" substitutionGroup="msb:Property">
@@ -1414,6 +1452,11 @@ elementFormDefault="qualified">
     <xs:element name="CLRSupport" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="UseDebugLibraries" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="CodePage" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="CompilerGeneratedFilesOutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="CompilerGeneratedFilesOutputPath" _locComment="" -->Controls where source generated files are saved.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="Configuration" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ConfigurationName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ConfigurationOverrideFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1691,10 +1734,15 @@ elementFormDefault="qualified">
     <xs:element name="DeployDirSuffix" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="DisableFastUpToDateCheck" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
-            <xs:documentation><!-- _locID_text="DisableFastUpToDateCheck" _locComment="" -->Whether Visual Studio should do its own faster up-to-date check before Building, rather than invoke MSBuild to do a possibly more accurate one. You would set this to false if you have a heavily customized build process and builds in Visual Studio are not occurring when they should.</xs:documentation>
+            <xs:documentation><!-- _locID_text="DisableFastUpToDateCheck" _locComment="" -->Whether Visual Studio should do its own faster up-to-date check before Building, rather than invoke MSBuild to do a possibly more accurate one. You would set this to true if you have a heavily customized build process and builds in Visual Studio are not occurring when they should.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="DocumentationFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="EmitCompilerGeneratedFiles" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EmitCompilerGeneratedFiles" _locComment="" -->Controls whether source generated files will be saved.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="EnableASPDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableASPXDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="EnableSQLServerDebugging" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1725,6 +1773,20 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="GenerateDocumentationFile" _locComment="" -->Value indicating whether a documentation file will be generated by the compiler</xs:documentation>
       </xs:annotation>
     </xs:element>
+    <xs:element name="CopyDebugSymbolFilesFromPackages" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation>
+                <!-- _locID_text="CopyDebugSymbolFilesFromPackages" _locComment="" -->Value indicating whether symbol files will be copied from NuGet packages by the compiler
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="CopyDocumentationFilesFromPackages" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation>
+                <!-- _locID_text="CopyDocumentationFilesFromPackages" _locComment="" -->Value indicating whether documentation files will be copied from NuGet packages by the compiler
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="GenerateManifests" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="GenerateLibraryLayout" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="GeneratePackageOnBuild" type="msb:boolean" substitutionGroup="msb:Property">
@@ -1733,6 +1795,11 @@ elementFormDefault="qualified">
       </xs:annotation>
     </xs:element>
     <xs:element name="DisableXbfGeneration" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="DisableTransitiveProjectReferences" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="DisableTransitiveProjectReferences" _locComment="" -->When true, do not discover ProjectReference items representing projects referenced by this project's ProjectReferences. Applies only to projects using the .NET SDK.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="SuppressXamlWarnings" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="XamlRootsLog" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="XamlSavedStateFilePath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -1810,16 +1877,23 @@ elementFormDefault="qualified">
             <xs:documentation><!-- _locID_text="EnableDefaultItems" _locComment="" -->Defaults to true, and if set to false will disable all default item globs.</xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="IsWebBootstrapper" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="IsAotCompatible" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="IsAotCompatible" _locComment="" -->Indicates whether a class library is compatible with native AOT. Setting to true will enable analyzers for trimming, single file, and AOT.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="IsWebBootstrapper" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="JCPA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="Keyword" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="LangVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VBRuntime" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="Prefer32Bit" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="HighEntropyVA" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="LinkIncremental" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="Prefer32Bit" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="PreferNativeArm64" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="HighEntropyVA" type="msb:boolean" substitutionGroup="msb:Property"/>
+    <xs:element name="LinkIncremental" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestCertificateThumbprint" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="EnableCustomCulture" type="msb:boolean" substitutionGroup="msb:EnableCustomCulture"/>
     <xs:element name="MapFileExtensions" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MapFileExtensions" _locComment="" -->boolean</xs:documentation>
@@ -1894,6 +1968,11 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="OSVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="BaseOutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="BaseOutputPath" _locComment="" -->Base path of output folder, where all configuration-specific output folders will be created. Default value is bin\.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="OutputPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OutputPath" _locComment="" -->Path to output folder, with trailing slash</xs:documentation>
@@ -1902,6 +1981,16 @@ elementFormDefault="qualified">
     <xs:element name="OutputType" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="OutputType" _locComment="" -->Type of output to generate (WinExe, Exe, or Library)</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="UseArtifactsOutput" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UseArtifactsOutput" _locComment="" -->Use a centralized location for all outputs of this project. The location of the centralized outputs is set by the ArtifactsPath property. Project outputs are grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="ArtifactsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="ArtifactsPath" _locComment="" -->The path to use for the centralized outputs - if set, UseArtifactsOutput will be defaulted to true. Project outputs will be placed under this path grouped by kind, then by project. See https://learn.microsoft.com/en-us/dotnet/core/sdk/artifacts-output for complete details.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="PackageOutputPath" substitutionGroup="msb:Property">
@@ -1958,7 +2047,7 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="PreserveCompilationContext" _locComment="" -->Value indicating whether reference assemblies can be used in dynamic compilation</xs:documentation>
       </xs:annotation>
     </xs:element>
-    <xs:element name="ProduceReferenceAssemblies" type="msb:boolean" substitutionGroup="msb:Property" />
+    <xs:element name="ProduceReferenceAssembly" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="ProductName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ProductVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ProjectGuid" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -2006,12 +2095,12 @@ elementFormDefault="qualified">
     <xs:element name="RootNamespace" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="RuntimeIdentifier" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="RuntimeIdentifier" _locComment="" -->Runtime identifier supported by the project (e.g. win10-x64)</xs:documentation>
+        <xs:documentation><!-- _locID_text="RuntimeIdentifier" _locComment="" -->Runtime identifier supported by the project (e.g. win-x64)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="RuntimeIdentifiers" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="RuntimeIdentifiers" _locComment="" -->Semi-colon separated list of runtime identifiers supported by the project (e.g. win10-x64;osx.10.11-x64;ubuntu.16.04-x64)</xs:documentation>
+        <xs:documentation><!-- _locID_text="RuntimeIdentifiers" _locComment="" -->Semi-colon separated list of runtime identifiers supported by the project (e.g. win-x64;osx-x64;linux-x64)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="SccProjectName" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -2055,12 +2144,12 @@ elementFormDefault="qualified">
     <xs:element name="TargetCulture" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="TargetFramework" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TargetFramework" _locComment="" -->Framework that this project targets. Must be a Target Framework Moniker (e.g. netcoreapp1.0)</xs:documentation>
+        <xs:documentation><!-- _locID_text="TargetFramework" _locComment="" -->Framework that this project targets. Must be a Target Framework Moniker (e.g. net8.0)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TargetFrameworks" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TargetFrameworks" _locComment="" -->Semi-colon separated list of frameworks that this project targets. Must be a Target Framework Moniker (e.g. netcoreapp1.0;net461)</xs:documentation>
+        <xs:documentation><!-- _locID_text="TargetFrameworks" _locComment="" -->Semi-colon separated list of frameworks that this project targets. Must be a Target Framework Moniker (e.g. net8.0;net461)</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TargetFrameworkVersion" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
@@ -2116,7 +2205,7 @@ elementFormDefault="qualified">
     <xs:element name="UseWindowsForms" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="UseWPF" type="msb:boolean" substitutionGroup="msb:Property" />
     <xs:element name="UseVSHostingProcess" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="UTF8OutPut" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
+    <xs:element name="UTF8Output" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VCTargetsPath" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="VSTO_TrustAssembliesLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="WarningLevel" type="msb:StringPropertyType" substitutionGroup="msb:Property">
@@ -2208,6 +2297,111 @@ elementFormDefault="qualified">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="EmbedRazorGenerateSources" _locComment="" -->Configures whether all of the @(RazorGenerate) items will be added as embedded files to the produced assembly. When true, everything in @(RazorGenerate) will be added to @(RazorEmbeddedFiles) and passed to CSC.</xs:documentation>
         </xs:annotation>
+    </xs:element>
+
+    <!-- ======================== TESTING PROPERTIES ======================== -->
+    <xs:element name="UseVSTest" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UseVSTest" _locComment="" -->Set to 'true' to use VSTest. The default is 'false' which uses MSTest runner. This property is only applicable when using MSTest.Sdk.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMSTestRunner" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMSTestRunner" _locComment="" -->Enables or disables the use of the MSTest runner. The default is 'true' when using MSTest.Sdk, and 'false' otherwise. Supported in MSTest 3.2 and later versions.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="GenerateTestingPlatformEntryPoint" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="GenerateTestingPlatformEntryPoint" _locComment="" -->Set this property to 'false' to disable the automatic generation of entry point for Microsoft.Testing.Platform.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="GenerateSelfRegisteredExtensions" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="GenerateSelfRegisteredExtensions" _locComment="" -->Set this property to 'false' to disable auto registration of extensions through the 'AddSelfRegisteredExtensions'.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="GenerateProgramFile" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="GenerateProgramFile" _locComment="" -->Set this property to 'false' to disable the automatic generation of entry point for VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <!-- Not documenting DisableTestingPlatformServerCapability intentionally for now. We don't expect any one to need it. -->
+    <xs:element name="TestingExtensionsProfile" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingExtensionsProfile" _locComment="" -->Controls the set of extensions that are enabled. Note that 'AllMicrosoft' enables all extensions, even those with a restrictive license.</xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Default" />
+          <xs:enumeration value="None" />
+          <xs:enumeration value="AllMicrosoft" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsCrashDump" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCrashDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.CrashDump extension. This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsCodeCoverage" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsCodeCoverage" _locComment="" -->Enables the Microsoft.Testing.Extensions.CodeCoverage extension. This is not supported by VSTest</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsTrxReport" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsTrxReport" _locComment="" -->Enables the Microsoft.Testing.Extensions.TrxReport extension. This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsHangDump" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHangDump" _locComment="" -->Enables the Microsoft.Testing.Extensions.HangDump extension. This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsHotReload" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsHotReload" _locComment="" -->Enables the Microsoft.Testing.Extensions.HotReload extension (it has restrictive license). This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableMicrosoftTestingExtensionsRetry" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableMicrosoftTestingExtensionsRetry" _locComment="" -->Enables the Microsoft.Testing.Extensions.Retry extension (it has restrictive license). This is not supported by VSTest.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnableAspireTesting" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnableAspireTesting" _locComment="" -->Enables the testing support for .NET Aspire application model. This adds a reference to 'Aspire.Hosting.Testing' NuGet package.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="EnablePlaywright" type="msb:boolean" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="EnablePlaywright" _locComment="" -->Enables end-to-end testing for modern web apps using Playwright. This adds a reference to 'Microsoft.Playwright.MSTest' NuGet package.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="IsTestingPlatformApplication" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="IsTestingPlatformApplication" _locComment="" -->Controls whether the application is a test application. Set it to 'false' in a non-test project that references a test project to avoid error CS8892.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformCommandLineArguments" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformCommandLineArguments" _locComment="" -->The command-line arguments to pass for the test executable. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformCaptureOutput" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformCaptureOutput" _locComment="" -->This property controls whether all console output that a test executable writes is captured and hidden from the user when you use 'dotnet test' to run 'Microsoft.Testing.Platform' tests. By default, the console output is hidden. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformDotnetTestSupport" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformDotnetTestSupport" _locComment="" -->This property controls whether VSTest is used when you use 'dotnet test' to run tests. If you set this property to 'true', VSTest is disabled and all 'Microsoft.Testing.Platform' tests are run directly. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
+    <xs:element name="TestingPlatformShowTestsFailure" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="TestingPlatformShowTestsFailure" _locComment="" -->This property controls whether a single failure or all errors in a failed test are reported when you use `dotnet test` to run tests. By default, test failures are summarized into a log file, and a single failure per test project is reported to MSBuild. To show errors per failed test, set this property to 'true'. This is not supported by VSTest.</xs:documentation>
+      </xs:annotation>
     </xs:element>
 
     <!-- ======================== gRPC properties ======================== -->
@@ -2356,9 +2550,14 @@ elementFormDefault="qualified">
         <xs:documentation><!-- _locID_text="PublishReadyToRun" _locComment="" -->Indicates whether the project should produce ReadyToRun images during publish.</xs:documentation>
       </xs:annotation>
     </xs:element>
+    <xs:element name="PublishAot" type="msb:boolean" substitutionGroup="msb:Property">
+      <xs:annotation>
+        <xs:documentation><!-- _locID_text="PublishAot" _locComment="" -->Indicates whether the project should produce native ahead-of-time compiled images during publish.</xs:documentation>
+      </xs:annotation>
+    </xs:element>
     <xs:element name="PublishSingleFile" type="msb:boolean" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="PublishSingleFile" _locComment="" -->Indicates whether the project should produce a self-extracting executable during publish.</xs:documentation>
+        <xs:documentation><!-- _locID_text="PublishSingleFile" _locComment="" -->Indicates whether the project should bundle all application-dependent files into a single binary during publish.</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="PublishTrimmed" type="msb:boolean" substitutionGroup="msb:Property">
@@ -2368,12 +2567,12 @@ elementFormDefault="qualified">
     </xs:element>
     <xs:element name="TrimmerRootAssembly" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TrimmerRootAssembly" _locComment="" -->Indicates to the linker to explicitly keep an assembly by adding it to your csproj (use the assembly name without extension).</xs:documentation>
+        <xs:documentation><!-- _locID_text="TrimmerRootAssembly" _locComment="" -->Assemblies that should not be trimmed (specify the assembly name without extension).</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="TrimmerRootDescriptor" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
-        <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->Gives the linker a more specific list of types/methods, etc. to include. Path to an xml file.</xs:documentation>
+        <xs:documentation><!-- _locID_text="TrimmerRootDescriptor" _locComment="" -->XML files that specify assemblies, types, and their members that should not be trimmed.</xs:documentation>
       </xs:annotation>
     </xs:element>
 
@@ -3201,25 +3400,25 @@ elementFormDefault="qualified">
             </xs:documentation>
         </xs:annotation>
     </xs:element>
-    <xs:element name="AssemblySearchPathUseCandidateAssemblyFiles" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseCandidateAssemblyFiles" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseReferencePath" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseReferencePath" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseHintPathFromItem" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseHintPathFromItem" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseTargetFrameworkDirectory" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseTargetFrameworkDirectory" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseAssemblyFoldersConfigFileSearchPath" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseAssemblyFoldersConfigFileSearchPath" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseRegistry" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseRegistry" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseAssemblyFolders" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseAssemblyFolders" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseGAC" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseGAC" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseRawFileName" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseRawFileName" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
-    <xs:element name="AssemblySearchPathUseOutDir" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:element name="AssemblySearchPath_UseOutDir" type="msb:boolean" substitutionGroup="msb:Property">
     </xs:element>
     <xs:element name="ResolveAssemblyReference" substitutionGroup="msb:Task">
         <xs:complexType>
@@ -3386,6 +3585,9 @@ elementFormDefault="qualified">
                     <xs:attribute name="CertificateThumbprint" use="required" />
                     <xs:attribute name="SigningTarget" use="required" />
                     <xs:attribute name="TimestampUrl" />
+                    <xs:attribute name="TargetFrameworkIdentifier" />
+                    <xs:attribute name="TargetFrameworkVersion" />
+                    <xs:attribute name="DisallowMansignTimestampFallback" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -5381,6 +5583,81 @@ elementFormDefault="qualified">
         </xs:complexType>
     </xs:element>
 
+    <!-- ============================ -->
+    <!-- Fast up-to-date check items. -->
+    <!-- ============================ -->
+
+    <xs:element name="UpToDateCheckInput" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckInputDescription" _locComment="" -->Defines an item to be considered an input to the project for the fast up-to-date check.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckInput_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckInput_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpToDateCheckOutput" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckOutputDescription" _locComment="" -->Defines an item to be considered an output of the project for the fast up-to-date check.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckOutput_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckOutput_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="UpToDateCheckBuilt" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="UpToDateCheckBuiltDescription" _locComment="" -->Defines an item to be considered an output of the project for the fast up-to-date check, with optional corresponding input via 'Original' metadata. When 'Original' metadata is specified, the input and output are considered in isolation. Useful when a single file will be copied (and potentially transformed in doing so) during build.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:attribute name="Set">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Set" _locComment="" -->Optional group(s) of inputs and outputs that should be considered in isolation during build. Useful when a build involves multiple discrete compilation/transpilation steps. Semicolon-delimited when multiple sets are required.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Kind">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Kind" _locComment="" -->Optional identifier for this item that allows it to be omitted from the fast up-to-date check via a global property.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="Original">
+                        <xs:annotation>
+                            <xs:documentation><!-- _locID_text="UpToDateCheckBuilt_Original" _locComment="" -->Optional location of the input item that produces this output. Useful when a file is copied (and potentially transformed in doing so) during build. If multiple inputs and/or outputs are involved, use 'Set' metadata instead.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
+
     <!-- ================ -->
     <!-- Packaging tasks. -->
     <!-- ================ -->
@@ -6000,6 +6277,7 @@ elementFormDefault="qualified">
                     <xs:attribute name="RetryDelayMilliseconds" />
                     <xs:attribute name="SkipUnchangedFiles" />
                     <xs:attribute name="SourceUrl" use="required" />
+                    <xs:attribute name="Timeout" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -6068,16 +6346,22 @@ elementFormDefault="qualified">
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="PublicKey" type="xs:string" use="optional">
+          <xs:attribute name="Key" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>
-                <!-- _locID_text="InternalsVisibleTo_PublicKey" _locComment="" -->Optional public key associated with the strong name signature of the friend assembly.
+                <!-- _locID_text="InternalsVisibleTo_Key" _locComment="" -->Optional public key associated with the strong name signature of the friend assembly.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
       </xs:complexContent>
     </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="InvariantGlobalization" type="msb:boolean" substitutionGroup="msb:Property">
+    <xs:annotation>
+      <xs:documentation><!-- _locID_text="InvariantGlobalization" _locComment="" -->Indicates whether an app runs in globalization-invariant mode without access to culture-specific data and behavior.</xs:documentation>
+    </xs:annotation>
   </xs:element>
 
 </xs:schema>

@@ -1,13 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Threading;
-    using System.Xml;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
     using Microsoft.Build.ObjectModelRemoting;
@@ -19,12 +19,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     For the ExternalProjectsProvider mock infrastructure we'll try to use very similar model as in the actual implementation in VS.
 
     Typical flow for "linked object" of type "Foo"
-    [ ---  Client Collection                                    ]                           [ Server collection (can be different process) ] 
+    [ ---  Client Collection                                    ]                           [ Server collection (can be different process) ]
     (Foo) localView <=> (FooLink) link <=> FooLinkRemoter (Proxy) <=~connection mechanism~=> FooLinkRemoter(stub) <=> (Real object)
-    
+
     FooLinkRemoter would be whatever ExternalProviders see useful to provide FooLink implementation and is compatable with connection mechanism
     it might be completely different interface since some link types would be either inefficient or impossible to serialize for example and pass cross process.
-    
+
     Here we can cheat a little bit, since we run both Client and Server collection in the same process so we can ignore connection mechanism (typically some
     form of serialization/deserialization) and just give the "client" link implementation the same Remoter object we create on the "server"
 
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// Base remoter object implementation.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal abstract class MockLinkRemoter<T> : ExportedLinksMap.LinkedObject<T> , IRemoterSource
+    internal abstract class MockLinkRemoter<T> : ExportedLinksMap.LinkedObject<T>, IRemoterSource
         where T : class
     {
         object IRemoterSource.RealObject => this.Source;
@@ -135,13 +135,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     internal interface IImportHolder
     {
         ProjectCollectionLinker Linker { get; }
+
         UInt32 LocalId { get; }
     }
 
     /// <summary>
     /// Provide ability to export and import OM objects to another collections.
     /// </summary>
-    internal class ProjectCollectionLinker : ExternalProjectsProvider
+    internal sealed class ProjectCollectionLinker : ExternalProjectsProvider
     {
         internal static int _collecitonId = 0;
 
@@ -152,20 +153,23 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private ProjectCollectionLinker(ConnectedProjectCollections group)
         {
             this.LinkedCollections = group;
-            this.CollectionId = (UInt32) Interlocked.Increment(ref _collecitonId);
+            this.CollectionId = (UInt32)Interlocked.Increment(ref _collecitonId);
             this.Collection = new ProjectCollection();
             this.LinkFactory = LinkedObjectsFactory.Get(this.Collection);
         }
 
-        public Project LoadProject(string path) =>  this.Collection.LoadProject(path);
+        public Project LoadProject(string path) => this.Collection.LoadProject(path);
+
         public Project LoadProjectIgnoreMissingImports(string path) => LoadProjectWithSettings(path, ProjectLoadSettings.IgnoreMissingImports);
+
         public Project LoadProjectWithSettings(string path, ProjectLoadSettings settings) => new Project(path, null, null, this.Collection, settings);
 
 
         public Project LoadInMemoryWithSettings(string content, ProjectLoadSettings settings = ProjectLoadSettings.Default)
         {
             content = ObjectModelHelpers.CleanupFileContents(content);
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml, null, null, this.Collection, settings);
             return project;
         }
@@ -191,7 +195,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             }
         }
 
-        private void ConnectTo (ProjectCollectionLinker other)
+        private void ConnectTo(ProjectCollectionLinker other)
         {
             if (other.CollectionId == this.CollectionId)
             {
@@ -217,7 +221,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         private static bool dbgValidateDuplicateViews = false;
 
 
-        internal  void ValidateNoDuplicates()
+        internal void ValidateNoDuplicates()
         {
             foreach (var r in imported)
             {
@@ -327,7 +331,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             {
                 var proxy = (ILinkMock)external;
 
-                remoter = (RMock) proxy.Remoter;
+                remoter = (RMock)proxy.Remoter;
                 return;
             }
 
@@ -369,7 +373,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             object Linked { get; }
         }
 
-        private class ActiveImport<T, RMock> : ImportedLinksMap.LinkedObject<RMock>, IImportHolder, IActiveImportDBG
+        private sealed class ActiveImport<T, RMock> : ImportedLinksMap.LinkedObject<RMock>, IImportHolder, IActiveImportDBG
             where T : class
             where RMock : MockLinkRemoter<T>
         {
@@ -386,8 +390,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             public ProjectCollectionLinker Linker { get; private set; }
 
-            public T Linked { get; protected set; }
-            public RMock Remoter { get; protected set; }
+            public T Linked { get; private set; }
+
+            public RMock Remoter { get; private set; }
         }
 
 
@@ -396,9 +401,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return new ConnectedProjectCollections();
         }
 
-        internal class ConnectedProjectCollections
+        internal sealed class ConnectedProjectCollections
         {
             private List<ProjectCollectionLinker> group = new List<ProjectCollectionLinker>();
+
             public ProjectCollectionLinker AddNew()
             {
                 var linker = new ProjectCollectionLinker(this);
@@ -439,14 +445,16 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        private class ExternalConnection
+        private sealed class ExternalConnection
         {
             public ExternalConnection(ProjectCollectionLinker linker)
             {
                 this.Linker = linker;
                 this.ActiveImports = ImportedLinksMap.Create();
             }
+
             public ProjectCollectionLinker Linker { get; }
+
             public ImportedLinksMap ActiveImports { get; private set; }
 
             public void Clear()

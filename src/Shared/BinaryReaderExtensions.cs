@@ -1,7 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
@@ -10,13 +11,25 @@ namespace Microsoft.Build.Shared
 {
     internal static class BinaryReaderExtensions
     {
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static string ReadOptionalString(this BinaryReader reader)
+#endif
+        public static string? ReadOptionalString(this BinaryReader reader)
         {
             return reader.ReadByte() == 0 ? null : reader.ReadString();
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static int? ReadOptionalInt32(this BinaryReader reader)
+        {
+            return reader.ReadByte() == 0 ? null : reader.ReadInt32();
+        }
+
+#if !TASKHOST
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static int Read7BitEncodedInt(this BinaryReader reader)
         {
             // Read out an Int32 7 bits at a time.  The high bit
@@ -41,7 +54,9 @@ namespace Microsoft.Build.Shared
             return count;
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
         public static DateTime ReadTimestamp(this BinaryReader reader)
         {
             long timestampTicks = reader.ReadInt64();
@@ -50,8 +65,9 @@ namespace Microsoft.Build.Shared
             return timestamp;
         }
 
+#if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BuildEventContext ReadOptionalBuildEventContext(this BinaryReader reader)
+        public static BuildEventContext? ReadOptionalBuildEventContext(this BinaryReader reader)
         {
             if (reader.ReadByte() == 0)
             {
@@ -74,6 +90,55 @@ namespace Microsoft.Build.Shared
 
             var buildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
             return buildEventContext;
+        }
+#endif
+
+#if !TASKHOST
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#endif
+        public static unsafe Guid ReadGuid(this BinaryReader reader)
+        {
+            return new Guid(reader.ReadBytes(sizeof(Guid)));
+        }
+
+        public static void ReadExtendedBuildEventData(this BinaryReader reader, IExtendedBuildEventArgs data)
+        {
+            data.ExtendedType = reader.ReadString();
+            data.ExtendedData = reader.ReadOptionalString();
+
+            bool haveMetadata = reader.ReadBoolean();
+            if (haveMetadata)
+            {
+                data.ExtendedMetadata = new Dictionary<string, string?>();
+
+                int count = reader.Read7BitEncodedInt();
+                for (int i = 0; i < count; i++)
+                {
+                    string key = reader.ReadString();
+                    string? value = reader.ReadOptionalString();
+
+                    data.ExtendedMetadata.Add(key, value);
+                }
+            }
+            else
+            {
+                data.ExtendedMetadata = null;
+            }
+        }
+
+        public static Dictionary<string, TimeSpan> ReadDurationDictionary(this BinaryReader reader)
+        {
+            int count = reader.Read7BitEncodedInt();
+            var durations = new Dictionary<string, TimeSpan>(count);
+            for (int i = 0; i < count; i++)
+            {
+                string key = reader.ReadString();
+                TimeSpan value = TimeSpan.FromTicks(reader.ReadInt64());
+
+                durations.Add(key, value);
+            }
+
+            return durations;
         }
     }
 }

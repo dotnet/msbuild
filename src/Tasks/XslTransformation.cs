@@ -1,16 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Xml;
-using System.Xml.Xsl;
 using System.Xml.XPath;
+using System.Xml.Xsl;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
+#if FEATURE_COMPILED_XSL
+using System.Collections.Generic;
+using System.Reflection;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -49,6 +54,11 @@ namespace Microsoft.Build.Tasks
         /// The XSLT input as string.
         /// </summary>
         public string XslContent { get; set; }
+
+        /// <summary>
+        /// Flag to preserve whitespaces in the XSLT file.
+        /// </summary>
+        public bool PreserveWhitespace { get; set; }
 
         /// <summary>
         /// The XSLT input as compiled dll.
@@ -96,15 +106,10 @@ namespace Microsoft.Build.Tasks
             try
             {
                 xmlinput = new XmlInput(XmlInputPaths, XmlContent);
-                xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log);
+                xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log, PreserveWhitespace);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.ArgumentError", e.Message);
                 return false;
             }
@@ -112,14 +117,14 @@ namespace Microsoft.Build.Tasks
             // Check if OutputPath has same number of parameters as xmlInputPaths.
             if (XmlInputPaths != null && XmlInputPaths.Length != _outputPaths.Length)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, XmlInputPaths.Length, "XmlContent", "XmlInputPaths");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, XmlInputPaths.Length, "OutputPaths", "XmlInputPaths");
                 return false;
             }
 
             // Check if OutputPath has 1 parameter if xmlString is specified.
             if (XmlContent != null && _outputPaths.Length != 1)
             {
-                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, 1, "XmlContent", "OutputPaths");
+                Log.LogErrorWithCodeFromResources("General.TwoVectorsMustHaveSameLength", _outputPaths.Length, 1, "OutputPaths", "XmlContent");
                 return false;
             }
 
@@ -130,13 +135,8 @@ namespace Microsoft.Build.Tasks
             {
                 arguments = ProcessXsltArguments(Parameters);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.XsltArgumentsError", e.Message);
                 return false;
             }
@@ -153,13 +153,8 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("XslTransform.PrecompiledXsltError");
                 return false;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadError", e.Message);
                 return false;
             }
@@ -167,27 +162,29 @@ namespace Microsoft.Build.Tasks
             // Do the transformation.
             try
             {
+                if (UseTrustedSettings)
+                {
+                    Log.LogMessageFromResources(MessageImportance.High, "XslTransform.SecuritySettingsViaUseTrustedSettings");
+                }
+
                 for (int i = 0; i < xmlinput.Count; i++)
                 {
                     using (XmlWriter xmlWriter = XmlWriter.Create(_outputPaths[i].ItemSpec, xslct.OutputSettings))
                     {
                         using (XmlReader xr = xmlinput.CreateReader(i))
                         {
-                            xslct.Transform(xr, arguments, xmlWriter);
+                            xslct.Transform(xr, arguments, xmlWriter, new XmlUrlResolver());
                         }
 
                         xmlWriter.Close();
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", e.Message);
+                string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
+                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", flattenedMessage);
+                Log.LogMessage(MessageImportance.Low, e.ToString());
                 return false;
             }
 
@@ -207,7 +204,7 @@ namespace Microsoft.Build.Tasks
         /// Takes the raw XML and loads XsltArgumentList
         /// </summary>
         /// <param name="xsltParametersXml">The raw XML that holds each parameter as <Parameter Name="" Value="" Namespace="" /> </param>
-        /// <returns>XsltArgumentList</returns>
+        /// <returns>XsltArgumentList.</returns>
         private static XsltArgumentList ProcessXsltArguments(string xsltParametersXml)
         {
             XsltArgumentList arguments = new XsltArgumentList();
@@ -220,8 +217,10 @@ namespace Microsoft.Build.Tasks
             try
             {
                 XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                XmlReader reader = XmlReader.Create(new StringReader("<XsltParameters>" + xsltParametersXml + "</XsltParameters>"), settings);
-                doc.Load(reader);
+                using (XmlReader reader = XmlReader.Create(new StringReader("<XsltParameters>" + xsltParametersXml + "</XsltParameters>"), settings))
+                {
+                    doc.Load(reader);
+                }
             }
             catch (XmlException xe)
             {
@@ -296,7 +295,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     XmlMode = XmlModes.Xml;
-                    _data = new[] { xml };
+                    _data = [xml];
                 }
             }
 
@@ -354,11 +353,16 @@ namespace Microsoft.Build.Tasks
             private readonly XslModes _xslMode;
 
             /// <summary>
-            /// Contains the raw XSLT 
+            /// Contains the raw XSLT
             /// or the path to XSLT file
             /// or the path to compiled XSLT dll.
             /// </summary>
             private readonly string _data;
+
+            /// <summary>
+            /// Flag to preserve whitespaces in the XSLT file.
+            /// </summary>
+            private bool _preserveWhitespace;
 
             /// <summary>
             /// Tool for logging build messages, warnings, and errors
@@ -373,7 +377,8 @@ namespace Microsoft.Build.Tasks
             /// <param name="xslt">The raw to XSLT or null.</param>
             /// <param name="xsltCompiledDll">The path to compiled XSLT file or null.</param>
             /// <param name="logTool">Log helper.</param>
-            public XsltInput(ITaskItem xsltFile, string xslt, ITaskItem xsltCompiledDll, TaskLoggingHelper logTool)
+            /// <param name="preserveWhitespace">Flag for xslt whitespace option.</param>
+            public XsltInput(ITaskItem xsltFile, string xslt, ITaskItem xsltCompiledDll, TaskLoggingHelper logTool, bool preserveWhitespace)
             {
                 _log = logTool;
                 if ((xsltFile != null && xslt != null) ||
@@ -402,6 +407,8 @@ namespace Microsoft.Build.Tasks
                     _xslMode = XslModes.XsltCompiledDll;
                     _data = xsltCompiledDll.ItemSpec;
                 }
+
+                _preserveWhitespace = preserveWhitespace;
             }
 
             /// <summary>
@@ -447,8 +454,12 @@ namespace Microsoft.Build.Tasks
                 switch (_xslMode)
                 {
                     case XslModes.Xslt:
-                        xslct.Load(XmlReader.Create(new StringReader(_data)), settings, new XmlUrlResolver());
-                        break;
+                        {
+                            using var sr = new StringReader(_data);
+                            using var xmlReader = XmlReader.Create(sr);
+                            xslct.Load(xmlReader, settings, new XmlUrlResolver());
+                            break;
+                        }
                     case XslModes.XsltFile:
                         if (useTrustedSettings)
                         {
@@ -461,7 +472,8 @@ namespace Microsoft.Build.Tasks
 
                         using (XmlReader reader = XmlReader.Create(new StreamReader(_data), new XmlReaderSettings { CloseInput = true }, _data))
                         {
-                            xslct.Load(new XPathDocument(reader), settings, new XmlUrlResolver());
+                            XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
+                            xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, new XmlUrlResolver());
                         }
                         break;
                     case XslModes.XsltCompiledDll:
@@ -486,6 +498,7 @@ namespace Microsoft.Build.Tasks
                 return xslct;
             }
 
+#if FEATURE_COMPILED_XSL
             /// <summary>
             /// Find the type from an assembly and loads it.
             /// </summary>
@@ -519,6 +532,7 @@ namespace Microsoft.Build.Tasks
                     throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.MustSpecifyType", assemblyPath));
                 }
             }
+#endif
         }
         #endregion
     }

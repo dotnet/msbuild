@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,6 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 #endif
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -19,8 +18,9 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ConstructOverSameFileReturnsSame()
         {
             ProjectRootElement projectXml1 = ProjectRootElement.Create();
-            projectXml1.Save(FileUtilities.GetTemporaryFile());
+            projectXml1.Save(FileUtilities.GetTemporaryFileName());
 
             ProjectRootElement projectXml2 = ProjectRootElement.Open(projectXml1.FullPath);
 
@@ -214,9 +214,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath3()
         {
-            string content = "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
+            string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
 
-            ProjectRootElement projectXml1 = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml1 = projectRootElementFromString.Project;
+
 
             projectXml1.FullPath = @"xyz\abc";
 
@@ -231,9 +233,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void ConstructOverSameFileReturnsSameEvenWithOneBeingRelativePath4()
         {
-            string content = "<Project ToolsVersion=\"4.0\" xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\r\n</Project>";
+            string content = "<Project ToolsVersion=\"4.0\">\r\n</Project>";
 
-            ProjectRootElement projectXml1 = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml1 = projectRootElementFromString.Project;
+
 
             projectXml1.FullPath = Path.Combine(Directory.GetCurrentDirectory(), @"xyz\abc");
 
@@ -264,8 +268,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader("XXX")));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -290,12 +293,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <XXX xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>
+                    <XXX />
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Valid Xml, invalid syntax below the root
@@ -306,14 +308,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <XXX/>
                     </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Root indicates upgrade needed
@@ -328,8 +329,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Valid Xml, invalid namespace below the root
@@ -346,8 +346,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that the namespace error reports are correct
@@ -367,7 +366,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             bool exceptionThrown = false;
             try
             {
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
+                ProjectRootElement project = projectRootElementFromString.Project;
             }
             catch (InvalidProjectFileException ex)
             {
@@ -392,7 +392,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                            <XXX YYY='ZZZ'/>
                         </ItemGroup>
@@ -400,8 +400,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Valid Xml, invalid syntax, should not get added to the Xml cache and
@@ -413,7 +412,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <ItemGroup>
                            <XXX YYY='ZZZ'/>
                         </ItemGroup>
@@ -426,7 +425,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     try
                     {
-                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                        path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                         File.WriteAllText(path, content);
 
                         ProjectRootElement.Open(path);
@@ -442,8 +441,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     File.Delete(path);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify that opening project using XmlTextReader does not add it to the Xml cache
@@ -453,16 +451,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Trait("Category", "netcore-linux-failing")]
         public void ValidXmlXmlTextReaderNotCache()
         {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    </Project>
-                ";
+            string content = @"<Project />";
 
             string path = null;
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, content);
 
                 var reader1 = XmlReader.Create(path);
@@ -491,21 +486,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void ValidXmlXmlReaderCache()
         {
-            string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-                    </Project>
-                ";
+            string content = @"<Project />";
 
-            string content2 = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' DefaultTargets='t'>
-                    </Project>
-                ";
+            string content2 = @"<Project DefaultTargets='t' />";
 
             string path = null;
 
             try
             {
-                path = FileUtilities.GetTemporaryFile();
+                path = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(path, content);
 
                 ProjectRootElement root1 = ProjectRootElement.Create(path);
@@ -531,7 +520,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void LoadCommonTargets()
         {
-            ProjectCollection projectCollection = new ProjectCollection();
+            using ProjectCollection projectCollection = new ProjectCollection();
             string toolsPath = projectCollection.Toolsets.Where(toolset => (string.Equals(toolset.ToolsVersion, ObjectModelHelpers.MSBuildDefaultToolsVersion, StringComparison.OrdinalIgnoreCase))).First().ToolsPath;
 
             string[] targets =
@@ -567,8 +556,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project = ProjectRootElement.Create(reader);
 
                 project.Save();
-            }
-           );
+            });
         }
         /// <summary>
         /// Save content with transforms.
@@ -581,7 +569,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             project.AddItem("i", "@(h->'%(x)')");
 
             StringBuilder builder = new StringBuilder();
-            StringWriter writer = new StringWriter(builder);
+            using StringWriter writer = new StringWriter(builder);
 
             project.Save(writer);
 
@@ -611,7 +599,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
 
                 project.Save(file);
 
@@ -703,8 +691,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.Save();
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that the ProjectRootElement.Encoding property getter returns values
@@ -713,19 +700,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void EncodingGetterBasedOnXmlDeclaration()
         {
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
+            using ProjectRootElementFromString projectRootElementFromStringUTF16 = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>"))));
+</Project>"));
+            ProjectRootElement project = projectRootElementFromStringUTF16.Project;
             Assert.Equal(Encoding.Unicode, project.Encoding);
 
-            project = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
+            using ProjectRootElementFromString projectRootElementFromStringUTF8 = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>"))));
+</Project>"));
+            project = projectRootElementFromStringUTF8.Project;
             Assert.Equal(Encoding.UTF8, project.Encoding);
 
-            project = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""us-ascii""?>
+            using ProjectRootElementFromString projectRootElementFromStringASCII = new(ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""us-ascii""?>
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>"))));
+</Project>"));
+            project = projectRootElementFromStringASCII.Project;
             Assert.Equal(Encoding.ASCII, project.Encoding);
         }
 
@@ -736,7 +726,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void EncodingGetterBasedOnActualEncodingWhenXmlDeclarationIsAbsent()
         {
-            string projectFullPath = FileUtilities.GetTemporaryFile();
+            string projectFullPath = FileUtilities.GetTemporaryFileName();
             try
             {
                 VerifyLoadedProjectHasEncoding(projectFullPath, Encoding.UTF8);
@@ -761,9 +751,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         [Fact]
         public void SaveUnmodifiedWithNewEncoding()
         {
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
+            using ProjectRootElementFromString projectRootElementFromString = new(ObjectModelHelpers.CleanupFileContents(@"
 <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
-</Project>"))));
+</Project>"));
+            ProjectRootElement project = projectRootElementFromString.Project;
+
             project.FullPath = FileUtilities.GetTemporaryFile();
             string projectFullPath = project.FullPath;
             try
@@ -828,7 +820,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Choose>
                     </Project>");
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectPropertyElement> properties = Helpers.MakeList(project.Properties);
 
@@ -885,7 +878,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         </Choose>
                     </Project>");
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectItemElement> items = Helpers.MakeList(project.Items);
 
@@ -898,11 +892,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
         /// <summary>
-        /// Build a solution file that can't be accessed
+        /// Build a solution file that can't be accessed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  // Security classes are not supported on Unix
-
+        [WindowsOnlyFact(additionalMessage: "Security classes are not supported on Unix.")]
         public void SolutionCanNotBeOpened()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -941,16 +933,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     File.Delete(tempFileSentinel);
                     Assert.False(File.Exists(solutionFile));
                 }
-            }
-           );
+            });
         }
 
         /// <summary>
-        /// Build a project file that can't be accessed
+        /// Build a project file that can't be accessed.
         /// </summary>
-        [Fact]
-        [PlatformSpecific (TestPlatforms.Windows)]
-        // FileSecurity class is not supported on Unix
+        [WindowsOnlyFact(additionalMessage: "FileSecurity class is not supported on Unix.")]
         public void ProjectCanNotBeOpened()
         {
             Assert.Throws<InvalidProjectFileException>(() =>
@@ -985,8 +974,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     File.Delete(projectFile);
                     Assert.False(File.Exists(projectFile));
                 }
-            }
-           );
+            });
         }
 #endif
 
@@ -1002,7 +990,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 try
                 {
-                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    solutionFile = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
 
                     // Arbitrary corrupt content
                     string content = @"Microsoft Visual Studio Solution File, Format Version 10.00
@@ -1017,14 +1005,12 @@ Project(""{";
                 {
                     File.Delete(solutionFile);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Open lots of projects concurrently to try to trigger problems
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]  //This test is platform specific for Windows
+        [WindowsOnlyFact]
         public void ConcurrentProjectOpenAndCloseThroughProject()
         {
             int iterations = 500;
@@ -1039,10 +1025,10 @@ Project(""{";
                     CreatePREWithSubstantialContent().Save(paths[i]);
                 }
 
-                var collection = new ProjectCollection();
+                using var collection = new ProjectCollection();
                 int counter = 0;
                 int remaining = iterations;
-                var done = new ManualResetEvent(false);
+                using var done = new ManualResetEvent(false);
 
                 for (int i = 0; i < iterations; i++)
                 {
@@ -1110,10 +1096,10 @@ Project(""{";
             {
                 var projects = new ProjectRootElement[iterations];
 
-                var collection = new ProjectCollection();
+                using var collection = new ProjectCollection();
                 int counter = 0;
                 int remaining = iterations;
-                var done = new ManualResetEvent(false);
+                using var done = new ManualResetEvent(false);
 
                 for (int i = 0; i < iterations; i++)
                 {
@@ -1280,7 +1266,8 @@ Project(""{";
 
   </Project>";
 
-            var pre = ProjectRootElement.Create(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))));
+            using ProjectRootElementFromString projectRootElementFromString = new(ObjectModelHelpers.CleanupFileContents(project));
+            ProjectRootElement pre = projectRootElementFromString.Project;
 
             ValidateDeepCloneAndCopyFrom(pre);
         }
@@ -1301,11 +1288,11 @@ Project(""{";
             {
                 var projectFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
                 var projectFile = projectFiles.CreatedFiles.First();
-
-                var projectXml = ProjectRootElement.Create(
-                    XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(project))),
-                    projectCollection,
-                    preserveFormatting: true);
+                using ProjectRootElementFromString projectRootElementFromString = new(
+                ObjectModelHelpers.CleanupFileContents(project),
+                projectCollection,
+                preserveFormatting: true);
+                ProjectRootElement projectXml = projectRootElementFromString.Project;
 
                 projectXml.Save(projectFile);
 
@@ -1351,7 +1338,8 @@ Project(""{";
                 projectElement.Reload(false, initialPreserveFormatting);
                 Assert.Equal(initialPreserveFormatting, projectElement.PreserveFormatting);
 
-                projectElement.ReloadFrom(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(SimpleProject))), false, reloadShouldPreserveFormatting);
+                using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(SimpleProject)));
+                projectElement.ReloadFrom(xmlReader, false, reloadShouldPreserveFormatting);
                 Assert.Equal(expectedFormattingAfterReload, projectElement.PreserveFormatting);
 
                 // reset project to original preserve formatting
@@ -1607,7 +1595,8 @@ true, true, true)]
                 var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(initialProjectContents, projectCollection1, preserveFormatting: true);
                 projectElement.Save(projectPath);
 
-                projectElement.ReloadFrom(XmlReader.Create(new StringReader(changedProjectContents1)));
+                using var xmlReader = XmlReader.Create(new StringReader(changedProjectContents1));
+                projectElement.ReloadFrom(xmlReader);
 
                 VerifyAssertLineByLine(changedProjectContents1, projectElement.RawXml);
 
@@ -1718,7 +1707,7 @@ true, true, true)]
             AssertProjectFileAfterReload(
                 true,
                 false,
-                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile);});
+                (initial, reload, actualFile) => { Assert.Equal(reload, actualFile); });
         }
 
         [Fact]
@@ -1759,7 +1748,8 @@ true, true, true)]
 
                 if (reloadProjectFromMemory)
                 {
-                    rootElement.ReloadFrom(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(ComplexProject))), false);
+                    using var xmlReader = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(ComplexProject)));
+                    rootElement.ReloadFrom(xmlReader, false);
                 }
                 else
                 {
@@ -1856,31 +1846,6 @@ true, true, true)]
             AssertReload(SimpleProject, ComplexProject, true, true, true, act);
         }
 
-        [Fact]
-        public void ReloadDoesNotLeakCachedXmlDocuments()
-        {
-            using var env = TestEnvironment.Create();
-            var testFiles = env.CreateTestProjectWithFiles("", new[] { "build.proj" });
-            var projectFile = testFiles.CreatedFiles.First();
-
-            var projectElement = ObjectModelHelpers.CreateInMemoryProjectRootElement(SimpleProject);
-            projectElement.Save(projectFile);
-
-            int originalDocumentCount = GetNumberOfDocumentsInProjectStringCache(projectElement);
-
-            // Test successful reload.
-            projectElement.Reload(false);
-            GetNumberOfDocumentsInProjectStringCache(projectElement).ShouldBe(originalDocumentCount);
-
-            // Test failed reload.
-            using (StreamWriter sw = new StreamWriter(projectFile))
-            {
-                sw.WriteLine("<XXX />"); // Invalid root element
-            }
-            Should.Throw<InvalidProjectFileException>(() => projectElement.Reload(false));
-            GetNumberOfDocumentsInProjectStringCache(projectElement).ShouldBe(originalDocumentCount);
-        }
-
         private void AssertReload(
             string initialContents,
             string changedContents,
@@ -1947,7 +1912,8 @@ true, true, true)]
         private void SaveProjectWithEncoding(string projectFullPath, Encoding encoding)
         {
             // Always use a new project collection to guarantee we're reading off disk.
-            ProjectRootElement project = ProjectRootElement.Open(projectFullPath, new ProjectCollection());
+            using var collection = new ProjectCollection();
+            ProjectRootElement project = ProjectRootElement.Open(projectFullPath, collection);
             project.Save(encoding);
             Assert.Equal(encoding, project.Encoding); // "Changing an unmodified project's encoding failed to update ProjectRootElement.Encoding."
 
@@ -1962,7 +1928,8 @@ true, true, true)]
                 Assert.Equal(expected, actual); // "The encoding was not emitted as an XML declaration."
             }
 
-            project = ProjectRootElement.Open(projectFullPath, new ProjectCollection());
+            using var projectCollection = new ProjectCollection();
+            project = ProjectRootElement.Open(projectFullPath, projectCollection);
 
             // It's ok for the read Encoding to differ in fields like DecoderFallback,
             // so a pure equality check here is too much.
@@ -1979,7 +1946,8 @@ true, true, true)]
             CreateProjectWithEncodingWithoutDeclaration(projectFullPath, encoding);
 
             // Let's just be certain the project has been read off disk...
-            ProjectRootElement project = ProjectRootElement.Open(projectFullPath, new ProjectCollection());
+            using var collection = new ProjectCollection();
+            ProjectRootElement project = ProjectRootElement.Open(projectFullPath, collection);
             Assert.Equal(encoding.WebName, project.Encoding.WebName);
         }
 
@@ -2004,7 +1972,8 @@ true, true, true)]
         {
             string content = ObjectModelHelpers.CleanupFileContents(ComplexProject);
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             return project;
         }
@@ -2012,18 +1981,6 @@ true, true, true)]
         private void VerifyAssertLineByLine(string expected, string actual)
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false);
-        }
-
-        /// <summary>
-        /// Returns the number of documents retained by the project string cache.
-        /// Peeks at it via reflection since internals are not visible to these tests.
-        /// </summary>
-        private int GetNumberOfDocumentsInProjectStringCache(ProjectRootElement project)
-        {
-            var bindingFlags = BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty;
-            object document = typeof(ProjectRootElement).InvokeMember("XmlDocument", bindingFlags, null, project, Array.Empty<object>());
-            object cache = document.GetType().InvokeMember("StringCache", bindingFlags, null, document, Array.Empty<object>());
-            return (int)cache.GetType().InvokeMember("DocumentCount", bindingFlags, null, cache, Array.Empty<object>());
         }
     }
 }

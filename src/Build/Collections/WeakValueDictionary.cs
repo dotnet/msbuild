@@ -1,10 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Collections
 {
@@ -13,7 +16,7 @@ namespace Microsoft.Build.Collections
     /// </summary>
     /// <typeparam name="K">Type of key</typeparam>
     /// <typeparam name="V">Type of value, without the WeakReference wrapper.</typeparam>
-    internal class WeakValueDictionary<K, V>
+    internal class WeakValueDictionary<K, V> : IEnumerable<KeyValuePair<K, V>>
         where V : class
     {
         /// <summary>
@@ -116,7 +119,7 @@ namespace Microsoft.Build.Collections
                 {
                     Scavenge();
 
-                    // If that didn't do anything, raise the capacity at which 
+                    // If that didn't do anything, raise the capacity at which
                     // we next scavenge. Note that we never shrink, but neither
                     // does the underlying dictionary.
                     if (_dictionary.Count == _capacity)
@@ -231,5 +234,22 @@ namespace Microsoft.Build.Collections
         {
             _dictionary.Clear();
         }
+
+        public IEnumerator<KeyValuePair<K, V>> GetEnumerator()
+        {
+            foreach (KeyValuePair<K, WeakReference<V>> kvp in _dictionary)
+            {
+                if (kvp.Value is null)
+                {
+                    yield return new KeyValuePair<K, V>(kvp.Key, null);
+                }
+                else if (kvp.Value.TryGetTarget(out V target))
+                {
+                    yield return new KeyValuePair<K, V>(kvp.Key, target);
+                }
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -7,6 +7,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.FileSystem
 {
@@ -69,7 +71,7 @@ namespace Microsoft.Build.Shared.FileSystem
             public const int PmsfMultiple = 0x1;
 
             /// <summary>
-            /// If PMSF_NORMAL is used, ignore leading spaces in the string pointed to by pszSpec. If PMSF_MULTIPLE is used, 
+            /// If PMSF_NORMAL is used, ignore leading spaces in the string pointed to by pszSpec. If PMSF_MULTIPLE is used,
             /// ignore leading spaces in each file type contained in the string pointed to by pszSpec. This flag can be combined with PMSF_NORMAL and PMSF_MULTIPLE.
             /// </summary>
             public const int PmsfDontStripSpaces = 0x00010000;
@@ -139,7 +141,7 @@ namespace Microsoft.Build.Shared.FileSystem
             /// <summary>
             /// Indicates if enumeration succeeded.
             /// </summary>
-            public bool Succeeded
+            public readonly bool Succeeded
             {
                 get { return Status == EnumerateDirectoryStatus.Success; }
             }
@@ -151,7 +153,7 @@ namespace Microsoft.Build.Shared.FileSystem
             /// <remarks>
             /// This is a good <c>default:</c> case when switching on every possible <see cref="EnumerateDirectoryStatus"/>
             /// </remarks>
-            public NativeWin32Exception ThrowForUnknownError()
+            public readonly NativeWin32Exception ThrowForUnknownError()
             {
                 Debug.Assert(Status == EnumerateDirectoryStatus.UnknownError);
                 throw CreateExceptionForError();
@@ -171,7 +173,7 @@ namespace Microsoft.Build.Shared.FileSystem
             /// <summary>
             /// Creates (but does not throw) an exception for this result. The result must not be successful.
             /// </summary>
-            public NativeWin32Exception CreateExceptionForError()
+            public readonly NativeWin32Exception CreateExceptionForError()
             {
                 Debug.Assert(Status != EnumerateDirectoryStatus.Success);
                 if (Status == EnumerateDirectoryStatus.UnknownError)

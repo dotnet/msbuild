@@ -1,19 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// Contains information about entries in the AssemblyFoldersEx registry keys.
-//-----------------------------------------------------------------------
-#if FEATURE_WIN32_REGISTRY
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
     /// Contains information about entries in the AssemblyFoldersEx registry keys.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public class AssemblyFoldersExInfo
     {
         /// <summary>
@@ -21,9 +21,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public AssemblyFoldersExInfo(RegistryHive hive, RegistryView view, string registryKey, string directoryPath, Version targetFrameworkVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(registryKey, nameof(registryKey));
-            ErrorUtilities.VerifyThrowArgumentNull(directoryPath, nameof(directoryPath));
-            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion, nameof(targetFrameworkVersion));
+            ErrorUtilities.VerifyThrowArgumentNull(registryKey);
+            ErrorUtilities.VerifyThrowArgumentNull(directoryPath);
+            ErrorUtilities.VerifyThrowArgumentNull(targetFrameworkVersion);
 
             Hive = hive;
             View = view;
@@ -58,4 +58,3 @@ namespace Microsoft.Build.Utilities
         public Version TargetFrameworkVersion { get; }
     }
 }
-#endif

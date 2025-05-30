@@ -1,14 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Shared.LanguageParser;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class StreamMappedString_Tests
+    public sealed class StreamMappedString_Tests
     {
         /// <summary>
         /// Test for a string that has ANSI but non-ascii characters.
@@ -22,7 +24,7 @@ namespace Microsoft.Build.UnitTests
 
             // Instead, directly write the ANSI character into the memory buffer.
             sourcesStream.Seek(11, SeekOrigin.Begin);
-            sourcesStream.WriteByte(0xc3);    // Plug the 'Ã' in 
+            sourcesStream.WriteByte(0xc3);    // Plug the 'Ã' in
             sourcesStream.Seek(0, SeekOrigin.Begin);
 
             // Should not throw an exception because we force ANSI.
@@ -136,8 +138,7 @@ namespace Microsoft.Build.UnitTests
                 StreamMappedString s = new StreamMappedString(stream, false);
 
                 Assert.Equal(String.Empty, s.Substring(1, 30));
-            }
-           );
+            });
         }
         [Fact]
         public void Regress_Mutation_SubstringOnLastPageWorks()
@@ -224,8 +225,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Read something way past the end. This should result in a range exception.
                 s.GetAt(1000000);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -237,8 +237,7 @@ namespace Microsoft.Build.UnitTests
                 StreamMappedString s = new StreamMappedString(stream, false, 256);
 
                 s.GetAt(256);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -251,15 +250,14 @@ namespace Microsoft.Build.UnitTests
 
                 // Read something way past the end. This should result in a range exception.
                 s.GetAt(1000000);
-            }
-           );
+            });
         }
 
 
         /// <summary>
         /// A stream class that counts the number of times it was reset.
         /// </summary>
-        private class RestartCountingStream : Stream
+        private sealed class RestartCountingStream : Stream
         {
             private int _resetCount;
             private Stream _stream;
@@ -337,8 +335,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-
-
-

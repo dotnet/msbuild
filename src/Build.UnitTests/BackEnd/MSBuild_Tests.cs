@@ -1,10 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -13,6 +12,8 @@ using Microsoft.Build.Utilities;
 
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -36,15 +37,12 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
             try
             {
                 Directory.SetCurrentDirectory(Path.GetTempPath());
-
-                string tempPath = Path.GetTempPath();
 
                 string tempProject = ObjectModelHelpers.CreateTempFileOnDisk(@"
                 <Project DefaultTargets=`TargetA; TargetB; TargetC` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -67,16 +65,16 @@ namespace Microsoft.Build.UnitTests
                     projectFile1 += "..\\";
                 }
 
-                int rootLength = Path.GetPathRoot(tempPath).Length;
-                string tempPathNoRoot = tempPath.Substring(rootLength);
+                int rootLength = Path.GetPathRoot(tempProject).Length;
+                string tempPathNoRoot = tempProject.Substring(rootLength);
 
-                projectFile1 += Path.Combine(tempPathNoRoot, fileName);
+                projectFile1 += tempPathNoRoot;
 
                 string parentProjectContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build`>
-                        <MSBuild Projects=`" + projectFile1 + @"` />
+                        <MSBuild Projects=`" + projectFile1 + @"`/>
                     </Target>
                 </Project>";
                 try
@@ -170,7 +168,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Ensures that it is possible to call the MSBuild task with an empty Projects parameter, and it 
+        /// Ensures that it is possible to call the MSBuild task with an empty Projects parameter, and it
         /// shouldn't error, and it shouldn't try to build itself.
         /// </summary>
         [Fact]
@@ -312,6 +310,56 @@ namespace Microsoft.Build.UnitTests
             Assert.DoesNotContain(error, logger.FullLog);
         }
 
+        /// <summary>
+        /// Verifies that nonexistent projects are skipped when requested when building in parallel.
+        /// DDB # 125831
+        /// </summary>
+        [Fact]
+        public void SkipNonexistentProjectsAsMetadataBuildingInParallel()
+        {
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(
+                "SkipNonexistentProjectsMain.csproj",
+                @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`t` >
+                        <ItemGroup>
+                            <ProjectReference Include=`this_project_does_not_exist_warn.csproj` >
+                                <SkipNonexistentProjects>true</SkipNonexistentProjects>
+                            </ProjectReference>
+                            <ProjectReference Include=`this_project_does_not_exist_error.csproj` >
+                            </ProjectReference>
+                            <ProjectReference Include=`foo.csproj` >
+                                <SkipNonexistentProjects>false</SkipNonexistentProjects>
+                            </ProjectReference>
+                        </ItemGroup>
+                        <MSBuild Projects=`@(ProjectReference)` BuildInParallel=`true` />
+                    </Target>
+                </Project>
+                ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(
+                "foo.csproj",
+                @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`t` >
+                        <Message Text=`Hello from foo.csproj`/>
+                    </Target>
+                </Project>
+                ");
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj", logger);
+
+            logger.AssertLogContains("Hello from foo.csproj");
+            string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist_warn.csproj");
+            string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_warn.csproj");
+            string error2 = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_error.csproj");
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(1, logger.ErrorCount);
+            Assert.Contains(message, logger.FullLog); // for the missing project
+            Assert.Contains(error2, logger.FullLog);
+            Assert.DoesNotContain(error, logger.FullLog);
+        }
+
         [Fact]
         public void LogErrorWhenBuildingVCProj()
         {
@@ -430,7 +478,7 @@ namespace Microsoft.Build.UnitTests
             // -------------------------------------------------------
             // TeamBuild.proj
             // -------------------------------------------------------
-            // Attempts to build the above ConsoleApplication1.csproj by calling the MSBuild task, 
+            // Attempts to build the above ConsoleApplication1.csproj by calling the MSBuild task,
             // and overriding the OutDir property.  However, the value being passed into OutDir
             // is coming from another property which is produced by CreateProperty and has
             // some special characters in it.
@@ -439,16 +487,16 @@ namespace Microsoft.Build.UnitTests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build`>
-                    
+
                         <CreateProperty Value=`$(MSBuildProjectDirectory)\binaries\`>
                             <Output PropertyName=`MasterOutDir` TaskParameter=`Value`/>
                         </CreateProperty>
-                        
+
                         <MSBuild Projects=`ConsoleApplication1\ConsoleApplication1.csproj`
                                  Properties=`OutDir=$(MasterOutDir)`
                                  Targets=`Rebuild`/>
                     </Target>
-                    
+
                 </Project>
                 ");
 
@@ -470,7 +518,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -539,7 +587,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -614,7 +662,7 @@ namespace Microsoft.Build.UnitTests
                           <UndefineProperties>g;h;</UndefineProperties>
                         </PR>
                       </ItemGroup>
-                      <Target Name='a'> 
+                      <Target Name='a'>
                         <MSBuild Projects='@(PR)' Properties='c=c;d=d;' RemoveProperties='i;c;' Targets='b'/>
                       </Target>
                       <Target Name='b'>
@@ -648,6 +696,193 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+
+        /// <summary>
+        /// Include and Exclude items outside and inside targets should result in same behavior on
+        ///  platform specific paths.
+        /// </summary>
+        [Fact]
+        public void ItemsIncludeExcludePathsCombinations()
+        {
+            string projectFile = null;
+
+            try
+            {
+                projectFile = ObjectModelHelpers.CreateTempFileOnDisk(@"
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <ItemGroup>
+                        <iout1 Include='a/b.foo' Exclude='a\b.foo' />
+                        <iout2 Include='a\b.foo' Exclude='a/b.foo' />
+                        <iout3 Include='a/b.foo' Exclude='a/b.foo' />
+                        <iout4 Include='a\b.foo' Exclude='a\b.foo' />
+                        <iout5 Include='a/b.foo' Exclude='a\c.foo' />
+                        <iout6 Include='a\b.foo' Exclude='a\c.foo' />
+                      </ItemGroup>
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='a/b.foo' Exclude='a\b.foo' />
+                          <iin2 Include='a\b.foo' Exclude='a/b.foo' />
+                          <iin3 Include='a/b.foo' Exclude='a/b.foo' />
+                          <iin4 Include='a\b.foo' Exclude='a\b.foo' />
+                          <iin5 Include='a/b.foo' Exclude='a\c.foo' />
+                          <iin6 Include='a\b.foo' Exclude='a\c.foo' />
+                        </ItemGroup>
+                        <Message Text='iout1=[@(iout1)]' Importance='High' />
+                        <Message Text='iout2=[@(iout2)]' Importance='High' />
+                        <Message Text='iout3=[@(iout3)]' Importance='High' />
+                        <Message Text='iout4=[@(iout4)]' Importance='High' />
+                        <Message Text='iout5=[@(iout5)]' Importance='High' />
+                        <Message Text='iout6=[@(iout6)]' Importance='High' />
+
+                        <Message Text='iin1=[@(iin1)]' Importance='High' />
+                        <Message Text='iin2=[@(iin2)]' Importance='High' />
+                        <Message Text='iin3=[@(iin3)]' Importance='High' />
+                        <Message Text='iin4=[@(iin4)]' Importance='High' />
+                        <Message Text='iin5=[@(iin5)]' Importance='High' />
+                        <Message Text='iin6=[@(iin6)]' Importance='High' />
+                      </Target>
+                    </Project>
+                ");
+
+                MockLogger logger = new MockLogger(_testOutput);
+                ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile, logger);
+
+                Console.WriteLine(logger.FullLog);
+
+                logger.AssertLogContains("iout1=[]");
+                logger.AssertLogContains("iout2=[]");
+                logger.AssertLogContains("iout3=[]");
+                logger.AssertLogContains("iout4=[]");
+                logger.AssertLogContains("iout5=[a/b.foo]");
+                logger.AssertLogContains($"iout6=[a{Path.DirectorySeparatorChar}b.foo]");
+                logger.AssertLogContains("iin1=[]");
+                logger.AssertLogContains("iin2=[]");
+                logger.AssertLogContains("iin3=[]");
+                logger.AssertLogContains("iin4=[]");
+                logger.AssertLogContains("iin5=[a/b.foo]");
+                logger.AssertLogContains($"iin6=[a{Path.DirectorySeparatorChar}b.foo]");
+            }
+            finally
+            {
+                File.Delete(projectFile);
+            }
+        }
+
+        /// <summary>
+        /// Referring to an item outside of target leads to 'naturally expected' reference to the item being processed.
+        ///  No expansion occurs.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionOutsideTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                     <ItemGroup>
+                        <iout1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                        <iout1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
+                      </ItemGroup>
+                      <Target Name='a'>
+                        <Message Text="iout1=[@(iout1)]" Importance='High' />
+                        <Message Text="iout1-target-paths=[@(iout1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogContains("iout1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogContains("iout1-target-paths=[b.foo;d.foo;h.foo]");
+        }
+
+        /// <summary>
+        /// Referring to an item within target leads to item expansion which might be unintended behavior - hence warning.
+        /// </summary>
+        [Fact]
+        public void ItemsRecursionWithinTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='a/b.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='c/d.foo' TargetPath='%(Filename)%(Extension)' />
+                          <iin1 Include='g/h.foo' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            string projFileName = "test.proj";
+            var projectFile = env.CreateFile(projFileName, ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogDoesntContain("iin1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogDoesntContain("iin1-target-paths=[b.foo;d.foo;h.foo]");
+            logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo;g/h.foo]");
+            logger.AssertLogContains("iin1-target-paths=[;b.foo;b.foo;d.foo]");
+
+            logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Filename"));
+            logger.AssertLogContains(string.Format(ResourceUtilities.GetResourceString("ItemReferencingSelfInTarget"), "iin1", "Extension"));
+            logger.AssertMessageCount("MSB4120", 6);
+            // The location of the offending attribute (TargetPath) is transferred - for both metadatums (%(Filename) and %(Extension)) on correct locations in xml
+            logger.AssertMessageCount($"{projFileName}(4,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(5,34):", 2, false);
+            logger.AssertMessageCount($"{projFileName}(6,34):", 2, false);
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(0, logger.ErrorCount);
+        }
+
+        /// <summary>
+        /// Referring to an unrelated item within target leads to expected expansion.
+        /// </summary>
+        [Fact]
+        public void UnrelatedItemsRecursionWithinTarget()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectContent = """
+                    <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <ItemGroup>
+                        <iout1 Include='a/b.foo'/>
+                        <iout1 Include='c/d.foo'/>
+                        <iout1 Include='g/h.foo'/>
+                      </ItemGroup>
+
+                      <Target Name='a'>
+                        <ItemGroup>
+                          <iin1 Include='@(iout1)' TargetPath='%(Filename)%(Extension)' />
+                        </ItemGroup>
+                        <Message Text="iin1=[@(iin1)]" Importance='High' />
+                        <Message Text="iin1-target-paths=[@(iin1->'%(TargetPath)')]" Importance='High' />
+                      </Target>
+                    </Project>
+                """;
+            var projectFile = env.CreateFile("test.proj", ObjectModelHelpers.CleanupFileContents(projectContent));
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectSuccess(projectFile.Path, logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            logger.AssertLogContains("iin1=[a/b.foo;c/d.foo;g/h.foo]");
+            logger.AssertLogContains("iin1-target-paths=[b.foo;d.foo;h.foo]");
+
+            logger.AssertLogDoesntContain("MSB4120");
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(0, logger.ErrorCount);
+        }
+
         /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
@@ -659,7 +894,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -726,7 +961,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyProp)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyProp)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -781,7 +1016,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -848,7 +1083,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='0'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -917,7 +1152,7 @@ namespace Microsoft.Build.UnitTests
 
                     <Target Name=`TargetA` Outputs=`a1.dll` Condition=`'$(MyPropG)'=='1'`/>
                     <Target Name=`TargetB` Outputs=`b1.dll` Condition=`'$(MyPropA)'=='1'`/>
-                   
+
                 </Project>
                 ");
 
@@ -994,7 +1229,7 @@ namespace Microsoft.Build.UnitTests
                     <ItemGroup>
                         <ProjectFile Include=`" + projectFile1 + @"` />
                     </ItemGroup>
-                   
+
                     <Target Name=`Build` Outputs=`$(SomeOutputs)`>
                         <MSBuild Projects=`@(ProjectFile)` Targets=`$(Targets)` TargetAndPropertyListSeparators=`%3B;%3C` />
                     </Target>
@@ -1059,14 +1294,14 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(project1), new TaskItem(project2)
                 };
 
-                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are not multiple nodes 
+                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are not multiple nodes
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
                     bool buildInParallel = false;
                     bool stopOnFirstFailure = false;
 
-                    // first set up the project being built. 
+                    // first set up the project being built.
                     switch (i)
                     {
                         case 0:
@@ -1107,7 +1342,7 @@ namespace Microsoft.Build.UnitTests
                     switch (i)
                     {
                         case 0:
-                            // Verify setting BuildInParallel and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel and StopOnFirstFailure to
                             // true will cause the msbuild task to set BuildInParallel to false during the execute
                             // Verify build did not build second project which has the message SecondProject
                             logger.AssertLogDoesntContain("SecondProject");
@@ -1117,7 +1352,7 @@ namespace Microsoft.Build.UnitTests
                             logger.AssertLogContains(AssemblyResources.GetString("MSBuild.NotBuildingInParallel"));
                             break;
                         case 1:
-                            // Verify setting BuildInParallel to true and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to true and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did  build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1136,7 +1371,7 @@ namespace Microsoft.Build.UnitTests
                             break;
 
                         case 3:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1162,7 +1397,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void StopOnFirstFailureandBuildInParallelMultipleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1183,14 +1417,14 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are multiple nodes 
+                // Test the various combinations of BuildInParallel and StopOnFirstFailure when the msbuild task is told there are multiple nodes
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
                     bool buildInParallel = false;
                     bool stopOnFirstFailure = false;
 
-                    // first set up the project being built. 
+                    // first set up the project being built.
                     switch (i)
                     {
                         case 0:
@@ -1226,7 +1460,7 @@ namespace Microsoft.Build.UnitTests
                         </Project>";
 
                     MockLogger logger = new MockLogger();
-                    ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
+                    using ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
                     Project p = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger);
                     bool success = p.Build();
                     switch (i)
@@ -1240,7 +1474,7 @@ namespace Microsoft.Build.UnitTests
                             logger.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.NotBuildingInParallel"));
                             break;
                         case 1:
-                            // Verify setting BuildInParallel to true and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to true and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1250,7 +1484,7 @@ namespace Microsoft.Build.UnitTests
                             logger.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.NotBuildingInParallel"));
                             break;
                         case 2:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // true will cause no change in BuildInParallel
                             // Verify build did not build second project which has the message SecondProject
                             logger.AssertLogDoesntContain("SecondProject");
@@ -1261,7 +1495,7 @@ namespace Microsoft.Build.UnitTests
                             break;
 
                         case 3:
-                            // Verify setting BuildInParallel to false and StopOnFirstFailure to 
+                            // Verify setting BuildInParallel to false and StopOnFirstFailure to
                             // false will cause no change in BuildInParallel
                             // Verify build did build second project which has the message SecondProject
                             logger.AssertLogContains("SecondProject");
@@ -1321,7 +1555,7 @@ namespace Microsoft.Build.UnitTests
                 </Project>";
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
+                using ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
                 Project p = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger);
                 bool success = p.Build();
 
@@ -1535,12 +1769,12 @@ namespace Microsoft.Build.UnitTests
                             <AdditionalProperties>C=$(CValues)%3BD=$(DValues)</AdditionalProperties>
                         </ProjectFile>
                     </ItemGroup>
-                   
+
                     <Target Name=`Build` Outputs=`$(SomeOutputs)`>
                         <MSBuild Projects=`@(ProjectFile)` Targets=`Build` Properties=`a=$(AValues)%3Bb=$(BValues)` TargetAndPropertyListSeparators=`%3B`>
                             <Output TaskParameter=`TargetOutputs` PropertyName=`SomeOutputs`/>
                         </MSBuild>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 
@@ -1600,13 +1834,13 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
-                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>                  
+                <Project DefaultTargets=`t` xmlns=`msbuildnamespace` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Target Name=`t`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`BUILD`>
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
                         </MSBuild>
                         <Message Text=`[@(out)]`/>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 
@@ -1636,13 +1870,13 @@ namespace Microsoft.Build.UnitTests
                 ");
 
             string projectFile2 = ObjectModelHelpers.CreateTempFileOnDisk(@"
-                <Project>                  
+                <Project>
                     <Target Name=`t`>
                         <MSBuild Projects=`" + projectFile1 + @"` Targets=`Build`>
                             <Output TaskParameter=`TargetOutputs` ItemName=`out`/>
                         </MSBuild>
                         <Message Text=`[@(out)]`/>
-                    </Target>	
+                    </Target>
                 </Project>
                 ");
 

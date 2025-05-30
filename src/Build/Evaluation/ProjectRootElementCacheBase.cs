@@ -1,8 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Construction;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -26,11 +28,6 @@ namespace Microsoft.Build.Evaluation
         internal delegate ProjectRootElement OpenProjectRootElement(string path, ProjectRootElementCacheBase cache);
 
         /// <summary>
-        /// Event that is fired when an entry in the Strong Cache is removed.
-        /// </summary>
-        internal static event StrongCacheEntryRemovedDelegate StrongCacheEntryRemoved;
-
-        /// <summary>
         /// Event which is fired when a project root element is added to this cache.
         /// </summary>
         internal event ProjectRootElementCacheAddEntryHandler ProjectRootElementAddedHandler;
@@ -45,7 +42,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal event EventHandler<ProjectChangedEventArgs> ProjectDirtied;
 
-        internal abstract ProjectRootElement Get(string projectFile, OpenProjectRootElement openProjectRootElement,
+        internal abstract ProjectRootElement Get(string projectFile, OpenProjectRootElement loadProjectRootElement,
             bool isExplicitlyLoaded,
             bool? preserveFormatting);
 
@@ -93,15 +90,6 @@ namespace Microsoft.Build.Evaluation
         protected void RaiseProjectRootElementAddedToCacheEvent(ProjectRootElement rootElement)
         {
             ProjectRootElementAddedHandler?.Invoke(this, new ProjectRootElementCacheAddEntryEventArgs(rootElement));
-        }
-
-        /// <summary>
-        /// Raises an event which is raised when a project root element is removed from the strong cache.
-        /// </summary>
-        protected virtual void RaiseProjectRootElementRemovedFromStrongCache(ProjectRootElement projectRootElement)
-        {
-            StrongCacheEntryRemovedDelegate removedEvent = StrongCacheEntryRemoved;
-            removedEvent?.Invoke(this, projectRootElement);
         }
     }
 

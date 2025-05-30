@@ -1,20 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.InteropServices.ComTypes;
-using System.Text;
-
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
 using COMException = System.Runtime.InteropServices.COMException;
+using Marshal = System.Runtime.InteropServices.Marshal;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Abstract base class for COM reference wrappers providing common functionality. 
+    /// Abstract base class for COM reference wrappers providing common functionality.
     /// This class hierarchy is used by the ResolveComReference task.Every class deriving from ComReference
     /// provides functionality for wrapping Com type libraries in a given way(for example AxReference, or PiaReference).
     /// </summary>
@@ -58,7 +57,7 @@ namespace Microsoft.Build.Tasks
         protected internal TaskLoggingHelper Log { get; }
 
         /// <summary>
-        /// True if this class should only log errors, but no messages or warnings.  
+        /// True if this class should only log errors, but no messages or warnings.
         /// </summary>
         protected internal bool Silent { get; }
 
@@ -88,7 +87,7 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (COMException ex)
                 {
-                    // it's not registered. 
+                    // it's not registered.
                     ado27Installed = false;
                     ado27ErrorMessage = ex.Message;
                 }
@@ -232,7 +231,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Gets the name of given type library. 
+        /// Gets the name of given type library.
         /// </summary>
         internal static bool GetTypeLibNameForITypeLib(TaskLoggingHelper log, bool silent, ITypeLib typeLib, string typeLibId, out string typeLibName)
         {
@@ -246,12 +245,12 @@ namespace Microsoft.Build.Tasks
             }
 
             // Get the custom attribute.  If anything fails then just return the
-            // type library name.  
+            // type library name.
             try
             {
                 typeLib2.GetCustData(ref NativeMethods.GUID_TYPELIB_NAMESPACE, out object data);
 
-                // if returned namespace is null or its type is not System.String, fall back to the default 
+                // if returned namespace is null or its type is not System.String, fall back to the default
                 // way of getting the type lib name (just to be safe)
                 if (data == null || !string.Equals(data.GetType().ToString(), "system.string", StringComparison.OrdinalIgnoreCase))
                 {
@@ -264,7 +263,7 @@ namespace Microsoft.Build.Tasks
 
                 if (typeLibName.Length >= 4)
                 {
-                    if (string.Equals(typeLibName.Substring(typeLibName.Length - 4), ".dll", StringComparison.OrdinalIgnoreCase))
+                    if (typeLibName.AsSpan().EndsWith(".dll".AsSpan(), StringComparison.OrdinalIgnoreCase))
                     {
                         typeLibName = typeLibName.Substring(0, typeLibName.Length - 4);
                     }
@@ -404,22 +403,33 @@ namespace Microsoft.Build.Tasks
 
         private static string GetModuleFileName(IntPtr handle)
         {
-            bool success = false;
-            var buffer = new StringBuilder();
+            char[] buffer = null;
 
             // Try increased buffer sizes if on longpath-enabled Windows
-            for (int bufferSize = NativeMethodsShared.MAX_PATH; !success && bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
+            for (int bufferSize = NativeMethodsShared.MAX_PATH; bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
             {
-                buffer.EnsureCapacity(bufferSize);
+                buffer = System.Buffers.ArrayPool<char>.Shared.Rent(bufferSize);
+                try
+                {
+                    var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
+                    int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, bufferSize);
 
-                var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
-                int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, buffer.Capacity);
+                    bool isBufferTooSmall = (uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER;
+                    if (pathLength != 0 && !isBufferTooSmall)
+                    {
+                        return new string(buffer, 0, pathLength);
+                    }
+                }
+                finally
+                {
+                    System.Buffers.ArrayPool<char>.Shared.Return(buffer);
+                }
 
-                bool isBufferTooSmall = ((uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER);
-                success = pathLength != 0 && !isBufferTooSmall;
+                // Double check that the buffer is not insanely big
+                ErrorUtilities.VerifyThrow(bufferSize <= int.MaxValue / 2, "Buffer size approaching int.MaxValue");
             }
 
-            return success ? buffer.ToString() : string.Empty;
+            return string.Empty;
         }
 
         /// <summary>
@@ -429,13 +439,13 @@ namespace Microsoft.Build.Tasks
         internal static bool GetPathOfTypeLib(TaskLoggingHelper log, bool silent, ref TYPELIBATTR typeLibAttr, out string typeLibPath)
         {
             // Get which file the type library resides in.  If the appropriate
-            // file cannot be found then a blank string is returned.  
+            // file cannot be found then a blank string is returned.
             typeLibPath = "";
 
             try
             {
                 // Get the path from the registry
-                // This call has known issues. See http://msdn.microsoft.com/en-us/library/ms221436.aspx for the method and 
+                // This call has known issues. See http://msdn.microsoft.com/en-us/library/ms221436.aspx for the method and
                 // here for the fix http://support.microsoft.com/kb/982110. Most users from Win7 or Win2008R2 should have already received this post Win7SP1.
                 // In Summary: The issue is about calls to The QueryPathOfRegTypeLib function not returning the correct path for a 32-bit version of a
                 // registered type library in a 64-bit edition of Windows 7 or in Windows Server 2008 R2. It either returns the 64bit path or null.

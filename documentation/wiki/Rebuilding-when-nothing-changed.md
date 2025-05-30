@@ -4,11 +4,11 @@ There is a class of problems with build where when you build twice, it still reb
 
 There are multiple tools to investigate and fix broken incrementality. Start with the blog posts below.
 
- * [https://blogs.msdn.microsoft.com/kirillosenkov/2014/08/04/how-to-investigate-rebuilding-in-visual-studio-when-nothing-has-changed/](https://blogs.msdn.microsoft.com/kirillosenkov/2014/08/04/how-to-investigate-rebuilding-in-visual-studio-when-nothing-has-changed/)
- * [https://blogs.msdn.microsoft.com/kirillosenkov/2015/05/12/msbuild-unnecessary-rebuilds-because-of-generated-assemblyattributes-cs/](https://blogs.msdn.microsoft.com/kirillosenkov/2015/05/12/msbuild-unnecessary-rebuilds-because-of-generated-assemblyattributes-cs/)
- * [http://www.andreas-reiff.de/2012/02/when-visual-studio-keeps-rebuilding-projects-that-have-not-changed/](http://www.andreas-reiff.de/2012/02/when-visual-studio-keeps-rebuilding-projects-that-have-not-changed/)
- * [MSDN: How to build incrementally](https://msdn.microsoft.com/en-us/library/ms171483.aspx)
- * [https://docs.microsoft.com/en-us/visualstudio/msbuild/incremental-builds?view=vs-2019](https://docs.microsoft.com/en-us/visualstudio/msbuild/incremental-builds?view=vs-2019)
+ * [How to investigate Rebuilding in Visual Studio when nothing has changed](https://learn.microsoft.com/archive/blogs/kirillosenkov/how-to-investigate-rebuilding-in-visual-studio-when-nothing-has-changed)
+ * [MSBuild: unnecessary rebuilds because of generated AssemblyAttributes.cs](https://learn.microsoft.com/archive/blogs/kirillosenkov/msbuild-unnecessary-rebuilds-because-of-generated-assemblyattributes-cs)
+ * [When Visual Studio keeps rebuilding Projects that have not changed](https://web.archive.org/web/20120321204616/http://www.andreas-reiff.de/2012/02/when-visual-studio-keeps-rebuilding-projects-that-have-not-changed/)
+ * [How to build incrementally](https://learn.microsoft.com/visualstudio/msbuild/how-to-build-incrementally)
+ * [Incremental builds](https://learn.microsoft.com/visualstudio/msbuild/incremental-builds)
 
 Strings to search for in the build logs:
  * `Building target "CoreCompile" completely`
@@ -16,4 +16,4 @@ Strings to search for in the build logs:
  * `out-of-date`
  * `missing`
 
-Consider using http://msbuildlog.com to help with searching through the build log.
+Consider using https://msbuildlog.com to help with searching through the build log.

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -17,12 +17,16 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Resolves an SDKReference to a full path on disk
     /// </summary>
+#pragma warning disable RS0022 // Constructor make noninheritable base class inheritable: Longstanding API design that we shouldn't change now
     public class GetSDKReferenceFiles : TaskExtension
+#pragma warning restore RS0022 // Constructor make noninheritable base class inheritable
     {
         /// <summary>
         /// Set of resolvedSDK references which we will use to find the reference assemblies.
@@ -77,7 +81,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Folder where the cache files are written to
         /// </summary>
-        private string _cacheFilePath = Path.GetTempPath();
+        private string _cacheFilePath = FileUtilities.TempFileDirectory;
 
         #region Properties
 
@@ -223,6 +227,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GetSDKReferenceFiles));
+                return false;
+            }
             return Execute(AssemblyNameExtension.GetAssemblyNameEx, AssemblyInformation.GetRuntimeVersion, p => FileUtilities.FileExistsNoThrow(p), synchronous: false);
         }
 
@@ -238,10 +247,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                // Filter out all references tagged as RuntimeReferenceOnly 
+                // Filter out all references tagged as RuntimeReferenceOnly
                 IEnumerable<ITaskItem> filteredResolvedSDKReferences = ResolvedSDKReferences.Where(
-                    sdkReference => !MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly")
-                );
+                    sdkReference => !MetadataConversionUtilities.TryConvertItemMetadataToBool(sdkReference, "RuntimeReferenceOnly"));
 
                 PopulateReferencesForSDK(filteredResolvedSDKReferences);
 
@@ -271,7 +279,7 @@ namespace Microsoft.Build.Tasks
 
                 GenerateOutputItems();
 
-                if (_exceptions.Count > 0 && LogCacheFileExceptions)
+                if (_exceptions.Any() && LogCacheFileExceptions)
                 {
                     foreach (string exceptionMessage in _exceptions)
                     {
@@ -279,13 +287,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("GetSDKReferenceFiles.CouldNotGetSDKReferenceFiles", e.Message);
             }
 
@@ -788,7 +791,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // We only care about the file name and not the path because if they have the same file name but different paths then they will likely contain
-                // the same namespaces and the compiler does not like to have two references with the same namespace passed at once without aliasing and 
+                // the same namespaces and the compiler does not like to have two references with the same namespace passed at once without aliasing and
                 // we have no way to do aliasing per assembly since we are grabbing a bunch of files at once.)
                 return String.Equals(FileName, other.FileName, StringComparison.OrdinalIgnoreCase);
             }
@@ -928,7 +931,7 @@ namespace Microsoft.Build.Tasks
                     if (!string.IsNullOrEmpty(cacheFile))
                     {
                         using FileStream fs = new FileStream(cacheFile, FileMode.Open);
-                        using var translator = BinaryTranslator.GetReadTranslator(fs, buffer: null);
+                        using var translator = BinaryTranslator.GetReadTranslator(fs, InterningBinaryReader.PoolingBuffer);
                         SDKInfo sdkInfo = new SDKInfo();
                         sdkInfo.Translate(translator);
                         return sdkInfo;
@@ -1087,7 +1090,11 @@ namespace Microsoft.Build.Tasks
                 string currentAssembly = String.Empty;
                 try
                 {
+#if NET
+                    currentAssembly = Assembly.GetExecutingAssembly().Location;
+#else
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
+#endif
                     var codeBase = new Uri(currentAssembly);
                     DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
                     if (FileSystems.Default.FileExists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
@@ -1095,13 +1102,8 @@ namespace Microsoft.Build.Tasks
                         return true;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    if (ExceptionHandling.IsCriticalException(ex))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the cache got written
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemGeneratingHash", currentAssembly, ex.Message));
 
@@ -1134,13 +1136,8 @@ namespace Microsoft.Build.Tasks
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     // Queue up for later logging, does not matter if the cache got written
                     _exceptionMessages.Enqueue(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetSDKReferenceFiles.ProblemGettingAssemblyMetadata", referencePath, e.Message));
                 }
@@ -1171,7 +1168,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(redistPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Enumerable.Empty<string>();
+                return [];
             }
 
             /// <summary>
@@ -1185,7 +1182,7 @@ namespace Microsoft.Build.Tasks
                     return Directory.GetDirectories(referencesPath, "*", SearchOption.AllDirectories);
                 }
 
-                return Enumerable.Empty<string>();
+                return [];
             }
         }
 

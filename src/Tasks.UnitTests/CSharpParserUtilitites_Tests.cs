@@ -1,12 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CSharpParserUtilititesTests
+    public sealed class CSharpParserUtilititesTests
     {
         // Try just and empty file
         [Fact]
@@ -287,7 +289,7 @@ namespace Microsoft.Build.UnitTests
 namespace n1
 #else
 namespace n2
-#endif    
+#endif
 { class c {} }
                 ", "n2.c");
         }
@@ -326,7 +328,7 @@ namespace n1
 #else
 using a=b;
 namespace n2
-#endif    
+#endif
 { class c {} }", "n2.c")]
         [InlineData(@"
 #if (false)
@@ -334,7 +336,7 @@ namespace n1;
 #else
 using a=b;
 namespace n2;
-#endif    
+#endif
 { class c {} }", "n1.n2.c")]
         public void PreprocessorControllingTwoNamespacesWithInterveningKeyword(string fileContents, string expected)
         {
@@ -343,23 +345,23 @@ namespace n2;
 
         [Theory]
         [InlineData(@"
-#if MY_CONSTANT                
-namespace i 
+#if MY_CONSTANT
+namespace i
 {
     #region Put the class in a region
-    class a 
+    class a
     {
-    }     
+    }
     #endregion
 }
 #endif // MY_CONSTANT ")]
         [InlineData(@"
-#if MY_CONSTANT                
+#if MY_CONSTANT
 namespace i;
     #region Put the class in a region
-    class a 
+    class a
     {
-    }     
+    }
     #endregion
 #endif // MY_CONSTANT")]
         public void Preprocessor(string fileContents)
@@ -370,18 +372,17 @@ namespace i;
         [Fact(Skip = "Preprocessor is not yet implemented.")]
         public void PreprocessorNamespaceInFalsePreprocessorBlock()
         {
-            AssertParse
-            (
+            AssertParse(
                 @"
-#if (false)             
-namespace i 
+#if (false)
+namespace i
 {
 #endif
-    class a 
+    class a
     {
-    }     
-#if (false)             
-namespace i 
+    }
+#if (false)
+namespace i
 }
 #endif
                 ", "a");
@@ -411,15 +412,10 @@ class c {}")]
         */
         private static void AssertParse(string source, string expectedClassName)
         {
-            ExtractedClassName className = CSharpParserUtilities.GetFirstClassNameFullyQualified
-            (
-                StreamHelpers.StringToStream(source)
-            );
+            ExtractedClassName className = CSharpParserUtilities.GetFirstClassNameFullyQualified(
+                StreamHelpers.StringToStream(source));
 
             Assert.Equal(expectedClassName, className.Name);
         }
     }
 }
-
-
-

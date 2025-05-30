@@ -1,8 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using Microsoft.CSharp;
-using Microsoft.Build.Tasks.Xaml;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.CodeDom;
@@ -12,7 +9,11 @@ using System.IO;
 using System.Reflection;
 using System.Xaml;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.CSharp;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -37,7 +38,7 @@ namespace Microsoft.Build.UnitTests
                                               <StringProperty Name=`BasicFileWOSwitch` />
                                               <StringProperty Name=`BasicDirectory` />
                                               <DynamicEnumProperty Name=`BasicDynamicEnum` />
-                                              
+
                                               <!-- More Complex types -->
                                               <BoolProperty Name=`ComplexReversible` Switch=`/Cr:CT` ReverseSwitch=`/Cr:CF` Separator=`:` />
                                               <BoolProperty Name=`ComplexNonreversibleWArgument` Switch=`/Cnrwa`>
@@ -53,7 +54,7 @@ namespace Microsoft.Build.UnitTests
                                               <IntProperty Name=`ComplexInteger` Switch=`/Ci` MinValue=`64` MaxValue=`255` />
 
                                               <!-- Dependencies, fallbacks, and so on -->
-                                              <BoolProperty Name=`OtherNonreversible` Switch=`/Onr`> 
+                                              <BoolProperty Name=`OtherNonreversible` Switch=`/Onr`>
                                                 <Argument IsRequired=`true` Property=`ComplexFileNoDefault` />
                                               </BoolProperty>
                                               <StringProperty Name=`ComplexDirectory` />
@@ -88,7 +89,7 @@ namespace Microsoft.Build.UnitTests
         private static string s_pathToMSBuildBinaries = null;
 
         /// <summary>
-        /// Returns the path to the MSBuild binaries 
+        /// Returns the path to the MSBuild binaries
         /// </summary>
         public static string PathToMSBuildBinaries
         {
@@ -120,12 +121,12 @@ namespace Microsoft.Build.UnitTests
             }
             catch (XamlParseException)
             {
-                Assert.True(false, "Parse of FakeTask XML failed");
+                Assert.Fail("Parse of FakeTask XML failed");
             }
 
             TaskGenerator tg = new TaskGenerator(tp);
             CodeCompileUnit compileUnit = tg.GenerateCode();
-            CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
+            using CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
 
             using (StringWriter sw = new StringWriter(CultureInfo.CurrentCulture))
             {
@@ -134,7 +135,7 @@ namespace Microsoft.Build.UnitTests
                 options.BracingStyle = "C";
 
                 codeGenerator.GenerateCodeFromCompileUnit(compileUnit, sw, options);
-                CSharpCodeProvider provider = new CSharpCodeProvider();
+                using CSharpCodeProvider provider = new CSharpCodeProvider();
                 // Build the parameters for source compilation.
                 CompilerParameters cp = new CompilerParameters();
 
@@ -146,7 +147,7 @@ namespace Microsoft.Build.UnitTests
                 cp.ReferencedAssemblies.Add(Path.Combine(PathToMSBuildBinaries, "Microsoft.Build.Utilities.Core.dll"));
                 cp.ReferencedAssemblies.Add(Path.Combine(PathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll"));
 
-                // Generate an executable instead of 
+                // Generate an executable instead of
                 // a class library.
                 cp.GenerateExecutable = false;
                 // Set the assembly file name to generate.
@@ -230,7 +231,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 return (string)task.GetType().InvokeMember("GetCommandLine_ForUnitTestsOnly", BindingFlags.Public | BindingFlags.NonPublic |
-                                    BindingFlags.Instance | BindingFlags.InvokeMethod, null, task, new object[] { });
+                                    BindingFlags.Instance | BindingFlags.InvokeMethod, null, task, Array.Empty<object>());
             }
             catch (TargetInvocationException e)
             {

@@ -1,14 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
-
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
-using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
+using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -36,8 +39,8 @@ namespace Microsoft.Build.Logging
 
     /// <summary>
     /// This class implements the default logger that outputs event data
-    /// to the console (stdout). 
-    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger, 
+    /// to the console (stdout).
+    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger,
     /// either SerialConsoleLogger or ParallelConsoleLogger.
     /// </summary>
     /// <remarks>This class is not thread safe.</remarks>
@@ -82,13 +85,11 @@ namespace Microsoft.Build.Logging
         /// <param name="write"></param>
         /// <param name="colorSet"></param>
         /// <param name="colorReset"></param>
-        public ConsoleLogger
-        (
+        public ConsoleLogger(
             LoggerVerbosity verbosity,
             WriteHandler write,
             ColorSetter colorSet,
-            ColorResetter colorReset
-        )
+            ColorResetter colorReset)
         {
             _verbosity = verbosity;
             _write = write;
@@ -102,17 +103,24 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private void InitializeBaseConsoleLogger()
         {
-            if (_consoleLogger != null) return;
+            if (_consoleLogger != null)
+            {
+                return;
+            }
 
             bool useMPLogger = false;
             bool disableConsoleColor = false;
             bool forceConsoleColor = false;
+            bool preferConsoleColor = false;
             if (!string.IsNullOrEmpty(_parameters))
             {
-                string[] parameterComponents = _parameters.Split(BaseConsoleLogger.parameterDelimiters);
+                string[] parameterComponents = _parameters.Split(LoggerParametersHelper.s_parameterDelimiters);
                 foreach (string param in parameterComponents)
                 {
-                    if (param.Length <= 0) continue;
+                    if (param.Length <= 0)
+                    {
+                        continue;
+                    }
 
                     if (string.Equals(param, "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
                     {
@@ -130,10 +138,15 @@ namespace Microsoft.Build.Logging
                     {
                         forceConsoleColor = true;
                     }
+                    if (string.Equals(param, "PREFERCONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Use ansi color codes if current target console do support it
+                        preferConsoleColor = ConsoleConfiguration.AcceptAnsiColorCodes;
+                    }
                 }
             }
 
-            if (forceConsoleColor)
+            if (forceConsoleColor || (!disableConsoleColor && preferConsoleColor))
             {
                 _colorSet = BaseConsoleLogger.SetColorAnsi;
                 _colorReset = BaseConsoleLogger.ResetColorAnsi;
@@ -147,10 +160,26 @@ namespace Microsoft.Build.Logging
             if (_numberOfProcessors == 1 && !useMPLogger)
             {
                 _consoleLogger = new SerialConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+                if (this is FileLogger)
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "serial";
+                }
+                else
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerType = "serial";
+                }
             }
             else
             {
                 _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
+                if (this is FileLogger)
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "parallel";
+                }
+                else
+                {
+                    KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerType = "parallel";
+                }
             }
 
             if (_showSummary != null)
@@ -301,7 +330,7 @@ namespace Microsoft.Build.Logging
 
         /// <summary>
         /// Apply a parameter.
-        /// NOTE: This method was public by accident in Whidbey, so it cannot be made internal now. It has 
+        /// NOTE: This method was public by accident in Whidbey, so it cannot be made internal now. It has
         /// no good reason for being public.
         /// </summary>
         public void ApplyParameter(string parameterName, string parameterValue)
@@ -328,6 +357,12 @@ namespace Microsoft.Build.Logging
             _numberOfProcessors = nodeCount;
             InitializeBaseConsoleLogger();
             _consoleLogger.Initialize(eventSource, nodeCount);
+
+            if (this is not FileLogger)
+            {
+                KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLogger = true;
+                KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerVerbosity = Verbosity.ToString();
+            }
         }
 
         /// <summary>

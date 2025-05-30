@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using System.Collections;
+using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
@@ -12,7 +14,7 @@ namespace Microsoft.Build.Shared.LanguageParser
      * Given C# sources, return an enumerator that will provide tokens one at a time.
      *
      */
-    sealed internal class CSharpTokenizer : IEnumerable
+    internal sealed class CSharpTokenizer : IEnumerable
     {
         /*
             These are the tokens that are specific to the C# tokenizer.
@@ -49,7 +51,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  GetEnumerator
-         * 
+         *
          * Return a new token enumerator.
          */
         public IEnumerator GetEnumerator()

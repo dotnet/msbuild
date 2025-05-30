@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,8 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -22,7 +24,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ConfigurationMetadata(BuildRequestConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(configuration, nameof(configuration));
+            ErrorUtilities.VerifyThrowArgumentNull(configuration);
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(configuration.GlobalProperties);
             _projectFullPath = FileUtilities.NormalizePath(configuration.ProjectFullPath);
             _toolsVersion = configuration.ToolsVersion;
@@ -33,9 +35,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ConfigurationMetadata(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project, nameof(project));
-            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalProperties.Count);
-            foreach (KeyValuePair<string, string> entry in project.GlobalProperties)
+            ErrorUtilities.VerifyThrowArgumentNull(project);
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(project.GlobalPropertiesCount);
+            foreach (KeyValuePair<string, string> entry in project.GlobalPropertiesEnumerable)
             {
                 _globalProperties[entry.Key] = ProjectPropertyInstance.Create(entry.Key, entry.Value);
             }
@@ -49,8 +51,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ConfigurationMetadata(string projectFullPath, PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath, nameof(projectFullPath));
-            ErrorUtilities.VerifyThrowArgumentNull(globalProperties, nameof(globalProperties));
+            ErrorUtilities.VerifyThrowArgumentLength(projectFullPath);
+            ErrorUtilities.VerifyThrowArgumentNull(globalProperties);
 
             _projectFullPath = projectFullPath;
             _toolsVersion = MSBuildConstants.CurrentToolsVersion;
@@ -162,10 +164,9 @@ namespace Microsoft.Build.BackEnd
             {
                 return true;
             }
-
             return ProjectFullPath.Equals(other.ProjectFullPath, StringComparison.OrdinalIgnoreCase) &&
-                   ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
-                   GlobalProperties.Equals(other.GlobalProperties);
+                ToolsVersion.Equals(other.ToolsVersion, StringComparison.OrdinalIgnoreCase) &&
+                GlobalProperties.Equals(other.GlobalProperties);
         }
 
         private string DebugString()

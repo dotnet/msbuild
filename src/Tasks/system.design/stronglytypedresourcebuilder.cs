@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 // ************************************************************************************************
 // ************************************************************************************************
@@ -23,7 +23,9 @@
 
 using System;
 using System.IO;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
 using System.Collections;
+#endif
 using System.Collections.Generic;
 using System.Resources;
 using System.CodeDom;
@@ -38,11 +40,11 @@ using Microsoft.Build.Shared;
   Plan for the future:
   Ideally we will be able to change the property getters here to use a
   resource index calculated at build time, being the x'th resource in the
-  .resources file.  We would then call something like 
+  .resources file.  We would then call something like
   ResourceManager.LookupResourceByIndex().  This would avoid some string
   comparisons during resource lookup.
 
-  This would require work from ResourceReader and/or ResourceWriter (or 
+  This would require work from ResourceReader and/or ResourceWriter (or
   a standalone, separate utility with duplicated code) to calculate the
   id's.  It would also require that all satellite assemblies use the same
   resource ID's as the main assembly.  This would require dummy entries
@@ -53,6 +55,8 @@ using Microsoft.Build.Shared;
          -- Brian Grunkemeyer, 1/16/2003
 */
 
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -67,10 +71,10 @@ namespace Microsoft.Build.Tasks
 
         // When fixing up identifiers, we will replace all these chars with
         // a single char that is valid in identifiers, such as '_'.
-        private static readonly char[] s_charsToReplace = new char[] { ' ',
+        private static readonly char[] s_charsToReplace = [' ',
         '\u00A0' /* non-breaking space */, '.', ',', ';', '|', '~', '@',
         '#', '%', '^', '&', '*', '+', '-', '/', '\\', '<', '>', '?', '[',
-        ']', '(', ')', '{', '}', '\"', '\'', ':', '!' };
+        ']', '(', ')', '{', '}', '\"', '\'', ':', '!'];
         private const char ReplacementChar = '_';
 
         private const String DocCommentSummaryStart = "<summary>";
@@ -168,7 +172,7 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentException(SR.GetString(SR.InvalidIdentifier, className));
             }
 
-            // If we have a namespace, verify the namespace is legal, 
+            // If we have a namespace, verify the namespace is legal,
             // attempting to fix it up if needed.
             if (!String.IsNullOrEmpty(generatedCodeNamespace))
             {
@@ -201,7 +205,7 @@ namespace Microsoft.Build.Tasks
             AddGeneratedCodeAttributeforMember(srClass);
 
             TypeAttributes ta = internalClass ? TypeAttributes.NotPublic : TypeAttributes.Public;
-            //ta |= TypeAttributes.Sealed;
+            // ta |= TypeAttributes.Sealed;
             srClass.TypeAttributes = ta;
             srClass.Comments.Add(new CodeCommentStatement(DocCommentSummaryStart, true));
             srClass.Comments.Add(new CodeCommentStatement(SR.GetString(SR.ClassDocComment), true));
@@ -315,9 +319,13 @@ namespace Microsoft.Build.Tasks
             if (resourcesNamespace != null)
             {
                 if (resourcesNamespace.Length > 0)
+                {
                     resMgrCtorParam = resourcesNamespace + '.' + baseName;
+                }
                 else
+                {
                     resMgrCtorParam = baseName;
+                }
             }
             else if (!string.IsNullOrEmpty(nameSpace))
             {
@@ -337,9 +345,14 @@ namespace Microsoft.Build.Tasks
             CodeConstructor ctor = new CodeConstructor();
             ctor.CustomAttributes.Add(suppressMessageAttrib);
             if (useStatic || internalClass)
+            {
                 ctor.Attributes = MemberAttributes.FamilyAndAssembly;
+            }
             else
+            {
                 ctor.Attributes = MemberAttributes.Public;
+            }
+
             srClass.Members.Add(ctor);
 
             // Emit _resMgr field.
@@ -349,7 +362,10 @@ namespace Microsoft.Build.Tasks
                 Attributes = MemberAttributes.Private
             };
             if (useStatic)
+            {
                 field.Attributes |= MemberAttributes.Static;
+            }
+
             srClass.Members.Add(field);
 
             // Emit _resCulture field, and leave it set to null.
@@ -357,7 +373,10 @@ namespace Microsoft.Build.Tasks
             field = new CodeMemberField(CultureTypeReference, CultureInfoFieldName);
             field.Attributes = MemberAttributes.Private;
             if (useStatic)
+            {
                 field.Attributes |= MemberAttributes.Static;
+            }
+
             srClass.Members.Add(field);
 
             // Emit ResMgr property
@@ -368,11 +387,18 @@ namespace Microsoft.Build.Tasks
             resMgr.HasSet = false;
             resMgr.Type = ResMgrCodeTypeReference;
             if (internalClass)
+            {
                 resMgr.Attributes = MemberAttributes.Assembly;
+            }
             else
+            {
                 resMgr.Attributes = MemberAttributes.Public;
+            }
+
             if (useStatic)
+            {
                 resMgr.Attributes |= MemberAttributes.Static;
+            }
 
             // Mark the ResMgr property as advanced
             var editorBrowsableStateTypeRef =
@@ -394,23 +420,29 @@ namespace Microsoft.Build.Tasks
             culture.HasSet = true;
             culture.Type = CultureTypeReference;
             if (internalClass)
+            {
                 culture.Attributes = MemberAttributes.Assembly;
+            }
             else
+            {
                 culture.Attributes = MemberAttributes.Public;
+            }
 
             if (useStatic)
+            {
                 culture.Attributes |= MemberAttributes.Static;
+            }
 
             // Mark the Culture property as advanced
             culture.CustomAttributes.Add(editorBrowsableAdvancedAttribute);
-            
+
             /*
               // Here's what I'm trying to emit.  Since not all languages support
               // try/finally, we'll avoid our double lock pattern here.
               // This will only hurt perf when we get two threads racing through
               // this method the first time.  Unfortunate, but not a big deal.
-              // Also, the .NET Compact Framework doesn't support 
-              // Thread.MemoryBarrier (they only run on processors w/ a strong 
+              // Also, the .NET Compact Framework doesn't support
+              // Thread.MemoryBarrier (they only run on processors w/ a strong
               // memory model, and who knows about IA64...)
               // Once we have Interlocked.CompareExchange<T>, we should use it here.
               if (_resMgr == null) {
@@ -464,9 +496,11 @@ namespace Microsoft.Build.Tasks
             {
                 // Stop at some length
                 if (commentString.Length > DocCommentLengthThreshold)
+                {
                     commentString = SR.GetString(SR.StringPropertyTruncatedComment, commentString.Substring(0, DocCommentLengthThreshold));
+                }
 
-                // Encode the comment so it is safe for xml.  SecurityElement.Escape is the only method I've found to do this. 
+                // Encode the comment so it is safe for xml.  SecurityElement.Escape is the only method I've found to do this.
                 commentString = System.Security.SecurityElement.Escape(commentString);
             }
 
@@ -480,7 +514,7 @@ namespace Microsoft.Build.Tasks
         //          return (Point) obj; }
         // }
         // Special cases static vs. non-static, as well as internal vs. internal.
-        // Also note the resource name could contain spaces, etc, while the 
+        // Also note the resource name could contain spaces, etc, while the
         // property name has to be a valid language identifier.
         [SuppressMessage("Microsoft.Globalization", "CA1303:DoNotPassLiteralsAsLocalizedParameters")]
         private static bool DefineResourceFetchingProperty(String propertyName, String resourceName, ResourceData data, CodeTypeDeclaration srClass, bool internalClass, bool useStatic)
@@ -500,14 +534,14 @@ namespace Microsoft.Build.Tasks
 
                 // Ensure type is internalally visible.  This is necessary to ensure
                 // users can access classes via a base type.  Imagine a class like
-                // Image or Stream as a internalally available base class, then an 
-                // internal type like MyBitmap or __UnmanagedMemoryStream as an 
-                // internal implementation for that base class.  For internalally 
-                // available strongly typed resource classes, we must return the 
-                // internal type.  For simplicity, we'll do that for internal strongly 
+                // Image or Stream as a internalally available base class, then an
+                // internal type like MyBitmap or __UnmanagedMemoryStream as an
+                // internal implementation for that base class.  For internalally
+                // available strongly typed resource classes, we must return the
+                // internal type.  For simplicity, we'll do that for internal strongly
                 // typed resource classes as well.  Ideally we'd also like to check
                 // for interfaces like IList, but I don't know how to do that without
-                // special casing collection interfaces & ignoring serialization 
+                // special casing collection interfaces & ignoring serialization
                 // interfaces or IDisposable.
                 while (!type.IsPublic)
                 {
@@ -541,12 +575,18 @@ namespace Microsoft.Build.Tasks
 
             prop.Type = valueType;
             if (internalClass)
+            {
                 prop.Attributes = MemberAttributes.Assembly;
+            }
             else
+            {
                 prop.Attributes = MemberAttributes.Public;
+            }
 
             if (useStatic)
+            {
                 prop.Attributes |= MemberAttributes.Static;
+            }
 
             // For Strings, emit this:
             //    return ResourceManager.GetString("name", _resCulture);
@@ -569,11 +609,17 @@ namespace Microsoft.Build.Tasks
             }
 
             if (isString)
+            {
                 getMethodName = "GetString";
+            }
             else if (isStream)
+            {
                 getMethodName = "GetStream";
+            }
             else
+            {
                 getMethodName = "GetObject";
+            }
 
             if (isString)
             {
@@ -583,9 +629,13 @@ namespace Microsoft.Build.Tasks
             { // Stream or Object
                 if (valueAsString == null ||
                     String.Equals(typeName, valueAsString)) // If the type did not override ToString, ToString just returns the type name.
+                {
                     text = SR.GetString(SR.NonStringPropertyComment, typeName);
+                }
                 else
+                {
                     text = SR.GetString(SR.NonStringPropertyDetailedComment, typeName, valueAsString);
+                }
             }
 
             prop.Comments.Add(new CodeCommentStatement(DocCommentSummaryStart, true));
@@ -621,29 +671,42 @@ namespace Microsoft.Build.Tasks
         private static String VerifyResourceName(String key, CodeDomProvider provider, bool isNameSpace)
         {
             if (key == null)
+            {
                 throw new ArgumentNullException(nameof(key));
+            }
+
             if (provider == null)
+            {
                 throw new ArgumentNullException(nameof(provider));
+            }
 
             foreach (char c in s_charsToReplace)
             {
                 // For namespaces, allow . and ::
                 if (!(isNameSpace && (c == '.' || c == ':')))
+                {
                     key = key.Replace(c, ReplacementChar);
+                }
             }
 
             if (provider.IsValidIdentifier(key))
+            {
                 return key;
+            }
 
-            // Now try fixing up keywords like "for".  
+            // Now try fixing up keywords like "for".
             key = provider.CreateValidIdentifier(key);
             if (provider.IsValidIdentifier(key))
+            {
                 return key;
+            }
 
             // make one last ditch effort by prepending _.  This fixes keys that start with a number
             key = "_" + key;
             if (provider.IsValidIdentifier(key))
+            {
                 return key;
+            }
 
             return null;
         }
@@ -665,7 +728,7 @@ namespace Microsoft.Build.Tasks
             {
                 String key = entry.Key;
 
-                // Disallow a property named ResourceManager or Culture - we add 
+                // Disallow a property named ResourceManager or Culture - we add
                 // those.  (Any other properties we add also must be listed here)
                 // Also disallow resource values of type Void.
                 if (String.Equals(key, ResMgrPropertyName) ||
@@ -695,7 +758,7 @@ namespace Microsoft.Build.Tasks
                         continue;
                     }
 
-                    // Now see if we've already mapped another key to the 
+                    // Now see if we've already mapped another key to the
                     // same name.
                     if (reverseFixupTable.TryGetValue(newKey, out string oldDuplicateKey))
                     {
@@ -720,7 +783,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     // There was a case-insensitive conflict between two keys.
-                    // Or possibly one key was fixed up in a way that conflicts 
+                    // Or possibly one key was fixed up in a way that conflicts
                     // with another key (ie, "A B" and "A_B").
                     if (reverseFixupTable.TryGetValue(key, out string fixedUp))
                     {

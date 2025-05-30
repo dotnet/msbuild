@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,9 +9,10 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Definition
 {
@@ -23,8 +24,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Toolset t = new Toolset(null, "x", new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -33,8 +33,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentNullException>(() =>
             {
                 Toolset t = new Toolset("x", null, new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -43,56 +42,46 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Throws<ArgumentException>(() =>
             {
                 Toolset t = new Toolset(String.Empty, "x", new ProjectCollection(), null);
-            }
-           );
+            });
         }
 
         [Fact]
         public void Regress27993_TrailingSlashTrimmedFromMSBuildToolsPath()
         {
             Toolset t;
+            (string, string)[] testCases = null;
 
             if (NativeMethodsShared.IsWindows)
             {
-                t = new Toolset("x", "C:", new ProjectCollection(), null);
-                Assert.Equal(@"C:", t.ToolsPath);
-                t = new Toolset("x", @"C:\", new ProjectCollection(), null);
-                Assert.Equal(@"C:\", t.ToolsPath);
-                t = new Toolset("x", @"C:\\", new ProjectCollection(), null);
-                Assert.Equal(@"C:\", t.ToolsPath);
-
-                t = new Toolset("x", @"C:\foo", new ProjectCollection(), null);
-                Assert.Equal(@"C:\foo", t.ToolsPath);
-                t = new Toolset("x", @"C:\foo\", new ProjectCollection(), null);
-                Assert.Equal(@"C:\foo", t.ToolsPath);
-                t = new Toolset("x", @"C:\foo\\", new ProjectCollection(), null);
-                Assert.Equal(@"C:\foo\", t.ToolsPath); // trim at most one slash
-
-                t = new Toolset("x", @"\\foo\share", new ProjectCollection(), null);
-                Assert.Equal(@"\\foo\share", t.ToolsPath);
-                t = new Toolset("x", @"\\foo\share\", new ProjectCollection(), null);
-                Assert.Equal(@"\\foo\share", t.ToolsPath);
-                t = new Toolset("x", @"\\foo\share\\", new ProjectCollection(), null);
-                Assert.Equal(@"\\foo\share\", t.ToolsPath); // trim at most one slash
+                testCases = [
+                    ("C:", @"C:"),
+                    (@"C:\", @"C:\"),
+                    (@"C:\\", @"C:\"),
+                    (@"C:\foo", @"C:\foo"),
+                    (@"C:\foo\", @"C:\foo"),
+                    (@"C:\foo\\", @"C:\foo\"), // trim at most one slash
+                    (@"\\foo\share", @"\\foo\share"),
+                    (@"\\foo\share\", @"\\foo\share"),
+                    (@"\\foo\share\\", @"\\foo\share\"), // trim at most one slash
+                ];
             }
             else
             {
-                t = new Toolset("x", "/", new ProjectCollection(), null);
-                Assert.Equal("/", t.ToolsPath);
-
-                t = new Toolset("x", "/foo", new ProjectCollection(), null);
-                Assert.Equal("/foo", t.ToolsPath);
-                t = new Toolset("x", "/foo/", new ProjectCollection(), null);
-                Assert.Equal(@"/foo", t.ToolsPath);
-                t = new Toolset("x", "/foo//", new ProjectCollection(), null);
-                Assert.Equal("/foo/", t.ToolsPath); // trim at most one slash
-
-                t = new Toolset("x", @"\\foo\share", new ProjectCollection(), null);
-                Assert.Equal(@"\\foo\share", t.ToolsPath);
-                t = new Toolset("x", @"\\foo\share/", new ProjectCollection(), null);
-                Assert.Equal(@"\\foo\share", t.ToolsPath);
-                t = new Toolset("x", @"\\foo\share//", new ProjectCollection(), null);
-                Assert.Equal(@"\\foo\share/", t.ToolsPath); // trim at most one slash
+                testCases = [
+                    ("/", "/"),
+                    ("/foo", "/foo"),
+                    ("/foo/", "/foo"),
+                    ("/foo//", "/foo/"),
+                    (@"\\foo\share", @"\\foo\share"),
+                    (@"\\foo\share/", @"\\foo\share"),
+                    (@"\\foo\share//", @"\\foo\share/"),
+                ];
+            }
+            foreach ((string pathValue, string expectedPath) in testCases)
+            {
+                using var collection = new ProjectCollection();
+                t = new Toolset("x", pathValue, collection, null);
+                Assert.Equal(expectedPath, t.ToolsPath);
             }
         }
 
@@ -117,7 +106,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Toolset t = new Toolset("4.0", "c:\\bar", buildProperties, environmentProperties, globalProperties,
                 subToolsets, "c:\\foo", "4.0", new Dictionary<string, ProjectImportPathMatch>
                 {
-                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> {@"c:\foo"})
+                    ["MSBuildExtensionsPath"] = new ProjectImportPathMatch("MSBuildExtensionsPath", new List<string> { @"c:\foo" })
                 });
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
@@ -154,7 +143,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
                 else
                 {
-                    Assert.True(false, $"Sub-toolset {key} was lost in translation.");
+                    Assert.Fail($"Sub-toolset {key} was lost in translation.");
                 }
             }
 
@@ -174,8 +163,7 @@ namespace Microsoft.Build.UnitTests.Definition
             Assert.Equal("v13.0", t.DefaultSubToolsetVersion);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
         public void TestDefaultSubToolsetFor40()
         {
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset("4.0");
@@ -189,8 +177,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
                 else
                 {
-                    // Otherwise, it's the highest one numerically.  Since by definition if Dev10 isn't 
-                    // installed and subtoolsets exists we must be at least Dev11, it should be "11.0" 
+                    // Otherwise, it's the highest one numerically.  Since by definition if Dev10 isn't
+                    // installed and subtoolsets exists we must be at least Dev11, it should be "11.0"
                     Assert.Equal("11.0", t.DefaultSubToolsetVersion);
                 }
             }
@@ -205,7 +193,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
-                ProjectCollection projectCollection = new ProjectCollection();
+                using ProjectCollection projectCollection = new ProjectCollection();
                 Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
@@ -239,7 +227,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
-                ProjectCollection projectCollection = new ProjectCollection();
+                using ProjectCollection projectCollection = new ProjectCollection();
                 Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
@@ -273,7 +261,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties.Add("VisualStudioVersion", "99.0");
 
-                ProjectCollection projectCollection = new ProjectCollection(globalProperties);
+                using ProjectCollection projectCollection = new ProjectCollection(globalProperties);
                 Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
@@ -295,7 +283,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", "foo");
 
-                ProjectCollection projectCollection = new ProjectCollection();
+                using ProjectCollection projectCollection = new ProjectCollection();
                 Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
@@ -317,7 +305,7 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", null);
 
-                ProjectCollection projectCollection = new ProjectCollection();
+                using ProjectCollection projectCollection = new ProjectCollection();
                 Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
@@ -345,7 +333,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties.Add("VisualStudioVersion", "v13.0");
 
-                ProjectCollection projectCollection = new ProjectCollection(globalProperties);
+                using ProjectCollection projectCollection = new ProjectCollection(globalProperties);
                 Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
@@ -439,8 +427,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 Assert.Equal("12.0", t.GenerateSubToolsetVersion(null, 13));
                 Assert.Equal("v13.0", t.GenerateSubToolsetVersion(null, 14));
 
-                // however, if there is no matching solution version, we just fall back to the 
-                // default sub-toolset. 
+                // however, if there is no matching solution version, we just fall back to the
+                // default sub-toolset.
                 Assert.Equal(t.DefaultSubToolsetVersion, t.GenerateSubToolsetVersion(null, 55));
             }
             finally
@@ -461,7 +449,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 IDictionary<string, string> globalProperties = new Dictionary<string, string>();
                 globalProperties.Add("VisualStudioVersion", "v13.0");
 
-                ProjectCollection projectCollection = new ProjectCollection(globalProperties);
+                using ProjectCollection projectCollection = new ProjectCollection(globalProperties);
                 Toolset parentToolset = projectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
                 Toolset t = new Toolset("Fake", parentToolset.ToolsPath, null, projectCollection, null, parentToolset.OverrideTasksPath);
@@ -489,32 +477,32 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:  
-        /// 
+        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:
+        ///
         /// ToolsVersion = Fake
-        /// Base Properties: 
+        /// Base Properties:
         /// a = a1
         /// b = b1
-        /// 
-        /// SubToolset "12.0": 
+        ///
+        /// SubToolset "12.0":
         /// d = d4
         /// e = e5
-        /// 
-        /// SubToolset "v11.0": 
+        ///
+        /// SubToolset "v11.0":
         /// b = b2
         /// c = c2
-        /// 
+        ///
         /// SubToolset "FakeSubToolset":
         /// a = a3
         /// c = c3
-        /// 
+        ///
         /// SubToolset "v13.0":
-        /// f = f6 
+        /// f = f6
         /// g = g7
         /// </summary>
         private Toolset GetFakeToolset(IDictionary<string, string> globalPropertiesForProjectCollection)
         {
-            ProjectCollection projectCollection = new ProjectCollection(globalPropertiesForProjectCollection);
+            using ProjectCollection projectCollection = new ProjectCollection(globalPropertiesForProjectCollection);
 
             IDictionary<string, string> properties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             properties.Add("a", "a1");

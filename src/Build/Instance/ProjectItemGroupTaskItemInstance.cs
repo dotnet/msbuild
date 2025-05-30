@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.Build.Construction;
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -16,7 +17,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} Include={_include} Exclude={_exclude} Remove={_remove} Condition={_condition}")]
-    public class ProjectItemGroupTaskItemInstance: ITranslatable
+    public class ProjectItemGroupTaskItemInstance : ITranslatable
     {
         /// <summary>
         /// Item type, for example "Compile"
@@ -135,8 +136,7 @@ namespace Microsoft.Build.Execution
         /// Metadata collection is ordered.
         /// Assumes ProjectItemGroupTaskMetadataInstance is an immutable type.
         /// </summary>
-        internal ProjectItemGroupTaskItemInstance
-            (
+        internal ProjectItemGroupTaskItemInstance(
             string itemType,
             string include,
             string exclude,
@@ -157,18 +157,17 @@ namespace Microsoft.Build.Execution
             ElementLocation removeMetadataLocation,
             ElementLocation keepDuplicatesLocation,
             ElementLocation conditionLocation,
-            List<ProjectItemGroupTaskMetadataInstance> metadata
-            )
+            List<ProjectItemGroupTaskMetadataInstance> metadata)
         {
-            ErrorUtilities.VerifyThrowInternalNull(itemType, nameof(itemType));
-            ErrorUtilities.VerifyThrowInternalNull(include, nameof(include));
-            ErrorUtilities.VerifyThrowInternalNull(exclude, nameof(exclude));
-            ErrorUtilities.VerifyThrowInternalNull(remove, nameof(remove));
-            ErrorUtilities.VerifyThrowInternalNull(keepMetadata, nameof(keepMetadata));
-            ErrorUtilities.VerifyThrowInternalNull(removeMetadata, nameof(removeMetadata));
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicates, nameof(keepDuplicates));
-            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(itemType);
+            ErrorUtilities.VerifyThrowInternalNull(include);
+            ErrorUtilities.VerifyThrowInternalNull(exclude);
+            ErrorUtilities.VerifyThrowInternalNull(remove);
+            ErrorUtilities.VerifyThrowInternalNull(keepMetadata);
+            ErrorUtilities.VerifyThrowInternalNull(removeMetadata);
+            ErrorUtilities.VerifyThrowInternalNull(keepDuplicates);
+            ErrorUtilities.VerifyThrowInternalNull(condition);
+            ErrorUtilities.VerifyThrowInternalNull(location);
 
             _itemType = itemType;
             _include = include;
@@ -195,7 +194,6 @@ namespace Microsoft.Build.Execution
 
         private ProjectItemGroupTaskItemInstance()
         {
-
         }
 
         /// <summary>

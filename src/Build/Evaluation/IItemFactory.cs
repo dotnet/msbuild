@@ -1,9 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -47,18 +48,18 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Creates an item based off the provided item, with cloning semantics.
-        /// New item is associated with the passed in defining project, not that of the original item. 
+        /// New item is associated with the passed in defining project, not that of the original item.
         /// </summary>
         T CreateItem(S source, string definingProject);
 
         /// <summary>
         /// Creates an item with the specified include and the metadata from the specified base item
-        /// New item is associated with the passed in defining project, not that of the original item. 
+        /// New item is associated with the passed in defining project, not that of the original item.
         /// </summary>
         T CreateItem(string include, S baseItem, string definingProject);
 
         /// <summary>
-        /// Creates an item using the specified evaluated include, include before wildcard expansion, 
+        /// Creates an item using the specified evaluated include, include before wildcard expansion,
         /// and defining project.
         /// </summary>
         T CreateItem(string include, string includeBeforeWildcardExpansion, string definingProject);
@@ -66,6 +67,6 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Applies the supplied metadata to the destination items.
         /// </summary>
-        void SetMetadata(IEnumerable<Pair<ProjectMetadataElement, string>> metadata, IEnumerable<T> destinationItems);
+        void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<T> destinationItems);
     }
 }

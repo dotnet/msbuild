@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -12,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     internal delegate void LinkStatusChangedDelegate(INodeEndpoint endpoint, LinkStatus status);
 
     /// <summary>
-    /// Used to receive data from a node 
+    /// Used to receive data from a node
     /// </summary>
     /// <param name="endpoint">The endpoint invoking the delegate.</param>
     /// <param name="packet">The packet received.</param>
@@ -32,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         Inactive,
 
         /// <summary>
-        /// The connection is active, the most recent data has been successfully sent, and the 
+        /// The connection is active, the most recent data has been successfully sent, and the
         /// node is responding to pings.
         /// </summary>
         Active,
@@ -101,5 +103,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be sent.</param>
         void SendData(INodePacket packet);
         #endregion
+
+        /// <summary>
+        /// Called when we are about to send last packet to finalize graceful disconnection with client.
+        /// This is needed to handle race condition when both client and server is gracefully about to close connection.
+        /// </summary>
+        void ClientWillDisconnect();
     }
 }

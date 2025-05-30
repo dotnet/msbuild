@@ -1,14 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Execution;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
-    internal class MockRunningObjectTable : IRunningObjectTableWrapper
+    internal sealed class MockRunningObjectTable : IRunningObjectTableWrapper
     {
         private readonly Dictionary<string, object> _dictionary = new Dictionary<string, object>();
 
@@ -33,7 +35,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return new MockRegisterHandle();
         }
 
-        private class MockRegisterHandle : IDisposable
+        private sealed class MockRegisterHandle : IDisposable
         {
             public void Dispose()
             {

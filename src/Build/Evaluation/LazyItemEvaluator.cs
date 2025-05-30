@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -9,14 +9,17 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 using System.Threading;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -43,26 +46,20 @@ namespace Microsoft.Build.Evaluation
         protected EvaluationContext EvaluationContext { get; }
 
         protected IFileSystem FileSystem => EvaluationContext.FileSystem;
+
         protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext);
-            _evaluatorData = new EvaluatorData(_outerEvaluatorData, itemType => GetItems(itemType));
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext);
+            _evaluatorData = new EvaluatorData(_outerEvaluatorData, _itemLists);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext, loggingContext);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
 
             EvaluationContext = evaluationContext;
-        }
-
-        private ImmutableList<I> GetItems(string itemType)
-        {
-            return _itemLists.TryGetValue(itemType, out LazyItemList itemList) ?
-                itemList.GetMatchedItems(ImmutableHashSet<string>.Empty) :
-                ImmutableList<I>.Empty;
         }
 
         public bool EvaluateConditionWithCurrentState(ProjectElement element, ExpanderOptions expanderOptions, ParserOptions parserOptions)
@@ -76,8 +73,7 @@ namespace Microsoft.Build.Evaluation
             ExpanderOptions expanderOptions,
             ParserOptions parserOptions,
             Expander<P, I> expander,
-            LazyItemEvaluator<P, I, M, D> lazyEvaluator
-            )
+            LazyItemEvaluator<P, I, M, D> lazyEvaluator)
         {
             if (condition?.Length == 0)
             {
@@ -87,18 +83,15 @@ namespace Microsoft.Build.Evaluation
 
             using (lazyEvaluator._evaluationProfiler.TrackCondition(element.ConditionLocation, condition))
             {
-                bool result = ConditionEvaluator.EvaluateCondition
-                    (
+                bool result = ConditionEvaluator.EvaluateCondition(
                     condition,
                     parserOptions,
                     expander,
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
                     element.ConditionLocation,
-                    lazyEvaluator._loggingContext.LoggingService,
-                    lazyEvaluator._loggingContext.BuildEventContext,
-                    lazyEvaluator.FileSystem
-                    );
+                    lazyEvaluator.FileSystem,
+                    loggingContext: lazyEvaluator._loggingContext);
                 MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
 
                 return result;
@@ -134,7 +127,7 @@ namespace Microsoft.Build.Evaluation
                 _normalizedItemValue = normalizedItemValue;
             }
 
-            public ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
+            public readonly ItemData Clone(IItemFactory<I, I> itemFactory, ProjectItemElement initialItemElementForFactory)
             {
                 // setting the factory's item element to the original item element that produced the item
                 // otherwise you get weird things like items that appear to have been produced by update elements
@@ -267,7 +260,9 @@ namespace Microsoft.Build.Evaluation
                 foreach (ItemData data in GetItemData(globsToIgnore))
                 {
                     if (data.ConditionResult)
+                    {
                         items.Add(data.Item);
+                    }
                 }
 
                 return items.ToImmutable();
@@ -341,7 +336,7 @@ namespace Microsoft.Build.Evaluation
                         break;
                     }
 
-                    //  If this is a remove operation, then add any globs that will be removed
+                    // If this is a remove operation, then add any globs that will be removed
                     //  to a list of globs to ignore in previous operations
                     if (currentList._memoizedOperation.Operation is RemoveOperation removeOperation)
                     {
@@ -369,7 +364,7 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, UpdateOperation> itemsWithNoWildcards = new Dictionary<string, UpdateOperation>(StringComparer.OrdinalIgnoreCase);
                 bool addedToBatch = false;
 
-                //  Walk back down the stack of item lists applying operations
+                // Walk back down the stack of item lists applying operations
                 while (itemListStack.Count > 0)
                 {
                     var currentList = itemListStack.Pop();
@@ -389,7 +384,7 @@ namespace Microsoft.Build.Evaluation
                                 break;
                             }
 
-                            string fullPath = FileUtilities.GetFullPath(frag.TextFragment, frag.ProjectDirectory);
+                            string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(frag.TextFragment, frag.ProjectDirectory);
                             if (itemsWithNoWildcards.ContainsKey(fullPath))
                             {
                                 // Another update will already happen on this path. Make that happen before evaluating this one.
@@ -422,7 +417,7 @@ namespace Microsoft.Build.Evaluation
                         ProcessNonWildCardItemUpdates(itemsWithNoWildcards, items);
                     }
 
-                    //  If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
+                    // If this is a remove operation, then it could modify the globs to ignore, so pop the potentially
                     //  modified entry off the stack of globs to ignore
                     if (currentList._memoizedOperation.Operation is RemoveOperation)
                     {
@@ -441,14 +436,12 @@ namespace Microsoft.Build.Evaluation
 
             private static void ProcessNonWildCardItemUpdates(Dictionary<string, UpdateOperation> itemsWithNoWildcards, OrderedItemDataCollection.Builder items)
             {
-#if DEBUG
-                ErrorUtilities.VerifyThrow(itemsWithNoWildcards.All(fragment => !MSBuildConstants.CharactersForExpansion.Any(fragment.Key.Contains)), $"{nameof(itemsWithNoWildcards)} should not contain any text fragments with wildcards.");
-#endif
                 if (itemsWithNoWildcards.Count > 0)
                 {
                     for (int i = 0; i < items.Count; i++)
                     {
-                        if (itemsWithNoWildcards.TryGetValue(FileUtilities.GetFullPath(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory), out UpdateOperation op))
+                        string fullPath = FileUtilities.NormalizePathForComparisonNoThrow(items[i].Item.EvaluatedInclude, items[i].Item.ProjectDirectory);
+                        if (itemsWithNoWildcards.TryGetValue(fullPath, out UpdateOperation op))
                         {
                             items[i] = op.UpdateItem(items[i]);
                         }
@@ -470,7 +463,7 @@ namespace Microsoft.Build.Evaluation
 
             public ProjectItemElement ItemElement { get; set; }
             public string ItemType { get; set; }
-            public ItemSpec<P,I> ItemSpec { get; set; }
+            public ItemSpec<P, I> ItemSpec { get; set; }
 
             public ImmutableDictionary<string, LazyItemList>.Builder ReferencedItemLists { get; } = Traits.Instance.EscapeHatches.UseCaseSensitiveItemNames ?
                 ImmutableDictionary.CreateBuilder<string, LazyItemList>() :
@@ -488,7 +481,7 @@ namespace Microsoft.Build.Evaluation
 
         private class OperationBuilderWithMetadata : OperationBuilder
         {
-            public ImmutableList<ProjectMetadataElement>.Builder Metadata = ImmutableList.CreateBuilder<ProjectMetadataElement>();
+            public readonly ImmutableArray<ProjectMetadataElement>.Builder Metadata = ImmutableArray.CreateBuilder<ProjectMetadataElement>();
 
             public OperationBuilderWithMetadata(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {
@@ -558,12 +551,12 @@ namespace Microsoft.Build.Evaluation
             // Process include
             ProcessItemSpec(rootDirectory, itemElement.Include, itemElement.IncludeLocation, operationBuilder);
 
-            //  Code corresponds to Evaluator.EvaluateItemElement
+            // Code corresponds to Evaluator.EvaluateItemElement
 
             // Process exclude (STEP 4: Evaluate, split, expand and subtract any Exclude)
             if (itemElement.Exclude.Length > 0)
             {
-                //  Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
+                // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
                 //  if so we need to add the right item reference
                 string evaluatedExclude = _expander.ExpandIntoStringLeaveEscaped(itemElement.Exclude, ExpanderOptions.ExpandProperties, itemElement.ExcludeLocation);
 

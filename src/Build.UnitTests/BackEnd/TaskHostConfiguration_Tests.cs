@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -11,10 +11,11 @@ using System.Threading;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -29,7 +30,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private bool _continueOnErrorDefault = true;
 
         /// <summary>
-        /// Test that an exception is thrown when the task name is null. 
+        /// Test that an exception is thrown when the task name is null.
         /// </summary>
         [Fact]
         public void ConstructorWithNullName()
@@ -59,12 +60,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
         /// <summary>
-        /// Test that an exception is thrown when the task name is empty. 
+        /// Test that an exception is thrown when the task name is empty.
         /// </summary>
         [Fact]
         public void ConstructorWithEmptyName()
@@ -94,9 +95,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test that an exception is thrown when the path to the task assembly is null
@@ -129,9 +130,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
@@ -166,14 +167,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     taskParameters: null,
                     globalParameters: null,
                     warningsAsErrors: null,
+                    warningsNotAsErrors: null,
                     warningsAsMessages: null);
-            }
-           );
+            });
         }
 #endif
 
         /// <summary>
-        /// Test the valid constructors.  
+        /// Test the valid constructors.
         /// </summary>
         [Fact]
         public void TestValidConstructors()
@@ -201,6 +202,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             TaskHostConfiguration config2 = new TaskHostConfiguration(
@@ -226,6 +228,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -252,6 +255,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             IDictionary<string, object> parameters2 = new Dictionary<string, object>();
@@ -283,6 +287,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: parameters2,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             HashSet<string> WarningsAsErrors = new HashSet<string>();
@@ -314,11 +319,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: parameters2,
                 globalParameters: null,
                 warningsAsErrors: WarningsAsErrors,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary is null. 
+        /// Test serialization / deserialization when the parameter dictionary is null.
         /// </summary>
         [Fact]
         public void TestTranslationWithNullDictionary()
@@ -352,6 +358,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: null,
                 globalParameters: expectedGlobalProperties,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -368,8 +375,59 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(expectedGlobalProperties, deserializedConfig.GlobalProperties);
         }
 
+#if FEATURE_APPDOMAIN
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary is empty. 
+        /// Test serialization / deserialization of the AppDomainSetup instance.
+        /// </summary>
+        [Theory]
+        [InlineData(new byte[] { 1, 2, 3 })]
+        [InlineData(null)]
+        public void TestTranslationWithAppDomainSetup(byte[] configBytes)
+        {
+            AppDomainSetup setup = new AppDomainSetup();
+
+            TaskHostConfiguration config = new TaskHostConfiguration(
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: null,
+                culture: Thread.CurrentThread.CurrentCulture,
+                uiCulture: Thread.CurrentThread.CurrentUICulture,
+                appDomainSetup: setup,
+                lineNumberOfTask: 1,
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"c:\my project\myproj.proj",
+                continueOnError: _continueOnErrorDefault,
+                taskName: "TaskName",
+                taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
+                taskParameters: new Dictionary<string, object>(),
+                globalParameters: new Dictionary<string, string>(),
+                warningsAsErrors: null,
+                warningsNotAsErrors: null,
+                warningsAsMessages: null);
+
+            setup.SetConfigurationBytes(configBytes);
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
+
+            deserializedConfig.AppDomainSetup.ShouldNotBeNull();
+
+            if (configBytes is null)
+            {
+                deserializedConfig.AppDomainSetup.GetConfigurationBytes().ShouldBeNull();
+            }
+            else
+            {
+                deserializedConfig.AppDomainSetup.GetConfigurationBytes().SequenceEqual(configBytes).ShouldBeTrue();
+            }
+        }
+#endif
+
+        /// <summary>
+        /// Test serialization / deserialization when the parameter dictionary is empty.
         /// </summary>
         [Fact]
         public void TestTranslationWithEmptyDictionary()
@@ -397,6 +455,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: new Dictionary<string, object>(),
                 globalParameters: new Dictionary<string, string>(),
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -416,7 +475,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains just value types. 
+        /// Test serialization / deserialization when the parameter dictionary contains just value types.
         /// </summary>
         [Fact]
         public void TestTranslationWithValueTypesInDictionary()
@@ -447,6 +506,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -465,7 +525,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem.
         /// </summary>
         [Fact]
         public void TestTranslationWithITaskItemInDictionary()
@@ -495,6 +555,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -512,7 +573,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array.
         /// </summary>
         [Fact]
         public void TestTranslationWithITaskItemArrayInDictionary()
@@ -542,6 +603,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: parameters,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -563,7 +625,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array.
         /// </summary>
         [Fact]
         public void TestTranslationWithWarningsAsErrors()
@@ -596,6 +658,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: WarningsAsErrors,
+                warningsNotAsErrors: null,
                 warningsAsMessages: null);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -609,7 +672,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             Assert.NotNull(deserializedConfig.WarningsAsErrors);
             config.WarningsAsErrors.SequenceEqual(deserializedConfig.WarningsAsErrors, StringComparer.Ordinal).ShouldBeTrue();
-
         }
 
         /// <summary>
@@ -646,6 +708,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters: null,
                 globalParameters: null,
                 warningsAsErrors: null,
+                warningsNotAsErrors: null,
                 warningsAsMessages: WarningsAsMessages);
 
             ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
@@ -658,7 +721,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Helper methods for testing the task host-related packets. 
+        /// Helper methods for testing the task host-related packets.
         /// </summary>
         internal static class TaskHostPacketHelpers
         {
@@ -674,12 +737,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (x == null || y == null)
                 {
-                    Assert.True(false, "The two item lists are not equal -- one of them is null");
+                    Assert.Fail("The two item lists are not equal -- one of them is null");
                 }
 
                 if (x.Length != y.Length)
                 {
-                    Assert.True(false, "The two item lists have different lengths, so they cannot be equal");
+                    Assert.Fail("The two item lists have different lengths, so they cannot be equal");
                 }
 
                 for (int i = 0; i < x.Length; i++)
@@ -700,7 +763,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (x == null || y == null)
                 {
-                    Assert.True(false, "The two items are not equal -- one of them is null");
+                    Assert.Fail("The two items are not equal -- one of them is null");
                 }
 
                 Assert.Equal(x.ItemSpec, y.ItemSpec);
@@ -714,7 +777,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     if (!metadataFromY.Contains(metadataName))
                     {
-                        Assert.True(false, string.Format("Only one item contains the '{0}' metadata", metadataName));
+                        Assert.Fail(string.Format("Only one item contains the '{0}' metadata", metadataName));
                     }
                     else
                     {

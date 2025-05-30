@@ -1,20 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging.StructuredLogger
 {
     /// <summary>
     /// Class representation of an MSBuild overall build execution.
     /// </summary>
-    internal class Build : LogProcessNode
+    internal sealed class Build : LogProcessNode
     {
         /// <summary>
-        /// A lookup table mapping of project identifiers to project nodes (which can be nested multiple layers). 
+        /// A lookup table mapping of project identifiers to project nodes (which can be nested multiple layers).
         /// </summary>
         private readonly ConcurrentDictionary<int, Project> _projectIdToProjectMap = new ConcurrentDictionary<int, Project>();
 
@@ -91,7 +93,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         }
 
         /// <summary>
-        /// Handler for a TaskCommandLine log event. Sets the command line arguments on the appropriate task. 
+        /// Handler for a TaskCommandLine log event. Sets the command line arguments on the appropriate task.
         /// </summary>
         /// <param name="taskCommandLineEventArgs">The <see cref="TaskCommandLineEventArgs"/> instance containing the event data.</param>
         public void AddCommandLine(TaskCommandLineEventArgs taskCommandLineEventArgs)

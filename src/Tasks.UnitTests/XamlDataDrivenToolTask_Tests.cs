@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -7,6 +7,8 @@ using System.Reflection;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
 {
@@ -27,7 +29,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Test to see whether all of the correct boolean switches are appended.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestDefaultFlags()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -39,7 +40,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// This test case leaves the default flags the way they are
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestReversibleFlagsWithDefaults()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -53,7 +53,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// This test case explicitly sets the ComplexReversible to be false
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestReversibleFlagsWithoutDefaults()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -67,7 +66,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests to make sure enums are working well.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestBasicString()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -77,7 +75,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestDynamicEnum()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -87,10 +84,9 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// Tests the basic string array type 
+        /// Tests the basic string array type
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestBasicStringArray()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -102,10 +98,9 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// Tests the basic string array type, with an array that contains multiple values. 
+        /// Tests the basic string array type, with an array that contains multiple values.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestBasicStringArray_MultipleValues()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -122,7 +117,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests to see whether the integer appears correctly on the command line
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestInteger()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -136,7 +130,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests the (full) functionality of a reversible property
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexReversible()
         {
             // When flag is set to false
@@ -153,7 +146,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexString()
         {
             // check to see that the resulting value is good
@@ -167,7 +159,6 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         /// Tests the functionality of a string type property
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexStringArray()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -178,19 +169,16 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexIntegerLessThanMin()
         {
             Assert.Throws<InvalidOperationException>(() =>
             {
                 object fakeTaskInstance = CreateFakeTask();
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 2);
-            }
-           );
+            });
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexIntegerGreaterThanMax()
         {
             Assert.Throws<InvalidOperationException>(() =>
@@ -199,11 +187,9 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
                 XamlTestHelpers.SetProperty(fakeTaskInstance, "ComplexInteger", 256);
                 string expectedResult = "/always /Ci256 /Cr:CT";
                 CheckCommandLine(expectedResult, XamlTestHelpers.GenerateCommandLine(fakeTaskInstance));
-            }
-           );
+            });
         }
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestComplexIntegerWithinRange()
         {
             object fakeTaskInstance = CreateFakeTask();
@@ -224,9 +210,9 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// XamlTaskFactory does not, in and of itself, support the idea of "always" switches or default values.  At least 
-        /// for Dev10, the workaround is to create a property as usual, and then specify the required values in the .props 
-        /// file.  Since these unit tests are just testing the task itself, this method serves as our ".props file".  
+        /// XamlTaskFactory does not, in and of itself, support the idea of "always" switches or default values.  At least
+        /// for Dev10, the workaround is to create a property as usual, and then specify the required values in the .props
+        /// file.  Since these unit tests are just testing the task itself, this method serves as our ".props file".
         /// </summary>
         public object CreateFakeTask()
         {
@@ -240,19 +226,18 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
     }
 
     /// <summary>
-    /// Tests for XamlDataDrivenToolTask / XamlTaskFactory in the context of a project file.  
+    /// Tests for XamlDataDrivenToolTask / XamlTaskFactory in the context of a project file.
     /// </summary>
     public class ProjectFileTests
     {
         /// <summary>
-        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
+        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CommandLineErrorsReportFullCommandlineAmpersandTemp()
         {
             string projectFile = @"
-                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
                         <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
                           <Task>
                             <![CDATA[
@@ -293,20 +278,22 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
                 ObjectModelHelpers.DeleteDirectory(newTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
 
         /// <summary>
-        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
+        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CommandLineErrorsReportFullCommandline()
         {
             string projectFile = @"
-                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
                         <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
                           <Task>
                             <![CDATA[
@@ -336,14 +323,13 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
         }
 
         /// <summary>
-        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message. 
+        /// Tests that when a call to a XamlDataDrivenTask fails, the commandline is reported in the error message.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SquareBracketEscaping()
         {
             string projectFile = @"
-                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
                         <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
                           <Task>
                             <![CDATA[

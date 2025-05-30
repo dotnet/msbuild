@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
@@ -16,7 +18,7 @@ namespace Microsoft.Build.Utilities
     internal class PlatformManifest
     {
         /// <summary>
-        /// Location of Platform.xml 
+        /// Location of Platform.xml
         /// </summary>
         private readonly string _pathToManifest;
 
@@ -26,7 +28,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public PlatformManifest(string pathToManifest)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pathToManifest, nameof(pathToManifest));
+            ErrorUtilities.VerifyThrowArgumentLength(pathToManifest);
             _pathToManifest = pathToManifest;
             LoadManifestFile();
         }
@@ -47,7 +49,7 @@ namespace Microsoft.Build.Utilities
         public string PlatformVersion { get; private set; }
 
         /// <summary>
-        /// The platforms that this platform depends on.  
+        /// The platforms that this platform depends on.
         /// Item1: Platform name
         /// Item2: Platform version
         /// </summary>
@@ -78,7 +80,7 @@ namespace Microsoft.Build.Utilities
         private void LoadManifestFile()
         {
             /*
-               Platform.xml format: 
+               Platform.xml format:
 
                <ApplicationPlatform name="UAP" friendlyName="Universal Application Platform" version="1.0.0.0">
                   <DependentPlatform name="UAP" version="1.0.0.0" />
@@ -94,9 +96,10 @@ namespace Microsoft.Build.Utilities
                 if (FileSystems.Default.FileExists(platformManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
-                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
-                    using (XmlReader xmlReader = XmlReader.Create(platformManifestPath, readerSettings))
+                    FileStream fs = File.OpenRead(platformManifestPath);
+                    using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                     {
                         doc.Load(xmlReader);
                     }
@@ -133,7 +136,7 @@ namespace Microsoft.Build.Utilities
                             {
                                 ApiContract.ReadContractsElement(childElement, ApiContracts);
                             }
-                            else if(ApiContract.IsVersionedContentElement(childElement.Name))
+                            else if (ApiContract.IsVersionedContentElement(childElement.Name))
                             {
                                 bool.TryParse(childElement.InnerText, out bool versionedContent);
                                 VersionedContent = versionedContent;
@@ -150,13 +153,8 @@ namespace Microsoft.Build.Utilities
                     ReadErrorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PlatformManifest.MissingPlatformXml", platformManifestPath);
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ReadErrorMessage = e.Message;
             }
         }
@@ -172,7 +170,7 @@ namespace Microsoft.Build.Utilities
             internal readonly string Name;
 
             /// <summary>
-            /// Version of the platform on which this platform depends 
+            /// Version of the platform on which this platform depends
             /// </summary>
             internal readonly string Version;
 
@@ -192,7 +190,7 @@ namespace Microsoft.Build.Utilities
         private static class Elements
         {
             /// <summary>
-            /// Root element 
+            /// Root element
             /// </summary>
             public const string ApplicationPlatform = "ApplicationPlatform";
 

@@ -1,15 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.UnitTests;
-using Microsoft.Build.Utilities;
-using Shouldly;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -36,10 +38,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceDirectory = new TaskItem(sourceFolder.Path)
                 };
 
-                zipDirectory.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(sourceFolder.Path, () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(zipFilePath, () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(zipFilePath, customMessage: _mockEngine.Log);
 
                 using (FileStream stream = new FileStream(zipFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
@@ -78,10 +80,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceDirectory = new TaskItem(sourceFolder.Path)
                 };
 
-                zipDirectory.Execute().ShouldBeTrue(() => _mockEngine.Log);
+                zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain(sourceFolder.Path, () => _mockEngine.Log);
-                _mockEngine.Log.ShouldContain(file.Path, () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
+                _mockEngine.Log.ShouldContain(file.Path, customMessage: _mockEngine.Log);
 
                 using (FileStream stream = new FileStream(file.Path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
@@ -116,9 +118,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     SourceDirectory = new TaskItem(folder.Path)
                 };
 
-                zipDirectory.Execute().ShouldBeFalse(() => _mockEngine.Log);
+                zipDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB3942", () => _mockEngine.Log);
+                _mockEngine.Log.ShouldContain("MSB3942", customMessage: _mockEngine.Log);
             }
         }
 
@@ -131,9 +133,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 SourceDirectory = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")))
             };
 
-            zipDirectory.Execute().ShouldBeFalse(() => _mockEngine.Log);
+            zipDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
 
-            _mockEngine.Log.ShouldContain("MSB3941", () => _mockEngine.Log);
+            _mockEngine.Log.ShouldContain("MSB3941", customMessage: _mockEngine.Log);
         }
     }
 }

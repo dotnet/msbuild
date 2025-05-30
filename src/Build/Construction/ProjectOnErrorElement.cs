@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Construction
         internal ProjectOnErrorElement(XmlElementWithLocation xmlElement, ProjectTargetElement parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -74,7 +76,7 @@ namespace Microsoft.Build.Construction
             XmlElementWithLocation element = containingProject.CreateElement(XMakeElements.onError);
 
             var onError = new ProjectOnErrorElement(element, containingProject) { ExecuteTargetsAttribute = executeTargets };
-            
+
             return onError;
         }
 

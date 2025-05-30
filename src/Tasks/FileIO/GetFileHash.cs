@@ -1,21 +1,24 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Computes the checksum for a single file.
     /// </summary>
-    public sealed class GetFileHash : TaskExtension
+    public sealed class GetFileHash : TaskExtension, ICancelableTask
     {
         internal const string _defaultFileHashAlgorithm = "SHA256";
         internal const string _hashEncodingHex = "hex";
@@ -75,8 +78,10 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            var parallelOptions = new ParallelOptions() { CancellationToken = _cancellationTokenSource.Token };
+
             var writeLock = new object();
-            Parallel.For(0, Files.Length, index =>
+            Parallel.For(0, Files.Length, parallelOptions, index =>
             {
                 var file = Files[index];
 
@@ -86,7 +91,7 @@ namespace Microsoft.Build.Tasks
                     return;
                 }
 
-                var hash = ComputeHash(algorithmFactory, file.ItemSpec);
+                var hash = ComputeHash(algorithmFactory, file.ItemSpec, _cancellationTokenSource.Token);
                 var encodedHash = EncodeHash(encoding, hash);
 
                 lock (writeLock)
@@ -113,6 +118,13 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors;
         }
 
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+        public void Cancel()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
         internal static string EncodeHash(HashEncoding encoding, byte[] hash)
         {
             return encoding switch
@@ -126,12 +138,16 @@ namespace Microsoft.Build.Tasks
         internal static bool TryParseHashEncoding(string value, out HashEncoding encoding)
             => Enum.TryParse<HashEncoding>(value, /*ignoreCase:*/ true, out encoding);
 
-        internal static byte[] ComputeHash(Func<HashAlgorithm> algorithmFactory, string filePath)
+        internal static byte[] ComputeHash(Func<HashAlgorithm> algorithmFactory, string filePath, CancellationToken ct)
         {
             using (var stream = File.OpenRead(filePath))
             using (var algorithm = algorithmFactory())
             {
+#if NET
+                return algorithm.ComputeHashAsync(stream, ct).Result;
+#else
                 return algorithm.ComputeHash(stream);
+#endif
             }
         }
     }

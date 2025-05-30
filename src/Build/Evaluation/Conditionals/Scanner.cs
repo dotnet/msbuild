@@ -1,13 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Globalization;
 using System;
 using System.Diagnostics;
-
-using Microsoft.Build.Framework;
+using System.Globalization;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -134,10 +133,14 @@ namespace Microsoft.Build.Evaluation
         internal bool Advance()
         {
             if (_errorState)
+            {
                 return false;
+            }
 
             if (_lookahead?.IsToken(Token.TokenType.EndOfInput) == true)
+            {
                 return true;
+            }
 
             SkipWhiteSpace();
 
@@ -166,11 +169,17 @@ namespace Microsoft.Build.Evaluation
                         break;
                     case '$':
                         if (!ParseProperty())
+                        {
                             return false;
+                        }
+
                         break;
                     case '%':
                         if (!ParseItemMetadata())
+                        {
                             return false;
+                        }
+
                         break;
                     case '@':
                         int start = _parsePoint;
@@ -186,7 +195,10 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                         if (!ParseItemList())
+                        {
                             return false;
+                        }
+
                         break;
                     case '!':
                         // negation and not-equal
@@ -253,12 +265,18 @@ namespace Microsoft.Build.Evaluation
                         break;
                     case '\'':
                         if (!ParseQuotedString())
+                        {
                             return false;
+                        }
+
                         break;
                     default:
                         // Simple strings, function calls, decimal numbers, hex numbers
                         if (!ParseRemaining())
+                        {
                             return false;
+                        }
+
                         break;
                 }
             }
@@ -364,7 +382,7 @@ namespace Microsoft.Build.Evaluation
                         // If it is not then the calling code will determine that
                         if (nestLevel == 0)
                         {
-                            if (whitespaceFound && !nonIdentifierCharacterFound && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                            if (whitespaceFound && !nonIdentifierCharacterFound)
                             {
                                 return false;
                             }
@@ -644,12 +662,16 @@ namespace Microsoft.Build.Evaluation
             if (CharacterUtilities.IsNumberStart(_expression[_parsePoint])) // numeric
             {
                 if (!ParseNumeric(start))
+                {
                     return false;
+                }
             }
             else if (CharacterUtilities.IsSimpleStringStart(_expression[_parsePoint])) // simple string (handle 'and' and 'or')
             {
                 if (!ParseSimpleStringOrFunction(start))
+                {
                     return false;
+                }
             }
             else
             {
@@ -670,11 +692,11 @@ namespace Microsoft.Build.Evaluation
         private bool ParseSimpleStringOrFunction(int start)
         {
             SkipSimpleStringChars();
-            if (string.Equals(_expression.Substring(start, _parsePoint - start), "and", StringComparison.OrdinalIgnoreCase))
+            if (_expression.AsSpan(start, _parsePoint - start).Equals("and".AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
                 _lookahead = Token.And;
             }
-            else if (string.Equals(_expression.Substring(start, _parsePoint - start), "or", StringComparison.OrdinalIgnoreCase))
+            else if (_expression.AsSpan(start, _parsePoint - start).Equals("or".AsSpan(), StringComparison.OrdinalIgnoreCase))
             {
                 _lookahead = Token.Or;
             }
@@ -742,25 +764,37 @@ namespace Microsoft.Build.Evaluation
         private void SkipWhiteSpace()
         {
             while (_parsePoint < _expression.Length && char.IsWhiteSpace(_expression[_parsePoint]))
+            {
                 _parsePoint++;
+            }
+
             return;
         }
         private void SkipDigits()
         {
             while (_parsePoint < _expression.Length && char.IsDigit(_expression[_parsePoint]))
+            {
                 _parsePoint++;
+            }
+
             return;
         }
         private void SkipHexDigits()
         {
             while (_parsePoint < _expression.Length && CharacterUtilities.IsHexDigit(_expression[_parsePoint]))
+            {
                 _parsePoint++;
+            }
+
             return;
         }
         private void SkipSimpleStringChars()
         {
             while (_parsePoint < _expression.Length && CharacterUtilities.IsSimpleStringChar(_expression[_parsePoint]))
+            {
                 _parsePoint++;
+            }
+
             return;
         }
     }

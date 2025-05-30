@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework;
 
 // This CallTarget intrinsic task replaces the one on Microsoft.Build.Tasks, which is now deprecated.
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -30,7 +32,7 @@ namespace Microsoft.Build.BackEnd
         private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
         /// <summary>
-        /// A list of targets to build.  This is a required parameter.  If you want to build the 
+        /// A list of targets to build.  This is a required parameter.  If you want to build the
         /// default targets, use the <see cref="MSBuild"/> task and pass in Projects=$(MSBuildProjectFile).
         /// </summary>
         /// <value>Array of target names.</value>
@@ -90,8 +92,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // This is a list of string[].  That is, each element in the list is a string[].  Each
-            // string[] represents a set of target names to build.  Depending on the value 
-            // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
+            // string[] represents a set of target names to build.  Depending on the value
+            // of the RunEachTargetSeparately parameter, we each just call the engine to run all
             // the targets together, or we call the engine separately for each target.
             List<string[]> targetLists = MSBuild.CreateTargetLists(Targets, RunEachTargetSeparately);
 

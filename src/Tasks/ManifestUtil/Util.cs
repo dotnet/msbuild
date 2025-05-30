@@ -1,9 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -13,10 +10,16 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Win32;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -27,9 +30,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static readonly string logPath = GetLogPath();
         private static readonly char[] s_fileNameInvalidChars = { '\\', '/', ':', '*', '?', '"', '<', '>', '|' };
         private static StreamWriter s_logFileWriter;
+#if !RUNTIME_TYPE_NETCORE
         // Major, Minor, Build and Revision of CLR v2.0
         private static readonly int[] s_clrVersion2 = { 2, 0, 50727, 0 };
-#if RUNTIME_TYPE_NETCORE
+#else
         // Major, Minor, Build and Revision of CLR v4.0
         private static readonly int[] s_clrVersion4 = { 4, 0, 30319, 0 };
 #endif
@@ -59,39 +63,29 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string ByteArrayToHex(Byte[] a)
         {
             if (a == null)
+            {
                 return null;
-            StringBuilder s = new StringBuilder(a.Length);
+            }
+
+#if NET
+            return Convert.ToHexString(a);
+#else
+            StringBuilder s = new StringBuilder(a.Length * 2);
             foreach (Byte b in a)
+            {
                 s.Append(b.ToString("X02", CultureInfo.InvariantCulture));
+            }
+
             return s.ToString();
+#endif
         }
 
-        public static string ByteArrayToString(Byte[] a)
-        {
-            if (a == null)
-                return null;
-            StringBuilder s = new StringBuilder(a.Length);
-            foreach (Byte b in a)
-                s.Append(Convert.ToChar(b));
-            return s.ToString();
-        }
-
-        public static int CopyStream(Stream input, Stream output)
+        public static void CopyStream(Stream input, Stream output)
         {
             const int bufferSize = 0x4000;
-            byte[] buffer = new byte[bufferSize];
-            int bytesCopied = 0;
-            int bytesRead;
-            do
-            {
-                bytesRead = input.Read(buffer, 0, bufferSize);
-                output.Write(buffer, 0, bytesRead);
-                bytesCopied += bytesRead;
-            } while (bytesRead > 0);
-            output.Flush();
+            input.CopyTo(output, bufferSize);
             input.Position = 0;
             output.Position = 0;
-            return bytesCopied;
         }
 
         public static string FilterNonprintableChars(string value)
@@ -99,10 +93,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             StringBuilder sb = new StringBuilder(value);
             int i = 0;
             while (i < sb.Length)
+            {
                 if (sb[i] < ' ')
+                {
                     sb.Remove(i, 1);
+                }
                 else
+                {
                     ++i;
+                }
+            }
+
             return sb.ToString();
         }
 
@@ -132,7 +133,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string GetClrVersion(string targetFrameworkVersion)
         {
             if (string.IsNullOrEmpty(targetFrameworkVersion))
+            {
                 return GetClrVersion();
+            }
 
             Version clrVersion;
 #if RUNTIME_TYPE_NETCORE
@@ -169,9 +172,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Version frameworkVersion = null;
             if (!String.IsNullOrEmpty(targetFramework))
             {
-                if (targetFramework.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+                if (targetFramework[0] is 'v' or 'V')
                 {
-                    Version.TryParse(targetFramework.Substring(1), out frameworkVersion);
+                    Version.TryParse(
+#if NET
+                        targetFramework.AsSpan(1),
+#else
+                        targetFramework.Substring(1),
+#endif
+                        out frameworkVersion);
                 }
                 else
                 {
@@ -184,15 +193,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string GetEmbeddedResourceString(string name)
         {
             Stream s = GetEmbeddedResourceStream(name);
-            StreamReader r = new StreamReader(s);
+            using StreamReader r = new StreamReader(s);
             return r.ReadToEnd();
         }
 
         public static Stream GetEmbeddedResourceStream(string name)
         {
             Assembly a = Assembly.GetExecutingAssembly();
-            Stream s = a.GetManifestResourceStream(String.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(Util).Namespace, name));
-            Debug.Assert(s != null, String.Format(CultureInfo.CurrentCulture, "EmbeddedResource '{0}' not found", name));
+            Stream s = a.GetManifestResourceStream($"{typeof(Util).Namespace}.{name}");
+            Debug.Assert(s != null, $"EmbeddedResource '{name}' not found");
             return s;
         }
 
@@ -206,25 +215,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             GetFileInfoImpl(path, targetFrameworkVersion, out hash, out length);
         }
 
-        [SuppressMessage("Microsoft.Security.Cryptography", "CA5354: SHA1CannotBeUsed.", Justification = ".NET 4.0 and earlier versions cannot parse SHA-2.")]
+        [SuppressMessage("Security", "CA5350:Do Not Use Weak Cryptographic Algorithms", Justification = ".NET 4.0 and earlier versions cannot parse SHA-2.")]
         private static void GetFileInfoImpl(string path, string targetFrameWorkVersion, out string hash, out long length)
         {
             FileInfo fi = new FileInfo(path);
             length = fi.Length;
 
             Stream s = null;
+            HashAlgorithm hashAlg = null;
             try
             {
                 s = fi.OpenRead();
-                HashAlgorithm hashAlg;
 
                 if (string.IsNullOrEmpty(targetFrameWorkVersion) || CompareFrameworkVersions(targetFrameWorkVersion, Constants.TargetFrameworkVersion40) <= 0)
                 {
-                    hashAlg = new SHA1CryptoServiceProvider();
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    // codeql[cs/weak-crypto] .NET 4.0 and earlier versions cannot parse SHA-2. Newer Frameworks use SHA256. https://devdiv.visualstudio.com/DevDiv/_workitems/edit/139025
+                    hashAlg = SHA1.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA1CryptoServiceProvider"
+#endif
+                        );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 }
                 else
                 {
-                    hashAlg = new SHA256CryptoServiceProvider();
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    hashAlg = SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                        "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                        );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 }
                 byte[] hashBytes = hashAlg.ComputeHash(s);
                 hash = Convert.ToBase64String(hashBytes);
@@ -232,18 +254,27 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             finally
             {
                 s?.Close();
+                hashAlg?.Dispose();
             }
         }
 
         private static string GetLogPath()
         {
-            if (!logging) return null;
+            if (!logging)
+            {
+                return null;
+            }
+
             string logPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), @"Microsoft\VisualStudio\8.0\VSPLOG");
             if (!FileSystems.Default.DirectoryExists(logPath))
+            {
                 Directory.CreateDirectory(logPath);
+            }
+
             return logPath;
         }
 
+        [SupportedOSPlatform("windows")]
         public static string GetRegisteredOrganization()
         {
             RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", false);
@@ -252,7 +283,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 string org = (string)key.GetValue("RegisteredOrganization");
                 org = org?.Trim();
                 if (!String.IsNullOrEmpty(org))
+                {
                     return org;
+                }
             }
             return null;
         }
@@ -265,9 +298,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static bool IsValidCulture(string value)
         {
             if (String.Equals(value, "neutral", StringComparison.OrdinalIgnoreCase))
+            {
                 return true; // "neutral" is valid in a manifest but not in CultureInfo class
+            }
+
             if (String.Equals(value, "*", StringComparison.OrdinalIgnoreCase))
+            {
                 return true; // "*" is same as "neutral"
+            }
+
             CultureInfo culture;
             try
             {
@@ -314,13 +353,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
 
             if (octets >= 1 && version.Major < 0)
+            {
                 return false;
+            }
+
             if (octets >= 2 && version.Minor < 0)
+            {
                 return false;
+            }
+
             if (octets >= 3 && version.Build < 0)
+            {
                 return false;
+            }
+
             if (octets >= 4 && version.Revision < 0)
+            {
                 return false;
+            }
 
             return true;
         }
@@ -328,24 +378,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static bool IsValidFrameworkVersion(string value)
         {
             if (value.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            {
                 return IsValidVersion(value.Substring(1), 2);
+            }
+
             return IsValidVersion(value, 2);
         }
 
         public static string PlatformToProcessorArchitecture(string platform)
         {
             for (int i = 0; i < s_platforms.Length; ++i)
+            {
                 if (String.Equals(platform, s_platforms[i], StringComparison.OrdinalIgnoreCase))
+                {
                     return s_processorArchitectures[i];
+                }
+            }
+
             return null;
         }
 
         private static ITaskItem[] RemoveDuplicateItems(ITaskItem[] items)
         {
             if (items == null)
+            {
                 return null;
+            }
+
             if (items.Length <= 1)
+            {
                 return items;
+            }
+
             var list = new Dictionary<string, ITaskItem>();
             foreach (ITaskItem item in items)
             {
@@ -378,7 +442,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             ITaskItem[] outputItems = RemoveDuplicateItems(items);
             if (outputItems != null)
+            {
                 Array.Sort(outputItems, s_itemComparer);
+            }
+
             return outputItems;
         }
 
@@ -392,15 +459,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public static void WriteFile(string path, Stream s)
         {
-            StreamReader r = new StreamReader(s);
+            using StreamReader r = new StreamReader(s);
             WriteFile(path, r.ReadToEnd());
         }
 
         public static void WriteLog(string text)
         {
             if (!logging)
+            {
                 return;
+            }
+
             if (s_logFileWriter == null)
+            {
                 try
                 {
                     s_logFileWriter = new StreamWriter(Path.Combine(logPath, "Microsoft.Build.Tasks.log"), false);
@@ -421,6 +492,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     return;
                 }
+            }
+
             s_logFileWriter.WriteLine(text);
             s_logFileWriter.Flush();
         }
@@ -428,9 +501,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void WriteLogFile(string filename, Stream s)
         {
             if (!logging)
+            {
                 return;
+            }
+
             string path = Path.Combine(logPath, filename);
-            StreamReader r = new StreamReader(s);
+            using var r = new StreamReader(s, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
             string text = r.ReadToEnd();
             try
             {
@@ -448,13 +524,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             catch (SecurityException)
             {
             }
+
             s.Position = 0;
         }
 
         public static void WriteLogFile(string filename, string s)
         {
             if (!logging)
+            {
                 return;
+            }
+
             string path = Path.Combine(logPath, filename);
             try
             {
@@ -481,14 +561,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static void WriteLogFile(string filename, System.Xml.XmlElement element)
         {
             if (!logging)
+            {
                 return;
+            }
+
             WriteLogFile(filename, element.OuterXml);
         }
 
         public static string WriteTempFile(Stream s)
         {
             // May throw IO-related exceptions
-            string path = FileUtilities.GetTemporaryFile();
+            string path = FileUtilities.GetTemporaryFileName();
 
             WriteFile(path, s);
             return path;
@@ -497,13 +580,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static string WriteTempFile(string s)
         {
             // May throw IO-related exceptions
-            string path = FileUtilities.GetTemporaryFile();
+            string path = FileUtilities.GetTemporaryFileName();
 
             WriteFile(path, s);
             return path;
         }
 
-        #region ItemComparer 
+        #region ItemComparer
         private static readonly ItemComparer s_itemComparer = new ItemComparer();
         private class ItemComparer : IComparer
         {
@@ -535,8 +618,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             if (version.StartsWith("v", StringComparison.OrdinalIgnoreCase))
             {
-                return new Version(version.Substring(1));
+                return Version.Parse(
+#if NET
+                    version.AsSpan(1));
+#else
+                    version.Substring(1));
+#endif
             }
+
             return new Version(version);
         }
 

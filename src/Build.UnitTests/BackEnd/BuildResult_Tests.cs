@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,6 @@ using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -28,23 +27,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestConstructorGood()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result2 = new BuildResult(request);
         }
 
         [Fact]
         public void Clone()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result1 = new BuildResult(request);
-            result1.ResultsByTarget.Add("FOO", BuildResultUtilities.GetEmptySucceedingTargetResult());
-            Assert.True(result1.ResultsByTarget.ContainsKey("foo")); // test comparer
+            result1.ResultsByTarget?.Add("FOO", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            Assert.True(result1.ResultsByTarget?.ContainsKey("foo")); // test comparer
 
             BuildResult result2 = result1.Clone();
 
-            result1.ResultsByTarget.Add("BAR", BuildResultUtilities.GetEmptySucceedingTargetResult());
-            Assert.True(result1.ResultsByTarget.ContainsKey("foo")); // test comparer
-            Assert.True(result1.ResultsByTarget.ContainsKey("bar"));
+            result1.ResultsByTarget?.Add("BAR", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            Assert.True(result1.ResultsByTarget?.ContainsKey("foo")); // test comparer
+            Assert.True(result1.ResultsByTarget?.ContainsKey("bar"));
 
             Assert.Equal(result1.SubmissionId, result2.SubmissionId);
             Assert.Equal(result1.ConfigurationId, result2.ConfigurationId);
@@ -52,27 +51,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(result1.ParentGlobalRequestId, result2.ParentGlobalRequestId);
             Assert.Equal(result1.NodeRequestId, result2.NodeRequestId);
             Assert.Equal(result1.CircularDependency, result2.CircularDependency);
-            Assert.Equal(result1.ResultsByTarget["foo"], result2.ResultsByTarget["foo"]);
+            Assert.Equal(result1.ResultsByTarget?["foo"], result2.ResultsByTarget?["foo"]);
             Assert.Equal(result1.OverallResult, result2.OverallResult);
         }
 
         [Fact]
         public void TestConstructorBad()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.Throws<NullReferenceException>(() =>
             {
-                BuildResult result = new BuildResult(null);
-            }
-           );
+                BuildResult result = new BuildResult(null!);
+            });
         }
         [Fact]
         public void TestConfigurationId()
         {
-            BuildRequest request = CreateNewBuildRequest(-1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(-1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Equal(-1, result.ConfigurationId);
 
-            BuildRequest request2 = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request2 = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result2 = new BuildResult(request2);
             Assert.Equal(1, result2.ConfigurationId);
         }
@@ -80,7 +78,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestExceptionGood()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Null(result.Exception);
             AccessViolationException e = new AccessViolationException();
@@ -92,20 +90,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestOverallResult()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
-            result.AddResultsForTarget("bar", new TargetResult(new TaskItem[0] { }, new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, new Exception())));
+            result.AddResultsForTarget("bar", new TargetResult(Array.Empty<TaskItem>(), new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, new Exception())));
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
-            result.AddResultsForTarget("baz", new TargetResult(new TaskItem[0] { }, BuildResultUtilities.GetStopWithErrorResult(new Exception())));
+            result.AddResultsForTarget("baz", new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult(new Exception())));
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
-            BuildRequest request2 = CreateNewBuildRequest(2, new string[0]);
+            BuildRequest request2 = CreateNewBuildRequest(2, Array.Empty<string>());
             BuildResult result2 = new BuildResult(request2);
             result2.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             result2.AddResultsForTarget("bar", BuildResultUtilities.GetEmptyFailingTargetResult());
@@ -115,7 +113,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestPacketType()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             Assert.Equal(NodePacketType.BuildResult, ((INodePacket)result).Type);
         }
@@ -123,7 +121,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestAddAndRetrieve()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             result.AddResultsForTarget("bar", BuildResultUtilities.GetEmptyFailingTargetResult());
@@ -137,11 +135,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 ITargetResult targetResult = result["foo"];
-            }
-           );
+            });
         }
 
         [Fact]
@@ -149,12 +146,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<KeyNotFoundException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
                 ITargetResult targetResult = result["bar"];
-            }
-           );
+            });
         }
 
         [Fact]
@@ -162,11 +158,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
-            }
-           );
+                result.AddResultsForTarget(null!, BuildResultUtilities.GetEmptySucceedingTargetResult());
+            });
         }
 
         [Fact]
@@ -174,11 +169,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget("foo", null);
-            }
-           );
+                result.AddResultsForTarget("foo", null!);
+            });
         }
 
         [Fact]
@@ -186,16 +180,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
-                result.AddResultsForTarget(null, BuildResultUtilities.GetEmptySucceedingTargetResult());
-            }
-           );
+                result.AddResultsForTarget(null!, BuildResultUtilities.GetEmptySucceedingTargetResult());
+            });
         }
         [Fact]
         public void TestMergeResults()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
@@ -222,13 +215,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
-                result.MergeResults(null);
-            }
-           );
+                result.MergeResults(null!);
+            });
         }
 
         [Fact]
@@ -236,22 +228,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
-                BuildRequest request2 = CreateNewBuildRequest(2, new string[0]);
+                BuildRequest request2 = CreateNewBuildRequest(2, Array.Empty<string>());
                 BuildResult result2 = new BuildResult(request2);
                 result2.AddResultsForTarget("bar", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
                 result.MergeResults(result2);
-            }
-           );
+            });
         }
         [Fact]
         public void TestHasResultsForTarget()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
 
@@ -262,26 +253,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestEnumerator()
         {
-            BuildRequest request = CreateNewBuildRequest(1, new string[0]);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildResult result = new BuildResult(request);
-            int countFound = 0;
-            foreach (KeyValuePair<string, TargetResult> resultPair in result.ResultsByTarget)
-            {
-                countFound++;
-            }
+            int countFound = result.ResultsByTarget?.Count ?? 0;
             Assert.Equal(0, countFound);
 
             result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
             bool foundFoo = false;
             countFound = 0;
-            foreach (KeyValuePair<string, TargetResult> resultPair in result.ResultsByTarget)
+            if (result.ResultsByTarget != null)
             {
-                if (resultPair.Key == "foo")
+                foreach (KeyValuePair<string, TargetResult> resultPair in result.ResultsByTarget)
                 {
-                    foundFoo = true;
+                    if (resultPair.Key == "foo")
+                    {
+                        foundFoo = true;
+                    }
+
+                    countFound++;
                 }
-                countFound++;
             }
+
             Assert.Equal(1, countFound);
             Assert.True(foundFoo);
 
@@ -289,20 +281,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             foundFoo = false;
             bool foundBar = false;
             countFound = 0;
-            foreach (KeyValuePair<string, TargetResult> resultPair in result.ResultsByTarget)
+            if (result.ResultsByTarget != null)
             {
-                if (resultPair.Key == "foo")
+                foreach (KeyValuePair<string, TargetResult> resultPair in result.ResultsByTarget)
                 {
-                    Assert.False(foundFoo);
-                    foundFoo = true;
+                    if (resultPair.Key == "foo")
+                    {
+                        Assert.False(foundFoo);
+                        foundFoo = true;
+                    }
+
+                    if (resultPair.Key == "bar")
+                    {
+                        Assert.False(foundBar);
+                        foundBar = true;
+                    }
+
+                    countFound++;
                 }
-                if (resultPair.Key == "bar")
-                {
-                    Assert.False(foundBar);
-                    foundBar = true;
-                }
-                countFound++;
             }
+
             Assert.Equal(2, countFound);
             Assert.True(foundFoo);
             Assert.True(foundBar);
@@ -322,26 +320,26 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.DefaultTargets = new List<string> { "c", "d" };
 
             result.AddResultsForTarget("alpha", new TargetResult(new TaskItem[] { fooTaskItem }, BuildResultUtilities.GetSuccessResult()));
-            result.AddResultsForTarget("omega", new TargetResult(new TaskItem[] { }, BuildResultUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
+            result.AddResultsForTarget("omega", new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetStopWithErrorResult(new ArgumentException("The argument was invalid"))));
 
             Assert.Equal(NodePacketType.BuildResult, (result as INodePacket).Type);
             ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
             INodePacket packet = BuildResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            BuildResult deserializedResult = packet as BuildResult;
+            BuildResult deserializedResult = (packet as BuildResult)!;
 
             Assert.Equal(result.ConfigurationId, deserializedResult.ConfigurationId);
             Assert.True(TranslationHelpers.CompareCollections(result.DefaultTargets, deserializedResult.DefaultTargets, StringComparer.Ordinal));
-            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception));
-            Assert.Equal(result.Exception.Message, deserializedResult.Exception.Message);
+            Assert.True(TranslationHelpers.CompareExceptions(result.Exception, deserializedResult.Exception, out string diffReason), diffReason);
+            Assert.Equal(result.Exception?.Message, deserializedResult.Exception?.Message);
             Assert.Equal(result.GlobalRequestId, deserializedResult.GlobalRequestId);
             Assert.True(TranslationHelpers.CompareCollections(result.InitialTargets, deserializedResult.InitialTargets, StringComparer.Ordinal));
             Assert.Equal(result.NodeRequestId, deserializedResult.NodeRequestId);
             Assert.Equal(result["alpha"].ResultCode, deserializedResult["alpha"].ResultCode);
-            Assert.True(TranslationHelpers.CompareExceptions(result["alpha"].Exception, deserializedResult["alpha"].Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result["alpha"].Exception, deserializedResult["alpha"].Exception, out diffReason), diffReason);
             Assert.True(TranslationHelpers.CompareCollections(result["alpha"].Items, deserializedResult["alpha"].Items, TaskItemComparer.Instance));
             Assert.Equal(result["omega"].ResultCode, deserializedResult["omega"].ResultCode);
-            Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception));
+            Assert.True(TranslationHelpers.CompareExceptions(result["omega"].Exception, deserializedResult["omega"].Exception, out diffReason), diffReason);
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
         }
 

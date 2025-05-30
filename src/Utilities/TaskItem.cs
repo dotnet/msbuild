@@ -1,18 +1,20 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Security;
 #if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
+using System.Security;
 #endif
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
@@ -20,9 +22,9 @@ namespace Microsoft.Build.Utilities
     /// This class represents a single item of the project, as it is passed into a task. TaskItems do not exactly correspond to
     /// item elements in project files, because then tasks would have access to data that wasn't explicitly passed into the task
     /// via the project file. It's not a security issue, but more just an issue with project file clarity and transparency.
-    /// 
+    ///
     /// Note: This class has to be sealed.  It has to be sealed because the engine instantiates it's own copy of this type and
-    /// thus if someone were to extend it, they would not get the desired behavior from the engine.  
+    /// thus if someone were to extend it, they would not get the desired behavior from the engine.
     /// </summary>
     /// <comment>
     /// Surprisingly few of these Utilities TaskItems are created: typically several orders of magnitude fewer than the number of engine TaskItems.
@@ -36,7 +38,7 @@ namespace Microsoft.Build.Utilities
     {
         #region Member Data
 
-        // This is the final evaluated item specification.  Stored in escaped form. 
+        // This is the final evaluated item specification.  Stored in escaped form.
         private string _itemSpec;
 
         // These are the user-defined metadata on the item, specified in the
@@ -49,8 +51,8 @@ namespace Microsoft.Build.Utilities
         private string _fullPath;
 
         /// <summary>
-        /// May be defined if we're copying this item from a pre-existing one.  Otherwise, 
-        /// we simply don't know enough to set it properly, so it will stay null. 
+        /// May be defined if we're copying this item from a pre-existing one.  Otherwise,
+        /// we simply don't know enough to set it properly, so it will stay null.
         /// </summary>
         private readonly string _definingProject;
 
@@ -59,8 +61,12 @@ namespace Microsoft.Build.Utilities
         #region Constructors
 
         /// <summary>
-        /// Default constructor -- we need it so this type is COM-createable.
+        /// Default constructor -- do not use.
         /// </summary>
+        /// <remarks>
+        /// This constructor exists only so that the type is COM-creatable. Prefer <see cref="TaskItem(string, bool)"/>.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public TaskItem()
         {
             _itemSpec = string.Empty;
@@ -69,16 +75,31 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// This constructor creates a new task item, given the item spec.
         /// </summary>
-        /// <comments>Assumes the itemspec passed in is escaped.</comments>
+        /// <comments>Assumes the itemspec passed in is escaped and represents a file path. </comments>
         /// <param name="itemSpec">The item-spec string.</param>
-        public TaskItem
-        (
-            string itemSpec
-        )
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(itemSpec, nameof(itemSpec));
+        public TaskItem(string itemSpec)
+            : this(itemSpec, treatAsFilePath: true) { }
 
-            _itemSpec = FileUtilities.FixFilePath(itemSpec);
+        /// <summary>
+        /// This constructor creates a new task item, given the item spec.
+        /// </summary>
+        /// <comments>
+        /// Assumes the itemspec passed in is escaped.
+        /// If <see name="treatAsFilePath" /> is set to <see langword="true" />, the value in <see name="itemSpec" />
+        /// will be fixed up as a path by having any backslashes replaced with slashes.
+        /// </comments>
+        /// <param name="itemSpec">The item-spec string.</param>
+        /// <param name="treatAsFilePath">
+        /// Specifies whether or not to treat the value in <see name="itemSpec" />
+        /// as a file path and attempt to normalize it.
+        /// </param>
+        public TaskItem(
+            string itemSpec,
+            bool treatAsFilePath)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
+
+            _itemSpec = treatAsFilePath ? FileUtilities.FixFilePath(itemSpec) : itemSpec;
         }
 
         /// <summary>
@@ -90,14 +111,12 @@ namespace Microsoft.Build.Utilities
         /// </comments>
         /// <param name="itemSpec">The item-spec string.</param>
         /// <param name="itemMetadata">Custom metadata on the item.</param>
-        public TaskItem
-        (
+        public TaskItem(
             string itemSpec,
-            IDictionary itemMetadata
-        ) :
+            IDictionary itemMetadata) :
             this(itemSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata, nameof(itemMetadata));
+            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata);
 
             if (itemMetadata.Count > 0)
             {
@@ -119,12 +138,10 @@ namespace Microsoft.Build.Utilities
         /// This constructor creates a new TaskItem, using the given ITaskItem.
         /// </summary>
         /// <param name="sourceItem">The item to copy.</param>
-        public TaskItem
-        (
-            ITaskItem sourceItem
-        )
+        public TaskItem(
+            ITaskItem sourceItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sourceItem, nameof(sourceItem));
+            ErrorUtilities.VerifyThrowArgumentNull(sourceItem);
 
             // Attempt to preserve escaped state
             if (!(sourceItem is ITaskItem2 sourceItemAsITaskItem2))
@@ -149,9 +166,9 @@ namespace Microsoft.Build.Utilities
         /// Gets or sets the item-spec.
         /// </summary>
         /// <comments>
-        /// This one is a bit tricky.  Orcas assumed that the value being set was escaped, but 
+        /// This one is a bit tricky.  Orcas assumed that the value being set was escaped, but
         /// that the value being returned was unescaped.  Maintain that behaviour here.  To get
-        /// the escaped value, use ITaskItem2.EvaluatedIncludeEscaped. 
+        /// the escaped value, use ITaskItem2.EvaluatedIncludeEscaped.
         /// </comments>
         /// <value>The item-spec string.</value>
         public string ItemSpec
@@ -217,9 +234,9 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Gets the metadata dictionary
-        /// Property is required so that we can access the metadata dictionary in an item from 
-        /// another appdomain, as the CLR has implemented remoting policies that disallow accessing 
-        /// private fields in remoted items. 
+        /// Property is required so that we can access the metadata dictionary in an item from
+        /// another appdomain, as the CLR has implemented remoting policies that disallow accessing
+        /// private fields in remoted items.
         /// </summary>
         private CopyOnWriteDictionary<string> Metadata
         {
@@ -243,7 +260,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="metadataName">Name of metadata to remove.</param>
         public void RemoveMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
@@ -254,17 +271,15 @@ namespace Microsoft.Build.Utilities
         /// Sets one of the arbitrary metadata on the item.
         /// </summary>
         /// <comments>
-        /// Assumes that the value being passed in is in its escaped form. 
+        /// Assumes that the value being passed in is in its escaped form.
         /// </comments>
         /// <param name="metadataName">Name of metadata to set or change.</param>
         /// <param name="metadataValue">Value of metadata.</param>
-        public void SetMetadata
-        (
+        public void SetMetadata(
             string metadataName,
-            string metadataValue
-        )
+            string metadataValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName);
 
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
@@ -281,7 +296,7 @@ namespace Microsoft.Build.Utilities
         /// If not found, returns empty string.
         /// </summary>
         /// <comments>
-        /// Returns the unescaped value of the metadata requested. 
+        /// Returns the unescaped value of the metadata requested.
         /// </comments>
         /// <param name="metadataName">The name of the metadata to retrieve.</param>
         /// <returns>The metadata value.</returns>
@@ -298,7 +313,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="destinationItem">The item to copy metadata to.</param>
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
 
             // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
             // between items, and need to know the source item where the metadata came from
@@ -377,8 +392,8 @@ namespace Microsoft.Build.Utilities
         /// 2) writing to this dictionary should not be reflected in the underlying item.
         /// </remarks>
         /// <comments>
-        /// Returns an UNESCAPED version of the custom metadata. For the escaped version (which 
-        /// is how it is stored internally), call ITaskItem2.CloneCustomMetadataEscaped. 
+        /// Returns an UNESCAPED version of the custom metadata. For the escaped version (which
+        /// is how it is stored internally), call ITaskItem2.CloneCustomMetadataEscaped.
         /// </comments>
         public IDictionary CloneCustomMetadata()
         {
@@ -421,7 +436,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The item-spec of the item.</returns>
         public static explicit operator string(TaskItem taskItemToCast)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast, nameof(taskItemToCast));
+            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast);
             return taskItemToCast.ItemSpec;
         }
 
@@ -434,7 +449,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         string ITaskItem2.GetMetadataValueEscaped(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
 
             string metadataValue = null;
 
@@ -456,13 +471,13 @@ namespace Microsoft.Build.Utilities
         /// Sets the escaped value of the metadata with the specified name.
         /// </summary>
         /// <comments>
-        /// Assumes the value is passed in unescaped. 
+        /// Assumes the value is passed in unescaped.
         /// </comments>
         void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue) => SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
 
         /// <summary>
         /// ITaskItem2 implementation which returns a clone of the metadata on this object.
-        /// Values returned are in their original escaped form. 
+        /// Values returned are in their original escaped form.
         /// </summary>
         /// <returns>The cloned metadata.</returns>
         IDictionary ITaskItem2.CloneCustomMetadataEscaped() => _metadata == null
@@ -487,11 +502,18 @@ namespace Microsoft.Build.Utilities
             return EnumerateMetadataLazy();
         }
 
+        void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+        {
+            _metadata ??= new CopyOnWriteDictionary<string>(MSBuildNameIgnoreCaseComparer.Default);
+            _metadata.SetItems(metadata.Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? string.Empty)));
+        }
+
+#if FEATURE_APPDOMAIN
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
         {
             if (_metadata == null)
             {
-                return Enumerable.Empty<KeyValuePair<string, string>>();
+                return [];
             }
 
             int count = _metadata.Count;
@@ -505,6 +527,7 @@ namespace Microsoft.Build.Utilities
 
             return result;
         }
+#endif
 
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
         {

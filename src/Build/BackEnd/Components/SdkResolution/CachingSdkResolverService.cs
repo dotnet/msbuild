@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -9,11 +9,12 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
-    internal sealed class CachingSdkResolverService: SdkResolverService
+    internal sealed class CachingSdkResolverService : SdkResolverService
     {
         /// <summary>
         /// Stores the cache in a set of concurrent dictionaries.  The main dictionary is by build submission ID and the inner dictionary contains a case-insensitive SDK name and the cached <see cref="SdkResult"/>.
@@ -34,15 +35,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             _cache.Clear();
         }
 
-        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio)
+        public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
-            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStart(sdk.Name, solutionPath, projectPath);
-
             SdkResult result;
+
+            bool wasResultCached = true;
+
+            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStart(sdk.Name, solutionPath ?? string.Empty, projectPath ?? string.Empty);
 
             if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
             {
-                result = base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+                result = base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
             }
             else
             {
@@ -57,7 +60,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                  */
                 Lazy<SdkResult> resultLazy = cached.GetOrAdd(
                     sdk.Name,
-                    key => new Lazy<SdkResult>(() => base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio)));
+                    key => new Lazy<SdkResult>(() =>
+                    {
+                        wasResultCached = false;
+
+                        return base.ResolveSdk(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
+                    }));
 
                 // Get the lazy value which will block all waiting threads until the SDK is resolved at least once while subsequent calls get cached results.
                 result = resultLazy.Value;
@@ -71,7 +79,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
             }
 
-            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStop(sdk.Name, solutionPath, projectPath, result.Success);
+            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStop(sdk.Name, solutionPath ?? string.Empty, projectPath ?? string.Empty, result.Success, wasResultCached);
 
             return result;
         }

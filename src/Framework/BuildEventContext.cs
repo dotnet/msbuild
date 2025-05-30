@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Will provide location information for an event, this is especially 
+    /// Will provide location information for an event, this is especially
     /// needed in a multi processor environment
     /// </summary>
     [Serializable]
@@ -15,7 +15,7 @@ namespace Microsoft.Build.Framework
         #region Data
 
         /// <summary>
-        /// Node event was in 
+        /// Node event was in
         /// </summary>
         private readonly int _nodeId;
 
@@ -25,7 +25,7 @@ namespace Microsoft.Build.Framework
         private readonly int _targetId;
 
         /// <summary>
-        ///The node-unique project request context the event was in
+        /// The node-unique project request context the event was in
         /// </summary>
         private readonly int _projectContextId;
 
@@ -56,13 +56,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// This is the original constructor.  No one should ever use this except internally for backward compatibility.
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int nodeId,
             int targetId,
             int projectContextId,
-            int taskId
-        )
+            int taskId)
             : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, InvalidProjectInstanceId, projectContextId, targetId, taskId)
         {
             // UNDONE: This is obsolete.
@@ -71,14 +69,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Constructs a BuildEventContext with a specified project instance id.
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int nodeId,
             int projectInstanceId,
             int projectContextId,
             int targetId,
-            int taskId
-        )
+            int taskId)
             : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
@@ -86,32 +82,28 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Constructs a BuildEventContext with a specific submission id
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int submissionId,
             int nodeId,
             int projectInstanceId,
             int projectContextId,
             int targetId,
-            int taskId
-        )
-            :this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
+            int taskId)
+            : this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
         {
         }
 
         /// <summary>
         /// Constructs a BuildEventContext
         /// </summary>
-        public BuildEventContext
-        (
+        public BuildEventContext(
             int submissionId,
             int nodeId,
             int evaluationId,
             int projectInstanceId,
             int projectContextId,
             int targetId,
-            int taskId
-        )
+            int taskId)
         {
             _submissionId = submissionId;
             _nodeId = nodeId;
@@ -123,13 +115,23 @@ namespace Microsoft.Build.Framework
         }
 
         #endregion
+        internal BuildEventContext WithInstanceIdAndContextId(int projectInstanceId, int projectContextId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, _evaluationId, projectInstanceId, projectContextId,
+                _targetId, _taskId);
+        }
+
+        internal BuildEventContext WithInstanceIdAndContextId(BuildEventContext other)
+        {
+            return WithInstanceIdAndContextId(other.ProjectInstanceId, other.ProjectContextId);
+        }
 
         #region Properties
 
         /// <summary>
         /// Returns a default invalid BuildEventContext
         /// </summary>
-        public static BuildEventContext Invalid => new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
+        public static BuildEventContext Invalid { get; } = new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
 
         /// <summary>
         /// Retrieves the Evaluation id.
@@ -215,7 +217,7 @@ namespace Microsoft.Build.Framework
         {
             var hash = 17;
             // submission ID does not contribute to equality
-            //hash = hash * 31 + _submissionId;
+            // hash = hash * 31 + _submissionId;
             hash = (hash * 31) + _nodeId;
             hash = (hash * 31) + _evaluationId;
             hash = (hash * 31) + _targetId;
@@ -227,15 +229,15 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Compare a BuildEventContext with this BuildEventContext. 
+        /// Compare a BuildEventContext with this BuildEventContext.
         /// A build event context is compared in the following way.
-        /// 
+        ///
         /// 1. If the object references are the same the contexts are equivalent
         /// 2. If the object type is the same and the Id values in the context are the same, the contexts are equivalent
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             // If the references are the same no need to do any more comparing
             if (ReferenceEquals(this, obj))
@@ -263,7 +265,7 @@ namespace Microsoft.Build.Framework
         /// <param name="left">Left hand side operand</param>
         /// <param name="right">Right hand side operand</param>
         /// <returns>True if the object values are identical, false if they are not identical</returns>
-        public static bool operator ==(BuildEventContext left, BuildEventContext right)
+        public static bool operator ==(BuildEventContext? left, BuildEventContext? right)
         {
             if (ReferenceEquals(left, right))
             {
@@ -285,7 +287,7 @@ namespace Microsoft.Build.Framework
         /// <param name="left">Left hand side operand</param>
         /// <param name="right">Right hand side operand</param>
         /// <returns>True if the object values are not identical, false if they are identical</returns>
-        public static bool operator !=(BuildEventContext left, BuildEventContext right)
+        public static bool operator !=(BuildEventContext? left, BuildEventContext? right)
         {
             return !(left == right);
         }

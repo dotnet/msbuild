@@ -1,20 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
     /// This class implements the "MSBuild" task, which hands off child project files to the MSBuild engine to be built.
-    /// Marked RunInMTA because there is no reason MSBuild tasks should run on a thread other than that of the 
+    /// Marked RunInMTA because there is no reason MSBuild tasks should run on a thread other than that of the
     /// RequestBuilder which spawned them.
     /// </remarks>
     [RunInMTA]
@@ -23,8 +25,13 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
         /// </summary>
-        private enum SkipNonexistentProjectsBehavior
+        private enum SkipNonExistentProjectsBehavior
         {
+            /// <summary>
+            /// Default when unset by user.
+            /// </summary>
+            Undefined,
+
             /// <summary>
             /// Skip the project if there is no file on disk.
             /// </summary>
@@ -47,13 +54,13 @@ namespace Microsoft.Build.Tasks
         private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
-        private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
+        private SkipNonExistentProjectsBehavior _skipNonExistentProjects = SkipNonExistentProjectsBehavior.Undefined;
 
         private TaskExecutionContext _executionContext;
 
         /// <summary>
-        /// A list of property name/value pairs to apply as global properties to 
-        /// the child project.  
+        /// A list of property name/value pairs to apply as global properties to
+        /// the child project.
         /// A typical input: "propname1=propvalue1", "propname2=propvalue2", "propname3=propvalue3".
         /// </summary>
         /// <remarks>
@@ -62,7 +69,7 @@ namespace Microsoft.Build.Tasks
         ///     The fact that this is a `string[]` makes the following illegal:
         ///         `<MSBuild Properties="TargetPath=@(OutputPathItem)" />`
         ///     The engine fails on this because it doesn't like item lists being concatenated with string
-        ///     constants when the data is being passed into an array parameter.  So the workaround is to 
+        ///     constants when the data is being passed into an array parameter.  So the workaround is to
         ///     write this in the project file:
         ///         `<MSBuild Properties="@(OutputPathItem-&gt;'TargetPath=%(Identity)')" />`
         ///     ]]>
@@ -120,7 +127,7 @@ namespace Microsoft.Build.Tasks
         public string ToolsVersion { get; set; }
 
         /// <summary>
-        /// When this is true we call the engine with all the projects at once instead of 
+        /// When this is true we call the engine with all the projects at once instead of
         /// calling the engine once per project
         /// </summary>
         public bool BuildInParallel { get; set; }
@@ -143,19 +150,22 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                switch (_skipNonexistentProjects)
+                switch (_skipNonExistentProjects)
                 {
-                    case SkipNonexistentProjectsBehavior.Build:
+                    case SkipNonExistentProjectsBehavior.Undefined:
+                        return "Undefined";
+
+                    case SkipNonExistentProjectsBehavior.Build:
                         return "Build";
 
-                    case SkipNonexistentProjectsBehavior.Error:
+                    case SkipNonExistentProjectsBehavior.Error:
                         return "False";
 
-                    case SkipNonexistentProjectsBehavior.Skip:
+                    case SkipNonExistentProjectsBehavior.Skip:
                         return "True";
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonexistentProjects);
+                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonExistentProjects);
                         break;
                 }
 
@@ -165,22 +175,17 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                if (String.Equals("Build", value, StringComparison.OrdinalIgnoreCase))
+                if (TryParseSkipNonExistentProjects(value, out SkipNonExistentProjectsBehavior behavior))
                 {
-                    _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Build;
-                }
-                else
-                {
-                    ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
-                    bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
-                    _skipNonexistentProjects = originalSkipValue ? SkipNonexistentProjectsBehavior.Skip : SkipNonexistentProjectsBehavior.Error;
+                    _skipNonExistentProjects = behavior;
                 }
             }
         }
 
+
         /// <summary>
         /// Unescape Targets, Properties (including Properties and AdditionalProperties as Project item metadata)
-        /// will be un-escaped before processing. e.g. %3B (an escaped ';') in the string for any of them will 
+        /// will be un-escaped before processing. e.g. %3B (an escaped ';') in the string for any of them will
         /// be treated as if it were an un-escaped ';'
         /// </summary>
         public string[] TargetAndPropertyListSeparators { get; set; }
@@ -227,7 +232,7 @@ namespace Microsoft.Build.Tasks
             }
 
             bool isRunningMultipleNodes = BuildEngine2.IsRunningMultipleNodes;
-            // If we are in single proc mode and stopOnFirstFailure is true, we cannot build in parallel because 
+            // If we are in single proc mode and stopOnFirstFailure is true, we cannot build in parallel because
             // building in parallel sends all of the projects to the engine at once preventing us from not sending
             // any more projects after the first failure. Therefore, to preserve compatibility with whidbey if we are in this situation disable buildInParallel.
             if (!isRunningMultipleNodes && StopOnFirstFailure && BuildInParallel)
@@ -247,8 +252,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // This is a list of string[].  That is, each element in the list is a string[].  Each
-            // string[] represents a set of target names to build.  Depending on the value 
-            // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
+            // string[] represents a set of target names to build.  Depending on the value
+            // of the RunEachTargetSeparately parameter, we each just call the engine to run all
             // the targets together, or we call the engine separately for each target.
             List<string[]> targetLists = CreateTargetLists(Targets, RunEachTargetSeparately);
 
@@ -259,10 +264,7 @@ namespace Microsoft.Build.Tasks
             if (BuildInParallel)
             {
                 skipProjects = new bool[Projects.Length];
-                for (int i = 0; i < skipProjects.Length; i++)
-                {
-                    skipProjects[i] = true;
-                }
+                skipProjects.AsSpan().Fill(true);
             }
             else
             {
@@ -284,12 +286,26 @@ namespace Microsoft.Build.Tasks
                     // Inform the user that we skipped the remaining projects because StopOnFirstFailure=true.
                     Log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingProjects");
 
-                    // We have encountered a failure.  Caller has requested that we not 
+                    // We have encountered a failure.  Caller has requested that we not
                     // continue with remaining projects.
                     break;
                 }
 
-                if (FileSystems.Default.FileExists(projectPath) || (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Build))
+                // Try to get the behavior from metadata if it is undefined.
+                var skipNonExistProjects = _skipNonExistentProjects;
+                if (_skipNonExistentProjects == SkipNonExistentProjectsBehavior.Undefined)
+                {
+                    if (TryParseSkipNonExistentProjects(project.GetMetadata("SkipNonexistentProjects"), out SkipNonExistentProjectsBehavior behavior))
+                    {
+                        skipNonExistProjects = behavior;
+                    }
+                    else
+                    {
+                        skipNonExistProjects = SkipNonExistentProjectsBehavior.Error;
+                    }
+                }
+
+                if (FileSystems.Default.FileExists(projectPath) || (skipNonExistProjects == SkipNonExistentProjectsBehavior.Build))
                 {
                     if (FileUtilities.IsVCProjFilename(projectPath))
                     {
@@ -304,8 +320,7 @@ namespace Microsoft.Build.Tasks
                     {
                         singleProject[0] = project;
 
-                        if (!ExecuteTargets
-                                (
+                        if (!ExecuteTargets(
                                 singleProject,
                                 propertiesTable,
                                 undefinePropertiesArray,
@@ -317,9 +332,7 @@ namespace Microsoft.Build.Tasks
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
                                 ToolsVersion,
-                                _executionContext
-                                )
-                           )
+                                _executionContext))
                         {
                             success = false;
                         }
@@ -331,14 +344,13 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    if (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Skip)
+                    if (skipNonExistProjects == SkipNonExistentProjectsBehavior.Skip)
                     {
                         Log.LogMessageFromResources(MessageImportance.High, "MSBuild.ProjectFileNotFoundMessage", projectPath);
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", _skipNonexistentProjects);
-                        Debugger.Launch();
+                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonExistProjects);
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", projectPath);
                         success = false;
                     }
@@ -373,8 +385,7 @@ namespace Microsoft.Build.Tasks
             // Make the call to build the projects
             if (projectsToBuildInParallel.Count > 0)
             {
-                if (!ExecuteTargets
-                                (
+                if (!ExecuteTargets(
                                 projectsToBuildInParallel,
                                 propertiesTable,
                                 undefinePropertiesArray,
@@ -386,9 +397,7 @@ namespace Microsoft.Build.Tasks
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
                                 ToolsVersion,
-                                _executionContext
-                                )
-                           )
+                                _executionContext))
                 {
                     success = false;
                 }
@@ -444,8 +453,8 @@ namespace Microsoft.Build.Tasks
         internal static List<string[]> CreateTargetLists(string[] targets, bool runEachTargetSeparately)
         {
             // This is a list of string[].  That is, each element in the list is a string[].  Each
-            // string[] represents a set of target names to build.  Depending on the value 
-            // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
+            // string[] represents a set of target names to build.  Depending on the value
+            // of the RunEachTargetSeparately parameter, we each just call the engine to run all
             // the targets together, or we call the engine separately for each target.
             var targetLists = new List<string[]>(runEachTargetSeparately ? targets.Length : 1);
             if (runEachTargetSeparately && targets.Length > 0)
@@ -453,7 +462,7 @@ namespace Microsoft.Build.Tasks
                 // Separate target invocations for each individual target.
                 foreach (string targetName in targets)
                 {
-                    targetLists.Add(new[] { targetName });
+                    targetLists.Add([targetName]);
                 }
             }
             else
@@ -467,8 +476,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <returns>True if the operation was successful</returns>
-        internal static bool ExecuteTargets
-            (
+        internal static bool ExecuteTargets(
             List<ITaskItem> projects,
             Dictionary<string, string> propertiesTable,
             string[] undefineProperties,
@@ -480,8 +488,7 @@ namespace Microsoft.Build.Tasks
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
             string toolsVersion,
-            TaskExecutionContext taskExecutionContext
-            )
+            TaskExecutionContext taskExecutionContext)
         {
             bool success = true;
 
@@ -511,10 +518,9 @@ namespace Microsoft.Build.Tasks
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
-                              out Dictionary<string, string> preProjectPropertiesTable)
-                           )
+                        if (!PropertyParser.GetTableWithEscaping(
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
+                              out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
                         }
@@ -552,10 +558,9 @@ namespace Microsoft.Build.Tasks
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                             (log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
-                              out Dictionary<string, string> additionalProjectPropertiesTable)
-                           )
+                        if (!PropertyParser.GetTableWithEscaping(
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
+                              out Dictionary<string, string> additionalProjectPropertiesTable))
                         {
                             return false;
                         }
@@ -594,12 +599,12 @@ namespace Microsoft.Build.Tasks
                     // Inform the user that we skipped the remaining targets StopOnFirstFailure=true.
                     log.LogMessageFromResources(MessageImportance.Low, "MSBuild.SkippingRemainingTargets");
 
-                    // We have encountered a failure.  Caller has requested that we not 
+                    // We have encountered a failure.  Caller has requested that we not
                     // continue with remaining targets.
                     break;
                 }
 
-                // Send the project off to the build engine.  By passing in null to the 
+                // Send the project off to the build engine.  By passing in null to the
                 // first param, we are indicating that the project to build is the same
                 // as the *calling* project file.
 
@@ -623,7 +628,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 foreach (ITaskItem outputItemFromTarget in outputItemsFromTarget)
                                 {
-                                    // No need to rebase if the calling project is the same as the callee project 
+                                    // No need to rebase if the calling project is the same as the callee project
                                     // (project == null).  Also no point in trying to copy item metadata either,
                                     // because no items were passed into the Projects parameter!
                                     if (projects[i] != null)
@@ -668,6 +673,27 @@ namespace Microsoft.Build.Tasks
             }
 
             return success;
+        }
+
+        private bool TryParseSkipNonExistentProjects(string value, out SkipNonExistentProjectsBehavior behavior)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                behavior = SkipNonExistentProjectsBehavior.Error;
+                return false;
+            }
+            else if (String.Equals("Build", value, StringComparison.OrdinalIgnoreCase))
+            {
+                behavior = SkipNonExistentProjectsBehavior.Build;
+            }
+            else
+            {
+                ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
+                bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
+                behavior = originalSkipValue ? SkipNonExistentProjectsBehavior.Skip : SkipNonExistentProjectsBehavior.Error;
+            }
+
+            return true;
         }
 
         #endregion

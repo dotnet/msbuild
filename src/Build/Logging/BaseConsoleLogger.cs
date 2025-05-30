@@ -1,22 +1,25 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-
+using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-
-using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
+using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -24,39 +27,9 @@ namespace Microsoft.Build.BackEnd.Logging
     internal delegate void WriteLinePrettyFromResourceDelegate(int indentLevel, string resourceString, params object[] args);
     #endregion
 
-    internal abstract class BaseConsoleLogger : INodeLogger
+    internal abstract class BaseConsoleLogger : INodeLogger, IStringBuilderProvider
     {
-        /// <summary>
-        /// When set, we'll try reading background color.
-        /// </summary>
-        private static bool _supportReadingBackgroundColor = true;
-
         #region Properties
-
-        /// <summary>
-        /// Some platforms do not allow getting current background color. There
-        /// is not way to check, but not-supported exception is thrown. Assume
-        /// black, but don't crash.
-        /// </summary>
-        internal static ConsoleColor BackgroundColor
-        {
-            get
-            {
-                if (_supportReadingBackgroundColor)
-                {
-                    try
-                    {
-                        return Console.BackgroundColor;
-                    }
-                    catch (PlatformNotSupportedException)
-                    {
-                        _supportReadingBackgroundColor = false;
-                    }
-                }
-
-                return ConsoleColor.Black;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the level of detail to show in the event log.
@@ -103,14 +76,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void ParseParameters()
         {
-            if (Parameters == null) return;
-
-            foreach (string parameter in Parameters.Split(parameterDelimiters))
+            foreach (var parameter in LoggerParametersHelper.ParseParameters(Parameters))
             {
-                if (string.IsNullOrWhiteSpace(parameter)) continue;
-
-                string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
-                ApplyParameter(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
+                ApplyParameter(parameter.Item1, parameter.Item2);
             }
         }
 
@@ -121,9 +89,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
         internal class DictionaryEntryKeyComparer : IComparer<DictionaryEntry>
         {
+            public static DictionaryEntryKeyComparer Instance { get; } = new();
+
+            private DictionaryEntryKeyComparer() { }
+
             public int Compare(DictionaryEntry a, DictionaryEntry b)
             {
-                return string.Compare((string) a.Key, (string) b.Key, StringComparison.CurrentCultureIgnoreCase);
+                return string.Compare((string)a.Key, (string)b.Key, StringComparison.CurrentCultureIgnoreCase);
             }
         }
 
@@ -150,25 +122,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="indent">Depth to indent.</param>
         internal string IndentString(string s, int indent)
         {
-            // It's possible the event has a null message
-            if (s == null) return string.Empty;
-
-            // This will never return an empty array.  The returned array will always
-            // have at least one non-null element, even if "s" is totally empty.
-            String[] subStrings = SplitStringOnNewLines(s);
-
-            StringBuilder result = new StringBuilder(
-                (subStrings.Length * indent) +
-                (subStrings.Length * Environment.NewLine.Length) +
-                s.Length);
-
-            for (int i = 0; i < subStrings.Length; i++)
-            {
-                result.Append(' ', indent).Append(subStrings[i]);
-                result.AppendLine();
-            }
-
-            return result.ToString();
+            return OptimizedStringIndenter.IndentString(s, indent, (IStringBuilderProvider)this);
         }
 
         /// <summary>
@@ -308,21 +262,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void IsRunningWithCharacterFileType()
         {
-            runningWithCharacterFileType = false;
-
-            if (NativeMethodsShared.IsWindows)
-            {
-                // Get the std out handle
-                IntPtr stdHandle = NativeMethodsShared.GetStdHandle(NativeMethodsShared.STD_OUTPUT_HANDLE);
-
-                if (stdHandle != NativeMethods.InvalidHandle)
-                {
-                    uint fileType = NativeMethodsShared.GetFileType(stdHandle);
-
-                    // The std out is a char type(LPT or Console)
-                    runningWithCharacterFileType = (fileType == NativeMethodsShared.FILE_TYPE_CHAR);
-                }
-            }
+            runningWithCharacterFileType = NativeMethodsShared.IsWindows && ConsoleConfiguration.OutputIsScreen;
         }
 
         /// <summary>
@@ -365,7 +305,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             try
             {
-                Console.ForegroundColor = TransformColor(c, BackgroundColor);
+                Console.ForegroundColor = TransformColor(c, ConsoleConfiguration.BackgroundColor);
             }
             catch (IOException)
             {
@@ -439,7 +379,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="background">current background</param>
         internal static ConsoleColor TransformColor(ConsoleColor foreground, ConsoleColor background)
         {
-            ConsoleColor result = foreground; //typically do nothing ...
+            ConsoleColor result = foreground; // typically do nothing ...
 
             if (foreground == background)
             {
@@ -478,7 +418,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             try
             {
-                ConsoleColor c = BackgroundColor;
+                ConsoleColor c = ConsoleConfiguration.BackgroundColor;
             }
             catch (IOException)
             {
@@ -557,9 +497,9 @@ namespace Microsoft.Build.BackEnd.Logging
             // Gather a sorted list of all the properties.
             var list = new List<DictionaryEntry>(properties.FastCountOrZero());
 
-            Internal.Utilities.EnumerateProperties(properties, kvp => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
+            Internal.Utilities.EnumerateProperties(properties, list, static (list, kvp) => list.Add(new DictionaryEntry(kvp.Key, kvp.Value)));
 
-            list.Sort(new DictionaryEntryKeyComparer());
+            list.Sort(DictionaryEntryKeyComparer.Instance);
             return list;
         }
 
@@ -578,7 +518,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 foreach (KeyValuePair<string, string> entry in environment)
                 {
                     setColor(ConsoleColor.Gray);
-                    WritePretty(String.Format(CultureInfo.CurrentCulture, "{0,-30} = ", entry.Key));
+                    WritePretty($"{entry.Key,-30} = ");
                     setColor(ConsoleColor.DarkGray);
                     WriteLinePretty(entry.Value);
                 }
@@ -596,7 +536,7 @@ namespace Microsoft.Build.BackEnd.Logging
             foreach (DictionaryEntry prop in list)
             {
                 setColor(ConsoleColor.Gray);
-                WritePretty(String.Format(CultureInfo.CurrentCulture, "{0,-30} = ", prop.Key));
+                WritePretty($"{prop.Key,-30} = ");
                 setColor(ConsoleColor.DarkGray);
                 WriteLinePretty(EscapingUtilities.UnescapeAll((string)prop.Value));
             }
@@ -611,7 +551,10 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void WriteItems(SortedList itemTypes)
         {
-            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0) return;
+            if (Verbosity != LoggerVerbosity.Diagnostic || !showItemAndPropertyList || itemTypes.Count == 0)
+            {
+                return;
+            }
 
             // Write the banner
             setColor(ConsoleColor.Green);
@@ -620,8 +563,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // Write each item type and its itemspec, one per line
             foreach (DictionaryEntry entry in itemTypes)
             {
-                string itemType = (string) entry.Key;
-                ArrayList itemTypeList = (ArrayList) entry.Value;
+                string itemType = (string)entry.Key;
+                ArrayList itemTypeList = (ArrayList)entry.Value;
 
                 if (itemTypeList.Count == 0)
                 {
@@ -713,12 +656,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
         protected virtual void WriteItemSpec(string itemSpec)
         {
-            WriteLinePretty("    " + itemSpec);
+            WriteLinePretty($"    {itemSpec}");
         }
 
         protected virtual void WriteMetadata(string name, string value)
         {
-            WriteLinePretty("        " + name + " = " + value);
+            WriteLinePretty($"        {name} = {value}");
         }
 
         /// <summary>
@@ -825,7 +768,11 @@ namespace Microsoft.Build.BackEnd.Logging
             /// </summary>
             internal bool InScope
             {
-                get { return inScope; }
+                get
+                {
+                    return inScope;
+                }
+
                 set
                 {
                     if (!reenteredScope)
@@ -874,8 +821,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     2,
                     "PerformanceLine",
                     time,
-                    String.Format(CultureInfo.CurrentCulture, "{0,-40}" /* pad to 40 align left */, scopeName),
-                    String.Format(CultureInfo.CurrentCulture, "{0,3}", calls));
+                    $"{scopeName,-40}", // pad to 40 align left
+                    $"{calls,3}");
             }
 
             /// <summary>
@@ -934,7 +881,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         public virtual void Shutdown()
         {
-            // do nothing
+            Traits.LogAllEnvironmentVariables = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGALLENVIRONMENTVARIABLES"));
         }
 
         internal abstract void ResetConsoleLoggerState();
@@ -990,7 +937,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (eventSource != null)
             {
                 eventSource.BuildStarted += BuildStartedHandler;
-                eventSource.BuildFinished +=BuildFinishedHandler;
+                eventSource.BuildFinished += BuildFinishedHandler;
                 eventSource.ProjectStarted += ProjectStartedHandler;
                 eventSource.ProjectFinished += ProjectFinishedHandler;
                 eventSource.TargetStarted += TargetStartedHandler;
@@ -1017,7 +964,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal virtual bool ApplyParameter(string parameterName, string parameterValue)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parameterName, nameof(parameterName));
+            ErrorUtilities.VerifyThrowArgumentNull(parameterName);
 
             switch (parameterName.ToUpperInvariant())
             {
@@ -1044,6 +991,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     return true;
                 case "SHOWENVIRONMENT":
                     showEnvironment = true;
+                    Traits.LogAllEnvironmentVariables = true;
                     return true;
                 case "SHOWPROJECTFILE":
                     if (parameterValue == null)
@@ -1080,33 +1028,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private bool ApplyVerbosityParameter(string parameterValue)
         {
-            switch (parameterValue.ToUpperInvariant())
+            if (LoggerParametersHelper.TryParseVerbosityParameter(parameterValue, out LoggerVerbosity? verbosity))
             {
-                case "Q":
-                case "QUIET":
-                    Verbosity = LoggerVerbosity.Quiet;
-                    return true;
-                case "M":
-                case "MINIMAL":
-                    Verbosity = LoggerVerbosity.Minimal;
-                    return true;
-                case "N":
-                case "NORMAL":
-                    Verbosity = LoggerVerbosity.Normal;
-                    return true;
-                case "D":
-                case "DETAILED":
-                    Verbosity = LoggerVerbosity.Detailed;
-                    return true;
-                case "DIAG":
-                case "DIAGNOSTIC":
-                    Verbosity = LoggerVerbosity.Diagnostic;
-                    return true;
-                default:
-                    string errorCode;
-                    string helpKeyword;
-                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
-                    throw new LoggerException(message, null, errorCode, helpKeyword);
+                Verbosity = (LoggerVerbosity)verbosity;
+                return true;
+            }
+            else
+            {
+                string errorCode;
+                string helpKeyword;
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
+                throw new LoggerException(message, null, errorCode, helpKeyword);
             }
         }
 
@@ -1178,16 +1110,6 @@ namespace Microsoft.Build.BackEnd.Logging
                  "__________________________________________________";
 
         /// <summary>
-        /// Console logger parameters delimiters.
-        /// </summary>
-        internal static readonly char[] parameterDelimiters = MSBuildConstants.SemicolonChar;
-
-        /// <summary>
-        /// Console logger parameter value split character.
-        /// </summary>
-        private static readonly char[] s_parameterValueSplitCharacter = MSBuildConstants.EqualsChar;
-
-        /// <summary>
         /// When true, accumulate performance numbers.
         /// </summary>
         internal bool showPerfSummary = false;
@@ -1225,6 +1147,14 @@ namespace Microsoft.Build.BackEnd.Logging
         internal bool ignoreLoggerErrors = true;
 
         internal bool runningWithCharacterFileType = false;
+
+        /// <summary>
+        /// Since logging messages are processed serially, we can use a single StringBuilder wherever needed.
+        /// It should not be done directly, but rather through the <see cref="IStringBuilderProvider"/> interface methods.
+        /// </summary>
+        private StringBuilder _sharedStringBuilder = new StringBuilder(0x100);
+
+        #endregion
 
         #region Per-build Members
 
@@ -1270,6 +1200,72 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #endregion
 
-        #endregion
+        /// <summary>
+        /// Since logging messages are processed serially, we can reuse a single StringBuilder wherever needed.
+        /// </summary>
+        StringBuilder IStringBuilderProvider.Acquire(int capacity)
+        {
+            StringBuilder shared = Interlocked.Exchange(ref _sharedStringBuilder, null);
+
+            Debug.Assert(shared != null, "This is not supposed to be used in multiple threads or multiple time. One method is expected to return it before next acquire. Most probably it was not returned.");
+            if (shared == null)
+            {
+                // This is not supposed to be used concurrently. One method is expected to return it before next acquire.
+                // However to avoid bugs in production, we will create new string builder
+                return StringBuilderCache.Acquire(capacity);
+            }
+
+            if (shared.Capacity < capacity)
+            {
+                const int minimumCapacity = 0x100; // 256 characters, 512 bytes
+                const int maximumBracketedCapacity = 0x80_000; // 512K characters, 1MB
+
+                if (capacity <= minimumCapacity)
+                {
+                    capacity = minimumCapacity;
+                }
+                else if (capacity < maximumBracketedCapacity)
+                {
+                    // GC likes arrays allocated with power of two bytes. Lets make it happy.
+
+                    // Find next power of two http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+                    int v = capacity;
+
+                    v--;
+                    v |= v >> 1;
+                    v |= v >> 2;
+                    v |= v >> 4;
+                    v |= v >> 8;
+                    v |= v >> 16;
+                    v++;
+
+                    capacity = v;
+                }
+                // If capacity is > maximumCapacity we will respect it and use it as is.
+
+                // Lets create new instance with enough capacity.
+                shared = new StringBuilder(capacity);
+            }
+
+            // Prepare for next use.
+            // Equivalent of sb.Clear() that works on .Net 3.5
+            shared.Length = 0;
+
+            return shared;
+        }
+
+        /// <summary>
+        /// Acquired StringBuilder must be returned before next use.
+        /// Unbalanced releases are not supported.
+        /// </summary>
+        string IStringBuilderProvider.GetStringAndRelease(StringBuilder builder)
+        {
+            // This is not supposed to be used concurrently. One method is expected to return it before next acquire.
+            // But just for sure if _sharedBuilder was already returned, keep the former.
+            StringBuilder previous = Interlocked.CompareExchange(ref _sharedStringBuilder, builder, null);
+            Debug.Assert(previous == null, "This is not supposed to be used in multiple threads or multiple time. One method is expected to return it before next acquire. Most probably it was double returned.");
+
+            return builder.ToString();
+        }
     }
 }

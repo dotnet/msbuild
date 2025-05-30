@@ -1,18 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+#if FEATURE_APPDOMAIN
 using System.Threading.Tasks;
+#endif
 
-using Microsoft.Build.Execution;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
+using System.IO;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -51,16 +55,16 @@ namespace Microsoft.Build.BackEnd
         private IDictionary<string, string> _factoryIdentityParameters;
 
         /// <summary>
-        /// Tracks whether, in the UsingTask invocation, we were specifically asked to use 
-        /// the task host.  If so, that overrides all other concerns, and we will launch 
-        /// the task host even if the requested runtime / architecture match that of the 
-        /// current MSBuild process. 
+        /// Tracks whether, in the UsingTask invocation, we were specifically asked to use
+        /// the task host.  If so, that overrides all other concerns, and we will launch
+        /// the task host even if the requested runtime / architecture match that of the
+        /// current MSBuild process.
         /// </summary>
         private bool _taskHostFactoryExplicitlyRequested;
 
         /// <summary>
-        /// Need to store away the taskloggingcontext used by CreateTaskInstance so that 
-        /// TaskLoader will be able to call back with errors.  
+        /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
+        /// TaskLoader will be able to call back with errors.
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
 
@@ -119,16 +123,16 @@ namespace Microsoft.Build.BackEnd
         /// Initializes this factory for instantiating tasks with a particular inline task block and a set of UsingTask parameters.
         /// </summary>
         /// <param name="taskName">Name of the task.</param>
-        /// <param name="factoryIdentityParameters">Special parameters that the task factory can use to modify how it executes tasks, 
-        /// such as Runtime and Architecture.  The key is the name of the parameter and the value is the parameter's value. This 
+        /// <param name="factoryIdentityParameters">Special parameters that the task factory can use to modify how it executes tasks,
+        /// such as Runtime and Architecture.  The key is the name of the parameter and the value is the parameter's value. This
         /// is the set of parameters that was set on the UsingTask using e.g. the UsingTask Runtime and Architecture parameters.</param>
         /// <param name="parameterGroup">The parameter group.</param>
         /// <param name="taskBody">The task body.</param>
         /// <param name="taskFactoryLoggingHost">The task factory logging host.</param>
         /// <returns>A value indicating whether initialization was successful.</returns>
         /// <remarks>
-        /// <para>MSBuild engine will call this to initialize the factory. This should initialize the factory enough so that the 
-        /// factory can be asked whether or not task names can be created by the factory.  If a task factory implements ITaskFactory2, 
+        /// <para>MSBuild engine will call this to initialize the factory. This should initialize the factory enough so that the
+        /// factory can be asked whether or not task names can be created by the factory.  If a task factory implements ITaskFactory2,
         /// this Initialize method will be called in place of ITaskFactory.Initialize.</para>
         /// <para>
         /// The taskFactoryLoggingHost will log messages in the context of the target where the task is first used.
@@ -145,14 +149,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
-            PropertyInfo[] infos = _loadedType.Type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            var propertyInfos = new TaskPropertyInfo[infos.Length];
-            for (int i = 0; i < infos.Length; i++)
-            {
-                propertyInfos[i] = new ReflectableTaskPropertyInfo(infos[i]);
-            }
-
-            return propertyInfos;
+            return _loadedType.Properties;
         }
 
         /// <summary>
@@ -178,12 +175,12 @@ namespace Microsoft.Build.BackEnd
         /// The task factory logging host will log messages in the context of the task.
         /// </param>
         /// <param name="taskIdentityParameters">
-        /// Special parameters that the task factory can use to modify how it executes tasks, such as Runtime and Architecture.  
-        /// The key is the name of the parameter and the value is the parameter's value.  This is the set of parameters that was 
-        /// set to the task invocation itself, via e.g. the special MSBuildRuntime and MSBuildArchitecture parameters.  
+        /// Special parameters that the task factory can use to modify how it executes tasks, such as Runtime and Architecture.
+        /// The key is the name of the parameter and the value is the parameter's value.  This is the set of parameters that was
+        /// set to the task invocation itself, via e.g. the special MSBuildRuntime and MSBuildArchitecture parameters.
         /// </param>
         /// <remarks>
-        /// If a task factory implements ITaskFactory2, MSBuild will call this method instead of ITaskFactory.CreateTask.  
+        /// If a task factory implements ITaskFactory2, MSBuild will call this method instead of ITaskFactory.CreateTask.
         /// </remarks>
         /// <returns>
         /// The generated task, or <c>null</c> if the task failed to be created.
@@ -205,7 +202,7 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
 #if FEATURE_APPDOMAIN
             AppDomain appDomain;
             if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
@@ -214,6 +211,7 @@ namespace Microsoft.Build.BackEnd
 
                 if (appDomain != null)
                 {
+                    AssemblyLoadsTracker.StopTracking(appDomain);
                     // Unload the AppDomain asynchronously to avoid a deadlock that can happen because
                     // AppDomain.Unload blocks for the process's one Finalizer thread to finalize all
                     // objects. Some objects are RCWs for STA COM objects and as such would need the
@@ -248,8 +246,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize the factory from the task registry
         /// </summary>
-        internal LoadedType InitializeFactory
-            (
+        internal LoadedType InitializeFactory(
                 AssemblyLoadInfo loadInfo,
                 string taskName,
                 IDictionary<string, TaskPropertyInfo> taskParameters,
@@ -258,10 +255,9 @@ namespace Microsoft.Build.BackEnd
                 bool taskHostFactoryExplicitlyRequested,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
-                string taskProjectFile
-            )
+                string taskProjectFile)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
+            ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
             if (taskFactoryIdentityParameters != null)
@@ -273,9 +269,13 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+                ErrorUtilities.VerifyThrowArgumentLength(taskName);
                 _taskName = taskName;
-                _loadedType = _typeLoader.Load(taskName, loadInfo);
+
+                string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
+                using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
+
+                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -302,13 +302,8 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, e.Message);
             }
 
@@ -328,30 +323,28 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> mergedParameters = null;
             _taskLoggingContext = taskLoggingContext;
 
-            // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate 
-            // the task factory parameters if we have any to calculate; otherwise even if we 
-            // still launch the task factory, it will be with parameters corresponding to the 
-            // current process. 
+            // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
+            // the task factory parameters if we have any to calculate; otherwise even if we
+            // still launch the task factory, it will be with parameters corresponding to the
+            // current process.
             if ((_factoryIdentityParameters?.Count > 0) || (taskIdentityParameters?.Count > 0))
             {
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
-                useTaskFactory = !NativeMethodsShared.IsMono
-                                 && (_taskHostFactoryExplicitlyRequested
-                                     || !TaskHostParametersMatchCurrentProcess(mergedParameters));
+                useTaskFactory = _taskHostFactoryExplicitlyRequested || !TaskHostParametersMatchCurrentProcess(mergedParameters);
             }
             else
             {
-                // if we don't have any task host parameters specified on either the using task or the 
+                // if we don't have any task host parameters specified on either the using task or the
                 // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
-                // as the task factory.  
+                // as the task factory.
                 useTaskFactory = _taskHostFactoryExplicitlyRequested;
             }
 
             if (useTaskFactory)
             {
-                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost, nameof(buildComponentHost));
+                ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
                 mergedParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -365,11 +358,18 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
 
-                TaskHostTask task = new TaskHostTask(taskLocation, taskLoggingContext, buildComponentHost, mergedParameters, _loadedType
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                TaskHostTask task = new TaskHostTask(
+                    taskLocation,
+                    taskLoggingContext,
+                    buildComponentHost,
+                    mergedParameters,
+                    _loadedType
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif
                     );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 return task;
             }
             else
@@ -378,20 +378,33 @@ namespace Microsoft.Build.BackEnd
                 AppDomain taskAppDomain = null;
 #endif
 
-                ITask taskInstance = TaskLoader.CreateTask(_loadedType, _taskName, taskLocation.File, taskLocation.Line, taskLocation.Column, new TaskLoader.LogError(ErrorLoggingDelegate)
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                ITask taskInstance = TaskLoader.CreateTask(
+                    _loadedType,
+                    _taskName,
+                    taskLocation.File,
+                    taskLocation.Line,
+                    taskLocation.Column,
+                    new TaskLoader.LogError(ErrorLoggingDelegate),
 #if FEATURE_APPDOMAIN
-                    , appDomainSetup
+                    appDomainSetup,
+                    appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
 #endif
-                    , isOutOfProc
+                    isOutOfProc
 #if FEATURE_APPDOMAIN
                     , out taskAppDomain
 #endif
                     );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
 #if FEATURE_APPDOMAIN
-                if (taskAppDomain != null)
+                if (taskAppDomain != null && taskInstance != null)
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
+                }
+                else if (taskAppDomain != null)
+                {
+                    AssemblyLoadsTracker.StopTracking(taskAppDomain);
                 }
 #endif
 
@@ -400,8 +413,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Is the given task name able to be created by the task factory. In the case of an assembly task factory 
-        /// this question is answered by checking the assembly wrapped by the task factory to see if it exists. 
+        /// Is the given task name able to be created by the task factory. In the case of an assembly task factory
+        /// this question is answered by checking the assembly wrapped by the task factory to see if it exists.
         /// </summary>
         internal bool TaskNameCreatableByFactory(string taskName, IDictionary<string, string> taskIdentityParameters, string taskProjectFile, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
         {
@@ -413,7 +426,7 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
-                // Parameters match, so now we check to see if the task exists. 
+                // Parameters match, so now we check to see if the task exists.
                 return _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly) != null;
             }
             catch (TargetInvocationException e)
@@ -440,13 +453,8 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
-            catch (Exception e) // Catching Exception, but rethrowing unless it's a well-known exception.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
-                if (ExceptionHandling.NotExpectedReflectionException(e))
-                {
-                    throw;
-                }
-
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
 
@@ -458,7 +466,7 @@ namespace Microsoft.Build.BackEnd
         #region Private members
 
         /// <summary>
-        /// Validates the given set of parameters, logging the appropriate errors as necessary. 
+        /// Validates the given set of parameters, logging the appropriate errors as necessary.
         /// </summary>
         private static void VerifyThrowIdentityParametersValid(IDictionary<string, string> identityParameters, IElementLocation errorLocation, string taskName, string runtimeName, string architectureName)
         {
@@ -470,8 +478,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!XMakeAttributes.IsValidMSBuildRuntimeValue(runtime))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject
-                                (
+                        ProjectErrorUtilities.ThrowInvalidProject(
                                     errorLocation,
                                     "TaskLoadFailureInvalidTaskHostFactoryParameter",
                                     taskName,
@@ -480,8 +487,7 @@ namespace Microsoft.Build.BackEnd
                                     XMakeAttributes.MSBuildRuntimeValues.clr2,
                                     XMakeAttributes.MSBuildRuntimeValues.clr4,
                                     XMakeAttributes.MSBuildRuntimeValues.currentRuntime,
-                                    XMakeAttributes.MSBuildRuntimeValues.any
-                                );
+                                    XMakeAttributes.MSBuildRuntimeValues.any);
                     }
                 }
 
@@ -490,8 +496,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!XMakeAttributes.IsValidMSBuildArchitectureValue(architecture))
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject
-                                (
+                        ProjectErrorUtilities.ThrowInvalidProject(
                                     errorLocation,
                                     "TaskLoadFailureInvalidTaskHostFactoryParameter",
                                     taskName,
@@ -500,22 +505,21 @@ namespace Microsoft.Build.BackEnd
                                     XMakeAttributes.MSBuildArchitectureValues.x86,
                                     XMakeAttributes.MSBuildArchitectureValues.x64,
                                     XMakeAttributes.MSBuildArchitectureValues.currentArchitecture,
-                                    XMakeAttributes.MSBuildArchitectureValues.any
-                                );
+                                    XMakeAttributes.MSBuildArchitectureValues.any);
                     }
                 }
             }
         }
 
         /// <summary>
-        /// Given the set of parameters that are set to the factory, and the set of parameters coming from the task invocation that we're searching for 
-        /// a matching record to, determine whether the parameters match this record.  
+        /// Given the set of parameters that are set to the factory, and the set of parameters coming from the task invocation that we're searching for
+        /// a matching record to, determine whether the parameters match this record.
         /// </summary>
         private static bool TaskIdentityParametersMatchFactory(IDictionary<string, string> factoryIdentityParameters, IDictionary<string, string> taskIdentityParameters)
         {
             if (taskIdentityParameters == null || taskIdentityParameters.Count == 0 || factoryIdentityParameters == null || factoryIdentityParameters.Count == 0)
             {
-                // either the task or the using task doesn't care about anything, in which case we match by default.  
+                // either the task or the using task doesn't care about anything, in which case we match by default.
                 return true;
             }
 
@@ -538,7 +542,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // one or more does not match, so we don't match.  
+            // one or more does not match, so we don't match.
             return false;
         }
 
@@ -572,10 +576,8 @@ namespace Microsoft.Build.BackEnd
             {
                 mergedParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                string taskRuntime;
-                taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out taskRuntime);
-                string usingTaskRuntime;
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out usingTaskRuntime);
+                taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
+                factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string usingTaskRuntime);
 
                 if (!XMakeAttributes.TryMergeRuntimeValues(taskRuntime, usingTaskRuntime, out mergedRuntime))
                 {
@@ -586,10 +588,8 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters.Add(XMakeAttributes.runtime, mergedRuntime);
                 }
 
-                string taskArchitecture;
-                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out taskArchitecture);
-                string usingTaskArchitecture;
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out usingTaskArchitecture);
+                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
+                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string usingTaskArchitecture);
 
                 if (!XMakeAttributes.TryMergeArchitectureValues(taskArchitecture, usingTaskArchitecture, out mergedArchitecture))
                 {
@@ -605,14 +605,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns true if the provided set of task host parameters matches the current process, 
-        /// and false otherwise. 
+        /// Returns true if the provided set of task host parameters matches the current process,
+        /// and false otherwise.
         /// </summary>
         private static bool TaskHostParametersMatchCurrentProcess(IDictionary<string, string> mergedParameters)
         {
             if (mergedParameters == null || mergedParameters.Count == 0)
             {
-                // We don't care, so they match by default. 
+                // We don't care, so they match by default.
                 return true;
             }
 
@@ -645,7 +645,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Log errors from TaskLoader. 
+        /// Log errors from TaskLoader.
         /// </summary>
         private void ErrorLoggingDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
         {

@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#if FEATURE_APPDOMAIN
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
 
 using System;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -12,17 +14,23 @@ using System.Security;
 using System.Threading;
 using System.Runtime.InteropServices.ComTypes;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#endif
+
+using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
+
     /// <summary>
     /// Registers a managed assembly for COM interop (equivalent of regasm.exe functionality, but this code
     /// doesn't actually call the exe).
     /// </summary>
-    public class UnregisterAssembly : AppDomainIsolatedTaskExtension
+    public class UnregisterAssembly : AppDomainIsolatedTaskExtension, IUnregisterAssemblyTaskContract
     {
         #region Properties
 
@@ -49,7 +57,7 @@ namespace Microsoft.Build.Tasks
 
             if (AssemblyListFile != null)
             {
-                cacheFile = (AssemblyRegistrationCache)StateFileBase.DeserializeCache(AssemblyListFile.ItemSpec, Log, typeof(AssemblyRegistrationCache));
+                cacheFile = StateFileBase.DeserializeCache<AssemblyRegistrationCache>(AssemblyListFile.ItemSpec, Log);
 
                 // no cache file, nothing to do. In case there was a problem reading the cache file, we can't do anything anyway.
                 if (cacheFile == null)
@@ -114,7 +122,7 @@ namespace Microsoft.Build.Tasks
 #if DEBUG
                     catch (Exception e)
                     {
-                        Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " + 
+                        Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " +
                             "Please log a MSBuild bug specifying the steps to reproduce the problem. " +
                             e.Message);
                         throw;
@@ -142,7 +150,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool Unregister(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, nameof(typeLibPath));
+            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath);
 
             Log.LogMessageFromResources(MessageImportance.Low, "UnregisterAssembly.UnregisteringAssembly", assemblyPath);
 
@@ -150,7 +158,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    // Load the specified assembly. 
+                    // Load the specified assembly.
                     Assembly asm = Assembly.UnsafeLoadFrom(assemblyPath);
 
                     var comRegistrar = new RegistrationServices();
@@ -162,7 +170,7 @@ namespace Microsoft.Build.Tasks
                         // Unregister the assembly
                         if (!comRegistrar.UnregisterAssembly(asm))
                         {
-                            // If the assembly doesn't contain any types that could be registered for COM interop, 
+                            // If the assembly doesn't contain any types that could be registered for COM interop,
                             // warn the user about it
                             Log.LogWarningWithCodeFromResources("UnregisterAssembly.NoValidTypes", assemblyPath);
                         }
@@ -263,7 +271,7 @@ namespace Microsoft.Build.Tasks
                     else
                     {
 #if DEBUG
-                        Debug.Assert(false, "Unexpected exception in UnregisterAssembly.DoExecute. " + 
+                        Debug.Assert(false, "Unexpected exception in UnregisterAssembly.DoExecute. " +
                             "Please log a MSBuild bug specifying the steps to reproduce the problem.");
 #endif
                         throw;
@@ -285,5 +293,37 @@ namespace Microsoft.Build.Tasks
         private const string unregisteringLockName = "MSBUILD_V_3_5_UNREGISTER_LOCK";
         #endregion
     }
-}
+
+#elif !NETFRAMEWORK
+
+    public sealed class UnregisterAssembly : TaskRequiresFramework, IUnregisterAssemblyTaskContract
+    {
+        public UnregisterAssembly()
+            : base(nameof(UnregisterAssembly))
+        {
+        }
+
+        #region Properties
+
+        public ITaskItem[] Assemblies { get; set; }
+
+        public ITaskItem[] TypeLibFiles { get; set; }
+
+        public ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+
 #endif
+
+    public interface IUnregisterAssemblyTaskContract
+    {
+        #region Properties
+
+        ITaskItem[] Assemblies { get; set; }
+        ITaskItem[] TypeLibFiles { get; set; }
+        ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+}

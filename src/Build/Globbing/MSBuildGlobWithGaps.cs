@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Globbing
 {
@@ -39,8 +41,8 @@ namespace Microsoft.Build.Globbing
         /// <param name="gaps">The gap glob</param>
         internal MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IMSBuildGlob gaps)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(mainGlob, nameof(mainGlob));
-            ErrorUtilities.VerifyThrowArgumentNull(gaps, nameof(gaps));
+            ErrorUtilities.VerifyThrowArgumentNull(mainGlob);
+            ErrorUtilities.VerifyThrowArgumentNull(gaps);
 
             MainGlob = mainGlob;
             Gaps = gaps;
@@ -53,8 +55,8 @@ namespace Microsoft.Build.Globbing
         /// <param name="gaps">The gap glob</param>
         public MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IEnumerable<IMSBuildGlob> gaps)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(mainGlob, nameof(mainGlob));
-            ErrorUtilities.VerifyThrowArgumentNull(gaps, nameof(gaps));
+            ErrorUtilities.VerifyThrowArgumentNull(mainGlob);
+            ErrorUtilities.VerifyThrowArgumentNull(gaps);
 
             MainGlob = mainGlob;
             Gaps = CompositeGlob.Create(gaps);
@@ -66,7 +68,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="mainGlob">The main glob</param>
         /// <param name="gaps">The gap glob</param>
         public MSBuildGlobWithGaps(IMSBuildGlob mainGlob, params IMSBuildGlob[] gaps) : this(mainGlob, gaps.AsEnumerable())
-        {}
+        { }
 
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)

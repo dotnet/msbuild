@@ -1,26 +1,28 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
     /// <summary>
     /// Compare the version numbers only for an AssemblyNameExtension and make sure they are in reverse order. This assumes the names are the same.
     /// </summary>
-    sealed internal class AssemblyNameReverseVersionComparer : IComparer<AssemblyNameExtension>
+    internal sealed class AssemblyNameReverseVersionComparer : IComparer<AssemblyNameExtension>
     {
         /// <summary>
         /// A static instance of the comparer for use in a sort method
         /// </summary>
-        internal readonly static IComparer<AssemblyNameExtension> GenericComparer = new AssemblyNameReverseVersionComparer();
+        internal static readonly IComparer<AssemblyNameExtension> GenericComparer = new AssemblyNameReverseVersionComparer();
 
         /// <summary>
         /// Compare x and y by version only.
-        /// 
+        ///
         /// Change the return value to sort the values in reverse order.
-        /// 
-        /// If x is greater than y  return -1 indicating x is less than y. 
+        ///
+        /// If x is greater than y  return -1 indicating x is less than y.
         /// If x is less than y  return 1 indicating x is greater than  y.
         /// If x and y are equal return 0.
         /// </summary>

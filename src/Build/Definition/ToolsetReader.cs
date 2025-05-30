@@ -1,21 +1,24 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using error = Microsoft.Build.Shared.ErrorUtilities;
+using ErrorUtils = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -24,11 +27,6 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal abstract class ToolsetReader
     {
-        /// <summary>
-        /// The global properties used to read the toolset.
-        /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
-
         /// <summary>
         /// The environment properties used to read the toolset.
         /// </summary>
@@ -42,7 +40,6 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             _environmentProperties = environmentProperties;
-            _globalProperties = globalProperties;
         }
 
         /// <summary>
@@ -96,8 +93,7 @@ namespace Microsoft.Build.Evaluation
         /// Gathers toolset data from the registry and configuration file, if any.
         /// NOTE:  this method is internal for unit testing purposes only.
         /// </summary>
-        internal static string ReadAllToolsets
-            (
+        internal static string ReadAllToolsets(
             Dictionary<string, Toolset> toolsets,
 #if FEATURE_WIN32_REGISTRY
             ToolsetRegistryReader registryReader,
@@ -105,8 +101,7 @@ namespace Microsoft.Build.Evaluation
             ToolsetConfigurationReader configurationReader,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
-            ToolsetDefinitionLocations locations
-            )
+            ToolsetDefinitionLocations locations)
         {
             var initialProperties =
                 new PropertyDictionary<ProjectPropertyInstance>(environmentProperties);
@@ -114,7 +109,7 @@ namespace Microsoft.Build.Evaluation
             initialProperties.ImportProperties(globalProperties);
 
             // The ordering here is important because the configuration file should have greater precedence
-            // than the registry, and we do a check and don't read in the new toolset if there's already one. 
+            // than the registry, and we do a check and don't read in the new toolset if there's already one.
             string defaultToolsVersionFromConfiguration = null;
             string overrideTasksPathFromConfiguration = null;
             string defaultOverrideToolsVersionFromConfiguration = null;
@@ -126,10 +121,22 @@ namespace Microsoft.Build.Evaluation
                     configurationReader = new ToolsetConfigurationReader(environmentProperties, globalProperties);
                 }
 
-                // Accumulation of properties is okay in the config file because it's deterministically ordered
-                defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
-                    initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
-                    out defaultOverrideToolsVersionFromConfiguration);
+                ReadConfigToolset();
+
+                // This is isolated into its own function in order to isolate loading of
+                // System.Configuration.ConfigurationManager.dll to codepaths that really
+                // need it as a way of mitigating the need to update references to that
+                // assembly in API consumers.
+                //
+                // https://github.com/microsoft/MSBuildLocator/issues/159
+                [MethodImplAttribute(MethodImplOptions.NoInlining)]
+                void ReadConfigToolset()
+                {
+                    // Accumulation of properties is okay in the config file because it's deterministically ordered
+                    defaultToolsVersionFromConfiguration = configurationReader.ReadToolsets(toolsets, globalProperties,
+                                    initialProperties, true /* accumulate properties */, out overrideTasksPathFromConfiguration,
+                                    out defaultOverrideToolsVersionFromConfiguration);
+                }
             }
 
             string defaultToolsVersionFromRegistry = null;
@@ -166,16 +173,12 @@ namespace Microsoft.Build.Evaluation
                             FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current);
                         if (v4Dir != null && !toolsets.ContainsKey("4.0"))
                         {
-                            // Create standard properties. On Mono they are well known
-                            var buildProperties =
-                                CreateStandardProperties(globalProperties, "4.0", libraryPath, v4Dir);
-
                             toolsets.Add(
                                 "4.0",
                                 new Toolset(
                                     "4.0",
                                     v4Dir,
-                                    buildProperties,
+                                    buildProperties: null,
                                     environmentProperties,
                                     globalProperties,
                                     null,
@@ -197,21 +200,12 @@ namespace Microsoft.Build.Evaluation
                                     continue;
                                 }
 
-                                if (NativeMethodsShared.IsMono && Version.TryParse(version, out Version parsedVersion) && parsedVersion.Major > 14)
-                                {
-                                    continue;
-                                }
-
-                                // Create standard properties. On Mono they are well known
-                                var buildProperties =
-                                    CreateStandardProperties(globalProperties, version, xbuildToolsetsDir, binPath);
-
                                 toolsets.Add(
                                     version,
                                     new Toolset(
                                         version,
                                         binPath,
-                                        buildProperties,
+                                        buildProperties: null,
                                         environmentProperties,
                                         globalProperties,
                                         null,
@@ -235,12 +229,12 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry. 
-            // The 3.5 installer writes one for 2.0, but 3.5 might not be installed.  
-            // The 4.0 and subsequent installers can't keep writing the 2.0 one, because (a) it causes SxS issues and (b) we 
+            // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry.
+            // The 3.5 installer writes one for 2.0, but 3.5 might not be installed.
+            // The 4.0 and subsequent installers can't keep writing the 2.0 one, because (a) it causes SxS issues and (b) we
             // don't want it unless 2.0 is installed.
             // So if the 2.0 framework is actually installed, we're reading the registry, and either the registry or the config
-            // file have not already created the 2.0 toolset, mock up a fake one.  
+            // file have not already created the 2.0 toolset, mock up a fake one.
             if (((locations & ToolsetDefinitionLocations.Registry) != 0) && !toolsets.ContainsKey("2.0")
                 && FrameworkLocationHelper.PathToDotNetFrameworkV20 != null)
             {
@@ -341,17 +335,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>Internal for unit testing only</remarks>
         /// <returns>the default tools version if available, or null otherwise</returns>
-        internal string ReadToolsets
-            (
+        internal string ReadToolsets(
             Dictionary<string, Toolset> toolsets,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             PropertyDictionary<ProjectPropertyInstance> initialProperties,
             bool accumulateProperties,
             out string msBuildOverrideTasksPath,
-            out string defaultOverrideToolsVersion
-            )
+            out string defaultOverrideToolsVersion)
         {
-            error.VerifyThrowArgumentNull(toolsets, "Toolsets");
+            ErrorUtils.VerifyThrowArgumentNull(toolsets, "Toolsets");
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 
@@ -385,8 +377,8 @@ namespace Microsoft.Build.Evaluation
         protected abstract IEnumerable<string> GetSubToolsetVersions(string toolsVersion);
 
         /// <summary>
-        /// Provides an enumerator over property definitions for a specified sub-toolset version 
-        /// under a specified toolset version. 
+        /// Provides an enumerator over property definitions for a specified sub-toolset version
+        /// under a specified toolset version.
         /// </summary>
         /// <param name="toolsVersion">The tools version.</param>
         /// <param name="subToolsetVersion">The sub-toolset version.</param>
@@ -401,21 +393,19 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Reads all the toolsets and populates the given ToolsetCollection with them
         /// </summary>
-        private void ReadEachToolset
-            (
+        private void ReadEachToolset(
             Dictionary<string, Toolset> toolsets,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             PropertyDictionary<ProjectPropertyInstance> initialProperties,
-            bool accumulateProperties
-            )
+            bool accumulateProperties)
         {
             foreach (ToolsetPropertyDefinition toolsVersion in ToolsVersions)
             {
                 // If there's already an existing toolset, it's of higher precedence, so
-                // don't even bother to read this toolset in.  
+                // don't even bother to read this toolset in.
                 if (!toolsets.ContainsKey(toolsVersion.Name))
                 {
-                    // We clone here because we don't want to interfere with the evaluation 
+                    // We clone here because we don't want to interfere with the evaluation
                     // of subsequent Toolsets; otherwise, properties found during the evaluation
                     // of this Toolset would be persisted in initialProperties and appear
                     // to later Toolsets as Global or Environment properties from the Engine.
@@ -423,11 +413,8 @@ namespace Microsoft.Build.Evaluation
 
                     Toolset toolset = ReadToolset(toolsVersion, globalProperties, initialPropertiesClone, accumulateProperties);
 
-                    // Register toolset paths into list of immutable directories
-                    //   example: C:\Windows\Microsoft.NET\Framework\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
-                    //   example:  C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
-                    FileClassifier.Shared.RegisterImmutableDirectory(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
+                    FileClassifier.Shared.RegisterFrameworkLocations(p =>
+                        initialPropertiesClone.GetProperty(p)?.EvaluatedValue);
 
                     if (toolset != null)
                     {
@@ -440,13 +427,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Reads the settings for a specified tools version
         /// </summary>
-        private Toolset ReadToolset
-            (
+        private Toolset ReadToolset(
             ToolsetPropertyDefinition toolsVersion,
             PropertyDictionary<ProjectPropertyInstance> globalProperties,
             PropertyDictionary<ProjectPropertyInstance> initialProperties,
-            bool accumulateProperties
-            )
+            bool accumulateProperties)
         {
             // Initial properties is the set of properties we're going to use to expand property expressions like $(foo)
             // in the values we read out of the registry or config file. We'll add to it as we pick up properties (including binpath)
@@ -475,7 +460,7 @@ namespace Microsoft.Build.Evaluation
                 IEnumerable<ToolsetPropertyDefinition> rawSubToolsetProperties = GetSubToolsetPropertyDefinitions(toolsVersion.Name, subToolsetVersion);
                 PropertyDictionary<ProjectPropertyInstance> subToolsetProperties = new PropertyDictionary<ProjectPropertyInstance>();
 
-                // If we have a sub-toolset, any values defined here will override the toolset properties. 
+                // If we have a sub-toolset, any values defined here will override the toolset properties.
                 foreach (ToolsetPropertyDefinition property in rawSubToolsetProperties)
                 {
                     EvaluateAndSetProperty(property, subToolsetProperties, globalProperties, initialProperties, false /* do not ever accumulate sub-toolset properties */, ref subToolsetToolsPath, ref subToolsetBinPath, ref expander);
@@ -501,7 +486,6 @@ namespace Microsoft.Build.Evaluation
                 InvalidToolsetDefinitionException.Throw("ConflictingValuesOfMSBuildToolsPath", toolsVersion.Name, toolsVersion.Source.LocationString);
             }
 
-            AppendStandardProperties(properties, globalProperties, toolsVersion.Name, null, toolsPath);
             Toolset toolset = null;
 
             try
@@ -518,101 +502,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Create a dictionary with standard properties.
-        /// </summary>
-        private static PropertyDictionary<ProjectPropertyInstance> CreateStandardProperties(
-            PropertyDictionary<ProjectPropertyInstance> globalProperties,
-            string version,
-            string root,
-            string toolsPath)
-        {
-            // Create standard properties. On Mono they are well known
-            if (!NativeMethodsShared.IsMono)
-            {
-                return null;
-            }
-            PropertyDictionary<ProjectPropertyInstance> buildProperties =
-                new PropertyDictionary<ProjectPropertyInstance>();
-            AppendStandardProperties(buildProperties, globalProperties, version, root, toolsPath);
-            return buildProperties;
-        }
-
-        /// <summary>
-        /// Appends standard properties to a dictionary. These properties are read from
-        /// the registry under Windows (they are a part of a toolset definition).
-        /// </summary>
-        private static void AppendStandardProperties(
-            PropertyDictionary<ProjectPropertyInstance> properties,
-            PropertyDictionary<ProjectPropertyInstance> globalProperties,
-            string version,
-            string root,
-            string toolsPath)
-        {
-            if (NativeMethodsShared.IsMono)
-            {
-                var v4Dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV40(DotNetFrameworkArchitecture.Current)
-                            + Path.DirectorySeparatorChar;
-                var v35Dir = FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current)
-                             + Path.DirectorySeparatorChar;
-
-                if (root == null)
-                {
-                    var libraryPath = NativeMethodsShared.FrameworkBasePath;
-                    if (toolsPath.StartsWith(libraryPath))
-                    {
-                        root = Path.GetDirectoryName(toolsPath);
-                        if (toolsPath.EndsWith("bin"))
-                        {
-                            root = Path.GetDirectoryName(root);
-                        }
-                    }
-                    else
-                    {
-                        root = libraryPath;
-                    }
-                }
-
-                root += Path.DirectorySeparatorChar;
-
-                // Global properties cannot be overwritten
-                if (globalProperties["FrameworkSDKRoot"] == null && properties["FrameworkSDKRoot"] == null)
-                {
-                    properties.Set(ProjectPropertyInstance.Create("FrameworkSDKRoot", root, true, false));
-                }
-                if (globalProperties["MSBuildToolsRoot"] == null && properties["MSBuildToolsRoot"] == null)
-                {
-                    properties.Set(ProjectPropertyInstance.Create("MSBuildToolsRoot", root, true, false));
-                }
-                if (globalProperties["MSBuildFrameworkToolsPath"] == null
-                    && properties["MSBuildFrameworkToolsPath"] == null)
-                {
-                    properties.Set(ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath", toolsPath, true, false));
-                }
-                if (globalProperties["MSBuildFrameworkToolsPath32"] == null
-                    && properties["MSBuildFrameworkToolsPath32"] == null)
-                {
-                    properties.Set(
-                        ProjectPropertyInstance.Create("MSBuildFrameworkToolsPath32", toolsPath, true, false));
-                }
-                if (globalProperties["MSBuildRuntimeVersion"] == null && properties["MSBuildRuntimeVersion"] == null)
-                {
-                    properties.Set(ProjectPropertyInstance.Create("MSBuildRuntimeVersion", version, true, false));
-                }
-                if (!string.IsNullOrEmpty(v35Dir) && globalProperties["SDK35ToolsPath"] == null
-                    && properties["SDK35ToolsPath"] == null)
-                {
-                    properties.Set(ProjectPropertyInstance.Create("SDK35ToolsPath", v35Dir, true, false));
-                }
-                if (!string.IsNullOrEmpty(v4Dir) && globalProperties["SDK40ToolsPath"] == null
-                    && properties["SDK40ToolsPath"] == null)
-                {
-                    properties.Set(ProjectPropertyInstance.Create("SDK40ToolsPath", v4Dir, true, false));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Processes a particular ToolsetPropertyDefinition into the correct value and location in the initial and/or final property set. 
+        /// Processes a particular ToolsetPropertyDefinition into the correct value and location in the initial and/or final property set.
         /// </summary>
         /// <param name="property">The ToolsetPropertyDefinition being analyzed.</param>
         /// <param name="properties">The final set of properties that we wish this toolset property to be added to. </param>
@@ -631,12 +521,10 @@ namespace Microsoft.Build.Evaluation
 
                 if (accumulateProperties)
                 {
-                    SetProperty
-                    (
+                    SetProperty(
                         new ToolsetPropertyDefinition(ReservedPropertyNames.toolsPath, toolsPath, property.Source),
                         initialProperties,
-                        globalProperties
-                    );
+                        globalProperties);
                 }
             }
             else if (String.Equals(property.Name, ReservedPropertyNames.binPath, StringComparison.OrdinalIgnoreCase))
@@ -646,12 +534,10 @@ namespace Microsoft.Build.Evaluation
 
                 if (accumulateProperties)
                 {
-                    SetProperty
-                    (
+                    SetProperty(
                         new ToolsetPropertyDefinition(ReservedPropertyNames.binPath, binPath, property.Source),
                         initialProperties,
-                        globalProperties
-                    );
+                        globalProperties);
                 }
             }
             else if (ReservedPropertyNames.IsReservedProperty(property.Name))
@@ -787,29 +673,33 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
         /// </summary>
-        public string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
+        public readonly string MSBuildPropertyName => String.Format($"$({StringRepresentation})");
 
         /// <summary>
         /// Tries to find a reference to MSBuildExtensionsPath* property in the given string
         /// </summary>
         public static MSBuildExtensionsPathReferenceKind FindIn(string expression)
         {
-            if (expression.IndexOf("$(MSBuildExtensionsPath)") >= 0)
+            const string PathBase = "$(MSBuildExtensionsPath";
+            int pos = expression.IndexOf(PathBase, StringComparison.Ordinal);
+            if (pos >= 0)
             {
-                return MSBuildExtensionsPathReferenceKind.Default;
+                ReadOnlySpan<char> remainder = expression.AsSpan(pos + PathBase.Length);
+                if (remainder.StartsWith(")".AsSpan()))
+                {
+                    return Default;
+                }
+                else if (remainder.StartsWith("32)".AsSpan()))
+                {
+                    return Path32;
+                }
+                else if (remainder.StartsWith("64)".AsSpan()))
+                {
+                    return Path64;
+                }
             }
 
-            if (expression.IndexOf("$(MSBuildExtensionsPath32)") >= 0)
-            {
-                return MSBuildExtensionsPathReferenceKind.Path32;
-            }
-
-            if (expression.IndexOf("$(MSBuildExtensionsPath64)") >= 0)
-            {
-                return MSBuildExtensionsPathReferenceKind.Path64;
-            }
-
-            return MSBuildExtensionsPathReferenceKind.None;
+            return None;
         }
-     }
+    }
 }

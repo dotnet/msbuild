@@ -1511,7 +1511,7 @@
         <source>TargetFramework Profile List Information:</source>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
         <note />
       </trans-unit>
@@ -2385,10 +2385,6 @@
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
         <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
-        <note />
-      </trans-unit>
-      <trans-unit id="Copy.ExactlyOneTypeOfLink">
-        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">

@@ -1,21 +1,25 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+#if FEATURE_SYSTEM_CONFIGURATION
+using System.Configuration;
 using System.Security;
+#endif
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -30,7 +34,7 @@ namespace Microsoft.Build.Tasks
     {
         private const string TypeNameSuffix = "_TypeName";
         private const string IsLiteralSuffix = "_IsLiteral";
-        private static readonly IEnumerable<string> NamespaceImports = new string[] { "System", "System.Reflection" };
+        private static readonly string[] NamespaceImports = ["System", "System.Reflection"];
         private static readonly IReadOnlyDictionary<string, ParameterType> EmptyParameterTypes = new Dictionary<string, ParameterType>();
 
         /// <summary>
@@ -63,7 +67,7 @@ namespace Microsoft.Build.Tasks
         /// The path to the file that was generated.
         /// If this is set, and a file name, the destination folder will be prepended.
         /// If this is set, and is rooted, the destination folder will be ignored.
-        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and 
+        /// If this is not set, the destination folder will be used, an arbitrary file name will be used, and
         /// the default extension for the language selected.
         /// </summary>
         [Output]
@@ -107,13 +111,17 @@ namespace Microsoft.Build.Tasks
                     OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, OutputFile.ItemSpec));
                 }
 
-                OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, extension));
+                OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, null, extension));
+
+                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(OutputFile.ItemSpec));
 
                 File.WriteAllText(MakePath(OutputFile.ItemSpec), code); // Overwrites file if it already exists (and can be overwritten)
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
-                Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotWriteOutput", (OutputFile == null) ? String.Empty : OutputFile.ItemSpec, ex.Message);
+                string itemSpec = OutputFile?.ItemSpec ?? String.Empty;
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(itemSpec);
+                Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotWriteOutput", itemSpec, ex.Message, lockedFileMessage);
                 return false;
             }
 
@@ -134,146 +142,157 @@ namespace Microsoft.Build.Tasks
             extension = null;
             bool haveGeneratedContent = false;
 
-            CodeDomProvider provider;
-
+            CodeDomProvider provider = null;
             try
             {
-                provider = CodeDomProvider.CreateProvider(Language);
-            }
-            catch (SystemException e) when
+                try
+                {
+                    provider = CodeDomProvider.CreateProvider(Language);
+                }
+                catch (SystemException e) when
 #if FEATURE_SYSTEM_CONFIGURATION
-            (e is ConfigurationException || e is SecurityException)
+                (e is ConfigurationException || e is SecurityException)
 #else
-            (e.GetType().Name == "ConfigurationErrorsException") //TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
+            (e.GetType().Name == "ConfigurationErrorsException") // TODO: catch specific exception type once it is public https://github.com/dotnet/corefx/issues/40456
 #endif
-            {
-                Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, e.Message);
-                return null;
-            }
-
-            extension = provider.FileExtension;
-
-            var unit = new CodeCompileUnit();
-
-            var globalNamespace = new CodeNamespace();
-            unit.Namespaces.Add(globalNamespace);
-
-            // Declare authorship. Unfortunately CodeDOM puts this comment after the attributes.
-            string comment = ResourceUtilities.GetResourceString("WriteCodeFragment.Comment");
-            globalNamespace.Comments.Add(new CodeCommentStatement(comment));
-
-            if (AssemblyAttributes == null)
-            {
-                return String.Empty;
-            }
-
-            // For convenience, bring in the namespaces, where many assembly attributes lie
-            foreach (string name in NamespaceImports)
-            {
-                globalNamespace.Imports.Add(new CodeNamespaceImport(name));
-            }
-
-            foreach (ITaskItem attributeItem in AssemblyAttributes)
-            {
-                // Some attributes only allow positional constructor arguments, or the user may just prefer them.
-                // To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
-                // If a parameter index is skipped, it's an error.
-                IDictionary customMetadata = attributeItem.CloneCustomMetadata();
-
-                // Some metadata may indicate the types of parameters. Use that metadata to determine
-                // the parameter types. Those metadata items will be removed from the dictionary.
-                IReadOnlyDictionary<string, ParameterType> parameterTypes = ExtractParameterTypes(customMetadata);
-
-                var orderedParameters = new List<AttributeParameter?>(new AttributeParameter?[customMetadata.Count + 1] /* max possible slots needed */);
-                var namedParameters = new List<AttributeParameter>();
-
-                foreach (DictionaryEntry entry in customMetadata)
                 {
-                    string name = (string)entry.Key;
-                    string value = (string)entry.Value;
-
-                    // Get the declared type information for this parameter.
-                    // If a type is not declared, then we infer the type.
-                    if (!parameterTypes.TryGetValue(name, out ParameterType type))
-                    {
-                        type = new ParameterType { Kind = ParameterTypeKind.Inferred };
-                    }
-
-                    if (name.StartsWith("_Parameter", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (!Int32.TryParse(name.Substring("_Parameter".Length), out int index))
-                        {
-                            Log.LogErrorWithCodeFromResources("General.InvalidValue", name, "WriteCodeFragment");
-                            return null;
-                        }
-
-                        if (index > orderedParameters.Count || index < 1)
-                        {
-                            Log.LogErrorWithCodeFromResources("WriteCodeFragment.SkippedNumberedParameter", index);
-                            return null;
-                        }
-
-                        // "_Parameter01" and "_Parameter1" would overwrite each other
-                        orderedParameters[index - 1] = new AttributeParameter { Type = type, Value = value };
-                    }
-                    else
-                    {
-                        namedParameters.Add(new AttributeParameter { Name = name, Type = type, Value = value });
-                    }
-                }
-
-                bool encounteredNull = false;
-                List<AttributeParameter> providedOrderedParameters = new();
-                for (int i = 0; i < orderedParameters.Count; i++)
-                {
-                    if (!orderedParameters[i].HasValue)
-                    {
-                        // All subsequent args should be null, else a slot was missed
-                        encounteredNull = true;
-                        continue;
-                    }
-
-                    if (encounteredNull)
-                    {
-                        Log.LogErrorWithCodeFromResources("WriteCodeFragment.SkippedNumberedParameter", i + 1 /* back to 1 based */);
-                        return null;
-                    }
-
-                    providedOrderedParameters.Add(orderedParameters[i].Value);
-                }
-
-                var attribute = new CodeAttributeDeclaration(new CodeTypeReference(attributeItem.ItemSpec));
-
-                // We might need the type of the attribute if we need to infer the
-                // types of the parameters. Search for it by the given type name,
-                // as well as within the namespaces that we automatically import.
-                Lazy<Type> attributeType = new(
-                    () => Type.GetType(attribute.Name, throwOnError: false) ?? NamespaceImports.Select(x => Type.GetType($"{x}.{attribute.Name}", throwOnError: false)).FirstOrDefault(),
-                    System.Threading.LazyThreadSafetyMode.None
-                );
-
-                if (
-                    !AddArguments(attribute, attributeType, providedOrderedParameters, isPositional: true)
-                    || !AddArguments(attribute, attributeType, namedParameters, isPositional: false))
-                {
+                    Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotCreateProvider", Language, e.Message);
                     return null;
                 }
 
-                unit.AssemblyCustomAttributes.Add(attribute);
-                haveGeneratedContent = true;
-            }
+                extension = provider.FileExtension;
 
-            var generatedCode = new StringBuilder();
-            using (var writer = new StringWriter(generatedCode, CultureInfo.CurrentCulture))
+                var unit = new CodeCompileUnit();
+
+                var globalNamespace = new CodeNamespace();
+                unit.Namespaces.Add(globalNamespace);
+
+                // Declare authorship. Unfortunately CodeDOM puts this comment after the attributes.
+                string comment = ResourceUtilities.GetResourceString("WriteCodeFragment.Comment");
+                globalNamespace.Comments.Add(new CodeCommentStatement(comment));
+
+                if (AssemblyAttributes == null)
+                {
+                    return String.Empty;
+                }
+
+                // For convenience, bring in the namespaces, where many assembly attributes lie
+                foreach (string name in NamespaceImports)
+                {
+                    globalNamespace.Imports.Add(new CodeNamespaceImport(name));
+                }
+
+                foreach (ITaskItem attributeItem in AssemblyAttributes)
+                {
+                    // Some attributes only allow positional constructor arguments, or the user may just prefer them.
+                    // To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
+                    // If a parameter index is skipped, it's an error.
+                    IDictionary customMetadata = attributeItem.CloneCustomMetadata();
+
+                    // Some metadata may indicate the types of parameters. Use that metadata to determine
+                    // the parameter types. Those metadata items will be removed from the dictionary.
+                    IReadOnlyDictionary<string, ParameterType> parameterTypes = ExtractParameterTypes(customMetadata);
+
+                    var orderedParameters = new List<AttributeParameter?>(new AttributeParameter?[customMetadata.Count + 1] /* max possible slots needed */);
+                    var namedParameters = new List<AttributeParameter>();
+
+                    foreach (DictionaryEntry entry in customMetadata)
+                    {
+                        string name = (string)entry.Key;
+                        string value = (string)entry.Value;
+
+                        // Get the declared type information for this parameter.
+                        // If a type is not declared, then we infer the type.
+                        if (!parameterTypes.TryGetValue(name, out ParameterType type))
+                        {
+                            type = new ParameterType { Kind = ParameterTypeKind.Inferred };
+                        }
+
+                        if (name.StartsWith("_Parameter", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (!Int32.TryParse(
+#if NET
+                                name.AsSpan("_Parameter".Length),
+#else
+                                name.Substring("_Parameter".Length),
+#endif
+                                out int index))
+                            {
+                                Log.LogErrorWithCodeFromResources("General.InvalidValue", name, "WriteCodeFragment");
+                                return null;
+                            }
+
+                            if (index > orderedParameters.Count || index < 1)
+                            {
+                                Log.LogErrorWithCodeFromResources("WriteCodeFragment.SkippedNumberedParameter", index);
+                                return null;
+                            }
+
+                            // "_Parameter01" and "_Parameter1" would overwrite each other
+                            orderedParameters[index - 1] = new AttributeParameter { Type = type, Value = value };
+                        }
+                        else
+                        {
+                            namedParameters.Add(new AttributeParameter { Name = name, Type = type, Value = value });
+                        }
+                    }
+
+                    bool encounteredNull = false;
+                    List<AttributeParameter> providedOrderedParameters = new();
+                    for (int i = 0; i < orderedParameters.Count; i++)
+                    {
+                        if (!orderedParameters[i].HasValue)
+                        {
+                            // All subsequent args should be null, else a slot was missed
+                            encounteredNull = true;
+                            continue;
+                        }
+
+                        if (encounteredNull)
+                        {
+                            Log.LogErrorWithCodeFromResources("WriteCodeFragment.SkippedNumberedParameter", i + 1 /* back to 1 based */);
+                            return null;
+                        }
+
+                        providedOrderedParameters.Add(orderedParameters[i].Value);
+                    }
+
+                    var attribute = new CodeAttributeDeclaration(new CodeTypeReference(attributeItem.ItemSpec));
+
+                    // We might need the type of the attribute if we need to infer the
+                    // types of the parameters. Search for it by the given type name,
+                    // as well as within the namespaces that we automatically import.
+                    Lazy<Type> attributeType = new(
+                        () => Type.GetType(attribute.Name, throwOnError: false) ?? NamespaceImports.Select(x => Type.GetType($"{x}.{attribute.Name}", throwOnError: false)).FirstOrDefault(),
+                        System.Threading.LazyThreadSafetyMode.None);
+
+                    if (
+                        !AddArguments(attribute, attributeType, providedOrderedParameters, isPositional: true)
+                        || !AddArguments(attribute, attributeType, namedParameters, isPositional: false))
+                    {
+                        return null;
+                    }
+
+                    unit.AssemblyCustomAttributes.Add(attribute);
+                    haveGeneratedContent = true;
+                }
+
+                var generatedCode = new StringBuilder();
+                using (var writer = new StringWriter(generatedCode, CultureInfo.CurrentCulture))
+                {
+                    provider.GenerateCodeFromCompileUnit(unit, writer, new CodeGeneratorOptions());
+                }
+
+                string code = generatedCode.ToString();
+
+                // If we just generated infrastructure, don't bother returning anything
+                // as there's no point writing the file
+                return haveGeneratedContent ? code : String.Empty;
+            }
+            finally
             {
-                provider.GenerateCodeFromCompileUnit(unit, writer, new CodeGeneratorOptions());
+                provider?.Dispose();
             }
-
-            string code = generatedCode.ToString();
-
-            // If we just generated infrastructure, don't bother returning anything
-            // as there's no point writing the file
-            return haveGeneratedContent ? code : String.Empty;
         }
 
         /// <summary>
@@ -315,7 +334,8 @@ namespace Microsoft.Build.Tasks
                         keysToRemove.Add(key);
 
                         // The parameter will have an explicit type. The metadata value is the type name.
-                        parameterTypes[parameterNameKey] = new ParameterType {
+                        parameterTypes[parameterNameKey] = new ParameterType
+                        {
                             Kind = ParameterTypeKind.Typed,
                             TypeName = value
                         };
@@ -347,7 +367,8 @@ namespace Microsoft.Build.Tasks
                         // that needs to be written to the generated file for that parameter.
                         if (string.Equals(value, "true", StringComparison.OrdinalIgnoreCase))
                         {
-                            parameterTypes[parameterNameKey] = new ParameterType {
+                            parameterTypes[parameterNameKey] = new ParameterType
+                            {
                                 Kind = ParameterTypeKind.Literal
                             };
                         }
@@ -377,8 +398,7 @@ namespace Microsoft.Build.Tasks
             CodeAttributeDeclaration attribute,
             Lazy<Type> attributeType,
             IReadOnlyList<AttributeParameter> parameters,
-            bool isPositional
-        )
+            bool isPositional)
         {
             Type[] constructorParameterTypes = null;
 
@@ -429,8 +449,7 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 constructorParameterTypes[i],
                                 parameter.Value,
-                                $"#{i + 1}" /* back to 1 based */
-                            );
+                                $"#{i + 1}"); /* back to 1 based */
                         }
                         else
                         {
@@ -438,12 +457,10 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 attributeType.Value?.GetProperty(parameter.Name)?.PropertyType,
                                 parameter.Value,
-                                parameter.Name
-                            );
+                                parameter.Name);
                         }
 
                         break;
-
                 }
 
                 attribute.Arguments.Add(new CodeAttributeArgument(parameter.Name, value));
@@ -480,7 +497,7 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources("WriteCodeFragment.MultipleConstructorsFound");
 
                     // Before parameter types could be specified, all parameter values were
-                    // treated as strings. To be backward-compatible, we need to prefer 
+                    // treated as strings. To be backward-compatible, we need to prefer
                     // the constructor that has all string parameters, if it exists.
                     var allStringParameters = candidates.FirstOrDefault(c => c.All(t => t == typeof(string)));
 
@@ -550,7 +567,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private CodeExpression ConvertParameterValueToInferredType(Type inferredType, string rawValue, string parameterName)
         {
-            // If we don't know what type the parameter should be, then we 
+            // If we don't know what type the parameter should be, then we
             // can't convert the type. We'll just treat is as a string.
             if (inferredType is null)
             {

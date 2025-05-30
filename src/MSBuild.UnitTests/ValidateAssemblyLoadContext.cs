@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
 
+using System.Runtime.Loader;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
-using System.Runtime.Loader;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {

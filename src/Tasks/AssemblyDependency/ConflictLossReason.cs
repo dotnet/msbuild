@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// If this reference lost in a conflict with another reference, this reason explains 
+    /// If this reference lost in a conflict with another reference, this reason explains
     /// why.
     /// </summary>
     internal enum ConflictLossReason
@@ -25,8 +27,8 @@ namespace Microsoft.Build.Tasks
         InsolubleConflict,
 
         /// <summary>
-        /// In this case, this reference was a dependency and the other reference was 
-        /// primary (specified in the project file). 
+        /// In this case, this reference was a dependency and the other reference was
+        /// primary (specified in the project file).
         /// </summary>
         WasNotPrimary,
 

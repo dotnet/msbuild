@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Collections;
 using System;
 using System.Diagnostics;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -23,7 +25,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The singleton empty element location.
         /// </summary>
-        private static ElementLocation s_emptyElementLocation = new SmallElementLocation(null, 0, 0);
+        private static readonly ElementLocation s_emptyElementLocation = new SmallElementLocation(null, 0, 0);
 
         /// <summary>
         /// The file from which this particular element originated.  It may
@@ -78,7 +80,7 @@ namespace Microsoft.Build.Construction
         /// It is to be used for the project location when the project has not been given a name.
         /// In that case, it exists, but can't have a specific location.
         /// </summary>
-        internal static ElementLocation EmptyLocation
+        public static ElementLocation EmptyLocation
         {
             get { return s_emptyElementLocation; }
         }
@@ -183,19 +185,16 @@ namespace Microsoft.Build.Construction
         /// In AG there are 600 locations that have a file but zero line and column.
         /// In theory yet another derived class could be made for these to save 4 bytes each.
         /// </remarks>
-        internal static ElementLocation Create(string file, int line, int column)
+        public static ElementLocation Create(string file, int line, int column)
         {
             if (string.IsNullOrEmpty(file) && line == 0 && column == 0)
             {
                 return EmptyLocation;
             }
 
-            if (line <= 65535 && column <= 65535)
-            {
-                return new ElementLocation.SmallElementLocation(file, line, column);
-            }
-
-            return new ElementLocation.RegularElementLocation(file, line, column);
+            return line <= 65535 && column <= 65535
+                ? new ElementLocation.SmallElementLocation(file, line, column)
+                : new ElementLocation.RegularElementLocation(file, line, column);
         }
 
         /// <summary>
@@ -215,7 +214,7 @@ namespace Microsoft.Build.Construction
             }
             else if (line != 0)
             {
-                locationString = file + " (" + line + ")";
+                locationString = $"{file} ({line})";
             }
             else
             {
@@ -299,8 +298,8 @@ namespace Microsoft.Build.Construction
         /// For when the line and column each fit in a short - under 65536
         /// (almost always will: microsoft.common.targets is less than 5000 lines long)
         /// When loading Australian Government, for example, there are over 31,000 ElementLocation
-        /// objects so this saves 4 bytes each = 123KB 
-        /// 
+        /// objects so this saves 4 bytes each = 123KB
+        ///
         /// A "very small" variation that used two bytes (or halves of a short) would fit about half of them
         /// and save 4 more bytes each, but the CLR packs each field to 4 bytes, so it isn't actually any smaller.
         /// </summary>

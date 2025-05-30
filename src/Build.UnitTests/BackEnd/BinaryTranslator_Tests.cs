@@ -1,15 +1,21 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -18,6 +24,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class BinaryTranslator_Tests
     {
+        static BinaryTranslator_Tests()
+        {
+            SerializationContractInitializer.Initialize();
+        }
+
         /// <summary>
         /// Tests the SerializationMode property
         /// </summary>
@@ -25,7 +36,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, null);
+            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
             Assert.Equal(TranslationDirection.ReadFromStream, readTranslator.Mode);
 
             using ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(stream);
@@ -125,7 +136,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeStringArray()
         {
-            HelperTestArray(new string[] { }, StringComparer.Ordinal);
+            HelperTestArray(Array.Empty<string>(), StringComparer.Ordinal);
             HelperTestArray(new string[] { "foo", "bar" }, StringComparer.Ordinal);
             HelperTestArray(null, StringComparer.Ordinal);
         }
@@ -169,34 +180,127 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(value, deserializedValue);
         }
 
-        /// <summary>
-        /// Tests serializing using the DotNet serializer.
-        /// </summary>
         [Fact]
-        public void TestSerializeDotNet()
+        public void TestSerializeException()
         {
-            ArgumentNullException value = new ArgumentNullException("The argument was null", new InsufficientMemoryException());
-            TranslationHelpers.GetWriteTranslator().TranslateDotNet(ref value);
+            Exception value = new ArgumentNullException("The argument was null");
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
 
-            ArgumentNullException deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
-        /// <summary>
-        /// Tests serializing using the DotNet serializer passing in null.
-        /// </summary>
         [Fact]
-        public void TestSerializeDotNetNull()
+        public void TestSerializeException_NestedWithStack()
         {
-            ArgumentNullException value = null;
-            TranslationHelpers.GetWriteTranslator().TranslateDotNet(ref value);
+            Exception value = null;
+            try
+            {
+                // Intentionally throw a nested exception with a stack trace.
+                value = value.InnerException;
+            }
+            catch (Exception e)
+            {
+                value = new ArgumentNullException("The argument was null", e);
+            }
 
-            ArgumentNullException deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        [Fact]
+        public void TestSerializeBuildException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message");
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    throw new ArgumentNullException("The argument was null", e);
+                }
+                catch (Exception exception)
+                {
+                    value = new InternalErrorException("Another message", exception);
+                }
+            }
+
+            Assert.NotNull(value);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        public static IEnumerable<object[]> GetBuildExceptionsAsTestData()
+            => AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                // TaskHost is copying code files - so has a copy of types with identical names.
+                .Where(a => !a.FullName!.StartsWith("MSBuildTaskHost", StringComparison.CurrentCultureIgnoreCase))
+                .SelectMany(s => s.GetTypes())
+                .Where(BuildExceptionSerializationHelper.IsSupportedExceptionType)
+                .Select(t => new object[] { t });
+
+        [Theory]
+        [MemberData(nameof(GetBuildExceptionsAsTestData))]
+        public void TestSerializationOfBuildExceptions(Type exceptionType)
+        {
+            Exception e = (Exception)Activator.CreateInstance(
+                exceptionType,
+                BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.CreateInstance | BindingFlags.Instance,
+                null,
+                new object[] { "msg", new GenericBuildTransferredException() },
+                System.Globalization.CultureInfo.CurrentCulture);
+            Exception remote;
+            try
+            {
+                throw e;
+            }
+            catch (Exception exception)
+            {
+                remote = exception;
+            }
+
+            Assert.NotNull(remote);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref remote);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(remote, deserializedValue, out string diffReason, true), $"Exception type {exceptionType.FullName} not properly de/serialized: {diffReason}");
+        }
+
+        [Fact]
+        public void TestInvalidProjectFileException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message", new InternalErrorException("Another message"));
+            }
+            catch (Exception e)
+            {
+                value = e;
+            }
+
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason, true), diffReason);
         }
 
         /// <summary>
@@ -321,6 +425,417 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Tests interning strings within an intern scope.
+        /// </summary>
+        /// <remarks>
+        /// Most of the string intern tests use casing differences to assert whether interning was successful, rather
+        /// than asserting the underlying buffer contents. Although the intended use is to deduplicate many strings of the
+        /// same casing, this is harder to validate this high level, so we focus on testing behavior here.
+        /// </remarks>
+        [Theory]
+        [InlineData("foo", true)]
+        [InlineData("", true)]
+        [InlineData(null, true)]
+        [InlineData("foo", false)]
+        [InlineData("", false)]
+        public void TestInternWithInterning(string value, bool nullable)
+        {
+            // Create a case mismatch to test if the string is deduplicated.
+            string valueUpperCase = value?.ToUpperInvariant();
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Intern(ref value, nullable);
+                translator.Intern(ref valueUpperCase, nullable);
+            });
+
+            string deserializedValue = null;
+            string deserializedValueUpperCase = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Intern(ref deserializedValue, nullable);
+                translator.Intern(ref deserializedValueUpperCase, nullable);
+            });
+
+            // All occurrences should deserialize to the first encountered value.
+            Assert.Equal(value, deserializedValue);
+            Assert.Equal(value, deserializedValueUpperCase);
+        }
+
+        /// <summary>
+        /// Tests interning strings outside of an intern scope.
+        /// All calls should be forwarded to the regular translate method.
+        /// </summary>
+        [Theory]
+        [InlineData("foo", true)]
+        [InlineData("", true)]
+        [InlineData(null, true)]
+        [InlineData("foo", false)]
+        [InlineData("", false)]
+        [InlineData(null, false)]
+        public void TestInternNoInterning(string value, bool nullable)
+        {
+            TranslationHelpers.GetWriteTranslator().Intern(ref value, nullable);
+
+            string deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().Intern(ref deserializedValue, nullable);
+
+            // If we haven't blown up so far, assume we've skipped interning.
+            Assert.Equal(value, deserializedValue);
+        }
+
+        /// <summary>
+        /// Tests interning path-like strings within an intern scope.
+        /// </summary>
+        [Theory]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", true)]
+        [InlineData("foo", true)]
+        [InlineData("", true)]
+        [InlineData(null, true)]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", false)]
+        [InlineData("foo", false)]
+        [InlineData("", false)]
+        public void TestInternPathWithInterning(string value, bool nullable)
+        {
+            // Create a case mismatch to test if the path parts are deduplicated.
+            string valueUpperCase = value?.ToUpperInvariant();
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.InternPath(ref value, nullable);
+                translator.InternPath(ref valueUpperCase, nullable);
+            });
+
+            string deserializedValue = null;
+            string deserializedValueUpperCase = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.InternPath(ref deserializedValue, nullable);
+                translator.InternPath(ref deserializedValueUpperCase, nullable);
+            });
+
+            // All occurrences should deserialize to the first encountered value.
+            Assert.Equal(value, deserializedValue);
+            Assert.Equal(value, deserializedValueUpperCase);
+        }
+
+        /// <summary>
+        /// Tests interning components in path-like strings.
+        /// </summary>
+        [Fact]
+        public void TestInternPathWithComponentsFirst()
+        {
+            // Create a case mismatch to test if the path parts are deduplicated.
+            string directory = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/SOMEPROJECT.NAMESPACE/DEBUG/NET472/";
+            string fileName = @"SOMEPROJECT.NAMESPACE.DLL";
+            string fullPath = @"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll";
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternPath(ref directory);
+                translator.InternPath(ref fileName);
+                translator.InternPath(ref fullPath);
+            });
+
+            string deserializedDirectory = null;
+            string deserializedFileName = null;
+            string deserializedFullPath = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternPath(ref deserializedDirectory);
+                translator.InternPath(ref deserializedFileName);
+                translator.InternPath(ref deserializedFullPath);
+            });
+
+            // The path components should be reconstructed using the first encountered value.
+            Assert.Equal(directory, deserializedDirectory);
+            Assert.Equal(fileName, deserializedFileName);
+            Assert.Equal(Path.Combine(directory, fileName), deserializedFullPath);
+        }
+
+        /// <summary>
+        /// Tests interning components in path-like strings.
+        /// </summary>
+        [Fact]
+        public void TestInternPathWithFullPathFirst()
+        {
+            // Create a case mismatch to test if the path parts are deduplicated.
+            string fullPath = @"c:/src/msbuild/artifacts/bin/someproject.namespace/debug/net472/someproject.namespace.dll";
+            string directory = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/SOMEPROJECT.NAMESPACE/DEBUG/NET472/";
+            string fileName = @"SOMEPROJECT.NAMESPACE.DLL";
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternPath(ref fullPath);
+                translator.InternPath(ref directory);
+                translator.InternPath(ref fileName);
+            });
+
+            string deserializedFullPath = null;
+            string deserializedDirectory = null;
+            string deserializedFileName = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternPath(ref deserializedFullPath);
+                translator.InternPath(ref deserializedDirectory);
+                translator.InternPath(ref deserializedFileName);
+            });
+
+            // The path components should be reconstructed using the first encountered value.
+            Assert.Equal(fullPath, deserializedFullPath);
+            Assert.Equal(fullPath, Path.Combine(deserializedDirectory, deserializedFileName));
+        }
+
+        /// <summary>
+        /// Tests serializing string arrays within an intern scope.
+        /// </summary>
+        [Fact]
+        public void TestInternStringArrayWithInterning()
+        {
+            // Create a case mismatch to test if the string is deduplicated.
+            string[] value1 = ["foo", "FOO"];
+            string[] value2 = ["Foo", "fOO"];
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Intern(ref value1);
+                translator.Intern(ref value2);
+            });
+
+            string[] deserializedValue1 = null;
+            string[] deserializedValue2 = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Intern(ref deserializedValue1);
+                translator.Intern(ref deserializedValue2);
+            });
+
+            // All occurrences should deserialize to the first encountered value.
+            string[] expectedValue = ["foo", "foo"];
+            Assert.True(TranslationHelpers.CompareCollections(expectedValue, deserializedValue1, StringComparer.Ordinal));
+            Assert.True(TranslationHelpers.CompareCollections(expectedValue, deserializedValue2, StringComparer.Ordinal));
+        }
+
+        /// <summary>
+        /// Tests serializing string arrays outside of an intern scope.
+        /// All calls should be forwarded to the regular translate method.
+        /// </summary>
+        [Fact]
+        public void TestInternStringArrayNoInterning()
+        {
+            string[] value1 = ["foo", "FOO"];
+            string[] value2 = ["Foo", "fOO"];
+
+            ITranslator translator = TranslationHelpers.GetWriteTranslator();
+            translator.Intern(ref value1);
+            translator.Intern(ref value2);
+
+            string[] deserializedValue1 = null;
+            string[] deserializedValue2 = null;
+            translator = TranslationHelpers.GetReadTranslator();
+            translator.Intern(ref deserializedValue1);
+            translator.Intern(ref deserializedValue2);
+
+            Assert.True(TranslationHelpers.CompareCollections(value1, deserializedValue1, StringComparer.Ordinal));
+            Assert.True(TranslationHelpers.CompareCollections(value2, deserializedValue2, StringComparer.Ordinal));
+        }
+
+        /// <summary>
+        /// End-to-end test using a mixture of interned and non-interned operations to ensure that we don't hit
+        /// invalid states, as this will be the most common use case.
+        /// </summary>
+        [Fact]
+        public void TestWithInterningMixedUsage()
+        {
+            string value1 = "Foobar";
+            string value2 = "foobar";
+            string valueToIntern = "FooBar";
+            int value3 = 10;
+            string value4 = "fooBar";
+
+            // Create a case mismatch to test if the string is deduplicated.
+            string valueToInternUpperCase = valueToIntern?.ToUpperInvariant();
+            string value5 = "Foo_Bar";
+
+            ITranslator translator = TranslationHelpers.GetWriteTranslator();
+
+            // Interleave interned and non-interned operations.
+            translator.Translate(ref value1);
+            translator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Translate(ref value2);
+                translator.Intern(ref valueToIntern);
+                translator.Translate(ref value3);
+                translator.Intern(ref valueToInternUpperCase);
+                translator.Translate(ref value4);
+            });
+            translator.Translate(ref value5);
+
+            string deserializedValue1 = null;
+            string deserializedValue2 = null;
+            string deserializedInternedValue = null;
+            int deserializedValue3 = -1;
+            string deserializedValue4 = null;
+            string deserializedInternedValueUpperCase = null;
+            string deserializedValue5 = null;
+
+            translator = TranslationHelpers.GetReadTranslator();
+
+            // This will only succeed if both translators are correctly sequenced:
+            // packet body -> intern header -> intern body -> packet body.
+            translator.Translate(ref deserializedValue1);
+            translator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Translate(ref deserializedValue2);
+                translator.Intern(ref deserializedInternedValue);
+                translator.Translate(ref deserializedValue3);
+                translator.Intern(ref deserializedInternedValueUpperCase);
+                translator.Translate(ref deserializedValue4);
+            });
+            translator.Translate(ref deserializedValue5);
+
+            // All non-interned values should maintain their original casing.
+            Assert.Equal(value1, deserializedValue1);
+            Assert.Equal(value2, deserializedValue2);
+            Assert.Equal(value3, deserializedValue3);
+            Assert.Equal(value4, deserializedValue4);
+            Assert.Equal(value5, deserializedValue5);
+
+            // All interned values should deserialize to the first encountered value.
+            Assert.Equal(valueToIntern, deserializedInternedValue);
+            Assert.Equal(valueToIntern, deserializedInternedValueUpperCase);
+        }
+
+        /// <summary>
+        /// Tests interning path-like strings outside of an intern scope.
+        /// All calls should be forwarded to the regular translate method.
+        /// </summary>
+        [Theory]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", true)]
+        [InlineData("foo", true)]
+        [InlineData("", true)]
+        [InlineData(null, true)]
+        [InlineData("foo", false)]
+        [InlineData(@"C:/src/msbuild/artifacts/bin/SomeProject.Namespace/Debug/net472/SomeProject.NameSpace.dll", false)]
+        [InlineData("", false)]
+        [InlineData(null, false)]
+        public void TestInternPathNoInterning(string value, bool nullable)
+        {
+            TranslationHelpers.GetWriteTranslator().InternPath(ref value, nullable);
+
+            string deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().InternPath(ref deserializedValue, nullable);
+
+            // If we haven't blown up so far, assume we've skipped interning.
+            Assert.Equal(value, deserializedValue);
+        }
+
+        /// <summary>
+        /// Tests no-op when nothing is written to the interner. E.g. a packet opens an intern scope, but none of its
+        /// translatable child objects write anything.
+        /// </summary>
+        [Fact]
+        public void TestWithInterningNoWritesDoesNotThrow()
+        {
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 128, translator =>
+            {
+            });
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 128, translator =>
+            {
+            });
+        }
+
+        /// <summary>
+        /// Tests reusing a translator with different interning comparers.
+        /// This is important if the translator is reused for multiple packet types with different case sensitivity.
+        /// </summary>
+        [Fact]
+        public void TestWithInterningResetsComparerBetweenScopes()
+        {
+            string mixedCaseValue = "StringWithSomeCasing";
+            string lowerCaseValue = "stringwithsomecasing";
+
+            MemoryStream serializationStream = new();
+            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(serializationStream);
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(serializationStream, InterningBinaryReader.PoolingBuffer);
+
+            writeTranslator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Intern(ref mixedCaseValue);
+                translator.Intern(ref lowerCaseValue);
+            });
+
+            serializationStream.Position = 0;
+
+            string deserializedMixedCaseValue = null;
+            string deserializedLowerCaseValue = null;
+
+            readTranslator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                translator.Intern(ref deserializedMixedCaseValue);
+                translator.Intern(ref deserializedLowerCaseValue);
+            });
+
+            // Only the first casing should be interned.
+            Assert.Equal(mixedCaseValue, deserializedMixedCaseValue);
+            Assert.Equal(mixedCaseValue, deserializedLowerCaseValue);
+
+            // Simulate translator reuse by resetting the underlying stream.
+            serializationStream.Position = 0;
+            serializationStream.SetLength(0);
+
+            writeTranslator.WithInterning(StringComparer.Ordinal, initialCapacity: 2, translator =>
+            {
+                translator.Intern(ref mixedCaseValue);
+                translator.Intern(ref lowerCaseValue);
+            });
+
+            serializationStream.Position = 0;
+
+            readTranslator.WithInterning(StringComparer.Ordinal, initialCapacity: 2, translator =>
+            {
+                translator.Intern(ref deserializedMixedCaseValue);
+                translator.Intern(ref deserializedLowerCaseValue);
+            });
+
+            // Both casings should be interned if the comparer was correctly reset.
+            Assert.Equal(mixedCaseValue, deserializedMixedCaseValue);
+            Assert.Equal(lowerCaseValue, deserializedLowerCaseValue);
+        }
+
+        /// <summary>
+        /// Tests throwing an exception on nested intern scopes, which is unsupported.
+        /// </summary>
+        [Fact]
+        public void TestWithInterningThrowsOnNestedScopes()
+        {
+            _ = Assert.Throws<InvalidOperationException>(() =>
+            {
+                ITranslator translator = TranslationHelpers.GetWriteTranslator();
+                translator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+                {
+                    translator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+                    {
+                    });
+                });
+            });
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+            {
+                // Reset the stream, since the broken write will result in an IO exception when read.
+            });
+
+            _ = Assert.Throws<InvalidOperationException>(() =>
+            {
+                ITranslator translator = TranslationHelpers.GetReadTranslator();
+                translator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+                {
+                    translator.WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 1, translator =>
+                    {
+                    });
+                });
+            });
+        }
+
+        /// <summary>
         /// Tests serializing a dictionary of { string, string }
         /// </summary>
         [Fact]
@@ -435,6 +950,178 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(value, deserializedValue);
         }
 
+        /// <summary>
+        /// Tests interning dictionaries of { string, string } within an intern scope.
+        /// </summary>
+        [Fact]
+        public void TestInternDictionaryStringString()
+        {
+            Dictionary<string, string> value = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["foo"] = "bar",
+                ["alpha"] = "omega",
+            };
+            Dictionary<string, string> valueUpperCase = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["FOO"] = "BAR",
+                ["ALPHA"] = "OMEGA",
+            };
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 4, translator =>
+            {
+                translator.InternDictionary(ref value, StringComparer.OrdinalIgnoreCase);
+                translator.InternDictionary(ref valueUpperCase, StringComparer.OrdinalIgnoreCase);
+            });
+
+            Dictionary<string, string> deserializedValue = null;
+            Dictionary<string, string> deserializedValueUpperCase = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 4, translator =>
+            {
+                translator.InternDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase);
+                translator.InternDictionary(ref deserializedValueUpperCase, StringComparer.OrdinalIgnoreCase);
+            });
+
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(value["foo"], deserializedValue["foo"]);
+            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+
+            // All occurrences should deserialize to the first encountered value.
+            // We don't test the keys since the dictionary already uses an ignore case comparer, and
+            // we also want to test that the dictionary comparer matches on both sides.
+            Assert.Equal(valueUpperCase.Count, deserializedValueUpperCase.Count);
+            Assert.Equal(value["foo"], deserializedValueUpperCase["foo"]);
+            Assert.Equal(value["alpha"], deserializedValueUpperCase["alpha"]);
+        }
+
+        /// <summary>
+        /// Tests interning a dictionary of { string, T } within an intern scope.
+        /// </summary>
+        [Fact]
+        public void TestInternDictionaryStringT()
+        {
+            // Since we don't have string values, mismatch the key comparer to verify that interning works.
+            Dictionary<string, BaseClass> value = new(StringComparer.Ordinal)
+            {
+                ["foo"] = new BaseClass(1),
+                ["alpha"] = new BaseClass(2),
+            };
+            Dictionary<string, BaseClass> valueUpperCase = new(StringComparer.Ordinal)
+            {
+                ["FOO"] = new BaseClass(1),
+                ["ALPHA"] = new BaseClass(2),
+            };
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternDictionary(ref value, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+                translator.InternDictionary(ref valueUpperCase, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+            });
+
+            Dictionary<string, BaseClass> deserializedValue = null;
+            Dictionary<string, BaseClass> deserializedValueUpperCase = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+                translator.InternDictionary(ref deserializedValueUpperCase, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+            });
+
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(0, BaseClass.Comparer.Compare(value["foo"], deserializedValue["foo"]));
+            Assert.Equal(0, BaseClass.Comparer.Compare(value["alpha"], deserializedValue["alpha"]));
+
+            // All occurrences should deserialize to the first encountered key.
+            Assert.Equal(0, BaseClass.Comparer.Compare(valueUpperCase["FOO"], deserializedValueUpperCase["foo"]));
+            Assert.Equal(0, BaseClass.Comparer.Compare(valueUpperCase["ALPHA"], deserializedValueUpperCase["alpha"]));
+        }
+
+        /// <summary>
+        /// Tests interning dictionaries of { string, string } with path-like values within an intern scope.
+        /// </summary>
+        [Fact]
+        public void TestInternPathDictionaryStringString()
+        {
+            Dictionary<string, string> value = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["foo"] = @"C:/src/msbuild/artifacts/bin/ProjectA.Namespace/Debug/net472/ProjectA.NameSpace.dll",
+                ["alpha"] = @"C:/src/msbuild/artifacts/bin/ProjectB.Namespace/Debug/net472/ProjectB.NameSpace.dll",
+            };
+            Dictionary<string, string> valueUpperCase = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["FOO"] = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/PROJECTA.NAMESPACE/DEBUG/NET472/PROJECTA.NAMESPACE.DLL",
+                ["ALPHA"] = @"C:/SRC/MSBUILD/ARTIFACTS/BIN/PROJECTB.NAMESPACE/DEBUG/NET472/PROJECTB.NAMESPACE.DLL",
+            };
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 4, translator =>
+            {
+                translator.InternDictionary(ref value, StringComparer.OrdinalIgnoreCase);
+                translator.InternDictionary(ref valueUpperCase, StringComparer.OrdinalIgnoreCase);
+            });
+
+            Dictionary<string, string> deserializedValue = null;
+            Dictionary<string, string> deserializedValueUpperCase = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 4, translator =>
+            {
+                translator.InternDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase);
+                translator.InternDictionary(ref deserializedValueUpperCase, StringComparer.OrdinalIgnoreCase);
+            });
+
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(value["foo"], deserializedValue["foo"]);
+            Assert.Equal(value["alpha"], deserializedValue["alpha"]);
+
+            // All occurrences should deserialize to the first encountered value.
+            // We don't test the keys since the dictionary already uses an ignore case comparer, and
+            // we also want to test that the dictionary comparer matches on both sides.
+            Assert.Equal(valueUpperCase.Count, deserializedValueUpperCase.Count);
+            Assert.Equal(value["foo"], deserializedValueUpperCase["foo"]);
+            Assert.Equal(value["alpha"], deserializedValueUpperCase["alpha"]);
+        }
+
+        /// <summary>
+        /// Tests interning a dictionary of { string, T } with path-like keys within an intern scope.
+        /// </summary>
+        [Fact]
+        public void TestInternPathDictionaryStringT()
+        {
+            const string PathA = @"C:/src/msbuild/artifacts/bin/ProjectA.Namespace/Debug/net472/ProjectA.NameSpace.dll";
+            const string PathB = @"C:/src/msbuild/artifacts/bin/ProjectB.Namespace/Debug/net472/ProjectB.NameSpace.dll";
+
+            // Since we don't have string values, mismatch the key comparer to verify that interning works.
+            Dictionary<string, BaseClass> value = new(StringComparer.Ordinal)
+            {
+                [PathA] = new BaseClass(1),
+                [PathB] = new BaseClass(2),
+            };
+            Dictionary<string, BaseClass> valueUpperCase = new(StringComparer.Ordinal)
+            {
+                [PathA.ToUpperInvariant()] = new BaseClass(1),
+                [PathB.ToUpperInvariant()] = new BaseClass(2),
+            };
+
+            TranslationHelpers.GetWriteTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternDictionary(ref value, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+                translator.InternDictionary(ref valueUpperCase, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+            });
+
+            Dictionary<string, BaseClass> deserializedValue = null;
+            Dictionary<string, BaseClass> deserializedValueUpperCase = null;
+            TranslationHelpers.GetReadTranslator().WithInterning(StringComparer.OrdinalIgnoreCase, initialCapacity: 2, translator =>
+            {
+                translator.InternDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+                translator.InternDictionary(ref deserializedValueUpperCase, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
+            });
+
+            Assert.Equal(value.Count, deserializedValue.Count);
+            Assert.Equal(0, BaseClass.Comparer.Compare(value[PathA], deserializedValue[PathA]));
+            Assert.Equal(0, BaseClass.Comparer.Compare(value[PathB], deserializedValue[PathB]));
+
+            // All occurrences should deserialize to the first encountered key.
+            Assert.Equal(0, BaseClass.Comparer.Compare(valueUpperCase[PathA.ToUpperInvariant()], deserializedValueUpperCase[PathA]));
+            Assert.Equal(0, BaseClass.Comparer.Compare(valueUpperCase[PathB.ToUpperInvariant()], deserializedValueUpperCase[PathB]));
+        }
+
+
         [Theory]
         [InlineData("en")]
         [InlineData("en-US")]
@@ -548,7 +1235,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ContentType = AssemblyContentType.WindowsRuntime,
                 CultureName = "zh-HK",
             };
-            value.SetPublicKey(new byte[]{ 3, 2, 1});
+            value.SetPublicKey(new byte[] { 3, 2, 1 });
             value.SetPublicKeyToken(new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 });
 
             TranslationHelpers.GetWriteTranslator().Translate(ref value);
@@ -777,10 +1464,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((BaseClass) obj);
+                if (ReferenceEquals(null, obj))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
+                if (obj.GetType() != this.GetType())
+                {
+                    return false;
+                }
+
+                return Equals((BaseClass)obj);
             }
 
             public override int GetHashCode()
@@ -791,7 +1490,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static public IComparer<BaseClass> Comparer
+            public static IComparer<BaseClass> Comparer
             {
                 get { return new BaseClassComparer(); }
             }
@@ -829,7 +1528,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for BaseClass.
             /// </summary>
-            private class BaseClassComparer : IComparer<BaseClass>
+            private sealed class BaseClassComparer : IComparer<BaseClass>
             {
                 /// <summary>
                 /// Constructor.
@@ -859,7 +1558,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Derived class for testing.
         /// </summary>
-        private class DerivedClass : BaseClass
+        private sealed class DerivedClass : BaseClass
         {
             /// <summary>
             /// A field.
@@ -885,7 +1584,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static new public IComparer<DerivedClass> Comparer
+            public static new IComparer<DerivedClass> Comparer
             {
                 get { return new DerivedClassComparer(); }
             }
@@ -914,7 +1613,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for DerivedClass.
             /// </summary>
-            private class DerivedClassComparer : IComparer<DerivedClass>
+            private sealed class DerivedClassComparer : IComparer<DerivedClass>
             {
                 /// <summary>
                 /// Constructor

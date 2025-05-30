@@ -1,16 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Runtime.Serialization;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This class encapsulates the default data associated with build events. 
+    /// This class encapsulates the default data associated with build events.
     /// It is intended to be extended/sub-classed.
     /// </summary>
     // WARNING: marking a type [Serializable] without implementing
@@ -25,17 +25,17 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Message. Volatile because it may be updated lock-free after construction.
         /// </summary>
-        private volatile string message;
+        private volatile string? message;
 
         /// <summary>
         /// Help keyword
         /// </summary>
-        private string helpKeyword;
+        private string? helpKeyword;
 
         /// <summary>
         /// Sender name
         /// </summary>
-        private string senderName;
+        private string? senderName;
 
         /// <summary>
         /// Timestamp
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Framework
         /// Build event context
         /// </summary>
         [OptionalField(VersionAdded = 2)]
-        private BuildEventContext buildEventContext;
+        private BuildEventContext? buildEventContext;
 
         /// <summary>
         /// Default constructor
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of event sender</param>
-        protected BuildEventArgs(string message, string helpKeyword, string senderName)
+        protected BuildEventArgs(string? message, string? helpKeyword, string? senderName)
             : this(message, helpKeyword, senderName, DateTime.UtcNow)
         {
         }
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of event sender</param>
         /// <param name="eventTimestamp">TimeStamp of when the event was created</param>
-        protected BuildEventArgs(string message, string helpKeyword, string senderName, DateTime eventTimestamp)
+        protected BuildEventArgs(string? message, string? helpKeyword, string? senderName, DateTime eventTimestamp)
         {
             this.message = message;
             this.helpKeyword = helpKeyword;
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Exposes the private <see cref="timestamp"/> field to derived types.
+        /// Exposes the private timestamp field to derived types.
         /// Used for serialization. Avoids the side effects of calling the
         /// <see cref="Timestamp"/> getter.
         /// </summary>
@@ -124,14 +124,14 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// The thread that raised event.  
+        /// The thread that raised event.
         /// </summary>
         public int ThreadId => threadId;
 
         /// <summary>
         /// Text of event.
         /// </summary>
-        public virtual string Message
+        public virtual string? Message
         {
             get => message;
             protected set => message = value;
@@ -141,7 +141,7 @@ namespace Microsoft.Build.Framework
         /// Exposes the underlying message field without side-effects.
         /// Used for serialization.
         /// </summary>
-        protected internal string RawMessage
+        protected internal string? RawMessage
         {
             get => FormattedMessage;
             set => message = value;
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Framework
         /// Like <see cref="RawMessage"/> but returns a formatted message string if available.
         /// Used for serialization.
         /// </summary>
-        private protected virtual string FormattedMessage
+        private protected virtual string? FormattedMessage
         {
             get => message;
         }
@@ -159,29 +159,29 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Custom help keyword associated with event.
         /// </summary>
-        public string HelpKeyword => helpKeyword;
+        public string? HelpKeyword => helpKeyword;
 
         /// <summary>
         /// Name of the object sending this event.
         /// </summary>
-        public string SenderName => senderName;
+        public string? SenderName => senderName;
 
         /// <summary>
         /// Event contextual information for the build event argument
         /// </summary>
-        public BuildEventContext BuildEventContext
+        public BuildEventContext? BuildEventContext
         {
             get => buildEventContext;
             set => buildEventContext = value;
         }
 
-#region CustomSerializationToStream
+        #region CustomSerializationToStream
         /// <summary>
         /// Serializes to a stream through a binary writer
         /// </summary>
         /// <param name="writer">Binary writer which is attached to the stream the event will be serialized into</param>
         /// <param name="messageToWrite">The message to write to the stream.</param>
-        private protected void WriteToStreamWithExplicitMessage(BinaryWriter writer, string messageToWrite)
+        private protected void WriteToStreamWithExplicitMessage(BinaryWriter writer, string? messageToWrite)
         {
             writer.WriteOptionalString(messageToWrite);
             writer.WriteOptionalString(helpKeyword);
@@ -249,9 +249,9 @@ namespace Microsoft.Build.Framework
                 }
             }
         }
-#endregion
+        #endregion
 
-#region SetSerializationDefaults
+        #region SetSerializationDefaults
         /// <summary>
         /// Run before the object has been deserialized
         /// UNDONE (Logging.)  Can this and the next function go away, and instead return a BuildEventContext.Invalid from
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Framework
         [OnDeserializing]
         private void SetBuildEventContextDefaultBeforeSerialization(StreamingContext sc)
         {
-            // Don't want to create a new one here as default all the time as that would be a lot of 
+            // Don't want to create a new one here as default all the time as that would be a lot of
             // possibly useless allocations
             buildEventContext = null;
         }
@@ -284,18 +284,18 @@ namespace Microsoft.Build.Framework
         /// This is used by the Message property overrides to reconstruct the
         /// message lazily on demand.
         /// </summary>
-        internal static Func<string, string[], string> ResourceStringFormatter = (string resourceName, string[] arguments) =>
+        internal static Func<string, string?[], string> ResourceStringFormatter = (resourceName, arguments) =>
         {
             var sb = new StringBuilder();
             sb.Append(resourceName);
-            sb.Append("(");
+            sb.Append('(');
 
             bool notFirst = false;
             foreach (var argument in arguments)
             {
                 if (notFirst)
                 {
-                    sb.Append(",");
+                    sb.Append(',');
                 }
                 else
                 {
@@ -305,7 +305,7 @@ namespace Microsoft.Build.Framework
                 sb.Append(argument);
             }
 
-            sb.Append(")");
+            sb.Append(')');
             return sb.ToString();
         };
 
@@ -315,7 +315,7 @@ namespace Microsoft.Build.Framework
         /// <param name="resourceName">Name of the resource string.</param>
         /// <param name="arguments">Optional list of arguments to pass to the formatted string.</param>
         /// <returns>The concatenated formatted string.</returns>
-        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params string[] arguments)
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params string?[] arguments)
         {
             return ResourceStringFormatter(resourceName, arguments);
         }

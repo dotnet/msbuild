@@ -1,15 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+#if DEBUG
 using System.IO;
+#endif
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.Debugging
 {
@@ -18,7 +20,7 @@ namespace Microsoft.Build.Shared.Debugging
     ///     tools like VS or CLI.
     ///     See example usages in PrintLineDebugger_Tests
     /// </summary>
-    internal class PrintLineDebugger : IDisposable
+    internal sealed class PrintLineDebugger : IDisposable
     {
         private static readonly Lazy<PropertyInfo> CommonWriterProperty = new Lazy<PropertyInfo>(
             () =>
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Shared.Debugging
 
                 var propertyInfo = commonWriterType.GetProperty("Writer", BindingFlags.Public | BindingFlags.Static);
 
-                ErrorUtilities.VerifyThrowInternalNull(propertyInfo, nameof(propertyInfo));
+                ErrorUtilities.VerifyThrowInternalNull(propertyInfo);
 
                 return propertyInfo;
             });
@@ -38,13 +40,17 @@ namespace Microsoft.Build.Shared.Debugging
         public static Lazy<PrintLineDebugger> DefaultWithProcessInfo =
             new Lazy<PrintLineDebugger>(() => Create(null, null, true));
 
+#if DEBUG
         private readonly string _id;
+#endif
 
         private readonly CommonWriterType _writerSetByThisInstance;
 
         public PrintLineDebugger(string id, CommonWriterType writer)
         {
+#if DEBUG
             _id = id ?? string.Empty;
+#endif
 
             if (writer != null)
             {
@@ -63,7 +69,7 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static CommonWriterType GetStaticWriter()
         {
-            return (CommonWriterType) CommonWriterProperty.Value.GetValue(null, null);
+            return (CommonWriterType)CommonWriterProperty.Value.GetValue(null, null);
         }
 
         // this setter is not thread safe because the assumption is that a writer is set once for the duration of the process (or multiple times from different tests which do not run in parallel).
@@ -78,7 +84,7 @@ namespace Microsoft.Build.Shared.Debugging
             }
 
             // wrap with a lock so multi threaded logging does not break messages apart
-            CommonWriterProperty.Value.SetValue(null, (CommonWriterType) LockWrappedWriter);
+            CommonWriterProperty.Value.SetValue(null, (CommonWriterType)LockWrappedWriter);
 
             void LockWrappedWriter(string id, string callsite, IEnumerable<string> message)
             {
@@ -128,7 +134,7 @@ namespace Microsoft.Build.Shared.Debugging
 #if DEBUG
             var writer = GetWriter();
 
-            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), new[] {message});
+            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), [message]);
 #endif
         }
 
@@ -145,10 +151,12 @@ namespace Microsoft.Build.Shared.Debugging
 #endif
         }
 
+#if DEBUG
         private static string CallsiteString(string sourceFilePath, string memberName, int sourceLineNumber)
         {
             return $"@{Path.GetFileNameWithoutExtension(sourceFilePath)}.{memberName}({sourceLineNumber})";
         }
+#endif
 
         private void ReleaseUnmanagedResources()
         {

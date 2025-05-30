@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             private int _charIndex;
 
-            internal Enumerator(ref InternableString str)
+            internal Enumerator(scoped ref InternableString str)
             {
                 _string = str;
                 _spanIndex = -1;
@@ -43,7 +43,7 @@ namespace Microsoft.NET.StringTools
             /// <summary>
             /// Returns the current character.
             /// </summary>
-            public ref readonly char Current
+            public readonly ref readonly char Current
             {
                 get
                 {
@@ -96,7 +96,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private readonly ReadOnlySpan<char> _inlineSpan;
 
-#if NETSTANDARD
+#if FEATURE_FASTSPAN
         /// <summary>
         /// .NET Core does not keep a reference to the containing object in <see cref="ReadOnlySpan{T}"/>. In particular,
         /// it cannot recover the string if the span represents one. We have to hold the reference separately to be able to
@@ -122,7 +122,7 @@ namespace Microsoft.NET.StringTools
             _inlineSpan = span;
             _spans = null;
             Length = span.Length;
-#if NETSTANDARD
+#if FEATURE_FASTSPAN
             _inlineSpanString = null;
 #endif
         }
@@ -141,7 +141,7 @@ namespace Microsoft.NET.StringTools
             _inlineSpan = str.AsSpan();
             _spans = null;
             Length = str.Length;
-#if NETSTANDARD
+#if FEATURE_FASTSPAN
             _inlineSpanString = str;
 #endif
         }
@@ -154,7 +154,7 @@ namespace Microsoft.NET.StringTools
             _inlineSpan = default(ReadOnlySpan<char>);
             _spans = stringBuilder.Spans;
             Length = stringBuilder.Length;
-#if NETSTANDARD
+#if FEATURE_FASTSPAN
             _inlineSpanString = null;
 #endif
         }
@@ -178,7 +178,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         /// <param name="other">Another string.</param>
         /// <returns>True if this string is equal to <paramref name="other"/>.</returns>
-        public bool Equals(string other)
+        public readonly bool Equals(string other)
         {
             if (other.Length != Length)
             {
@@ -210,7 +210,7 @@ namespace Microsoft.NET.StringTools
         /// System.String in which case the original string is returned.
         /// </summary>
         /// <returns>The string.</returns>
-        public unsafe string ExpensiveConvertToString()
+        public readonly unsafe string ExpensiveConvertToString()
         {
             if (Length == 0)
             {
@@ -220,7 +220,7 @@ namespace Microsoft.NET.StringTools
             // Special case: if we hold just one string, we can directly return it.
             if (_inlineSpan.Length == Length)
             {
-#if NETSTANDARD
+#if FEATURE_FASTSPAN
                 if (_inlineSpanString != null)
                 {
                     return _inlineSpanString;
@@ -268,7 +268,7 @@ namespace Microsoft.NET.StringTools
 
                 // The invariant that Length is the sum of span lengths is critical in this unsafe method.
                 // Violating it may lead to memory corruption and, since this code tends to run under a lock,
-                // to hangs caused by the lock getting orphaned. Attempt to detect that and throw now, 
+                // to hangs caused by the lock getting orphaned. Attempt to detect that and throw now,
                 // before the corruption causes further problems.
                 if (destPtr != resultPtr + Length)
                 {
@@ -283,7 +283,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         /// <param name="str">The string to compare to.</param>
         /// <returns>True is this instance wraps the given string.</returns>
-        public bool ReferenceEquals(string str)
+        public readonly bool ReferenceEquals(string str)
         {
             if (_inlineSpan.Length == Length)
             {
@@ -317,7 +317,7 @@ namespace Microsoft.NET.StringTools
         /// characters that feed into the same operation but straddle multiple spans. Note that it must return the same value for
         /// a given string regardless of how it's split into spans (e.g. { "AB" } and { "A", "B" } have the same hash code).
         /// </remarks>
-        public override unsafe int GetHashCode()
+        public override readonly unsafe int GetHashCode()
         {
             uint hash = (5381 << 16) + 5381;
             bool hashedOddNumberOfCharacters = false;
@@ -387,7 +387,7 @@ namespace Microsoft.NET.StringTools
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint RotateLeft(uint value, int offset)
         {
-#if NETCOREAPP
+#if NET
             return System.Numerics.BitOperations.RotateLeft(value, offset);
 #else
             // Copied from System\Numerics\BitOperations.cs in dotnet/runtime as the routine is not available on .NET Framework.

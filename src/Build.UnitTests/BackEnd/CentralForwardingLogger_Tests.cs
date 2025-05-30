@@ -1,10 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Logging
 {
@@ -44,7 +45,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Verify the correct exception is thrown when the logger is initialized with a null 
+        /// Verify the correct exception is thrown when the logger is initialized with a null
         /// event source.
         /// </summary>
         [Fact]
@@ -54,11 +55,10 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 CentralForwardingLogger centralLogger = new CentralForwardingLogger();
                 centralLogger.Initialize(null);
-            }
-           );
+            });
         }
         /// <summary>
-        /// Verify the correct exception is thrown when the logger is initialized with a null 
+        /// Verify the correct exception is thrown when the logger is initialized with a null
         /// event source.
         /// </summary>
         [Fact]
@@ -68,8 +68,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 CentralForwardingLogger centralLogger = new CentralForwardingLogger();
                 centralLogger.Initialize(null, 4);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the shutdown method will null out the event redirector
@@ -123,7 +122,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         /// <summary>
         /// Create a new forwarding logger, event redirector, and event source.
-        /// The returned event source can then have and event raised on it and it can 
+        /// The returned event source can then have and event raised on it and it can
         /// check to see if the event raised matches the one we were expecting.
         /// </summary>
         /// <param name="buildEventToCheck">A build event we are expecting to be forwarded by the forwarding logger</param>
@@ -139,19 +138,19 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// An event redirector which takes in an expected event 
-        /// and when the forwarding logger forwards and event 
+        /// An event redirector which takes in an expected event
+        /// and when the forwarding logger forwards and event
         /// we check to see if the events match. This allows
         /// us to check to see if the forwarding logger is
         /// sending us the events we send in.
         /// </summary>
-        private class TestEventRedirector : IEventRedirector
+        private sealed class TestEventRedirector : IEventRedirector
         {
             #region Data
 
             /// <summary>
-            /// Event we expect to see in the ForwardEvent method. 
-            /// This helps us verify that a logger is correctly forwarding 
+            /// Event we expect to see in the ForwardEvent method.
+            /// This helps us verify that a logger is correctly forwarding
             /// an event.
             /// </summary>
             private BuildEventArgs _expectedEvent;

@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -20,6 +22,11 @@ namespace Microsoft.Build.Tasks
         /// The literal searchpath element that was used to discover this location.
         /// </summary>
         internal string SearchPath { get; set; }
+
+        /// <summary>
+        /// The parent assembly that was used for the SearchPath.
+        /// </summary>
+        internal string ParentAssembly { get; set; }
 
         /// <summary>
         /// The name of the assembly found at that location. Will be null if there was no assembly there.

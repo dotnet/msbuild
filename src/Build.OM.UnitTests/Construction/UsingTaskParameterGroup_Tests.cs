@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// ParameterGroup with no parameters inside
         /// </summary>
         private static string s_contentEmptyParameterGroup = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup/>
                        </UsingTask>
@@ -31,7 +32,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// ParameterGroup with duplicate child parameters
         /// </summary>
         private static string s_contentDuplicateParameters = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
                               <MyParameter/>
@@ -45,7 +46,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// ParameterGroup with multiple parameters
         /// </summary>
         private static string s_contentMultipleParameters = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup>
                               <MyParameter1 ParameterType='System.String' Output='true' Required='false'/>
@@ -64,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             UsingTaskParameterGroupElement parameterGroup = GetParameterGroupXml(s_contentEmptyParameterGroup);
             Assert.NotNull(parameterGroup);
             Assert.Equal(0, parameterGroup.Count);
-            Assert.Null(parameterGroup.Parameters.GetEnumerator().Current);
+            Assert.Empty(parameterGroup.Parameters);
         }
 
         /// <summary>
@@ -106,9 +107,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 GetParameterGroupXml(s_contentDuplicateParameters);
-                Assert.True(false);
-            }
-           );
+                Assert.Fail();
+            });
         }
         /// <summary>
         /// Read parameterGroup with a attribute
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                            <ParameterGroup BadAttribute='Hello'/>
                        </UsingTask>
@@ -127,16 +127,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
-            }
-           );
+                Assert.Fail();
+            });
         }
         /// <summary>
         /// Helper to get a UsingTaskParameterGroupElement from xml
         /// </summary>
         private static UsingTaskParameterGroupElement GetParameterGroupXml(string contents)
         {
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(contents)));
+            using ProjectRootElementFromString projectRootElementFromString = new(contents);
+            ProjectRootElement project = projectRootElementFromString.Project;
+
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             return usingTask.ParameterGroup;
         }

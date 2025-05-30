@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 using System.Reflection;
-using Microsoft.Build.Execution;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -81,7 +83,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it. 
+        /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         /// <param name="lookup">The lookup used for expansion and to receive created items and properties.</param>
         internal abstract void ExecuteTask(Lookup lookup);

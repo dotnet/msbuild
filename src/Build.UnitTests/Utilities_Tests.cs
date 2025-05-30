@@ -1,38 +1,29 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
-
-using Microsoft.Build.Shared;
-
-using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
+using System.Collections.Generic;
+using System.IO;
+using Shouldly;
+using Xunit;
+using Xunit.Abstractions;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using MSBuildApp = Microsoft.Build.CommandLine.MSBuildApp;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-
 using Toolset = Microsoft.Build.Evaluation.Toolset;
-
-
 using XmlDocumentWithLocation = Microsoft.Build.Construction.XmlDocumentWithLocation;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
 
-using Xunit;
-using System.Collections.Generic;
-using System.IO;
-using Xunit.Abstractions;
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
     public class UtilitiesTestStandard : UtilitiesTest
     {
-        private readonly ITestOutputHelper _output;
-
-        public UtilitiesTestStandard(ITestOutputHelper output)
+        public UtilitiesTestStandard()
         {
             this.loadAsReadOnly = false;
-            _output = output;
         }
 
         [Fact]
@@ -78,55 +69,41 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CommentsInPreprocessing()
         {
-            Microsoft.Build.Construction.XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
+            using TestEnvironment env = TestEnvironment.Create();
+            XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
 
-            string input = FileUtilities.GetTemporaryFile();
-            string output = FileUtilities.GetTemporaryFile();
+            TransientTestFile inputFile = env.CreateFile("tempInput.tmp", ObjectModelHelpers.CleanupFileContents(@"
+<Project DefaultTargets='Build'>
+<Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
+</Project>"));
+            TransientTestFile outputFile = env.CreateFile("tempOutput.tmp");
 
-            string _initialLoadFilesWriteable = Environment.GetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE");
-            try
-            {
-                Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
-
-                string content = ObjectModelHelpers.CleanupFileContents(@"
-<Project DefaultTargets='Build' ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-  <Import Project='$(MSBuildToolsPath)\Microsoft.CSharp.targets'/>
-</Project>");
-                File.WriteAllText(input, content);
+            env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
 
 #if FEATURE_GET_COMMANDLINE
-                Assert.Equal(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + input +
-                    (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + output + @""""));
+            MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + inputFile.Path +
+                (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + outputFile.Path + @"""")
+                .ShouldBe(MSBuildApp.ExitType.Success);
 #else
-                Assert.Equal(
-                    MSBuildApp.ExitType.Success,
-                    MSBuildApp.Execute(
-                        new[] { @"c:\bin\msbuild.exe", '"' + input + '"',
-                    '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + output + '"'}));
+            Assert.Equal(
+                MSBuildApp.ExitType.Success,
+                MSBuildApp.Execute(
+                    new[] { @"c:\bin\msbuild.exe", '"' + inputFile.Path + '"',
+                '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + outputFile.Path + '"'}));
 #endif
 
-                bool foundDoNotModify = false;
-                foreach (string line in File.ReadLines(output))
-                {
-                    if (line.Contains("<!---->")) // This is what it will look like if we're loading read/only
-                    {
-                        Assert.True(false);
-                    }
-
-                    if (line.Contains("DO NOT MODIFY")) // this is in a comment in our targets
-                    {
-                        foundDoNotModify = true;
-                    }
-                }
-
-                Assert.True(foundDoNotModify);
-            }
-            finally
+            bool foundDoNotModify = false;
+            foreach (string line in File.ReadLines(outputFile.Path))
             {
-                File.Delete(input);
-                File.Delete(output);
-                Environment.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", _initialLoadFilesWriteable);
+                line.ShouldNotContain("<!---->", customMessage: "This is what it will look like if we're loading read/only");
+
+                if (line.Contains("DO NOT MODIFY")) // this is in a comment in our targets
+                {
+                    foundDoNotModify = true;
+                }
             }
+
+            foundDoNotModify.ShouldBeTrue();
         }
 
         [Fact]
@@ -176,8 +153,7 @@ namespace Microsoft.Build.UnitTests
                     <Import Project=`$(MSBuildBinPath)\\Microsoft.CSharp.Targets` />
                 </Project>
             ");
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify ProjectExtensions cannot exist twice
@@ -188,14 +164,13 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                     <ProjectExtensions/>
                     <Import Project=`$(MSBuildBinPath)\\Microsoft.CSharp.Targets` />
                     <ProjectExtensions/>
                 </Project>
             ");
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests that we can correctly pass a CDATA tag containing less-than signs into a property value.
@@ -333,30 +308,15 @@ namespace Microsoft.Build.UnitTests
         public void CreateToolsVersionString()
         {
             List<Toolset> toolsets = new List<Toolset>();
-            toolsets.Add(new Toolset("66", "x", new ProjectCollection(), null));
-            toolsets.Add(new Toolset("44", "y", new ProjectCollection(), null));
+
+            using var colletionX = new ProjectCollection();
+            using var colletionY = new ProjectCollection();
+            toolsets.Add(new Toolset("66", "x", colletionX, null));
+            toolsets.Add(new Toolset("44", "y", colletionY, null));
 
             string result = InternalUtilities.CreateToolsVersionListString(toolsets);
 
             Assert.Equal("\"66\", \"44\"", result);
-        }
-
-        /// <summary>
-        /// Verify our custom way of getting env vars gives the same results as the BCL.
-        /// </summary>
-        [Fact]
-        public void GetEnvVars()
-        {
-            IDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
-            IDictionary referenceVars = Environment.GetEnvironmentVariables();
-            IDictionary<string, string> referenceVars2 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (DictionaryEntry item in referenceVars)
-            {
-                referenceVars2.Add((string)item.Key, (string)item.Value);
-            }
-
-            Helpers.AssertCollectionsValueEqual(envVars, referenceVars2);
         }
 
         protected string GetXmlContents(string xmlText)

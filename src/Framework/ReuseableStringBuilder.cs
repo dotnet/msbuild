@@ -1,11 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Text;
 using System.Threading;
 using Microsoft.Build.Eventing;
@@ -49,7 +50,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public int Length
         {
-            get { return _borrowedBuilder?.Length ?? 0; }
+            get
+            {
+                return _borrowedBuilder?.Length ?? 0;
+            }
+
             set
             {
                 LazyPrepare();
@@ -110,6 +115,28 @@ namespace Microsoft.Build.Framework
         {
             LazyPrepare();
             _borrowedBuilder.Append(value, startIndex, count);
+            return this;
+        }
+
+        /// <inheritdoc cref="StringBuilder.AppendFormat(IFormatProvider, string, object[])"/>
+        internal ReuseableStringBuilder AppendFormat(
+            CultureInfo currentCulture,
+            string format,
+            params object[] args)
+        {
+            LazyPrepare();
+            _borrowedBuilder.AppendFormat(
+                currentCulture,
+                format,
+                args);
+            return this;
+        }
+
+        /// <inheritdoc cref="StringBuilder.AppendLine()"/>
+        internal ReuseableStringBuilder AppendLine()
+        {
+            LazyPrepare();
+            _borrowedBuilder.AppendLine();
             return this;
         }
 
@@ -218,7 +245,7 @@ namespace Microsoft.Build.Framework
 
             /// <summary>
             /// Obtains a string builder which may or may not already
-            /// have been used. 
+            /// have been used.
             /// Never returns null.
             /// </summary>
             internal static StringBuilder Get(int capacity)
@@ -236,7 +263,7 @@ namespace Microsoft.Build.Framework
                     // If user wants bigger capacity than maximum capacity, respect it.
                     returned = new StringBuilder(SelectBracketedCapacity(capacity));
 #if DEBUG
-                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity:capacity, oldCapacity:0, type:"miss");
+                    MSBuildEventSource.Log.ReusableStringBuilderFactoryStart(hash: returned.GetHashCode(), newCapacity: capacity, oldCapacity: 0, type: "miss");
 #endif
                 }
                 else if (returned.Capacity < capacity)
@@ -271,9 +298,9 @@ namespace Microsoft.Build.Framework
                 int balance = Interlocked.Decrement(ref s_getVsReleaseBalance);
                 Debug.Assert(balance == 0, "Unbalanced Get vs Release. Either forgotten Release or used from multiple threads concurrently.");
 #endif
-                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder, nameof(returning._borrowedBuilder));
+                FrameworkErrorUtilities.VerifyThrowInternalNull(returning._borrowedBuilder);
 
-                StringBuilder returningBuilder = returning._borrowedBuilder!;
+                StringBuilder returningBuilder = returning._borrowedBuilder;
                 int returningLength = returningBuilder.Length;
 
                 // It's possible for someone to cause the builder to
@@ -283,7 +310,7 @@ namespace Microsoft.Build.Framework
                 //
                 // If some code has a bug and forgets to return their builder
                 // (or we refuse it here because it's too big) the next user will
-                // get given a new one, and then return it soon after. 
+                // get given a new one, and then return it soon after.
                 // So the shared builder will be "replaced".
                 if (returningBuilder.Capacity > MaxBuilderSizeCapacity)
                 {
@@ -331,11 +358,15 @@ namespace Microsoft.Build.Framework
                 const int minimumCapacity = 0x100; // 256 characters, 512 bytes
 
                 if (requiredCapacity <= minimumCapacity)
+                {
                     return minimumCapacity;
+                }
 
                 // If user wants bigger capacity than maximum respect it as it could be used as buffer in P/Invoke.
                 if (requiredCapacity >= MaxBuilderSizeCapacity)
+                {
                     return requiredCapacity;
+                }
 
                 // Find next power of two http://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
                 int v = requiredCapacity;

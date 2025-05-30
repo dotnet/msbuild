@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Collections;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Collections
 {
@@ -18,7 +20,7 @@ namespace Microsoft.Build.Collections
     /// Thus this is an omission from the BCL.
     /// </remarks>
     /// <typeparam name="T">Type of element in the collection</typeparam>
-    internal class ReadOnlyCollection<T> : ICollection<T>, ICollection
+    internal sealed class ReadOnlyCollection<T> : ICollection<T>, ICollection
     {
         /// <summary>
         /// Backing live enumerable.
@@ -27,9 +29,9 @@ namespace Microsoft.Build.Collections
         private IEnumerable<T> _backing;
 
         /// <summary>
-        /// Construct a read only wrapper around the current contents 
-        /// of the IEnumerable, or around the backing collection if the 
-        /// IEnumerable is in fact a collection. 
+        /// Construct a read only wrapper around the current contents
+        /// of the IEnumerable, or around the backing collection if the
+        /// IEnumerable is in fact a collection.
         /// </summary>
         internal ReadOnlyCollection(IEnumerable<T> backing)
         {
@@ -112,8 +114,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Contains(T item)
         {
-            // UNDONE: IEnumerable.Contains<T>() does the ICollection check, 
-            // so we could just use IEnumerable.Contains<T>() here.  
+            // UNDONE: IEnumerable.Contains<T>() does the ICollection check,
+            // so we could just use IEnumerable.Contains<T>() here.
             if (!(_backing is ICollection<T>))
             {
                 return _backing.Contains<T>(item);
@@ -127,7 +129,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
+            ErrorUtilities.VerifyThrowArgumentNull(array);
 
             ICollection<T> backingCollection = _backing as ICollection<T>;
             if (backingCollection != null)
@@ -183,7 +185,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void ICollection.CopyTo(Array array, int index)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
+            ErrorUtilities.VerifyThrowArgumentNull(array);
 
             int i = index;
             foreach (T entry in _backing)

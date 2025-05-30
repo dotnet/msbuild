@@ -1,51 +1,39 @@
 # MSBuild Command-Line Switches
-See the [MSBuild Command-Line Reference](https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference) for more information on switches.
+See the [MSBuild Command-Line Reference](https://learn.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference) for more information on switches.
  * `MSBuild.exe -pp:<FILE>`
    * MSBuild preprocessor. Pass /pp to the command line to create a single huge XML project file with all project imports inlined in the correct order. This is useful to investigate the ordering of imports and property and target overrides during evaluation.
    * Example usage: `msbuild MyProject.csproj /pp:inlined.xml`
  * `MSBuild.exe -nr:false`
    * Disable node reuse (`/nodeReuse:false`). Don't leave MSBuild.exe processes hanging around (and possibly locking files) after the build completes. See more details in MSBuild command line help (/?). See also `MSBUILDDISABLENODEREUSE=1` below. Note that using this when building repeatedly will cause slower builds.
  * `MSBuild.exe -bl`
-   * Records all build events to a structured binary log file. The [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) tool can be used to analyze this file.
+   * Records all build events to a structured [binary log file](./Providing-Binary-Logs.md). The [MSBuildStructuredLog](https://github.com/KirillOsenkov/MSBuildStructuredLog) tool can be used to analyze this file.
  * `MSBuild.exe -noconlog`
    * Used to suppress the usage of the console logger, which is otherwise always attached.
  * `MSBuild.exe -flp:v=diag`
    * Passes parameters to the file logger. If you want to attach multiple file loggers, you do so by specifying additional parameters in the switches /flp1, /flp2, /flp3, and so on.
 
+
+# Building MSBuild
+
+The documentation on building MSBuild:
+- [Full Framework MSBuild](./Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md)
+- [.Net Core MSBuild](./Building-Testing-and-Debugging-on-.Net-Core-MSBuild.md)
+
 # Environment Variables
- * `MSBUILDTARGETOUTPUTLOGGING=1`
-   * Set this to enable [printing all target outputs to the log](https://blogs.msdn.microsoft.com/msbuild/2010/03/31/displaying-target-output-items-using-the-console-logger).
- * `MSBUILDLOGTASKINPUTS=1`
-   * Log task inputs (not needed if there are any diagnostic loggers already).
- * `MSBUILDEMITSOLUTION=1`
-   * Save the generated .proj file for the .sln that is used to build the solution.
- * `MSBUILDENABLEALLPROPERTYFUNCTIONS=1`
-   * Enable [additional property functions](https://blogs.msdn.microsoft.com/visualstudio/2010/04/02/msbuild-property-functions).
- * `MSBUILDLOGVERBOSERARSEARCHRESULTS=1`
-   * In ResolveAssemblyReference task, log verbose search results.
- * `MSBUILDLOGCODETASKFACTORYOUTPUT=1`
-   * Dump generated code for task to a <GUID>.txt file in the TEMP directory
- * `MSBUILDDISABLENODEREUSE=1`
-   * Set this to not leave MSBuild processes behind (see `/nr:false` above, but the environment variable is useful to also set this for Visual Studio for example).
- * `MSBUILDLOGASYNC=1`
-   * Enable asynchronous logging.
- * `MSBUILDDEBUGONSTART=1`
-   * Launch debugger on build start.
-   * Setting the value of 2 allows for manually attaching a debugger to a process ID.
- * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
-   * Dumps scheduler state at specified directory
+
+The list of environment variables could be found [here](./MSBuild-Environment-Variables.md)
 
 # TreatAsLocalProperty
 If MSBuild.exe is passed properties on the command line, such as `/p:Platform=AnyCPU` then this value overrides whatever assignments you have to that property inside property groups. For instance, `<Platform>x86</Platform>` will be ignored. To make sure your local assignment to properties overrides whatever they pass on the command line, add the following at the top of your MSBuild project file:
 
 ```
-<Project TreatAsLocalProperty="Platform" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project TreatAsLocalProperty="Platform" DefaultTargets="Build">
 ```
 
 This will make sure that your local assignments to the `Platform` property are respected. You can specify multiple properties in `TreatAsLocalProperty` separated by semicolon.
 
 # Visual Studio Background Builds
-Set the `TRACEDESIGNTIME=true` environment variable to output design-time build logs to TEMP: read more here: https://blogs.msdn.microsoft.com/jeremykuhne/2016/06/06/vs-background-builds
+Set the `TRACEDESIGNTIME=true` environment variable to output design-time build logs to TEMP: read more here: https://learn.microsoft.com/archive/blogs/jeremykuhne/vs-background-builds
 
 # Visual Studio Design-time (IntelliSense) builds
 
@@ -55,23 +43,6 @@ Use this command-line to approximate what the design-time build does:
 /t:CollectResolvedSDKReferencesDesignTime;DebugSymbolsProjectOutputGroup;CollectPackageReferences;ResolveComReferencesDesignTime;ContentFilesProjectOutputGroup;DocumentationProjectOutputGroupDependencies;SGenFilesOutputGroup;ResolveProjectReferencesDesignTime;SourceFilesProjectOutputGroup;DebugSymbolsProjectOutputGroupDependencies;SatelliteDllsProjectOutputGroup;BuiltProjectOutputGroup;SGenFilesOutputGroupDependencies;ResolveAssemblyReferencesDesignTime;CollectAnalyzersDesignTime;CollectSDKReferencesDesignTime;DocumentationProjectOutputGroup;PriFilesOutputGroup;BuiltProjectOutputGroupDependencies;ResolvePackageDependenciesDesignTime;SatelliteDllsProjectOutputGroupDependencies;SDKRedistOutputGroup;CompileDesignTime /p:SkipCompilerExecution=true /p:ProvideCommandLineArgs=true /p:BuildingInsideVisualStudio=true /p:DesignTimeBuild=true
 ```
 
-# Extend all builds (at system-wide level)
-See https://www.simple-talk.com/dotnet/.net-tools/extending-msbuild, "Extending all builds" section. Also read about [MSBuildUserExtensionsPath](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,33), [CustomBeforeMicrosoftCommonProps](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,68), [CustomBeforeMicrosoftCommonTargets](http://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.targets,71), and CustomAfterMicrosoftCommonProps/CustomAfterMicrosoftCommonTargets.
-
-Example:
-Create this file (Custom.props) in `C:\Users\username\AppData\Local\Microsoft\MSBuild\14.0\Microsoft.Common.targets\ImportAfter`:
-
-```
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <MyCustomProperty>Value!</MyCustomProperty>
-  </PropertyGroup>
-</Project>
-```
-
-then build any project. It will have MyCustomProperty set to Value!
-
 # Diagnose WPF temporary assembly compilation issues
 
 Set the property `GenerateTemporaryTargetAssemblyDebuggingInformation` on the `GenerateTemporaryTargetAssembly` task:
@@ -80,3 +51,110 @@ https://referencesource.microsoft.com/#PresentationBuildTasks/BuildTasks/Microso
 If the property `$(GenerateTemporaryTargetAssemblyDebuggingInformation)` is set, the temporary project generated during XAML project build will not be deleted and will be available for inspection. This is only available in the recent versions of .NET Framework, so check if your `Microsoft.WinFX.targets` file has it.
 
 Also the name of the project was renamed from `*.tmp_proj` to `*_wpftmp.csproj` so the file extension is now C#: `WpfApp1_jzmidb3d_wpftmp.csproj`
+
+# Extending builds
+
+See the "Extending All Builds" section from [this article](https://www.red-gate.com/simple-talk/development/dotnet-development/extending-msbuild/). Also read about [`CustomBeforeMicrosoftCommonProps`](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/Microsoft.Common.props,68), [`CustomBeforeMicrosoftCommonTargets`](https://referencesource.microsoft.com/#MSBuildFiles/C/ProgramFiles(x86)/MSBuild/14.0/bin_/amd64/Microsoft.Common.targets,71), and `CustomAfterMicrosoftCommonProps`/`CustomAfterMicrosoftCommonTargets`. And don't miss the explainer below.
+
+Create a file, say `Custom.props`, with the following contents:
+
+```
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <MyCustomProperty>Value!</MyCustomProperty>
+  </PropertyGroup>
+</Project>
+```
+
+and place it in one of the locations described below, then build any project. It will have `MyCustomProperty` set to `Value!`.
+
+## User-wide level (`MSBuildUserExtensionsPath`)
+
+In one of the following locations (`%LOCALAPPDATA%` evaluating to something like `C:\Users\username\AppData\Local`):
+
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Imports\Microsoft.Common.props\ImportBefore`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore`
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Imports\Microsoft.Common.props\ImportAfter`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter`
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Microsoft.Common.targets\ImportBefore`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportBefore`
+* `%LOCALAPPDATA%\Microsoft\MSBuild\Current\Microsoft.Common.targets\ImportAfter`
+  * aka: `$(MSBuildUserExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter`
+
+**Note:** the above locations are in the order in which they are imported by `Microsoft.Common.props` and `Microsoft.Common.targets` respectively. Setting your properties later, overwrites previous values. And mind the additional directory level `Imports\` for the files imported by `Microsoft.Common.props`.
+
+**Also note:** [`$(MSBuildUserExtensionsPath)`](https://learn.microsoft.com/visualstudio/msbuild/customize-your-local-build#msbuildextensionspath-and-msbuilduserextensionspath) is equal to `%LOCALAPPDATA%\Microsoft\MSBuild`.
+
+## MSBuild-wide level (`MSBuildExtensionsPath`)
+
+There is another MSBuild-wide location imported by `Microsoft.Common.props` from underneath `$(MSBuildToolsRoot)`, the installation directory of MSBuild, - which, when using it from modern Visual Studio versions, would often equal `$(VsInstallRoot)\MSBuild`. It goes by the name [`MSBuildExtensionsPath`](https://learn.microsoft.com/visualstudio/msbuild/customize-your-local-build#msbuildextensionspath-and-msbuilduserextensionspath).
+
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportBefore`
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props\ImportAfter`
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportBefore`
+* `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.targets\ImportAfter`
+
+The principle is the same, drop a valid MSBuild file into one of these locations to extend your build according to whatever you put into the respective MSBuild file.
+
+**Note:** The value of `$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Imports\Microsoft.Common.props` after evaluation would be something like `C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Current\Imports\Microsoft.Common.Props`.
+
+**Also note:** technically the imports happen from `Microsoft.Common.CurrentVersion.targets` where the above directories say `Microsoft.Common.targets`.
+
+## Explainer: the underlying extension mechanisms and related mechanisms
+
+The above explanations are only half the truth, though.
+
+* The file extension of the file doesn't matter - it's a convention. Any file conforming to the MSBuild XML schema in that location should get picked up and imported.
+* `Microsoft.Common.props` and `Microsoft.Common.targets` conditionally imports from the locations mentioned throughout this section, you can use properties to suppress this extension mechanism, say from the command line:
+  * For user-wide locations set these properties to something else than `true` respectively:
+    * `ImportUserLocationsByWildcardBeforeMicrosoftCommonProps`
+    * `ImportUserLocationsByWildcardAfterMicrosoftCommonProps`
+    * `ImportUserLocationsByWildcardBeforeMicrosoftCommonTargets`
+    * `ImportUserLocationsByWildcardAfterMicrosoftCommonTargets`
+  * For MSBuild-wide locations set these properties to something else than `true` respectively:
+    * `ImportByWildcardBeforeMicrosoftCommonProps`
+    * `ImportByWildcardAfterMicrosoftCommonProps`
+    * `ImportByWildcardBeforeMicrosoftCommonTargets`
+    * `ImportByWildcardAfterMicrosoftCommonTargets`
+* The `Directory.*.props`, `Directory.*.targets` et. al. also offer ways to extend your build. They are fairly well-known and documented:
+  * [`Directory.Build.props` and `Directory.Build.targets`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory)
+  * [`Directory.Solution.props` and `Directory.Solution.targets`](https://learn.microsoft.com/visualstudio/msbuild/customize-solution-build) as well as `before.{solutionname}.sln.targets` and `after.{solutionname}.sln.targets` can be used to inject properties, item definitions, items and targets into your build
+
+
+## Using quotes in MSBuild properties
+There are times when MSBuild needs to be invoked with property arguments using the `/p:propertyName=propertyValue` syntax. However, the way of achieving the proper result can vary depending on the shell used to run the MSBuild (PowerShell, PowerShell Core, Command Prompt, etc.). 
+
+When the property value contains quotes (`"`), it may be handled differently depending on the interpreting shell.
+
+Let's explore the ways to pass property values that contain special symbols like `"`:
+
+Example project: 
+```
+<Project>
+  <Target Name="PrintPropertyValue">
+      <Message Text="Property value = ($(propertyValue))" Importance="high" />
+  </Target>
+</Project>
+```
+
+- CMD:
+  ```
+  msbuild.exe filename.proj /p:propertyValue="Hello, \"World!\""
+  ```
+
+  For more details about parsing in CMD and usage of special characters, please visit [this page](https://learn.microsoft.com/windows-server/administration/windows-commands/cmd)
+
+- Windows PowerShell:
+  ```
+  msbuild.exe filename.proj /p:propertyValue="Hello, \`"World!\`""
+  ```
+
+  For more details about parsing in Windows PowerShell 5.1 and usage of special characters, please visit [this page](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-5.1)
+
+- PowerShell Core:
+  ```
+  msbuild.exe filename.proj /p:propertyValue="Hello, `"World!`""
+  ```
+
+  For more details about parsing in PowerShell (7.4 and higher) and usage of special characters, please visit [this page](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.4)

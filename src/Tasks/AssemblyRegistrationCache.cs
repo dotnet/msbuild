@@ -1,18 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
     /// This class is a caching mechanism for the Register/UnregisterAssembly task to keep track of registered assemblies to clean up
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class AssemblyRegistrationCache : StateFileBase, ITranslatable
     {
         /// <summary>
@@ -65,7 +64,7 @@ namespace Microsoft.Build.Tasks
 
         public override void Translate(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(translator, nameof(translator));
+            ErrorUtilities.VerifyThrowArgumentNull(translator);
             translator.Translate(ref _assemblies);
             translator.Translate(ref _typeLibraries);
         }

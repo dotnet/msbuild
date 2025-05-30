@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -16,10 +16,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
 using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
-using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -104,7 +106,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectRootElement = projectRootElementFromString.Project;
 
             var project = new Project(projectRootElement);
 
@@ -126,7 +129,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectRootElement = projectRootElementFromString.Project;
 
             var project = new Project(projectRootElement);
 
@@ -192,7 +196,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             string content = string.Format(projectFormatString, sdkNames[0], sdkNames[1], sdkNames[2]);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectRootElement = projectRootElementFromString.Project;
 
             Project project = new Project(projectRootElement);
 
@@ -235,7 +240,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             // Based on the new-console-project CLI template (but not matching exactly
             // should not be a deal-breaker).
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             project.DeepClone();
         }
@@ -268,8 +274,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             // Based on the new-console-project CLI template (but not matching exactly
             // should not be a deal-breaker).
             string content = string.Format(projectFormatString, SdkName, projectInnerContents);
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            ProjectRootElement clone = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
+            ProjectRootElement clone = projectRootElementFromString.Project;
 
             clone.DeepCopyFrom(project);
 
@@ -323,7 +330,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
             else
             {
-                var project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
+                using ProjectRootElementFromString projectRootElementFromString = new(content);
+                var project = new Project(projectRootElementFromString.Project);
                 Assert.Empty(project.Imports);
             }
         }
@@ -432,7 +440,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             string content = string.Format(projectFormatString, SdkName, projectInnerContents, sdkVersion, minimumSdkVersion);
 
-            ProjectRootElement projectRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectRootElement = projectRootElementFromString.Project;
             var project = new Project(projectRootElement);
             project.Imports.Count.ShouldBe(2);
             var importElement = project.Imports[0].ImportingElement;
@@ -507,7 +516,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
             string projectContents = string.Format(projectTemplate, SdkName, _projectInnerContents, version, minimumVersion);
 
-            var project = Project.FromXmlReader(XmlReader.Create(new StringReader(projectContents)), new ProjectOptions());
+            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
+            var project = Project.FromXmlReader(xmlReader, new ProjectOptions());
 
             project.Imports.Count.ShouldBe(2);
             var imports = project.Imports;
@@ -540,7 +550,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedDataTemplate
+        internal sealed class SdkPropertiesAreExpandedDataTemplate
         {
             public SdkPropertiesAreExpandedDataTemplate(string template, bool expectedMinimumVersionIsNull)
             {
@@ -563,7 +573,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedCase
+        internal sealed class SdkPropertiesAreExpandedCase
         {
             public SdkPropertiesAreExpandedCase(SdkReferencePropertyExpansionMode? mode,
                 SdkPropertiesAreExpandedDataTemplate template, bool setName, bool setVersion, bool expectedSuccess)
@@ -587,18 +597,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 var result = new StringBuilder(256);
                 if (Mode.HasValue)
+                {
                     result.Append(Mode);
+                }
                 else
+                {
                     result.Append($"{nameof(Mode)}: <null>");
+                }
 
                 result.Append($", {Template}, {nameof(TemplateName)}: {TemplateName}, {nameof(TemplateVersion)}: {TemplateVersion}");
 
                 if (SetNameProperty)
+                {
                     result.Append(", SetName");
+                }
+
                 if (SetVersionProperty)
+                {
                     result.Append(", SetVersion");
+                }
+
                 if (ExpectedSuccess)
+                {
                     result.Append(", ExpectedSuccess");
+                }
 
                 return result.ToString();
             }
@@ -609,7 +631,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         internal void SdkPropertiesAreExpanded(SdkPropertiesAreExpandedCase data)
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
-            _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode.ToString());
+            _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode?.ToString());
+            _env.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
+
+            Build.BackEnd.SdkResolution.CachingSdkResolverLoader.ResetStateForTests();
 
             File.WriteAllText(_sdkPropsPath, _sdkPropsContent);
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
@@ -619,26 +644,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 data.TemplateName,
                 _projectInnerContents,
                 data.TemplateVersion,
-                null
-            );
+                null);
 
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(
-                new MockExpandedSdkResolver(_testSdkDirectory)
-            );
+                new MockExpandedSdkResolver(_testSdkDirectory));
 
             void AddProperty(string name, string value) =>
                 (projectOptions.GlobalProperties ??= new Dictionary<string, string>()).Add(name, value);
 
             if (data.SetNameProperty)
+            {
                 AddProperty(SdkNamePropertyName, SdkName);
+            }
 
             if (data.SetVersionProperty)
+            {
                 AddProperty(SdkVersionPropertyName, SdkExpectedVersion);
+            }
 
             using var xmlReader = XmlReader.Create(new StringReader(projectContents));
 
             if (!data.ExpectedSuccess)
+            {
                 projectOptions.LoadSettings |= ProjectLoadSettings.IgnoreMissingImports;
+            }
 
             var project = Project.FromXmlReader(xmlReader, projectOptions);
 
@@ -652,14 +681,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 var expectedSdkReferenceRaw = new SdkReference(
                     data.TemplateName,
                     data.TemplateVersion,
-                    data.Template.ExpectedMinimumVersion
-                );
+                    data.Template.ExpectedMinimumVersion);
 
                 var expectedSdkReference = new SdkReference(
                     SdkName,
                     SdkExpectedVersion,
-                    data.Template.ExpectedMinimumVersion
-                );
+                    data.Template.ExpectedMinimumVersion);
 
                 project.Imports.Count.ShouldBe(2);
 
@@ -696,14 +723,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     var templates = new[]
                     {
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsAttributeWithVersion, true
-                        ),
+                            ProjectTemplateSdkAsAttributeWithVersion, true),
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsElementWithVersion, false
-                        ),
+                            ProjectTemplateSdkAsElementWithVersion, false),
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsExplicitImportWithVersion, false
-                        )
+                            ProjectTemplateSdkAsExplicitImportWithVersion, false)
                     };
 
                     foreach (var template in templates)
@@ -729,8 +753,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setName
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setName)
                             {
                                 TemplateName = SdkNameProperty
                             }
@@ -739,8 +762,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setVersion
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setVersion)
                             {
                                 TemplateVersion = SdkVersionProperty
                             }
@@ -749,8 +771,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setName && setVersion
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setName && setVersion)
                             {
                                 TemplateName = SdkNameProperty,
                                 TemplateVersion = SdkVersionProperty
@@ -785,8 +806,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     SdkName when sdk.Version == SdkExpectedVersion =>
                     factory.IndicateSuccess(ResolvedPath, SdkExpectedVersion),
-                    SdkName => factory.IndicateFailure(new[] {ErrorVersion}),
-                    _ => factory.IndicateFailure(new[] {ErrorName})
+                    SdkName => factory.IndicateFailure(new[] { ErrorVersion }),
+                    _ => factory.IndicateFailure(new[] { ErrorName })
                 };
             }
         }
@@ -794,6 +815,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void Dispose()
         {
             _env.Dispose();
+            Build.BackEnd.SdkResolution.CachingSdkResolverLoader.ResetStateForTests();
         }
 
         private void VerifyPropertyFromImplicitImport(Project project, string propertyName, string expectedContainingProjectPath, string expectedValue)

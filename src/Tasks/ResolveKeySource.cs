@@ -1,18 +1,20 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 using System.IO;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 using Microsoft.Build.Framework;
+#if FEATURE_PFX_SIGNING
+using System.Globalization;
+using System.Security.Cryptography;
+using Microsoft.Runtime.Hosting;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_PFX_SIGNING
-using Microsoft.Runtime.Hosting;
 #endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -22,8 +24,10 @@ namespace Microsoft.Build.Tasks
     public class ResolveKeySource : TaskExtension
     {
         private const string pfxFileExtension = ".pfx";
+#if !RUNTIME_TYPE_NETCORE
         private const string pfxFileContainerPrefix = "VS_KEY_";
-        
+#endif
+
         #region Properties
 
         public string KeyFile { get; set; }
@@ -58,6 +62,7 @@ namespace Microsoft.Build.Tasks
             return ResolveAssemblyKey() && ResolveManifestKey();
         }
 
+#if FEATURE_PFX_SIGNING
         // We we use hash the contens of .pfx file so we can establish relationship file <-> container name, whithout
         // need to prompt for password. Note this is not used for any security reasons. With the departure from standard MD5 algoritm
         // we need as simple hash function for replacement. The data blobs we use (.pfx files)  are
@@ -83,6 +88,7 @@ namespace Microsoft.Build.Tasks
             result |= dw2;
             return result;
         }
+#endif
 
         private bool ResolveAssemblyKey()
         {
@@ -123,7 +129,7 @@ namespace Microsoft.Build.Tasks
                             fs = File.OpenRead(KeyFile);
                             int fileLength = (int)fs.Length;
                             var keyBytes = new byte[fileLength];
-                            fs.Read(keyBytes, 0, fileLength);
+                            fs.ReadFromStream(keyBytes, 0, fileLength);
 
                             UInt64 hash = HashFromBlob(keyBytes);
                             hash ^= HashFromBlob(userNameBytes); // modify it with the username hash, so each user would get different hash for the same key
@@ -154,7 +160,7 @@ namespace Microsoft.Build.Tasks
                             fs?.Close();
                         }
 #else
-                        Log.LogError("PFX signing not supported on .NET Core");
+                        Log.LogErrorWithCodeFromResources("ResolveKeySource.PfxUnsupported");
                         pfxSuccess = false;
 #endif
                     }
@@ -212,7 +218,7 @@ namespace Microsoft.Build.Tasks
                     {
                         bool imported = false;
                         // first try it with no password
-                        var cert = new X509Certificate2();
+                        using var cert = new X509Certificate2();
                         var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         try
                         {
@@ -262,7 +268,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 #else
-                Log.LogError("Certificate signing not supported on .NET Core");
+                Log.LogErrorWithCodeFromResources("ResolveKeySource.PfxUnsupported");
 #endif
             }
             else if (!certInStore && !string.IsNullOrEmpty(CertificateFile) && !string.IsNullOrEmpty(CertificateThumbprint))

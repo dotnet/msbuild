@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
@@ -12,14 +14,14 @@ namespace Microsoft.Build.Shared.LanguageParser
     * Given vb sources, enumerate over all tokens.
     *
     */
-    sealed internal class VisualBasicTokenEnumerator : TokenEnumerator
+    internal sealed class VisualBasicTokenEnumerator : TokenEnumerator
     {
         // Reader over the sources.
         private VisualBasicTokenCharReader _reader = null;
 
         /*
         * Method:  TokenEnumerator
-        * 
+        *
         * Construct
         */
         internal VisualBasicTokenEnumerator(Stream binaryStream, bool forceANSI)
@@ -29,10 +31,10 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  FindNextToken
-        * 
+        *
         * Find the next token. Return 'true' if one was found. False, otherwise.
         */
-        override internal bool FindNextToken()
+        internal override bool FindNextToken()
         {
             int startPosition = _reader.Position;
 
@@ -101,8 +103,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 //      Date is a keyword but,
                 //      [Date] is an identifier.
                 _reader.CurrentCharacter == '[' ||
-                _reader.MatchNextIdentifierStart()
-            )
+                _reader.MatchNextIdentifierStart())
             {
                 bool escapedIdentifier = false;
                 if (_reader.CurrentCharacter == '[')
@@ -184,7 +185,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     return true;
                 }
 
-                // Sink a suffix if there is one.                    
+                // Sink a suffix if there is one.
                 _reader.SinkIntegerSuffix();
 
                 current = new HexIntegerLiteralToken();
@@ -199,7 +200,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     return true;
                 }
 
-                // Sink a suffix if there is one.                    
+                // Sink a suffix if there is one.
                 _reader.SinkIntegerSuffix();
 
                 current = new VisualBasicTokenizer.OctalIntegerLiteralToken();
@@ -208,7 +209,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // Is it a decimal integer?
             else if (_reader.SinkMultipleDecimalDigits())
             {
-                // Sink a suffix if there is one.                    
+                // Sink a suffix if there is one.
                 _reader.SinkDecimalIntegerSuffix();
 
                 current = new DecimalIntegerLiteralToken();
@@ -258,7 +259,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 }
                 while (!_reader.EndOfLines && _reader.SinkCharacter() != '\"');
 
-                // Can't end a file inside a string 
+                // Can't end a file inside a string
                 if (_reader.EndOfLines)
                 {
                     current = new EndOfFileInsideStringToken();
@@ -270,7 +271,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             }
 
 
-            // We didn't recognize the token, so this is a syntax error. 
+            // We didn't recognize the token, so this is a syntax error.
             _reader.SinkCharacter();
             current = new UnrecognizedToken();
             return true;
@@ -316,10 +317,10 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
         * Method:  Reader
-        * 
+        *
         * Return the token char reader.
         */
-        override internal TokenCharReader Reader
+        internal override TokenCharReader Reader
         {
             get
             {

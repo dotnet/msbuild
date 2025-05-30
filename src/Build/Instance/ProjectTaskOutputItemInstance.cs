@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
-using Microsoft.Build.Construction;
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -58,9 +59,9 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalLength(itemType, nameof(itemType));
             ErrorUtilities.VerifyThrowInternalLength(taskParameter, nameof(taskParameter));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
-            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation, nameof(itemTypeLocation));
-            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation, nameof(taskParameterLocation));
+            ErrorUtilities.VerifyThrowInternalNull(location);
+            ErrorUtilities.VerifyThrowInternalNull(itemTypeLocation);
+            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation);
 
             _itemType = itemType;
             _taskParameter = taskParameter;

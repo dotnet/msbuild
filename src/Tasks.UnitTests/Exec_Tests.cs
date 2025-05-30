@@ -1,27 +1,30 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Collections.Generic;
-using Microsoft.Build.Evaluation;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests for the Exec task
     /// </summary>
-    sealed public class Exec_Tests
+    public sealed class Exec_Tests
     {
         private readonly ITestOutputHelper _output;
 
@@ -49,7 +52,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile()
@@ -67,28 +69,39 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void EscapeSpecifiedCharactersInPathToGeneratedBatchFile_DisabledUnderChangeWave16_10()
+        [UnixOnlyTheory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ExecSetsLocaleOnUnix(bool enableChangeWave)
         {
-            using (var testEnvironment = TestEnvironment.Create())
+            using (var env = TestEnvironment.Create())
             {
-                ChangeWaves.ResetStateForTests();
-                testEnvironment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                env.SetEnvironmentVariable("LANG", null);
+                env.SetEnvironmentVariable("LC_ALL", null);
 
-                var newTempPath = testEnvironment.CreateNewTempPathWithSubfolder("hello()w]o(rld)").TempPath;
+                if (enableChangeWave)
+                {
+                    ChangeWaves.ResetStateForTests();
+                    // Important: use the version here
+                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                }
 
-                string tempPath = Path.GetTempPath();
-                Assert.StartsWith(newTempPath, tempPath);
+                Exec exec = PrepareExec("echo LANG=$LANG; echo LC_ALL=$LC_ALL;");
+                bool result = exec.Execute();
+                Assert.True(result);
 
-                // Now run the Exec task on a simple command.
-                Exec exec = PrepareExec("echo Hello World!");
-                exec.Execute().ShouldBeFalse();
-
-                ChangeWaves.ResetStateForTests();
+                MockEngine engine = (MockEngine)exec.BuildEngine;
+                if (enableChangeWave)
+                {
+                    engine.AssertLogContains("LANG=en_US.UTF-8");
+                    engine.AssertLogContains("LC_ALL=en_US.UTF-8");
+                }
+                else
+                {
+                    engine.AssertLogDoesntContain("LANG=en_US.UTF-8");
+                    engine.AssertLogDoesntContain("LC_ALL=en_US.UTF-8");
+                }
             }
         }
 
@@ -97,7 +110,6 @@ namespace Microsoft.Build.UnitTests
         /// lying around.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NoTempFileLeaks()
         {
             using (var testEnvironment = TestEnvironment.Create())
@@ -157,7 +169,21 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
             Assert.Equal(expectedExitCode, exec.ExitCode);
             ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
-            Assert.Equal(1, ((MockEngine)exec.BuildEngine).Warnings);
+            int warningsCount = ((MockEngine)exec.BuildEngine).Warnings;
+            if (warningsCount == 1)
+            {
+                warningsCount.ShouldBe(1,
+                $"Expected 1 warning, encountered {warningsCount}: " + string.Join(",",
+                    ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
+            }
+            else
+            {
+                // Occasionally temp files fail to delete because of virus checkers, so generate MSB5018 warning
+                ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5018");
+                warningsCount.ShouldBe(2,
+                $"Expected 2 warnings, encountered {warningsCount}: " + string.Join(",",
+                    ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
+            }
 
             // ToolTask does not log an error on timeout.
             Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
@@ -179,20 +205,11 @@ namespace Microsoft.Build.UnitTests
             // ToolTask does not log an error on timeout.
             mockEngine.Errors.ShouldBe(0);
 
-            if (NativeMethodsShared.IsMono)
-            {
-                const int STILL_ACTIVE = 259; // When Process.WaitForExit times out.
-                exec.ExitCode.ShouldBeOneOf(137, STILL_ACTIVE);
-            }
-            else
-            {
-                // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
-                exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
-            }
+            // On non-Windows the exit code of a killed process is 128 + SIGKILL = 137
+            exec.ExitCode.ShouldBe(NativeMethodsShared.IsWindows ? -1 : 137);
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [UnixOnlyFact]
         public void WindowsNewLineCharactersInCommandOnUnix()
         {
             var exec = PrepareExec("echo hello\r\n\r\n");
@@ -269,8 +286,7 @@ namespace Microsoft.Build.UnitTests
             ((MockEngine)exec.BuildEngine).AssertLogContains("[" + working + "]");
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]   // UNC is Windows-Only
+        [WindowsOnlyFact(additionalMessage: "UNC is Windows-Only.")]
         public void UNCWorkingDirectoryUsed()
         {
             Exec exec = PrepareExec("echo [%cd%]");
@@ -339,7 +355,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -374,7 +393,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -385,7 +407,7 @@ namespace Microsoft.Build.UnitTests
         public void TempPathContainsAmpersand3()
         {
             string directoryWithAmpersand = "nospace& space";
-            string newTmp = Path.Combine(Path.GetTempPath(), directoryWithAmpersand);
+            string newTmp = Path.Combine(FileUtilities.TempFileDirectory, directoryWithAmpersand);
             string oldTmp = Environment.GetEnvironmentVariable("TMP");
 
             try
@@ -408,7 +430,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -442,7 +467,10 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable("TMP", oldTmp);
-                if (Directory.Exists(newTmp)) FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                if (Directory.Exists(newTmp))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(newTmp);
+                }
             }
         }
 
@@ -486,10 +514,9 @@ namespace Microsoft.Build.UnitTests
         /// Exec task will NOT use UTF8 when UTF8 Never is specified and non-ANSI characters are in the Command
         /// <remarks>Exec task will fail as the cmd processor will not be able to run the command.</remarks>
         /// </summary>
-        [Theory]
+        [WindowsOnlyTheory]
         [InlineData("Never")]
         [InlineData("System")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void ExecTaskUtf8NeverWithNonAnsi(string useUtf8)
         {
             RunExec(true, EncodingUtilities.CurrentSystemOemEncoding.EncodingName, useUtf8, false);
@@ -523,7 +550,7 @@ namespace Microsoft.Build.UnitTests
 
                 MethodInfo generateCommandLineCommandsMethod = execType.GetMethod("GenerateCommandLineCommands", BindingFlags.Instance | BindingFlags.NonPublic);
 
-                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, new object[0]) as string;
+                string commandLine = generateCommandLineCommandsMethod.Invoke(exec, Array.Empty<object>()) as string;
 
                 if (autoRunShouldBeDisabled)
                 {
@@ -575,7 +602,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (expectSuccess)
                 {
-                    ((MockEngine) exec.BuildEngine).AssertLogContains("[hello]");
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("[hello]");
                 }
 
                 Assert.Equal(expectedEncoding, exec.StdOutEncoding);
@@ -584,7 +611,9 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 if (Directory.Exists(folder))
+                {
                     FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
+                }
             }
 
             return;
@@ -619,9 +648,13 @@ namespace Microsoft.Build.UnitTests
         {
             Exec exec;
             if (NativeMethodsShared.IsWindows)
+            {
                 exec = PrepareExec("echo Some output & echo Some output & echo Some output & echo Some output ");
+            }
             else
+            {
                 exec = PrepareExec("echo Some output ; echo Some output ; echo Some output ; echo Some output ");
+            }
 
             exec.CustomErrorRegularExpression = "~!@#$%^_)(*&^%$#@@#XF &%^%T$REd((((([[[[";
             exec.CustomWarningRegularExpression = "*";
@@ -638,9 +671,14 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo ALERT:This is an error & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo ALERT:This is an error ; echo Some more output";
+            }
+
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
 
@@ -664,9 +702,13 @@ namespace Microsoft.Build.UnitTests
         {
             string cmdLine;
             if (NativeMethodsShared.IsWindows)
+            {
                 cmdLine = "echo Some output & echo YOOHOO:This is a warning & echo Some more output";
+            }
             else
+            {
                 cmdLine = "echo Some output ; echo YOOHOO:This is a warning ; echo Some more output";
+            }
 
             Exec exec = PrepareExec(cmdLine);
             bool result = exec.Execute();
@@ -867,49 +909,32 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ConsoleToMSBuild()
         {
-            //Exec with no output
+            // Exec with no output
             Exec exec = PrepareExec("set foo=blah");
-            //Test Set and Get of ConsoleToMSBuild
+            // Test Set and Get of ConsoleToMSBuild
             exec.ConsoleToMSBuild = true;
             Assert.True(exec.ConsoleToMSBuild);
 
             bool result = exec.Execute();
             Assert.True(result);
 
-            //Nothing to run, so the list should be empty
+            // Nothing to run, so the list should be empty
             Assert.Empty(exec.ConsoleOutput);
 
 
-            //first echo prints "Hello stderr" to stderr, second echo prints to stdout
+            // first echo prints "Hello stderr" to stderr, second echo prints to stdout
             string testString = "echo Hello stderr 1>&2\necho Hello stdout";
             exec = PrepareExec(testString);
 
-            //Test Set and Get of ConsoleToMSBuild
+            // Test Set and Get of ConsoleToMSBuild
             exec.ConsoleToMSBuild = true;
             Assert.True(exec.ConsoleToMSBuild);
 
             result = exec.Execute();
             Assert.True(result);
 
-            //Both two lines should had gone to stdout
+            // Both two lines should had gone to stdout
             Assert.Equal(2, exec.ConsoleOutput.Length);
-        }
-
-        /// <summary>
-        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
-        /// in the current system encoding.
-        /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void CanEncodeTest()
-        {
-            var defaultEncoding = EncodingUtilities.CurrentSystemOemEncoding;
-
-            string nonAnsiCharacters = "\u521B\u5EFA";
-            string pathWithAnsiCharacters = @"c:\windows\system32\cmd.exe";
-
-            Assert.False(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, nonAnsiCharacters));
-            Assert.True(EncodingUtilities.CanEncodeString(defaultEncoding.CodePage, pathWithAnsiCharacters));
         }
 
         [Fact]
@@ -933,7 +958,7 @@ echo line 3"" />
                         Loggers = new[] { logger },
                     };
 
-                    var collection = new ProjectCollection(
+                    using var collection = new ProjectCollection(
                         new Dictionary<string, string>(),
                         new[] { logger },
                         remoteLoggers: null,
@@ -964,7 +989,6 @@ echo line 3"" />
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EndToEndMultilineExec_EscapeSpecialCharacters()
@@ -991,7 +1015,7 @@ echo line 3"" />
                         Loggers = new[] { logger },
                     };
 
-                    var collection = new ProjectCollection(
+                    using var collection = new ProjectCollection(
                         new Dictionary<string, string>(),
                         new[] { logger },
                         remoteLoggers: null,
@@ -1017,65 +1041,26 @@ echo line 3"" />
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void EndToEndMultilineExec_EscapeSpecialCharacters_DisabledUnderChangeWave16_10()
+        public void ConsoleOutputDoesNotTrimLeadingWhitespace()
         {
+            string lineWithLeadingWhitespace = "    line with some leading whitespace";
+
             using (var env = TestEnvironment.Create(_output))
             {
-                ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+                var textFilePath = env.CreateFile("leading-whitespace.txt", lineWithLeadingWhitespace).Path;
+                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? $"type {textFilePath}" : $"cat {textFilePath}");
+                exec.ConsoleToMSBuild = true;
 
-                var testProject = env.CreateTestProjectWithFiles(@"<Project>
-<Target Name=""ExecCommand"">
-  <Exec Command=""echo Hello, World!"" />
-   </Target>
-</Project>");
+                bool result = exec.Execute();
 
-                // Ensure path has subfolders
-                var newTempPath = env.CreateNewTempPathWithSubfolder("hello()wo(rld)").TempPath;
-                string tempPath = Path.GetTempPath();
-                Assert.StartsWith(newTempPath, tempPath);
-
-                using (var buildManager = new BuildManager())
-                {
-                    MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
-
-                    var parameters = new BuildParameters()
-                    {
-                        Loggers = new[] { logger },
-                    };
-
-                    var collection = new ProjectCollection(
-                        new Dictionary<string, string>(),
-                        new[] { logger },
-                        remoteLoggers: null,
-                        ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1,
-                        onlyLogCriticalEvents: false,
-                        loadProjectsReadOnly: true);
-
-                    var project = collection.LoadProject(testProject.ProjectFile).CreateProjectInstance();
-
-                    var request = new BuildRequestData(
-                        project,
-                        targetsToBuild: new[] { "ExecCommand" },
-                        hostServices: null);
-
-                    var result = buildManager.Build(parameters, request);
-
-                    logger.AssertLogContains("Hello, World!");
-
-                    result.OverallResult.ShouldBe(BuildResultCode.Failure);
-                }
-                ChangeWaves.ResetStateForTests();
+                result.ShouldBeTrue();
+                exec.ConsoleOutput.Length.ShouldBe(1);
+                exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
             }
         }
     }
 
-    internal class ExecWrapper : Exec
+    internal sealed class ExecWrapper : Exec
     {
         public Encoding StdOutputEncoding
         {
@@ -1094,6 +1079,3 @@ echo line 3"" />
         }
     }
 }
-
-
-

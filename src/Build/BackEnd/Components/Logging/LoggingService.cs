@@ -1,19 +1,23 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks.Dataflow;
+using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -58,7 +62,7 @@ namespace Microsoft.Build.BackEnd.Logging
         ShuttingDown,
 
         /// <summary>
-        /// The logging service completly shutdown
+        /// The logging service completely shutdown.
         /// </summary>
         Shutdown
     }
@@ -66,8 +70,13 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// Logging services is used as a helper class to assist logging messages in getting to the correct loggers.
     /// </summary>
-    internal partial class LoggingService : ILoggingService, INodePacketHandler, IBuildComponent
+    internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
+        /// <summary>
+        /// Gets or sets a value if BuildCheck is enabled. The presence of this flag influences the logging logic.
+        /// </summary>
+        private bool _buildCheckEnabled;
+
         /// <summary>
         /// The default maximum size for the logging event queue.
         /// </summary>
@@ -85,7 +94,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         /// <summary>
         /// A cached reflection accessor for an internal member.
@@ -94,14 +103,14 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         #region Data
 
         /// <summary>
         /// The mapping of build request configuration ids to project file names.
         /// </summary>
-        private Dictionary<int, string> _projectFileMap;
+        private ConcurrentDictionary<int, string> _projectFileMap;
 
         /// <summary>
         /// The current state of the logging service
@@ -165,12 +174,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// The next project ID to assign when a project evaluation started event is received.
         /// </summary>
-        private int _nextEvaluationId = 1;
+        private int _nextEvaluationId;
 
         /// <summary>
         /// The next project ID to assign when a project started event is received.
         /// </summary>
-        private int _nextProjectId = 1;
+        private int _nextProjectId;
 
         /// <summary>
         /// The next target ID to assign when a target started event is received.
@@ -198,12 +207,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool? _includeEvaluationProfile;
 
         /// <summary>
-        /// Whether properties and items should be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>.
-        /// </summary>
-        private bool? _includeEvaluationPropertiesAndItems;
-
-        /// <summary>
         /// Whether to include task inputs in task events.
         /// </summary>
         private bool? _includeTaskInputs;
@@ -214,14 +217,24 @@ namespace Microsoft.Build.BackEnd.Logging
         private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedErrors = new HashSet<int>();
 
         /// <summary>
+        /// A list of build submission IDs that have logged errors through buildcheck.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
+        /// </summary>
+        private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedBuildcheckErrors = new HashSet<int>();
+
+        /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsAsErrorsByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsErrorsByProject;
+
+        /// <summary>
+        /// A list of warnings to not to be promoted to errors for an associated <see cref="BuildEventContext"/>.
+        /// </summary>
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsNotAsErrorsByProject;
 
         /// <summary>
         /// A list of warnings to treat as messages for an associated <see cref="BuildEventContext"/>.
         /// </summary>
-        private IDictionary<int, ISet<string>> _warningsAsMessagesByProject;
+        private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsMessagesByProject;
 
         /// <summary>
         /// The minimum message importance that must be logged because there is a possibility that a logger consumes it.
@@ -232,14 +245,34 @@ namespace Microsoft.Build.BackEnd.Logging
         #region LoggingThread Data
 
         /// <summary>
-        /// The data flow buffer for logging events.
+        /// Queue for asynchronous event processing.
         /// </summary>
-        private BufferBlock<object> _loggingQueue;
+        private ConcurrentQueue<object> _eventQueue;
 
         /// <summary>
-        /// The data flow processor for logging events.
+        /// Event set when message is consumed from queue.
         /// </summary>
-        private ActionBlock<object> _loggingQueueProcessor;
+        private AutoResetEvent _dequeueEvent;
+
+        /// <summary>
+        /// Event set when queue become empty. 
+        /// </summary>
+        private ManualResetEvent _emptyQueueEvent;
+
+        /// <summary>
+        /// Event set when message is added into queue.
+        /// </summary>
+        private AutoResetEvent _enqueueEvent;
+
+        /// <summary>
+        /// CTS for stopping logging event processing.
+        /// </summary>
+        private CancellationTokenSource _loggingEventProcessingCancellation;
+
+        /// <summary>
+        /// Task which pump/process messages from <see cref="_eventQueue"/>
+        /// </summary>
+        private Thread _loggingEventProcessingThread;
 
         /// <summary>
         /// The queue size above which the queue will close to messages from remote nodes.
@@ -269,7 +302,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The node identifier.</param>
         protected LoggingService(LoggerMode loggerMode, int nodeId)
         {
-            _projectFileMap = new Dictionary<int, string>();
+            _projectFileMap = new ConcurrentDictionary<int, string>();
             _logMode = loggerMode;
             _loggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
@@ -284,8 +317,7 @@ namespace Microsoft.Build.BackEnd.Logging
             string queueCapacityEnvironment = Environment.GetEnvironmentVariable("MSBUILDLOGGINGQUEUECAPACITY");
             if (!String.IsNullOrEmpty(queueCapacityEnvironment))
             {
-                uint localQueueCapacity;
-                if (UInt32.TryParse(queueCapacityEnvironment, out localQueueCapacity))
+                if (UInt32.TryParse(queueCapacityEnvironment, out uint localQueueCapacity))
                 {
                     _queueCapacity = localQueueCapacity;
                 }
@@ -295,7 +327,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             if (_logMode == LoggerMode.Asynchronous)
             {
-                CreateLoggingEventQueue();
+                StartLoggingEventProcessing();
             }
 
             // Ensure the static constructor of ItemGroupLoggingHelper runs.
@@ -332,6 +364,11 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Properties
 
         /// <summary>
+        /// Router of the build engine runtime execution information.
+        /// </summary>
+        public IBuildEngineDataRouter BuildEngineDataRouter => this;
+
+        /// <summary>
         /// Properties we need to serialize from the child node
         /// </summary>
         public string[] PropertiesToSerialize
@@ -366,11 +403,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextEvaluationId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
-                    return _nextEvaluationId;
-                }
+                // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
+                return Interlocked.Add(ref _nextEvaluationId, MaxCPUCount + 2);
             }
         }
 
@@ -382,11 +416,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextProjectId += MaxCPUCount + 2 /* We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)*/;
-                    return _nextProjectId;
-                }
+                // We can create one node more than the maxCPU count (this can happen if either the inproc or out of proc node has not been created yet and the project collection needs to be counted also)
+                return Interlocked.Add(ref _nextProjectId, MaxCPUCount + 2);
             }
         }
 
@@ -398,11 +429,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextTargetId++;
-                    return _nextTargetId;
-                }
+                return Interlocked.Increment(ref _nextTargetId);
             }
         }
 
@@ -414,11 +441,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             get
             {
-                lock (_lockObject)
-                {
-                    _nextTaskId++;
-                    return _nextTaskId;
-                }
+                return Interlocked.Increment(ref _nextTaskId);
             }
         }
 
@@ -453,6 +476,11 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Gets or sets a value that will error when the build process fails an up-to-date check.
+        /// </summary>
+        public bool Question { get; set; }
+
+        /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
         /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
@@ -474,6 +502,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
         /// </summary>
         public ISet<string> WarningsAsErrors
+        {
+            get;
+            set;
+        } = null;
+
+        /// <summary>
+        /// Get of warnings to not treat as errors. Only has any effect if WarningsAsErrors is empty but not null.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors
         {
             get;
             set;
@@ -515,25 +552,77 @@ namespace Microsoft.Build.BackEnd.Logging
             set => _includeTaskInputs = value;
         }
 
-        /// <summary>
-        /// Should properties and items be logged on <see cref="ProjectEvaluationFinishedEventArgs"/>
-        /// instead of <see cref="ProjectStartedEventArgs"/>?
-        /// </summary>
-        public bool IncludeEvaluationPropertiesAndItems
+        /// <inheritdoc cref="ILoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents"/>
+        public void SetIncludeEvaluationPropertiesAndItemsInEvents(bool inProjectStartedEvent, bool inEvaluationFinishedEvent)
+        {
+            _evalDataBehaviorSet = true;
+            IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = inEvaluationFinishedEvent;
+            IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = inProjectStartedEvent;
+        }
+
+        private bool _evalDataBehaviorSet;
+        private bool _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+        private bool _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+        private void InferEvalDataBehavior()
+        {
+            if (_evalDataBehaviorSet)
+            {
+                return;
+            }
+            // Set this right away - to prevent SO exception in case of any future refactoring
+            //  that would refer to the IncludeEvaluation... properties here
+            _evalDataBehaviorSet = true;
+
+            bool? escapeHatch = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation;
+            if (escapeHatch.HasValue)
+            {
+                IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = escapeHatch.Value;
+                IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !escapeHatch.Value;
+            }
+            else
+            {
+                var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>().ToList();
+
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+                {
+                    // If any logger requested the data - we need to emit them
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent =
+                        sinks.Any(sink => sink.IncludeEvaluationPropertiesAndItems);
+                    // If any logger didn't request the data - hence it's likely legacy logger
+                    //  - we need to populate the data in legacy way
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent =
+                        sinks.Any(sink => !sink.IncludeEvaluationPropertiesAndItems);
+                }
+                else
+                {
+                    bool allSinksIncludeEvalData = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
+
+                    IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = allSinksIncludeEvalData;
+                    IncludeEvaluationPropertiesAndItemsInProjectStartedEvent = !allSinksIncludeEvalData;
+                }
+            }
+        }
+
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent
         {
             get
             {
-                if (_includeEvaluationPropertiesAndItems == null)
-                {
-                    var sinks = _eventSinkDictionary.Values.OfType<EventSourceSink>();
-                    // .All() on an empty list defaults to true, we want to default to false
-                    _includeEvaluationPropertiesAndItems = sinks.Any() && sinks.All(sink => sink.IncludeEvaluationPropertiesAndItems);
-                }
-
-                return _includeEvaluationPropertiesAndItems ?? false;
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
             }
+            private set => _includeEvaluationPropertiesAndItemsInProjectStartedEvent = value;
+        }
 
-            set => _includeEvaluationPropertiesAndItems = value;
+        /// <inheritdoc cref="ILoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent"/>
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent
+        {
+            get
+            {
+                InferEvalDataBehavior();
+                return _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
+            }
+            private set => _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = value;
         }
 
         /// <summary>
@@ -543,6 +632,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         public bool HasBuildSubmissionLoggedErrors(int submissionId)
         {
+            if (_buildSubmissionIdsThatHaveLoggedBuildcheckErrors.Contains(submissionId))
+            {
+                return true;
+            }
+
             // Warnings as errors are not tracked if the user did not specify to do so
             if (WarningsAsErrors == null && _warningsAsErrorsByProject == null)
             {
@@ -554,105 +648,120 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Returns a hashset of warnings to be logged as errors for the specified build context.
+        /// Returns a collection of warnings to be logged as errors for the specified build context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
         /// <returns>
         /// </returns>
         public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
         {
-            int key = GetWarningsAsErrorOrMessageKey(context);
-
-            if (_warningsAsErrorsByProject != null && _warningsAsErrorsByProject.TryGetValue(key, out ISet<string> warningsAsErrors))
-            {
-                if (WarningsAsErrors != null)
-                {
-                    warningsAsErrors.UnionWith(WarningsAsErrors);
-                }
-
-                return warningsAsErrors;
-            }
-            else
-            {
-                return WarningsAsErrors;
-            }
+            return GetWarningsForProject(context, _warningsAsErrorsByProject, WarningsAsErrors);
         }
 
+        /// <summary>
+        /// Returns a collection of warnings not to be logged as errors for the specified build context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be kept as warnings.</param>
+        /// <returns>
+        /// </returns>
+        public ICollection<string> GetWarningsNotAsErrors(BuildEventContext context)
+        {
+            return GetWarningsForProject(context, _warningsNotAsErrorsByProject, WarningsNotAsErrors);
+        }
+
+        /// <summary>
+        /// Returns a collection of warnings to be demoted to messages for the specified build context.
+        /// </summary>
+        /// <param name="context">The build context through which warnings will be logged as messages.</param>
+        /// <returns>
+        /// </returns>
         public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
         {
-            int key = GetWarningsAsErrorOrMessageKey(context);
+            return GetWarningsForProject(context, _warningsAsMessagesByProject, WarningsAsMessages);
+        }
 
-            if (_warningsAsMessagesByProject != null && _warningsAsMessagesByProject.TryGetValue(key, out ISet<string> warningsAsMessages))
+        /// <summary>
+        /// Helper method that unifies the logic for GetWarningsAsErrors, GetWarningsNotAsErrors, and GetWarningsAsMessages.
+        /// Specifically, this method returns a collection of codes that, within the context of a particular project, should
+        /// be treated specially. These tend to come from setting the associated properties in the project file. These are
+        /// added to previously known codes as necessary.
+        /// </summary>
+        /// <param name="context">The specific context in which to consider special treatment for warnings.</param>
+        /// <param name="warningsByProject">A dictionary of all warnings to be treated special by for which projects.</param>
+        /// <param name="warnings">Warning codes we already know should be promoted, demoted, or not promoted as relevant.</param>
+        /// <returns></returns>
+        private ICollection<string> GetWarningsForProject(BuildEventContext context, IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, ISet<string> warnings)
+        {
+            WarningsConfigKey key = GetWarningsConfigKey(context);
+
+            if (warningsByProject != null && warningsByProject.TryGetValue(key, out ISet<string> newWarnings))
             {
-                if (WarningsAsMessages != null)
+                if (warnings != null)
                 {
-                    warningsAsMessages.UnionWith(WarningsAsMessages);
+                    newWarnings.UnionWith(warnings);
                 }
 
-                return warningsAsMessages;
+                return newWarnings;
             }
             else
             {
-                return WarningsAsMessages;
-            }
-        }
-
-        public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
-        {
-            lock (_lockObject)
-            {
-                int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
-
-                if (_warningsAsErrorsByProject == null)
-                {
-                    _warningsAsErrorsByProject = new ConcurrentDictionary<int, ISet<string>>();
-                }
-
-                if (!_warningsAsErrorsByProject.ContainsKey(key))
-                {
-                    // The same project instance can be built multiple times with different targets.  In this case the codes have already been added
-                    _warningsAsErrorsByProject[key] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
-                }
-            }
-        }
-
-        public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
-        {
-            lock (_lockObject)
-            {
-                int key = GetWarningsAsErrorOrMessageKey(buildEventContext);
-
-                if (_warningsAsMessagesByProject == null)
-                {
-                    _warningsAsMessagesByProject = new ConcurrentDictionary<int, ISet<string>>();
-                }
-
-                if (!_warningsAsMessagesByProject.ContainsKey(key))
-                {
-                    // The same project instance can be built multiple times with different targets.  In this case the codes have already been added
-                    _warningsAsMessagesByProject[key] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
-                }
+                return warnings;
             }
         }
 
         /// <summary>
-        /// Return whether or not the LoggingQueue has any events left in it
+        /// Adds warning codes that should be treated as errors to the known set.
         /// </summary>
-        public bool LoggingQueueHasEvents
+        /// <param name="buildEventContext">The context in which to consider possible warnings to be promoted.</param>
+        /// <param name="codes">Codes to promote</param>
+        public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
-            get
+            AddWarningsAsMessagesOrErrors(ref _warningsAsErrorsByProject, buildEventContext, codes);
+        }
+
+        /// <summary>
+        /// Adds warning codes that should not be treated as errors even if WarnAsError is empty (specifying that all warnings should be promoted).
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider warnings not to be promoted.</param>
+        /// <param name="codes">Codes not to promote</param>
+        public void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            AddWarningsAsMessagesOrErrors(ref _warningsNotAsErrorsByProject, buildEventContext, codes);
+        }
+
+        /// <summary>
+        /// Adds warning codes that should be treated as messages.
+        /// </summary>
+        /// <param name="buildEventContext">The context in which to consider warnings to be demoted.</param>
+        /// <param name="codes">Codes to demote</param>
+        public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            AddWarningsAsMessagesOrErrors(ref _warningsAsMessagesByProject, buildEventContext, codes);
+        }
+
+        /// <summary>
+        /// Adds warning codes to be treated or not treated as warnings or errors to the set of project-specific codes.
+        /// </summary>
+        /// <param name="warningsByProject">Dictionary with what warnings are currently known (by project) that we will add to.</param>
+        /// <param name="buildEventContext">Context for the project to be added</param>
+        /// <param name="codes">Codes to add</param>
+        private void AddWarningsAsMessagesOrErrors(ref IDictionary<WarningsConfigKey, ISet<string>> warningsByProject, BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            if (codes == null)
             {
-                lock (_lockObject)
+                return;
+            }
+
+            lock (_lockObject)
+            {
+                WarningsConfigKey key = GetWarningsConfigKey(buildEventContext);
+
+                warningsByProject ??= new ConcurrentDictionary<WarningsConfigKey, ISet<string>>();
+
+                if (!warningsByProject.ContainsKey(key))
                 {
-                    if (_loggingQueue != null)
-                    {
-                        return _loggingQueue.Count > 0;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalError("loggingQueue is null");
-                        return false;
-                    }
+                    // The same project instance can be built multiple times with different targets.  In this case the codes have already been added
+                    warningsByProject[key] = new HashSet<string>(codes, StringComparer.OrdinalIgnoreCase);
                 }
             }
         }
@@ -760,11 +869,17 @@ namespace Microsoft.Build.BackEnd.Logging
                 // this information default to 1
                 _maxCPUCount = buildComponentHost.BuildParameters.MaxNodeCount;
 
+                Question = buildComponentHost.BuildParameters.Question;
+
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
 
                 _serviceState = LoggingServiceState.Initialized;
+
+                _buildEngineDataRouter = (buildComponentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)?.BuildEngineDataRouter;
+
+                _buildCheckEnabled = buildComponentHost.BuildParameters.IsBuildCheckEnabled;
             }
         }
 
@@ -806,7 +921,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         // 2. Terminate the logging event queue
                         if (_logMode == LoggerMode.Asynchronous)
                         {
-                            TerminateLoggingEventQueue();
+                            TerminateLoggingEventProcessing();
                         }
                     }
 
@@ -830,12 +945,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // sink for the central loggers.
                     _centralForwardingLoggerSinkId = -1;
 
-                    // Clean up anything related to the asynchronous logging
-                    if (_logMode == LoggerMode.Asynchronous)
-                    {
-                        _loggingQueue = null;
-                        _loggingQueueProcessor = null;
-                    }
+                    CleanLoggingEventProcessing();
 
                     _loggers = new List<ILogger>();
                     _loggerDescriptions = null;
@@ -869,7 +979,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
             LogMessagePacket loggingPacket = (LogMessagePacket)packet;
             InjectNonSerializedData(loggingPacket);
-            ProcessLoggingEvent(loggingPacket.NodeBuildEvent, allowThrottling: true);
+
+            ErrorUtilities.VerifyThrow(loggingPacket.EventType != LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
+
+            ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }
 
         /// <summary>
@@ -902,14 +1015,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
                     string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
-                    LoggerDescription centralForwardingLoggerDescription = new LoggerDescription
-                                                                                     (
+                    LoggerDescription centralForwardingLoggerDescription = new LoggerDescription(
                                                                                       loggerClassName,
                                                                                       loggerAssemblyName,
                                                                                       null /*Not needed as we are loading from current assembly*/,
                                                                                       string.Empty /*No parameters needed as we are forwarding all events*/,
-                                                                                      LoggerVerbosity.Diagnostic /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
-                                                                                     );
+                                                                                      LoggerVerbosity.Diagnostic); /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
 
                     // Registering a distributed logger will initialize the logger, and create and initialize the forwarding logger.
                     // In addition it will register the logging description so that it can be instantiated on a node.
@@ -917,13 +1028,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
-                    // will be attached to that eventSource sink so that they get all of the events forwarded by 
+                    // will be attached to that eventSource sink so that they get all of the events forwarded by
                     // forwarded by the CentralForwardingLogger
                     _centralForwardingLoggerSinkId = centralForwardingLoggerDescription.LoggerId;
                 }
                 else
                 {
-                    // We have already create a forwarding logger and have a single eventSink which 
+                    // We have already create a forwarding logger and have a single eventSink which
                     // a logger can listen to inorder to get all events in the system
                     EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId];
 
@@ -954,7 +1065,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            // UNDONE: (Logging) This should re-initialize this logging service. 
+            // UNDONE: (Logging) This should re-initialize this logging service.
         }
 
         /// <summary>
@@ -1095,45 +1206,44 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         public void LogBuildEvent(BuildEventArgs buildEvent)
         {
-            lock (_lockObject)
+            ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+
+            BuildWarningEventArgs warningEvent = null;
+            BuildErrorEventArgs errorEvent = null;
+            BuildMessageEventArgs messageEvent = null;
+
+            if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
-                ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
+                warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent, false);
+            }
+            else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null && errorEvent.BuildEventContext != null && errorEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            {
+                errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent, false);
+            }
+            else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            {
+                // The AssemblyLoadBuildEventArgs are logged asynchronously, and build doesn't wait for those,
+                //  so it can happen that ProjectFinishedEventArgs occured first - removing the id->file mapping from map,
+                //  but AssemblyLoadsTracker still uses the BuildEventContext for that project
+                messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent, buildEvent is AssemblyLoadBuildEventArgs);
+            }
 
-                BuildWarningEventArgs warningEvent = null;
-                BuildErrorEventArgs errorEvent = null;
-                BuildMessageEventArgs messageEvent = null;
-
-                if ((warningEvent = buildEvent as BuildWarningEventArgs) != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+            if (OnlyLogCriticalEvents)
+            {
+                // Only log certain events if OnlyLogCriticalEvents is true
+                if (
+                    (warningEvent != null)
+                    || (errorEvent != null)
+                    || (buildEvent is CustomBuildEventArgs)
+                    || (buildEvent is CriticalBuildMessageEventArgs))
                 {
-                    warningEvent.ProjectFile = GetAndVerifyProjectFileFromContext(warningEvent.BuildEventContext);
-                }
-                else if ((errorEvent = buildEvent as BuildErrorEventArgs) != null && errorEvent.BuildEventContext != null && errorEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    errorEvent.ProjectFile = GetAndVerifyProjectFileFromContext(errorEvent.BuildEventContext);
-                }
-                else if ((messageEvent = buildEvent as BuildMessageEventArgs) != null && messageEvent.BuildEventContext != null && messageEvent.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
-                {
-                    messageEvent.ProjectFile = GetAndVerifyProjectFileFromContext(messageEvent.BuildEventContext);
-                }
-
-                if (OnlyLogCriticalEvents)
-                {
-                    // Only log certain events if OnlyLogCriticalEvents is true
-                    if (
-                        (warningEvent != null)
-                        || (errorEvent != null)
-                        || (buildEvent is CustomBuildEventArgs)
-                        || (buildEvent is CriticalBuildMessageEventArgs)
-                       )
-                    {
-                        ProcessLoggingEvent(buildEvent);
-                    }
-                }
-                else
-                {
-                    // Log all events if OnlyLogCriticalEvents is false
                     ProcessLoggingEvent(buildEvent);
                 }
+            }
+            else
+            {
+                // Log all events if OnlyLogCriticalEvents is false
+                ProcessLoggingEvent(buildEvent);
             }
         }
 
@@ -1147,20 +1257,21 @@ namespace Microsoft.Build.BackEnd.Logging
         /// In Synchronous mode the event should be routed to the correct sink or logger right away
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
-        /// <param name="allowThrottling"><code>true</code> to allow throttling, otherwise <code>false</code>.</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent, bool allowThrottling = false)
+        protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
-                // If the queue is at capacity, this call will block - the task returned by SendAsync only completes 
-                // when the message is actually consumed or rejected (permanently) by the buffer.
-                var task = _loggingQueue.SendAsync(buildEvent);
-                if (allowThrottling)
+                // Block until queue is not full.
+                while (_eventQueue.Count >= _queueCapacity)
                 {
-                    task.Wait();
+                    // Block and wait for dequeue event.
+                    _dequeueEvent.WaitOne();
                 }
+
+                _eventQueue.Enqueue(buildEvent);
+                _enqueueEvent.Set();
             }
             else
             {
@@ -1172,41 +1283,21 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Wait for the logging messages in the logging queue to be completly processed.
+        /// Wait for the logging messages in the logging queue to be completely processed.
         /// This is required because for Logging build finished or when the component is to shutdown
         /// we need to make sure we process all of the events before the build finished event is raised
         /// and we need to make sure we process all of the logging events before we shutdown the component.
         /// </summary>
-        internal void WaitForThreadToProcessEvents()
+        public void WaitForLoggingToProcessEvents()
         {
-            // This method may be called in the shutdown submission callback, this callback may be called after the logging service has 
-            // shutdown and nulled out the events we were going to wait on.
-            if (_logMode == LoggerMode.Asynchronous && _loggingQueue != null)
+            while (_eventQueue?.IsEmpty == false)
             {
-                BufferBlock<object> loggingQueue = null;
-                ActionBlock<object> loggingQueueProcessor = null;
-
-                lock (_lockObject)
-                {
-                    loggingQueue = _loggingQueue;
-                    loggingQueueProcessor = _loggingQueueProcessor;
-
-                    // Replaces _loggingQueue and _loggingQueueProcessor with new one, this will assure that
-                    // no further messages could possibly be trying to be added into queue we are about to drain
-                    CreateLoggingEventQueue();
-                }
-
-                // Drain queue.
-                // This shall not be locked to avoid possible deadlock caused by
-                // event handlers to reenter 'this' instance while trying to log something.
-                if (loggingQueue != null)
-                {
-                    Debug.Assert(!Monitor.IsEntered(_lockObject));
-
-                    loggingQueue.Complete();
-                    loggingQueueProcessor.Completion.Wait();
-                }
+                _emptyQueueEvent?.WaitOne();
             }
+            // To avoid race condition when last message has been removed from queue but
+            //   not yet fully processed (handled by loggers), we need to make sure _emptyQueueEvent
+            //   is set as it is guaranteed to be in set state no sooner than after event has been processed.
+            _emptyQueueEvent?.WaitOne();
         }
 
         /// <summary>
@@ -1217,8 +1308,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (loggingPacket?.NodeBuildEvent != null && _componentHost != null)
             {
-                var projectStartedEventArgs = loggingPacket.NodeBuildEvent.Value.Value as ProjectStartedEventArgs;
-                if (projectStartedEventArgs != null && _configCache.Value != null)
+                if (loggingPacket.NodeBuildEvent.Value.Value is ProjectStartedEventArgs projectStartedEventArgs && _configCache.Value != null)
                 {
                     ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(projectStartedEventArgs.ProjectId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
                     BuildRequestConfiguration buildRequestConfiguration = _configCache.Value[projectStartedEventArgs.ProjectId];
@@ -1229,6 +1319,12 @@ namespace Microsoft.Build.BackEnd.Logging
                     s_projectStartedEventArgsGlobalProperties.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.GlobalProperties.ToDictionary(), index: null);
 
                     s_projectStartedEventArgsToolsVersion.Value.SetValue(projectStartedEventArgs, buildRequestConfiguration.ToolsVersion, null);
+
+                    // When logging happens out of process, we need to map the project context id to the project file on the receiving side.
+                    if (!_projectFileMap.ContainsKey(projectStartedEventArgs.BuildEventContext.ProjectContextId))
+                    {
+                        _projectFileMap[projectStartedEventArgs.BuildEventContext.ProjectContextId] = projectStartedEventArgs.ProjectFile;
+                    }
                 }
             }
         }
@@ -1236,69 +1332,108 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Private Methods
-        private static int GetWarningsAsErrorOrMessageKey(BuildEventContext buildEventContext)
+        private static WarningsConfigKey GetWarningsConfigKey(BuildEventContext buildEventContext)
         {
-            var hash = 17;
-            hash = (hash * 31) + buildEventContext.ProjectInstanceId;
-            hash = (hash * 31) + buildEventContext.ProjectContextId;
-            return hash;
+            return new WarningsConfigKey(buildEventContext.ProjectInstanceId, buildEventContext.ProjectContextId);
         }
 
-        private static int GetWarningsAsErrorOrMessageKey(BuildEventArgs buildEventArgs)
+        private static WarningsConfigKey GetWarningsConfigKey(BuildEventArgs buildEventArgs)
         {
-            return GetWarningsAsErrorOrMessageKey(buildEventArgs.BuildEventContext);
+            return GetWarningsConfigKey(buildEventArgs.BuildEventContext);
+        }
+
+        private readonly record struct WarningsConfigKey(int InstanceId, int ContextId);
+
+        /// <summary>
+        /// Create a logging thread to process the logging queue.
+        /// </summary>
+        private void StartLoggingEventProcessing()
+        {
+            _eventQueue = new ConcurrentQueue<object>();
+            _dequeueEvent = new AutoResetEvent(false);
+            _emptyQueueEvent = new ManualResetEvent(false);
+            _enqueueEvent = new AutoResetEvent(false);
+            _loggingEventProcessingCancellation = new CancellationTokenSource();
+
+            _loggingEventProcessingThread = new Thread(LoggingEventProc);
+            _loggingEventProcessingThread.Name = $"MSBuild LoggingService events queue pump: {this.GetHashCode()}";
+            _loggingEventProcessingThread.IsBackground = true;
+            _loggingEventProcessingThread.Start();
+
+            void LoggingEventProc()
+            {
+                var completeAdding = _loggingEventProcessingCancellation.Token;
+                WaitHandle[] waitHandlesForNextEvent = [completeAdding.WaitHandle, _enqueueEvent];
+
+                try
+                {
+                    // Store field references locally to prevent race with cleanup
+                    var eventQueue = _eventQueue;
+                    var dequeueEvent = _dequeueEvent;
+                    var emptyQueueEvent = _emptyQueueEvent;
+                    var enqueueEvent = _enqueueEvent;
+
+                    do
+                    {
+                        if (eventQueue.TryDequeue(out object ev))
+                        {
+                            LoggingEventProcessor(ev);
+                            dequeueEvent?.Set();
+                        }
+                        else
+                        {
+                            emptyQueueEvent?.Set();
+
+                            // Wait for next event, or finish.
+                            if (!completeAdding.IsCancellationRequested && eventQueue.IsEmpty)
+                            {
+                                WaitHandle.WaitAny(waitHandlesForNextEvent);
+                            }
+
+                            emptyQueueEvent.Reset();
+                        }
+                    } while (!eventQueue.IsEmpty || !completeAdding.IsCancellationRequested);
+
+                    emptyQueueEvent.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Events/queue were disposed during shutdown, exit processing
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Clean resources used for logging event processing queue.
+        /// </summary>
+        private void CleanLoggingEventProcessing()
+        {
+            _loggingEventProcessingCancellation?.Cancel();
+            _dequeueEvent?.Dispose();
+            _enqueueEvent?.Dispose();
+            _emptyQueueEvent?.Dispose();
+            _loggingEventProcessingCancellation?.Dispose();
+
+            _eventQueue = null;
+
+            _dequeueEvent = null;
+            _enqueueEvent = null;
+            _emptyQueueEvent = null;
+
+            _loggingEventProcessingCancellation = null;
+            _loggingEventProcessingThread = null;
         }
 
         /// <summary>
         /// Create a logging thread to process the logging queue
         /// </summary>
-        private void CreateLoggingEventQueue()
+        private void TerminateLoggingEventProcessing()
         {
-            // We are creating a two-node dataflow graph here.  The first node is a buffer, which will hold up to the number of
-            // logging events we have specified as the queueCapacity.  The second node is the processor which will actually process each message.
-            // When the capacity of the buffer is reached, further attempts to send messages to it will block.
-            // The reason we can't just set the BoundedCapacity on the processing block is that ActionBlock has some weird behavior
-            // when the queue capacity is reached.  Specifically, it will block new messages from being processed until it has
-            // entirely drained its input queue, as opposed to letting new ones in as old ones are processed.  This is logged as 
-            // a perf bug (305575) against Dataflow.  If they choose to fix it, we can eliminate the buffer node from the graph.
-            var dataBlockOptions = new DataflowBlockOptions
-            {
-                BoundedCapacity = Convert.ToInt32(_queueCapacity)
-            };
-
-            var loggingQueue = new BufferBlock<object>(dataBlockOptions);
-
-            var executionDataBlockOptions = new ExecutionDataflowBlockOptions
-            {
-                BoundedCapacity = 1
-            };
-
-            var loggingQueueProcessor = new ActionBlock<object>(loggingEvent => LoggingEventProcessor(loggingEvent), executionDataBlockOptions);
-
-            var dataLinkOptions = new DataflowLinkOptions
-            {
-                PropagateCompletion = true
-            };
-
-            loggingQueue.LinkTo(loggingQueueProcessor, dataLinkOptions);
-
-            lock (_lockObject)
-            {
-                _loggingQueue = loggingQueue;
-                _loggingQueueProcessor = loggingQueueProcessor;
-            }
-        }
-
-        /// <summary>
-        /// Wait for the logginQueue to empty and then terminate the logging thread
-        /// </summary>
-        private void TerminateLoggingEventQueue()
-        {
-            // Dont accept any more items from other threads.
-            _loggingQueue.Complete();
-
-            // Wait for completion
-            _loggingQueueProcessor.Completion.Wait();
+            // Capture pump task in local variable as cancelling event processing is nulling _loggingEventProcessingThread.
+            var pumpTask = _loggingEventProcessingThread;
+            _loggingEventProcessingCancellation.Cancel();
+            pumpTask.Join();
         }
 
         /// <summary>
@@ -1315,17 +1450,8 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 logger?.Shutdown();
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorDuringLoggerShutdown", false, logger.GetType().Name);
             }
         }
@@ -1405,17 +1531,8 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private void RouteBuildEvent(object loggingEvent)
         {
-            BuildEventArgs buildEventArgs = null;
-
-            if (loggingEvent is BuildEventArgs)
-            {
-                buildEventArgs = (BuildEventArgs)loggingEvent;
-            }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs>)
-            {
-                buildEventArgs = ((KeyValuePair<int, BuildEventArgs>)loggingEvent).Value;
-            }
-            else
+            BuildEventArgs buildEventArgs = loggingEvent as BuildEventArgs ?? (loggingEvent as KeyValuePair<int, BuildEventArgs>?)?.Value;
+            if (buildEventArgs is null)
             {
                 ErrorUtilities.ThrowInternalError("Unknown logging item in queue:" + loggingEvent.GetType().FullName);
             }
@@ -1424,64 +1541,140 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (ShouldTreatWarningAsMessage(warningEvent))
                 {
-                    loggingEvent = new BuildMessageEventArgs(
-                        warningEvent.Subcategory,
-                        warningEvent.Code,
-                        warningEvent.File,
-                        warningEvent.LineNumber,
-                        warningEvent.ColumnNumber,
-                        warningEvent.EndLineNumber,
-                        warningEvent.EndColumnNumber,
-                        warningEvent.Message,
-                        warningEvent.HelpKeyword,
-                        warningEvent.SenderName,
-                        MessageImportance.Low,
-                        warningEvent.Timestamp)
+                    if (buildEventArgs is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
-                        BuildEventContext = warningEvent.BuildEventContext,
-                        ProjectFile = warningEvent.ProjectFile,
-                    };
+                        buildEventArgs = new ExtendedBuildMessageEventArgs(
+                                extWarningEvent.ExtendedType,
+                                extWarningEvent.Subcategory,
+                                extWarningEvent.Code,
+                                extWarningEvent.File,
+                                extWarningEvent.LineNumber,
+                                extWarningEvent.ColumnNumber,
+                                extWarningEvent.EndLineNumber,
+                                extWarningEvent.EndColumnNumber,
+                                extWarningEvent.Message,
+                                extWarningEvent.HelpKeyword,
+                                extWarningEvent.SenderName,
+                                MessageImportance.Low,
+                                extWarningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                            ExtendedMetadata = extWarningEvent.ExtendedMetadata,
+                            ExtendedData = extWarningEvent.ExtendedData,
+                        };
+                    }
+                    else
+                    {
+                        buildEventArgs = new BuildMessageEventArgs(
+                            warningEvent.Subcategory,
+                            warningEvent.Code,
+                            warningEvent.File,
+                            warningEvent.LineNumber,
+                            warningEvent.ColumnNumber,
+                            warningEvent.EndLineNumber,
+                            warningEvent.EndColumnNumber,
+                            warningEvent.Message,
+                            warningEvent.HelpKeyword,
+                            warningEvent.SenderName,
+                            MessageImportance.Low,
+                            warningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                        };
+                    }
                 }
                 else if (ShouldTreatWarningAsError(warningEvent))
                 {
-                    loggingEvent = new BuildErrorEventArgs(
-                        warningEvent.Subcategory,
-                        warningEvent.Code,
-                        warningEvent.File,
-                        warningEvent.LineNumber,
-                        warningEvent.ColumnNumber,
-                        warningEvent.EndLineNumber,
-                        warningEvent.EndColumnNumber,
-                        warningEvent.Message,
-                        warningEvent.HelpKeyword,
-                        warningEvent.SenderName,
-                        warningEvent.Timestamp)
+                    if (warningEvent is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
-                        BuildEventContext = warningEvent.BuildEventContext,
-                        ProjectFile = warningEvent.ProjectFile,
-                    };
+                        buildEventArgs = new ExtendedBuildErrorEventArgs(
+                            extWarningEvent.ExtendedType,
+                            extWarningEvent.Subcategory,
+                            extWarningEvent.Code,
+                            extWarningEvent.File,
+                            extWarningEvent.LineNumber,
+                            extWarningEvent.ColumnNumber,
+                            extWarningEvent.EndLineNumber,
+                            extWarningEvent.EndColumnNumber,
+                            extWarningEvent.Message,
+                            extWarningEvent.HelpKeyword,
+                            extWarningEvent.SenderName,
+                            extWarningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                            ExtendedMetadata = extWarningEvent.ExtendedMetadata,
+                            ExtendedData = extWarningEvent.ExtendedData,
+                        };
+                    }
+                    else
+                    {
+                        buildEventArgs = new BuildErrorEventArgs(
+                            warningEvent.Subcategory,
+                            warningEvent.Code,
+                            warningEvent.File,
+                            warningEvent.LineNumber,
+                            warningEvent.ColumnNumber,
+                            warningEvent.EndLineNumber,
+                            warningEvent.EndColumnNumber,
+                            warningEvent.Message,
+                            warningEvent.HelpKeyword,
+                            warningEvent.SenderName,
+                            warningEvent.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                        };
+                    }
                 }
             }
 
-            if (loggingEvent is BuildErrorEventArgs errorEvent)
+            if (buildEventArgs is BuildErrorEventArgs errorEvent)
             {
-                // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
-                _buildSubmissionIdsThatHaveLoggedErrors.Add(errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId);
+                int submissionId = errorEvent.BuildEventContext?.SubmissionId ?? BuildEventContext.InvalidSubmissionId;
+
+                if (buildEventArgs is BuildCheckResultError)
+                {
+                    _buildSubmissionIdsThatHaveLoggedBuildcheckErrors.Add(submissionId);
+                }
+                else
+                {
+                    // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
+                    _buildSubmissionIdsThatHaveLoggedErrors.Add(submissionId);
+                }
             }
 
-            if (loggingEvent is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+            // Respect warning-promotion properties from the remote project
+            if (buildEventArgs is ProjectStartedEventArgs projectStartedEvent)
             {
-                _warningsAsErrorsByProject?.Remove(GetWarningsAsErrorOrMessageKey(projectFinishedEvent));
-                _warningsAsMessagesByProject?.Remove(GetWarningsAsErrorOrMessageKey(projectFinishedEvent));
+                AddWarningsAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsErrors);
+                AddWarningsAsMessages(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsMessages);
+                AddWarningsNotAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsNotAsErrors);
+            }
+
+            if (buildEventArgs is ProjectFinishedEventArgs projectFinishedEvent && projectFinishedEvent.BuildEventContext != null)
+            {
+                WarningsConfigKey key = GetWarningsConfigKey(projectFinishedEvent);
+                _warningsAsErrorsByProject?.Remove(key);
+                _warningsNotAsErrorsByProject?.Remove(key);
+                _warningsAsMessagesByProject?.Remove(key);
             }
 
             if (loggingEvent is BuildEventArgs)
             {
-                RouteBuildEvent((BuildEventArgs)loggingEvent);
+                RouteBuildEvent(buildEventArgs);
             }
-            else if (loggingEvent is KeyValuePair<int, BuildEventArgs>)
+            else if (loggingEvent is KeyValuePair<int, BuildEventArgs> loggingEventKeyValuePair)
             {
-                RouteBuildEvent((KeyValuePair<int, BuildEventArgs>)loggingEvent);
+                if (loggingEventKeyValuePair.Value != buildEventArgs)
+                {
+                    // buildEventArgs has been altered, lets use that new one
+                    loggingEventKeyValuePair = new KeyValuePair<int, BuildEventArgs>(loggingEventKeyValuePair.Key, buildEventArgs);
+                }
+
+                RouteBuildEvent(loggingEventKeyValuePair);
             }
         }
 
@@ -1493,8 +1686,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TryRaiseProjectStartedEvent(nodeEvent.Value);
 
             // Get the sink which will handle the build event, then send the event to that sink
-            IBuildEventSink sink;
-            bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out sink);
+            bool gotSink = _eventSinkDictionary.TryGetValue(nodeEvent.Key, out IBuildEventSink sink);
             if (gotSink && sink != null)
             {
                 // Sinks in the eventSinkDictionary are expected to not be null.
@@ -1513,16 +1705,16 @@ namespace Microsoft.Build.BackEnd.Logging
             TryRaiseProjectStartedEvent(eventArg);
 
             // The event has not been through a filter yet. All events must go through a filter before they make it to a logger
-            if (_filterEventSource != null)   // Loggers may not be registered
+            if (_filterEventSource != null) // Loggers may not be registered
             {
                 // Send the event to the filter, the Consume will not return until all of the loggers which have registered to the event have process
                 // them.
                 _filterEventSource.Consume(eventArg);
 
-                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the 
+                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the
                 // central logger sinks to see if they have received the events or not. If the sink has not received the event we need to send it to the
                 // logger for backwards compatibility with orcas.
-                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to 
+                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to
                 // forward build started or build finished events. In the new OM we allow the loggers to forward the events. However since orcas did not forward them
                 // we need to support loggers which cannot forward the events.
                 if (eventArg is BuildStartedEventArgs)
@@ -1534,7 +1726,7 @@ namespace Microsoft.Build.BackEnd.Logging
                         {
                             if (!sink.HaveLoggedBuildStartedEvent)
                             {
-                                sink.Consume(eventArg, (int)pair.Key);
+                                sink.Consume(eventArg, pair.Key);
                             }
 
                             // Reset the HaveLoggedBuildStarted event because no one else will be sending a build started event to any loggers at this time.
@@ -1574,8 +1766,20 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="Exception">Any exception which is a ExceptionHandling.IsCriticalException will not be wrapped</exception>
         private void InitializeLogger(ILogger logger, IEventSource sourceForLogger)
         {
+            ILogger UnwrapLoggerType(ILogger log)
+            {
+                while (log is ProjectCollection.ReusableLogger reusableLogger)
+                {
+                    log = reusableLogger.OriginalLogger;
+                }
+
+                return log;
+            }
+
             try
             {
+                using var assemblyLoadTracker = AssemblyLoadsTracker.StartTracking(this, AssemblyLoadingContext.LoggerInitialization, UnwrapLoggerType(logger).GetType());
+
                 INodeLogger nodeLogger = logger as INodeLogger;
                 if (nodeLogger != null)
                 {
@@ -1586,17 +1790,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     logger.Initialize(sourceForLogger);
                 }
             }
-            catch (LoggerException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e) && e is not LoggerException)
             {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 InternalLoggerException.Throw(e, null, "FatalErrorWhileInitializingLogger", true, logger.GetType().Name);
             }
 
@@ -1619,22 +1814,33 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </remarks>
         private void UpdateMinimumMessageImportance(ILogger logger)
         {
-            var innerLogger = (logger is Evaluation.ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
+            var innerLogger = (logger is ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
             MessageImportance? minimumImportance = innerLogger switch
             {
                 Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
                 Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
 
-                // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
-                // where we must log everything. They can be ignored in inproc nodes.
+                // The BuildCheck connector logger consumes only high priority messages.
+                BuildCheckForwardingLogger => MessageImportance.High,
+                BuildCheckConnectorLogger => MessageImportance.High,
+
+                // If this is not an OutOfProc node, we can ignore the central forwarding logger, because we'll be
+                // setting the message importance to accurate level based on the exact needs of the central logger.
+                // That will happen in separate call to this method, with the central logger itself. This is because in the
+                // inproc case, we register the central loggers (that are the destination for the logging),
+                // wherease in the out-of-proc case, we register the forwarding loggers only - and those need to make sure
+                // to forward at minimum what is required by the central logger.
                 CentralForwardingLogger => (_nodeId > 1 ? MessageImportance.Low : null),
 
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // If the logger is not on our whitelist, there are no importance guarantees. Fall back to "any importance".
-                _ => MessageImportance.Low
+                // The terminal logger consumes only high priority messages.
+                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger.TerminalLogger"
+                    ? MessageImportance.High
+                    // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
+                    : MessageImportance.Low,
             };
 
             if (minimumImportance != null)
@@ -1701,14 +1907,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Get the project name from a context ID. Throw an exception if it's not found.
         /// </summary>
-        private string GetAndVerifyProjectFileFromContext(BuildEventContext context)
+        private string GetAndVerifyProjectFileFromContext(BuildEventArgs eventArgs, bool allowCacheMiss)
         {
+            BuildEventContext context = eventArgs.BuildEventContext!;
             _projectFileMap.TryGetValue(context.ProjectContextId, out string projectFile);
 
             // PERF: Not using VerifyThrow to avoid boxing an int in the non-error case.
-            if (projectFile == null)
+            if (projectFile == null && !allowCacheMiss)
             {
-                ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", context.ProjectContextId);
+                ErrorUtilities.ThrowInternalError(
+                    "ContextID {0} should have been in the ID-to-project file mapping but wasn't! Encountered during logging message: '{1}'",
+                    context.ProjectContextId, eventArgs.Message);
             }
 
             return projectFile;
@@ -1722,23 +1931,28 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool ShouldTreatWarningAsMessage(BuildWarningEventArgs warningEvent)
         {
             // This only applies if the user specified /nowarn at the command-line or added the warning code through the object model
-            //
             if (WarningsAsMessages?.Contains(warningEvent.Code) == true)
             {
                 return true;
             }
 
             // This only applies if the user specified <MSBuildWarningsAsMessages /> and there is a valid ProjectInstanceId
-            //
             if (_warningsAsMessagesByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(warningEvent), out ISet<string> codesByProject))
+                if (_warningsAsMessagesByProject.TryGetValue(GetWarningsConfigKey(warningEvent), out ISet<string> codesByProject))
                 {
                     return codesByProject?.Contains(warningEvent.Code) == true;
                 }
             }
 
             return false;
+        }
+
+        private bool WarningAsErrorNotOverriden(BuildWarningEventArgs warningEvent)
+        {
+            WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
+
+            return WarningsNotAsErrors?.Contains(warningEvent.Code) != true && !(_warningsNotAsErrorsByProject?.TryGetValue(key, out ISet<string> notToError) == true && notToError.Contains(warningEvent.Code));
         }
 
         /// <summary>
@@ -1749,12 +1963,10 @@ namespace Microsoft.Build.BackEnd.Logging
         private bool ShouldTreatWarningAsError(BuildWarningEventArgs warningEvent)
         {
             // This only applies if the user specified /warnaserror from the command-line or added an empty set through the object model
-            //
             if (WarningsAsErrors != null)
             {
                 // Global warnings as errors apply to all projects.  If the list is empty or contains the code, the warning should be treated as an error
-                //
-                if (WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningEvent.Code))
+                if ((WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningEvent)) || WarningsAsErrors.Contains(warningEvent.Code))
                 {
                     return true;
                 }
@@ -1762,17 +1974,19 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // This only applies if the user specified <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors or <MSBuildWarningsAsErrors />
             // and there is a valid ProjectInstanceId for the warning.
-            //
             if (_warningsAsErrorsByProject != null && warningEvent.BuildEventContext != null && warningEvent.BuildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 // Attempt to get the list of warnings to treat as errors for the current project
-                //
-                if (_warningsAsErrorsByProject.TryGetValue(GetWarningsAsErrorOrMessageKey(warningEvent), out ISet<string> codesByProject))
+                WarningsConfigKey key = GetWarningsConfigKey(warningEvent);
+                if (_warningsAsErrorsByProject.TryGetValue(key, out ISet<string> codesByProject))
                 {
                     // We create an empty set if all warnings should be treated as errors so that should be checked first.
                     // If the set is not empty, check the specific code.
-                    //
-                    return codesByProject != null && (codesByProject.Count == 0 || codesByProject.Contains(warningEvent.Code));
+                    ISet<string> codesToIgnoreByProject = null;
+                    _warningsNotAsErrorsByProject?.TryGetValue(key, out codesToIgnoreByProject);
+                    return codesByProject != null &&
+                        ((codesByProject.Count == 0 && (codesToIgnoreByProject is null || !codesToIgnoreByProject.Contains(warningEvent.Code)))
+                        || codesByProject.Contains(warningEvent.Code));
                 }
             }
 

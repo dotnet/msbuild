@@ -1,23 +1,25 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
     /*
      * Class:   CSharpTokenCharReader
      *
-     * Reads over the contents of a C# source file (in the form of a string). 
+     * Reads over the contents of a C# source file (in the form of a string).
      * Provides utility functions for dealing with C#-specific tokens.
      *
      */
-    sealed internal class CSharpTokenCharReader : TokenCharReader
+    internal sealed class CSharpTokenCharReader : TokenCharReader
     {
         /*
          * Method:  CSharpTokenCharReader
-         * 
+         *
          * Construct
          */
         internal CSharpTokenCharReader(Stream binaryStream, bool forceANSI)
@@ -27,8 +29,8 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkLongIntegerSuffix
-         * 
-         * Skip C# integer literal long suffix: L, U, l, u, ul, etc.                    
+         *
+         * Skip C# integer literal long suffix: L, U, l, u, ul, etc.
          */
         internal bool SinkLongIntegerSuffix()
         {
@@ -55,7 +57,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkOperatorOrPunctuator
-         * 
+         *
          * Determine whether this is a C# operator or punctuator
          */
         internal bool SinkOperatorOrPunctuator()
@@ -71,7 +73,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkStringEscape
-         * 
+         *
          * Determine whether this is a valid escape character for strings?
          */
         internal bool SinkStringEscape()
@@ -100,7 +102,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  MatchRegularStringLiteral
-         * 
+         *
          * Determine whether this is a regular C# string literal character
          */
         internal bool MatchRegularStringLiteral()
@@ -115,7 +117,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  SinkMultipleWhiteSpace
-         * 
+         *
          * Sink some C# whitespace
          */
         internal bool SinkMultipleWhiteSpace()
@@ -131,4 +133,3 @@ namespace Microsoft.Build.Shared.LanguageParser
         }
     }
 }
-

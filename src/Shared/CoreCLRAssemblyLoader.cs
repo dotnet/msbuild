@@ -1,14 +1,16 @@
-﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -117,7 +119,7 @@ namespace Microsoft.Build.Shared
             // of the Microsoft.Build.* assembly.
             assemblyName.Version = _currentAssemblyVersion;
 
-            var searchPaths = new[] { Assembly.GetExecutingAssembly().Location };
+            string[] searchPaths = [Assembly.GetExecutingAssembly().Location];
             return TryResolveAssemblyFromPaths(context, assemblyName, searchPaths);
         }
 
@@ -143,14 +145,14 @@ namespace Microsoft.Build.Shared
 
         private Assembly TryResolveAssemblyFromPaths(AssemblyLoadContext context, AssemblyName assemblyName, IEnumerable<string> searchPaths)
         {
-            foreach (var cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
+            foreach (string cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
                 // If no culture is specified, attempt to load directly from
                 // the known dependency paths.
                 ? new[] { string.Empty }
                 // Search for satellite assemblies in culture subdirectories
                 // of the assembly search directories, but fall back to the
                 // bare search directory if that fails.
-                : new[] { assemblyName.CultureName, string.Empty })
+                : [assemblyName.CultureName, string.Empty])
             {
                 foreach (var searchPath in searchPaths)
                 {
@@ -165,10 +167,12 @@ namespace Microsoft.Build.Shared
                     }
 
                     AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                    if (candidateAssemblyName.Version >= assemblyName.Version)
+                    if (candidateAssemblyName.Version != assemblyName.Version)
                     {
-                        return LoadAndCache(context, candidatePath);
+                        continue;
                     }
+
+                    return LoadAndCache(context, candidatePath);
                 }
             }
 

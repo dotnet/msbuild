@@ -1,73 +1,86 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
+
+#nullable disable
 
 namespace Microsoft.Build.Graph.UnitTests
 {
     internal static class GraphTestingUtilities
     {
-        public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> {{PropertyNames.IsGraphBuild, "true"}}.ToImmutableDictionary();
+        public static readonly ImmutableDictionary<string, string> EmptyGlobalProperties = new Dictionary<string, string> { { PropertyNames.IsGraphBuild, "true" } }.ToImmutableDictionary();
 
-        public static readonly string InnerBuildPropertyName = "InnerBuild";
-        public static readonly string InnerBuildPropertiesName = "InnerBuildProperties";
+        public const string InnerBuildPropertyName = "InnerBuild";
+        public const string InnerBuildPropertiesName = "InnerBuildProperties";
 
-        public static readonly string MultitargetingSpecificationPropertyGroup = $@"<PropertyGroup>
+        public const string MultitargetingSpecificationPropertyGroup = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
                                                                         <{InnerBuildPropertiesName}>a;b</{InnerBuildPropertiesName}>
                                                                      </PropertyGroup>";
-        public static readonly string HardCodedInnerBuildWithMultitargetingSpecification = $@"<PropertyGroup>
+        public const string HardCodedInnerBuildWithMultitargetingSpecification = $@"<PropertyGroup>
                                                                         <InnerBuildProperty>{InnerBuildPropertyName}</InnerBuildProperty>
                                                                         <InnerBuildPropertyValues>{InnerBuildPropertiesName}</InnerBuildPropertyValues>
                                                                         <{InnerBuildPropertyName}>a</{InnerBuildPropertyName}>
                                                                      </PropertyGroup>";
 
-        public static readonly string EnableTransitiveProjectReferencesPropertyGroup = @"<PropertyGroup>
+        public const string EnableTransitiveProjectReferencesPropertyGroup = @"<PropertyGroup>
                                                                                             <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
                                                                                          </PropertyGroup>";
 
-        public static void AssertOuterBuildAsNonRoot(
+        public static void AssertOuterBuild(
             ProjectGraphNode outerBuild,
             ProjectGraph graph,
             Dictionary<string, string> additionalGlobalProperties = null,
             int expectedInnerBuildCount = 2)
         {
-            additionalGlobalProperties ??= new Dictionary<string, string>();
+            additionalGlobalProperties ??= new Dictionary<string, string>(0);
 
             AssertOuterBuildEvaluation(outerBuild, additionalGlobalProperties);
 
-            outerBuild.ProjectReferences.ShouldBeEmpty();
-            outerBuild.ReferencingProjects.ShouldNotBeEmpty();
+            outerBuild.ProjectReferences.Count.ShouldBe(expectedInnerBuildCount);
 
-            foreach (var outerBuildReferencer in outerBuild.ReferencingProjects)
+            // Outer -> Inner build edges
+            foreach (ProjectGraphNode innerBuild in outerBuild.ProjectReferences)
             {
-                var innerBuilds =
-                    outerBuildReferencer.ProjectReferences.Where(
-                        p =>
-                            IsInnerBuild(p) 
-                            && p.ProjectInstance.FullPath == outerBuild.ProjectInstance.FullPath).ToArray();
+                AssertInnerBuildEvaluation(innerBuild, true, additionalGlobalProperties);
+
+                ProjectItemInstance edge = graph.TestOnly_Edges[(outerBuild, innerBuild)];
+                edge.DirectMetadataCount.ShouldBe(1);
+
+                string expectedPropertiesMetadata = $"{InnerBuildPropertyName}={innerBuild.ProjectInstance.GlobalProperties[InnerBuildPropertyName]}";
+                edge.GetMetadata("Properties").EvaluatedValue.ShouldBe(expectedPropertiesMetadata);
+            }
+
+            // Ensure edges were added directly to the inner builds
+            foreach (ProjectGraphNode outerBuildReferencer in outerBuild.ReferencingProjects)
+            {
+                ProjectGraphNode[] innerBuilds = outerBuildReferencer.ProjectReferences
+                    .Where(p => p.ProjectType == ProjectInterpretation.ProjectType.InnerBuild && p.ProjectInstance.FullPath == outerBuild.ProjectInstance.FullPath)
+                    .ToArray();
 
                 innerBuilds.Length.ShouldBe(expectedInnerBuildCount);
 
-                foreach (var innerBuild in innerBuilds)
+                foreach (ProjectGraphNode innerBuild in innerBuilds)
                 {
                     AssertInnerBuildEvaluation(innerBuild, true, additionalGlobalProperties);
 
                     innerBuild.ReferencingProjects.ShouldContain(outerBuildReferencer);
-                    innerBuild.ReferencingProjects.ShouldNotContain(outerBuild);
+                    innerBuild.ReferencingProjects.ShouldContain(outerBuild);
 
-                    graph.TestOnly_Edges.HasEdge((outerBuild, innerBuild)).ShouldBeFalse();
+                    graph.TestOnly_Edges.HasEdge((outerBuild, innerBuild)).ShouldBeTrue();
 
-                    var edgeToOuterBuild = graph.TestOnly_Edges[(outerBuildReferencer, outerBuild)];
-                    var edgeToInnerBuild = graph.TestOnly_Edges[(outerBuildReferencer, innerBuild)];
+                    ProjectItemInstance edgeToOuterBuild = graph.TestOnly_Edges[(outerBuildReferencer, outerBuild)];
+                    ProjectItemInstance edgeToInnerBuild = graph.TestOnly_Edges[(outerBuildReferencer, innerBuild)];
 
                     edgeToOuterBuild.ShouldBe(edgeToInnerBuild);
                 }
@@ -78,7 +91,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             additionalGlobalProperties ??= new Dictionary<string, string>();
 
-            IsNotMultitargeting(node).ShouldBeTrue();
+            node.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.NonMultitargeting);
             node.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
             node.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
         }
@@ -87,8 +100,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             additionalGlobalProperties.ShouldNotBeNull();
 
-            IsOuterBuild(outerBuild).ShouldBeTrue();
-            IsInnerBuild(outerBuild).ShouldBeFalse();
+            outerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.OuterBuild);
 
             outerBuild.ProjectInstance.GetProperty(InnerBuildPropertyName).ShouldBeNull();
             outerBuild.ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(EmptyGlobalProperties.AddRange(additionalGlobalProperties));
@@ -101,8 +113,7 @@ namespace Microsoft.Build.Graph.UnitTests
         {
             additionalGlobalProperties.ShouldNotBeNull();
 
-            IsOuterBuild(innerBuild).ShouldBeFalse();
-            IsInnerBuild(innerBuild).ShouldBeTrue();
+            innerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
 
             var innerBuildPropertyValue = innerBuild.ProjectInstance.GetPropertyValue(InnerBuildPropertyName);
 
@@ -117,21 +128,6 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        internal static bool IsOuterBuild(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.OuterBuild;
-        }
-
-        internal static bool IsInnerBuild(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.InnerBuild;
-        }
-
-        internal static bool IsNotMultitargeting(ProjectGraphNode project)
-        {
-            return ProjectInterpretation.GetProjectType(project.ProjectInstance) == ProjectInterpretation.ProjectType.NonMultitargeting;
-        }
-
         internal static ProjectGraphNode GetFirstNodeWithProjectNumber(ProjectGraph graph, int projectNum)
         {
             return GetNodesWithProjectNumber(graph, projectNum).First();
@@ -144,7 +140,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
         internal static ProjectGraphNode GetOuterBuild(ProjectGraph graph, int projectNumber)
         {
-            return GetNodesWithProjectNumber(graph, projectNumber).FirstOrDefault(IsOuterBuild);
+            return GetNodesWithProjectNumber(graph, projectNumber).FirstOrDefault(i => i.ProjectType == ProjectInterpretation.ProjectType.OuterBuild);
         }
 
         internal static IReadOnlyCollection<ProjectGraphNode> GetInnerBuilds(ProjectGraph graph, int projectNumber)
@@ -158,7 +154,7 @@ namespace Microsoft.Build.Graph.UnitTests
             else
             {
                 var innerBuilds = GetNodesWithProjectNumber(graph, projectNumber)
-                    .Where(p => IsInnerBuild(p) && p.ProjectInstance.FullPath.Equals(outerBuild.ProjectInstance.FullPath))
+                    .Where(p => p.ProjectType == ProjectInterpretation.ProjectType.InnerBuild && p.ProjectInstance.FullPath.Equals(outerBuild.ProjectInstance.FullPath))
                     .ToArray();
 
                 innerBuilds.ShouldNotBeEmpty();
@@ -203,8 +199,7 @@ namespace Microsoft.Build.Graph.UnitTests
             int[] projectReferences = null,
             Dictionary<string, string[]> projectReferenceTargets = null,
             string defaultTargets = null,
-            string extraContent = null
-            )
+            string extraContent = null)
         {
             return Helpers.CreateProjectFile(
                 env,

@@ -1,5 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
+
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace Microsoft.Build.Tasks
 {
@@ -34,6 +40,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// A link pointing to more information about the warning
         /// </summary>
+        [StringSyntax(StringSyntaxAttribute.Uri)]
         public string HelpLink { get; set; }
 
         /// <summary>

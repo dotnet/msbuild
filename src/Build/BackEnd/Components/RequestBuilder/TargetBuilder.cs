@@ -1,20 +1,23 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -88,6 +91,11 @@ namespace Microsoft.Build.BackEnd
         private bool _legacyCallTargetContinueOnError;
 
         /// <summary>
+        /// Flag indicating whether telemetry is requested.
+        /// </summary>
+        private bool _isTelemetryRequested;
+
+        /// <summary>
         /// Builds the specified targets.
         /// </summary>
         /// <param name="loggingContext">The logging context for the project.</param>
@@ -97,13 +105,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="baseLookup">The Lookup containing all current items and properties for this target.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> to use when building the targets.</param>
         /// <returns>The target's outputs and result codes</returns>
-        public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
+        public async Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targetNames, Lookup baseLookup, CancellationToken cancellationToken)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext, "projectLoggingContext");
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrowArgumentNull(callback, "requestBuilderCallback");
-            ErrorUtilities.VerifyThrowArgumentNull(targetNames, nameof(targetNames));
-            ErrorUtilities.VerifyThrowArgumentNull(baseLookup, nameof(baseLookup));
+            ErrorUtilities.VerifyThrowArgumentNull(targetNames);
+            ErrorUtilities.VerifyThrowArgumentNull(baseLookup);
             ErrorUtilities.VerifyThrow(targetNames.Length > 0, "List of targets must be non-empty");
             ErrorUtilities.VerifyThrow(_componentHost != null, "InitializeComponent must be called before building targets.");
 
@@ -140,17 +148,17 @@ namespace Microsoft.Build.BackEnd
 
             List<TargetSpecification> targets = new List<TargetSpecification>(targetNames.Length);
 
-            foreach (string targetName in targetNames)
+            foreach ((string name, TargetBuiltReason reason) targetName in targetNames)
             {
-                var targetExists = _projectInstance.Targets.TryGetValue(targetName, out ProjectTargetInstance targetInstance);
+                var targetExists = _projectInstance.Targets.TryGetValue(targetName.name, out ProjectTargetInstance targetInstance);
                 if (!targetExists && entry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.SkipNonexistentTargets))
                 {
                     _projectLoggingContext.LogComment(Framework.MessageImportance.Low,
-                        "TargetSkippedWhenSkipNonexistentTargets", targetName);
+                        "TargetSkippedWhenSkipNonexistentTargets", targetName.name);
                 }
                 else
                 {
-                    targets.Add(new TargetSpecification(targetName, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation));
+                    targets.Add(new TargetSpecification(targetName.name, targetExists ? targetInstance.Location : _projectInstance.ProjectFileLocation, targetName.reason));
                 }
             }
 
@@ -182,7 +190,7 @@ namespace Microsoft.Build.BackEnd
 
             // Gather up outputs for the requested targets and return those.  All of our information should be in the base lookup now.
             ComputeAfterTargetFailures(targetNames);
-            BuildResult resultsToReport = new BuildResult(_buildResult, targetNames);
+            BuildResult resultsToReport = new BuildResult(_buildResult, targetNames.Select(target => target.name).ToArray());
 
             // Return after-build project state if requested.
             if (_requestEntry.Request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.ProvideProjectStateAfterBuild))
@@ -209,8 +217,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             _componentHost = host;
+            _isTelemetryRequested = host.BuildParameters.IsTelemetryEnabled;
         }
 
         /// <summary>
@@ -403,24 +412,21 @@ namespace Microsoft.Build.BackEnd
                 (
                 !_cancellationToken.IsCancellationRequested &&
                 !stopProcessingStack &&
-                !_targetsToBuild.IsEmpty
-                )
+                !_targetsToBuild.IsEmpty)
             {
                 TargetEntry currentTargetEntry = _targetsToBuild.Peek();
                 switch (currentTargetEntry.State)
                 {
                     case TargetEntryState.Dependencies:
                         // Ensure we are dealing with a target which actually exists.
-                        ProjectErrorUtilities.VerifyThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                         _requestEntry.RequestConfiguration.Project.Targets.ContainsKey(currentTargetEntry.Name),
                         currentTargetEntry.ReferenceLocation,
                         "TargetDoesNotExist",
-                        currentTargetEntry.Name
-                        );
+                        currentTargetEntry.Name);
 
-                        // If we already have results for this target which were not skipped, we can ignore it.  In 
-                        // addition, we can also ignore its before and after targets -- if this target has already run, 
+                        // If we already have results for this target which were not skipped, we can ignore it.  In
+                        // addition, we can also ignore its before and after targets -- if this target has already run,
                         // then so have they.
                         if (!CheckSkipTarget(ref stopProcessingStack, currentTargetEntry))
                         {
@@ -446,7 +452,7 @@ namespace Microsoft.Build.BackEnd
                             IList<TargetSpecification> dependencies = currentTargetEntry.GetDependencies(_projectLoggingContext);
 
                             // Push our before targets now, unconditionally.  If we have marked that we should stop processing the stack here, which can only
-                            // happen if our current target was supposed to stop processing AND we had no after targets, then our last before target should 
+                            // happen if our current target was supposed to stop processing AND we had no after targets, then our last before target should
                             // inherit the stop processing flag and we will reset it.
                             // Our parent is the target before which we run, just like a depends-on target.
                             IList<TargetSpecification> beforeTargets = _requestEntry.RequestConfiguration.Project.GetTargetsWhichRunBefore(currentTargetEntry.Name);
@@ -484,7 +490,7 @@ namespace Microsoft.Build.BackEnd
                             // Execute all of the tasks on this target.
                             MSBuildEventSource.Log.TargetStart(currentTargetEntry.Name);
                             await currentTargetEntry.ExecuteTarget(taskBuilder, _requestEntry, _projectLoggingContext, _cancellationToken);
-                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name);
+                            MSBuildEventSource.Log.TargetStop(currentTargetEntry.Name, currentTargetEntry.Result?.TargetResultCodeToString() ?? string.Empty);
                         }
 
                         break;
@@ -518,6 +524,11 @@ namespace Microsoft.Build.BackEnd
                         // CallTarget, make sure we don't contribute this failure to the overall success of the build.
                         targetResult.TargetFailureDoesntCauseBuildFailure = _legacyCallTargetContinueOnError;
 
+                        if (_isTelemetryRequested)
+                        {
+                            targetResult.TargetLocation = currentTargetEntry.Target.Location;
+                        }
+
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
 
@@ -546,9 +557,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True to skip the target, false otherwise.</returns>
         private bool CheckSkipTarget(ref bool stopProcessingStack, TargetEntry currentTargetEntry)
         {
-            if (_buildResult.HasResultsForTarget(currentTargetEntry.Name))
+            if (_buildResult.TryGetResultsForTarget(currentTargetEntry.Name, out TargetResult targetResult))
             {
-                TargetResult targetResult = _buildResult[currentTargetEntry.Name] as TargetResult;
                 ErrorUtilities.VerifyThrowInternalNull(targetResult, "targetResult");
 
                 if (targetResult.ResultCode != TargetResultCode.Skipped)
@@ -584,11 +594,11 @@ namespace Microsoft.Build.BackEnd
                     {
                         TargetEntry topEntry = _targetsToBuild.Pop();
 
-                        // If this is a skip because of target failure, we should behave in the same way as we 
-                        // would if this target actually failed -- remove all its dependencies from the stack as 
-                        // well.  Otherwise, we could encounter a situation where a failure target happens in the 
+                        // If this is a skip because of target failure, we should behave in the same way as we
+                        // would if this target actually failed -- remove all its dependencies from the stack as
+                        // well.  Otherwise, we could encounter a situation where a failure target happens in the
                         // middle of execution once, then exits, then a request comes through to build the same
-                        // targets, reaches that target, skips-already-failed, and then continues building. 
+                        // targets, reaches that target, skips-already-failed, and then continues building.
                         PopDependencyTargetsOnTargetFailure(topEntry, targetResult, ref stopProcessingStack);
                     }
 
@@ -663,14 +673,11 @@ namespace Microsoft.Build.BackEnd
 
                 if (buildReason == TargetBuiltReason.BeforeTargets || buildReason == TargetBuiltReason.AfterTargets)
                 {
-                    // Don't build any Before or After targets for which we already have results.  Unlike other targets, 
+                    // Don't build any Before or After targets for which we already have results.  Unlike other targets,
                     // we don't explicitly log a skipped-with-results message because it is not interesting.
-                    if (_buildResult.HasResultsForTarget(targetSpecification.TargetName))
+                    if (_buildResult.TryGetResultsForTarget(targetSpecification.TargetName, out TargetResult targetResult) && targetResult.ResultCode != TargetResultCode.Skipped)
                     {
-                        if (_buildResult[targetSpecification.TargetName].ResultCode != TargetResultCode.Skipped)
-                        {
-                            continue;
-                        }
+                        continue;
                     }
                 }
 
@@ -735,9 +742,14 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                // The buildReason argument for this function can be BeforeTargets or AfterTargets, we don't want to override the reason when adding a new entry
+                // If the reason is None, it means it does not depend on another target. So we can use the target's BuiltReason.
+                TargetBuiltReason entryReason = buildReason == TargetBuiltReason.None ? targetSpecification._targetBuiltReason : buildReason;
+
                 // Add to the list of targets to push.  We don't actually put it on the stack here because we could run into a circular dependency
                 // during this loop, in which case the target stack would be out of whack.
-                TargetEntry newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, buildReason, _componentHost, stopProcessingOnCompletion);
+                TargetEntry newEntry = new TargetEntry(_requestEntry, this as ITargetBuilderCallback, targetSpecification, baseLookup, parentTargetEntry, entryReason, _componentHost, _projectLoggingContext, stopProcessingOnCompletion);
+
                 newEntry.ErrorTarget = addAsErrorTarget;
                 targetsToPush.Add(newEntry);
                 stopProcessingOnCompletion = false; // The first target on the stack (the last one to be run) always inherits the stopProcessing flag.
@@ -772,15 +784,15 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-        private void ComputeAfterTargetFailures(string[] targetNames)
+        private void ComputeAfterTargetFailures((string name, TargetBuiltReason reason)[] targetNames)
         {
-            foreach (string targetName in targetNames)
+            foreach ((string name, TargetBuiltReason reason) targetName in targetNames)
             {
-                if (_buildResult.ResultsByTarget.TryGetValue(targetName, out TargetResult targetBuildResult))
+                if (_buildResult.ResultsByTarget.TryGetValue(targetName.name, out TargetResult targetBuildResult))
                 {
                     // Queue of targets waiting to be processed, seeded with the specific target for which we're computing AfterTargetsHaveFailed.
                     var targetsToCheckForAfterTargets = new Queue<string>();
-                    targetsToCheckForAfterTargets.Enqueue(targetName);
+                    targetsToCheckForAfterTargets.Enqueue(targetName.name);
 
                     // Set of targets already processed, to break cycles of AfterTargets.
                     // Initialized lazily when needed below.
@@ -804,7 +816,7 @@ namespace Microsoft.Build.BackEnd
 
                             targetsChecked ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default)
                                 {
-                                    targetName
+                                    targetName.name
                                 };
 
                             // If we haven't seen this target yet, add it to the list to check.

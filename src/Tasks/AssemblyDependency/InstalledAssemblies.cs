@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -31,14 +32,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="isPrerequisite">Whether this assembly will be available on target machines.</param>
         /// <param name="isRedistRoot">May be true, false or null. Null means there was no IsRedistRoot in the redist list.</param>
         /// <param name="redistName">Name of the corresponding Resist specified in the redist list.</param>
-        internal void GetInfo
-        (
+        internal void GetInfo(
             AssemblyNameExtension assemblyName,
             out Version unifiedVersion,
             out bool isPrerequisite,
             out bool? isRedistRoot,
-            out string redistName
-        )
+            out string redistName)
         {
             unifiedVersion = assemblyName.Version;
             isPrerequisite = false;
@@ -66,7 +65,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            // Dont allow downgrading of reference version due to redist unification because this is automatic rather than something like an appconfig which 
+            // Dont allow downgrading of reference version due to redist unification because this is automatic rather than something like an appconfig which
             // has to be manually set. However if the major version is 255 then we do want to unify down the version number.
             if (assemblyName.Version <= highestVersionFromRedistList.AssemblyNameExtension.Version || assemblyName.Version.Major == 255)
             {
@@ -94,7 +93,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Key value pair, K: Assembly entry of highest value in the redist list. V: AssemblyNameExtension with the version information or null if the name could not be found</returns>
         internal AssemblyEntry FindHighestVersionInRedistList(AssemblyNameExtension assemblyName)
         {
-            // The assembly we are looking for is not listed in a redist list which contains framework assemblies. We do not want to find 
+            // The assembly we are looking for is not listed in a redist list which contains framework assemblies. We do not want to find
             // find non framework assembly entries.
             if (!FrameworkAssemblyEntryInRedist(assemblyName))
             {
@@ -140,7 +139,7 @@ namespace Microsoft.Build.Tasks
         {
             if (_redistList == null)
             {
-                return Enumerable.Empty<AssemblyEntry>();
+                return [];
             }
 
             return _redistList.FindAssemblyNameFromSimpleName(simpleName);

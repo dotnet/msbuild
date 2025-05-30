@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -39,7 +41,6 @@ namespace Microsoft.Build.Evaluation
 
                 #region IEnumerable implementation
 
-                ImmutableList<ItemData>.Enumerator GetEnumerator() => _listBuilder.GetEnumerator();
                 IEnumerator<ItemData> IEnumerable<ItemData>.GetEnumerator() => _listBuilder.GetEnumerator();
 
                 System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _listBuilder.GetEnumerator();
@@ -50,7 +51,11 @@ namespace Microsoft.Build.Evaluation
 
                 public ItemData this[int index]
                 {
-                    get { return _listBuilder[index]; }
+                    get
+                    {
+                        return _listBuilder[index];
+                    }
+
                     set
                     {
                         // Update the dictionary if it exists.
@@ -76,7 +81,6 @@ namespace Microsoft.Build.Evaluation
                                 ItemDataCollectionValue<I> newDictionaryEntry = _dictionaryBuilder[newNormalizedValue];
                                 newDictionaryEntry.Add(value.Item);
                                 _dictionaryBuilder[newNormalizedValue] = newDictionaryEntry;
-
                             }
                             else
                             {

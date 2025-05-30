@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -56,8 +58,15 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <returns>The BuildEventContext to use for this project.</returns>
         internal ProjectLoggingContext LogProjectStarted(BuildRequestEntry requestEntry)
         {
+            (ProjectStartedEventArgs arg, ProjectLoggingContext ctx) = CreateProjectLoggingContext(requestEntry);
+            LoggingService.LogProjectStarted(arg);
+            return ctx;
+        }
+
+        internal (ProjectStartedEventArgs, ProjectLoggingContext) CreateProjectLoggingContext(BuildRequestEntry requestEntry)
+        {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return new ProjectLoggingContext(this, requestEntry);
+            return ProjectLoggingContext.CreateLoggingContext(this, requestEntry);
         }
 
         /// <summary>
@@ -88,16 +97,16 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // When pulling a request from the cache, we want to make sure we log a target skipped event for any targets which
             // were used to build the request including default and initial targets.
-            foreach (string target in configuration.GetTargetsUsedToBuildRequest(request))
+            foreach ((string name, TargetBuiltReason reason) target in configuration.GetTargetsUsedToBuildRequest(request))
             {
-                var targetResult = result[target];
+                var targetResult = result[target.name];
                 bool isFailure = targetResult.ResultCode == TargetResultCode.Failure;
 
                 var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                 {
                     BuildEventContext = projectLoggingContext.BuildEventContext,
-                    TargetName = target,
-                    BuildReason = TargetBuiltReason.None,
+                    TargetName = target.name,
+                    BuildReason = target.reason,
                     SkipReason = isFailure ? TargetSkipReason.PreviouslyBuiltUnsuccessfully : TargetSkipReason.PreviouslyBuiltSuccessfully,
                     OriginallySucceeded = !isFailure,
                     OriginalBuildEventContext = (targetResult as TargetResult)?.OriginalBuildEventContext

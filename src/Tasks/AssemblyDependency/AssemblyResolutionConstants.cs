@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -9,27 +11,27 @@ namespace Microsoft.Build.Tasks
     internal static class AssemblyResolutionConstants
     {
         /// <summary>
-        /// Special hintpath indicator. May be passed in where SearchPaths are taken. 
+        /// Special hintpath indicator. May be passed in where SearchPaths are taken.
         /// </summary>
         public const string hintPathSentinel = "{hintpathfromitem}";
 
         /// <summary>
-        /// Special AssemblyFolders indicator. May be passed in where SearchPaths are taken. 
+        /// Special AssemblyFolders indicator. May be passed in where SearchPaths are taken.
         /// </summary>
         public const string assemblyFoldersSentinel = "{assemblyfolders}";
 
         /// <summary>
-        /// Special CandidateAssemblyFiles indicator. May be passed in where SearchPaths are taken. 
+        /// Special CandidateAssemblyFiles indicator. May be passed in where SearchPaths are taken.
         /// </summary>
         public const string candidateAssemblyFilesSentinel = "{candidateassemblyfiles}";
 
         /// <summary>
-        /// Special GAC indicator. May be passed in where SearchPaths are taken. 
+        /// Special GAC indicator. May be passed in where SearchPaths are taken.
         /// </summary>
         public const string gacSentinel = "{gac}";
 
         /// <summary>
-        /// Special Framework directory indicator. May be passed in where SearchPaths are taken. 
+        /// Special Framework directory indicator. May be passed in where SearchPaths are taken.
         /// </summary>
         public const string frameworkPathSentinel = "{targetframeworkdirectory}";
 
@@ -40,12 +42,12 @@ namespace Microsoft.Build.Tasks
         public const string rawFileNameSentinel = "{rawfilename}";
 
         /// <summary>
-        /// Special AssemblyFoldersEx indicator.  May be passed in where SearchPaths are taken. 
+        /// Special AssemblyFoldersEx indicator.  May be passed in where SearchPaths are taken.
         /// </summary>
         public const string assemblyFoldersExSentinel = "{registry:";
 
         /// <summary>
-        /// Special AssemblyFoldersFromConfig indicator.  May be passed in where SearchPaths are taken. 
+        /// Special AssemblyFoldersFromConfig indicator.  May be passed in where SearchPaths are taken.
         /// </summary>
         public const string assemblyFoldersFromConfigSentinel = "{assemblyfoldersfromconfig:";
     }

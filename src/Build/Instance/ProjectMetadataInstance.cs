@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
-using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -59,7 +61,7 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         internal ProjectMetadataInstance(string name, string escapedValue, bool allowItemSpecModifiers)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             if (allowItemSpecModifiers)
             {
@@ -97,7 +99,7 @@ namespace Microsoft.Build.Execution
         /// Name of the metadata
         /// </summary>
         /// <remarks>
-        /// This cannot be set, as it is used as the key into 
+        /// This cannot be set, as it is used as the key into
         /// the item's metadata table.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -109,7 +111,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Evaluated value of the metadatum. 
+        /// Evaluated value of the metadatum.
         /// Never null.
         /// </summary>
         public string EvaluatedValue
@@ -162,7 +164,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public override string ToString()
         {
-            return _name + "=" + _escapedValue;
+            return $"{_name}={_escapedValue}";
         }
 
         #region INodePacketTranslatable Members

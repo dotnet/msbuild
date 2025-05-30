@@ -1,25 +1,29 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Xml;
-using System.IO;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
-using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
+using InternalUtilities = Microsoft.Build.Internal.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
-    /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data. 
+    /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data.
     /// </summary>
     public class Project_Internal_Tests
     {
         /// <summary>
-        /// Set default tools version; subsequent projects should use it 
+        /// Set default tools version; subsequent projects should use it
         /// </summary>
         [Fact]
         public void SetDefaultToolsVersion()
@@ -29,12 +33,12 @@ namespace Microsoft.Build.UnitTests.Definition
             try
             {
                 // In the new world of figuring out the ToolsVersion to use, we completely ignore the default
-                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying 
-                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.  
+                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying
+                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 collection.AddToolset(new Toolset("x", @"c:\y", collection, null));
 
                 collection.DefaultToolsVersion = "x";
@@ -42,12 +46,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 Assert.Equal("x", collection.DefaultToolsVersion);
 
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'/>
                     </Project>
                 ";
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, null, collection);
+                using ProjectFromString projectFromString = new(content, null, null, collection);
+                Project project = projectFromString.Project;
 
                 Assert.Equal("x", project.ToolsVersion);
             }
@@ -59,10 +64,10 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// If the ToolsVersion in the project file is bogus, we'll default to the current ToolsVersion and successfully 
-        /// load it.  Make sure we can RE-load it, too, and successfully pick up the correct copy of the loaded project. 
-        /// 
-        /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath. 
+        /// If the ToolsVersion in the project file is bogus, we'll default to the current ToolsVersion and successfully
+        /// load it.  Make sure we can RE-load it, too, and successfully pick up the correct copy of the loaded project.
+        ///
+        /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath.
         /// </summary>
         [Fact]
         public void ReloadProjectWithInvalidToolsVersionInFile()
@@ -72,18 +77,19 @@ namespace Microsoft.Build.UnitTests.Definition
             try
             {
                 // In the new world of figuring out the ToolsVersion to use, we completely ignore the default
-                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying 
-                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.  
+                // ToolsVersion in the ProjectCollection.  However, this test explicitly depends on modifying
+                // that, so we need to turn the new defaulting behavior off in order to verify that this still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
                 string content = @"
-                    <Project ToolsVersion='bogus' xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project ToolsVersion='bogus'>
                         <Target Name='t'/>
                     </Project>
                 ";
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 project.FullPath = "c:\\123.proj";
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
@@ -116,10 +122,10 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                // In the new world of figuring out the ToolsVersion to use, we completely ignore what 
+                // In the new world of figuring out the ToolsVersion to use, we completely ignore what
                 // is written in the project file.  However, this test explicitly depends on effectively
-                // modifying the "project file" (through the construction model OM), so we need to turn 
-                // that behavior off in order to verify that it still works.  
+                // modifying the "project file" (through the construction model OM), so we need to turn
+                // that behavior off in order to verify that it still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
@@ -167,10 +173,10 @@ namespace Microsoft.Build.UnitTests.Definition
 
             try
             {
-                // In the new world of figuring out the ToolsVersion to use, we completely ignore what 
+                // In the new world of figuring out the ToolsVersion to use, we completely ignore what
                 // is written in the project file.  However, this test explicitly depends on effectively
-                // modifying the "project file" (through the construction model OM), so we need to turn 
-                // that behavior off in order to verify that it still works.  
+                // modifying the "project file" (through the construction model OM), so we need to turn
+                // that behavior off in order to verify that it still works.
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
@@ -200,13 +206,13 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ProjectEvaluationShouldRespectConditionsIfProjectLoadSettingsSaysSo()
         {
             var projectContents = @"
-<Project>   
+<Project>
    <ItemDefinitionGroup Condition=`1 == 2`>
      <I>
        <m>v</m>
      </I>
    </ItemDefinitionGroup>
-   
+
    <PropertyGroup Condition=`1 == 2`>
      <P1>v</P1>
    </PropertyGroup>
@@ -228,8 +234,8 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var project = new Project(XmlReader.Create(new StringReader(projectContents)), new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection, ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
-
+                using ProjectFromString projectFromString = new(projectContents, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection, ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+                Project project = projectFromString.Project;
                 var data = project.TestOnlyGetPrivateData;
 
                 project.GetProperty("P1").ShouldBeNull();
@@ -250,6 +256,93 @@ namespace Microsoft.Build.UnitTests.Definition
                 {
                     var c = project.ItemsIgnoringCondition;
                 });
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when calling <see cref="Project.FromFile(string, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectFromFileInteractive(bool interactive)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(projectCollection);
+
+                projectRootElement.Save(testEnvironment.CreateFile().Path);
+
+                Project project = Project.FromFile(
+                    projectRootElement.FullPath,
+                    new ProjectOptions
+                    {
+                        Interactive = interactive,
+                        ProjectCollection = projectCollection,
+                    });
+
+                project.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when calling <see cref="Project.FromProjectRootElement(ProjectRootElement, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectFromProjectRootElementInteractive(bool interactive)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(projectCollection);
+
+                projectRootElement.Save(testEnvironment.CreateFile().Path);
+
+                Project project = Project.FromProjectRootElement(
+                    projectRootElement,
+                    new ProjectOptions
+                    {
+                        Interactive = interactive,
+                        ProjectCollection = projectCollection,
+                    });
+
+                project.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when calling <see cref="Project.FromXmlReader(XmlReader, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectFromXmlReaderInteractive(bool interactive)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(projectCollection);
+
+                projectRootElement.Save(testEnvironment.CreateFile().Path);
+
+                using (XmlReader xmlReader = XmlReader.Create(projectRootElement.FullPath))
+                {
+                    Project project = Project.FromXmlReader(
+                        xmlReader,
+                        new ProjectOptions
+                        {
+                            Interactive = interactive,
+                            ProjectCollection = projectCollection,
+                        });
+
+                    project.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+                }
             }
         }
     }

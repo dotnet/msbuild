@@ -1,10 +1,16 @@
-﻿// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
+#if NET
+using System.Linq;
+#else
+using System.Collections.Generic;
 using Microsoft.Build.Shared;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -17,36 +23,40 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal static class CultureInfoCache
     {
-        private static readonly HashSet<string> ValidCultureNames;
+#if !NET
+        private static readonly Lazy<HashSet<string>> ValidCultureNames = new Lazy<HashSet<string>>(() => InitializeValidCultureNames());
+#endif
 
-        static CultureInfoCache()
+        // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
+        // These pseudo-locales are available in versions of Windows from Vista and later.
+        // However, from Windows 10, version 1803, they are not returned when enumerating the
+        // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
+        private static readonly string[] pseudoLocales = ["qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh"];
+
+#if !NET
+        private static HashSet<string> InitializeValidCultureNames()
         {
-            ValidCultureNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
 #if !FEATURE_CULTUREINFO_GETCULTURES
             if (!AssemblyUtilities.CultureInfoHasGetCultures())
             {
-                ValidCultureNames = HardcodedCultureNames;
-                return;
+                return HardcodedCultureNames;
             }
 #endif
-
+            HashSet<string> validCultureNames = new(StringComparer.OrdinalIgnoreCase);
             foreach (CultureInfo cultureName in AssemblyUtilities.GetAllCultures())
             {
-                ValidCultureNames.Add(cultureName.Name);
+                validCultureNames.Add(cultureName.Name);
             }
 
-            // https://docs.microsoft.com/en-gb/windows/desktop/Intl/using-pseudo-locales-for-localization-testing
-            // These pseudo-locales are available in versions of Windows from Vista and later.
-            // However, from Windows 10, version 1803, they are not returned when enumerating the
-            // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
-            var pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
-
+            // Account for pseudo-locales (see above)
             foreach (string pseudoLocale in pseudoLocales)
             {
-                ValidCultureNames.Add(pseudoLocale);
+                validCultureNames.Add(pseudoLocale);
             }
+
+            return validCultureNames;
         }
+#endif
 
         /// <summary>
         /// Determine if a culture string represents a valid <see cref="CultureInfo"/> instance.
@@ -55,10 +65,24 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if the culture is determined to be valid.</returns>
         internal static bool IsValidCultureString(string name)
         {
-            return ValidCultureNames.Contains(name);
+#if NET
+            try
+            {
+                // GetCultureInfo throws if the culture doesn't exist
+                CultureInfo.GetCultureInfo(name, predefinedOnly: true);
+                return true;
+            }
+            catch
+            {
+                // Second attempt: try pseudolocales (see above)
+                return pseudoLocales.Contains(name, StringComparer.OrdinalIgnoreCase);
+            }
+#else
+            return ValidCultureNames.Value.Contains(name);
+#endif
         }
 
-#if !FEATURE_CULTUREINFO_GETCULTURES
+#if !NET && !FEATURE_CULTUREINFO_GETCULTURES
         // Copied from https://github.com/aspnet/Localization/blob/5e1fb16071affd15f15b9c732833f3ae2ac46e10/src/Microsoft.Framework.Globalization.CultureInfoCache/CultureInfoList.cs
         // Regenerated using the tool (removed by https://github.com/aspnet/Localization/pull/130)
         //   * Removed the empty string from the list
@@ -920,4 +944,3 @@ namespace Microsoft.Build.Tasks
 #endif
     }
 }
-

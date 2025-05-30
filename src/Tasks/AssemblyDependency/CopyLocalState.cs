@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -70,6 +71,11 @@ namespace Microsoft.Build.Tasks
         /// The property copyLocalDependenciesWhenParentReferenceInGac is set to false and all the parent source items were found in the GAC.
         /// </summary>
         NoBecauseParentReferencesFoundInGAC,
+
+        /// <summary>
+        /// The "assembly" should not be copied because it is a bad image—possibly not managed, possibly not an assembly at all.
+        /// </summary>
+        NoBecauseBadImage,
     }
 
     /// <remarks>
@@ -96,6 +102,7 @@ namespace Microsoft.Build.Tasks
                 case CopyLocalState.NoBecauseReferenceFoundInGAC:
                 case CopyLocalState.NoBecauseEmbedded:
                 case CopyLocalState.NoBecauseParentReferencesFoundInGAC:
+                case CopyLocalState.NoBecauseBadImage:
                     return false;
                 default:
                     throw new InternalErrorException("Unexpected CopyLocal flag.");
@@ -103,7 +110,7 @@ namespace Microsoft.Build.Tasks
                     //
                     //   ErrorUtilities.VerifyThrow(false, "Unexpected CopyLocal flag.");
                     //
-                    // but this popped up constantly when debugging because its call 
+                    // but this popped up constantly when debugging because its call
                     // directly by a property accessor in Reference.
             }
         }

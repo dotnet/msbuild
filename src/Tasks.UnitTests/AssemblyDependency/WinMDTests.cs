@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Globalization;
 using Microsoft.Build.Framework;
@@ -8,12 +11,13 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task.
     /// </summary>
-    [Trait("Category", "non-mono-tests")]
     public sealed class WinMDTests : ResolveAssemblyReferenceTestFixture
     {
         public WinMDTests(ITestOutputHelper output) : base(output)

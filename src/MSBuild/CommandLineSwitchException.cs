@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.Serialization;
@@ -9,22 +9,22 @@ using System.Security.Permissions;
 
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
     /// This exception is used to flag (syntax) errors in command line switches passed to the application.
     /// </summary>
     [Serializable]
-    internal sealed class CommandLineSwitchException : Exception
+    internal sealed class CommandLineSwitchException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// This constructor initializes the exception message.
         /// </summary>
         /// <param name="message"></param>
-        private CommandLineSwitchException
-        (
-            string message
-        ) :
+        private CommandLineSwitchException(
+            string message) :
             base(message)
         {
             // do nothing
@@ -35,11 +35,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="message"></param>
         /// <param name="commandLineArg"></param>
-        private CommandLineSwitchException
-        (
+        private CommandLineSwitchException(
             string message,
-            string commandLineArg
-        ) :
+            string commandLineArg) :
             this(message)
         {
             this.commandLineArg = commandLineArg;
@@ -48,15 +46,15 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Serialization constructor
         /// </summary>
-        private CommandLineSwitchException
-        (
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
+#endif
+        private CommandLineSwitchException(
             SerializationInfo info,
-            StreamingContext context
-        ) :
+            StreamingContext context) :
             base(info, context)
-
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info);
 
             commandLineArg = info.GetString("commandLineArg");
         }
@@ -99,6 +97,9 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
 #if FEATURE_SECURITY_PERMISSIONS
         [SecurityPermissionAttribute(SecurityAction.Demand, SerializationFormatter = true)]
+#endif
+#if NET8_0_OR_GREATER
+        [Obsolete(DiagnosticId = "SYSLIB0051")]
 #endif
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
         {

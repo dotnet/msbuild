@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -9,6 +9,8 @@ using System.Runtime.ConstrainedExecution;
 #endif
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -16,9 +18,9 @@ namespace Microsoft.Build.Collections
     /// </summary>
     internal static class HashHelpers
     {
-        // Table of prime numbers to use as hash table sizes. 
+        // Table of prime numbers to use as hash table sizes.
         // The entry used for capacity is the smallest prime number in this array
-        // that is larger than twice the previous capacity. 
+        // that is larger than twice the previous capacity.
 
         internal static readonly int[] primes = {
             3, 7, 11, 17, 23, 29, 37, 47, 59, 71, 89, 107, 131, 163, 197, 239, 293, 353, 431, 521, 631, 761, 919,
@@ -67,7 +69,7 @@ namespace Microsoft.Build.Collections
                 }
             }
 
-            // Outside of our predefined table. Compute the hard way. 
+            // Outside of our predefined table. Compute the hard way.
             for (int i = (min | 1); i < Int32.MaxValue; i += 2)
             {
                 if (IsPrime(i))
@@ -90,7 +92,7 @@ namespace Microsoft.Build.Collections
 
             // Allow the hashtables to grow to maximum possible size (~2G elements) before encoutering capacity overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
-            if ((uint) newSize > MaxPrimeArrayLength)
+            if ((uint)newSize > MaxPrimeArrayLength)
             {
                 return MaxPrimeArrayLength;
             }

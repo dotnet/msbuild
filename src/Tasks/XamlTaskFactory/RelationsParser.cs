@@ -1,11 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Xml;
 using System.IO;
+using System.Xml;
 using Microsoft.Build.Shared;
+using File = System.IO.File;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Xaml
 {
@@ -172,17 +175,19 @@ namespace Microsoft.Build.Tasks.Xaml
         #endregion
 
         /// <summary>
-        /// The method that loads in an XML file
+        /// The method that loads in an XML file.
         /// </summary>
-        /// <param name="fileName">the xml file containing switches and properties</param>
-        private XmlDocument LoadFile(string fileName)
+        /// <param name="filePath">the xml file containing switches and properties.</param>
+        private XmlDocument LoadFile(string filePath)
         {
             try
             {
                 var xmlDocument = new XmlDocument();
-                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                XmlReader reader = XmlReader.Create(fileName, settings);
+                XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(filePath);
+                using XmlReader reader = XmlReader.Create(fs, settings);
                 xmlDocument.Load(reader);
+
                 return xmlDocument;
             }
             catch (FileNotFoundException e)
@@ -207,9 +212,12 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 var xmlDocument = new XmlDocument();
                 XmlReaderSettings settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
-                xmlDocument.Load(reader);
-                return xmlDocument;
+                using (XmlReader reader = XmlReader.Create(new StringReader(xml), settings))
+                {
+                    xmlDocument.Load(reader);
+
+                    return xmlDocument;
+                }
             }
             catch (XmlException e)
             {
@@ -219,7 +227,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Parses the xml file
+        /// Parses the xml file.
         /// </summary>
         public bool ParseXmlDocument(string fileName)
         {
@@ -519,7 +527,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 child = child.NextSibling;
             }
 
-            // We've read any enumerated values and any dependencies, so we just 
+            // We've read any enumerated values and any dependencies, so we just
             // have to add the switchRelations
             switchRelationsList.Add(switchRelationsToAdd.SwitchValue, switchRelationsToAdd);
             return true;
@@ -552,7 +560,7 @@ namespace Microsoft.Build.Tasks.Xaml
                         switchRelations.Status = attribute.InnerText;
                         break;
                     default:
-                        //LogError("InvalidAttribute", attribute.Name);
+                        // LogError("InvalidAttribute", attribute.Name);
                         break;
                 }
             }

@@ -1,13 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Tasks;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssemblyRegistrationCache_Tests
+    public sealed class AssemblyRegistrationCache_Tests
     {
         [Fact]
         public void ExerciseCache()
@@ -38,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             {
                 TransientTestFile file = env.CreateFile();
                 arc.SerializeCache(file.Path, null);
-                arc2 = StateFileBase.DeserializeCache(file.Path, null, typeof(AssemblyRegistrationCache)) as AssemblyRegistrationCache;
+                arc2 = StateFileBase.DeserializeCache<AssemblyRegistrationCache>(file.Path, null);
             }
 
             arc2._assemblies.Count.ShouldBe(arc._assemblies.Count);

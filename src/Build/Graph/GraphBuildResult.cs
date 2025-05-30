@@ -1,13 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 
 namespace Microsoft.Build.Graph
 {
-    public sealed class GraphBuildResult
+    public sealed class GraphBuildResult : BuildResultBase
     {
         /// <summary>
         /// Constructor creates a build result with results for each graph node.
@@ -21,17 +23,6 @@ namespace Microsoft.Build.Graph
         }
 
         /// <summary>
-        /// Constructor creates a build result indicating a circular dependency was created.
-        /// </summary>
-        /// <param name="submissionId">The id of the build submission.</param>
-        /// <param name="circularDependency">Set to true if a circular dependency was detected.</param>
-        internal GraphBuildResult(int submissionId, bool circularDependency)
-        {
-            SubmissionId = submissionId;
-            CircularDependency = circularDependency;
-        }
-
-        /// <summary>
         /// Constructs a graph build result with an exception
         /// </summary>
         /// <param name="submissionId">The id of the build submission.</param>
@@ -40,31 +31,32 @@ namespace Microsoft.Build.Graph
         {
             SubmissionId = submissionId;
             Exception = exception;
+            ResultsByNode = ImmutableDictionary<ProjectGraphNode, BuildResult>.Empty;
         }
 
         /// <summary>
         /// Returns the submission id.
         /// </summary>
-        public int SubmissionId { get; }
+        public override int SubmissionId { get; }
 
         /// <summary>
         /// Returns a flag indicating if a circular dependency was detected.
         /// </summary>
-        public bool CircularDependency { get; }
+        public override bool CircularDependency => Exception is CircularDependencyException;
 
         /// <summary>
         /// Returns the exception generated while this result was run, if any.
         /// </summary>
-        public Exception Exception { get; internal set; }
+        public override Exception? Exception { get; internal set; }
 
         /// <summary>
         /// Returns the overall result for this result set.
         /// </summary>
-        public BuildResultCode OverallResult
+        public override BuildResultCode OverallResult
         {
             get
             {
-                if (Exception != null || CircularDependency)
+                if (Exception != null)
                 {
                     return BuildResultCode.Failure;
                 }

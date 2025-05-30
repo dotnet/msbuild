@@ -1,14 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 
 using Microsoft.Build.Shared.LanguageParser;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class VisualBasicTokenizer_Tests
+    public sealed class VisualBasicTokenizer_Tests
     {
         [Fact]
         public void Empty() { AssertTokenize("", "", "", 0); }
@@ -71,11 +73,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoneUnderscore()
         {
-            AssertTokenize
-            (
+            AssertTokenize(
                 "Sub Foo(ByVal _ As Int16)\xd",
-                "Keyword(Sub).Identifier(Foo)Separator(()Keyword(ByVal).ExpectedIdentifier(_)"
-            );
+                "Keyword(Sub).Identifier(Foo)Separator(()Keyword(ByVal).ExpectedIdentifier(_)");
         }
 
         // Boolean literals
@@ -164,22 +164,18 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CheckAllOperators()
         {
-            AssertTokenize
-            (
+            AssertTokenize(
                 "a=1 & 2*3+4-5/6\\7^8<9=10>11\xd",
-                @"Identifier(a)Operator(=)DecimalIntegerLiteral(1).Operator(&).DecimalIntegerLiteral(2)Operator(*)DecimalIntegerLiteral(3)Operator(+)DecimalIntegerLiteral(4)Operator(-)DecimalIntegerLiteral(5)Operator(/)DecimalIntegerLiteral(6)Operator(\)DecimalIntegerLiteral(7)Operator(^)DecimalIntegerLiteral(8)Operator(<)DecimalIntegerLiteral(9)Operator(=)DecimalIntegerLiteral(10)Operator(>)DecimalIntegerLiteral(11)eol"
-            );
+                @"Identifier(a)Operator(=)DecimalIntegerLiteral(1).Operator(&).DecimalIntegerLiteral(2)Operator(*)DecimalIntegerLiteral(3)Operator(+)DecimalIntegerLiteral(4)Operator(-)DecimalIntegerLiteral(5)Operator(/)DecimalIntegerLiteral(6)Operator(\)DecimalIntegerLiteral(7)Operator(^)DecimalIntegerLiteral(8)Operator(<)DecimalIntegerLiteral(9)Operator(=)DecimalIntegerLiteral(10)Operator(>)DecimalIntegerLiteral(11)eol");
         }
 
         // Inplace arrays
         [Fact]
         public void InplaceArray()
         {
-            AssertTokenize
-            (
+            AssertTokenize(
                 "Me.Controls.AddRange(New Control() {Me.lblCodebase, Me.lblCopyright})\xd",
-                "Keyword(Me)Separator(.)Identifier(Controls)Separator(.)Identifier(AddRange)Separator(()Keyword(New).Identifier(Control)Separator(()Separator()).Separator({)Keyword(Me)Separator(.)Identifier(lblCodebase)Separator(,).Keyword(Me)Separator(.)Identifier(lblCopyright)Separator(})Separator())eol"
-            );
+                "Keyword(Me)Separator(.)Identifier(Controls)Separator(.)Identifier(AddRange)Separator(()Keyword(New).Identifier(Control)Separator(()Separator()).Separator({)Keyword(Me)Separator(.)Identifier(lblCodebase)Separator(,).Keyword(Me)Separator(.)Identifier(lblCopyright)Separator(})Separator())eol");
         }
 
         // Keywords
@@ -190,20 +186,16 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void WackyBrackettedClassName()
         {
-            AssertTokenize
-            (
+            AssertTokenize(
                 "Public Class [!output SAFE_ITEM_NAME]\xd",
-                "Keyword(Public).Keyword(Class).ExpectedIdentifier([)"
-            );
+                "Keyword(Public).Keyword(Class).ExpectedIdentifier([)");
         }
         [Fact]
         public void MyClassIsAKeyword()
         {
-            AssertTokenize
-            (
+            AssertTokenize(
                 "Class MyClass\xd",
-                "Keyword(Class).Keyword(MyClass)eol"
-            );
+                "Keyword(Class).Keyword(MyClass)eol");
         }
 
 
@@ -215,12 +207,12 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenize
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
-        * Also, the source must be regenerated exactly when the tokens are concatenated 
+        * Also, the source must be regenerated exactly when the tokens are concatenated
         * back together,
         */
-        static private void AssertTokenize(string source, string expectedTokenKey)
+        private static void AssertTokenize(string source, string expectedTokenKey)
         {
             // Most of the time, we expect the rebuilt source to be the same as the input source.
             AssertTokenize(source, source, expectedTokenKey, 1);
@@ -228,24 +220,20 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenize
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
         * Also compare the source that is regenerated by concatenating all of the tokens
         * to 'expectedSource'.
         */
-        static private void AssertTokenize
-        (
+        private static void AssertTokenize(
            string source,
            string expectedSource,
            string expectedTokenKey,
-           int expectedLastLineNumber
-        )
+           int expectedLastLineNumber)
         {
-            VisualBasicTokenizer tokens = new VisualBasicTokenizer
-            (
+            VisualBasicTokenizer tokens = new VisualBasicTokenizer(
                 StreamHelpers.StringToStream(source),
-                false
-            );
+                false);
             string results = "";
             string tokenKey = "";
             int lastLine = 0;
@@ -300,6 +288,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

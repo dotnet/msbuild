@@ -1,13 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -95,7 +97,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public BuildRequest()
         {
-
         }
 
         private BuildRequest(
@@ -118,6 +119,11 @@ namespace Microsoft.Build.BackEnd
             _nodeRequestId = nodeRequestId;
             _buildRequestDataFlags = buildRequestDataFlags;
             _requestedProjectState = requestedProjectState;
+
+            if (_requestedProjectState != null)
+            {
+                _buildRequestDataFlags |= BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
+            }
         }
 
         /// <summary>
@@ -179,7 +185,7 @@ namespace Microsoft.Build.BackEnd
         : this(submissionId, nodeRequestId, configurationId, hostServices, buildRequestDataFlags, requestedProjectState, projectContextId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(escapedTargets, "targets");
-            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext, nameof(parentBuildEventContext));
+            ErrorUtilities.VerifyThrowArgumentNull(parentBuildEventContext);
 
             // When targets come into a build request, we unescape them.
             _targets = new List<string>(escapedTargets.Count);

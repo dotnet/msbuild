@@ -1,11 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Shouldly;
-using System;
-using System.Collections.Generic;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -53,6 +54,5 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             hashSdkItem1.ShouldBe(hashSdkItem2);
         }
-
     }
 }

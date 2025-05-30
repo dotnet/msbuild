@@ -1,13 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
+using Shouldly;
+using Xunit;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
-using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -26,8 +31,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.CreateTargetElement("@#$invalid@#$");
-            }
-           );
+            });
         }
         /// <summary>
         /// Read targets in an empty project
@@ -36,7 +40,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoTarget()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            Assert.Null(project.Targets.GetEnumerator().Current);
+            Assert.Empty(project.Targets);
         }
 
         /// <summary>
@@ -46,12 +50,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadEmptyTarget()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'/>
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
 
             Assert.Equal(0, Helpers.Count(target.Children));
@@ -101,8 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.Inputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null outputs on the target element
@@ -114,8 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.Outputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null dependsOnTargets on the target element
@@ -127,8 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.DependsOnTargets = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null dependsOnTargets on the target element
@@ -140,8 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectTargetElement target = GetTargetXml();
                 target.KeepDuplicateOutputs = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set null condition on the target element
@@ -164,14 +165,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target/>
                     </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read a target with an invalid attribute
@@ -182,14 +182,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target XX='YY'/>
                     </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an target with two task children
@@ -308,7 +307,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         /// <summary>
         /// Set return value.  Verify that setting to the empty string and null are
-        /// both allowed and have distinct behaviour. 
+        /// both allowed and have distinct behaviour.
         /// </summary>
         [Fact]
         public void SetReturns()
@@ -338,12 +337,41 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
+        /// Parse invalid property under target
+        /// </summary>
+        [Fact]
+        public void ReadInvalidPropertyUnderTarget()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+
+                string projectFile = @"
+                    <Project>
+                        <Target Name='t'>
+                            <test>m</test>
+                        </Target>
+                    </Project>";
+                TransientTestFile file = env.CreateFile("proj.csproj", projectFile);
+                using ProjectCollection collection = new ProjectCollection();
+                var error = Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                    collection.LoadProject(file.Path).Build().ShouldBeTrue();
+                });
+
+                error.ErrorCode.ShouldMatch("MSB4067");
+                var expectedString = "<PropertyGroup>";
+                error.Message.ShouldMatch(expectedString);
+            }
+        }
+
+        /// <summary>
         /// Helper to get an empty ProjectTargetElement with various attributes and two tasks
         /// </summary>
         private static ProjectTargetElement GetTargetXml()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t' Inputs='i' Outputs='o' DependsOnTargets='d' Condition='c'>
                             <t1/>
                             <t2/>
@@ -351,7 +379,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
             ProjectTargetElement target = (ProjectTargetElement)Helpers.GetFirst(project.Children);
             return target;
         }

@@ -1,11 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System;
 using System.Text;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -58,7 +61,7 @@ bar", false)]
             var projectContents =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <!--Initial Comment-->
-                       
+
                   <!--Ending Comment-->
                 </Project>
                 ";
@@ -67,7 +70,7 @@ bar", false)]
             {
                 // reset all hooks
                 XmlDocumentWithLocation.ClearReadOnlyFlags_UnitTestsOnly();
-                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASREADONLY", null); //clear
+                env.SetEnvironmentVariable("MSBUILDLOADALLFILESASREADONLY", null); // clear
                 env.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", null); // clear
                 env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", null); // clear
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
@@ -89,7 +92,7 @@ bar", false)]
             var projectContents =
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' DefaultTargets='Build' xmlns='msbuildnamespace'>
                   <!--Initial Comment-->
-                       
+
                   <!--Ending Comment-->
                 </Project>
                 ";
@@ -113,6 +116,17 @@ bar", false)]
                 Assert.Equal(string.Empty, children[0].ChildNodes[0].Value);
                 Assert.Equal(string.Empty, children[0].ChildNodes[1].Value);
             }
+        }
+
+        [Fact]
+        public void CreateEphemeralCannotBeDirtied()
+        {
+            var projectRootElement = ProjectRootElement.CreateEphemeral(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            var versionBeforeMarkDirty = projectRootElement.Version;
+
+            projectRootElement.MarkDirty("test", "test");
+
+            Assert.Equal(projectRootElement.Version, versionBeforeMarkDirty);
         }
     }
 }

@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
@@ -21,7 +23,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
     }
 
-    internal class RemotedResolvedImport
+    internal sealed class RemotedResolvedImport
     {
         public RemotedResolvedImport(ResolvedImport resolvedImport, ProjectCollectionLinker exporter)
         {
@@ -38,12 +40,5 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public SdkResult SdkResult { get; }
 
         public bool IsImported { get; }
-
-        ResolvedImport Import(ProjectCollectionLinker importer)
-        {
-            var importElement = (ProjectImportElement)importer.Import<ProjectElement, MockProjectImportElementLinkRemoter>(this.ImportingElement);
-            var projectElement = (ProjectRootElement)importer.Import<ProjectElement, MockProjectRootElementLinkRemoter>(this.ImportedProject);
-            return importer.LinkFactory.Create(importElement, projectElement, 0, this.SdkResult, this.IsImported);
-        }
     }
 }

@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -19,13 +20,13 @@ namespace Microsoft.Build.Shared
     /// PERF: since we escape and unescape relatively frequently, it may be worth caching
     /// the last N strings that were (un)escaped
     /// </remarks>
-    static internal class EscapingUtilities
+    internal static class EscapingUtilities
     {
         /// <summary>
         /// Optional cache of escaped strings for use when needing to escape in performance-critical scenarios with significant
         /// expected string reuse.
         /// </summary>
-        private static Dictionary<string, string> s_unescapedToEscapedStrings = new Dictionary<string, string>(StringComparer.Ordinal);
+        private static readonly Dictionary<string, string> s_unescapedToEscapedStrings = new Dictionary<string, string>(StringComparer.Ordinal);
 
         private static bool TryDecodeHexDigit(char character, out int value)
         {
@@ -101,8 +102,7 @@ namespace Microsoft.Build.Shared
                 if (
                         (indexOfPercent <= (escapedStringLength - 3)) &&
                         TryDecodeHexDigit(escapedString[indexOfPercent + 1], out int digit1) &&
-                        TryDecodeHexDigit(escapedString[indexOfPercent + 2], out int digit2)
-                    )
+                        TryDecodeHexDigit(escapedString[indexOfPercent + 2], out int digit2))
                 {
                     // First copy all the characters up to the current percent sign into
                     // the destination.
@@ -214,10 +214,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="unescapedString"></param>
         /// <returns></returns>
-        private static bool ContainsReservedCharacters
-            (
-            string unescapedString
-            )
+        private static bool ContainsReservedCharacters(
+            string unescapedString)
         {
             return -1 != unescapedString.IndexOfAny(s_charsToEscape);
         }

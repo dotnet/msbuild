@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -41,7 +43,14 @@ namespace Microsoft.Build.BackEnd
         void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator);
 
         /// <summary>
-        /// Routes the specified packet
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator);
+
+        /// <summary>
+        /// Routes the specified packet.
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet to route.</param>

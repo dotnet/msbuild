@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,6 +7,8 @@ using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -77,7 +79,7 @@ namespace Microsoft.Build.Evaluation
 
             public override int MatchCount(string itemToMatch)
             {
-                return ReferencedItems.Count(v => v.ItemAsValueFragment.MatchCount(itemToMatch) > 0);
+                return ReferencedItems.Count(v => v.ItemAsValueFragment.IsMatch(itemToMatch));
             }
 
             public override bool IsMatch(string itemToMatch)
@@ -142,7 +144,7 @@ namespace Microsoft.Build.Evaluation
         ///     The expander needs to have a default item factory set.
         /// </summary>
         // todo Make this type immutable. Dealing with an Expander change is painful. See the ItemExpressionFragment
-            public Expander<P, I> Expander { get; set; }
+        public Expander<P, I> Expander { get; set; }
 
         /// <summary>
         ///     The xml attribute where this itemspec comes from
@@ -170,7 +172,7 @@ namespace Microsoft.Build.Evaluation
 
         private List<ItemSpecFragment> BuildItemFragments(IElementLocation itemSpecLocation, string projectDirectory, bool expandProperties)
         {
-            //  Code corresponds to Evaluator.CreateItemsFromInclude
+            // Code corresponds to Evaluator.CreateItemsFromInclude
             var evaluatedItemspecEscaped = ItemSpecString;
 
             if (string.IsNullOrEmpty(evaluatedItemspecEscaped))
@@ -221,7 +223,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         // The expression is not of the form "@(X)". Treat as string
 
-                        //  Code corresponds to EngineFileUtilities.GetFileList
+                        // Code corresponds to EngineFileUtilities.GetFileList
                         if (!FileMatcher.HasWildcards(splitEscaped))
                         {
                             // No real wildcards means we just return the original string.  Don't even bother
@@ -259,7 +261,7 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            //  Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
+            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
             if (expression.Length == 0)
             {
                 return null;
@@ -366,7 +368,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            return matches ?? Array.Empty<string>();
+            return matches ?? [];
         }
 
         /// <summary>
@@ -566,7 +568,9 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     /// <typeparam name="P">Property type</typeparam>
     /// <typeparam name="I">Item type</typeparam>
-    internal sealed class MetadataTrie<P, I> where P : class, IProperty where I : class, IItem, IMetadataTable
+    internal sealed class MetadataTrie<P, I>
+        where P : class, IProperty
+        where I : class, IItem, IMetadataTable
     {
         private readonly Dictionary<string, MetadataTrie<P, I>> _children;
         private readonly Func<string, string> _normalize;
@@ -577,7 +581,7 @@ namespace Microsoft.Build.Evaluation
                 options == MatchOnMetadataOptions.CaseInsensitive || FileUtilities.PathComparison == StringComparison.OrdinalIgnoreCase ? StringComparer.OrdinalIgnoreCase :
                 StringComparer.Ordinal;
             _children = new Dictionary<string, MetadataTrie<P, I>>(comparer);
-            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>) (p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
+            _normalize = options == MatchOnMetadataOptions.PathLike ? (Func<string, string>)(p => FileUtilities.NormalizePathForComparisonNoThrow(p, Environment.CurrentDirectory)) : p => p;
             foreach (ItemSpec<P, I>.ItemExpressionFragment frag in itemSpec.Fragments)
             {
                 foreach (ItemSpec<P, I>.ReferencedItem referencedItem in frag.ReferencedItems)

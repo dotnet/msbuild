@@ -1,14 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -30,32 +30,25 @@ namespace Microsoft.Build.Evaluation
 
         internal static ToolsetConfigurationSection ReadToolsetConfigurationSection(Configuration configuration)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0))
+            if (configuration == null)
             {
-                if (configuration == null)
-                {
-                    return null;
-                }
-
-                lock (s_syncLock)
-                {
-                    // Cache 1st requested configuration section. In unit tests, different Configuration is provided for particular test cases.
-                    // During runtime, however, only MSBuild exe configuration file is provided to read toolset configuration from,
-                    //   and modifying MSBuild exe configuration during lifetime of msbuild nodes is neither expected nor supported.
-                    if (s_toolsetConfigurationSectionCache == null)
-                    {
-                        s_toolsetConfigurationSectionCache = GetToolsetConfigurationSection(configuration);
-                        s_configurationOfCachedSection = configuration;
-                    }
-
-                    return s_configurationOfCachedSection == configuration ?
-                        s_toolsetConfigurationSectionCache :
-                        GetToolsetConfigurationSection(configuration);
-                }
+                return null;
             }
-            else
+
+            lock (s_syncLock)
             {
-                return GetToolsetConfigurationSection(configuration);
+                // Cache 1st requested configuration section. In unit tests, different Configuration is provided for particular test cases.
+                // During runtime, however, only MSBuild exe configuration file is provided to read toolset configuration from,
+                //   and modifying MSBuild exe configuration during lifetime of msbuild nodes is neither expected nor supported.
+                if (s_toolsetConfigurationSectionCache == null)
+                {
+                    s_toolsetConfigurationSectionCache = GetToolsetConfigurationSection(configuration);
+                    s_configurationOfCachedSection = configuration;
+                }
+
+                return s_configurationOfCachedSection == configuration ?
+                    s_toolsetConfigurationSectionCache :
+                    GetToolsetConfigurationSection(configuration);
             }
         }
 
@@ -132,7 +125,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                return (string)base["toolsVersion"];
+                return (string)base[nameof(toolsVersion)];
             }
 
             set
@@ -286,7 +279,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (element.ElementInformation.LineNumber != 0)
                         {
-                            locationString = String.Format("{0} ({1})", element.ElementInformation.Source, element.ElementInformation.LineNumber);
+                            locationString = $"{element.ElementInformation.Source} ({element.ElementInformation.LineNumber})";
                         }
                         else
                         {
@@ -738,7 +731,7 @@ namespace Microsoft.Build.Evaluation
                 // whenever the base class gives us an empty string.
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
-                string defaultValue = (string)base["DefaultOverrideToolsVersion"];
+                string defaultValue = (string)base[nameof(DefaultOverrideToolsVersion)];
                 return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
 

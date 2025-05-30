@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -7,14 +10,15 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     public sealed class WarningsAsMessagesAndErrorsTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
-
-        ITestOutputHelper _output;
+        private ITestOutputHelper _output;
 
         public WarningsAsMessagesAndErrorsTests(ITestOutputHelper output)
         {
@@ -168,9 +172,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         {"Foo", ExpectedEventCode},
                     },
-                    warningsAsMessages: "$(Foo)"
-                )
-            );
+                    warningsAsMessages: "$(Foo)"));
 
             VerifyBuildMessageEvent(logger);
         }
@@ -211,8 +213,7 @@ namespace Microsoft.Build.Engine.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(
                 GetTestProject(
                     warningsAsMessages: ExpectedEventCode,
-                    warningsAsErrors: ExpectedEventCode
-                    ));
+                    warningsAsErrors: ExpectedEventCode));
 
             VerifyBuildMessageEvent(logger);
         }
@@ -273,7 +274,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Theory]
-        
+
         [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false)] // Log MSB1234, treat as error via MSBuildWarningsAsErrors
         [InlineData("MSB1235", "", "MSB1234", "MSB1234", true)] // Log MSB1234, expect MSB1234 as error via MSBuildTreatWarningsAsErrors
         [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true)]// Log MSB1234, MSBuildWarningsAsMessages takes priority
@@ -357,7 +358,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.WarningCount.ShouldBe(2);
                 logger.ErrorCount.ShouldBe(1);
 
-                // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run. 
+                // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run.
                 logger.AssertLogDoesntContain("MSB1237");
             }
         }
@@ -524,6 +525,34 @@ namespace Microsoft.Build.Engine.UnitTests
                 MockLogger logger = proj.BuildProjectExpectFailure();
 
                 logger.AssertLogContains("MSB4181");
+            }
+        }
+
+        /// <summary>
+        /// MSBuildWarningsAsMessages should allow comma separation.
+        /// </summary>
+        [Fact]
+        public void MSBuildWarningsAsMessagesWithCommaSeparation()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                var content = """
+                <Project>
+                    <PropertyGroup>
+                       <MSBuildWarningsAsMessages>NAT011,NAT012</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+
+                    <Target Name='Build'>
+                        <Warning Code="NAT011" Text="You fail" />
+                        <Warning Code="NAT012" Text="Other Fail" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
             }
         }
     }

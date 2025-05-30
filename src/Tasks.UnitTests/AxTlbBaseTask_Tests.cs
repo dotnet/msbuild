@@ -1,17 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Runtime.Hosting;
-using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
 {
-    sealed public class AxTlbBaseTask_Tests
+    public sealed class AxTlbBaseTask_Tests
     {
         /// <summary>
         /// Tests the /delaysign switch
@@ -38,14 +40,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Tests the /keycontainer: switch
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void KeyContainer()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Key container is not supported, except under Windows"
-            }
-
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "FakeTlb.tlb";
             string badParameterValue = "badKeyContainer";
@@ -65,13 +62,13 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 Assert.Equal(badParameterValue, t.KeyContainer); // "New KeyContainer value should be set"
                 CommandLine.ValidateHasParameter(t, @"/keycontainer:" + badParameterValue, false /* no response file */);
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer", t.KeyContainer);
-                //ensure the key does not exist in the CSP
+                // ensure the key does not exist in the CSP
                 StrongNameHelpers.StrongNameKeyDelete(goodParameterValue);
 
                 IntPtr publicKeyBlob = IntPtr.Zero;
                 int publicKeyBlobSize = 0;
 
-                //add key to CSP
+                // add key to CSP
                 if (StrongNameHelpers.StrongNameKeyGen(goodParameterValue, 1 /* leave key registered */, out publicKeyBlob, out publicKeyBlobSize) && publicKeyBlob != IntPtr.Zero)
                 {
                     StrongNameHelpers.StrongNameFreeBuffer(publicKeyBlob);
@@ -83,12 +80,12 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 }
                 else
                 {
-                    Assert.True(false, "Key container could not be created (perhaps you are not running as admin).");
+                    Assert.Fail("Key container could not be created (perhaps you are not running as admin).");
                 }
             }
             finally
             {
-                //remove key from CSP
+                // remove key from CSP
                 StrongNameHelpers.StrongNameKeyDelete(goodParameterValue);
 
                 // get rid of the generated temp file
@@ -194,7 +191,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         }
 
         /// <summary>
-        /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.  
+        /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.
         /// </summary>
         [Fact]
         public void SdkToolsPath()
@@ -228,7 +225,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         }
 
         /// <summary>
-        /// Tests the ToolPath property:  Should log an error if it's null or a bad path.  
+        /// Tests the ToolPath property:  Should log an error if it's null or a bad path.
         /// </summary>
         [Fact]
         public void ToolPath()
@@ -265,14 +262,9 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// Tests that strong name sign-related parameters are validated properly, causing the task
         /// to fail if they are incorrectly set up.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void TaskFailsWhenImproperlySigned()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "Key container is not supported, except under Windows"
-            }
-
             var t = new ResolveComReference.TlbImp();
             t.TypeLibName = "Blah.tlb";
             string tempKeyContainer = null;
@@ -293,13 +285,13 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 t.KeyFile = tempKeyFile;
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.CannotSpecifyBothKeyFileAndKeyContainer");
 
-                // All the inputs are correct, but the KeyContainer passed in is bad            
+                // All the inputs are correct, but the KeyContainer passed in is bad
                 t.DelaySign = false;
                 t.KeyContainer = tempKeyContainer;
                 t.KeyFile = null;
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInContainer", t.KeyContainer);
 
-                // All the inputs are correct, but the KeyFile passed in is bad            
+                // All the inputs are correct, but the KeyFile passed in is bad
                 t.KeyContainer = null;
                 t.KeyFile = tempKeyFile;
                 Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "AxTlbBaseTask.StrongNameUtils.NoKeyPairInFile", t.KeyFile);
@@ -318,12 +310,12 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         }
     }
 
-    sealed internal class Utilities
+    internal sealed class Utilities
     {
         /// <summary>
         /// Given an instance of an AxImp task, executes that task (assuming all necessary parameters
         /// have been set ahead of time) and verifies that the execution log contains the error
-        /// corresponding to the resource name passed in. 
+        /// corresponding to the resource name passed in.
         /// </summary>
         /// <param name="t">The task to execute and check</param>
         /// <param name="errorResource">The name of the resource string to check the log for</param>
@@ -356,7 +348,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         /// <summary>
         /// Given an instance of an AxImp task, executes that task (assuming all necessary parameters
         /// have been set ahead of time) and verifies that the execution log does not contain the error
-        /// corresponding to the resource name passed in. 
+        /// corresponding to the resource name passed in.
         /// </summary>
         /// <param name="t">The task to execute and check</param>
         /// <param name="errorResource">The name of the resource string to check the log for</param>

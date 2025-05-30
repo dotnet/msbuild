@@ -1,10 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -33,7 +35,9 @@ namespace Microsoft.Build.Framework
                 return enumerableMetadata;
             }
 
-            // In theory this should never be reachable.
+            // Fallback for
+            //  * ITaskItem implementations from MSBuild 3.5 from the GAC
+            //  * Custom ITaskItems that don't use Dictionary<string,string>
             var list = new KeyValuePair<string, string>[customMetadata.Count];
             int i = 0;
 
@@ -55,8 +59,7 @@ namespace Microsoft.Build.Framework
                     Debug.Fail(e.ToString());
                 }
 
-                list[i] = new KeyValuePair<string, string>(metadataName, valueOrError);
-                i += 1;
+                list[i++] = new KeyValuePair<string, string>(metadataName, valueOrError);
             }
 
             return list;

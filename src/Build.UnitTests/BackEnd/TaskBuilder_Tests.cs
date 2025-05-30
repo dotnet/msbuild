@@ -1,12 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
@@ -15,14 +15,15 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Threading;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -31,32 +32,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class TaskBuilder_Tests : ITargetBuilderCallback
     {
-        /// <summary>
-        /// The mock component host and logger
-        /// </summary>
-        private MockHost _host;
-
         private readonly ITestOutputHelper _testOutput;
-
-        /// <summary>
-        /// The temporary project we use to run the test
-        /// </summary>
-        private ProjectInstance _testProject;
 
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
         public TaskBuilder_Tests(ITestOutputHelper output)
         {
-            _host = new MockHost();
             _testOutput = output;
-            _testProject = CreateTestProject();
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                  OUTPUT PARAMS
-         * 
+         *
          *********************************************************************************/
 
         /// <summary>
@@ -69,18 +58,45 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
-                         <NonExistantTask Condition=""'1'=='1'""/>
-                         <Message Text='Made it'/>                    
+                         <NonExistentTask Condition=""'1'=='1'""/>
+                         <Message Text='Made it'/>
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
 
             logger.AssertLogContains("MSB4036");
             logger.AssertLogDoesntContain("Made it");
+        }
+
+        [Fact]
+        public void TasksOnlyLogStartedEventOnceEach()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+            @"<Project>
+              <Target Name='t'>
+                  <Message Text='Made it'/>
+              </Target>
+            </Project>");
+
+            TransientTestFile projectFile = env.CreateFile("myProj.proj", projectFileContents);
+            env.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", @"C:\Users\namytelk\Desktop");
+
+            string results = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:diag", out bool success);
+
+            int count = 0;
+            for (int index = results.IndexOf("Task \"Message\""); index >= 0; index = results.IndexOf("Task \"Message\"", index))
+            {
+                count++;
+                index += 14; // Skip to the end of this string
+            }
+
+            count.ShouldBe(1);
         }
 
         /// <summary>
@@ -95,12 +111,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(
                 @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <Target Name='t'>
-                         <NonExistantTask Condition=""'1'=='2'""/>
-                         <Message Text='Made it'/>                    
+                         <NonExistentTask Condition=""'1'=='2'""/>
+                         <Message Text='Made it'/>
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -116,19 +133,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildManager manager = new BuildManager();
                 ProjectCollection collection = new ProjectCollection();
 
+                string sleepCommand = Helpers.GetSleepCommand(TimeSpan.FromSeconds(10));
                 string contents = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion ='Current'>
+                    <Project ToolsVersion ='Current'>
                      <Target Name='test'>
-                        <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+                        <Exec Command='" + sleepCommand + @"'/>
                      </Target>
                     </Project>";
 
                 MockLogger logger = new MockLogger(_testOutput);
-
-                var project = new Project(XmlReader.Create(new StringReader(contents)), null, MSBuildConstants.CurrentToolsVersion, collection)
+                using ManualResetEvent waitCommandExecuted = new ManualResetEvent(false);
+                string unescapedSleepCommand = sleepCommand.Replace("&quot;", "\"").Replace("&gt;", ">");
+                logger.AdditionalHandlers.Add((sender, args) =>
                 {
-                    FullPath = env.CreateFile().Path
-                };
+                    if (unescapedSleepCommand.Equals(args.Message))
+                    {
+                        waitCommandExecuted.Set();
+                    }
+                });
+
+                using ProjectFromString projectFromString = new(contents, null, MSBuildConstants.CurrentToolsVersion, collection);
+                Project project = projectFromString.Project;
+                project.FullPath = env.CreateFile().Path;
 
                 var _parameters = new BuildParameters
                 {
@@ -136,17 +162,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Loggers = new ILogger[] { logger },
                     EnableNodeReuse = false
                 };
-                ;
 
                 BuildRequestData data = new BuildRequestData(project.CreateProjectInstance(), new string[] { "test" }, collection.HostServices);
                 manager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = manager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
-                Thread.Sleep(500);
+                int timeoutMilliseconds = 2000;
+                bool isCommandExecuted = waitCommandExecuted.WaitOne(timeoutMilliseconds);
                 manager.CancelAllSubmissions();
-                asyncResult.WaitHandle.WaitOne();
+                bool isSubmissionComplated = asyncResult.WaitHandle.WaitOne(timeoutMilliseconds);
                 BuildResult result = asyncResult.BuildResult;
                 manager.EndBuild();
+                isCommandExecuted.ShouldBeTrue($"Waiting for that the sleep command is executed failed in the timeout period {timeoutMilliseconds} ms.");
+                isSubmissionComplated.ShouldBeTrue($"Waiting for that the build submission is completed failed in the timeout period {timeoutMilliseconds} ms.");
 
                 // No errors from cancelling a build.
                 logger.ErrorCount.ShouldBe(0);
@@ -190,11 +218,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                          Condition=""'%(LogicalName)' != '' "">
                              <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                          </CreateProperty>
-                         <Message Text='final:[$(LinkSwitches)]'/>                    
+                         <Message Text='final:[$(LinkSwitches)]'/>
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -221,7 +250,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                       <ItemGroup>
                         <i Include='" + files[0] + "'><output>" + files[1] + @"</output></i>
-                      </ItemGroup> 
+                      </ItemGroup>
                       <ItemGroup>
                          <EmbeddedResource Include='a.resx'>
                         <LogicalName>foo</LogicalName>
@@ -234,7 +263,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         </EmbeddedResource>
                         </ItemGroup>
                       <Target Name='t2' DependsOnTargets='t'>
-                        <Message Text='final:[$(LinkSwitches)]'/>   
+                        <Message Text='final:[$(LinkSwitches)]'/>
                       </Target>
                       <Target Name='t' Inputs='%(i.Identity)' Outputs='%(i.Output)'>
                         <Message Text='start:[Hello]'/>
@@ -242,11 +271,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                          Condition=""'%(LogicalName)' != '' "">
                              <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                         </CreateProperty>
-                        <Message Text='end:[hello]'/>                    
+                        <Message Text='end:[hello]'/>
                     </Target>
                     </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+                using ProjectFromString projectFromString = new(projectFileContents);
+                Project project = projectFromString.Project;
                 List<ILogger> loggers = new List<ILogger>();
                 loggers.Add(logger);
                 project.Build("t2", loggers);
@@ -286,17 +316,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Target Name='Build'>
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""Value"" PropertyName=""Property1""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='Property1=[$(Property1)]' />
 
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""%(TaskParameterItem.ParameterName)"" PropertyName=""Property2""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='Property2=[$(Property2)]' />
 
                         <CreateProperty Value=""@(TaskParameterItem)"">
                             <Output TaskParameter=""Value"" PropertyName=""%(TaskParameterItem.PropertyName)""/>
-                        </CreateProperty> 
+                        </CreateProperty>
                         <Message Text='MetadataProperty=[$(MetadataProperty)]' />
 
                         <CreateItem Include=""@(TaskParameterItem)"">
@@ -316,7 +346,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target>
                 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build(loggers);
@@ -346,9 +377,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <Copy SourceFiles='|' DestinationFolder='c:\' ContinueOnError='true' />
         <PropertyGroup>
            <p>$(MSBuildLastTaskResult)</p>
-        </PropertyGroup>                 
-        <Message Text='[1:$(MSBuildLastTaskResult)]'/> <!-- Should be false: propertygroup did not reset it -->   
-        <Message Text='[p:$(p)]'/> <!-- Should be false as stored earlier -->   
+        </PropertyGroup>
+        <Message Text='[1:$(MSBuildLastTaskResult)]'/> <!-- Should be false: propertygroup did not reset it -->
+        <Message Text='[p:$(p)]'/> <!-- Should be false as stored earlier -->
         <Message Text='[2:$(MSBuildLastTaskResult)]'/> <!-- Message succeeded, should now be true -->
     </Target>
     <Target Name='t2' DependsOnTargets='t'>
@@ -365,7 +396,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             MockLogger logger = new MockLogger();
             loggers.Add(logger);
@@ -402,7 +434,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             project.Build("t", new[] { logger }).ShouldBeTrue();
 
             // Assuming the current directory of the test .dll has at least one subfolder
@@ -429,7 +462,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -452,7 +486,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -482,7 +517,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -512,7 +548,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -525,7 +562,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NullMetadataOnOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -542,7 +578,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 
@@ -550,7 +586,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void NullMetadataOnLegacyOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -567,8 +602,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
+        }
+
+        /// <summary>
+        /// If an item returned from a task has bare-minimum metadata implementation, we shouldn't crash.
+        /// </summary>
+        [Fact]
+        public void MinimalLegacyOutputItems()
+        {
+            string customTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            string projectContents = $"""
+                                     <Project>
+                                       <UsingTask TaskName="TaskThatReturnsMinimalItem" AssemblyFile="{customTaskPath}" />
+
+                                       <Target Name="Build">
+                                         <TaskThatReturnsMinimalItem>
+                                           <Output TaskParameter="MinimalTaskItemOutput" ItemName="Outputs"/>
+                                         </TaskThatReturnsMinimalItem>
+
+                                         <Message Text="[%(Outputs.Identity): %(Outputs.a)]" Importance="High" />
+                                       </Target>
+                                     </Project>
+                                     """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
         }
 
         /// <summary>
@@ -640,15 +700,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                     </Project>";
 
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
 
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6521")]
-        [Trait("Category", "non-mono-tests")]
+        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
         public void NullMetadataOnLegacyOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -684,6 +743,47 @@ namespace Microsoft.Build.UnitTests.BackEnd
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
             logger.AssertLogContains("[foo: ]");
         }
+
+        /// <summary>
+        /// If an item being output from a task has null metadata, we shouldn't crash.
+        /// </summary>
+        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
+        [Trait("Category", "non-mono-tests")]
+        public void NullMetadataOnLegacyOutputItems_InlineTask_Diagnostic()
+        {
+            string projectContents = @"
+                    <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`NullMetadataTask_v4` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildFrameworkToolsPath)\Microsoft.Build.Tasks.v4.0.dll`>
+                            <ParameterGroup>
+                               <OutputItems ParameterType=`Microsoft.Build.Framework.ITaskItem[]` Output=`true` />
+                            </ParameterGroup>
+                            <Task>
+                                <Code>
+                                <![CDATA[
+                                    OutputItems = new ITaskItem[1];
+
+                                    IDictionary<string, string> metadata = new Dictionary<string, string>();
+                                    metadata.Add(`a`, null);
+
+                                    OutputItems[0] = new TaskItem(`foo`, (IDictionary)metadata);
+
+                                    return true;
+                                ]]>
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                      <Target Name=`Build`>
+                        <NullMetadataTask_v4>
+                          <Output TaskParameter=`OutputItems` ItemName=`Outputs` />
+                        </NullMetadataTask_v4>
+
+                        <Message Text=`[%(Outputs.Identity): %(Outputs.a)]` Importance=`High` />
+                      </Target>
+                    </Project>";
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, loggerVerbosity: LoggerVerbosity.Diagnostic);
+            logger.AssertLogContains("[foo: ]");
+        }
 #endif
 
         /// <summary>
@@ -704,7 +804,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// which didn't support the defining project metadata.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -716,7 +815,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests that putting the RunInSTA attribute on a task causes it to run in the STA thread.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequired()
         {
             TestSTATask(true, false, false);
@@ -726,7 +824,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an STA task with an exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequiredWithException()
         {
             TestSTATask(true, false, true);
@@ -736,7 +833,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an STA task with failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadRequiredWithFailure()
         {
             TestSTATask(true, true, false);
@@ -746,7 +842,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequired()
         {
             TestSTATask(false, false, false);
@@ -756,7 +851,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task with an exception.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequiredWithException()
         {
             TestSTATask(false, false, true);
@@ -766,7 +860,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests an MTA task with failure.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestSTAThreadNotRequiredWithFailure()
         {
             TestSTATask(false, true, false);
@@ -848,11 +941,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
-/*********************************************************************************
- * 
- *                                     Helpers
- * 
- *********************************************************************************/
+        /*********************************************************************************
+         *
+         *                                     Helpers
+         *
+         *********************************************************************************/
 
         /// <summary>
         /// Helper method for validating the setting of defining project metadata on items
@@ -869,7 +962,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <Import Project=`b.proj` />
 
                     <Target Name=`Run`>
-                      <ItemCreationTask 
+                      <ItemCreationTask
                         InputItemsToPassThrough=`@(PassThrough)`
                         InputItemsToCopy=`@(Copy)`>
                           <Output TaskParameter=`OutputString` ItemName=`A` />
@@ -878,10 +971,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                           <Output TaskParameter=`CopiedOutputItems` ItemName=`D` />
                       </ItemCreationTask>
 
-                      <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`C is wrong: EXPECTED: [a] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'a'` />    
-                      <Warning Text=`D is wrong: EXPECTED: [a] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'a'` />    
+                      <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`C is wrong: EXPECTED: [a] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'a'` />
+                      <Warning Text=`D is wrong: EXPECTED: [a] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'a'` />
                     </Target>
                 </Project>
 ";
@@ -988,11 +1081,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 	</Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
 
             return project;
         }
-#endif
 
         /// <summary>
         /// Helper to create the STA test task.
@@ -1003,6 +1096,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 @"
 using System;
 using Microsoft.Build.Framework;
+
 namespace ClassLibrary2
 {" + (requireSTA ? "[RunInSTA]" : String.Empty) + @"
     public class ThreadTask : ITask
@@ -1065,86 +1159,14 @@ namespace ClassLibrary2
 }";
             return CustomTaskHelper.GetAssemblyForTask(taskContents);
         }
-
-        /// <summary>
-        /// Creates a test project.
-        /// </summary>
-        /// <returns>The project.</returns>
-        private ProjectInstance CreateTestProject()
-        {
-            string projectFileContents = ObjectModelHelpers.CleanupFileContents(@"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-
-                    <ItemGroup>
-                        <Compile Include='b.cs' />
-                        <Compile Include='c.cs' />
-                    </ItemGroup>
-
-                    <ItemGroup>
-                        <Reference Include='System' />
-                    </ItemGroup>
-
-                    <Target Name='Empty' />
-
-                    <Target Name='Skip' Inputs='testProject.proj' Outputs='testProject.proj' />
-
-                    <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>                    
-                        <ErrorTask2 ContinueOnError='False'/>  
-                        <ErrorTask3 /> 
-                        <OnError ExecuteTargets='Foo'/>                  
-                        <OnError ExecuteTargets='Bar'/>                  
-                    </Target>
-
-                    <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
-                        <FooTask1/>
-                    </Target>
-
-                    <Target Name='Bar'>
-                        <BarTask1/>
-                    </Target>
-
-                    <Target Name='Baz' DependsOnTargets='Bar'>
-                        <BazTask1/>
-                        <BazTask2/>
-                    </Target>
-
-                    <Target Name='Baz2' DependsOnTargets='Bar;Foo'>
-                        <Baz2Task1/>
-                        <Baz2Task2/>
-                        <Baz2Task3/>
-                    </Target>
-
-                    <Target Name='DepSkip' DependsOnTargets='Skip'>
-                        <DepSkipTask1/>
-                        <DepSkipTask2/>
-                        <DepSkipTask3/>
-                    </Target>
-
-                    <Target Name='DepError' DependsOnTargets='Foo;Skip;Error'>
-                        <DepSkipTask1/>
-                        <DepSkipTask2/>
-                        <DepSkipTask3/>
-                    </Target>
-
-                </Project>
-                ");
-
-            IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testfile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0");
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
-            config.Project = project.CreateProjectInstance();
-            cache.AddConfiguration(config);
-
-            return config.Project;
-        }
+#endif
 
         /// <summary>
         /// The mock component host object.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
-#region IBuildComponentHost Members
+            #region IBuildComponentHost Members
 
             /// <summary>
             /// The config cache
@@ -1275,6 +1297,9 @@ namespace ClassLibrary2
                 };
             }
 
+            public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+                => (TComponent)GetComponent(type);
+
             /// <summary>
             /// Register a component factory.
             /// </summary>
@@ -1282,28 +1307,7 @@ namespace ClassLibrary2
             {
             }
 
-#endregion
-
-#region IBuildComponent Members
-
-            /// <summary>
-            /// Sets the component host
-            /// </summary>
-            /// <param name="host">The component host</param>
-            public void InitializeComponent(IBuildComponentHost host)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <summary>
-            /// Shuts down the component
-            /// </summary>
-            public void ShutdownComponent()
-            {
-                throw new NotImplementedException();
-            }
-
-#endregion
+            #endregion
         }
     }
 }

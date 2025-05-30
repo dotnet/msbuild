@@ -1,8 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,6 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
@@ -19,6 +19,8 @@ using static Microsoft.Build.UnitTests.Helpers;
 
 using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
 using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string>;
+
+#nullable disable
 
 namespace Microsoft.Build.Graph.UnitTests
 {
@@ -42,11 +44,11 @@ namespace Microsoft.Build.Graph.UnitTests
         private readonly MockLogger _logger;
 
         [Theory]
-        [InlineData(new byte[] {})]
-        [InlineData(new byte[] {1})]
-        [InlineData(new byte[] {0})]
-        [InlineData(new byte[] {1, 1})]
-        [InlineData(new byte[] {1, 1, 90, 23})]
+        [InlineData(new byte[] { })]
+        [InlineData(new byte[] { 1 })]
+        [InlineData(new byte[] { 0 })]
+        [InlineData(new byte[] { 1, 1 })]
+        [InlineData(new byte[] { 1, 1, 90, 23 })]
         public void InvalidCacheFilesShouldLogError(byte[] cacheContents)
         {
             var project = CreateProjectFileWithBuildTargetAndItems(_env, 1).Path;
@@ -61,13 +63,13 @@ namespace Microsoft.Build.Graph.UnitTests
                 _logger,
                 new BuildParameters
                 {
-                    InputResultsCacheFiles = new[] {existingFile}
+                    InputResultsCacheFiles = new[] { existingFile }
                 });
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
             _logger.FullLog.ShouldContain("MSB4256:");
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(6);
             _logger.ErrorCount.ShouldBe(1);
         }
 
@@ -100,9 +102,9 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 buildManager.BeginBuild(new BuildParameters
                 {
-                    InputResultsCacheFiles = new []{"a", "b"},
+                    InputResultsCacheFiles = new[] { "a", "b" },
                     OutputResultsCacheFile = "c",
-                    Loggers = new []{_logger}
+                    Loggers = new[] { _logger }
                 });
 
                 buildManager.EndBuild();
@@ -162,7 +164,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 _logger,
                 new BuildParameters
                 {
-                    InputResultsCacheFiles = new[] {outputCache}
+                    InputResultsCacheFiles = new[] { outputCache }
                 });
 
             resultFromCachedBuild.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -296,7 +298,7 @@ namespace Microsoft.Build.Graph.UnitTests
             var outputCaches = new OutputCacheDictionary();
 
             // Build unchanged project files using caches.
-            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
+            BuildUsingCaches(_env, topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
 
             // Change the project files to remove all items.
             var collection = _env.CreateProjectCollection().Collection;
@@ -316,6 +318,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             // Build again using the first caches. Project file changes from references should not be visible.
             BuildUsingCaches(
+                _env,
                 topoSortedNodes,
                 expectedOutput,
                 outputCaches,
@@ -341,7 +344,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
             var outputCaches = new OutputCacheDictionary();
 
-            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
+            BuildUsingCaches(_env, topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
 
             var rootNode = topoSortedNodes.First(n => Path.GetFileNameWithoutExtension(n.ProjectInstance.FullPath) == "1");
             var outputCache = outputCaches[rootNode];
@@ -352,13 +355,13 @@ namespace Microsoft.Build.Graph.UnitTests
 
             deserializationInfo.exception.ShouldBeNull();
 
-            var buildResults = deserializationInfo.ResultsCache.GetEnumerator().ToArray();
+            var buildResults = deserializationInfo.ResultsCache.ToArray();
             buildResults.ShouldHaveSingleItem();
 
             var rootNodeBuildResult = buildResults.First();
             rootNodeBuildResult.ResultsByTarget["Build"].Items.Select(i => i.ItemSpec).ToArray().ShouldBe(expectedOutput[rootNode]);
 
-            var configEntries = deserializationInfo.ConfigCache.GetEnumerator().ToArray();
+            var configEntries = deserializationInfo.ConfigCache.ToArray();
             configEntries.ShouldHaveSingleItem();
 
             configEntries.First().ConfigurationId.ShouldBe(rootNodeBuildResult.ConfigurationId);
@@ -379,12 +382,12 @@ namespace Microsoft.Build.Graph.UnitTests
 
             var outputCaches = new OutputCacheDictionary();
 
-            BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
+            BuildUsingCaches(_env, topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: true);
 
             // remove cache for project 3 to cause a cache miss
             outputCaches.Remove(expectedOutput.Keys.First(n => ProjectNumber(n) == "3"));
 
-            var results = BuildUsingCaches(topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: false, assertBuildResults: false);
+            var results = BuildUsingCaches(_env, topoSortedNodes, expectedOutput, outputCaches, generateCacheFiles: false, assertBuildResults: false);
 
             results["3"].Result.OverallResult.ShouldBe(BuildResultCode.Success);
             results["2"].Result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -404,23 +407,29 @@ namespace Microsoft.Build.Graph.UnitTests
         /// This method runs in two modes.
         /// When <param name="generateCacheFiles"></param> is true, the method will fill in the empty <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/>, simulating a build from scratch.
         /// When it is false, it uses the filled in <param name="outputCaches"/> and <param name="expectedNodeBuildOutput"/> to simulate a fully cached build.
-        /// 
+        ///
         /// </summary>
+        /// <param name="env">The test environment under which to run.</param>
         /// <param name="topoSortedNodes"></param>
         /// <param name="expectedNodeBuildOutput"></param>
         /// <param name="outputCaches"></param>
         /// <param name="generateCacheFiles"></param>
         /// <param name="assertBuildResults"></param>
         /// <param name="expectedOutputProducer"></param>
+        /// <param name="targetListsPerNode">The list of targets to build per node.</param>
+        /// <param name="projectIsolationMode">The isolation mode under which to run.</param>
         /// <returns></returns>
-        private Dictionary<string, (BuildResult Result, MockLogger Logger)> BuildUsingCaches(
+        internal static Dictionary<string, (BuildResult Result, MockLogger Logger)> BuildUsingCaches(
+            TestEnvironment env,
             IReadOnlyCollection<ProjectGraphNode> topoSortedNodes,
             ExpectedNodeBuildOutput expectedNodeBuildOutput,
             OutputCacheDictionary outputCaches,
             bool generateCacheFiles,
             bool assertBuildResults = true,
             // (current node, expected output dictionary) -> actual expected output for current node
-            Func<ProjectGraphNode, ExpectedNodeBuildOutput, string[]> expectedOutputProducer = null)
+            Func<ProjectGraphNode, ExpectedNodeBuildOutput, string[]> expectedOutputProducer = null,
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetListsPerNode = null,
+            ProjectIsolationMode projectIsolationMode = ProjectIsolationMode.False)
         {
             expectedOutputProducer ??= ((node, expectedOutputs) => expectedOutputs[node]);
 
@@ -443,23 +452,25 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 var buildParameters = new BuildParameters
                 {
-                    InputResultsCacheFiles = cacheFilesForReferences
+                    InputResultsCacheFiles = cacheFilesForReferences,
+                    ProjectIsolationMode = projectIsolationMode,
                 };
 
                 if (generateCacheFiles)
                 {
-                    outputCaches[node] = _env.DefaultTestDirectory.CreateFile($"OutputCache-{ProjectNumber(node)}").Path;
+                    outputCaches[node] = env.DefaultTestDirectory.CreateFile($"OutputCache-{ProjectNumber(node)}").Path;
                     buildParameters.OutputResultsCacheFile = outputCaches[node];
                 }
 
-                var logger = new MockLogger();
+                var logger = new MockLogger(env.Output);
 
-                buildParameters.Loggers = new[] {logger};
+                buildParameters.Loggers = new[] { logger };
 
                 var result = BuildProjectFileUsingBuildManager(
                     node.ProjectInstance.FullPath,
                     null,
-                    buildParameters);
+                    buildParameters,
+                    targetListsPerNode?[node] != null ? targetListsPerNode?[node] : node.ProjectInstance.DefaultTargets);
 
                 results[ProjectNumber(node)] = (result, logger);
 
@@ -507,8 +518,7 @@ namespace Microsoft.Build.Graph.UnitTests
             int projectNumber,
             int[] projectReferences = null,
             string defaultTargets = null,
-            string explicitTargets = null
-            )
+            string explicitTargets = null)
         {
             var sb = new StringBuilder();
 
@@ -522,7 +532,7 @@ namespace Microsoft.Build.Graph.UnitTests
                                 ? $"Targets='{explicitTargets}'"
                                 : string.Empty)}
                             >
-                            <Output TaskParameter='TargetOutputs' ItemName='i' />  
+                            <Output TaskParameter='TargetOutputs' ItemName='i' />
                         </MSBuild>
                     </Target>");
 
@@ -536,8 +546,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 projectReferences,
                 null,
                 defaultTargets,
-                sb.ToString()
-                );
+                sb.ToString());
         }
 
         [Fact]
@@ -551,12 +560,12 @@ namespace Microsoft.Build.Graph.UnitTests
                 _logger,
                 new BuildParameters
                 {
-                    InputResultsCacheFiles = new[] {"FileDoesNotExist1", existingFile, "FileDoesNotExist2"}
+                    InputResultsCacheFiles = new[] { "FileDoesNotExist1", existingFile, "FileDoesNotExist2" }
                 });
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
 
-            _logger.AllBuildEvents.Count.ShouldBe(4);
+            _logger.AllBuildEvents.Count.ShouldBe(6);
             _logger.Errors.First().Message.ShouldContain("MSB4255:");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist1");
             _logger.Errors.First().Message.ShouldContain("FileDoesNotExist2");

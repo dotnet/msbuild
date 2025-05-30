@@ -1,25 +1,26 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
-
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Microsoft.Build.Execution;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -31,7 +32,7 @@ namespace Microsoft.Build.UnitTests
         private Dictionary<string, string> _environment;
 
         private static string s_dummyProjectContents = @"
-         <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+         <Project>
             <Target Name='XXX'>
                <Message Text='[hee haw]'/>
             </Target>
@@ -42,7 +43,7 @@ namespace Microsoft.Build.UnitTests
             </Target>
          </Project>";
 
-        private class SimulatedConsole
+        private sealed class SimulatedConsole
         {
             private StringBuilder _simulatedConsole;
 
@@ -101,7 +102,7 @@ namespace Microsoft.Build.UnitTests
                 _simulatedConsole.Append("<reset color>");
             }
 
-            public static implicit operator string (SimulatedConsole sc)
+            public static implicit operator string(SimulatedConsole sc)
             {
                 return sc.ToString();
             }
@@ -116,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
+        private sealed class MyCustomBuildEventArgs2 : CustomBuildEventArgs { }
 
         private readonly ITestOutputHelper _output;
 
@@ -131,7 +132,6 @@ namespace Microsoft.Build.UnitTests
 
             _output = output;
         }
-
 
         /// <summary>
         /// Verify when the project has not been named that we correctly get the same placeholder
@@ -173,7 +173,6 @@ namespace Microsoft.Build.UnitTests
         /// started event but there was no target printed out.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestTargetAfterProjectStarted()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -220,8 +219,8 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeTrue();
-            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 1 [" + project.ProjectFile + ":: Number=1]");
-            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 2 [" + project.ProjectFile + ":: Number=2]");
+            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 1 [" + project.ProjectFile + "::Number=1]");
+            sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 2 [" + project.ProjectFile + "::Number=2]");
         }
 
         [Fact]
@@ -261,8 +260,8 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeFalse();
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1]");
-            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + "::Number=1]");
+            sc.ToString().ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + "::Number=2]");
         }
 
         [Theory]
@@ -276,7 +275,7 @@ namespace Microsoft.Build.UnitTests
 
             if (includeEvaluationPropertiesAndItems)
             {
-                pc.Collection.LoggingService.IncludeEvaluationPropertiesAndItems = true;
+                pc.Collection.LoggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(inProjectStartedEvent: false, inEvaluationFinishedEvent: true);
             }
 
             var project = env.CreateTestProjectWithFiles(@"
@@ -287,7 +286,7 @@ namespace Microsoft.Build.UnitTests
             <ItemGroup>
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=1' />
                 <P Include='$(MSBuildThisFileFullPath)' AdditionalProperties='Number=2' />
-    
+
                 <ProjectConfigurationDescription Include='Number=$(Number)' />
                 <ProjectConfigurationDescription Include='TargetFramework=$(TargetFramework)' />
             </ItemGroup>
@@ -314,13 +313,11 @@ namespace Microsoft.Build.UnitTests
 
             p.Build().ShouldBeFalse();
             string output = sc.ToString();
-            output.ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + ":: Number=1 TargetFramework=netcoreapp2.1]");
-            output.ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + ":: Number=2 TargetFramework=netcoreapp2.1]");
+            output.ShouldContain("source_of_error : error : Hello from project 1 [" + project.ProjectFile + "::Number=1 TargetFramework=netcoreapp2.1]");
+            output.ShouldContain("source_of_error : error : Hello from project 2 [" + project.ProjectFile + "::Number=2 TargetFramework=netcoreapp2.1]");
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/6518")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Minimal path validation in Core allows expanding path containing quoted slashes.")]
-        [SkipOnMono("Minimal path validation in Mono allows expanding path containing quoted slashes.")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Minimal path validation in Core allows expanding path containing quoted slashes.", Skip = "https://github.com/dotnet/msbuild/issues/6518")]
         public void TestItemsWithUnexpandableMetadata()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -346,7 +343,6 @@ namespace Microsoft.Build.UnitTests
         /// Verify that on minimal verbosity the console logger does not log the target names.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TestNoTargetNameOnMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -364,7 +360,6 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if a target has no messages logged that its started and finished events show up on detailed but not normal.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EmptyTargetsOnDetailedButNotNormal()
         {
             SimulatedConsole sc = new SimulatedConsole();
@@ -409,7 +404,6 @@ namespace Microsoft.Build.UnitTests
         /// Test a number of cases where difference values from showcommandline are used with normal verbosity
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ShowCommandLineWithNormalVerbosity()
         {
             string command = "echo a";
@@ -1205,7 +1199,7 @@ namespace Microsoft.Build.UnitTests
 
             string ss = cl.IndentString(s, 0);
 
-            //should be a no-op
+            // should be a no-op
             ss.ShouldBe($"foo{Environment.NewLine}");
         }
 
@@ -1219,7 +1213,7 @@ namespace Microsoft.Build.UnitTests
 
             string ss = cl.IndentString(s, 4);
 
-            //should convert lines to system format
+            // should convert lines to system format
             ss.ShouldBe($"    foo{Environment.NewLine}    bar{Environment.NewLine}    baz{Environment.NewLine}    {Environment.NewLine}");
         }
 
@@ -1231,22 +1225,22 @@ namespace Microsoft.Build.UnitTests
 
             string ss = cl.IndentString(s, 0);
 
-            //should convert lines to system format
+            // should convert lines to system format
             ss.ShouldBe($"foo{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}");
         }
 
         [Fact]
         public void MultilineFormatMixedLineEndings()
         {
-            string s = "foo" + "\r\n\r\n" + "bar" + "\n" + "baz" + "\n\r\n\n" +
+            string s = "\n" + "foo" + "\r\n\r\n" + "bar" + "\n" + "baz" + "\n\r\n\n" +
                 "jazz" + "\r\n" + "razz" + "\n\n" + "matazz" + "\n" + "end";
 
             SerialConsoleLogger cl = new SerialConsoleLogger();
 
             string ss = cl.IndentString(s, 0);
 
-            //should convert lines to system format
-            ss.ShouldBe($"foo{Environment.NewLine}{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}jazz{Environment.NewLine}razz{Environment.NewLine}{Environment.NewLine}matazz{Environment.NewLine}end{Environment.NewLine}");
+            // should convert lines to system format
+            ss.ShouldBe($"{Environment.NewLine}foo{Environment.NewLine}{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}jazz{Environment.NewLine}razz{Environment.NewLine}{Environment.NewLine}matazz{Environment.NewLine}end{Environment.NewLine}");
         }
 
         [Fact]
@@ -1260,7 +1254,7 @@ namespace Microsoft.Build.UnitTests
 
             es.Consume(new BuildStartedEventArgs("bs", null));
 
-            //Clear time dependent build started message
+            // Clear time dependent build started message
             sc.Clear();
 
             es.Consume(new ProjectStartedEventArgs("ps1", null, "fname1", "", null, null));
@@ -1301,7 +1295,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(new BuildStartedEventArgs("bs", null));
 
 
-            //Clear time dependent build started message
+            // Clear time dependent build started message
             sc.Clear();
 
             es.Consume(new ProjectStartedEventArgs("ps1", null, "fname1", "", null, null));
@@ -1431,10 +1425,10 @@ namespace Microsoft.Build.UnitTests
             string prop1;
             string prop2;
             string prop3;
-            if (cl is SerialConsoleLogger)
+            if (cl is SerialConsoleLogger scl)
             {
-                var propertyList = ((SerialConsoleLogger)cl).ExtractPropertyList(properties);
-                ((SerialConsoleLogger)cl).WriteProperties(propertyList);
+                var propertyList = scl.ExtractPropertyList(properties);
+                scl.WriteProperties(propertyList);
                 prop1 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop1", "val1");
                 prop2 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop2", "val2");
                 prop3 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "pro(p3)", "va;%3b;l3");
@@ -1686,10 +1680,10 @@ namespace Microsoft.Build.UnitTests
             string item3spec;
             string item3metadatum = string.Empty;
 
-            if (cl is SerialConsoleLogger)
+            if (cl is SerialConsoleLogger scl)
             {
-                SortedList itemList = ((SerialConsoleLogger)cl).ExtractItemList(items);
-                ((SerialConsoleLogger)cl).WriteItems(itemList);
+                SortedList itemList = scl.ExtractItemList(items);
+                scl.WriteItems(itemList);
                 item1spec = "spec" + Environment.NewLine;
                 item2spec = "spec2" + Environment.NewLine;
                 item3spec = "(spec;3" + Environment.NewLine;
@@ -1768,10 +1762,10 @@ namespace Microsoft.Build.UnitTests
                     cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
                 }
 
-                if (cl is SerialConsoleLogger)
+                if (cl is SerialConsoleLogger scl)
                 {
-                    SortedList itemList = ((SerialConsoleLogger)cl).ExtractItemList(items);
-                    ((SerialConsoleLogger)cl).WriteItems(itemList);
+                    SortedList itemList = scl.ExtractItemList(items);
+                    scl.WriteItems(itemList);
                 }
                 else
                 {
@@ -1939,7 +1933,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Create an event source
             EventSourceSink es = new EventSourceSink();
-            //Create a simulated console
+            // Create a simulated console
             SimulatedConsole sc = new SimulatedConsole();
 
             // error and warning string for 1 error and 1 warning
@@ -2029,7 +2023,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Create an event source
             EventSourceSink es = new EventSourceSink();
-            //Create a simulated console
+            // Create a simulated console
             SimulatedConsole sc = new SimulatedConsole();
 
             // error and warning string for 1 error and 1 warning
@@ -2119,7 +2113,7 @@ namespace Microsoft.Build.UnitTests
             for (int i = 1; i <= 2; i++)
             {
                 EventSourceSink es = new EventSourceSink();
-                //Create a simulated console
+                // Create a simulated console
                 SimulatedConsole sc = new SimulatedConsole();
                 // Create a ConsoleLogger with Normal verbosity
                 ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
@@ -2135,7 +2129,7 @@ namespace Microsoft.Build.UnitTests
 
                 // BuildStarted Event
                 es.Consume(new BuildStartedEventArgs("bs", null));
-                //Project Started Event
+                // Project Started Event
                 ProjectStartedEventArgs project1Started = new ProjectStartedEventArgs(1, null, null, "p", "t", null, null, new BuildEventContext(BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId));
                 project1Started.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
                 es.Consume(project1Started);
@@ -2164,7 +2158,7 @@ namespace Microsoft.Build.UnitTests
                 es.Consume(targetFinished1);
 
                 ProjectStartedEventArgs project2Started = new ProjectStartedEventArgs(2, null, null, "p2", "t2", null, null, project1Started.BuildEventContext);
-                //Project Started Event
+                // Project Started Event
                 project2Started.BuildEventContext = new BuildEventContext(2, 2, 2, 2);
                 es.Consume(project2Started);
                 TargetStartedEventArgs targetStarted2 = new TargetStartedEventArgs(null, null, "t2", null, null);
@@ -2244,7 +2238,7 @@ namespace Microsoft.Build.UnitTests
         public void DeferredMessages()
         {
             EventSourceSink es = new EventSourceSink();
-            //Create a simulated console
+            // Create a simulated console
             SimulatedConsole sc = new SimulatedConsole();
             // Create a ConsoleLogger with Detailed verbosity
             ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Detailed, sc.Write, sc.SetColor, sc.ResetColor);
@@ -2296,11 +2290,11 @@ namespace Microsoft.Build.UnitTests
             for (int i = 0; i < 2; i++)
             {
                 EventSourceSink es = new EventSourceSink();
-                //Create a simulated console
+                // Create a simulated console
                 SimulatedConsole sc = new SimulatedConsole();
                 // Create a ConsoleLogger with Normal verbosity
                 ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
-                //Make sure the MPLogger switch will property work on both Initialize methods
+                // Make sure the MPLogger switch will property work on both Initialize methods
                 L.Parameters = "EnableMPLogging";
                 if (i == 0)
                 {
@@ -2335,7 +2329,7 @@ namespace Microsoft.Build.UnitTests
         public void TestPrintTargetNamePerMessage()
         {
             EventSourceSink es = new EventSourceSink();
-            //Create a simulated console
+            // Create a simulated console
             SimulatedConsole sc = new SimulatedConsole();
             // Create a ConsoleLogger with Normal verbosity
             ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
@@ -2389,7 +2383,7 @@ namespace Microsoft.Build.UnitTests
 
 
                 EventSourceSink es = new EventSourceSink();
-                //Create a simulated console
+                // Create a simulated console
                 SimulatedConsole sc = new SimulatedConsole();
                 ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
 
@@ -2459,6 +2453,7 @@ namespace Microsoft.Build.UnitTests
         /// Check to see what kind of device we are outputting the log to, is it a character device, a file, or something else
         /// this can be used by loggers to modify their outputs based on the device they are writing to
         /// </summary>
+        [SupportedOSPlatform("windows")]
         internal bool IsRunningWithCharacterFileType()
         {
             // Get the std out handle

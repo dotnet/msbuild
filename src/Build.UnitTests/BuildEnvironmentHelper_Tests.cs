@@ -1,9 +1,14 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -57,9 +62,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// If MSBUILD_EXE_PATH is explicitly set, we should detect it as a VisualStudio instance even in older scenarios
         /// (for example when the install path is under 15.0).
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void FindVisualStudioEnvironmentByEnvironmentVariable()
         {
             using (var env = new EmptyVSEnviroment())
@@ -85,9 +88,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void FindBuildEnvironmentFromCommandLineVisualStudio()
         {
             using (var env = new EmptyVSEnviroment())
@@ -120,9 +121,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void FindBuildEnvironmentFromRunningProcessVisualStudio()
         {
             using (var env = new EmptyVSEnviroment())
@@ -191,9 +190,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void FindBuildEnvironmentFromVisualStudioRoot()
         {
             using (var env = new EmptyVSEnviroment())
@@ -210,11 +207,9 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Theory]
+        [WindowsFullFrameworkOnlyTheory(additionalMessage: "No Visual Studio installed for .NET.")]
         [InlineData(MSBuildConstants.CurrentVisualStudioVersion, true)]
         [InlineData("15.0", false)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void BuildEnvironmentDetectsVisualStudioByEnvironment(string visualStudioVersion, bool shouldBeValid)
         {
             using (var env = new EmptyVSEnviroment())
@@ -237,9 +232,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcess()
         {
             using (var env = new EmptyVSEnviroment())
@@ -252,9 +245,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentDetectsVisualStudioByMSBuildProcessAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -267,9 +258,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyTheory(additionalMessage: "No Visual Studio installed for .NET.")]
         [InlineData("17.0", true)]
         [InlineData("17.3", true)]
         [InlineData("16.0", false)]
@@ -320,9 +309,7 @@ namespace Microsoft.Build.Engine.UnitTests
             BuildEnvironmentHelper.Instance.RunningInVisualStudio.ShouldBeFalse();
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentDetectsVisualStudioByProcessName()
         {
             using (var env = new EmptyVSEnviroment())
@@ -335,9 +322,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentDetectsVisualStudioByBlendProcess()
         {
             using (var env = new EmptyVSEnviroment())
@@ -350,9 +335,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentFindsAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -366,11 +349,11 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
+        [WindowsOnlyFact]
         public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles:true, includeAmd64Folder:true))
+            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
             {
                 var msBuild64Exe = Path.Combine(env.BuildDirectory, "amd64", MSBuildExeName);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => msBuild64Exe, ReturnNull, ReturnNull,
@@ -383,8 +366,8 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
         public void BuildEnvironmentFindsAmd64NoVS()
         {
             using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
@@ -398,9 +381,8 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentFindsAmd64RunningInAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -430,9 +412,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentVSFromMSBuildAssembly()
         {
             using (var env = new EmptyVSEnviroment())
@@ -449,9 +429,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "No Visual Studio install for netcore")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No Visual Studio installed for .NET.")]
         public void BuildEnvironmentVSFromMSBuildAssemblyAmd64()
         {
             using (var env = new EmptyVSEnviroment())
@@ -473,7 +451,7 @@ namespace Microsoft.Build.Engine.UnitTests
             return null;
         }
 
-        private class EmptyVSEnviroment : EmptyStandaloneEnviroment
+        private sealed class EmptyVSEnviroment : EmptyStandaloneEnviroment
         {
             public string DevEnvPath { get; }
 

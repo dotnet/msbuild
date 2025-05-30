@@ -1,17 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
@@ -230,8 +230,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
 
                 project.AddItem("i", String.Empty);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add an item with null metadata parameter.
@@ -526,8 +525,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectItemElement item2 =
                 project.AddItem(
                     "i",
-                    NativeMethodsShared.IsWindows ? @"c:\subdir1\a\b\subdir2\c\i1.xyx" : "/subdir1/a/b/subdir2/c/i1.xyx")
-                    [0].Xml;
+                    NativeMethodsShared.IsWindows ? @"c:\subdir1\a\b\subdir2\c\i1.xyx" : "/subdir1/a/b/subdir2/c/i1.xyx")[
+                    0].Xml;
 
             string expected = ObjectModelHelpers.CleanupFileContents(
                                   NativeMethodsShared.IsWindows ?
@@ -706,7 +705,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetMetadata_ItemOriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -714,9 +713,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
-
-            Project project = new Project(content);
+</Project>");
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Helpers.GetFirst(project.GetItems("i")).SetMetadataValue("m", "m2");
 
@@ -745,7 +744,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetMetadataUnevaluatedValue_ItemOriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -753,9 +752,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m");
             metadatum.UnevaluatedValue = "m2";
@@ -984,7 +984,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RenameItem_OriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -992,9 +992,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
             item.Rename("h1b");
@@ -1154,7 +1155,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RenameThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => {i.Rename("foo");});
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { i.Rename("foo"); });
         }
 
         /// <summary>
@@ -1318,7 +1319,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItem_OriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -1326,9 +1327,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.RemoveItem(Helpers.GetFirst(project.GetItems("i")));
 
@@ -1420,14 +1422,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItem_IncludingFromIgnoringConditionList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup Condition=""false"">
     <i Include=""i1"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Empty(Helpers.MakeList(project.GetItems("i")));
             List<ProjectItem> itemsIgnoringCondition = Helpers.MakeList(project.GetItemsIgnoringCondition("i"));
@@ -1455,7 +1458,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [MemberData(nameof(ItemElementsWithGlobsThatRequireSplitting))]
         public void RemoveItemsThrowsWhenItemElementSplittingIsDisabled(string projectContents, int itemIndex, SetupProject setupProject)
         {
-            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new [] {i}); });
+            AssertDisabledItemSplitting(projectContents, itemIndex, setupProject, (p, i) => { p.RemoveItems(new[] { i }); });
         }
 
         /// <summary>
@@ -1587,8 +1590,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var property = project.SetProperty("p", "v1");
                 property.Xml.Parent.RemoveAllChildren();
                 property.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting an evaluated property after its XML's parent has been removed should
@@ -1603,8 +1605,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var property = project.SetProperty("p", "v1");
                 property.Xml.Parent.Parent.RemoveAllChildren();
                 property.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting an evaluated metadatum after its XML has been removed should
@@ -1619,8 +1620,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var metadatum = project.AddItem("i", "i1")[0].SetMetadataValue("p", "v1");
                 metadatum.Xml.Parent.RemoveAllChildren();
                 metadatum.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Changing an item's type after its XML has been removed should
@@ -1635,8 +1635,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var item = project.AddItem("i", "i1")[0];
                 item.Xml.Parent.RemoveAllChildren();
                 item.ItemType = "j";
-            }
-           );
+            });
         }
         /// <summary>
         /// Changing an item's type after its XML has been removed should
@@ -1651,8 +1650,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var item = project.AddItem("i", "i1")[0];
                 item.Xml.Parent.RemoveAllChildren();
                 item.RemoveMetadata("m");
-            }
-           );
+            });
         }
 
         [Theory]
@@ -1676,8 +1674,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             new[] // files that should be captured by the glob
             {
                 "a.foo"
-            }
-            )]
+            })]
         // explode on item coming from glob that expands to multiple items
         [InlineData(
             @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -1692,8 +1689,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             {
                 "a.foo",
                 "b.foo"
-            }
-            )]
+            })]
         public void RemoveMetadataThrowsWhenItemElementSplittingIsDisabledAndItemComesFromGlob(string projectContents, int itemIndex, string[] files)
         {
             using (var env = TestEnvironment.Create())
@@ -1728,8 +1724,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var metadatum = project.AddItem("i", "i1")[0].SetMetadataValue("p", "v1");
                 metadatum.Xml.Parent.Parent.RemoveAllChildren();
                 metadatum.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting an evaluated metadatum after its XML's parent's parent has been removed should
@@ -1744,8 +1739,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 var metadatum = project.AddItem("i", "i1")[0].SetMetadataValue("p", "v1");
                 metadatum.Xml.Parent.Parent.Parent.RemoveAllChildren();
                 metadatum.UnevaluatedValue = "v2";
-            }
-           );
+            });
         }
 
         [Theory]
@@ -1999,7 +1993,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddMetadata_Reevaluation()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"">
@@ -2007,9 +2001,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
       <m>m1</m>
     </i>
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.Items);
 
@@ -2159,8 +2154,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project();
 
                 project.AddItemFast("i", String.Empty);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add an item with null metadata parameter.
@@ -2592,8 +2586,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             else
             {
-                var content = XmlReader.Create(new StringReader(projectContents));
-                project = new Project(content);
+                using ProjectFromString projectFromString = new(projectContents);
+                project = projectFromString.Project;
 
                 setupProject?.Invoke(project);
                 project.ReevaluateIfNecessary();

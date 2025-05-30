@@ -1,7 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#if FEATURE_APPDOMAIN
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
 
 using System;
 using System.Diagnostics;
@@ -11,18 +11,25 @@ using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Security;
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#endif
+
+using Microsoft.Build.Framework;
+
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK && FEATURE_APPDOMAIN
+
     /// <summary>
     /// Registers a managed assembly for COM interop (equivalent of regasm.exe functionality, but this code doesn't actually call the exe).
     /// </summary>
     /// <comment>ITypeLibExporterNotifySink is necessary for the ITypeLibConverter.ConvertAssemblyToTypeLib call.</comment>
-    public class RegisterAssembly : AppDomainIsolatedTaskExtension, ITypeLibExporterNotifySink
+    public class RegisterAssembly : AppDomainIsolatedTaskExtension, ITypeLibExporterNotifySink, IRegisterAssemblyTaskContract
     {
         #region Properties
 
@@ -74,7 +81,7 @@ namespace Microsoft.Build.Tasks
 
             if ((AssemblyListFile?.ItemSpec.Length > 0))
             {
-                cacheFile = (AssemblyRegistrationCache)StateFileBase.DeserializeCache(AssemblyListFile.ItemSpec, Log, typeof(AssemblyRegistrationCache)) ??
+                cacheFile = StateFileBase.DeserializeCache<AssemblyRegistrationCache>(AssemblyListFile.ItemSpec, Log) ??
                             new AssemblyRegistrationCache();
             }
 
@@ -118,7 +125,7 @@ namespace Microsoft.Build.Tasks
 #if DEBUG
                     catch (Exception e)
                     {
-                        Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " + 
+                        Debug.Assert(false, "Unexpected exception in AssemblyRegistration.Execute. " +
                             "Please log a MSBuild bug specifying the steps to reproduce the problem. " +
                             e.Message);
                         throw;
@@ -185,7 +192,7 @@ namespace Microsoft.Build.Tasks
         /// </comment>
         public object ResolveRef(Assembly assemblyToResolve)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve, nameof(assemblyToResolve));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyToResolve);
 
             Log.LogErrorWithCodeFromResources("RegisterAssembly.AssemblyNotRegisteredForComInterop", assemblyToResolve.GetName().FullName);
             _typeLibExportFailed = true;
@@ -201,7 +208,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool Register(string assemblyPath, string typeLibPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath, nameof(typeLibPath));
+            ErrorUtilities.VerifyThrowArgumentNull(typeLibPath);
 
             Log.LogMessageFromResources(MessageImportance.Low, "RegisterAssembly.RegisteringAssembly", assemblyPath);
 
@@ -215,7 +222,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                // Load the specified assembly. 
+                // Load the specified assembly.
                 Assembly asm = Assembly.UnsafeLoadFrom(assemblyPath);
 
                 var comRegistrar = new RegistrationServices();
@@ -223,8 +230,8 @@ namespace Microsoft.Build.Tasks
                 // Register the assembly
                 if (!comRegistrar.RegisterAssembly(asm, CreateCodeBase ? AssemblyRegistrationFlags.SetCodeBase : AssemblyRegistrationFlags.None))
                 {
-                    // If the assembly doesn't contain any types that could be registered for COM interop, 
-                    // warn the user about it.  
+                    // If the assembly doesn't contain any types that could be registered for COM interop,
+                    // warn the user about it.
                     Log.LogWarningWithCodeFromResources("RegisterAssembly.NoValidTypes", assemblyPath);
                 }
 
@@ -341,7 +348,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Persist the type library
-                UCOMICreateITypeLib createTypeLib = (UCOMICreateITypeLib)convertedTypeLib;
+                ICreateTypeLib createTypeLib = (ICreateTypeLib)convertedTypeLib;
 
                 createTypeLib.SaveAllChanges();
             }
@@ -358,5 +365,41 @@ namespace Microsoft.Build.Tasks
 
         #endregion
     }
-}
+
+#elif !NETFRAMEWORK
+
+    public sealed class RegisterAssembly : TaskRequiresFramework, IRegisterAssemblyTaskContract
+    {
+        public RegisterAssembly()
+            : base(nameof(RegisterAssembly))
+        {
+        }
+
+        #region Properties
+
+        public ITaskItem[] Assemblies { get; set; }
+
+        [Output]
+        public ITaskItem[] TypeLibFiles { get; set; }
+
+        public bool CreateCodeBase { get; set; }
+
+        public ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+
 #endif
+
+    internal interface IRegisterAssemblyTaskContract
+    {
+        #region Properties
+
+        ITaskItem[] Assemblies { get; set; }
+        ITaskItem[] TypeLibFiles { get; set; }
+        bool CreateCodeBase { get; set; }
+        ITaskItem AssemblyListFile { get; set; }
+
+        #endregion
+    }
+}

@@ -1,37 +1,56 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if NETFRAMEWORK
+using System.Linq;
+#endif
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
-
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+using Microsoft.NET.StringTools;
 using Microsoft.Win32;
-
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// The Intrinsic class provides static methods that can be accessed from MSBuild's
-    /// property functions using $([MSBuild]::Function(x,y))
+    /// property functions using $([MSBuild]::Function(x,y)).
     /// </summary>
-    internal static class IntrinsicFunctions
+    internal static partial class IntrinsicFunctions
     {
-#if FEATURE_WIN32_REGISTRY
-        private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
+        // lang=regex
+        private const string RegistrySdkSpecification = @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$";
 
-        private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
-#endif // FEATURE_WIN32_REGISTRY
+#pragma warning disable CA1416 // Platform compatibility: we'll only use this on Windows
+        private static readonly object[] DefaultRegistryViews = [RegistryView.Default];
+#pragma warning restore CA1416
 
-        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => new NuGetFrameworkWrapper());
+#if NET
+        [GeneratedRegex(RegistrySdkSpecification, RegexOptions.IgnoreCase)]
+        private static partial Regex RegistrySdkRegex { get; }
+#else
+        private static Regex s_registrySdkRegex;
+        private static Regex RegistrySdkRegex => s_registrySdkRegex ??= new Regex(RegistrySdkSpecification, RegexOptions.IgnoreCase);
+#endif
+
+        private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
 
         /// <summary>
         /// Add two doubles
@@ -161,12 +180,34 @@ namespace Microsoft.Build.Evaluation
             return ~first;
         }
 
-#if FEATURE_WIN32_REGISTRY
+        internal static int LeftShift(int operand, int count)
+        {
+            return operand << count;
+        }
+
+        internal static int RightShift(int operand, int count)
+        {
+            return operand >> count;
+        }
+
+        internal static int RightShiftUnsigned(int operand, int count)
+        {
+            return operand >>> count;
+        }
+
         /// <summary>
         /// Get the value of the registry key and value, default value is null
         /// </summary>
         internal static object GetRegistryValue(string keyName, string valueName)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return null;
+            }
+#endif
             return Registry.GetValue(keyName, valueName, null /* null to match the $(Regsitry:XYZ@ZBC) behaviour */);
         }
 
@@ -175,11 +216,28 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static object GetRegistryValue(string keyName, string valueName, object defaultValue)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return defaultValue;
+            }
+#endif
             return Registry.GetValue(keyName, valueName, defaultValue);
         }
 
         internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return defaultValue;
+            }
+#endif
+
             if (views == null || views.Length == 0)
             {
                 views = DefaultRegistryViews;
@@ -193,6 +251,15 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, ArraySegment<object> views)
         {
+#if RUNTIME_TYPE_NETCORE
+            // .NET Core MSBuild used to always return empty, so match that behavior
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
+            {
+                return defaultValue;
+            }
+#endif
+
             // We will take on handing of default value
             // A we need to act on the null return from the GetValue call below
             // so we can keep searching other registry views
@@ -208,8 +275,8 @@ namespace Microsoft.Build.Evaluation
             {
                 if (viewObject is string viewAsString)
                 {
-                    string typeLeafName = typeof(RegistryView).Name + ".";
-                    string typeFullName = typeof(RegistryView).FullName + ".";
+                    string typeLeafName = $"{typeof(RegistryView).Name}.";
+                    string typeFullName = $"{typeof(RegistryView).FullName}.";
 
                     // We'll allow the user to specify the leaf or full type name on the RegistryView enum
                     viewAsString = viewAsString.Replace(typeFullName, "").Replace(typeLeafName, "");
@@ -223,7 +290,7 @@ namespace Microsoft.Build.Evaluation
                         // Fake common requests to HKLM that we can resolve
 
                         // See if this asks for a specific SDK
-                        var m = RegistrySdkRegex.Value.Match(keyName);
+                        var m = RegistrySdkRegex.Match(keyName);
 
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
@@ -233,6 +300,7 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
+#pragma warning disable CA2000 // Dispose objects before losing scope is false positive here.
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                     {
                         if (key != null)
@@ -253,39 +321,13 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 }
             }
 
             // We will have either found a result or defaultValue if one wasn't found at this point
             return result;
         }
-
-#else // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-
-        /// <summary>
-        /// Get the value of the registry key and value, default value is null
-        /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName)
-        {
-            return null; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-
-        /// <summary>
-        /// Get the value of the registry key and value
-        /// </summary>
-        internal static object GetRegistryValue(string keyName, string valueName, object defaultValue)
-        {
-            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-
-        /// <summary>
-        /// Get the value of the registry key from one of the RegistryView's specified
-        /// </summary>
-        internal static object GetRegistryValueFromView(string keyName, string valueName, object defaultValue, params object[] views)
-        {
-            return defaultValue; // FEATURE_WIN32_REGISTRY is off, need to mock the function names to let scrips call these property functions and get NULLs rather than fail with errors
-        }
-#endif
 
         /// <summary>
         /// Given the absolute location of a file, and a disc location, returns relative file path to that disk location.
@@ -348,12 +390,87 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        ///<summary>
-        /// Hash the string independent of bitness and target framework.
+        /// <summary>
+        /// Returns the string after converting all bytes to base 64 (alphanumeric characters plus '+' and '/'), ending in one or two '='.
         /// </summary>
-        internal static int StableStringHash(string toHash)
+        /// <param name="toEncode">String to encode in base 64.</param>
+        /// <returns>The encoded string.</returns>
+        internal static string ConvertToBase64(string toEncode)
         {
-            return CommunicationsUtilities.GetHashCode(toHash);
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(toEncode));
+        }
+
+        /// <summary>
+        /// Returns the string after converting from base 64 (alphanumeric characters plus '+' and '/'), ending in one or two '='.
+        /// </summary>
+        /// <param name="toDecode">The string to decode.</param>
+        /// <returns>The decoded string.</returns>
+        internal static string ConvertFromBase64(string toDecode)
+        {
+            return Encoding.UTF8.GetString(Convert.FromBase64String(toDecode));
+        }
+
+        internal enum StringHashingAlgorithm
+        {
+            // Legacy way of calculating StableStringHash - which was derived from string GetHashCode
+            Legacy,
+            // FNV-1a 32bit hash
+            Fnv1a32bit,
+            // Custom FNV-1a 32bit hash - optimized for speed by hashing by the whole chars (not individual bytes)
+            Fnv1a32bitFast,
+            // FNV-1a 64bit hash
+            Fnv1a64bit,
+            // Custom FNV-1a 64bit hash - optimized for speed by hashing by the whole chars (not individual bytes)
+            Fnv1a64bitFast,
+            // SHA256 hash - gets the hex string of the hash (with no prefix)
+            Sha256
+        }
+
+        /// <summary>
+        /// Legacy implementation that doesn't lead to JIT pulling the new functions from StringTools (so those must not be referenced anywhere in the function body)
+        ///  - for cases where the calling code would erroneously load old version of StringTools alongside of the new version of Microsoft.Build.
+        /// Should be removed once Wave17_10 is removed.
+        /// </summary>
+        internal static object StableStringHashLegacy(string toHash)
+            => CommunicationsUtilities.GetHashCode(toHash);
+
+        /// <summary>
+        /// Hash the string independent of bitness, target framework and default codepage of the environment.
+        /// We do not want this to be inlined, as then the Expander would call directly the new overload, and hence
+        ///  JIT load the functions from StringTools - so we would not be able to prevent their loading with ChangeWave as we do now.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal static object StableStringHash(string toHash)
+            => StableStringHash(toHash, StringHashingAlgorithm.Legacy);
+
+        internal static object StableStringHash(string toHash, StringHashingAlgorithm algo) =>
+            algo switch
+            {
+                StringHashingAlgorithm.Legacy => CommunicationsUtilities.GetHashCode(toHash),
+                StringHashingAlgorithm.Fnv1a32bit => FowlerNollVo1aHash.ComputeHash32(toHash),
+                StringHashingAlgorithm.Fnv1a32bitFast => FowlerNollVo1aHash.ComputeHash32Fast(toHash),
+                StringHashingAlgorithm.Fnv1a64bit => FowlerNollVo1aHash.ComputeHash64(toHash),
+                StringHashingAlgorithm.Fnv1a64bitFast => FowlerNollVo1aHash.ComputeHash64Fast(toHash),
+                StringHashingAlgorithm.Sha256 => CalculateSha256(toHash),
+                _ => throw new ArgumentOutOfRangeException(nameof(algo), algo, null)
+            };
+
+        private static string CalculateSha256(string toHash)
+        {
+#if NET
+            Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
+            SHA256.HashData(Encoding.UTF8.GetBytes(toHash), hash);
+            return Convert.ToHexStringLower(hash);
+#else
+            using var sha = SHA256.Create();
+            var hashResult = new StringBuilder();
+            foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
+            {
+                hashResult.Append(theByte.ToString("x2"));
+            }
+
+            return hashResult.ToString();
+#endif
         }
 
         /// <summary>
@@ -515,9 +632,47 @@ namespace Microsoft.Build.Evaluation
             return NuGetFramework.Value.GetTargetPlatformVersion(tfm, versionPartCount);
         }
 
+        internal static string FilterTargetFrameworks(string incoming, string filter)
+        {
+            return NuGetFramework.Value.FilterTargetFrameworks(incoming, filter);
+        }
+
         internal static bool AreFeaturesEnabled(Version wave)
         {
             return ChangeWaves.AreFeaturesEnabled(wave);
+        }
+
+        internal static string SubstringByAsciiChars(string input, int start, int length)
+        {
+            if (start > input.Length)
+            {
+                return string.Empty;
+            }
+
+            if (start + length > input.Length)
+            {
+                length = input.Length - start;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in input.AsSpan(start, length))
+            {
+                if (c >= 32 && c <= 126 && !FileUtilities.InvalidFileNameChars.Contains(c))
+                {
+                    sb.Append(c);
+                }
+                else
+                {
+                    sb.Append('_');
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        internal static string CheckFeatureAvailability(string featureName)
+        {
+            return Features.CheckFeatureAvailability(featureName).ToString();
         }
 
         public static string GetCurrentToolsDirectory()
@@ -555,12 +710,24 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
         }
 
-        public static bool IsRunningFromVisualStudio()
+        public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+
+        public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
-            return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+            pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
+            if (File.Exists(pathToAssembly))
+            {
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
+
+                return true;
+            }
+
+            loggingContext.LogComment(MessageImportance.Low, "CustomCheckAssemblyNotExist", pathToAssembly);
+
+            return false;
         }
 
-#region Debug only intrinsics
+        #region Debug only intrinsics
 
         /// <summary>
         /// returns if the string contains escaped wildcards
@@ -570,9 +737,8 @@ namespace Microsoft.Build.Evaluation
             return new List<string> { "A", "B", "C", "D" };
         }
 
-#endregion
+        #endregion
 
-#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Following function will parse a keyName and returns the basekey for it.
         /// It will also store the subkey name in the out parameter.
@@ -580,6 +746,7 @@ namespace Microsoft.Build.Evaluation
         /// The return value shouldn't be null.
         /// Taken from: \ndp\clr\src\BCL\Microsoft\Win32\Registry.cs
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private static RegistryKey GetBaseKeyFromKeyName(string keyName, RegistryView view, out string subKeyName)
         {
             if (keyName == null)
@@ -636,11 +803,10 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                subKeyName = keyName.Substring(i + 1, keyName.Length - i - 1);
+                subKeyName = keyName.Substring(i + 1);
             }
 
             return basekey;
         }
-#endif
     }
 }

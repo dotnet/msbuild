@@ -1,15 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Runtime.InteropServices;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// This empty interface is used to pass host objects from an IDE to individual
     /// tasks.  Depending on the task itself and what kinds parameters and functionality
-    /// it exposes, the task should define its own interface that inherits from this one, 
+    /// it exposes, the task should define its own interface that inherits from this one,
     /// and then use that interface to communicate with the host.
     /// </summary>
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]

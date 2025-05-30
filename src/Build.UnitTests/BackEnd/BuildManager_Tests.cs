@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -27,6 +26,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -80,7 +81,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = false
             };
             _buildManager = new BuildManager();
-            _projectCollection = new ProjectCollection();
+            _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
             _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
@@ -91,9 +92,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public void Dispose()
         {
-            _buildManager.Dispose();
-            _projectCollection.Dispose();
-            _env.Dispose();
+            try
+            {
+                _buildManager.Dispose();
+                _projectCollection.Dispose();
+            }
+            finally
+            {
+                _env.Dispose();
+            }
         }
 
         /// <summary>
@@ -129,8 +136,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -193,7 +200,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         .ProjectInstance.FullPath,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    new string[0],
+                    Array.Empty<string>(),
                     null));
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -246,8 +253,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             _logger.ProjectStartedEvents.Count.ShouldBe(1);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             properties.TryGetValue("InitialProperty1", out string propertyValue).ShouldBeTrue();
             propertyValue.ShouldBe("InitialProperty1", StringCompareShould.IgnoreCase);
@@ -285,10 +292,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            var project = new Project(XmlReader.Create(new StringReader(contents1)), null, null, _projectCollection)
-            {
-                FullPath = _env.CreateFile(".proj").Path
-            };
+            using ProjectFromString projectFromString = new(contents1, null, null, _projectCollection);
+            Project project = projectFromString.Project;
+            project.FullPath = _env.CreateFile(".proj").Path;
 
             project.Save();
 
@@ -317,8 +323,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1975")]
-#elif MONO
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Theory(Skip = "https://github.com/dotnet/msbuild/issues/2057")]
 #endif
@@ -336,7 +340,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
             }
 
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
 
             // Get number of MSBuild processes currently instantiated
             int numberProcsOriginally = (new List<Process>(Process.GetProcessesByName("MSBuild"))).Count;
@@ -357,7 +361,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = true,
                 DisableInProcNode = true,
                 SaveOperatingEnvironment = false,
-                Loggers = new List<ILogger> {new MockLogger(_output)}
+                Loggers = new List<ILogger> { new MockLogger(_output) }
             };
 
             // Tell the build manager to not disturb process wide state
@@ -366,7 +370,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Use a separate BuildManager for the node shutdown build, so that we don't have
             // to worry about taking dependencies on whether or not the existing ones have already
             // disappeared.
-            var shutdownManager = new BuildManager("IdleNodeShutdown");
+            using var shutdownManager = new BuildManager("IdleNodeShutdown");
             shutdownManager.Build(buildParameters, requestData);
 
             // Number of nodes after the build has to be greater than the original number
@@ -395,11 +399,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void SimpleBuildOutOfProcess()
         {
             RunOutOfProcBuild(_ => _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1"));
@@ -408,11 +408,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A simple successful build, out of process only. Triggered by setting build parameters' DisableInProcNode to true.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void DisableInProcNode()
         {
             RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
@@ -444,7 +440,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Project project = CreateProject(CleanupFileContents(contents), MSBuildDefaultToolsVersion, _projectCollection, false);
 
-            var data = new BuildRequestData(project.CreateProjectInstance(), new string[0], _projectCollection.HostServices);
+            var data = new BuildRequestData(project.CreateProjectInstance(), Array.Empty<string>(), _projectCollection.HostServices);
             var customparameters = new BuildParameters { EnableNodeReuse = false, Loggers = new ILogger[] { _logger } };
             buildParametersModifier(customparameters);
 
@@ -458,11 +454,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.NotEqual(Process.GetCurrentProcess().Id, processId); // "Build is expected to be out-of-proc. In fact it was in-proc."
         }
 
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void RequestedResultsAreSatisfied()
         {
             const string contents = @"
@@ -506,16 +498,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     {"AnItem", null},
                     {"ItemWithMetadata", new List<string> {"Metadatum1"}},
                 },
-                PropertyFilters = new List<string> {"NewProperty", "RequestedProperty"},
+                PropertyFilters = new List<string> { "NewProperty", "RequestedProperty" },
             };
 
-            var data = new BuildRequestData(project.CreateProjectInstance(), new [] {"test", "other"},
+            var data = new BuildRequestData(project.CreateProjectInstance(), new[] { "test", "other" },
                 _projectCollection.HostServices, BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild, null,
                 requestedProjectState);
             var customparameters = new BuildParameters
             {
                 EnableNodeReuse = false,
-                Loggers = new ILogger[] {_logger},
+                Loggers = new ILogger[] { _logger },
                 DisableInProcNode = true,
             };
 
@@ -578,8 +570,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -618,8 +610,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -655,15 +647,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.SetEnvironmentVariable("MsBuildForwardPropertiesFromChild", "Something");
 
             var project = CreateProject(contents, null, _projectCollection, false);
-            var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
+            var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -681,8 +673,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -711,9 +701,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
@@ -734,8 +732,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1976")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -771,11 +767,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.SetEnvironmentVariable("MsBuildForwardPropertiesFromChild", "InitialProperty3;IAMNOTREAL");
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
+            _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "0");
+
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Equal(3, _logger.ProjectStartedEvents.Count);
@@ -796,18 +802,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("InitialProperty3", propertyValue);
 
             projectStartedEvent = _logger.ProjectStartedEvents[2];
-            Assert.Null(projectStartedEvent.Properties);
+            properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
         /// Make sure when if the environment variable MsBuildForwardPropertiesFromChild is set to empty and
         /// we launch a child node that we get no properties
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ForwardNoPropertiesLaunchChildNode()
         {
             string contents = CleanupFileContents(@"
@@ -828,7 +831,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
 
@@ -837,7 +840,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -847,8 +850,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/933")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -891,13 +892,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
             var newToolSet = new Toolset("CustomToolSet", "c:\\SomePath", projectCollection, null);
             projectCollection.AddToolset(newToolSet);
 
             var project = CreateProject(contents, null, projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
             var customParameters = new BuildParameters(projectCollection) { Loggers = new ILogger[] { _logger } };
             BuildResult result = _buildManager.Build(customParameters, data);
@@ -908,11 +909,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// When a child node is launched by default we should not send any properties.
         /// we launch a child node that we get no properties
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ForwardNoPropertiesLaunchChildNodeDefault()
         {
             string contents = CleanupFileContents(@"
@@ -932,7 +929,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
-                MSBuildDefaultToolsVersion, new string[] { }, null);
+                MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
@@ -940,7 +937,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -1098,7 +1095,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void BuildRequestWithoutBegin()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
         }
 
@@ -1108,7 +1105,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void GraphBuildRequestWithoutBegin()
         {
-            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.BuildRequest(data));
         }
 
@@ -1118,7 +1115,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendBuildRequestWithoutBegin()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
@@ -1128,7 +1125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendGraphBuildRequestWithoutBegin()
         {
-            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), Array.Empty<string>(), null);
             Should.Throw<InvalidOperationException>(() => _buildManager.PendBuildRequest(data));
         }
 
@@ -1141,8 +1138,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidOperationException>(() =>
                 {
                     _buildManager.EndBuild();
-                }
-            );
+                });
         }
 
         [Fact]
@@ -1154,7 +1150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ");
             var project = CreateProject(contents, null, _projectCollection, false);
             var globalProperties = new Dictionary<string, string>();
-            var targets = new string[0];
+            var targets = Array.Empty<string>();
             var brd = new BuildRequestData(project.FullPath, globalProperties, null, targets, new HostServices());
             using (var bm = new BuildManager())
             {
@@ -1218,7 +1214,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendBuildRequestAfterEnd()
         {
-            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+            BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
             _buildManager.BeginBuild(new BuildParameters());
             _buildManager.EndBuild();
 
@@ -1231,7 +1227,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void PendGraphBuildRequestAfterEnd()
         {
-            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), new string[0], null);
+            GraphBuildRequestData data = new GraphBuildRequestData("foo", new Dictionary<string, string>(), Array.Empty<string>(), null);
             _buildManager.BeginBuild(new BuildParameters());
             _buildManager.EndBuild();
 
@@ -1247,7 +1243,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 BuildRequestData data =
-                    new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", new string[0], null);
+                    new BuildRequestData("foo", new Dictionary<string, string>(), "2.0", Array.Empty<string>(), null);
                 _buildManager.BeginBuild(new BuildParameters());
 
                 Assert.Throws<InvalidOperationException>(() => { _buildManager.Build(new BuildParameters(), data); });
@@ -1301,7 +1297,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestData data = GetBuildRequestData(contents);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission submission1 = _buildManager.PendBuildRequest(data);
-            var callbackFinished = new AutoResetEvent(false);
+            using var callbackFinished = new AutoResetEvent(false);
             submission1.ExecuteAsync(submission =>
             {
                 _buildManager.EndBuild();
@@ -1489,7 +1485,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             _buildManager.PendBuildRequest(data);
             _buildManager.EndBuild();
@@ -1509,18 +1505,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             _buildManager.PendBuildRequest(data);
             _buildManager.CancelAllSubmissions();
             _buildManager.EndBuild();
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously: needs to be async for xunit's timeout system
         /// <summary>
         /// A canceled build
         /// </summary>
         [Fact(Timeout = 20_000)]
-        public void CancelledBuild()
+        public async System.Threading.Tasks.Task CancelledBuild()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
@@ -1532,14 +1530,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
 ");
 
-            BuildParameters parameters = new ()
+            BuildParameters parameters = new()
             {
                 ShutdownInProcNodeOnBuildFinish = true,
                 Loggers = new ILogger[] { _logger, new MockLogger(printEventsToStdout: true) },
                 EnableNodeReuse = false
             };
 
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
 
             Console.WriteLine("CancelledBuild: beginning build");
             _buildManager.BeginBuild(_parameters);
@@ -1573,7 +1571,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildWithDelay20()
         {
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null) return;
+            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
+            {
+                return;
+            }
 
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='2.0'>
@@ -1609,7 +1610,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildInTaskHostWithDelay20()
         {
-            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null) return;
+            if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
+            {
+                return;
+            }
 
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -1620,7 +1624,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
@@ -1652,13 +1656,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
+            Stopwatch sw = Stopwatch.StartNew();
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
 
@@ -1670,6 +1675,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
             _logger.AssertLogDoesntContain("[errormessage]");
+            // The build should bail out immediately after executing CancelAllSubmissions, build stalling for a longer time
+            //  is very unexpected.
+            sw.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+        }
+
+        /// <summary>
+        /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
+        /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
+        ///
+        /// This test also exercises the possibility of CancelAllSubmissions being executed after EndBuild -
+        /// which can happen even if they are synchronously executed in expected order - the CancelAllSubmissions is internally
+        /// asynchronous and hence part of the execution can happen after EndBuild.
+        /// </summary>
+        [Fact]
+        public void CancelledBuildWithDelay40_WithThreatSwap()
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test'>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
+    <Message Text='[errormessage]'/>
+ </Target>
+</Project>
+");
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
+            _buildManager.BeginBuild(_parameters);
+            Stopwatch sw = Stopwatch.StartNew();
+            BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
+            asyncResult.ExecuteAsync(null, null);
+
+            Thread.Sleep(500);
+            // Simulate the case where CancelAllSubmissions is called after EndBuild or its internal queued task is swapped
+            //  and executed after EndBuild starts execution.
+            System.Threading.Tasks.Task.Delay(500).ContinueWith(t => _buildManager.CancelAllSubmissions());
+            _buildManager.EndBuild();
+
+            asyncResult.WaitHandle.WaitOne();
+            BuildResult result = asyncResult.BuildResult;
+
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
+            _logger.AssertLogDoesntContain("[errormessage]");
+            // The build should bail out immediately after executing CancelAllSubmissions, build stalling for a longer time
+            //  is very unexpected.
+            sw.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
         }
 
         /// <summary>
@@ -1679,16 +1728,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void CancelledBuildInTaskHostWithDelay40()
         {
-            string contents = CleanupFileContents(@"
+            string contents = CleanupFileContents(@$"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <UsingTask TaskName='Microsoft.Build.Tasks.Exec' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a' TaskFactory='TaskHostFactory' />
  <Target Name='test'>
-    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='{Helpers.GetSleepCommand(TimeSpan.FromSeconds(10))}'/>
     <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
-            BuildRequestData data = GetBuildRequestData(contents, new string[] { }, MSBuildDefaultToolsVersion);
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
@@ -1725,8 +1774,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
-            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new[] {"target1"}));
-            BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(instance, new[] {"target2"}));
+            BuildResult result1 = _buildManager.BuildRequest(new BuildRequestData(instance, new[] { "target1" }));
+            BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(instance, new[] { "target2" }));
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Success, result1.OverallResult);
@@ -1757,9 +1806,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
 
-            BuildSubmission submission =_buildManager.PendBuildRequest(new BuildRequestData(instance, new[] {"target1"}));
+            BuildSubmission submission = _buildManager.PendBuildRequest(new BuildRequestData(instance, new[] { "target1" }));
             submission.ExecuteAsync(null, null);
-            BuildResult result2 =_buildManager.BuildRequest(new BuildRequestData(project.CreateProjectInstance(), new[] {"target2"}));
+            BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(project.CreateProjectInstance(), new[] { "target2" }));
 
             submission.WaitHandle.WaitOne();
             var result1 = submission.BuildResult;
@@ -1792,9 +1841,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
 
-            BuildSubmission submission = _buildManager.PendBuildRequest(new BuildRequestData(instance, new[] {"target1"}));
+            BuildSubmission submission = _buildManager.PendBuildRequest(new BuildRequestData(instance, new[] { "target1" }));
             submission.ExecuteAsync(null, null);
-            BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(project.CreateProjectInstance(), new[] {"target1"}));
+            BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(project.CreateProjectInstance(), new[] { "target1" }));
             submission.WaitHandle.WaitOne();
             var result1 = submission.BuildResult;
 
@@ -1828,7 +1877,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             File.WriteAllText(projectFile, contents);
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
-            var data = new BuildRequestData(projectFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new string[] { }, null);
+            var data = new BuildRequestData(projectFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             _buildManager.Build(_parameters, data);
         }
 
@@ -1983,12 +2032,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Create Project 1
             ProjectInstance projectInstance = CreateProjectInstance(contents1, null, _projectCollection, false);
-            var data = new BuildRequestData(projectInstance, new string[0]);
+            var data = new BuildRequestData(projectInstance, Array.Empty<string>());
 
             _logger.ClearLog();
 
             // Write the second project to disk and load it into its own project collection
-            var projectCollection2 = new ProjectCollection();
+            using var projectCollection2 = new ProjectCollection();
             File.WriteAllText(p2pProject, contents2);
 
             Project project2 = projectCollection2.LoadProject(p2pProject);
@@ -2010,7 +2059,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Create a new build.
             ProjectInstance projectInstance2 = CreateProjectInstance(contents1, null, _projectCollection, false);
-            var data2 = new BuildRequestData(projectInstance2, new string[0]);
+            var data2 = new BuildRequestData(projectInstance2, Array.Empty<string>());
 
             // Build again.
             _parameters.ResetCaches = false;
@@ -2047,7 +2096,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(importedProjectPath, contents2);
             File.WriteAllText(rootProjectPath, String.Format(CultureInfo.InvariantCulture, contents1, importedProjectPath));
 
-            var projectCollection = new ProjectCollection();
+            using var projectCollection = new ProjectCollection();
 
             // Run a simple build just to prove that nothing is left in the cache.
             var data = new BuildRequestData(rootProjectPath, ReadOnlyEmptyDictionary<string, string>.Instance, null, new[] { "test" }, null);
@@ -2126,11 +2175,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that disabling the in-proc node doesn't cause projects which don't require it to fail.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void Regress239661()
         {
             string contents = CleanupFileContents(@"
@@ -2148,7 +2193,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string fileName = _env.CreateFile(".proj").Path;
             File.WriteAllText(fileName, contents);
-            var data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, MSBuildDefaultToolsVersion, new string[0], null);
+            var data = new BuildRequestData(fileName, _projectCollection.GlobalProperties, MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             _parameters.DisableInProcNode = true;
             BuildResult result = _buildManager.Build(_parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -2188,11 +2233,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that properties and items are transferred to the out-of-proc node when an instance is used to start the build.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ProjectInstanceTransfersToOOPNode()
         {
             string contents = CleanupFileContents(@"
@@ -2236,7 +2277,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
 
-            var data = new BuildRequestData(instance, new string[0]);
+            var data = new BuildRequestData(instance, Array.Empty<string>());
 
             // Force this to build out-of-proc
             _parameters.DisableInProcNode = true;
@@ -2253,11 +2294,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensures that a limited set of properties are transferred from a project instance to an OOP node.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void ProjectInstanceLimitedTransferToOOPNode()
         {
             string contents = CleanupFileContents(@"
@@ -2280,7 +2317,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             instance.SetProperty("VirtualProp", "overridden");
             instance.SetProperty("Unmodified", "changed");
 
-            var data = new BuildRequestData(instance, new string[0], null, BuildRequestDataFlags.None, new string[] { "VirtualProp" });
+            var data = new BuildRequestData(instance, Array.Empty<string>(), null, BuildRequestDataFlags.None, new string[] { "VirtualProp" });
 
             // Force this to build out-of-proc
             _parameters.DisableInProcNode = true;
@@ -2296,7 +2333,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void CacheLifetime()
         {
             FileUtilities.ClearCacheDirectory();
@@ -2307,7 +2343,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Do a build with one build manager.
             using (var outerBuildManager = new BuildManager())
             {
-                outerBuildCacheDirectory = BuildAndCheckCache(outerBuildManager, new string[] { });
+                outerBuildCacheDirectory = BuildAndCheckCache(outerBuildManager, Array.Empty<string>());
 
                 // Do another build with a second build manager while the first still exists.  Since both BuildManagers
                 // share a process-wide cache directory, we want to verify that they don't stomp on each other, either
@@ -2554,8 +2590,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/933")]
-#elif MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -2567,7 +2601,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var projD = _env.CreateFile(".proj").Path;
 
             string contentsA = @"<?xml version='1.0' encoding='utf-8'?>
-<Project ToolsVersion='4.0' DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='4.0' DefaultTargets='Build'>
   <ItemGroup>
     <ProjectReference Include='" + projD + @"' />
     <ProjectReference Include='" + projC + @"' />
@@ -2581,7 +2615,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ";
 
             string contentsB = @"<?xml version='1.0' encoding='utf-8'?>
-<Project ToolsVersion='4.0' DefaultTargets='CallsGenerateImpLib' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='4.0' DefaultTargets='CallsGenerateImpLib'>
   <Target Name='CallsGenerateImpLib'>
     <MSBuild Projects='" + projC + @"' Targets='GenerateImpLib' BuildInParallel='true' />
   </Target>
@@ -2590,7 +2624,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ";
 
             string contentsC = @"<?xml version='1.0' encoding='utf-8'?>
-<Project ToolsVersion='4.0' DefaultTargets='Default' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='4.0' DefaultTargets='Default'>
   <Target Name='Default' DependsOnTargets='ResolveReferences;BuildCompile'>
     <Message Text='Executed Default' />
   </Target>
@@ -2611,7 +2645,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ";
 
             string contentsD = @"<?xml version='1.0' encoding='utf-8'?>
-<Project ToolsVersion='4.0' DefaultTargets='Build' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='4.0' DefaultTargets='Build'>
   <Target Name='Build'>
     <Message Text='In d.proj' />
   </Target>
@@ -2653,11 +2687,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// second request will bail out where the first request did, as though it had
         /// executed the target, rather than skipping and continuing.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_Simple()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -2705,7 +2735,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _parameters.EnableNodeReuse = false;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null,
-                new[] {"Build"}, new HostServices());
+                new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
@@ -2736,11 +2766,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// expected in the first request, but be skipped by the second (since if it's "skipping
         /// unsuccessful", it can assume that all other OnError targets have also already been run)
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_OnErrorChain()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -2806,7 +2832,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _parameters.EnableNodeReuse = false;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null,
-                new[] {"Build"}, new HostServices());
+                new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
@@ -2855,11 +2881,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// they're marked as ContinueOnError=ErrorAndContinue, then we won't bail, but
         /// will continue executing (on the first request) or skipping (on the second)
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_ErrorAndContinue()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -2910,7 +2932,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _parameters.EnableNodeReuse = false;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null,
-                new[] {"Build"}, new HostServices());
+                new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
@@ -2945,11 +2967,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that if the errors are in AfterTargets, we still
         /// exit as though the target that those targets run after has already run.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyMultipleRequestForSameProjectWithErrors_AfterTargets()
         {
             var projA = _env.CreateFile(".proj").Path;
@@ -3000,7 +3018,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _parameters.EnableNodeReuse = false;
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null,
-                new[] {"Build"}, new HostServices());
+                new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
@@ -3069,7 +3087,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _buildManager.BeginBuild(_parameters);
             var data = new BuildRequestData(projA, new Dictionary<string, string>(), null,
-                new[] {"Build"}, new HostServices());
+                new[] { "Build" }, new HostServices());
             BuildResult result = _buildManager.PendBuildRequest(data).Execute();
 
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
@@ -3115,7 +3133,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 
-            var project1DoneEvent = new AutoResetEvent(false);
+            using var project1DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project1);
@@ -3126,7 +3144,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 project1DoneEvent.Set();
             });
 
-            var project2DoneEvent = new AutoResetEvent(false);
+            using var project2DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project2);
@@ -3193,7 +3211,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 
-            var project1DoneEvent = new AutoResetEvent(false);
+            using var project1DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 // need to kick off project 2 first so that it project 1 can get submitted before the P2P happens
@@ -3206,7 +3224,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 project1DoneEvent.Set();
             });
 
-            var project2DoneEvent = new AutoResetEvent(false);
+            using var project2DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project1);
@@ -3232,11 +3250,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// submissions aren't restricted to running strictly serially by the single in-proc
         /// node.
         /// </summary>
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1245")]
-#else
         [Fact]
-#endif
         public void TestSimultaneousSubmissionsWithLegacyThreadingData_P2P_MP()
         {
             string projectContent1 = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -3284,7 +3298,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 };
             BuildManager.DefaultBuildManager.BeginBuild(buildParameters);
 
-            var project1DoneEvent = new AutoResetEvent(false);
+            using var project1DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 // need to kick off project 2 first so that it project 1 can get submitted before the P2P happens
@@ -3297,7 +3311,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 project1DoneEvent.Set();
             });
 
-            var project2DoneEvent = new AutoResetEvent(false);
+            using var project2DoneEvent = new AutoResetEvent(false);
             ThreadPool.QueueUserWorkItem(delegate
             {
                 ProjectInstance pi = BuildManager.DefaultBuildManager.GetProjectInstanceForBuild(project1);
@@ -3526,9 +3540,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static Dictionary<string, string> ExtractProjectStartedPropertyList(IEnumerable properties)
         {
-            // Gather a sorted list of all the properties.
-            return properties?.Cast<DictionaryEntry>()
-                .ToDictionary(prop => (string) prop.Key, prop => (string) prop.Value, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> propertiesLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Internal.Utilities.EnumerateProperties(properties, propertiesLookup,
+                static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+
+            return propertiesLookup;
         }
 
         /// <summary>
@@ -3578,10 +3594,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private Project CreateProject(string contents, string toolsVersion, ProjectCollection projectCollection, bool deleteTempProject)
         {
-            var project = new Project(XmlReader.Create(new StringReader(contents)), null, toolsVersion, projectCollection)
-            {
-                FullPath = _env.CreateFile().Path
-            };
+            using ProjectFromString projectFromString = new(contents, null, toolsVersion, projectCollection);
+            Project project = projectFromString.Project;
+            project.FullPath = _env.CreateFile().Path;
 
             if (!deleteTempProject)
             {
@@ -3607,7 +3622,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // causes the projects to be built to be separate configs, which allows us to build the same project
             // a bunch of times in parallel.
             //
-            // <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>
+            // <Project/>
             //   <ItemGroup>
             //     <ProjectReference Include="RootProjectName.proj">
             //       <AdditionalProperties>p={incremented value}</AdditionalProperties>
@@ -3679,7 +3694,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var p2pProjectPath = testFiles.CreatedFiles[0];
                     File.WriteAllText(p2pProjectPath, p2pProjectContents);
 
-                    var mainRootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(string.Format(mainProjectContents, p2pProjectPath))), collection);
+                    using ProjectRootElementFromString projectRootElementFromString = new(string.Format(mainProjectContents, p2pProjectPath), collection);
+                    ProjectRootElement mainRootElement = projectRootElementFromString.Project;
 
                     mainRootElement.FullPath = testFiles.CreatedFiles[1];
                     mainRootElement.Save();
@@ -3691,7 +3707,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                     Assert.Empty(mainInstance.GlobalProperties);
 
-                    var request = new BuildRequestData(mainInstance, new[] {"BuildOther"});
+                    var request = new BuildRequestData(mainInstance, new[] { "BuildOther" });
 
                     var parameters = new BuildParameters
                     {
@@ -3720,7 +3736,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                         p2pInstance.SetProperty("P", newPropertyValue);
 
-                        request = new BuildRequestData(p2pInstance, new[] {"Foo"});
+                        request = new BuildRequestData(p2pInstance, new[] { "Foo" });
                         submission = manager.PendBuildRequest(request);
                         results = submission.Execute();
 
@@ -3757,13 +3773,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 
 </Project>";
-            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] {"main", "p2p"}, string.Empty);
+            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "p2p" }, string.Empty);
 
             var buildParameters = new BuildParameters(_projectCollection)
             {
                 DisableInProcNode = true,
                 EnableNodeReuse = false,
-                Loggers = new ILogger[] {_logger}
+                Loggers = new ILogger[] { _logger }
             };
 
             _buildManager.BeginBuild(buildParameters);
@@ -3782,9 +3798,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     mainProjectPath,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    new[] {"MainTarget"},
-                    null
-                );
+                    new[] { "MainTarget" },
+                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
 
@@ -3800,9 +3815,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        /// When a ProjectInstance based BuildRequestData is built out of proc, the node should
+        /// <summary>
+        /// When a <see cref="ProjectInstance"/> based <see cref="BuildRequestData"/> is built out of proc, the node should
         /// not reload it from disk but instead fully utilize the entire translate project instance state
-        /// to do the build
+        /// to do the build.
+        /// </summary>
+        /// <param name="shouldSerializeEntireState"><see langword="true"/> to serialize the entire project instance state; otherwise, <see langword="false"/>.</param>
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -3823,13 +3841,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
   </Target>
 </Project>";
 
-            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] {"main", "import"}, string.Empty);
+            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "import" }, string.Empty);
 
             var importPath = testFiles.CreatedFiles[1];
             File.WriteAllText(importPath, CleanupFileContents(importProject));
 
-            var root = ProjectRootElement.Create(
-                XmlReader.Create(new StringReader(string.Format(mainProject, importPath))), _projectCollection);
+            using ProjectRootElementFromString projectRootElementFromString = new(string.Format(mainProject, importPath), _projectCollection);
+            ProjectRootElement root = projectRootElementFromString.Project;
             root.FullPath = Path.GetTempFileName();
             root.Save();
 
@@ -3841,13 +3859,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             instance.TranslateEntireState = shouldSerializeEntireState;
 
-            var request = new BuildRequestData(instance, new[] {"Foo"});
+            var request = new BuildRequestData(instance, new[] { "Foo" });
 
             var parameters = new BuildParameters(_projectCollection)
             {
                 DisableInProcNode = true,
                 EnableNodeReuse = false,
-                Loggers = new ILogger[] {_logger}
+                Loggers = new ILogger[] { _logger }
             };
 
             _buildManager.BeginBuild(parameters);
@@ -3871,7 +3889,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Building the stale project instance should still succeed when the entire state is translated: MSBuild should use the
             // in-memory state to build and not reload from disk.
             _buildManager.BeginBuild(parameters);
-            request = new BuildRequestData(instance, new[] {"Foo"}, null,
+            request = new BuildRequestData(instance, new[] { "Foo" }, null,
                 BuildRequestDataFlags.ReplaceExistingProjectInstance);
             submission = _buildManager.PendBuildRequest(request);
 
@@ -3938,8 +3956,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
                     new[] { "MainTarget" },
-                    null
-                );
+                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
 
@@ -3958,7 +3975,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Regression test for https://github.com/dotnet/msbuild/issues/3047
         /// </summary>
         [Fact]
-        [SkipOnMono("out-of-proc nodes not working on mono yet")]
         public void MultiProcReentrantProjectWithCallTargetDoesNotFail()
         {
             var a =
@@ -4026,7 +4042,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     }
                 };
 
-                var buildRequestData = new BuildRequestData(entryFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[]{ "EntryTarget" }, null);
+                var buildRequestData = new BuildRequestData(entryFile, new Dictionary<string, string>(), MSBuildDefaultToolsVersion, new[] { "EntryTarget" }, null);
 
                 var result = _buildManager.Build(buildParameters, buildRequestData);
 
@@ -4055,7 +4071,7 @@ $@"<Project InitialTargets=`Sleep`>
 </Project>";
 
             Exception exception = null;
-            var manager = new BuildManager();
+            using var manager = new BuildManager();
 
             using (var env = TestEnvironment.Create())
             {
@@ -4082,8 +4098,8 @@ $@"<Project InitialTargets=`Sleep`>
                      * the request but does not simulate the ProjectStarted / ProjectEnded events. It also leaves logging completion to the
                      * BuildManager.
                      */
-                    var request1 = new BuildRequestData(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, new[] {"Build"}, null);
-                    var request2 = new BuildRequestData(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, new[] {"Build"}, null);
+                    var request1 = new BuildRequestData(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, new[] { "Build" }, null);
+                    var request2 = new BuildRequestData(testFiles.ProjectFile, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, new[] { "Build" }, null);
 
                     /* During builds, msbuild changes the current directory.
                      * When this test fails, the build never finishes so the current directory never gets restored.
@@ -4102,8 +4118,8 @@ $@"<Project InitialTargets=`Sleep`>
                     submission1.ExecuteAsync(null, null);
                     submission2.ExecuteAsync(null, null);
 
-                    submission1.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
-                    submission2.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+                    submission1.WaitHandle.WaitOne(TimeSpan.FromSeconds(20));
+                    submission2.WaitHandle.WaitOne(TimeSpan.FromSeconds(20));
 
                     submission1.IsCompleted.ShouldBeTrue();
                     submission2.IsCompleted.ShouldBeTrue();
@@ -4206,15 +4222,17 @@ $@"<Project InitialTargets=`Sleep`>
         {
             string project1 = _env.CreateFile(".proj").Path;
             string project2 = _env.CreateFile(".proj").Path;
+            string project3 = _env.CreateFile(".proj").Path;
 
             File.WriteAllText(project1, CleanupFileContents($@"
 <Project>
   <ItemGroup>
     <ProjectReferenceTargets Include='Build' Targets='Build' />
     <ProjectReference Include='{project2}' />
+    <ProjectReference Include='{project3}' />
   </ItemGroup>
   <Target Name='Build'>
-    <MsBuild Projects='{project2}' Targets='Build' />
+    <MsBuild Projects='@(ProjectReference)' Targets='Build' />
   </Target>
 </Project>
 "));
@@ -4223,13 +4241,21 @@ $@"<Project InitialTargets=`Sleep`>
   <WellThisIsntValid>
 </Project>
 "));
+            File.WriteAllText(project3, CleanupFileContents(@"
+<Project>
+  <WellThisIsntValid>
+</Project>
+"));
 
             var data = new GraphBuildRequestData(new ProjectGraphEntryPoint(project1), Array.Empty<string>());
 
             GraphBuildResult result = _buildManager.Build(_parameters, data);
-            result.OverallResult.ShouldBe(BuildResultCode.Failure);
-            result.Exception.ShouldBeOfType<InvalidProjectFileException>()
-                .ProjectFile.ShouldBe(project2);
+            result.ShouldHaveFailed();
+
+            AggregateException aggException = result.Exception.ShouldBeOfType<AggregateException>();
+            aggException.InnerExceptions.Count.ShouldBe(2);
+            aggException.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBeOneOf(project2, project3);
+            aggException.InnerExceptions[1].ShouldBeOfType<InvalidProjectFileException>().ProjectFile.ShouldBeOneOf(project2, project3);
         }
 
         [Fact]
@@ -4315,19 +4341,22 @@ $@"<Project InitialTargets=`Sleep`>
         [Fact]
         public void GraphBuildShouldBeAbleToConstructGraphButSkipBuild()
         {
-            var graph = Helpers.CreateProjectGraph(env: _env, dependencyEdges: new Dictionary<int, int[]> {{1, new[] {2, 3}}});
+            var graph = Helpers.CreateProjectGraph(env: _env, dependencyEdges: new Dictionary<int, int[]> { { 1, new[] { 2, 3 } } });
 
             MockLogger logger = null;
 
             using (var buildSession = new Helpers.BuildManagerSession(_env))
             {
-                var graphResult = buildSession.BuildGraphSubmission(
-                    new GraphBuildRequestData(
-                        projectGraphEntryPoints: new[] {new ProjectGraphEntryPoint(graph.GraphRoots.First().ProjectInstance.FullPath)},
-                        targetsToBuild: new string[0],
+                var requestData = new GraphBuildRequestData(
+                        projectGraphEntryPoints: new[] { new ProjectGraphEntryPoint(
+                            graph.GraphRoots.First().ProjectInstance.FullPath,
+                            new Dictionary<string, string>() { {"property1", "value1" } }) },
+                        targetsToBuild: Array.Empty<string>(),
                         hostServices: null,
                         flags: BuildRequestDataFlags.None,
-                        graphBuildOptions: new GraphBuildOptions {Build = false}));
+                        graphBuildOptions: new GraphBuildOptions { Build = false });
+
+                var graphResult = buildSession.BuildGraphSubmission(requestData);
 
                 graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
                 logger = buildSession.Logger;
@@ -4385,6 +4414,30 @@ $@"<Project InitialTargets=`Sleep`>
             _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
+        }
+
+        [Fact]
+        public void ProjectWithNoTargets()
+        {
+            string contents = @"<Project />";
+
+            BuildRequestData data = GetBuildRequestData(contents);
+            BuildResult result = _buildManager.Build(_parameters, data);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+
+            _logger.AssertLogContains("MSB4040");
+        }
+
+        [Fact]
+        public void ProjectWithNoTargetsGraph()
+        {
+            string contents = @"<Project />";
+
+            GraphBuildRequestData data = GetGraphBuildRequestData(contents);
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+
+            _logger.AssertLogContains("MSB4040");
         }
     }
 }

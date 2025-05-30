@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics.CodeAnalysis;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -26,7 +28,7 @@ namespace Microsoft.Build.Framework
     }
 
     /// <summary>
-    /// This interface extends IBuildEngine to provide a mechanism allowing tasks to 
+    /// This interface extends IBuildEngine to provide a mechanism allowing tasks to
     /// share data between task invocations.
     /// </summary>
     public interface IBuildEngine4 : IBuildEngine3
@@ -43,9 +45,9 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// <para>
         /// This method may be called by tasks which need to maintain state across task invocations,
-        /// such as to cache data which may be expensive to generate but which is known not to change during the 
+        /// such as to cache data which may be expensive to generate but which is known not to change during the
         /// build.  It is strongly recommended that <paramref name="allowEarlyCollection"/> be set to true if the
-        /// object will retain any significant amount of data, as this gives MSBuild the most flexibility to 
+        /// object will retain any significant amount of data, as this gives MSBuild the most flexibility to
         /// manage limited process memory resources.
         /// </para>
         /// <para>

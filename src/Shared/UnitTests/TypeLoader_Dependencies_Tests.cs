@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System.IO;
@@ -8,14 +8,16 @@ using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class TypeLoader_Dependencies_Tests
     {
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "TaskWithDependency");
-        private static readonly string ProjectFileName = "TaskWithDependencyTest.proj";
-        private static readonly string TaskDllFileName = "TaskWithDependency.dll";
-        private static readonly string DependencyDllFileName = "Dependency.dll";
+        private const string ProjectFileName = "TaskWithDependencyTest.proj";
+        private const string TaskDllFileName = "TaskWithDependency.dll";
+        private const string DependencyDllFileName = "Dependency.dll";
 
         [Fact]
         public void LoadAssemblyAndDependency_InsideProjectFolder()
@@ -31,6 +33,7 @@ namespace Microsoft.Build.UnitTests
                 string dllPath = Path.Combine(dir.Path, TaskDllFileName);
 
                 CheckIfCorrectAssemblyLoaded(output, dllPath);
+                CheckIfCorrectAssemblyLoadedMessageLogged(output);
             }
         }
 
@@ -49,6 +52,7 @@ namespace Microsoft.Build.UnitTests
                 successfulExit.ShouldBeTrue(output);
 
                 CheckIfCorrectAssemblyLoaded(output, newTaskDllPath);
+                CheckIfCorrectAssemblyLoadedMessageLogged(output);
             }
         }
 
@@ -105,6 +109,19 @@ namespace Microsoft.Build.UnitTests
                 scriptOutput.ShouldNotContain(successfulMessage, Case.Insensitive);
             }
         }
+
+        private void CheckIfCorrectAssemblyLoadedMessageLogged(string scriptOutput)
+        {
+            var assemblyLoadedTaskRun = "Assembly loaded during TaskRun";
+
+#if FEATURE_ASSEMBLYLOADCONTEXT
+            var message = "AssemblyLoadContext: MSBuild plugin";
+#else
+            var message = "AppDomain: [Default]";
+#endif
+
+            scriptOutput.ShouldContain(assemblyLoadedTaskRun);
+            scriptOutput.ShouldContain(message);
+        }
     }
 }
-

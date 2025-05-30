@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Globbing
 {
@@ -28,7 +30,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(IEnumerable<IMSBuildGlob> globs)
             : this(globs.ToImmutableArray())
-        {}
+        { }
 
         /// <summary>
         ///     Constructor
@@ -36,7 +38,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="globs">Children globs. Input gets shallow cloned</param>
         public CompositeGlob(params IMSBuildGlob[] globs)
             : this(ImmutableArray.Create(globs))
-        {}
+        { }
 
         /// <summary>
         ///     Constructor
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Globbing
         /// <param name="glob2">Second child glob.</param>
         internal CompositeGlob(IMSBuildGlob glob1, IMSBuildGlob glob2)
             : this(ImmutableArray.Create(glob1, glob2))
-        {}
+        { }
 
         /// <summary>
         ///     Constructor
@@ -60,7 +62,7 @@ namespace Microsoft.Build.Globbing
         public bool IsMatch(string stringToMatch)
         {
             // Threadpools are a scarce resource in Visual Studio, do not use them.
-            //return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
+            // return Globs.AsParallel().Any(g => g.IsMatch(stringToMatch));
 
             return _globs.Any(static (glob, str) => glob.IsMatch(str), stringToMatch);
         }
@@ -83,7 +85,7 @@ namespace Microsoft.Build.Globbing
         /// <returns>The logical disjunction of the input globs.</returns>
         public static IMSBuildGlob Create(IEnumerable<IMSBuildGlob> globs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(globs, nameof(globs));
+            ErrorUtilities.VerifyThrowArgumentNull(globs);
 
             if (globs is ImmutableArray<IMSBuildGlob> immutableGlobs)
             {

@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using BuildResult = Microsoft.Build.Execution.BuildResult;
+using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -137,7 +139,7 @@ namespace Microsoft.Build.BackEnd
 
         #region Methods
         /// <summary>
-        /// Prepares the engine for a new build and spins up the engine thread.  
+        /// Prepares the engine for a new build and spins up the engine thread.
         /// The engine must be in the Idle state, and not already be initialized.
         /// </summary>
         /// <param name="loggingContext">The logging context for the node.</param>
@@ -152,7 +154,7 @@ namespace Microsoft.Build.BackEnd
         void CleanupForBuild();
 
         /// <summary>
-        /// Submits the specified request to the build queue. 
+        /// Submits the specified request to the build queue.
         /// </summary>
         /// <param name="request">The request to build.</param>
         /// <remarks>It is only valid to call this method when the engine is in the Idle or

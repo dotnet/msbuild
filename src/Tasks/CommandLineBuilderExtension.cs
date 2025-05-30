@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -8,6 +8,8 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -34,12 +36,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set a boolean switch iff its value exists and its value is 'true'.
         /// </summary>
-        internal void AppendWhenTrue
-            (
+        internal void AppendWhenTrue(
             string switchName,
             Hashtable bag,
-            string parameterName
-            )
+            string parameterName)
         {
             object obj = bag[parameterName];
             // If the switch isn't set, don't add it to the command line.
@@ -57,12 +57,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set a boolean switch only if its value exists.
         /// </summary>
-        internal void AppendPlusOrMinusSwitch
-            (
+        internal void AppendPlusOrMinusSwitch(
             string switchName,
             Hashtable bag,
-            string parameterName
-            )
+            string parameterName)
         {
             object obj = bag[parameterName];
             // If the switch isn't set, don't add it to the command line.
@@ -77,11 +75,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set a boolean switch only if its value exists.
         /// </summary>
-        internal void AppendPlusOrMinusSwitch
-            (
+        internal void AppendPlusOrMinusSwitch(
             string switchName,
-            bool? value
-            )
+            bool? value)
         {
             if (value.HasValue)
             {
@@ -93,14 +89,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set a switch if its value exists by choosing from the input choices
         /// </summary>
-        internal void AppendByChoiceSwitch
-            (
+        internal void AppendByChoiceSwitch(
             string switchName,
             Hashtable bag,
             string parameterName,
             string choice1,
-            string choice2
-            )
+            string choice2)
         {
             object obj = bag[parameterName];
             // If the switch isn't set, don't add it to the command line.
@@ -114,12 +108,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Set an integer switch only if its value exists.
         /// </summary>
-        internal void AppendSwitchWithInteger
-            (
+        internal void AppendSwitchWithInteger(
             string switchName,
             Hashtable bag,
-            string parameterName
-            )
+            string parameterName)
         {
             object obj = bag[parameterName];
             // If the switch isn't set, don't add it to the command line.
@@ -176,12 +168,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="switchName"></param>
         /// <param name="parameters"></param>
         /// <param name="attributes"></param>
-        internal void AppendSwitchIfNotNull
-        (
+        internal void AppendSwitchIfNotNull(
             string switchName,
             ITaskItem[] parameters,
-            string[] attributes
-        )
+            string[] attributes)
         {
             AppendSwitchIfNotNull(switchName, parameters, attributes, null /* treatAsFlag */);
         }
@@ -205,7 +195,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Returns true if the parameter is empty in spirits, 
+        /// Returns true if the parameter is empty in spirits,
         /// even if it contains the separators and white space only
         /// Split on the characters provided.
         /// </summary>
@@ -237,20 +227,16 @@ namespace Microsoft.Build.Tasks
         /// <param name="parameters"></param>
         /// <param name="metadataNames"></param>
         /// <param name="treatAsFlags"></param>
-        internal void AppendSwitchIfNotNull
-        (
+        internal void AppendSwitchIfNotNull(
             string switchName,
             ITaskItem[] parameters,
             string[] metadataNames,
-            bool[] treatAsFlags       // May be null. In this case no metadata are treated as flags.
-            )
+            bool[] treatAsFlags)       // May be null. In this case no metadata are treated as flags.
         {
-            ErrorUtilities.VerifyThrow
-            (
+            ErrorUtilities.VerifyThrow(
                 treatAsFlags == null ||
                 (metadataNames != null && metadataNames.Length == treatAsFlags.Length),
-                "metadataNames and treatAsFlags should have the same length."
-            );
+                "metadataNames and treatAsFlags should have the same length.");
 
             if (parameters != null)
             {
@@ -310,11 +296,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Appends a switch if the specified value is <code>true</code>.
         /// </summary>
-        internal void AppendSwitchIfTrue
-            (
+        internal void AppendSwitchIfTrue(
             string switchName,
-            bool? value
-            )
+            bool? value)
         {
             if (value.HasValue && value.Value)
             {

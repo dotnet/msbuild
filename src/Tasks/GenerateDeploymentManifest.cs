@@ -1,16 +1,20 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Generates a deploy manifest for ClickOnce projects.
     /// </summary>
+    [SupportedOSPlatform("windows")]
     public sealed class GenerateDeploymentManifest : GenerateManifestBase
     {
         private bool? _createDesktopShortcut;
@@ -121,7 +125,7 @@ namespace Microsoft.Build.Tasks
 
         private bool BuildResolvedSettings(DeployManifest manifest)
         {
-            // Note: if changing the logic in this function, please update the logic in 
+            // Note: if changing the logic in this function, please update the logic in
             //  GenerateApplicationManifest.BuildResolvedSettings as well.
             if (Product != null)
             {
@@ -140,11 +144,22 @@ namespace Microsoft.Build.Tasks
             else if (String.IsNullOrEmpty(manifest.Publisher))
             {
                 string org = Util.GetRegisteredOrganization();
+
                 manifest.Publisher = !String.IsNullOrEmpty(org) ? org : manifest.Product;
             }
             Debug.Assert(!String.IsNullOrEmpty(manifest.Publisher));
 
             return true;
+        }
+
+        public override bool Execute()
+        {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateDeploymentManifest));
+                return false;
+            }
+            return base.Execute();
         }
 
         protected override Type GetObjectType()

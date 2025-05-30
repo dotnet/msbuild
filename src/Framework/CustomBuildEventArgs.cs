@@ -1,24 +1,31 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Arguments for custom build events.
     /// </summary>
-    // WARNING: marking a type [Serializable] without implementing
-    // ISerializable imposes a serialization contract -- it is a
-    // promise to never change the type's fields i.e. the type is
-    // immutable; adding new fields in the next version of the type
-    // without following certain special FX guidelines, can break both
-    // forward and backward compatibility
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > In .NET 8 and later and Visual Studio 17.8 and later, this type is deprecated; instead use [ExtendedCustomBuildEventArgs](/dotnet/api/microsoft.build.framework.extendedcustombuildeventargs).
+    /// > For more information, see [MSBuild custom derived build events deprecated](/dotnet/core/compatibility/sdk/8.0/custombuildeventargs).
+    /// ]]></format>
+    /// </remarks>
     [Serializable]
     public abstract class CustomBuildEventArgs : LazyFormattedBuildEventArgs
     {
         /// <summary>
-        /// Default constructor 
+        /// Default constructor
         /// </summary>
         protected CustomBuildEventArgs()
             : base()
@@ -32,12 +39,10 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of sender</param>
-        protected CustomBuildEventArgs
-        (
+        protected CustomBuildEventArgs(
             string message,
             string helpKeyword,
-            string senderName
-        )
+            string senderName)
             : this(message, helpKeyword, senderName, DateTime.UtcNow)
         {
             // do nothing
@@ -50,13 +55,11 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of sender</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        protected CustomBuildEventArgs
-        (
+        protected CustomBuildEventArgs(
             string message,
             string helpKeyword,
             string senderName,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : this(message, helpKeyword, senderName, eventTimestamp, null)
         {
             // do nothing
@@ -70,14 +73,12 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of sender</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">Message arguments</param>
-        protected CustomBuildEventArgs
-        (
-            string message,
+        protected CustomBuildEventArgs(
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             DateTime eventTimestamp,
-            params object[] messageArgs
-        )
+            params object[] messageArgs)
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
             // do nothing

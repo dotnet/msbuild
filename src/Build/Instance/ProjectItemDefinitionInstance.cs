@@ -1,15 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -18,7 +21,7 @@ namespace Microsoft.Build.Execution
     /// Immutable.
     /// </summary>
     [DebuggerDisplay("{_itemType} #Metadata={MetadataCount}")]
-    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>, ITranslatable
+    public class ProjectItemDefinitionInstance : IKeyed, IMetadataTable, IItemDefinition<ProjectMetadataInstance>, ITranslatable, IItemTypeDefinition
     {
         /// <summary>
         /// Item type, for example "Compile", that this item definition applies to
@@ -28,9 +31,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Collection of metadata that link the XML metadata and instance metadata
         /// Since evaluation has occurred, this is an unordered collection.
-        /// Is never null or empty.
         /// </summary>
-        private CopyOnWritePropertyDictionary<ProjectMetadataInstance> _metadata;
+        private IDictionary<string, ProjectMetadataInstance> _metadata;
 
         /// <summary>
         /// Constructs an empty project item definition instance.
@@ -38,7 +40,7 @@ namespace Microsoft.Build.Execution
         /// <param name="itemType">The type of item this definition object represents.</param>
         internal ProjectItemDefinitionInstance(string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowArgumentNull(itemType);
 
             _itemType = itemType;
         }
@@ -55,13 +57,23 @@ namespace Microsoft.Build.Execution
         {
             if (itemDefinition.MetadataCount > 0)
             {
-                _metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-            }
+                var copyOnWriteMetadataDictionary = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata => new ProjectMetadataInstance(originalMetadata));
+                copyOnWriteMetadataDictionary.ImportProperties(projectMetadataInstances);
 
-            foreach (ProjectMetadata originalMetadata in itemDefinition.Metadata)
-            {
-                _metadata.Set(new ProjectMetadataInstance(originalMetadata));
+                _metadata = copyOnWriteMetadataDictionary;
             }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProjectItemDefinitionInstance"/> class.
+        /// </summary>
+        /// <param name="itemType">The type of item this definition object represents.</param>
+        /// <param name="metadata">A (possibly null) collection of the metadata associated with this item definition.</param>
+        internal ProjectItemDefinitionInstance(string itemType, IDictionary<string, ProjectMetadataInstance> metadata)
+            : this(itemType)
+        {
+            _metadata = metadata;
         }
 
         private ProjectItemDefinitionInstance()
@@ -94,7 +106,7 @@ namespace Microsoft.Build.Execution
                     return ReadOnlyEmptyCollection<ProjectMetadataInstance>.Instance;
                 }
 
-                return new ReadOnlyCollection<ProjectMetadataInstance>(_metadata);
+                return new ReadOnlyCollection<ProjectMetadataInstance>(_metadata.Values);
             }
         }
 
@@ -109,21 +121,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Names of all metadata on this item definition
         /// </summary>
-        public IEnumerable<string> MetadataNames
-        {
-            get
-            {
-                if (_metadata == null)
-                {
-                    yield break;
-                }
-
-                foreach (ProjectMetadataInstance metadatum in _metadata)
-                {
-                    yield return metadatum.Name;
-                }
-            }
-        }
+        public IEnumerable<string> MetadataNames => _metadata == null ? [] : _metadata.Keys;
 
         /// <summary>
         /// Implementation of IKeyed exposing the item type, so these
@@ -212,8 +210,9 @@ namespace Microsoft.Build.Execution
         {
             ProjectItemDefinitionElement element = parent.ContainingProject.CreateItemDefinitionElement(ItemType);
             parent.AppendChild(element);
-            foreach (ProjectMetadataInstance metadataInstance in _metadata)
+            foreach (var kvp in _metadata)
             {
+                ProjectMetadataInstance metadataInstance = kvp.Value;
                 element.AddMetadata(metadataInstance.Name, metadataInstance.EvaluatedValue);
             }
 
@@ -223,15 +222,22 @@ namespace Microsoft.Build.Execution
         void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _itemType);
-            translator.TranslateDictionary(ref _metadata, ProjectMetadataInstance.FactoryForDeserialization);
+            translator.TranslateDictionary(ref _metadata, ProjectMetadataInstance.FactoryForDeserialization, CreateMetadataCollection);
         }
 
         internal static ProjectItemDefinitionInstance FactoryForDeserialization(ITranslator translator)
         {
             var instance = new ProjectItemDefinitionInstance();
-            ((ITranslatable) instance).Translate(translator);
+            ((ITranslatable)instance).Translate(translator);
 
             return instance;
+        }
+
+        string IItemTypeDefinition.ItemType => _itemType;
+
+        private static IDictionary<string, ProjectMetadataInstance> CreateMetadataCollection(int capacity)
+        {
+            return new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
         }
     }
 }

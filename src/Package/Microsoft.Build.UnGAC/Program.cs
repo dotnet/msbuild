@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+
+#nullable disable
 
 namespace Microsoft.Build.UnGAC
 {
@@ -11,9 +13,9 @@ namespace Microsoft.Build.UnGAC
     /// It runs at VS install-time as well as repair-time.
     /// It is intended to run as best effort. Meaning that if it fails, we avoid throwing and instead log it.
     /// </summary>
-    class Program
+    internal sealed class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             try
             {
@@ -24,7 +26,14 @@ namespace Microsoft.Build.UnGAC
                     "Microsoft.Build.Framework, Version=15.1.0.0",
                     "Microsoft.Build.Tasks.Core, Version=15.1.0.0",
                     "Microsoft.Build.Utilities.Core, Version=15.1.0.0",
-                    "Microsoft.Build.Conversion.Core, Version=15.1.0.0"
+                    "Microsoft.Build.Conversion.Core, Version=15.1.0.0",
+                    "Microsoft.NET.StringTools, Version=1.0.0.0",
+                    "BuildXL.Processes, Version=1.0.0.0",
+                    "BuildXL.Utilities.Core, Version=1.0.0.0",
+                    "BuildXL.Native, Version=1.0.0.0",
+                    "Microsoft.VisualStudio.SolutionPersistence, Version=1.0.0.0",
+                    "Microsoft.VisualStudio.OpenTelemetry.ClientExtensions, Version=0.1.0.0",
+                    "Microsoft.VisualStudio.OpenTelemetry.Collector, Version=0.1.0.0",
                 };
 
                 uint hresult = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);

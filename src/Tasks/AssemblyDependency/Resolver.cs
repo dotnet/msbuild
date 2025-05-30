@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -86,6 +88,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="sdkName">The name of the sdk to resolve.</param>
         /// <param name="rawFileNameCandidate">The reference's 'include' treated as a raw file name.</param>
         /// <param name="isPrimaryProjectReference">Whether or not this reference was directly from the project file (and therefore not a dependency)</param>
+        /// <param name="isImmutableFrameworkReference">True if <paramref name="rawFileNameCandidate"/> is guaranteed to exist on disk and never change.</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
         /// <param name="executableExtensions">Allowed executable extensions.</param>
         /// <param name="hintPath">The item's hintpath value.</param>
@@ -94,20 +97,19 @@ namespace Microsoft.Build.Tasks
         /// <param name="foundPath">The path where the file was found.</param>
         /// <param name="userRequestedSpecificFile">Whether or not the user wanted a specific file (for example, HintPath is a request for a specific file)</param>
         /// <returns>True if the file was resolved.</returns>
-        public abstract bool Resolve
-        (
+        public abstract bool Resolve(
             AssemblyNameExtension assemblyName,
             string sdkName,
             string rawFileNameCandidate,
             bool isPrimaryProjectReference,
+            bool isImmutableFrameworkReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string hintPath,
             string assemblyFolderKey,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected,
             out string foundPath,
-            out bool userRequestedSpecificFile
-        );
+            out bool userRequestedSpecificFile);
 
         /// <summary>
         /// The search path element that this resolver is based on.
@@ -134,15 +136,13 @@ namespace Microsoft.Build.Tasks
         /// Resolve a single file.
         /// </summary>
         /// <returns>True if the file was a match, false otherwise.</returns>
-        protected bool ResolveAsFile
-        (
+        protected bool ResolveAsFile(
             string fullPath,
             AssemblyNameExtension assemblyName,
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
-            List<ResolutionSearchLocation> assembliesConsideredAndRejected
-        )
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected)
         {
             ResolutionSearchLocation considered = null;
             if (assembliesConsideredAndRejected != null)
@@ -174,15 +174,13 @@ namespace Microsoft.Build.Tasks
         /// <param name="allowMismatchBetweenFusionNameAndFileName">Whether to allow naming mismatch.</param>
         /// <param name="pathToCandidateAssembly">Path to a possible file.</param>
         /// <param name="searchLocation">Information about why the candidate file didn't match</param>
-        protected bool FileMatchesAssemblyName
-        (
+        protected bool FileMatchesAssemblyName(
             AssemblyNameExtension assemblyName,
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
             string pathToCandidateAssembly,
-            ResolutionSearchLocation searchLocation
-        )
+            ResolutionSearchLocation searchLocation)
         {
             if (searchLocation != null)
             {
@@ -242,7 +240,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
-                    // Still it happened once, with an older version of the CLR. 
+                    // Still it happened once, with an older version of the CLR.
 
                     // ...falling through and relying on the targetAssemblyName==null behavior below...
                 }
@@ -267,12 +265,11 @@ namespace Microsoft.Build.Tasks
                     // If we are targeting a given processor architecture check to see if they match, if we are targeting MSIL then any architecture will do.
                     if (compareProcessorArchitecture)
                     {
-                        // Only reject the assembly if the target processor architecture does not match the assemby processor architecture and the assembly processor architecture is not NONE or MSIL.
+                        // Only reject the assembly if the target processor architecture does not match the assembly processor architecture and the assembly processor architecture is not NONE or MSIL.
                         if (
                               targetAssemblyName.AssemblyName.ProcessorArchitecture != targetProcessorArchitecture &&  /* The target and assembly architectures do not match*/
                               (targetProcessorArchitecture != ProcessorArchitecture.None && targetAssemblyName.AssemblyName.ProcessorArchitecture != ProcessorArchitecture.None)  /*The assembly is not none*/
-                              && (targetProcessorArchitecture != ProcessorArchitecture.MSIL && targetAssemblyName.AssemblyName.ProcessorArchitecture != ProcessorArchitecture.MSIL) /*The assembly is not MSIL*/
-                           )
+                              && (targetProcessorArchitecture != ProcessorArchitecture.MSIL && targetAssemblyName.AssemblyName.ProcessorArchitecture != ProcessorArchitecture.MSIL)) /*The assembly is not MSIL*/
                         {
                             if (searchLocation != null)
                             {
@@ -330,15 +327,13 @@ namespace Microsoft.Build.Tasks
         /// <param name="directory">the directory to look in</param>
         /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
         /// <returns>'null' if the assembly wasn't found.</returns>
-        protected string ResolveFromDirectory
-        (
+        protected string ResolveFromDirectory(
             AssemblyNameExtension assemblyName,
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
             string directory,
-            List<ResolutionSearchLocation> assembliesConsideredAndRejected
-        )
+            List<ResolutionSearchLocation> assembliesConsideredAndRejected)
         {
             if (assemblyName == null)
             {
@@ -367,7 +362,7 @@ namespace Microsoft.Build.Tasks
                         throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
                     }
 
-                    // We have a full path returned 
+                    // We have a full path returned
                     if (ResolveAsFile(fullPath, assemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))
                     {
                         if (candidateFullPath == null)
@@ -377,10 +372,10 @@ namespace Microsoft.Build.Tasks
 
                         /*
                          * After finding a file we now will check to see if it matches the type of processor architecture we want to return. The rules are as follows
-                         * 
+                         *
                          * If targeting AMD64 / X86 / IA64 / ARM /NONE we will return the first assembly which has a matching processor architecture OR is an assembly with a processor architecture of MSIL or NONE
-                         * 
-                         * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return 
+                         *
+                         * If targeting MSIL we will first look through all of the assemblies, if an MSIL assembly is found we will return that. If no MSIL assembly is found we will return
                          * the first assembly which matches reguardless of its processor architecture.
                          */
 

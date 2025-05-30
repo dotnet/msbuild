@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,6 +7,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -92,7 +94,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // If we should use the absolute path, update the item contents
                     // Since ItemSpec, which fullPath comes from, is unescaped, re-escape when setting
-                    // item.ItemSpec, since the setter for ItemSpec expects an escaped value. 
+                    // item.ItemSpec, since the setter for ItemSpec expects an escaped value.
                     if (UpdateToAbsolutePaths)
                     {
                         item.ItemSpec = EscapingUtilities.Escape(fullPath);

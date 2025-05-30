@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,15 +9,18 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.TestComparers
 {
-    internal class TaskRegistryComparers
+    internal sealed class TaskRegistryComparers
     {
-        internal class TaskRegistryComparer : IEqualityComparer<TaskRegistry>
+        internal sealed class TaskRegistryComparer : IEqualityComparer<TaskRegistry>
         {
             public bool Equals(TaskRegistry x, TaskRegistry y)
             {
                 Assert.Equal(x.Toolset, y.Toolset, new ToolsetComparer());
+                Assert.Equal(x.NextRegistrationOrderId, y.NextRegistrationOrderId);
 
                 Helpers.AssertDictionariesEqual(
                     x.TaskRegistrations,
@@ -26,8 +29,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                     {
                         Assert.Equal(xp.Key, yp.Key, TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
                         Assert.Equal(xp.Value, yp.Value, new RegisteredTaskRecordComparer());
-                    }
-                );
+                    });
 
                 return true;
             }
@@ -38,7 +40,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             }
         }
 
-        internal class RegisteredTaskRecordComparer : IEqualityComparer<TaskRegistry.RegisteredTaskRecord>
+        internal sealed class RegisteredTaskRecordComparer : IEqualityComparer<TaskRegistry.RegisteredTaskRecord>
         {
             public bool Equals(TaskRegistry.RegisteredTaskRecord x, TaskRegistry.RegisteredTaskRecord y)
             {
@@ -66,7 +68,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             }
         }
 
-        internal class ParamterGroupAndTaskBodyComparer : IEqualityComparer<TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord>
+        internal sealed class ParamterGroupAndTaskBodyComparer : IEqualityComparer<TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord>
         {
             public bool Equals(
                 TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord x,
@@ -93,7 +95,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             }
         }
 
-        internal class TaskPropertyInfoComparer : IEqualityComparer<TaskPropertyInfo>
+        internal sealed class TaskPropertyInfoComparer : IEqualityComparer<TaskPropertyInfo>
         {
             public bool Equals(TaskPropertyInfo x, TaskPropertyInfo y)
             {
@@ -111,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             }
         }
 
-        public class ToolsetComparer : IEqualityComparer<Toolset>
+        public sealed class ToolsetComparer : IEqualityComparer<Toolset>
         {
             public bool Equals(Toolset x, Toolset y)
             {

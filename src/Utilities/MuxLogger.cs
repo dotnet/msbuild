@@ -1,52 +1,55 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
-    /// This is a multiplexing logger. The purpose of this logger is to allow the registration and deregistration of 
+    /// This is a multiplexing logger. The purpose of this logger is to allow the registration and deregistration of
     /// multiple loggers during the build. This is to support the VS IDE scenario where loggers are registered and unregistered
     /// for each project system's build request. This means one physical build may have multiple logical builds
-    /// each with their own set of loggers. 
-    /// 
-    /// The Mux logger will register itself with the build manager as a regular central /l style logger. 
+    /// each with their own set of loggers.
+    ///
+    /// The Mux logger will register itself with the build manager as a regular central /l style logger.
     /// It will be responsible for receiving messages from the build manager and route them to the correct
     /// logger based on the logical build the message came from.
-    /// 
+    ///
     /// Requirements:
     ///     1) Multiplexing logger will be registered at the beginning of the build manager's Begin build
     ///         Any loggers registered before the build manager actually started building will get the build started event at the same time as the MUX logger
-    ///         Any loggers registered after the build manager starts the build will get a synthesised build started event. The event cannot be cached because the 
+    ///         Any loggers registered after the build manager starts the build will get a synthesised build started event. The event cannot be cached because the
     ///         timestamp of the build started event is determined when the event is created, caching the event would give incorrect build times in the loggers registered to the MUX.
-    ///         
+    ///
     ///     2) The MUX logger will be initialized by the build manager.
     ///         The mux will listen to all events on the event source from the build manager and will route events correctly to the registered loggers.
-    ///     
+    ///
     ///     3) The MUX logger will be shutdown when the build is finished in end build . At this time it will un-register any loggers attached to it.
-    ///     
+    ///
     ///     4) The MUX logger will log the build finished event when the project finished event for the first project started event is seen for each logger.
-    ///    
+    ///
     /// Registering Loggers:
-    /// 
+    ///
     /// The multiplexing logger will function in the following way:
     ///     A logger will be passed to the MUX Register logger method with a submission ID which will be used to route a the message to the correct logger.
     ///     A new event source will be created so that the logger passed in can be registered to that event source
     ///     If the build started event has already been logged the MUX logger will create a new BuildStartedEvent and send that to the event source.
-    ///     
+    ///
     /// UnregisterLoggers:
     ///     When a build submission is completed the UnregisterLoggers method will be called with the submission ID.
     ///     At this point we will look up the success state of the project finished event for the submission ID and log a build finished event to the logger.
     ///     The event source will be cleaned up.  This may be interesting because the unregister will come from a thread other than what is doing the logging.
     ///     This may create a Synchronization issue, if unregister is called while events are being logged.
     /// </summary>
-    //     
+    //
     // UNDONE: If we can use ErrorUtilities, replace all InvalidOperation and Argument exceptions with the appropriate calls.
-    // 
+    //
     public class MuxLogger : INodeLogger
     {
         /// <summary>
@@ -377,8 +380,8 @@ namespace Microsoft.Build.Utilities
             private bool _shutdown;
             #endregion
 
-            // Keep instance of event handlers so they can be unregistered at the end of the submissionID. 
-            // If we wait for the entire build to finish we will leak the handlers until we unregister ALL of the handlers from the 
+            // Keep instance of event handlers so they can be unregistered at the end of the submissionID.
+            // If we wait for the entire build to finish we will leak the handlers until we unregister ALL of the handlers from the
             // event source on the build manager.
             #region RegisteredHandlers
             /// <summary>
@@ -533,8 +536,8 @@ namespace Microsoft.Build.Utilities
             public event CustomBuildEventHandler CustomEventRaised;
 
             /// <summary>
-            /// this event is raised to log build status events, such as 
-            /// build/project/target/task started/stopped 
+            /// this event is raised to log build status events, such as
+            /// build/project/target/task started/stopped
             /// </summary>
             public event BuildStatusEventHandler StatusEventRaised;
 
@@ -644,6 +647,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -671,9 +675,7 @@ namespace Microsoft.Build.Utilities
                         buildEvent.BuildEventContext != null &&
                         (
                          buildEvent.BuildEventContext.SubmissionId != _submissionId && /* The build submission does not match the submissionId for this logger */
-                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId /*We do not have a build submissionid this can happen if the error comes from the nodeloggingcontext*/
-                        )
-                       )
+                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId))
                     {
                         return;
                     }
@@ -690,6 +692,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -715,9 +718,7 @@ namespace Microsoft.Build.Utilities
                         buildEvent.BuildEventContext != null &&
                         (
                          buildEvent.BuildEventContext.SubmissionId != _submissionId && /* The build submission does not match the submissionId for this logger */
-                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId /*We do not have a build submissionid this can happen if the error comes from the nodeloggingcontext*/
-                        )
-                       )
+                         buildEvent.BuildEventContext.SubmissionId != BuildEventContext.InvalidSubmissionId))
                     {
                         return;
                     }
@@ -734,6 +735,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -773,6 +775,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -817,6 +820,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -850,12 +854,15 @@ namespace Microsoft.Build.Utilities
 
                     if (_firstProjectStartedEventContext == null)
                     {
-                        // Capture the build event context for the first project started event so we can make sure we know when to fire the 
+                        // Capture the build event context for the first project started event so we can make sure we know when to fire the
                         // build finished event (in the case of loggers on the mux logger this is on the last project finished event for the submission
                         _firstProjectStartedEventContext = buildEvent.BuildEventContext;
 
                         // We've never seen a project started event, so raise the build started event and save this project started event.
-                        BuildStartedEventArgs startedEvent = new BuildStartedEventArgs(_buildStartedEvent.Message, _buildStartedEvent.HelpKeyword, _buildStartedEvent.BuildEnvironment);
+                        BuildStartedEventArgs startedEvent =
+                            new BuildStartedEventArgs(_buildStartedEvent.Message,
+                            _buildStartedEvent.HelpKeyword,
+                            Traits.LogAllEnvironmentVariables ? _buildStartedEvent.BuildEnvironment : _buildStartedEvent.BuildEnvironment?.Where(kvp => EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(kvp.Key)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value));
                         RaiseBuildStartedEvent(sender, startedEvent);
                     }
 
@@ -871,6 +878,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -912,6 +920,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -953,6 +962,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -994,6 +1004,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1035,6 +1046,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1076,6 +1088,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1117,6 +1130,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1163,6 +1177,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1198,10 +1213,7 @@ namespace Microsoft.Build.Utilities
                         (
                          buildEvent.BuildEventContext.SubmissionId != _submissionId && /* The build submission does not match the submissionId for this logger */
                          !( /* We do not have a build submissionid this can happen if the event comes from the nodeloggingcontext -- but we only want to raise it if it was an error or warning */
-                           buildEvent.BuildEventContext.SubmissionId == BuildEventContext.InvalidSubmissionId && eventIsErrorOrWarning
-                          )
-                        )
-                       )
+                           buildEvent.BuildEventContext.SubmissionId == BuildEventContext.InvalidSubmissionId && eventIsErrorOrWarning)))
                     {
                         return;
                     }
@@ -1224,6 +1236,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)
@@ -1237,7 +1250,7 @@ namespace Microsoft.Build.Utilities
                     }
 
                     // If this project finished event matches our first project started event, then send build finished.
-                    // Because of the way the event source works, we actually have to process this here rather than in project finished because if the 
+                    // Because of the way the event source works, we actually have to process this here rather than in project finished because if the
                     // logger is registered without a ProjectFinished handler, but does have an Any handler (as the mock logger does) then we would end up
                     // sending the BuildFinished event before the ProjectFinished event got processed in the Any handler.
                     ProjectFinishedEventArgs projectFinishedEvent = buildEvent as ProjectFinishedEventArgs;
@@ -1269,6 +1282,7 @@ namespace Microsoft.Build.Utilities
                             // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
                             // if a fellow logger is throwing in an event handler.
                             UnregisterAllEventHandlers();
+
                             throw;
                         }
                         catch (Exception)

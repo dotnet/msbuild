@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -26,7 +28,7 @@ namespace Microsoft.Build.BackEnd.Logging
         #region Constructors
         /// <summary>
         /// Initalize this class with a central logger id identifying the central logger to which
-        /// these events should consumed by. The redirector will send the messages to the registered sink to 
+        /// these events should consumed by. The redirector will send the messages to the registered sink to
         /// be consumed
         /// </summary>
         /// <param name="loggerId">Id which will be attached to the build event arguments to indicate which logger the events came from</param>

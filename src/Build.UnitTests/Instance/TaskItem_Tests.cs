@@ -1,21 +1,21 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Construction;
-using Microsoft.Build.UnitTests.BackEnd;
-using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
-using System.Xml;
-using Microsoft.Build.Framework;
-using System.IO;
 using System.Linq;
-using Xunit;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
+using Xunit;
+using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.MetadataCount.ShouldBe(s_builtInMetadataNames.Length + 2);
             item.DirectMetadataCount.ShouldBe(1);
 
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
+            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
             metadata.Count.ShouldBe(2);
             metadata["a"].EvaluatedValue.ShouldBe("override");
             metadata["b"].EvaluatedValue.ShouldBe("base");
@@ -233,7 +233,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Flushing an item through a task should not mess up special characters on the metadata. 
+        /// Flushing an item through a task should not mess up special characters on the metadata.
         /// </summary>
         [Fact]
         public void Escaping1()
@@ -272,7 +272,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -285,13 +286,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata. 
+        /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE || MONO
-        [Fact(Skip = "FEATURE: TASKHOST")]
-#else
         [Fact]
-#endif
         public void Escaping2()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -329,7 +326,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -342,13 +340,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either. 
+        /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either.
         /// </summary>
-#if RUNTIME_TYPE_NETCORE || MONO
-        [Fact(Skip = "FEATURE: TASKHOST")]
-#else
         [Fact]
-#endif
         public void Escaping3()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -367,7 +361,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();

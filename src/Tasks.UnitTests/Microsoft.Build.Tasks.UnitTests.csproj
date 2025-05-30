@@ -4,6 +4,7 @@
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
@@ -15,9 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
+    <PackageReference Include="Verify.Xunit" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -25,13 +25,17 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
-    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" ReferenceOutputAssembly="false" Private="false" SetTargetFramework="TargetFramework=netstandard2.0" />
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
+    <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" ReferenceOutputAssembly="false" Private="false" />
+    <ProjectReference Include="..\Samples\Dependency\Dependency.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="System.Security.Principal.Windows" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="PresentationFramework" Condition="$([MSBuild]::IsOSPlatform('windows'))" />
@@ -43,20 +47,12 @@
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
-    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
       <Link>NativeMethodsShared_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
-    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs" />
-    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
-      <Link>TestEnvironment.cs</Link>
-    </Compile>
-    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
+    <Compile Include="..\Shared\ProcessExtensions.cs" />
 
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
@@ -68,6 +64,27 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TestResources\CustomCulture\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Class1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM.sln">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Custom_COM.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Properties\AssemblyInfo.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="TestDocuments\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
@@ -75,11 +92,6 @@
     <Compile Remove="XamlDataDrivenToolTask_Tests.cs" />
     <Compile Remove="XamlTaskFactory_Tests.cs" />
     <Compile Remove="XamlTestHelpers.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <Compile Remove="LC_Tests.cs" />
-    <Compile Remove="SGen_Tests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
@@ -101,8 +113,6 @@
     <Compile Remove="ResourceHandling\GenerateResourceOutOfProc_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGen_Tests.cs" />
     <Compile Remove="ResourceHandling\ResGenDependencies_Tests.cs" />
-    <Compile Remove="GetInstalledSDKLocations_Tests.cs" />
-    <Compile Remove="GetSDKReference_Tests.cs" />
     <Compile Remove="LC_Tests.cs" />
     <Compile Remove="MockTypeInfo.cs" />
     <Compile Remove="MockTypeLib.cs" />
@@ -123,7 +133,6 @@
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
     <Compile Remove="AssemblyDependency\WinMDTests.cs" />
     <Compile Remove="ResolveComReference_Tests.cs" />
-    <Compile Remove="ResolveSDKReference_Tests.cs" />
     <Compile Remove="SdkToolsPathUtility_Tests.cs" />
     <Compile Remove="TlbImp_Tests.cs" />
     <Compile Remove="VisualBasicParserUtilitites_Tests.cs" />
@@ -137,7 +146,22 @@
 
   <ItemGroup>
     <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestResources\Projects\Custom_COM\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestResources\ClickOnceProfile.pubxml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestResources\lorem.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestResources\Manifests\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <EmbeddedResource Update="TestResources\CustomCulture\*.resx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <None Update="TestResources\mycert.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

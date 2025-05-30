@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,19 +10,26 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     /// <summary>
     /// This class is the top-level object for the bootstrapper system.
     /// </summary>
-    [ComVisible(true), Guid("1D9FE38A-0226-4b95-9C6B-6DFFA2236270"), ClassInterface(ClassInterfaceType.None)]
+    [ComVisible(true)]
+    [Guid("1D9FE38A-0226-4b95-9C6B-6DFFA2236270")]
+    [ClassInterface(ClassInterfaceType.None)]
+    [SupportedOSPlatform("windows")]
     public class BootstrapperBuilder : IBootstrapperBuilder
     {
         private static readonly bool s_logging = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSPLOG"));
@@ -46,7 +52,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private const string ENGINE_PATH = "Engine"; // relative to bootstrapper path
         private const string SCHEMA_PATH = "Schemas"; // relative to bootstrapper path
-        private const string PACKAGE_PATH = "Packages"; // relative to bootstrapper path 
+        private const string PACKAGE_PATH = "Packages"; // relative to bootstrapper path
         private const string RESOURCES_PATH = "";
 
         private const string BOOTSTRAPPER_NAMESPACE = "http://schemas.microsoft.com/developer/2004/01/bootstrapper";
@@ -196,7 +202,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     configElement.AppendChild(applicationElement);
                 }
 
-                // Key: File hash, Value: A DictionaryEntry whose Key is "EULAx" and value is a 
+                // Key: File hash, Value: A DictionaryEntry whose Key is "EULAx" and value is a
                 // fully qualified path to a eula. It can be any eula that matches the hash.
                 var eulas = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.Ordinal);
 
@@ -219,7 +225,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     var fi = new FileInfo(de.Value);
                     using (FileStream fs = fi.OpenRead())
                     {
-                        data = new StreamReader(fs).ReadToEnd();
+                        using var sr = new StreamReader(fs);
+                        data = sr.ReadToEnd();
                     }
 
                     resourceUpdater.AddStringResource(44, de.Key, data);
@@ -485,9 +492,9 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     Refresh();
                 }
 
-                List<string> list = _cultures.Values.Select(v => v.ToString()).ToList();
-                list.Sort();
-                return list.ToArray();
+                string[] array = _cultures.Values.Select(v => v.ToString()).ToArray();
+                Array.Sort(array);
+                return array;
             }
         }
 
@@ -526,14 +533,15 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 foreach (string subDirectory in Directory.GetDirectories(startDirectory))
                 {
                     string resourceDirectory = System.IO.Path.Combine(startDirectory, subDirectory);
-                    string resourceFile = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
-                    if (FileSystems.Default.FileExists(resourceFile))
+                    string resourceFilePath = System.IO.Path.Combine(resourceDirectory, SETUP_RESOURCES_FILE);
+                    if (FileSystems.Default.FileExists(resourceFilePath))
                     {
                         var resourceDoc = new XmlDocument();
                         try
                         {
-                            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                            using (var xr = XmlReader.Create(resourceFile, xrs))
+                            var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                            FileStream fs = File.OpenRead(resourceFilePath);
+                            using (var xr = XmlReader.Create(fs, xrs))
                             {
                                 resourceDoc.Load(xr);
                             }
@@ -546,7 +554,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         }
 
                         XmlNode rootNode = resourceDoc.SelectSingleNode("Resources");
-                        XmlAttribute cultureAttribute = (XmlAttribute) rootNode?.Attributes.GetNamedItem("Culture");
+                        XmlAttribute cultureAttribute = (XmlAttribute)rootNode?.Attributes.GetNamedItem("Culture");
                         if (cultureAttribute != null)
                         {
                             XmlNode stringsNode = rootNode.SelectSingleNode("Strings");
@@ -595,7 +603,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     foreach (string strSubDirectory in Directory.GetDirectories(packagePath))
                     {
                         int nStartIndex = packagePath.Length;
-                        if ((strSubDirectory.ToCharArray())[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
+                        if (strSubDirectory[nStartIndex] == System.IO.Path.DirectorySeparatorChar)
                         {
                             nStartIndex++;
                         }
@@ -753,7 +761,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
 
                 // If we could not remove any products and there are still products in the queue
-                // there must be a loop in it. We'll break the loop by removing the dependencies 
+                // there must be a loop in it. We'll break the loop by removing the dependencies
                 // of the first project in the queue;
                 if (buildQueue.Count > 0 && productsToRemove.Count == 0)
                 {
@@ -821,80 +829,44 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
                 if (fileExists)
                 {
-                    var xmlTextReader = new XmlTextReader(filePath) { DtdProcessing = DtdProcessing.Ignore };
-
-                    XmlReader xmlReader = xmlTextReader;
-
+                    XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
+                    xmlReaderSettings.DtdProcessing = DtdProcessing.Ignore;
                     if (validate)
                     {
-#pragma warning disable 618 // Using XmlValidatingReader. TODO: We need to switch to using XmlReader.Create() with validation.
-                        var validatingReader = new XmlValidatingReader(xmlReader);
-#pragma warning restore 618
-                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                        using (XmlReader xr = XmlReader.Create(schemaPath, xrSettings))
+                        xmlReaderSettings.ValidationType = ValidationType.Schema;
+                        xmlReaderSettings.XmlResolver = null;
+                        xmlReaderSettings.ValidationEventHandler += results.SchemaValidationEventHandler; ;
+                        xmlReaderSettings.Schemas.Add(null, schemaPath);
+                    }
+
+                    using (StreamReader streamReader = new StreamReader(filePath))
+                    {
+                        using (XmlReader xmlReader = XmlReader.Create(streamReader, xmlReaderSettings, filePath))
                         {
                             try
                             {
-                                // first, add our schema to the validating reader's collection of schemas
-                                var xmlSchema = validatingReader.Schemas.Add(null, xr);
-
-                                // if our schema namespace gets out of sync,
-                                //   then all of our calls to SelectNodes and SelectSingleNode will fail
-                                Debug.Assert((xmlSchema != null) &&
-                                    string.Equals(schemaNamespace, xmlSchema.TargetNamespace, StringComparison.Ordinal),
-                                    System.IO.Path.GetFileName(schemaPath) + " and BootstrapperBuilder.vb have mismatched namespaces, so the BootstrapperBuilder will fail to work.");
-
-                                // if we're supposed to be validating, then hook up our handler
-                                validatingReader.ValidationEventHandler += results.SchemaValidationEventHandler;
-
-                                // switch readers so the doc does the actual read over the validating
-                                //   reader so we get validation events as we load the document
-                                xmlReader = validatingReader;
+                                Debug.Assert(_document != null, "our document should have been created by now!");
+                                xmlDocument = new XmlDocument(_document.NameTable);
+                                xmlDocument.Load(xmlReader);
                             }
                             catch (XmlException ex)
                             {
-                                Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
-                                validate = false;
+                                Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
+                                return null;
                             }
                             catch (System.Xml.Schema.XmlSchemaException ex)
                             {
-                                Debug.Fail("Failed to load schema '" + schemaPath + "' due to the following exception:\r\n" + ex.Message);
-                                validate = false;
+                                Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
+                                return null;
                             }
                         }
-                    }
-
-                    try
-                    {
-                        Debug.Assert(_document != null, "our document should have been created by now!");
-                        xmlDocument = new XmlDocument(_document.NameTable);
-                        xmlDocument.Load(xmlReader);
-                    }
-                    catch (XmlException ex)
-                    {
-                        Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
-                        return null;
-                    }
-                    catch (System.Xml.Schema.XmlSchemaException ex)
-                    {
-                        Debug.Fail("Failed to load document '" + filePath + "' due to the following exception:\r\n" + ex.Message);
-                        return null;
-                    }
-                    finally
-                    {
-                        xmlReader.Close();
                     }
 
                     // Note that the xml document's default namespace must match the schema namespace
                     //   or none of our SelectNodes/SelectSingleNode calls will succeed
                     Debug.Assert(xmlDocument.DocumentElement != null &&
-                        string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal),
-                        "'" + xmlDocument.DocumentElement.NamespaceURI + "' is not '" + schemaNamespace + "'...");
-
-                    if ((xmlDocument.DocumentElement == null) ||
-                       (!string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal)))
-                    {
-                    }
+                                string.Equals(xmlDocument.DocumentElement.NamespaceURI, schemaNamespace, StringComparison.Ordinal),
+                                "'" + xmlDocument.DocumentElement.NamespaceURI + "' is not '" + schemaNamespace + "'...");
                 }
             }
 
@@ -976,7 +948,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                     }
 
                                     XmlNode langNode = langDoc.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":Package", _xmlNamespaceManager);
-                                    Debug.Assert(langNode != null, string.Format(CultureInfo.CurrentCulture, "Unable to find a package node in {0}", strLangManifestFilename));
+                                    Debug.Assert(langNode != null, $"Unable to find a package node in {strLangManifestFilename}");
                                     if (langNode != null)
                                     {
                                         XmlElement langElement = (XmlElement)(_document.ImportNode(langNode, true));
@@ -1010,7 +982,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                             ReplacePackageFileAttributes(langElement, EULA_ATTRIBUTE, packageFilesNode, "PackageFile", "OldName", "SourcePath");
                                         }
 
-                                        // in general, we prefer the attributes of the language document over the 
+                                        // in general, we prefer the attributes of the language document over the
                                         //  attributes of the base document.  Copy attributes from the lang to the merged,
                                         //  and then merge all unique elements into merge
                                         foreach (XmlAttribute attribute in langElement.Attributes)
@@ -1068,7 +1040,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                 }
                                 else
                                 {
-                                    Debug.WriteLine(String.Format(CultureInfo.CurrentCulture, "Validation results already added for Product Code '{0}'", productCodeAttribute));
+                                    Debug.WriteLine($"Validation results already added for Product Code '{productCodeAttribute}'");
                                 }
                             }
                         }
@@ -1101,7 +1073,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 XmlNode packageFilesNode = node.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":Package/" + BOOTSTRAPPER_PREFIX + ":PackageFiles", _xmlNamespaceManager);
                 string copyAllPackageFiles = String.Empty;
 
-                if (packageFilesNode != null) copyAllPackageFiles = ReadAttribute(packageFilesNode, "CopyAllPackageFiles");
+                if (packageFilesNode != null)
+                {
+                    copyAllPackageFiles = ReadAttribute(packageFilesNode, "CopyAllPackageFiles");
+                }
 
                 product = new Product(node, productCode, results, copyAllPackageFiles);
                 XmlNodeList packageNodeList = node.SelectNodes(BOOTSTRAPPER_PREFIX + ":Package", _xmlNamespaceManager);
@@ -1118,7 +1093,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             }
 
             if (fPackageAdded)
+            {
                 return product;
+            }
+
             return null;
         }
 
@@ -1226,12 +1204,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             XmlNode baseNode = baseElement.SelectSingleNode(BOOTSTRAPPER_PREFIX + ":" + strNodeName, _xmlNamespaceManager);
 
             // There are 4 basic cases to be dealt with:
-            // Case #    1       2       3       4      
+            // Case #    1       2       3       4
             // base      null    null    present present
             // lang      null    present null    present
             // Result    null    lang    base    combine
             //
-            // Cases 1 - 3 are pretty trivial.  
+            // Cases 1 - 3 are pretty trivial.
             if (baseNode == null)
             {
                 if (langNode != null)
@@ -1534,7 +1512,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                                 // Add the file size to the PackageFileNode
                                 XmlAttribute sizeAttribute = packageFileNode.OwnerDocument.CreateAttribute("Size");
                                 var fi = new FileInfo(packageFileSource.Value);
-                                sizeAttribute.Value = "" + (fi.Length.ToString(CultureInfo.InvariantCulture));
+                                sizeAttribute.Value = fi.Length.ToString(CultureInfo.InvariantCulture);
                                 MergeAttribute(packageFileNode, sizeAttribute);
                             }
                         }
@@ -1553,7 +1531,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                         else
                         {
                             string configFileKey = string.Format(CultureInfo.InvariantCulture, "EULA{0}", eulas.Count);
-                            var de = new KeyValuePair<string ,string>(configFileKey, eulaAttribute.Value);
+                            var de = new KeyValuePair<string, string>(configFileKey, eulaAttribute.Value);
                             eulas[key] = de;
                             eulaAttribute.Value = configFileKey;
                         }
@@ -1569,7 +1547,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 if (configElement != null)
                 {
                     configElement.AppendChild(configElement.OwnerDocument.ImportNode(node, true));
-                    DumpXmlToFile(node, string.Format(CultureInfo.CurrentCulture, "{0}.{1}.xml", package.Product.ProductCode, package.Culture));
+                    DumpXmlToFile(node, $"{package.Product.ProductCode}.{package.Culture}.xml");
                 }
             }
 
@@ -1619,15 +1597,22 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private static string ByteArrayToString(byte[] byteArray)
         {
-            if (byteArray == null) return null;
+            if (byteArray == null)
+            {
+                return null;
+            }
 
-            var output = new StringBuilder(byteArray.Length);
+#if NET
+            return Convert.ToHexString(byteArray);
+#else
+            var output = new StringBuilder(byteArray.Length * 2);
             foreach (byte byteValue in byteArray)
             {
                 output.Append(byteValue.ToString("X02", CultureInfo.InvariantCulture));
             }
 
             return output.ToString();
+#endif
         }
 
         private static string GetFileHash(string filePath)
@@ -1638,8 +1623,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             // Bootstrapper is always signed with the SHA-256 algorithm, no matter which version of
             // the .NET Framework we are targeting.  In ideal situations, bootstrapper files will be
             // pre-signed anwyay; this is a fallback in case we ever encounter a bootstrapper that is
-            // not signed.  
-            System.Security.Cryptography.SHA256CryptoServiceProvider sha = new System.Security.Cryptography.SHA256CryptoServiceProvider();
+            // not signed.
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            using System.Security.Cryptography.SHA256 sha = System.Security.Cryptography.SHA256.Create(
+#if FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES
+                "System.Security.Cryptography.SHA256CryptoServiceProvider"
+#endif
+                );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
             using (Stream s = fi.OpenRead())
             {
@@ -1677,7 +1668,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (ci != null)
             {
                 package = builder.Product.Packages.Package(ci.Name);
-                if (package != null) return package;
+                if (package != null)
+                {
+                    return package;
+                }
 
                 // Target culture not found?  Go through the progression of parent cultures (up until but excluding the invariant culture) -> fallback culture -> parent fallback culture -> default culture -> parent default culture -> any culture available
                 // Note: there is no warning if the parent culture of the requested culture is found
@@ -1687,7 +1681,10 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 while (parentCulture != CultureInfo.InvariantCulture)
                 {
                     package = GetPackageForSettings_Helper(ci, parentCulture, builder, results, false);
-                    if (package != null) return package;
+                    if (package != null)
+                    {
+                        return package;
+                    }
 
                     parentCulture = parentCulture.Parent;
                 }
@@ -1696,26 +1693,41 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (fallbackCI != null)
             {
                 package = GetPackageForSettings_Helper(ci, fallbackCI, builder, results, true);
-                if (package != null) return package;
+                if (package != null)
+                {
+                    return package;
+                }
 
                 if (!fallbackCI.IsNeutralCulture)
                 {
                     package = GetPackageForSettings_Helper(ci, fallbackCI.Parent, builder, results, true);
-                    if (package != null) return package;
+                    if (package != null)
+                    {
+                        return package;
+                    }
                 }
             }
 
             package = GetPackageForSettings_Helper(ci, Util.DefaultCultureInfo, builder, results, true);
-            if (package != null) return package;
+            if (package != null)
+            {
+                return package;
+            }
 
             if (!Util.DefaultCultureInfo.IsNeutralCulture)
             {
                 package = GetPackageForSettings_Helper(ci, Util.DefaultCultureInfo.Parent, builder, results, true);
-                if (package != null) return package;
+                if (package != null)
+                {
+                    return package;
+                }
             }
 
             if (results != null && ci != null)
+            {
                 results.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.UsingProductCulture", ci.Name, builder.Name, builder.Product.Packages.Item(0).Culture));
+            }
+
             return builder.Product.Packages.Item(0);
         }
 
@@ -1791,19 +1803,26 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             CultureInfo ci = Util.GetCultureInfoFromString(settings.Culture);
             CultureInfo fallbackCI = Util.GetCultureInfoFromString(settings.FallbackCulture);
             XmlNode cultureNode;
-            
+
             if (ci != null)
             {
                 // Work through the progression of parent cultures (up until but excluding the invariant culture) -> fallback culture -> parent fallback culture -> default culture -> parent default culture -> any available culture
                 cultureNode = GetResourcesNodeForSettings_Helper(ci, ci, results, ref codepage, false);
-                if (cultureNode != null) return cultureNode;
+                if (cultureNode != null)
+                {
+                    return cultureNode;
+                }
+
                 CultureInfo parentCulture = ci.Parent;
 
                 // Keep going up the chain of parents, stopping at the invariant culture
                 while (parentCulture != CultureInfo.InvariantCulture)
                 {
                     cultureNode = GetResourcesNodeForSettings_Helper(ci, parentCulture, results, ref codepage, false);
-                    if (cultureNode != null) return cultureNode;
+                    if (cultureNode != null)
+                    {
+                        return cultureNode;
+                    }
 
                     parentCulture = parentCulture.Parent;
                 }
@@ -1812,22 +1831,34 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             if (fallbackCI != null)
             {
                 cultureNode = GetResourcesNodeForSettings_Helper(ci, fallbackCI, results, ref codepage, true);
-                if (cultureNode != null) return cultureNode;
+                if (cultureNode != null)
+                {
+                    return cultureNode;
+                }
 
                 if (!fallbackCI.IsNeutralCulture)
                 {
                     cultureNode = GetResourcesNodeForSettings_Helper(ci, fallbackCI.Parent, results, ref codepage, true);
-                    if (cultureNode != null) return cultureNode;
+                    if (cultureNode != null)
+                    {
+                        return cultureNode;
+                    }
                 }
             }
 
             cultureNode = GetResourcesNodeForSettings_Helper(ci, Util.DefaultCultureInfo, results, ref codepage, true);
-            if (cultureNode != null) return cultureNode;
+            if (cultureNode != null)
+            {
+                return cultureNode;
+            }
 
             if (!Util.DefaultCultureInfo.IsNeutralCulture)
             {
                 cultureNode = GetResourcesNodeForSettings_Helper(ci, Util.DefaultCultureInfo.Parent, results, ref codepage, true);
-                if (cultureNode != null) return cultureNode;
+                if (cultureNode != null)
+                {
+                    return cultureNode;
+                }
             }
 
             KeyValuePair<string, XmlNode> altCulturePair = _cultures.FirstOrDefault();
@@ -1902,7 +1933,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     XmlElement filesNode = applicationElement.OwnerDocument.CreateElement("Files");
                     XmlElement fileNode = filesNode.OwnerDocument.CreateElement("File");
                     AddAttribute(fileNode, "Name", settings.ApplicationFile);
-                    AddAttribute(fileNode, URLNAME_ATTRIBUTE, Uri.EscapeUriString(settings.ApplicationFile));
+                    AddAttribute(fileNode, URLNAME_ATTRIBUTE, Uri.EscapeDataString(settings.ApplicationFile));
                     filesNode.AppendChild(fileNode);
                     applicationElement.AppendChild(filesNode);
                 }
@@ -1956,7 +1987,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             Assembly a = Assembly.GetExecutingAssembly();
             Stream s = a.GetManifestResourceStream(String.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(BootstrapperBuilder).Namespace, name));
-            Debug.Assert(s != null, String.Format(CultureInfo.CurrentCulture, "EmbeddedResource '{0}' not found", name));
+            Debug.Assert(s != null, $"EmbeddedResource '{name}' not found");
             return s;
         }
 
@@ -1970,32 +2001,33 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     {
                         xmlwriter.Formatting = Formatting.Indented;
                         xmlwriter.Indentation = 4;
-                        xmlwriter.WriteNode(new XmlNodeReader(node), true);
+                        using var xmlReader = new XmlNodeReader(node);
+                        xmlwriter.WriteNode(xmlReader, true);
                     }
                 }
                 catch (IOException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (ArgumentException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (NotSupportedException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (XmlException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
             }
@@ -2014,22 +2046,22 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                 }
                 catch (IOException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (UnauthorizedAccessException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (ArgumentException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
                 catch (NotSupportedException)
                 {
-                    // can't write info to a log file?  This is a trouble-shooting helper only, and 
+                    // can't write info to a log file?  This is a trouble-shooting helper only, and
                     // this exception can be ignored
                 }
             }
@@ -2093,7 +2125,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
                     // If the public key in the file doesn't match the public key on disk, issue a build warning
                     // Skip this check if the public key attribute is "0", as this means we're expecting the public key
                     // comparison to be skipped at install time because the file is signed by an MS trusted cert.
-                    if (publicKeyAttribute.Value.Equals("0", StringComparison.OrdinalIgnoreCase) == false &&
+                    if (!publicKeyAttribute.Value.Equals("0", StringComparison.OrdinalIgnoreCase) &&
                         publicKey?.Equals(publicKeyAttribute.Value, StringComparison.OrdinalIgnoreCase) == false)
                     {
                         results?.AddMessage(BuildMessage.CreateMessage(BuildMessageSeverity.Warning, "GenerateBootstrapper.DifferingPublicKeys", PUBLICKEY_ATTRIBUTE, builder.Name, fileSource));
@@ -2131,7 +2163,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 try
                 {
-                    var cert = new X509Certificate(fileSource);
+                    using var cert = new X509Certificate(fileSource);
                     string publicKey = cert.GetPublicKeyString();
                     return publicKey;
                 }
@@ -2163,7 +2195,11 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 
         private static string GetLogPath()
         {
-            if (!s_logging) return null;
+            if (!s_logging)
+            {
+                return null;
+            }
+
             string logPath = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 @"Microsoft\VisualStudio\" + VisualStudioConstants.CurrentVisualStudioVersion + @"\VSPLOG");
@@ -2175,12 +2211,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         {
             var includedProducts = new Dictionary<string, Product>(StringComparer.OrdinalIgnoreCase)
             {
-                // Add in this product in case there is a circular includes: 
+                // Add in this product in case there is a circular includes:
                 // we won't continue to explore this product.  It will be removed later.
                 { product.ProductCode, product }
             };
 
-            // Recursively add included products 
+            // Recursively add included products
             foreach (Product p in product.Includes)
             {
                 AddIncludedProducts(p, includedProducts);

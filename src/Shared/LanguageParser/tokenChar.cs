@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
@@ -15,13 +17,13 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsNewLine(char c)
+        internal static bool IsNewLine(char c)
         {
             // From the C# spec and vb specs, newline characters are:
             return c == 0x000d        // Carriage return
                     || c == 0x000a        // Linefeed
                     || c == 0x2028        // Line separator
-                    || c == 0x2029        // Paragraph separator                       
+                    || c == 0x2029        // Paragraph separator
                         ;
         }
 
@@ -30,7 +32,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsLetter(char c)
+        internal static bool IsLetter(char c)
         {
             UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
@@ -42,8 +44,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                     || cat == UnicodeCategory.TitlecaseLetter
                     || cat == UnicodeCategory.ModifierLetter
                     || cat == UnicodeCategory.OtherLetter
-                    || cat == UnicodeCategory.LetterNumber
-                )
+                    || cat == UnicodeCategory.LetterNumber)
             {
                 return true;
             }
@@ -55,15 +56,14 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsDecimalDigit(char c)
+        internal static bool IsDecimalDigit(char c)
         {
             UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // decimal-digit-character:
             if (
-                    cat == UnicodeCategory.DecimalDigitNumber
-                )
+                    cat == UnicodeCategory.DecimalDigitNumber)
             {
                 return true;
             }
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsConnecting(char c)
+        internal static bool IsConnecting(char c)
         {
             UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
@@ -83,8 +83,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // connecting-character:
             if
             (
-                cat == UnicodeCategory.ConnectorPunctuation
-            )
+                cat == UnicodeCategory.ConnectorPunctuation)
             {
                 return true;
             }
@@ -96,7 +95,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsCombining(char c)
+        internal static bool IsCombining(char c)
         {
             UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
@@ -104,8 +103,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             // combining-character:
             if (
                     cat == UnicodeCategory.NonSpacingMark // Mn
-                    || cat == UnicodeCategory.SpacingCombiningMark  // Mc 
-                )
+                    || cat == UnicodeCategory.SpacingCombiningMark)  // Mc
             {
                 return true;
             }
@@ -117,15 +115,14 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsFormatting(char c)
+        internal static bool IsFormatting(char c)
         {
             UnicodeCategory cat = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
 
             // From 2.4.2 of the C# Language Specification
             // formatting-character:
             if (
-                    cat == UnicodeCategory.Format  // Cf
-                )
+                    cat == UnicodeCategory.Format)  // Cf
             {
                 return true;
             }
@@ -137,7 +134,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsHexDigit(char c)
+        internal static bool IsHexDigit(char c)
         {
             // From 2.4.4.2 of the C# Language Specification
             // hex-digit:
@@ -145,8 +142,7 @@ namespace Microsoft.Build.Shared.LanguageParser
             (
                 (c >= '0' && c <= '9')
                 || (c >= 'A' && c <= 'F')
-                || (c >= 'a' && c <= 'f')
-            )
+                || (c >= 'a' && c <= 'f'))
             {
                 return true;
             }
@@ -158,12 +154,11 @@ namespace Microsoft.Build.Shared.LanguageParser
         /// </summary>
         /// <param name="c"></param>
         /// <returns></returns>
-        static internal bool IsOctalDigit(char c)
+        internal static bool IsOctalDigit(char c)
         {
             if
             (
-                c >= '0' && c <= '7'
-            )
+                c >= '0' && c <= '7')
             {
                 return true;
             }
@@ -171,4 +166,3 @@ namespace Microsoft.Build.Shared.LanguageParser
         }
     }
 }
-

@@ -1,11 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
+using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -14,6 +15,8 @@ using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Evaluation;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -146,7 +149,7 @@ namespace Microsoft.Build.BackEnd
                 _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
                 _nodeEndpoint.Listen(this);
 
-                var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
+                WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
                 _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
@@ -229,6 +232,16 @@ namespace Microsoft.Build.BackEnd
         {
             // The in-proc endpoint shouldn't be serializing, just routing.
             ErrorUtilities.ThrowInternalError("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
+        }
+
+        /// <summary>
+        /// Not necessary for in-proc node - we don't serialize.
+        /// </summary>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            // The in-proc endpoint shouldn't be serializing, just routing.
+            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializePacket on the in-proc node.");
+            return null;
         }
 
         /// <summary>
@@ -320,13 +333,8 @@ namespace Microsoft.Build.BackEnd
                     _buildRequestEngine.CleanupForBuild();
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
-                if (ExceptionHandling.IsCriticalException(ex))
-                {
-                    throw;
-                }
-
                 // If we had some issue shutting down, don't reuse the node because we may be in some weird state.
                 if (_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse)
                 {
@@ -350,18 +358,7 @@ namespace Microsoft.Build.BackEnd
                 NativeMethodsShared.SetCurrentDirectory(_savedCurrentDirectory);
 
                 // Restore the original environment.
-                foreach (KeyValuePair<string, string> entry in CommunicationsUtilities.GetEnvironmentVariables())
-                {
-                    if (!_savedEnvironment.ContainsKey(entry.Key))
-                    {
-                        Environment.SetEnvironmentVariable(entry.Key, null);
-                    }
-                }
-
-                foreach (KeyValuePair<string, string> entry in _savedEnvironment)
-                {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
-                }
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
             }
 
             exception = _shutdownException;

@@ -1,7 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -13,7 +15,7 @@ namespace Microsoft.Build.Evaluation
     {
         /// <summary>
         /// Returns a list of items with the specified item type.
-        /// 
+        ///
         /// If there are no items of this type, returns an empty list.
         /// </summary>
         /// <param name="itemType">The item type of items to return.</param>

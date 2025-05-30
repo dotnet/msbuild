@@ -4,6 +4,8 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework.XamlTypes;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -360,7 +362,7 @@ namespace Microsoft.Build.Shared
                 category.Validate();
             }
 
-            // If the DataSource property is not defined on this Rule, check that a DataSource is 
+            // If the DataSource property is not defined on this Rule, check that a DataSource is
             // specified locally on every property.
             if (null == type.DataSource)
             {

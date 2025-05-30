@@ -1,15 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
+
+#nullable disable
 
 namespace Microsoft.Build.Globbing
 {
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Globbing
         }
 
         // Cache of Regex objects that we have created and are still alive.
-        private static WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
+        private static readonly WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
 
         private readonly Lazy<GlobState> _state;
 
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Globbing
         /// <inheritdoc />
         public bool IsMatch(string stringToMatch)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stringToMatch, nameof(stringToMatch));
+            ErrorUtilities.VerifyThrowArgumentNull(stringToMatch);
 
             if (!IsLegal)
             {
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Globbing
         /// <returns></returns>
         public MatchInfoResult MatchInfo(string stringToMatch)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(stringToMatch, nameof(stringToMatch));
+            ErrorUtilities.VerifyThrowArgumentNull(stringToMatch);
 
             if (FileUtilities.PathIsInvalid(stringToMatch) || !IsLegal)
             {
@@ -168,8 +168,8 @@ namespace Microsoft.Build.Globbing
         /// <returns></returns>
         public static MSBuildGlob Parse(string globRoot, string fileSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(globRoot, nameof(globRoot));
-            ErrorUtilities.VerifyThrowArgumentNull(fileSpec, nameof(fileSpec));
+            ErrorUtilities.VerifyThrowArgumentNull(globRoot);
+            ErrorUtilities.VerifyThrowArgumentNull(fileSpec);
             ErrorUtilities.VerifyThrowArgumentInvalidPath(globRoot, nameof(globRoot));
 
             if (string.IsNullOrEmpty(globRoot))
@@ -210,16 +210,10 @@ namespace Microsoft.Build.Globbing
                         RegexOptions regexOptions = FileMatcher.DefaultRegexOptions;
                         // compile the regex since it's expected to be used multiple times
                         // For the kind of regexes used here, compilation on .NET Framework tends to be expensive and not worth the small
-                        // run-time boost so it's enabled only on .NET Core by default.
+                        // run-time boost so it's enabled only on .NET Core.
 #if RUNTIME_TYPE_NETCORE
-                        bool compileRegex = true;
-#else
-                        bool compileRegex = !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0);
+                        regexOptions |= RegexOptions.Compiled;
 #endif
-                        if (compileRegex)
-                        {
-                            regexOptions |= RegexOptions.Compiled;
-                        }
                         Regex newRegex = new Regex(matchFileExpression, regexOptions);
                         lock (s_regexCache)
                         {

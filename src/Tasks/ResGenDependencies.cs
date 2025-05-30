@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+#if FEATURE_RESXREADER_LIVEDESERIALIZATION
+using System.Collections;
 using System.Resources;
+#endif
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
@@ -14,16 +16,14 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
     /// This class is a caching mechanism for the resgen task to keep track of linked
     /// files within processed .resx files.
-    /// 
-    /// This is an on-disk serialization format, don't change field names or types or use readonly.
     /// </remarks>
-    /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-    [Serializable]
     internal sealed class ResGenDependencies : StateFileBase, ITranslatable
     {
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Ok, this is slightly complicated.  Changing the base directory in any manner may
                     // result in changes to how we find .resx files.  Therefore, we must clear our out
-                    // cache whenever the base directory changes.  
+                    // cache whenever the base directory changes.
                     resXFiles.Clear();
                     _isDirty = true;
                     baseLinkedFileDirectory = value;
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                // Ensure that the cache is properly initialized with respect to how resgen will 
+                // Ensure that the cache is properly initialized with respect to how resgen will
                 // resolve linked files within .resx files.  ResGen has two different
                 // ways for resolving relative file-paths in linked files. The way
                 // that ResGen resolved relative paths before Whidbey was always to
@@ -102,7 +102,8 @@ namespace Microsoft.Build.Tasks
         {
             translator.TranslateDictionary(ref resXFiles,
                 (ITranslator translator, ref string s) => translator.Translate(ref s),
-                (ITranslator translator, ref ResXFile resx) => {
+                (ITranslator translator, ref ResXFile resx) =>
+                {
                     ResXFile temp = resx ?? new();
                     temp.Translate(translator);
                     resx = temp;
@@ -110,7 +111,8 @@ namespace Microsoft.Build.Tasks
                 count => new Dictionary<string, ResXFile>(count));
             translator.TranslateDictionary(ref portableLibraries,
                 (ITranslator translator, ref string s) => translator.Translate(ref s),
-                (ITranslator translator, ref PortableLibraryFile portableLibrary) => {
+                (ITranslator translator, ref PortableLibraryFile portableLibrary) =>
+                {
                     PortableLibraryFile temp = portableLibrary ?? new();
                     temp.Translate(translator);
                     portableLibrary = temp;
@@ -119,13 +121,13 @@ namespace Microsoft.Build.Tasks
             translator.Translate(ref baseLinkedFileDirectory);
         }
 
-        internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader)
+        internal ResXFile GetResXFileInfo(string resxFile, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
             // First, try to retrieve the resx information from our hashtable.
             if (!resXFiles.TryGetValue(resxFile, out ResXFile retVal))
             {
-                // Ok, the file wasn't there.  Add it to our cache and return it to the caller.  
-                retVal = AddResxFile(resxFile, useMSBuildResXReader);
+                // Ok, the file wasn't there.  Add it to our cache and return it to the caller.
+                retVal = AddResxFile(resxFile, useMSBuildResXReader, log, logWarningForBinaryFormatter);
             }
             else
             {
@@ -135,19 +137,19 @@ namespace Microsoft.Build.Tasks
                 {
                     resXFiles.Remove(resxFile);
                     _isDirty = true;
-                    retVal = AddResxFile(resxFile, useMSBuildResXReader);
+                    retVal = AddResxFile(resxFile, useMSBuildResXReader, log, logWarningForBinaryFormatter);
                 }
             }
 
             return retVal;
         }
 
-        private ResXFile AddResxFile(string file, bool useMSBuildResXReader)
+        private ResXFile AddResxFile(string file, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
             // This method adds a .resx file "file" to our .resx cache.  The method causes the file
             // to be cracked for contained files.
 
-            var resxFile = new ResXFile(file, BaseLinkedFileDirectory, useMSBuildResXReader);
+            var resxFile = new ResXFile(file, BaseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter);
             resXFiles.Add(file, resxFile);
             _isDirty = true;
             return resxFile;
@@ -155,7 +157,7 @@ namespace Microsoft.Build.Tasks
 
         internal PortableLibraryFile TryGetPortableLibraryInfo(string libraryPath)
         {
-            // First, try to retrieve the portable library information from our hashtable.  
+            // First, try to retrieve the portable library information from our hashtable.
             portableLibraries.TryGetValue(libraryPath, out PortableLibraryFile retVal);
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
@@ -183,9 +185,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
-        internal override void SerializeCache(string stateFile, TaskLoggingHelper log)
+        internal override void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
-            base.SerializeCache(stateFile, log);
+            base.SerializeCache(stateFile, log, serializeEmptyState);
             _isDirty = false;
         }
 
@@ -194,9 +196,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static ResGenDependencies DeserializeCache(string stateFile, bool useSourcePath, TaskLoggingHelper log)
         {
-            var retVal = (ResGenDependencies)DeserializeCache(stateFile, log, typeof(ResGenDependencies)) ?? new ResGenDependencies();
+            var retVal = DeserializeCache<ResGenDependencies>(stateFile, log) ?? new ResGenDependencies();
 
-            // Ensure that the cache is properly initialized with respect to how resgen will 
+            // Ensure that the cache is properly initialized with respect to how resgen will
             // resolve linked files within .resx files.  ResGen has two different
             // ways for resolving relative file-paths in linked files. The way
             // that ResGen resolved relative paths before Whidbey was always to
@@ -212,11 +214,7 @@ namespace Microsoft.Build.Tasks
 
         /// <remarks>
         /// Represents a single .resx file in the dependency cache.
-        /// 
-        /// This is an on-disk serialization format, don't change field names or types or use readonly.
         /// </remarks>
-        /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
-        [Serializable]
         internal sealed class ResXFile : DependencyFile, ITranslatable
         {
             // Files contained within this resx file.
@@ -224,7 +222,7 @@ namespace Microsoft.Build.Tasks
 
             internal string[] LinkedFiles => linkedFiles;
 
-            internal ResXFile(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader) : base(filename)
+            internal ResXFile(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter) : base(filename)
             {
                 // Creates a new ResXFile object and populates the class member variables
                 // by computing a list of linked files within the .resx that was passed in.
@@ -233,7 +231,7 @@ namespace Microsoft.Build.Tasks
 
                 if (FileSystems.Default.FileExists(FileName))
                 {
-                    linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory, useMSBuildResXReader);
+                    linkedFiles = GetLinkedFiles(filename, baseLinkedFileDirectory, useMSBuildResXReader, log, logWarningForBinaryFormatter);
                 }
             }
 
@@ -254,7 +252,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <exception cref="ArgumentException">May be thrown if Resx is invalid. May contain XmlException.</exception>
             /// <exception cref="XmlException">May be thrown if Resx is invalid</exception>
-            private static string[] GetLinkedFiles(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader)
+            private static string[] GetLinkedFiles(string filename, string baseLinkedFileDirectory, bool useMSBuildResXReader, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
             {
                 // This method finds all linked .resx files for the .resx file that is passed in.
                 // filename is the filename of the .resx file that is to be examined.
@@ -264,7 +262,7 @@ namespace Microsoft.Build.Tasks
 
                 if (useMSBuildResXReader)
                 {
-                    foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null))
+                    foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null, log, logWarningForBinaryFormatter))
                     {
                         if (resource is FileStreamResource linkedResource)
                         {
@@ -316,13 +314,14 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <remarks>
-        /// Represents a single assembly in the dependency cache, which may produce 
+        /// Represents a single assembly in the dependency cache, which may produce
         /// 0 to many ResW files.
-        /// 
-        /// This is an on-disk serialization format, don't change field names or types or use readonly.
+        ///
+        /// Must be serializable because instances may be marshaled cross-AppDomain, see <see cref="ProcessResourceFiles.PortableLibraryCacheInfo"/>.
         /// </remarks>
-        /// Serializable should be included in all state files. It permits BinaryFormatter-based calls, including from GenerateResource, which we cannot move off BinaryFormatter.
+#if FEATURE_APPDOMAIN
         [Serializable]
+#endif
         internal sealed class PortableLibraryFile : DependencyFile, ITranslatable
         {
             internal string[] outputFiles;
@@ -411,7 +410,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
         }
-        
+
         /// <summary>
         /// Whether this cache is dirty or not.
         /// </summary>

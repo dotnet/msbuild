@@ -1,6 +1,6 @@
-#Debugging with MacOS
+# Debugging with MacOS
 * Open terminal 
-  * Hit command-space, type terminal, hit enter. Alternatively, hit magnifying glass (spotlight) in upper-right corner and search for terminal.)
+  * Hit command-space, type terminal, hit enter. Alternatively, hit magnifying glass (spotlight) in upper-right corner and search for terminal.
 * Build and run tests
   * Navigation in terminal is similar to command prompt (cd), although you type `ls` in place of `dir`.
   * **Use `./build.sh -test` instead of `.\build.cmd -test`.**

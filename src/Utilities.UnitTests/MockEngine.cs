@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -9,23 +9,25 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /***************************************************************************
-     * 
+     *
      * Class:       MockEngine
-     * 
+     *
      * In order to execute tasks, we have to pass in an Engine object, so the
      * task can log events.  It doesn't have to be the real Engine object, just
      * something that implements the IBuildEngine2 interface.  So, we mock up
      * a fake engine object here, so we're able to execute tasks from the unit tests.
-     * 
+     *
      * The unit tests could have instantiated the real Engine object, but then
      * we would have had to take a reference onto the Microsoft.Build.Engine assembly, which
      * is somewhat of a no-no for task assemblies.
-     * 
+     *
      **************************************************************************/
-    internal sealed class MockEngine : IBuildEngine3
+    internal sealed class MockEngine3 : IBuildEngine3
     {
         private StringBuilder _log = new StringBuilder();
 

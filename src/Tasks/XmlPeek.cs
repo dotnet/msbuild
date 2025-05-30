@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -11,6 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -19,18 +21,10 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public class XmlPeek : TaskExtension
     {
-        #region Members
+        #region Properties
 
         /// <summary>
         /// The XPath Query.
-        /// </summary>
-        private string _query;
-
-        #endregion
-
-        #region Properties
-        /// <summary>
-        /// The XML input as a file path.
         /// </summary>
         public ITaskItem XmlInputPath { get; set; }
 
@@ -42,16 +36,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The XPath Query.
         /// </summary>
-        public string Query
-        {
-            get
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(_query, "Query");
-                return _query;
-            }
-
-            set => _query = value;
-        }
+        [Required]
+        public string Query { get; set; }
 
         /// <summary>
         /// The results returned by this task.
@@ -69,6 +55,7 @@ namespace Microsoft.Build.Tasks
         /// if DTD is present. This was a pre-v15 behavior. By default, a DTD clause if any is ignored.
         /// </summary>
         public bool ProhibitDtd { get; set; }
+
         #endregion
 
         /// <summary>
@@ -78,19 +65,12 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             XmlInput xmlinput;
-            ErrorUtilities.VerifyThrowArgumentNull(_query, nameof(Query));
-
             try
             {
                 xmlinput = new XmlInput(XmlInputPath, XmlContent);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeek.ArgumentError", e.Message);
                 return false;
             }
@@ -102,16 +82,10 @@ namespace Microsoft.Build.Tasks
                 using (XmlReader xr = xmlinput.CreateReader(ProhibitDtd))
                 {
                     xpathdoc = new XPathDocument(xr);
-                    xr.Dispose();
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
                 return false;
             }
@@ -125,16 +99,11 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Create the expression from query
-                expr = nav.Compile(_query);
+                expr = nav.Compile(Query);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
-                Log.LogErrorWithCodeFromResources("XmlPeekPoke.XPathError", _query, e.Message);
+                Log.LogErrorWithCodeFromResources("XmlPeekPoke.XPathError", Query, e.Message);
                 return false;
             }
 
@@ -145,13 +114,8 @@ namespace Microsoft.Build.Tasks
             {
                 LoadNamespaces(ref xmlNamespaceManager, Namespaces);
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 Log.LogErrorWithCodeFromResources("XmlPeek.NamespacesError", e.Message);
                 return false;
             }
@@ -186,7 +150,7 @@ namespace Microsoft.Build.Tasks
             int i = 0;
             foreach (string item in peekValues)
             {
-                Result[i++] = new TaskItem(item);
+                Result[i++] = new TaskItem(EscapingUtilities.Escape(item));
 
                 // This can be logged a lot, so low importance
                 Log.LogMessageFromResources(MessageImportance.Low, "XmlPeek.Found", item);
@@ -248,7 +212,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// This class prepares XML input from XMLInputPath and XMLContent parameters
         /// </summary>
-        internal class XmlInput
+        private sealed class XmlInput
         {
             /// <summary>
             /// This either contains the raw Xml or the path to Xml file.
@@ -256,7 +220,7 @@ namespace Microsoft.Build.Tasks
             private readonly string _data;
 
             /// <summary>
-            /// Filestream used to read XML.
+            /// FileStream used to read XML.
             /// </summary>
             private FileStream _fs;
 
@@ -272,7 +236,8 @@ namespace Microsoft.Build.Tasks
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPeek.XmlInput.TooMany"));
                 }
-                else if (xmlInputPath == null && xmlContent == null)
+
+                if (xmlInputPath == null && xmlContent == null)
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XmlPeek.XmlInput.TooFew"));
                 }
@@ -292,7 +257,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Possible accepted types of XML input.
             /// </summary>
-            public enum XmlModes
+            private enum XmlModes
             {
                 /// <summary>
                 /// If the mode is a XML file.
@@ -308,7 +273,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Returns the current mode of the XmlInput
             /// </summary>
-            public XmlModes XmlMode { get; }
+            private XmlModes XmlMode { get; }
 
             /// <summary>
             /// Creates correct reader based on the input type.

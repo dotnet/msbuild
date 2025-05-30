@@ -1,9 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
-
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -14,10 +13,11 @@ namespace Microsoft.Build.Evaluation
     [DebuggerDisplay("{DebuggerDisplay,nq}")]
     internal sealed class NumericExpressionNode : OperandExpressionNode
     {
-        private string _value;
+        private readonly string _value;
 
         internal NumericExpressionNode(string value)
         {
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(value), "NumericExpressionNode cannot have empty value");
             _value = value;
         }
 
@@ -32,10 +32,14 @@ namespace Microsoft.Build.Evaluation
             return ConversionUtilities.TryConvertDecimalOrHexToDouble(_value, out result);
         }
 
-        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version result)
+        internal override bool TryVersionEvaluate(ConditionEvaluator.IConditionEvaluationState state, out Version? result)
         {
             return Version.TryParse(_value, out result);
         }
+
+        /// <inheritdoc cref="GenericExpressionNode"/>
+        internal override bool IsUnexpandedValueEmpty()
+            => false;
 
         /// <summary>
         /// Get the unexpanded value
@@ -54,7 +58,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// If any expression nodes cache any state for the duration of evaluation, 
+        /// If any expression nodes cache any state for the duration of evaluation,
         /// now's the time to clean it up
         /// </summary>
         internal override void ResetState()

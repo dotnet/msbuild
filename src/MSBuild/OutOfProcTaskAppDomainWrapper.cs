@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.CommandLine
 {
@@ -13,7 +15,7 @@ namespace Microsoft.Build.CommandLine
     internal class OutOfProcTaskAppDomainWrapper : OutOfProcTaskAppDomainWrapperBase
     {
         /// <summary>
-        /// This is an extension of the OutOfProcTaskAppDomainWrapper that is responsible 
+        /// This is an extension of the OutOfProcTaskAppDomainWrapper that is responsible
         /// for activating and executing the user task.
         /// This extension provides support for ICancellable Out-Of-Proc tasks.
         /// </summary>

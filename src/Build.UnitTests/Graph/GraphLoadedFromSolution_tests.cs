@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -16,6 +16,8 @@ using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
+
+#nullable disable
 
 namespace Microsoft.Build.Graph.UnitTests
 {
@@ -56,7 +58,8 @@ namespace Microsoft.Build.Graph.UnitTests
                     new ProjectGraph("nonExistent.sln");
                 });
 
-            exception.Message.ShouldContain("The project file could not be loaded. Could not find file");
+            exception.Message.ShouldContain("The project file could not be loaded.");
+            exception.Message.ShouldContain("Could not find file");
         }
 
         [Fact]
@@ -76,12 +79,10 @@ namespace Microsoft.Build.Graph.UnitTests
                 defaultTargets: null,
                 extraContent: referenceToSolution);
 
-            var exception = Should.Throw<InvalidOperationException>(
-                () =>
-                {
-                    new ProjectGraph(root.Path);
-                });
+            var aggException = Should.Throw<AggregateException>(() => new ProjectGraph(root.Path));
+            aggException.InnerExceptions.ShouldHaveSingleItem();
 
+            var exception = aggException.InnerExceptions[0].ShouldBeOfType<InvalidOperationException>();
             exception.Message.ShouldContain("MSB4263:");
         }
 
@@ -175,7 +176,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 foreach (var graph in Graphs)
                 {
                     foreach (
-                        var currentSolutionConfigurationPlatform in SolutionFileBuilder.SolutionConfigurationPlatformsDefaults.Concat(new SolutionConfigurationInSolution[] {null}))
+                        var currentSolutionConfigurationPlatform in SolutionFileBuilder.SolutionConfigurationPlatformsDefaults.Concat(new SolutionConfigurationInSolution[] { null }))
                     {
                         yield return new[]
                         {
@@ -228,7 +229,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 {
                     {"1", _env.CreateFile("1.csproj", string.Empty).Path}
                 },
-                SolutionConfigurationPlatforms = new[] {new SolutionConfigurationInSolution("Foo", "Bar")},
+                SolutionConfigurationPlatforms = new[] { new SolutionConfigurationInSolution("Foo", "Bar") },
                 ProjectConfigurations = new Dictionary<string, Dictionary<SolutionConfigurationInSolution, ProjectConfigurationInSolution>>
                 {
                     {
@@ -260,12 +261,12 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 yield return new object[]
                 {
-                    new Dictionary<int, int[]> //graph nodes and ProjectReference edges
+                    new Dictionary<int, int[]> // graph nodes and ProjectReference edges
                     {
                         {1, null},
                         {2, null}
                     },
-                    new[] {(1, 2)}, // solution only edges
+                    new[] {(1, 2) }, // solution only edges
                     false, // is there a cycle
                     false // solution edges overlap with graph edges
                 };
@@ -277,7 +278,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {1, null},
                         {2, null}
                     },
-                    new[] {(1, 2), (2, 1)},
+                    new[] {(1, 2), (2, 1) },
                     true,
                     false
                 };
@@ -292,7 +293,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, null},
                         {5, null}
                     },
-                    new[] {(1, 2), (1, 3), (2, 4), (3,4), (4, 5)},
+                    new[] {(1, 2), (1, 3), (2, 4), (3,4), (4, 5) },
                     false,
                     false
                 };
@@ -307,7 +308,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, null},
                         {5, null}
                     },
-                    new[] {(1, 2), (1, 3), (2, 4), (3, 4), (4, 5), (2, 3)},
+                    new[] {(1, 2), (1, 3), (2, 4), (3, 4), (4, 5), (2, 3) },
                     false,
                     false
                 };
@@ -322,7 +323,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, null},
                         {5, null}
                     },
-                    new[] {(1, 3), (2, 3), (3, 4), (3, 5), (5, 4), (2, 1)},
+                    new[] {(1, 3), (2, 3), (3, 4), (3, 5), (5, 4), (2, 1) },
                     false,
                     false
                 };
@@ -333,7 +334,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                     },
-                    new[] {(1, 2)},
+                    new[] {(1, 2) },
                     false,
                     true
                 };
@@ -344,7 +345,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                     },
-                    new[] {(1, 2), (1, 2)},
+                    new[] {(1, 2), (1, 2) },
                     false,
                     true
                 };
@@ -355,7 +356,7 @@ namespace Microsoft.Build.Graph.UnitTests
                     {
                         {1, new []{2}},
                     },
-                    new[] {(2, 1)},
+                    new[] {(2, 1) },
                     true,
                     false
                 };
@@ -370,7 +371,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(3, 2)},
+                    new[] {(3, 2) },
                     false,
                     false
                 };
@@ -385,7 +386,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(1, 2), (1, 3), (3, 2), (1, 5)},
+                    new[] {(1, 2), (1, 3), (3, 2), (1, 5) },
                     false,
                     true
                 };
@@ -400,7 +401,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(3, 2), (5, 3)},
+                    new[] {(3, 2), (5, 3) },
                     true,
                     false
                 };
@@ -415,7 +416,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {4, new []{5}},
                         {5, null}
                     },
-                    new[] {(5, 3)},
+                    new[] {(5, 3) },
                     true,
                     false
                 };
@@ -428,7 +429,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {2, new[] {3}},
                         {3, new[] {4}},
                     },
-                    new[] {(1,3), (2, 4)},
+                    new[] {(1,3), (2, 4) },
                     false,
                     false
                 };
@@ -441,7 +442,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {2, new[] {3}},
                         {3, new[] {4}},
                     },
-                    new[] {(1,3), (2, 4), (1, 2), (2, 3), (3, 4)},
+                    new[] {(1,3), (2, 4), (1, 2), (2, 3), (3, 4) },
                     false,
                     true
                 };
@@ -454,7 +455,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {3, null},
                         {4, null}
                     },
-                    new[] {(3, 2), (2, 4)},
+                    new[] {(3, 2), (2, 4) },
                     false,
                     false
                 };
@@ -467,7 +468,7 @@ namespace Microsoft.Build.Graph.UnitTests
                         {3, null},
                         {4, null}
                     },
-                    new[] {(3, 2), (2, 4), (4, 1)},
+                    new[] {(3, 2), (2, 4), (4, 1) },
                     true,
                     false
                 };
@@ -522,6 +523,39 @@ namespace Microsoft.Build.Graph.UnitTests
             exception.ShouldBeNull();
 
             var graphFromSolutionEdges = graphFromSolution.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
+
+            // These are global properties added by GraphBuilder when building a solution
+            HashSet<string> propertiesToIgnore = new(StringComparer.OrdinalIgnoreCase)
+            {
+                "CurrentSolutionConfigurationContents",
+                "BuildingSolutionFile",
+                "SolutionDir",
+                "SolutionExt",
+                "SolutionFileName",
+                "SolutionName",
+                SolutionProjectGenerator.SolutionPathPropertyName
+            };
+
+            // Solutions add these global properties
+            foreach (string propertyToIgnore in propertiesToIgnore)
+            {
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.ShouldContainKey(propertyToIgnore);
+                }
+            }
+
+            // Remove some properties for comparison purposes as we are comparing a graph created from a solution against the graph (without solution properties) used to make the solution.
+            // This is done as a separate pass since some edges may be sharing an instance.
+            foreach (string propertyToIgnore in propertiesToIgnore)
+            {
+                foreach ((ConfigurationMetadata, ConfigurationMetadata) graphFromSolutionEdge in graphFromSolutionEdges.Keys)
+                {
+                    graphFromSolutionEdge.Item1.GlobalProperties.Remove(propertyToIgnore);
+                    graphFromSolutionEdge.Item2.GlobalProperties.Remove(propertyToIgnore);
+                }
+            }
 
             // Original edges get preserved.
             foreach (var graphEdge in graphEdges)
@@ -579,13 +613,13 @@ namespace Microsoft.Build.Graph.UnitTests
                     {"3", GraphTestingUtilities.CreateProjectFile(_env, 3, new[] {4}, extraContent: MultitargetingSpecificationPropertyGroup).Path},
                     {"4", GraphTestingUtilities.CreateProjectFile(_env, 4).Path}
                 },
-                SolutionDependencies = new[] {("1", "2"), ("3", "4")}
+                SolutionDependencies = new[] { ("1", "2"), ("3", "4") }
             }.BuildSolution();
 
             var graph = new ProjectGraph(_env.CreateFile("solution.sln", solutionContents).Path);
 
             var edges = graph.TestOnly_Edges.TestOnly_AsConfigurationMetadata();
-            edges.Count.ShouldBe(8);
+            edges.Count.ShouldBe(10);
 
             var node1 = GetFirstNodeWithProjectNumber(graph, 1);
             node1.ProjectReferences.Count.ShouldBe(3);
@@ -610,28 +644,6 @@ namespace Microsoft.Build.Graph.UnitTests
             {
                 return edgeInfos.Where(e => e.Key.Item2.Equals(node.ToConfigurationMetadata())).Select(e => e.Value);
             }
-        }
-
-        [Fact]
-        public void GraphConstructionShouldThrowOnMissingSolutionDependencies()
-        {
-            var solutionContents = SolutionFileBuilder.FromGraphEdges(
-                _env,
-                new Dictionary<int, int[]> {{1, null}, {2, null}},
-                new[] {("1", new[] {Guid.NewGuid().ToString("B")})}).BuildSolution();
-
-            var solutionFile = _env.CreateFile(
-                "solution.sln",
-                solutionContents)
-                .Path;
-
-            var exception = Should.Throw<InvalidProjectFileException>(
-                () =>
-                {
-                    new ProjectGraph(solutionFile);
-                });
-
-            exception.Message.ShouldContain("but a project with this GUID was not found in the .SLN file");
         }
 
         private static bool IsSolutionItemReference(ProjectItemInstance edgeItem)
@@ -661,8 +673,9 @@ namespace Microsoft.Build.Graph.UnitTests
             var globalProperties = currentSolutionConfiguration != null
                 ? new Dictionary<string, string>
                 {
-                    ["Configuration"] = currentSolutionConfiguration.ConfigurationName,
-                    ["Platform"] = currentSolutionConfiguration.PlatformName
+                    // Intentionally use mismatched casing to ensure it's properly normalized.
+                    ["Configuration"] = currentSolutionConfiguration.ConfigurationName.ToUpperInvariant(),
+                    ["Platform"] = currentSolutionConfiguration.PlatformName.ToUpperInvariant()
                 }
                 : new Dictionary<string, string>();
 
@@ -671,6 +684,9 @@ namespace Microsoft.Build.Graph.UnitTests
                     solutionPath,
                     globalProperties),
                 _env.CreateProjectCollection().Collection);
+
+            // Exactly 1 node per project
+            graph.ProjectNodes.Count.ShouldBe(graph.ProjectNodes.Select(GetProjectPath).Distinct().Count());
 
             // in the solution, all nodes are entry points
             graphFromSolution.EntryPointNodes.Select(GetProjectPath)
@@ -690,19 +706,9 @@ namespace Microsoft.Build.Graph.UnitTests
 
             foreach (var node in graphFromSolution.ProjectNodes)
             {
-                // Project references get duplicated, once as entry points from the solution (handled in the if block) and once as nodes
-                // produced by ProjectReference items (handled in the else block).
-                if (node.ReferencingProjects.Count == 0)
-                {
-                    var expectedProjectConfiguration = actualProjectConfigurations[GetProjectNumber(node).ToString()][expectedCurrentConfiguration];
-                    GetConfiguration(node).ShouldBe(expectedProjectConfiguration.ConfigurationName);
-                    GetPlatform(node).ShouldBe(expectedProjectConfiguration.PlatformName);
-                }
-                else
-                {
-                    GetConfiguration(node).ShouldBe(GetConfiguration(node.ReferencingProjects.First()));
-                    GetPlatform(node).ShouldBe(GetPlatform(node.ReferencingProjects.First()));
-                }
+                var expectedProjectConfiguration = actualProjectConfigurations[GetProjectNumber(node).ToString()][expectedCurrentConfiguration];
+                GetConfiguration(node).ShouldBe(expectedProjectConfiguration.ConfigurationName);
+                GetPlatform(node).ShouldBe(expectedProjectConfiguration.PlatformName);
             }
         }
 

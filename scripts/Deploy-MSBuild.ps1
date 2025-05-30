@@ -4,8 +4,10 @@ Param(
   [string] $destination,
   [ValidateSet('Debug','Release')]
   [string] $configuration = "Debug",
-  [ValidateSet('Core','Desktop')]
-  [string] $runtime = "Desktop"
+  [ValidateSet('Core','Desktop', 'Detect', 'Full')]
+  [string] $runtime = "Detect",
+  [string] $binDirectory = "",
+  [bool] $makeBackup = $true
 )
 
 Set-StrictMode -Version "Latest"
@@ -15,9 +17,9 @@ function Copy-WithBackup ($origin, $destinationSubFolder = "") {
     $directoryPart = [IO.Path]::Combine($destination, $destinationSubFolder, $origin.IntermediaryDirectories)
     $destinationPath = Join-Path -Path $directoryPart (Split-Path $origin.SourceFile -leaf)
 
-    $backupInto = [IO.Path]::Combine($BackupFolder, $destinationSubFolder)
+    if (($makeBackup) -and (Test-Path $destinationPath -PathType Leaf)) {
+        $backupInto = [IO.Path]::Combine($BackupFolder, $destinationSubFolder)
 
-    if (Test-Path $destinationPath -PathType Leaf) {
         # Back up previous copy of the file
         if (!(Test-Path $backupInto)) {
             [system.io.directory]::CreateDirectory($backupInto)
@@ -45,18 +47,44 @@ function FileToCopy([string] $sourceFileRelativeToRepoRoot, [string] $intermedia
 
 # TODO: find most-recently-built MSBuild and make it default $configuration
 
-$BackupFolder = New-Item (Join-Path $destination -ChildPath "Backup-$(Get-Date -Format FileDateTime)") -itemType directory -ErrorAction Stop
-
 Write-Verbose "Copying $configuration MSBuild to $destination"
-Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
+
+if ($makeBackup) {
+    $BackupFolder = New-Item (Join-Path $destination -ChildPath "Backup-$(Get-Date -Format FileDateTime)") -itemType directory -ErrorAction Stop
+    Write-Host "Existing MSBuild assemblies backed up to $BackupFolder"
+}
+else {
+    Write-Host "Existing MSBuild assemblies won't be backed up"
+}
+
+if ($runtime -eq "Detect") {
+    if ($destination -like "*dotnet*sdk*") {
+        $runtime = "Core"
+        Write-Host "Detected path that looks like an sdk. Writing .NET Core assemblies."
+    }
+    else {
+        $runtime = "Desktop"
+        Write-Host "Detected path that does not look like an sdk. Writing .NET Framework assemblies."
+    }
+}
+else {
+    if ($runtime -eq "Full") {
+        $runtime = "Desktop"
+    }
+}
 
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
-    $targetFramework = "net6.0"
+    $targetFramework = "net9.0"
 }
 
-$bootstrapBinDirectory = "artifacts\bin\MSBuild.Bootstrap\$configuration\$targetFramework"
+# If bootstrap directory is not defined in parameters, use the default location
+if ($binDirectory -eq "") {
+    $binDirectory = "artifacts\bin"
+}
+
+$bootstrapBinDirectory = "$binDirectory\MSBuild.Bootstrap\$configuration\$targetFramework"
 
 $filesToCopyToBin = @(
     FileToCopy "$bootstrapBinDirectory\Microsoft.Build.dll"
@@ -88,8 +116,6 @@ $filesToCopyToBin = @(
 
 if ($runtime -eq "Desktop") {
     $runtimeSpecificFiles = @(
-        FileToCopy "artifacts\bin\Microsoft.Build.Conversion\$configuration\$targetFramework\Microsoft.Build.Conversion.Core.dll"
-        FileToCopy "artifacts\bin\Microsoft.Build.Engine\$configuration\$targetFramework\Microsoft.Build.Engine.dll"
 
         FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"
@@ -105,6 +131,7 @@ if ($runtime -eq "Desktop") {
         FileToCopy "$bootstrapBinDirectory\System.Collections.Immutable.dll"
         FileToCopy "$bootstrapBinDirectory\System.Memory.dll"
         FileToCopy "$bootstrapBinDirectory\System.Numerics.Vectors.dll"
+        FileToCopy "$bootstrapBinDirectory\System.Reflection.MetadataLoadContext.dll"
         FileToCopy "$bootstrapBinDirectory\System.Resources.Extensions.dll"
         FileToCopy "$bootstrapBinDirectory\System.Runtime.CompilerServices.Unsafe.dll"
         FileToCopy "$bootstrapBinDirectory\System.Text.Encodings.Web.dll"
@@ -123,14 +150,14 @@ if ($runtime -eq "Desktop") {
     $x86files = @(
         FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
         FileToCopy "$bootstrapBinDirectory\MSBuild.exe.config"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
+        FileToCopy "$binDirectory\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "$binDirectory\MSBuildTaskHost\$configuration\net35\MSBuildTaskHost.pdb"
     )
     $amd64files = @(
-        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe"
-        FileToCopy "artifacts\bin\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe.config"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.exe"
-        FileToCopy "artifacts\bin\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.pdb"
+        FileToCopy "$binDirectory\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe"
+        FileToCopy "$binDirectory\MSBuild\x64\$configuration\$targetFramework\MSBuild.exe.config"
+        FileToCopy "$binDirectory\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.exe"
+        FileToCopy "$binDirectory\MSBuildTaskHost\x64\$configuration\net35\MSBuildTaskHost.pdb"
     )
 }
 

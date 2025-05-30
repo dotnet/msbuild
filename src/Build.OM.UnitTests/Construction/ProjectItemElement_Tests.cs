@@ -1,16 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Linq;
 using System.Xml;
-
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Evaluation;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     public class ProjectItemElement_Tests
     {
         private const string RemoveInTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Remove='i'/>
@@ -30,21 +30,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
         private const string RemoveOutsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                             <ItemGroup>
                                 <i Remove='i'/>
                             </ItemGroup>
                     </Project>
                 ";
         private const string IncludeOutsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i'/>
                         </ItemGroup>
                     </Project>
                 ";
         private const string IncludeInsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i'/>
@@ -53,14 +53,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
         private const string UpdateOutsideTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                             <ItemGroup>
                                 <i Update='i'/>
                             </ItemGroup>
                     </Project>
                 ";
         private const string UpdateInTarget = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Update='i'/>
@@ -82,20 +82,44 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Equal(0, Helpers.Count(item.Metadata));
         }
 
+        [Fact]
+        public void ReadMetadataLocationPreserved()
+        {
+            string project = """
+                <Project>
+                    <Target Name='t'>
+                        <ItemGroup>
+                            <i Include='i' MetadataA='123' MetadataB='xyz' />
+                        </ItemGroup>
+                    </Target>
+                </Project>
+                """;
+
+            ProjectItemElement item = GetItemFromContent(project);
+            Assert.Equal(2, item.Metadata.Count);
+            ProjectMetadataElement metadatum1 = item.Metadata.First();
+            ProjectMetadataElement metadatum2 = item.Metadata.Skip(1).First();
+
+            Assert.Equal(4, metadatum1.Location.Line);
+            Assert.Equal(4, metadatum2.Location.Line);
+            Assert.Equal(27, metadatum1.Location.Column);
+            Assert.Equal(43, metadatum2.Location.Column);
+        }
+
         /// <summary>
         /// Read item with no include
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i/>
                         </ItemGroup>
                     </Project>
                 ")]
         // https://github.com/dotnet/msbuild/issues/900
-        //[InlineData(@"
-        //            <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+        // [InlineData(@"
+        //            <Project>
         //                <Target Name='t'>
         //                    <ItemGroup>
         //                        <i/>
@@ -108,8 +132,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -117,14 +140,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='a'>error text</i>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='a'>error text</i>
@@ -137,8 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -146,14 +168,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include=''/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include=''/>
@@ -166,8 +188,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -175,14 +196,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <PropertyGroup Include='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <PropertyGroup Include='i1'/>
@@ -195,8 +216,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -206,7 +226,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadInvalidExcludeWithoutInclude()
         {
             var project = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Exclude='i1'/>
                         </ItemGroup>
@@ -215,12 +235,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var exception =
                 Assert.Throws<InvalidProjectFileException>(
-                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
-                    );
-            
+                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); });
+
             Assert.Contains("Items that are outside Target elements must have one of the following operations: Include, Update, or Remove.", exception.Message);
         }
-        
+
         /// <summary>
         /// Read item with Exclude without Include under a target
         /// </summary>
@@ -228,7 +247,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadInvalidExcludeWithoutIncludeUnderTarget()
         {
             var project = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Exclude='i1'/>
@@ -239,22 +258,21 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var exception =
                 Assert.Throws<InvalidProjectFileException>(
-                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); }
-                    );
-            
+                    () => { ProjectRootElement.Create(XmlReader.Create(new StringReader(project))); });
+
             Assert.Contains("The attribute \"Exclude\" in element <i> is unrecognized.", exception.Message);
         }
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i include='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i include='i1'/>
@@ -263,14 +281,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' exclude='i2' />
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' exclude='i2' />
@@ -283,8 +301,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -292,7 +309,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i'>
                                 <m1>v1</m1>
@@ -304,7 +321,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i'>
@@ -318,7 +335,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='v1' />
                             <i2 Include='i' Exclude='j' m2='v2' />
@@ -326,7 +343,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i' m1='v1' />
@@ -337,8 +354,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadBasic(string project)
         {
-            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement) projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
+            ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
 
             var items = Helpers.MakeList(itemGroup.Items);
 
@@ -364,7 +382,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i1 Include='i'>
                                 <m1>v1</m1>
@@ -375,7 +393,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i1 Include='i'>
@@ -389,7 +407,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadMetadata(string project)
         {
-            ProjectRootElement projectElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
+            using ProjectRootElementFromString projectRootElementFromString = new(project);
+            ProjectRootElement projectElement = projectRootElementFromString.Project;
             ProjectItemGroupElement itemGroup = (ProjectItemGroupElement)projectElement.AllChildren.FirstOrDefault(c => c is ProjectItemGroupElement);
             ProjectItemElement item = Helpers.GetFirst(itemGroup.Items);
 
@@ -406,14 +425,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Update='i2'/>
@@ -426,20 +445,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Exclude='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Exclude='i1' Update='i2'/>
@@ -452,20 +470,19 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Exclude='i1' Update='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Exclude='i1' Update='i2'/>
@@ -478,8 +495,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -487,7 +503,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Remove='i1'>
                                     <m> </m>
@@ -496,7 +512,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Remove='i1'>
@@ -511,8 +527,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -520,14 +535,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Exclude='i1' Remove='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Exclude='i1' Remove='i1'/>
@@ -540,8 +555,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -549,14 +563,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Remove='i1'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Remove='i1'/>
@@ -569,8 +583,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(project)));
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -604,14 +617,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         [Theory]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1' Exclude='i2'/>
                         </ItemGroup>
                     </Project>
                 ")]
         [InlineData(@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup>
                                 <i Include='i1' Exclude='i2'/>
@@ -730,8 +743,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Remove = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -747,8 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Update = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -809,8 +820,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Include = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -826,10 +836,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Exclude = "i1";
-            }
-           );
+            });
         }
-        
+
         /// <summary>
         /// Set Update when Remove is present
         /// </summary>
@@ -843,11 +852,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Update = "i1";
-            }
-           );
+            });
         }
 
-        /// 
+        ///
         /// <summary>
         /// Set the Update on an item
         /// </summary>
@@ -906,8 +914,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Include = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -923,8 +930,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectItemElement item = GetItemFromContent(project);
 
                 item.Exclude = "i1";
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -1032,7 +1038,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         private static ProjectItemElement GetItemFromContent(string content)
         {
-            var project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
+
             return Helpers.GetFirst(project.Items);
         }
     }

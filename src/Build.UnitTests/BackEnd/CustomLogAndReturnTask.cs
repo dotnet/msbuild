@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public class CustomLogAndReturnTask : Task
@@ -24,12 +26,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public override bool Execute()
         {
-            if(!string.IsNullOrEmpty(WarningCode))
+            if (!string.IsNullOrEmpty(WarningCode))
             {
                 Log.LogWarning(null, WarningCode, null, null, 0, 0, 0, 0, "Warning Logged!", null);
             }
 
-            if(!string.IsNullOrEmpty(ErrorCode))
+            if (!string.IsNullOrEmpty(ErrorCode))
             {
                 Log.LogError(null, ErrorCode, null, null, 0, 0, 0, 0, "Error Logged!", null);
             }

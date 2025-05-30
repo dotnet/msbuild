@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -31,7 +33,7 @@ namespace Microsoft.Build.Construction
         internal ProjectUsingTaskBodyElement(XmlElementWithLocation xmlElement, ProjectUsingTaskElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
             VerifyCorrectParent(parent);
         }
 
@@ -44,7 +46,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -54,7 +56,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the unevaluated value of the contents of the task xml 
+        /// Gets or sets the unevaluated value of the contents of the task xml
         /// Returns empty string if it is not present.
         /// </summary>
         public string TaskBody
@@ -157,7 +159,7 @@ namespace Microsoft.Build.Construction
             var parentUsingTask = parent as ProjectUsingTaskElement;
             ErrorUtilities.VerifyThrowInvalidOperation(parentUsingTask != null, "OM_CannotAcceptParent");
 
-            // Since there is not going to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and 
+            // Since there is not going to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {

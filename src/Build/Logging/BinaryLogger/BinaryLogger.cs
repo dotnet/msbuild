@@ -1,9 +1,15 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
 using System.IO.Compression;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -17,7 +23,7 @@ namespace Microsoft.Build.Logging
     /// <remarks>The logger is public so that it can be instantiated from MSBuild.exe via command-line switch.</remarks>
     public sealed class BinaryLogger : ILogger
     {
-        // version 2: 
+        // version 2:
         //   - new BuildEventContext.EvaluationId
         //   - new record kinds: ProjectEvaluationStarted, ProjectEvaluationFinished
         // version 3:
@@ -51,7 +57,48 @@ namespace Microsoft.Build.Logging
         //   - TargetSkippedEventArgs: added OriginallySucceeded, Condition, EvaluatedCondition
         // version 14:
         //   - TargetSkippedEventArgs: added SkipReason, OriginalBuildEventContext
-        internal const int FileFormatVersion = 14;
+        // version 15:
+        //   - new record kind: ResponseFileUsedEventArgs
+        // version 16:
+        //   - AssemblyLoadBuildEventArgs
+        // version 17:
+        //   - Added extended data for types implementing IExtendedBuildEventArgs
+        // version 18:
+        //   - Making ProjectStartedEventArgs, ProjectEvaluationFinishedEventArgs, AssemblyLoadBuildEventArgs equal
+        //     between de/serialization roundtrips.
+        //   - Adding serialized events lengths - to support forward compatible reading
+        // version 19:
+        //   - GeneratedFileUsedEventArgs exposed for brief period of time (so let's continue with 20)
+        // version 20:
+        //   - TaskStartedEventArgs: Added TaskAssemblyLocation property
+        // version 21:
+        //   - TaskParameterEventArgs: Added ParameterName and PropertyName properties
+        // version 22:
+        //    - extend EnvironmentVariableRead with location where environment variable was used.
+        // version 23:
+        //    - new record kinds: BuildCheckMessageEvent, BuildCheckWarningEvent, BuildCheckErrorEvent,
+        //    BuildCheckTracingEvent, BuildCheckAcquisitionEvent, BuildSubmissionStartedEvent
+        // version 24:
+        //    - new record kind: BuildCanceledEventArgs
+        // version 25:
+        //    - add extra information to PropertyInitialValueSetEventArgs and PropertyReassignmentEventArgs and change message formatting logic.
+
+        // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
+        // Both components must stay in sync to avoid issues with logging or event handling in the products.
+
+        // This should be never changed.
+        // The minimum version of the binary log reader that can read log of above version.
+        internal const int ForwardCompatibilityMinimalVersion = 18;
+
+        // The current version of the binary log representation.
+        // Changes with each update of the binary log format.
+        internal const int FileFormatVersion = 25;
+
+        // The minimum version of the binary log reader that can read log of above version.
+        // This should be changed only when the binary log format is changed in a way that would prevent it from being
+        // read by older readers. (changing of the individual BuildEventArgs or adding new is fine - as reader can
+        // skip them if they are not known to it. Example of change requiring the increment would be the introduction of strings deduplication)
+        internal const int MinimumReaderVersion = 18;
 
         private Stream stream;
         private BinaryWriter binaryWriter;
@@ -59,6 +106,7 @@ namespace Microsoft.Build.Logging
         private ProjectImportsCollector projectImportsCollector;
         private string _initialTargetOutputLogging;
         private bool _initialLogImports;
+        private string _initialIsBinaryLoggerEnabled;
 
         /// <summary>
         /// Describes whether to collect the project files (including imported project files) used during the build.
@@ -79,7 +127,7 @@ namespace Microsoft.Build.Logging
             /// <summary>
             /// Create an external .ProjectImports.zip archive for the project files.
             /// </summary>
-            ZipFile
+            ZipFile,
         }
 
         /// <summary>
@@ -87,33 +135,47 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
-        private string FilePath { get; set; }
+        internal string FilePath { get; private set; }
 
-        /// <summary>
+        /// <summary> Gets or sets the verbosity level.</summary>
+        /// <remarks>
         /// The binary logger Verbosity is always maximum (Diagnostic). It tries to capture as much
         /// information as possible.
-        /// </summary>
+        /// </remarks>
         public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Diagnostic;
 
         /// <summary>
-        /// The only supported parameter is the output log file path (e.g. "msbuild.binlog") 
+        /// Gets or sets the parameters. The only supported parameter is the output log file path (for example, "msbuild.binlog").
         /// </summary>
         public string Parameters { get; set; }
 
         /// <summary>
-        /// Initializes the logger by subscribing to events of IEventSource
+        /// Optional expander of wildcard(s) within the LogFile path parameter of a binlog <see cref="Parameters"/>.
+        /// Wildcards can be used in the LogFile parameter in a form for curly brackets ('{}', '{[param]}').
+        /// Currently, the only supported wildcard is '{}', the optional parameters within the curly brackets
+        ///  are not currently supported, however the string parameter to the <see cref="PathParameterExpander"/> func
+        /// is reserved for this purpose.
+        /// </summary>
+        internal Func<string, string> PathParameterExpander { private get; set; } = ExpandPathParameter;
+
+        /// <summary>
+        /// Initializes the logger by subscribing to events of the specified event source and embedded content source.
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
             _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
+            _initialIsBinaryLoggerEnabled = Environment.GetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED");
 
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "true");
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", "1");
+            Environment.SetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED", bool.TrueString);
+
             Traits.Instance.EscapeHatches.LogProjectImports = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
-            ProcessParameters();
+            ProcessParameters(out bool omitInitialInfo);
+            var replayEventSource = eventSource as IBinaryLogReplaySource;
 
             try
             {
@@ -135,9 +197,10 @@ namespace Microsoft.Build.Logging
 
                 stream = new FileStream(FilePath, FileMode.Create);
 
-                if (CollectProjectImports != ProjectImportsCollectionMode.None)
+                if (CollectProjectImports != ProjectImportsCollectionMode.None && replayEventSource == null)
                 {
                     projectImportsCollector = new ProjectImportsCollector(FilePath, CollectProjectImports == ProjectImportsCollectionMode.ZipFile);
+                    projectImportsCollector.FileIOExceptionEvent += EventSource_AnyEventRaised;
                 }
 
                 if (eventSource is IEventSource3 eventSource3)
@@ -172,11 +235,57 @@ namespace Microsoft.Build.Logging
                 eventArgsWriter.EmbedFile += EventArgsWriter_EmbedFile;
             }
 
-            binaryWriter.Write(FileFormatVersion);
+            if (replayEventSource != null)
+            {
+                if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
+                {
+                    replayEventSource.EmbeddedContentRead += args =>
+                        eventArgsWriter.WriteBlob(args.ContentKind, args.ContentStream);
+                }
+                else if (CollectProjectImports == ProjectImportsCollectionMode.ZipFile)
+                {
+                    replayEventSource.EmbeddedContentRead += args =>
+                        ProjectImportsCollector.FlushBlobToFile(FilePath, args.ContentStream);
+                }
 
-            LogInitialInfo();
+                // If raw events are provided - let's try to use the advantage.
+                // But other subscribers can later on subscribe to structured events -
+                //  for this reason we do only subscribe delayed.
+                replayEventSource.DeferredInitialize(
+                    // For raw events we cannot write the initial info - as we cannot write
+                    //  at the same time as raw events are being written - this would break the deduplicated strings store.
+                    // But we need to write the version info - but since we read/write raw - let's not change the version info.
+                    () =>
+                    {
+                        binaryWriter.Write(replayEventSource.FileFormatVersion);
+                        binaryWriter.Write(replayEventSource.MinimumReaderVersion);
+                        replayEventSource.RawLogRecordReceived += RawEvents_LogDataSliceReceived;
+                        // Replay separated strings here as well (and do not deduplicate! It would skew string indexes)
+                        replayEventSource.StringReadDone += strArg => eventArgsWriter.WriteStringRecord(strArg.StringToBeUsed);
+                    },
+                    SubscribeToStructuredEvents);
+            }
+            else
+            {
+                SubscribeToStructuredEvents();
+            }
 
-            eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLogger = true;
+
+            void SubscribeToStructuredEvents()
+            {
+                // Write the version info - the latest version is written only for structured events replaying
+                //  as raw events do not change structure - hence the version is the same as the one they were written with.
+                binaryWriter.Write(FileFormatVersion);
+                binaryWriter.Write(MinimumReaderVersion);
+
+                if (!omitInitialInfo)
+                {
+                    LogInitialInfo();
+                }
+
+                eventSource.AnyEventRaised += EventSource_AnyEventRaised;
+            }
         }
 
         private void EventArgsWriter_EmbedFile(string filePath)
@@ -206,19 +315,34 @@ namespace Microsoft.Build.Logging
         public void Shutdown()
         {
             Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
-            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : "");
+            Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : null);
+            Environment.SetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED", _initialIsBinaryLoggerEnabled);
+
             Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;
 
             if (projectImportsCollector != null)
             {
+                // Write the build check editorconfig file paths to the log
+                foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
+                {
+                    projectImportsCollector.AddFile(filePath);
+                }
+                EditorConfigParser.ClearEditorConfigFilePaths();
+                projectImportsCollector.Close();
+
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
                 {
-                    eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, projectImportsCollector.GetAllBytes());
+                    projectImportsCollector.ProcessResult(
+                        streamToEmbed => eventArgsWriter.WriteBlob(BinaryLogRecordKind.ProjectImportArchive, streamToEmbed),
+                        LogMessage);
+
+                    projectImportsCollector.DeleteArchive();
                 }
 
-                projectImportsCollector.Close();
+                projectImportsCollector.FileIOExceptionEvent -= EventSource_AnyEventRaised;
                 projectImportsCollector = null;
             }
+
 
             if (stream != null)
             {
@@ -231,6 +355,11 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        private void RawEvents_LogDataSliceReceived(BinaryLogRecordKind recordKind, Stream stream)
+        {
+            eventArgsWriter.WriteBlob(recordKind, stream);
+        }
+
         private void EventSource_AnyEventRaised(object sender, BuildEventArgs e)
         {
             Write(e);
@@ -240,17 +369,27 @@ namespace Microsoft.Build.Logging
         {
             if (stream != null)
             {
+                if (projectImportsCollector != null)
+                {
+                    CollectImports(e);
+                }
+
+                if (DoNotWriteToBinlog(e))
+                {
+                    return;
+                }
+
                 // TODO: think about queuing to avoid contention
                 lock (eventArgsWriter)
                 {
                     eventArgsWriter.Write(e);
                 }
-
-                if (projectImportsCollector != null)
-                {
-                    CollectImports(e);
-                }
             }
+        }
+
+        private static bool DoNotWriteToBinlog(BuildEventArgs e)
+        {
+            return e is GeneratedFileUsedEventArgs;
         }
 
         private void CollectImports(BuildEventArgs e)
@@ -263,9 +402,18 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFile(projectArgs.ProjectFile);
             }
-            else if (e is MetaprojectGeneratedEventArgs metaprojectArgs)
+            else if (e is MetaprojectGeneratedEventArgs { metaprojectXml: { } } metaprojectArgs)
             {
                 projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
+            }
+            else if (e is ResponseFileUsedEventArgs responseFileArgs && responseFileArgs.ResponseFilePath != null)
+            {
+                projectImportsCollector.AddFile(responseFileArgs.ResponseFilePath);
+            }
+            else if (e is GeneratedFileUsedEventArgs generatedFileUsedEventArgs && generatedFileUsedEventArgs.FilePath != null)
+            {
+                string fullPath = Path.GetFullPath(generatedFileUsedEventArgs.FilePath);
+                projectImportsCollector.AddFileFromMemory(fullPath, generatedFileUsedEventArgs.Content);
             }
         }
 
@@ -274,13 +422,14 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <exception cref="LoggerException">
         /// </exception>
-        private void ProcessParameters()
+        private void ProcessParameters(out bool omitInitialInfo)
         {
             if (Parameters == null)
             {
                 throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
             }
 
+            omitInitialInfo = false;
             var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
             foreach (var parameter in parameters)
             {
@@ -296,15 +445,13 @@ namespace Microsoft.Build.Logging
                 {
                     CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
                 }
-                else if (parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase))
+                else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
                 {
-                    FilePath = parameter;
-                    if (FilePath.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase))
-                    {
-                        FilePath = FilePath.Substring("LogFile=".Length);
-                    }
-
-                    FilePath = FilePath.Trim('"');
+                    omitInitialInfo = true;
+                }
+                else if (TryInterpretPathParameter(parameter, out string filePath))
+                {
+                    FilePath = filePath;
                 }
                 else
                 {
@@ -316,6 +463,7 @@ namespace Microsoft.Build.Logging
             {
                 FilePath = "msbuild.binlog";
             }
+            KnownTelemetry.LoggingConfigurationTelemetry.BinaryLoggerUsedDefaultName = FilePath == "msbuild.binlog";
 
             try
             {
@@ -329,5 +477,40 @@ namespace Microsoft.Build.Logging
                 throw new LoggerException(message, e, errorCode, helpKeyword);
             }
         }
+
+        private bool TryInterpretPathParameter(string parameter, out string filePath)
+        {
+            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+
+            if (hasPathPrefix)
+            {
+                parameter = parameter.Substring("LogFile=".Length);
+            }
+
+            parameter = parameter.Trim('"');
+
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+            filePath = parameter;
+
+            if (!isWildcard)
+            {
+                return hasProperExtension;
+            }
+
+            filePath = parameter.Replace("{}", GetUniqueStamp(), StringComparison.Ordinal);
+
+            if (!hasProperExtension)
+            {
+                filePath += ".binlog";
+            }
+            return true;
+        }
+
+        private string GetUniqueStamp()
+            => (PathParameterExpander ?? ExpandPathParameter)(string.Empty);
+
+        private static string ExpandPathParameter(string parameters)
+            => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{EnvironmentUtilities.CurrentProcessId}--{StringUtils.GenerateRandomString(6)}";
     }
 }

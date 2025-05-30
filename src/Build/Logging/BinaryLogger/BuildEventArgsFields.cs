@@ -1,5 +1,10 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -27,5 +32,6 @@ namespace Microsoft.Build.Logging
         public int ColumnNumber { get; set; }
         public int EndLineNumber { get; set; }
         public int EndColumnNumber { get; set; }
+        public ExtendedDataFields Extended { get; set; }
     }
 }

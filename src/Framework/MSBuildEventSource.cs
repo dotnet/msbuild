@@ -1,16 +1,37 @@
-﻿using System.Diagnostics.Tracing;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Diagnostics.Tracing;
 
 namespace Microsoft.Build.Eventing
 {
     /// <summary>
     /// This captures information of how various key methods of building with MSBuild ran.
     /// </summary>
+    /// <remarks>
+    /// Changes to existing event method signatures will not be reflected unless you update the <see cref="EventAttribute.Version" /> property or assign a new event ID.
+    /// </remarks>
     [EventSource(Name = "Microsoft-Build")]
     internal sealed class MSBuildEventSource : EventSource
     {
         public static class Keywords
         {
+            /// <summary>
+            /// Keyword applied to all MSBuild events.
+            /// </summary>
+            /// <remarks>
+            /// Literally every event should define this.
+            /// </remarks>
             public const EventKeywords All = (EventKeywords)0x1;
+
+            /// <summary>
+            /// Keyword for events that should go in the text performance log when turned on.
+            /// </summary>
+            /// <remarks>
+            /// This keyword should be applied only to events that are low-volume
+            /// and likely to be useful to diagnose perf issues using the
+            /// <see href="https://github.com/dotnet/msbuild/pull/5861">text perf log</see>.
+            /// </remarks>
             public const EventKeywords PerformanceLog = (EventKeywords)0x2;
         }
 
@@ -58,11 +79,12 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of information of how a project file built.
         /// <param name="projectPath">Filename of the project being built.</param>
+        /// <param name="targets">Names of the targets that built.</param>
         /// </summary>
-        [Event(5, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void BuildProjectStart(string projectPath)
+        [Event(5, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void BuildProjectStart(string projectPath, string targets)
         {
-            WriteEvent(5, projectPath);
+            WriteEvent(5, projectPath, targets);
         }
 
         /// <param name="projectPath">Filename of the project being built.</param>
@@ -219,7 +241,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(27);
         }
 
-        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
         public void RarOverallStop(int assembliesCount, int assemblyFilesCount, int resolvedFilesCount, int resolvedDependencyFilesCount, int copyLocalFilesCount, bool findDependencies)
         {
             WriteEvent(28, assembliesCount, assemblyFilesCount, resolvedFilesCount, resolvedDependencyFilesCount, copyLocalFilesCount, findDependencies);
@@ -293,7 +315,7 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <summary>
-        /// Call this method to notify listeners of profiling for the method that removes blacklisted references from the reference table. It puts primary and dependency references in invalid file lists.
+        /// Call this method to notify listeners of profiling for the method that removes denylisted references from the reference table. It puts primary and dependency references in invalid file lists.
         /// </summary>
         [Event(35, Keywords = Keywords.All)]
         public void RarRemoveReferencesMarkedForExclusionStart()
@@ -341,10 +363,11 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void TargetStop(string targetName)
+        /// <param name="result">Target stop result.</param>
+        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void TargetStop(string targetName, string result)
         {
-            WriteEvent(44, targetName);
+            WriteEvent(44, targetName, result);
         }
 
         /// <summary>
@@ -455,13 +478,13 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(62, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStart()
+        public void SdkResolverLoadAllResolversStart()
         {
             WriteEvent(62);
         }
 
         [Event(63, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStop(int resolverCount)
+        public void SdkResolverLoadAllResolversStop(int resolverCount)
         {
             WriteEvent(63, resolverCount);
         }
@@ -484,10 +507,10 @@ namespace Microsoft.Build.Eventing
             WriteEvent(66, sdkName, solutionPath, projectPath);
         }
 
-        [Event(67, Keywords = Keywords.All)]
-        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success)
+        [Event(67, Keywords = Keywords.All, Version = 2)]
+        public void CachedSdkResolverServiceResolveSdkStop(string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
         {
-            WriteEvent(67, sdkName, solutionPath, projectPath, success);
+            WriteEvent(67, sdkName, solutionPath, projectPath, success, wasResultCached);
         }
 
         /// <remarks>
@@ -519,6 +542,143 @@ namespace Microsoft.Build.Eventing
             WriteEvent(70, oldHash, newHash);
         }
 
-#endregion
+        [Event(71, Keywords = Keywords.All)]
+        public void ProjectCacheCreatePluginInstanceStart(string pluginAssemblyPath)
+        {
+            WriteEvent(71, pluginAssemblyPath);
+        }
+
+        [Event(72, Keywords = Keywords.All)]
+        public void ProjectCacheCreatePluginInstanceStop(string pluginAssemblyPath, string pluginTypeName)
+        {
+            WriteEvent(72, pluginAssemblyPath, pluginTypeName);
+        }
+
+        [Event(73, Keywords = Keywords.All)]
+        public void ProjectCacheBeginBuildStart(string pluginTypeName)
+        {
+            WriteEvent(73, pluginTypeName);
+        }
+
+        [Event(74, Keywords = Keywords.All)]
+        public void ProjectCacheBeginBuildStop(string pluginTypeName)
+        {
+            WriteEvent(74, pluginTypeName);
+        }
+
+        [Event(75, Keywords = Keywords.All)]
+        public void ProjectCacheGetCacheResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(75, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(76, Keywords = Keywords.All)]
+        public void ProjectCacheGetCacheResultStop(string pluginTypeName, string projectPath, string targets, string cacheResultType)
+        {
+            WriteEvent(76, pluginTypeName, projectPath, targets, cacheResultType);
+        }
+
+        [Event(77, Keywords = Keywords.All)]
+        public void ProjectCacheEndBuildStart(string pluginTypeName)
+        {
+            WriteEvent(77, pluginTypeName);
+        }
+
+        [Event(78, Keywords = Keywords.All)]
+        public void ProjectCacheEndBuildStop(string pluginTypeName)
+        {
+            WriteEvent(78, pluginTypeName);
+        }
+
+        [Event(79, Keywords = Keywords.All)]
+        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(int submissionId, string sdkName, string solutionPath, string projectPath)
+        {
+            WriteEvent(79, submissionId, sdkName, solutionPath, projectPath);
+        }
+
+        [Event(80, Keywords = Keywords.All)]
+        public void OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStop(int submissionId, string sdkName, string solutionPath, string projectPath, bool success, bool wasResultCached)
+        {
+            WriteEvent(80, submissionId, sdkName, solutionPath, projectPath, success, wasResultCached);
+        }
+
+        [Event(81, Keywords = Keywords.All)]
+        public void SdkResolverFindResolversManifestsStart()
+        {
+            WriteEvent(81);
+        }
+
+        [Event(82, Keywords = Keywords.All)]
+        public void SdkResolverFindResolversManifestsStop(int resolverManifestCount)
+        {
+            WriteEvent(82, resolverManifestCount);
+        }
+
+        [Event(83, Keywords = Keywords.All)]
+        public void SdkResolverLoadResolversStart()
+        {
+            WriteEvent(83);
+        }
+
+        [Event(84, Keywords = Keywords.All)]
+        public void SdkResolverLoadResolversStop(string manifestName, int resolverCount)
+        {
+            WriteEvent(84, manifestName, resolverCount);
+        }
+
+        [Event(85, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStart(string assemblyName)
+        {
+            WriteEvent(85, assemblyName);
+        }
+
+        [Event(86, Keywords = Keywords.All)]
+        public void CreateLoadedTypeStop(string assemblyName)
+        {
+            WriteEvent(86, assemblyName);
+        }
+
+        [Event(87, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStart()
+        {
+            WriteEvent(87);
+        }
+
+        [Event(88, Keywords = Keywords.All)]
+        public void LoadAssemblyAndFindTypeStop(string assemblyPath, int numberOfPublicTypesSearched)
+        {
+            WriteEvent(88, assemblyPath, numberOfPublicTypesSearched);
+        }
+
+        [Event(89, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStart(string commandLine)
+        {
+            WriteEvent(89, commandLine);
+        }
+
+        [Event(90, Keywords = Keywords.All)]
+        public void MSBuildServerBuildStop(string commandLine, int countOfConsoleMessages, long sumSizeOfConsoleMessages, string clientExitType, string serverExitType)
+        {
+            WriteEvent(90, commandLine, countOfConsoleMessages, sumSizeOfConsoleMessages, clientExitType, serverExitType);
+        }
+
+        [Event(91, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStart(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(91, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(92, Keywords = Keywords.All)]
+        public void ProjectCacheHandleBuildResultStop(string pluginTypeName, string projectPath, string targets)
+        {
+            WriteEvent(92, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(93, Keywords = Keywords.All)]
+        public void CancelSubmissionsStart()
+        {
+            WriteEvent(93);
+        }
+        #endregion
     }
 }

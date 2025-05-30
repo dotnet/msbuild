@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using Microsoft.Build.Framework;
 
+#nullable disable
+
 #if BUILD_ENGINE
 using Microsoft.Build.Shared;
-
 namespace Microsoft.Build.BackEnd.Components.Caching
 #else
 namespace Microsoft.Build.Shared
@@ -21,7 +22,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The cache for AppDomain lifetime objects.
         /// </summary>
-        private static Lazy<ConcurrentDictionary<object, object>> s_appDomainLifetimeObjects = new Lazy<ConcurrentDictionary<object, object>>();
+        private static readonly Lazy<ConcurrentDictionary<object, object>> s_appDomainLifetimeObjects = new Lazy<ConcurrentDictionary<object, object>>();
 
         /// <summary>
         /// The cache for Build lifetime objects.
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Shared
 
         #region IRegisteredTaskObjectCache
 
-        /// <summary> 
+        /// <summary>
         /// Disposes of all of the cached objects registered with the specified lifetime.
         /// </summary>
         public void DisposeCacheObjects(RegisteredTaskObjectLifetime lifetime)
@@ -94,7 +95,7 @@ namespace Microsoft.Build.Shared
         protected bool IsCollectionEmptyOrUncreated(RegisteredTaskObjectLifetime lifetime)
         {
             var collection = GetCollectionForLifetime(lifetime, dontCreate: true);
-            return (collection == null) || (collection.Count == 0);
+            return (collection == null) || collection.IsEmpty;
         }
 
         /// <summary>
@@ -147,13 +148,8 @@ namespace Microsoft.Build.Shared
                         IDisposable disposable = obj as IDisposable;
                         disposable?.Dispose();
                     }
-                    catch (Exception ex)
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                     {
-                        if (ExceptionHandling.IsCriticalException(ex))
-                        {
-                            throw;
-                        }
-
                         // Eat it.  We don't have a way to log here because at a minimum the build has already completed.
                     }
                 }

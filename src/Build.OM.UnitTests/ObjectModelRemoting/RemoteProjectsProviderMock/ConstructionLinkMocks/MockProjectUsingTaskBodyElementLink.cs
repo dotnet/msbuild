@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
@@ -7,7 +9,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectUsingTaskBodyElementLinkRemoter : MockProjectElementLinkRemoter
+    internal sealed class MockProjectUsingTaskBodyElementLinkRemoter : MockProjectElementLinkRemoter
     {
         public ProjectUsingTaskBodyElement UsingTaskBodyXml => (ProjectUsingTaskBodyElement)Source;
 
@@ -26,7 +28,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public string TaskBody { get => this.UsingTaskBodyXml.TaskBody; set => this.UsingTaskBodyXml.TaskBody = value; }
     }
 
-    internal class MockProjectUsingTaskBodyElementLink : ProjectUsingTaskBodyElementLink, ILinkMock, IProjectElementLinkHelper
+    internal sealed class MockProjectUsingTaskBodyElementLink : ProjectUsingTaskBodyElementLink, ILinkMock, IProjectElementLinkHelper
     {
         public MockProjectUsingTaskBodyElementLink(MockProjectUsingTaskBodyElementLinkRemoter proxy, IImportHolder holder)
         {
@@ -66,7 +68,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
 namespace Microsoft.Build.Engine.OM.UnitTests.ObjectModelRemoting.RemoteProjectsProviderMock.ConstructionLinkMocks
 {
-    class MockProjectUsingTaskBodyElementLink
+    internal sealed class MockProjectUsingTaskBodyElementLink
     {
     }
 }

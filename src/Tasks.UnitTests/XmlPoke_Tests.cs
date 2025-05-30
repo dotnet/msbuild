@@ -1,24 +1,30 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
 using Shouldly;
+
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class XmlPoke_Tests
+    public sealed class XmlPoke_Tests
     {
         private const string XmlNamespaceUsedByTests = "http://nsurl";
 
         private const string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
-        
+
 <class AccessModifier='public' Name='test' xmlns:s='" + XmlNamespaceUsedByTests + @"'>
   <s:variable Type='String' Name='a'></s:variable>
   <s:variable Type='String' Name='b'></s:variable>
@@ -27,7 +33,7 @@ namespace Microsoft.Build.UnitTests
 </class>";
 
         private const string _xmlFileNoNs = @"<?xml version='1.0' encoding='utf-8'?>
-        
+
 <class AccessModifier='public' Name='test'>
   <variable Type='String' Name='a'></variable>
   <variable Type='String' Name='b'></variable>
@@ -58,7 +64,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PokeNoNamespace()
         {
             const string query = "//variable/@Name";
@@ -134,41 +139,81 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void PokeMissingParams()
+        public void PokeWithNoParameters()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileNoNs, out xmlInputPath);
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(@"<Project><Target Name=""Test""><XmlPoke /></Target></Project>", log);
 
-            for (int i = 0; i < 8; i++)
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
+        }
+
+        [Fact]
+        public void PokeWithMissingRequiredQuery()
+        {
+            const string projectContent = @"<Project><Target Name=""Test""><XmlPoke XmlInputPath=""nonesuch"" /></Target></Project>";
+
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(projectContent, log);
+
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
+            log.AssertLogContains("\"Query\"");
+        }
+
+        [Fact]
+        public void PokeWithMissingRequiredXmlInputPath()
+        {
+            const string projectContent = @"<Project><Target Name=""Test""><XmlPoke Query=""nonesuch"" /></Target></Project>";
+
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(projectContent, log);
+
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
+            log.AssertLogContains("\"XmlInputPath\"");
+        }
+
+        [Fact]
+        public void PokeWithRequiredParameters()
+        {
+            MockEngine engine = new(true);
+            Prepare(_xmlFileNoNs, out string xmlInputPath);
+
+            XmlPoke task = new()
             {
-                XmlPoke p = new XmlPoke();
-                p.BuildEngine = engine;
+                BuildEngine = engine,
+                XmlInputPath = new TaskItem(xmlInputPath),
+                Query = "//variable/@Name",
+            };
 
-                if ((i & 1) == 1)
-                {
-                    p.XmlInputPath = new TaskItem(xmlInputPath);
-                }
+            task.Execute().ShouldBeTrue();
+        }
 
-                if ((i & 2) == 2)
-                {
-                    p.Query = "//variable/@Name";
-                }
+        [Fact]
+        // https://github.com/dotnet/msbuild/issues/5814
+        public void XmlPokeWithEmptyValue()
+        {
+            string xmlInputPath;
+            string query = "//class/variable/@Name";
+            Prepare(_xmlFileNoNs, out xmlInputPath);
+            string projectContents = $"""
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                <Target Name='Poke'>
+                    <XmlPoke Value='' Query='{query}' XmlInputPath='{xmlInputPath}'/>
+                </Target>
+                </Project>
+                """;
 
-                if ((i & 4) == 4)
-                {
-                    p.Value = new TaskItem("Mert");
-                }
+            ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
 
-                // "Expecting argumentnullexception for the first 7 tests"
-                if (i < 7)
-                {
-                    Should.Throw<ArgumentNullException>(() => p.Execute());
-                }
-                else
-                {
-                    Should.NotThrow(() => p.Execute());
-                }
+            string result = File.ReadAllText(xmlInputPath);
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.LoadXml(result);
+            List<XmlAttribute> nodes = xmlDocument.SelectNodes(query)?.Cast<XmlAttribute>().ToList();
+            foreach (var node in nodes)
+            {
+                node.Value.ShouldBe(string.Empty);
             }
         }
 
@@ -247,7 +292,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PokeElement()
         {
             const string query = "//variable/.";
@@ -271,16 +315,16 @@ namespace Microsoft.Build.UnitTests
         public void PokeWithoutUsingTask()
         {
             string projectContents = @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='msbuilddefaulttoolsversion'>
   <Target Name='x'>
     <XmlPoke Value='abc' Query='def' XmlInputPath='ghi.jkl' ContinueOnError='true' />
   </Target>
 </Project>";
 
-            // The task will error, but ContinueOnError means that it will just be a warning.  
+            // The task will error, but ContinueOnError means that it will just be a warning.
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents);
 
-            // Verify that the task was indeed found. 
+            // Verify that the task was indeed found.
             logger.AssertLogDoesntContain("MSB4036");
         }
 

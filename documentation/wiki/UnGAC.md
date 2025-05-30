@@ -2,7 +2,7 @@
 
 ## What is the GAC?
 
-See the [public documentation](https://docs.microsoft.com/dotnet/framework/app-domains/gac). The GAC is a folder where different installations of VS on the same machine look for assemblies that are commonly used. If an assembly is in the GAC, it will be prioritized over any other assembly.
+See the [public documentation](https://learn.microsoft.com/dotnet/framework/app-domains/gac). The GAC is a folder where different installations of VS on the same machine look for assemblies that are commonly used. If an assembly is in the GAC, it will be prioritized over any other assembly.
 
 The only MSBuild assemblies you may see in the GAC are version 4.8. There is no reason any modern (15.1+) MSBuild assembly should be in the GAC today.
 
@@ -20,6 +20,11 @@ Run the [EnumerateMSBuild powershell script](https://github.com/dotnet/msbuild/b
     gacutil /u "Microsoft.Build.Tasks.Core, Version=15.1.0.0"
     gacutil /u "Microsoft.Build.Utilities.Core, Version=15.1.0.0"
     gacutil /u "Microsoft.Build.Framework, Version=15.1.0.0"
+    gacutil /u "Microsoft.NET.StringTools, Version=1.0.0.0"
+    gacutil /u "BuildXL.Processes, Version=1.0.0.0"
+    gacutil /u "BuildXL.Utilities.Core, Version=1.0.0.0"
+    gacutil /u "BuildXL.Native, Version=1.0.0.0"
+    gacutil /u "Microsoft.VisualStudio.SolutionPersistence, Version=1.0.0.0"
     ```
 3. If you want to do this 'safely', move the folder out of the GAC and return it if it doesn't resolve the issue.
 

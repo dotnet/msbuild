@@ -1,10 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 using System.Reflection;
-
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
@@ -19,11 +17,11 @@ namespace Microsoft.Build.Shared
         /// For saving the assembly that was loaded by the TypeLoader
         /// We only use this when the assembly failed to load properly into the appdomain
         /// </summary>
-        private static LoadedType s_resolverLoadedType;
+        private static LoadedType? s_resolverLoadedType;
 #endif
 
         /// <summary>
-        /// Delegate for logging task loading errors. 
+        /// Delegate for logging task loading errors.
         /// </summary>
         internal delegate void LogError(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs);
 
@@ -35,31 +33,36 @@ namespace Microsoft.Build.Shared
         internal static bool IsTaskClass(Type type, object unused)
         {
             return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
-#if FEATURE_TYPE_GETINTERFACE
                 type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
-#else
-                type.GetInterfaces().Any(interfaceType => interfaceType.FullName == "Microsoft.Build.Framework.ITask"));
-#endif
         }
 
         /// <summary>
-        /// Creates an ITask instance and returns it.  
+        /// Creates an ITask instance and returns it.
         /// </summary>
-        internal static ITask CreateTask(LoadedType loadedType, string taskName, string taskLocation, int taskLine, int taskColumn, LogError logError
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static ITask? CreateTask(
+            LoadedType loadedType,
+            string taskName,
+            string taskLocation,
+            int taskLine,
+            int taskColumn,
+            LogError logError,
 #if FEATURE_APPDOMAIN
-            , AppDomainSetup appDomainSetup
+            AppDomainSetup appDomainSetup,
+            Action<AppDomain> appDomainCreated,
 #endif
-            , bool isOutOfProc
+            bool isOutOfProc
 #if FEATURE_APPDOMAIN
-            , out AppDomain taskAppDomain
+            , out AppDomain? taskAppDomain
 #endif
             )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
 #if FEATURE_APPDOMAIN
-            bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute();
+            bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
             s_resolverLoadedType = null;
             taskAppDomain = null;
-            ITask taskInstanceInOtherAppDomain = null;
+            ITask? taskInstanceInOtherAppDomain = null;
 #endif
 
             try
@@ -67,16 +70,14 @@ namespace Microsoft.Build.Shared
 #if FEATURE_APPDOMAIN
                 if (separateAppDomain)
                 {
-                    if (!loadedType.Type.GetTypeInfo().IsMarshalByRef)
+                    if (!loadedType.IsMarshalByRef)
                     {
-                        logError
-                        (
+                        logError(
                             taskLocation,
                             taskLine,
                             taskColumn,
                             "TaskNotMarshalByRef",
-                            taskName
-                         );
+                            taskName);
 
                         return null;
                     }
@@ -110,13 +111,12 @@ namespace Microsoft.Build.Shared
 
                         if (loadedType.LoadedAssembly != null)
                         {
-                            taskAppDomain.Load(loadedType.LoadedAssembly.GetName());
+                            taskAppDomain.Load(loadedType.LoadedAssemblyName);
                         }
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
-                        // Hook up last minute dumping of any exceptions 
+                        // Hook up last minute dumping of any exceptions
                         taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
-#endif
+                        appDomainCreated?.Invoke(taskAppDomain);
                     }
                 }
                 else
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Shared
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
-                    return (ITask)Activator.CreateInstance(loadedType.Type);
+                    return (ITask?)Activator.CreateInstance(loadedType.Type);
                 }
 
 #if FEATURE_APPDOMAIN
@@ -140,15 +140,13 @@ namespace Microsoft.Build.Shared
                     // to fail here.
                     if (taskType != loadedType.Type)
                     {
-                        logError
-                        (
+                        logError(
                         taskLocation,
                         taskLine,
                         taskColumn,
                         "ConflictingTaskAssembly",
                         loadedType.Assembly.AssemblyFile,
-                        loadedType.Type.GetTypeInfo().Assembly.Location
-                        );
+                        loadedType.Type.GetTypeInfo().Assembly.Location);
 
                         taskInstanceInOtherAppDomain = null;
                     }
@@ -158,7 +156,7 @@ namespace Microsoft.Build.Shared
                     taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
                 }
 
-                return taskInstanceInOtherAppDomain;
+                return  taskInstanceInOtherAppDomain;
 #endif
             }
             finally
@@ -179,15 +177,15 @@ namespace Microsoft.Build.Shared
         /// This is a resolver to help created AppDomains when they are unable to load an assembly into their domain we will help
         /// them succeed by providing the already loaded one in the currentdomain so that they can derive AssemblyName info from it
         /// </summary>
-        internal static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
+        internal static Assembly? AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if ((s_resolverLoadedType?.LoadedAssembly != null))
+            if (args.Name.Equals(s_resolverLoadedType?.LoadedAssemblyName?.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                // Match the name being requested by the resolver with the FullName of the assembly we have loaded
-                if (args.Name.Equals(s_resolverLoadedType.LoadedAssembly.FullName, StringComparison.Ordinal))
+                if (s_resolverLoadedType == null || s_resolverLoadedType.Path == null)
                 {
-                    return s_resolverLoadedType.LoadedAssembly;
+                    return null;
                 }
+                return s_resolverLoadedType.LoadedAssembly ?? Assembly.Load(s_resolverLoadedType.Path);
             }
 
             return null;

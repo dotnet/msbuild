@@ -1,21 +1,25 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
+#if !NET
 using System.Text;
+#endif
 using Error = Microsoft.Build.Shared.ErrorUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
     /// <summary>
     /// This class contains only static methods, which are useful throughout many
-    /// of the MSBuild classes and don't really belong in any specific class.   
+    /// of the MSBuild classes and don't really belong in any specific class.
     /// </summary>
     internal static class ConversionUtilities
     {
         /// <summary>
-        /// Converts a string to a bool.  We consider "true/false", "on/off", and 
+        /// Converts a string to a bool.  We consider "true/false", "on/off", and
         /// "yes/no" to be valid boolean representations in the XML.
         /// </summary>
         /// <param name="parameterValue">The string to convert.</param>
@@ -55,6 +59,9 @@ namespace Microsoft.Build.Shared
         /// <returns>A string byte types formated as X2.</returns>
         internal static string ConvertByteArrayToHex(byte[] bytes)
         {
+#if NET
+            return Convert.ToHexString(bytes);
+#else
             var sb = new StringBuilder();
             foreach (var b in bytes)
             {
@@ -62,6 +69,7 @@ namespace Microsoft.Build.Shared
             }
 
             return sb.ToString();
+#endif
         }
 
         internal static bool TryConvertStringToBool(string parameterValue, out bool boolValue)
@@ -92,7 +100,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if the string represents a valid MSBuild boolean true value,
         /// such as "on", "!false", "yes"
         /// </summary>
-        private static bool ValidBooleanTrue(string parameterValue)
+        internal static bool ValidBooleanTrue(string parameterValue)
         {
             return String.Equals(parameterValue, "true", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "on", StringComparison.OrdinalIgnoreCase) ||
@@ -106,7 +114,7 @@ namespace Microsoft.Build.Shared
         /// Returns true if the string represents a valid MSBuild boolean false value,
         /// such as "!on" "off" "no" "!true"
         /// </summary>
-        private static bool ValidBooleanFalse(string parameterValue)
+        internal static bool ValidBooleanFalse(string parameterValue)
         {
             return String.Equals(parameterValue, "false", StringComparison.OrdinalIgnoreCase) ||
                    String.Equals(parameterValue, "off", StringComparison.OrdinalIgnoreCase) ||
@@ -129,7 +137,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static double ConvertHexToDouble(string number)
         {
-            return (double)Int32.Parse(number.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat);
+            return (double)Int32.Parse(
+#if NET
+                number.AsSpan(2),
+#else
+                number.Substring(2),
+#endif
+                NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat);
         }
 
         /// <summary>
@@ -170,9 +184,15 @@ namespace Microsoft.Build.Shared
         {
             bool canConvert = false;
             value = 0;
-            if (number.Length >= 3 && number[0] == '0' && (number[1] == 'x' || number[1] == 'X'))
+            if (number.Length >= 3 && number[0] is '0' && number[1] is 'x' or 'X')
             {
-                canConvert = Int32.TryParse(number.Substring(2), NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat, out value);
+                canConvert = Int32.TryParse(
+#if NET
+                    number.AsSpan(2),
+#else
+                    number.Substring(2),
+#endif
+                    NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture.NumberFormat, out value);
             }
             return canConvert;
         }

@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -99,7 +101,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public override bool Execute()
         {
-            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(LC));
+            Log.LogErrorWithCodeFromResources("TaskRequiresFrameworkFailure", nameof(LC));
             return false;
         }
 #endif

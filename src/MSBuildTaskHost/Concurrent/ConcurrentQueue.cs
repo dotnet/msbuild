@@ -1,7 +1,12 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.Concurrent
 {
@@ -46,7 +51,7 @@ namespace Microsoft.Build.Shared.Concurrent
         /// <summary>The current head segment.</summary>
         private volatile Segment _head;
 
-        static internal object VolatileReader(ref object o) => Thread.VolatileRead(ref o);
+        internal static object VolatileReader(ref object o) => Thread.VolatileRead(ref o);
         /// <summary>
         /// Initializes a new instance of the <see cref="ConcurrentQueue{T}"/> class.
         /// </summary>
@@ -256,7 +261,7 @@ namespace Microsoft.Build.Shared.Concurrent
         /// <summary>
         /// Provides a multi-producer, multi-consumer thread-safe bounded segment.  When the queue is full,
         /// enqueues fail and return false.  When the queue is empty, dequeues fail and return null.
-        /// These segments are linked together to form the unbounded <see cref="ConcurrentQueue{T}"/>. 
+        /// These segments are linked together to form the unbounded <see cref="ConcurrentQueue{T}"/>.
         /// </summary>
         [DebuggerDisplay("Capacity = {Capacity}")]
         private sealed class Segment
@@ -547,12 +552,16 @@ namespace Microsoft.Build.Shared.Concurrent
             }
         }
     }
+
     /// <summary>Padded head and tail indices, to avoid false sharing between producers and consumers.</summary>
     [DebuggerDisplay("Head = {Head}, Tail = {Tail}")]
     [StructLayout(LayoutKind.Explicit, Size = 192)] // padding before/between/after fields based on typical cache line size of 64
     internal struct PaddedHeadAndTail
     {
-        [FieldOffset(64)] public int Head;
-        [FieldOffset(128)] public int Tail;
+        [FieldOffset(64)]
+        public int Head;
+
+        [FieldOffset(128)]
+        public int Tail;
     }
 }

@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Logging
 {
@@ -50,11 +51,10 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(PacketProcessor);
                 transportSink.Consume(null, 0);
-            }
-           );
+            });
         }
         /// <summary>
-        /// Verify consume properly packages up the message event into a packet and send it to the 
+        /// Verify consume properly packages up the message event into a packet and send it to the
         /// transport delegate
         /// </summary>
         [Fact]
@@ -122,12 +122,10 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Make sure shutdown will correctly null out the send data delegate
         /// </summary>
-        [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/282")]
+        [WindowsFullFrameworkOnlyFact("https://github.com/dotnet/msbuild/issues/282")]
         public void TestShutDown()
         {
-            SendDataDelegate transportDelegate = PacketProcessor;
+            SendDataDelegate transportDelegate = new(PacketProcessor);
             var weakTransportDelegateReference = new WeakReference(transportDelegate);
             var transportSink = new BuildEventArgTransportSink(transportDelegate);
 
@@ -145,7 +143,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         /// <summary>
         /// Create a method which will be a fake method to process a packet.
-        /// This needs to be done because using an anonymous method does not work. 
+        /// This needs to be done because using an anonymous method does not work.
         /// Using an anonymous method does not work because when the delegate is created
         /// it seems that a field is created which creates a strong reference
         /// between the delegate and the class it was created in. This means the delegate is not

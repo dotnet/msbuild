@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
@@ -9,7 +11,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// <summary>
     /// The C# does not really provide a easy way to efficiently implement inheritance in cases like this
     /// for abstract classes or interface, when there is a hierarchy, it is not way to share the implementation.
-    /// Like if one have IFoo and IBar : IFoo (or as we do abstractFoo, abstractBar:abstractFoo) 
+    /// Like if one have IFoo and IBar : IFoo (or as we do abstractFoo, abstractBar:abstractFoo)
     /// we can provide implementation for IFoo, but we can not use that for implementations for IBar.
     /// Since no multiple inheritance or other suitable mechanism for code share across classes is supported by C#,
     /// Instead IBar implementation should fully implement both IFoo and IBar interfaces.
@@ -165,7 +167,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             var factoryRemote = xml.Linker.Export<ProjectElement, MockProjectRootElementLinkRemoter>(factory);
             var parentRemote = (MockProjectElementContainerLinkRemoter)xml.Linker.ExportElement(parent);
-            var result  = xml.ContainerProxy.DeepClone(factoryRemote, parentRemote);
+            var result = xml.ContainerProxy.DeepClone(factoryRemote, parentRemote);
 
             return (ProjectElementContainer)result.Import(xml.Linker);
         }

@@ -1,25 +1,26 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.Versioning;
-
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// File.GetAttributes delegate
+    /// File.GetAttributes delegate.
     /// </summary>
     /// <param name="path">The path get attributes for.</param>
     internal delegate FileAttributes GetAttributes(string path);
 
     /// <summary>
-    /// File SetAttributes delegate
+    /// File SetAttributes delegate.
     /// </summary>
     /// <param name="path">The path to set attributes for.</param>
     /// <param name="attributes">The actual file attributes.</param>
@@ -36,7 +37,7 @@ namespace Microsoft.Build.Tasks
     internal delegate void SetLastWriteTime(string path, DateTime timestamp);
 
     /// <summary>
-    /// GetDirectories delegate
+    /// GetDirectories delegate.
     /// </summary>
     /// <param name="path">The path to get directories for.</param>
     /// <param name="pattern">The pattern to search for.</param>
@@ -79,7 +80,7 @@ namespace Microsoft.Build.Tasks
     internal delegate string GetPathFromFusionName(string strongName);
 
     /// <summary>
-    /// Delegate. Given an assembly name, crack it open and retrieve the list of dependent 
+    /// Delegate. Given an assembly name, crack it open and retrieve the list of dependent
     /// assemblies and  the list of scatter files.
     /// </summary>
     /// <param name="path">Path to the assembly.</param>
@@ -87,14 +88,12 @@ namespace Microsoft.Build.Tasks
     /// <param name="dependencies">Receives the list of dependencies.</param>
     /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
     /// <param name="frameworkNameAttribute">The framework name</param>
-    internal delegate void GetAssemblyMetadata
-    (
+    internal delegate void GetAssemblyMetadata(
         string path,
         ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
         out AssemblyNameExtension[] dependencies,
         out string[] scatterFiles,
-        out FrameworkName frameworkNameAttribute
-    );
+        out FrameworkName frameworkNameAttribute);
 
     /// <summary>
     /// Delegate to take in a dll path and read the machine type from the PEHeader
@@ -107,7 +106,7 @@ namespace Microsoft.Build.Tasks
     internal delegate string GetAssemblyPathInGac(AssemblyNameExtension assemblyName, System.Reflection.ProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion);
 
     /// <summary>
-    /// Determines if a assembly is an winmd file 
+    /// Determines if a assembly is an winmd file
     /// </summary>
     internal delegate bool IsWinMDFile(string fullpath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd);
 

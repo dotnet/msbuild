@@ -1,16 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-
 using Xunit;
-using System;
-using System.Collections.Generic;
-using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -19,11 +20,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// </summary>
     public class ImportFromMSBuildExtensionsPathTests : IDisposable
     {
-        string toolsVersionToUse = null;
+        private string toolsVersionToUse = null;
 
         public ImportFromMSBuildExtensionsPathTests()
         {
-            toolsVersionToUse = new ProjectCollection().DefaultToolsVersion;
+            using var collection = new ProjectCollection();
+            toolsVersionToUse = collection.DefaultToolsVersion;
         }
 
         public void Dispose()
@@ -48,7 +50,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"), GetExtensionTargetsFileContent1());
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
-                var projColln = GetProjectCollection();
+                using var projColln = GetProjectCollection();
 
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", extnDir1, Path.Combine("tmp", "nonexistent")));
                 var logger = new MockLogger();
@@ -75,7 +77,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ConditionalImportFromExtensionsPathNotFound()
         {
             string extnTargetsFileContentWithCondition = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <PropertyGroup>
                         <PropertyFromExtn1>FooBar</PropertyFromExtn1>
                     </PropertyGroup>
@@ -92,7 +94,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] { extnDir1, Path.Combine("tmp", "nonexistent") },
                                                             null,
-                                                            (p, l) => {
+                                                            (p, l) =>
+                                                            {
                                                                 Assert.True(p.Build());
 
                                                                 l.AssertLogContains("Running FromExtn");
@@ -104,7 +107,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ImportFromExtensionsPathCircularImportError()
         {
             string extnTargetsFileContent1 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='FromExtn'>
                         <Message Text='Running FromExtn'/>
                     </Target>
@@ -113,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ";
 
             string extnTargetsFileContent2 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='FromExtn2'>
                         <Message Text='Running FromExtn'/>
                     </Target>
@@ -136,7 +139,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtensionPathFallbackIsCaseInsensitive()
         {
             string mainTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='Main'>
                         <Message Text='Running Main'/>
                     </Target>
@@ -145,7 +148,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>";
 
             string extnTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='FromExtn'>
                         <Message Text='Running {0}'/>
                     </Target>
@@ -173,7 +176,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ImportFromExtensionsPathWithWildCard()
         {
             string mainTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='Main'>
                         <Message Text='Running Main'/>
                     </Target>
@@ -182,7 +185,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>";
 
             string extnTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='{0}'>
                         <Message Text='Running {0}'/>
                     </Target>
@@ -216,7 +219,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ImportFromExtensionsPathWithWildCardAndSelfImport()
         {
             string mainTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='Main'>
                         <Message Text='Running Main'/>
                     </Target>
@@ -225,14 +228,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 </Project>";
 
             string extnTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='{0}'>
                         <Message Text='Running {0}'/>
                     </Target>
                 </Project>";
 
             string extnTargetsFileContent2 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Import Project='$(MSBuildExtensionsPath)\circularwildcardtest\*.proj'/>
                     <Target Name='{0}'>
                         <Message Text='Running {0}'/>
@@ -269,11 +272,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ImportFromExtensionsPathWithWildCardNothingFound()
         {
             string extnTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='FromExtn'>
                         <Message Text='Running FromExtn'/>
                     </Target>
-                    <Import Project='$(MSBuildExtensionsPath)\non-existant\*.proj'/>
+                    <Import Project='$(MSBuildExtensionsPath)\non-existent\*.proj'/>
                 </Project>
                 ";
 
@@ -287,7 +290,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ImportFromExtensionsPathInvalidFile()
         {
-            string extnTargetsFileContent = @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >";
+            string extnTargetsFileContent = @"<Project>";
 
             string extnDir1 = null;
             string mainProjectPath = null;
@@ -297,7 +300,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 extnDir1 = GetNewExtensionsPathAndCreateFile("extensions1", Path.Combine("foo", "extn.proj"), extnTargetsFileContent);
                 mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
-                var projColln = GetProjectCollection();
+                using var projColln = GetProjectCollection();
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", extnDir1,
                                                                                 Path.Combine("tmp", "nonexistent")));
                 var logger = new MockLogger();
@@ -323,7 +326,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ImportFromExtensionsPathSearchOrder()
         {
             string extnTargetsFileContent1 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <PropertyGroup>
                         <PropertyFromExtn1>FromFirstFile</PropertyFromExtn1>
                     </PropertyGroup>
@@ -335,7 +338,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ";
 
             string extnTargetsFileContent2 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <PropertyGroup>
                         <PropertyFromExtn1>FromSecondFile</PropertyFromExtn1>
                     </PropertyGroup>
@@ -355,7 +358,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] { extnDir2, Path.Combine("tmp", "nonexistent"), extnDir1 },
                                                             null,
-                                                            (p, l) => {
+                                                            (p, l) =>
+                                                            {
                                                                 Assert.True(p.Build());
 
                                                                 l.AssertLogContains("Running FromExtn");
@@ -367,7 +371,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ImportFromExtensionsPathSearchOrder2()
         {
             string extnTargetsFileContent1 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <PropertyGroup>
                         <PropertyFromExtn1>FromFirstFile</PropertyFromExtn1>
                     </PropertyGroup>
@@ -379,7 +383,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ";
 
             string extnTargetsFileContent2 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <PropertyGroup>
                         <PropertyFromExtn1>FromSecondFile</PropertyFromExtn1>
                     </PropertyGroup>
@@ -399,7 +403,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // MSBuildExtensionsPath* property value has highest priority for the lookups
             try
             {
-                var projColln = GetProjectCollection();
+                using var projColln = GetProjectCollection();
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader("MSBuildExtensionsPath", Path.Combine("tmp", "non-existent"), extnDir1));
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
@@ -446,7 +450,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ImportFromExtensionsPathAnd32And64()
         {
             string extnTargetsFileContentTemplate = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='FromExtn{0}' DependsOnTargets='{1}'>
                         <Message Text='Running FromExtn{0}'/>
                     </Target>
@@ -491,7 +495,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(String.Format(configFileContents, extnDir1, extnDir2, extnDir3));
 
                 var reader = GetStandardConfigurationReader();
-                var projColln = GetProjectCollection();
+                using var projColln = GetProjectCollection();
 
                 projColln.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -529,7 +533,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandExtensionsPathFallback()
         {
             string extnTargetsFileContentTemplate = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='FromExtn'>
                         <Message Text='Running FromExtn'/>
                     </Target>
@@ -568,7 +572,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
 
                 var reader = GetStandardConfigurationReader();
-                var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+                using var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -590,7 +594,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExpandExtensionsPathFallbackInErrorMessage()
         {
             string extnTargetsFileContentTemplate = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='FromExtn'>
                         <Message Text='Running FromExtn'/>
                     </Target>
@@ -629,7 +633,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
 
                 var reader = GetStandardConfigurationReader();
-                var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+                using var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -652,7 +656,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void FallbackImportWithIndirectReference()
         {
             string mainTargetsFileContent = @"
-               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+               <Project>
                    <PropertyGroup>
                        <VSToolsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v99</VSToolsPath>
                    </PropertyGroup>
@@ -661,7 +665,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                </Project>";
 
             string extnTargetsFileContentTemplate = @"
-               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+               <Project>
                    <Target Name='FromExtn'>
                        <Message Text='Running FromExtn'/>
                    </Target>
@@ -699,7 +703,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
 
                 var reader = GetStandardConfigurationReader();
-                var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+                using var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -721,13 +725,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void FallbackImportWithUndefinedProperty()
         {
             string mainTargetsFileContent = @"
-               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+               <Project>
                    <Import Project='$(UndefinedProperty)\file.props' Condition=""Exists('$(UndefinedProperty)\file.props')"" />
                    <Target Name='Main' DependsOnTargets='FromExtn' />
                </Project>";
 
             string extnTargetsFileContentTemplate = @"
-               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+               <Project>
                    <Target Name='FromExtn'>
                        <Message Text='Running FromExtn'/>
                    </Target>
@@ -764,7 +768,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
 
                 var reader = GetStandardConfigurationReader();
-                var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+                using var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -786,7 +790,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             // Import something from $(UndefinedProperty)
             string mainTargetsFileContent = @"
-               <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+               <Project>
                    <Import Project='$(UndefinedProperty)\filenotfound.props' />
                    <Target Name='Main' DependsOnTargets='FromExtn' />
                </Project>";
@@ -823,7 +827,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(configFileContents);
 
                 var reader = GetStandardConfigurationReader();
-                var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
+                using var projectCollection = GetProjectCollection(new Dictionary<string, string> { ["FallbackExpandDir1"] = extnDir1 });
 
                 projectCollection.ResetToolsetsForTests(reader);
                 var logger = new MockLogger();
@@ -839,8 +843,45 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
             }
         }
+        /// <summary>
+        /// Fall-back search path on a property that is not valid. https://github.com/dotnet/msbuild/issues/8762
+        /// </summary>
+        /// <param name="projectValue">imported project value expression</param>
+        [Theory]
+        [InlineData("")]
+        [InlineData("|")]
+        public void FallbackImportWithInvalidProjectValue(string projectValue)
+        {
+            string mainTargetsFileContent = $"""
+                <Project>
+                    <PropertyGroup>
+                    <VSToolsPath>{projectValue}</VSToolsPath>
+                </PropertyGroup>
+                <Import Project="$(VSToolsPath)"/>
+                </Project>
+                """;
 
-        void CreateAndBuildProjectForImportFromExtensionsPath(string extnPathPropertyName, Action<Project, MockLogger> action)
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            string mainProjectPath = testEnvironment.CreateTestProjectWithFiles("main.proj", mainTargetsFileContent).ProjectFile;
+            using var projectCollection = GetProjectCollection();
+            projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", "temp"));
+            var logger = new MockLogger();
+            projectCollection.RegisterLogger(logger);
+            Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+
+            if (string.IsNullOrEmpty(projectValue))
+            {
+                logger.AssertLogContains("MSB4102");
+            }
+            else
+            {
+#if NETFRAMEWORK
+                logger.AssertLogContains("MSB4102");
+#endif
+            }
+        }
+
+        private void CreateAndBuildProjectForImportFromExtensionsPath(string extnPathPropertyName, Action<Project, MockLogger> action)
         {
             string extnDir1 = null, extnDir2 = null, mainProjectPath = null;
             try
@@ -873,12 +914,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        void CreateAndBuildProjectForImportFromExtensionsPath(string mainProjectPath, string extnPathPropertyName, string[] extnDirs, Action<string[]> setExtensionsPath,
+        private void CreateAndBuildProjectForImportFromExtensionsPath(string mainProjectPath, string extnPathPropertyName, string[] extnDirs, Action<string[]> setExtensionsPath,
                 Action<Project, MockLogger> action)
         {
             try
             {
-                var projColln = GetProjectCollection();
+                using var projColln = GetProjectCollection();
 
                 projColln.ResetToolsetsForTests(WriteConfigFileAndGetReader(extnPathPropertyName, extnDirs));
                 var logger = new MockLogger();
@@ -953,7 +994,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return projColln;
         }
 
-        string GetNewExtensionsPathAndCreateFile(string extnDirName, string relativeFilePath, string fileContents)
+        private string GetNewExtensionsPathAndCreateFile(string extnDirName, string relativeFilePath, string fileContents)
         {
             var extnDir = Path.Combine(ObjectModelHelpers.TempProjectDir, extnDirName);
             Directory.CreateDirectory(Path.Combine(extnDir, Path.GetDirectoryName(relativeFilePath)));
@@ -962,10 +1003,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return extnDir;
         }
 
-        string GetMainTargetFileContent(string extensionsPathPropertyName = "MSBuildExtensionsPath")
+        private string GetMainTargetFileContent(string extensionsPathPropertyName = "MSBuildExtensionsPath")
         {
             string mainTargetsFileContent = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <Target Name='Main' DependsOnTargets='FromExtn'>
                         <Message Text='PropertyFromExtn1: $(PropertyFromExtn1)'/>
                     </Target>
@@ -976,10 +1017,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return String.Format(mainTargetsFileContent, extensionsPathPropertyName);
         }
 
-        string GetExtensionTargetsFileContent1(string extensionsPathPropertyName = "MSBuildExtensionsPath")
+        private string GetExtensionTargetsFileContent1(string extensionsPathPropertyName = "MSBuildExtensionsPath")
         {
             string extnTargetsFileContent1 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <PropertyGroup>
                         <PropertyFromExtn1>FooBar</PropertyFromExtn1>
                     </PropertyGroup>
@@ -994,10 +1035,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             return String.Format(extnTargetsFileContent1, extensionsPathPropertyName);
         }
 
-        string GetExtensionTargetsFileContent2(string extensionsPathPropertyName = "MSBuildExtensionsPath")
+        private string GetExtensionTargetsFileContent2(string extensionsPathPropertyName = "MSBuildExtensionsPath")
         {
             string extnTargetsFileContent2 = @"
-                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                <Project>
                     <PropertyGroup>
                         <PropertyFromExtn2>Abc</PropertyFromExtn2>
                     </PropertyGroup>
@@ -1013,7 +1054,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
+            using var xmlReader = new ProjectCollection();
+            return new ToolsetConfigurationReader(xmlReader.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
     }
 }

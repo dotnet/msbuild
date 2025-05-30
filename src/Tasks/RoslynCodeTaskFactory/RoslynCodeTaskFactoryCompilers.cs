@@ -1,18 +1,24 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using System;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     internal abstract class RoslynCodeTaskFactoryCompilerBase : ToolTaskExtension
     {
 #if RUNTIME_TYPE_NETCORE
-        private static readonly string DotnetCliPath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+        private readonly string _dotnetCliPath;
 #endif
 
         private readonly Lazy<string> _executablePath;
@@ -41,6 +47,26 @@ namespace Microsoft.Build.Tasks
             }, isThreadSafe: true);
 
             StandardOutputImportance = MessageImportance.Low.ToString("G");
+
+#if RUNTIME_TYPE_NETCORE
+            // Tools and MSBuild Tasks within the SDK that invoke binaries via the dotnet host are expected
+            // to honor the environment variable DOTNET_HOST_PATH to ensure a consistent experience.
+            _dotnetCliPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            if (string.IsNullOrEmpty(_dotnetCliPath))
+            {
+                // Fallback to get dotnet path from current process which might be dotnet executable.
+                _dotnetCliPath = EnvironmentUtilities.ProcessPath;
+            }
+
+            // If dotnet path is not found, rely on dotnet via the system's PATH
+            bool runningOnWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            string exeSuffix = runningOnWindows ? ".exe" : string.Empty;
+            var dotnetFileName = $"dotnet{exeSuffix}";
+            if (!_dotnetCliPath.EndsWith(dotnetFileName, StringComparison.OrdinalIgnoreCase))
+            {
+                _dotnetCliPath = "dotnet";
+            }
+#endif
         }
 
         public bool? Deterministic { get; set; }
@@ -97,7 +123,7 @@ namespace Microsoft.Build.Tasks
             }
 
 #if RUNTIME_TYPE_NETCORE
-            return DotnetCliPath;
+            return _dotnetCliPath;
 #else
             return _executablePath.Value;
 #endif

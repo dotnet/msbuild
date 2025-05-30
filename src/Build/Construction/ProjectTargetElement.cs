@@ -1,16 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTargetElement(XmlElementWithLocation xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -56,22 +56,22 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get an enumerator over any child item groups
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroups => GetChildrenOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get an enumerator over any child property groups
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => GetChildrenOfType<ProjectPropertyGroupElement>();
 
         /// <summary>
         /// Get an enumerator over any child tasks
         /// </summary>
-        public ICollection<ProjectTaskElement> Tasks => new ReadOnlyCollection<ProjectTaskElement>(Children.OfType<ProjectTaskElement>());
+        public ICollection<ProjectTaskElement> Tasks => GetChildrenOfType<ProjectTaskElement>();
 
         /// <summary>
         /// Get an enumerator over any child onerrors
         /// </summary>
-        public ICollection<ProjectOnErrorElement> OnErrors => new ReadOnlyCollection<ProjectOnErrorElement>(Children.OfType<ProjectOnErrorElement>());
+        public ICollection<ProjectOnErrorElement> OnErrors => GetChildrenOfType<ProjectOnErrorElement>();
 
         #endregion
 
@@ -86,14 +86,18 @@ namespace Microsoft.Build.Construction
                 if (Link != null) { return TargetLink.Name; }
 
                 // No thread-safety lock required here because many reader threads would set the same value to the field.
-                if (_name != null) return _name;
+                if (_name != null)
+                {
+                    return _name;
+                }
+
                 string unescapedValue = EscapingUtilities.UnescapeAll(GetAttributeValue(XMakeAttributes.name));
                 return _name = unescapedValue;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value, nameof(value));
+                ErrorUtilities.VerifyThrowArgumentLength(value);
                 if (Link != null)
                 {
                     TargetLink.Name = value;
@@ -102,7 +106,7 @@ namespace Microsoft.Build.Construction
 
                 string unescapedValue = EscapingUtilities.UnescapeAll(value);
 
-                int indexOfSpecialCharacter = unescapedValue.IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
+                int indexOfSpecialCharacter = unescapedValue.AsSpan().IndexOfAny(XMakeElements.InvalidTargetNameCharacters);
                 if (indexOfSpecialCharacter >= 0)
                 {
                     ErrorUtilities.ThrowArgument("OM_NameInvalid", unescapedValue, unescapedValue[indexOfSpecialCharacter]);
@@ -167,7 +171,7 @@ namespace Microsoft.Build.Construction
                 if (String.IsNullOrEmpty(value) && !BuildParameters.KeepDuplicateOutputs)
                 {
                     // In 4.0, by default we do NOT keep duplicate outputs unless they user has either set the attribute
-                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.                    
+                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.
                     value = "False";
                 }
 
@@ -263,19 +267,17 @@ namespace Microsoft.Build.Construction
                     return;
                 }
 
-                XmlAttributeWithLocation returnsAttribute = ProjectXmlUtilities.SetOrRemoveAttribute
-                    (
+                XmlAttributeWithLocation returnsAttribute = ProjectXmlUtilities.SetOrRemoveAttribute(
                         XmlElement,
                         XMakeAttributes.returns,
                         value,
-                        true /* only remove the element if the value is null -- setting to empty string is OK */
-                    );
+                        true); /* only remove the element if the value is null -- setting to empty string is OK */
 
-                // if this target's Returns attribute is non-null, then there is at least one target in the 
-                // parent project that has the returns attribute.  
-                // NOTE: As things are currently, if a project is created that has targets with Returns, but then 
-                // all of those targets are set to not have Returns anymore, the PRE will still claim that it 
-                // contains targets with the Returns attribute.  Do we care? 
+                // if this target's Returns attribute is non-null, then there is at least one target in the
+                // parent project that has the returns attribute.
+                // NOTE: As things are currently, if a project is created that has targets with Returns, but then
+                // all of those targets are set to not have Returns anymore, the PRE will still claim that it
+                // contains targets with the Returns attribute.  Do we care?
                 if (returnsAttribute != null)
                 {
                     ((ProjectRootElement)Parent).ContainsTargetsWithReturnsAttribute = true;
@@ -311,7 +313,7 @@ namespace Microsoft.Build.Construction
                 if ((location == null) && !BuildParameters.KeepDuplicateOutputs)
                 {
                     // In 4.0, by default we do NOT keep duplicate outputs unless they user has either set the attribute
-                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.                    
+                    // explicitly or overridden it globally with MSBUILDKEEPDUPLICATEOUTPUTS set to a non-empty value.
                     location = NameLocation;
                 }
 
@@ -376,7 +378,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectTaskElement AddTask(string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentLength(taskName);
 
             ProjectTaskElement task = ContainingProject.CreateTaskElement(taskName);
 

@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Collections
 {
@@ -32,8 +34,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal ReadOnlyConvertingDictionary(IDictionary<K, V> backing, Func<V, N> converter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(backing, nameof(backing));
-            ErrorUtilities.VerifyThrowArgumentNull(converter, nameof(converter));
+            ErrorUtilities.VerifyThrowArgumentNull(backing);
+            ErrorUtilities.VerifyThrowArgumentNull(converter);
 
             _backing = backing;
             _converter = converter;

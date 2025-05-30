@@ -1,12 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
 #else
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
@@ -19,7 +20,7 @@ using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 using System.Xml.Schema;
 using System.Runtime.Serialization;
-#if !CLR2COMPATIBILITY
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
 using Microsoft.Build.Shared.Debugging;
 #endif
 using Microsoft.Build.Framework;
@@ -32,12 +33,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
-        private static readonly string s_debugDumpPath;
-
-        static ExceptionHandling()
-        {
-            s_debugDumpPath = GetDebugDumpPath();
-        }
+        private static readonly string s_debugDumpPath = GetDebugDumpPath();
 
         /// <summary>
         /// Gets the location of the directory used for diagnostic log files.
@@ -46,24 +42,46 @@ namespace Microsoft.Build.Shared
         private static string GetDebugDumpPath()
         {
             string debugPath =
-// Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+
+                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net7.0)'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net472)'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                /* Unmerged change from project 'MSBuildTaskHost'
+                Before:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                After:
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
+                */
+                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
 #if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                        Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 #else
-                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_0)
-                    ? DebugUtils.DebugPath
-                    : Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+                DebugUtils.DebugPath;
 #endif
 
             return !string.IsNullOrEmpty(debugPath)
                     ? debugPath
-                    : Path.GetTempPath();
+                    : FileUtilities.TempFileDirectory;
         }
 
         /// <summary>
         /// The directory used for diagnostic log files.
         /// </summary>
         internal static string DebugDumpPath => s_debugDumpPath;
+
+        /// <summary>
+        /// The file used for diagnostic log files.
+        /// </summary>
+        internal static string DumpFilePath => s_dumpFileName;
 
 #if !BUILDINGAPPXTASKS
         /// <summary>
@@ -85,6 +103,9 @@ namespace Microsoft.Build.Shared
              || e is ThreadAbortException
              || e is ThreadInterruptedException
              || e is AccessViolationException
+#if !TASKHOST
+             || e is CriticalTaskException
+#endif
 #if !BUILDINGAPPXTASKS
              || e is InternalErrorException
 #endif
@@ -153,7 +174,9 @@ namespace Microsoft.Build.Shared
         internal static bool IsXmlException(Exception e)
         {
             return e is XmlException
-                || e is XmlSyntaxException
+#if FEATURE_SECURITY_PERMISSIONS
+                || e is System.Security.XmlSyntaxException
+#endif
                 || e is XmlSchemaException
                 || e is UriFormatException; // XmlTextReader for example uses this under the covers
         }
@@ -202,8 +225,7 @@ namespace Microsoft.Build.Shared
             if
             (
                 IsXmlException(e)
-                || !NotExpectedException(e)
-            )
+                || !NotExpectedException(e))
             {
                 return false;
             }
@@ -237,9 +259,7 @@ namespace Microsoft.Build.Shared
                 || e is TargetException                 // thrown when an attempt is made to invoke a non-static method on a null object.  This may occur because the caller does not
                                                         //     have access to the member, or because the target does not define the member, and so on.
                 || e is MissingFieldException           // thrown when code in a dependent assembly attempts to access a missing field in an assembly that was modified.
-                || !NotExpectedException(e)             // Reflection can throw IO exceptions if the assembly cannot be opened
-
-            )
+                || !NotExpectedException(e))             // Reflection can throw IO exceptions if the assembly cannot be opened
             {
                 return false;
             }
@@ -257,8 +277,7 @@ namespace Microsoft.Build.Shared
             if
             (
                 e is SerializationException ||
-                !NotExpectedReflectionException(e)
-            )
+                !NotExpectedReflectionException(e))
             {
                 return false;
             }
@@ -300,7 +319,6 @@ namespace Microsoft.Build.Shared
             return true;
         }
 
-#if FEATURE_APPDOMAIN_UNHANDLED_EXCEPTION
         /// <summary>
         /// Dump any unhandled exceptions to a file so they can be diagnosed
         /// </summary>
@@ -310,49 +328,55 @@ namespace Microsoft.Build.Shared
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
         }
-#endif
 
         /// <summary>
         /// Dump the exception information to a file
         /// </summary>
         internal static void DumpExceptionToFile(Exception ex)
         {
-            //  Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
-            //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
-            //  applied to a static method.
-            lock (typeof(ExceptionHandling))
+            try
             {
-                if (s_dumpFileName == null)
+                // Locking on a type is not recommended.  However, we are doing it here to be extra cautious about compatibility because
+                //  this method previously had a [MethodImpl(MethodImplOptions.Synchronized)] attribute, which does lock on the type when
+                //  applied to a static method.
+                lock (typeof(ExceptionHandling))
                 {
-                    Guid guid = Guid.NewGuid();
-
-                    // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
-                    // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
-                    if (!FileSystems.Default.DirectoryExists(DebugDumpPath))
+                    if (s_dumpFileName == null)
                     {
+                        Guid guid = Guid.NewGuid();
+
+                        // For some reason we get Watson buckets because GetTempPath gives us a folder here that doesn't exist.
+                        // Either because %TMP% is misdefined, or because they deleted the temp folder during the build.
                         // If this throws, no sense catching it, we can't log it now, and we're here
                         // because we're a child node with no console to log to, so die
                         Directory.CreateDirectory(DebugDumpPath);
-                    }
 
-                    var pid = Process.GetCurrentProcess().Id;
-                    // This naming pattern is assumed in ReadAnyExceptionFromFile
-                    s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
+                        var pid = EnvironmentUtilities.CurrentProcessId;
+                        // This naming pattern is assumed in ReadAnyExceptionFromFile
+                        s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
+
+                        using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
+                        {
+                            writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
+                            writer.WriteLine("=====================");
+                        }
+                    }
 
                     using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
                     {
-                        writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
-                        writer.WriteLine("=====================");
+                        // "G" format is, e.g., 6/15/2008 9:15:07 PM
+                        writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
+                        writer.WriteLine(ex.ToString());
+                        writer.WriteLine("===================");
                     }
                 }
+            }
 
-                using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
-                {
-                    // "G" format is, e.g., 6/15/2008 9:15:07 PM
-                    writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
-                    writer.WriteLine(ex.ToString());
-                    writer.WriteLine("===================");
-                }
+            // Some customers experience exceptions such as 'OutOfMemory' errors when msbuild attempts to log errors to a local file.
+            // This catch helps to prevent the application from crashing in this best-effort dump-diagnostics path,
+            // but doesn't prevent the overall crash from going to Watson.
+            catch
+            {
             }
         }
 
@@ -371,7 +395,7 @@ namespace Microsoft.Build.Shared
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
-                    builder.Append(":");
+                    builder.Append(':');
                     builder.Append(Environment.NewLine);
                     builder.Append(File.ReadAllText(file));
                     builder.Append(Environment.NewLine);

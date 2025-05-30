@@ -7,6 +7,8 @@ using System.Collections.Immutable;
 // provided by Linq. The immutable collections library includes ImmutableArrayExtensions
 // which is also in this namespace.
 
+#nullable disable
+
 namespace System.Linq
 {
     internal static class ImmutableCollectionsExtensions

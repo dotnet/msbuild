@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections;
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Collections
 {
@@ -20,16 +22,16 @@ namespace Microsoft.Build.Collections
     /// <typeparam name="K">Type of key</typeparam>
     /// <typeparam name="V">Type of value</typeparam>
     [DebuggerDisplay("#Keys={KeyCount} #Values={ValueCount}")]
-    internal class MultiDictionary<K, V>
+    internal class MultiDictionary<K, V> : IMultiDictionary<K, V>
         where K : class
         where V : class
     {
-        // The simplest implementation of MultiDictionary would use a Dictionary<K, List<V>>. 
+        // The simplest implementation of MultiDictionary would use a Dictionary<K, List<V>>.
         // However, a List<T> with one element is 44 bytes (empty, 24 bytes)
         // even though a single Object takes up only 12 bytes.
         // If most values are only one element, we can save space by storing Object
         // and using its implicit type field to discriminate.
-        // 
+        //
         // Experiments, using a large number of keys:
         //
         // Dictionary<string,List<object>>, each key with one item, 127 bytes/key
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Collections
         // MultiDictionary<string, object>, each key with 2 items, 139 bytes/key
         //
         // Savings for 10,000 objects with 1.01 per entry is 420Kb out of 1.2Mb
-        // If keys and values are already allocated (e.g., strings in use elsewhere) then this is 
+        // If keys and values are already allocated (e.g., strings in use elsewhere) then this is
         // the complete cost of the collection.
 
         /// <summary>
@@ -84,7 +86,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Enumerator over values that have the specified key.
         /// </summary>
-        internal IEnumerable<V> this[K key]
+        public IEnumerable<V> this[K key]
         {
             get
             {
@@ -243,7 +245,7 @@ namespace Microsoft.Build.Collections
                 }
                 else if (_entry is TT)
                 {
-                    var list = new List<TT> { (TT) _entry, value };
+                    var list = new List<TT> { (TT)_entry, value };
                     _entry = list;
                 }
                 else

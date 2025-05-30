@@ -1,8 +1,10 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Framework
 {
@@ -19,7 +21,7 @@ namespace Microsoft.Build.UnitTests.Framework
         public void DoNotCrashOnInvalidFormatExpression()
         {
             string content = @"
- <Project DefaultTargets=`t` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+ <Project DefaultTargets=`t` ToolsVersion=`msbuilddefaulttoolsversion`>
    <UsingTask
      TaskName=`Crash`
      TaskFactory=`CodeTaskFactory`

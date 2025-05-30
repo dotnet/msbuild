@@ -1,23 +1,24 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Logging;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests.BackEnd;
-using System.Threading;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Logging
 {
@@ -116,8 +117,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 IBuildComponent logServiceComponent = (IBuildComponent)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 logServiceComponent.InitializeComponent(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify an exception is thrown if in initialized is called after the service has been shutdown
@@ -129,8 +129,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 _initializedService.ShutdownComponent();
                 _initializedService.InitializeComponent(new MockHost());
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the correct exceptions are thrown if the loggers crash
@@ -190,8 +189,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 _initializedService.ShutdownComponent();
                 _initializedService.ShutdownComponent();
-            }
-           );
+            });
         }
         #endregion
 
@@ -205,8 +203,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.RegisterLogger(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when we try and register a logger
@@ -220,8 +217,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 _initializedService.ShutdownComponent();
                 RegularILogger regularILogger = new RegularILogger();
                 _initializedService.RegisterLogger(regularILogger);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify a logger exception when initializing a logger is rethrown
@@ -234,8 +230,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggerThrowException exceptionLogger = new LoggerThrowException(false, true, new LoggerException());
                 _initializedService.RegisterLogger(exceptionLogger);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify a general exception when initializing a logger is wrapped
@@ -248,8 +243,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggerThrowException exceptionLogger = new LoggerThrowException(false, true, new Exception());
                 _initializedService.RegisterLogger(exceptionLogger);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -262,8 +256,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggerThrowException exceptionLogger = new LoggerThrowException(false, true, new StackOverflowException());
                 _initializedService.RegisterLogger(exceptionLogger);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -325,8 +318,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.RegisterDistributedLogger(null, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when we try and register a distributed logger
@@ -345,8 +337,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
 #endif
                 _initializedService.RegisterDistributedLogger(null, description);
-            }
-           );
+            });
         }
         /// <summary>
         /// Register both a good central logger and a good forwarding logger
@@ -425,7 +416,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(2, regularILoggerB.BuildStartedCount);
             Assert.Equal(2, regularILoggerC.BuildStartedCount);
 
-            // Make sure if we call build started again we only get one other build started event.
+            // Make sure if we call build finished again we only get one other build finished event.
             _initializedService.LogBuildFinished(true);
             Assert.Equal(2, regularILoggerA.BuildFinishedCount);
             Assert.Equal(2, regularILoggerB.BuildFinishedCount);
@@ -510,8 +501,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.InitializeNodeLoggers(null, new EventSourceSink(), 3);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when an empty description collection is passed in
@@ -522,8 +512,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.InitializeNodeLoggers(new List<LoggerDescription>(), new EventSourceSink(), 3);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when we try and register a description and the component has already shutdown
@@ -543,8 +532,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 List<LoggerDescription> tempList = new List<LoggerDescription>();
                 tempList.Add(description);
                 _initializedService.InitializeNodeLoggers(tempList, new EventSourceSink(), 2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Register both a good central logger and a good forwarding logger
@@ -685,8 +673,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 loggingService.PacketReceived(1, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify when a non logging packet is received.
@@ -700,8 +687,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 NonLoggingPacket packet = new NonLoggingPacket();
                 loggingService.PacketReceived(1, packet);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify when a logging packet is received the build event is
@@ -797,6 +783,18 @@ namespace Microsoft.Build.UnitTests.Logging
             MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsErrors);
 
             logger.Errors.ShouldHaveSingleItem();
+        }
+
+        [Fact]
+        public void VerifyWarningsPromotedToErrorsAreCounted()
+        {
+            ILoggingService ls = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            ls.WarningsAsErrors = new HashSet<string>();
+            ls.WarningsAsErrors.Add("FOR123");
+            BuildWarningEventArgs warningArgs = new("abc", "FOR123", "", 0, 0, 0, 0, "warning message", "keyword", "sender");
+            warningArgs.BuildEventContext = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            ls.LogBuildEvent(warningArgs);
+            ls.HasBuildSubmissionLoggedErrors(1).ShouldBeTrue();
         }
 
         /// <summary>
@@ -1069,7 +1067,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void ImportanceReflectsUnknownLoggerVerbosity()
         {
             // Minimum message importance is Low (i.e. we're logging everything) even when all registered loggers have
-            // Normal verbosity if at least of one them is not on our whitelist.
+            // Normal verbosity if at least of one them is not on our allowlist.
             _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
             _initializedService.RegisterLogger(new MockLogger() { Verbosity = LoggerVerbosity.Normal });
             _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Normal));
@@ -1124,13 +1122,13 @@ namespace Microsoft.Build.UnitTests.Logging
             try
             {
                 _initializedService.ShutdownComponent();
-                Assert.True(false, "No Exceptions Generated");
+                Assert.Fail("No Exceptions Generated");
             }
             catch (Exception e)
             {
                 if (e.GetType() != expectedExceptionType)
                 {
-                    Assert.True(false, "Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
+                    Assert.Fail("Expected a " + expectedExceptionType + " but got a " + e.GetType() + " Stack:" + e.ToString());
                 }
             }
         }
@@ -1151,14 +1149,12 @@ namespace Microsoft.Build.UnitTests.Logging
                 eventsToForward = "BuildStartedEvent;BuildFinishedEvent;ProjectStartedEvent;ProjectFinishedEvent;TargetStartedEvent;TargetFinishedEvent;TaskStartedEvent;TaskFinishedEvent;ErrorEvent;WarningEvent;HighMessageEvent;NormalMessageEvent;LowMessageEvent;CustomEvent;CommandLine";
             }
 
-            LoggerDescription centralLoggerDescrption = new LoggerDescription
-                                                                             (
+            LoggerDescription centralLoggerDescrption = new LoggerDescription(
                                                                               loggerClassName,
                                                                               loggerAssemblyName,
                                                                               null /*Not needed as we are loading from current assembly*/,
                                                                               eventsToForward,
-                                                                              LoggerVerbosity.Diagnostic /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
-                                                                             );
+                                                                              LoggerVerbosity.Diagnostic); /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
             return centralLoggerDescrption;
         }
 
@@ -1504,7 +1500,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         ///  Create a non logging packet to test the packet handling code
         /// </summary>
-        internal class NonLoggingPacket : INodePacket
+        internal sealed class NonLoggingPacket : INodePacket
         {
             #region Members
 

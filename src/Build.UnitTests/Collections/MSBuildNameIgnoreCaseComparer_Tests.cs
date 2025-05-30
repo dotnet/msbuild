@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
@@ -55,7 +56,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Null 
+        /// Null
         /// </summary>
         [Fact]
         public void Null1()
@@ -64,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Null 
+        /// Null
         /// </summary>
         [Fact]
         public void Null2()
@@ -73,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Invalid start 
+        /// Invalid start
         /// </summary>
         [Fact]
         public void InvalidValue2()
@@ -81,11 +82,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 MSBuildNameIgnoreCaseComparer.Default.Equals("x", "y", -1, 0);
-            }
-           );
+            });
         }
         /// <summary>
-        /// Invalid small end 
+        /// Invalid small end
         /// </summary>
         [Fact]
         public void InvalidValue4()
@@ -93,11 +93,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 MSBuildNameIgnoreCaseComparer.Default.Equals("x", "y", 0, -1);
-            }
-           );
+            });
         }
         /// <summary>
-        /// Invalid large end 
+        /// Invalid large end
         /// </summary>
         [Fact]
         public void InvalidValue5()
@@ -105,8 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Throws<InternalErrorException>(() =>
             {
                 MSBuildNameIgnoreCaseComparer.Default.Equals("x", "y", 0, 2);
-            }
-           );
+            });
         }
         /// <summary>
         /// End past the end of other string
@@ -161,7 +159,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             Assert.True(0 == MSBuildNameIgnoreCaseComparer.Default.GetHashCode((string)null));
 
-            MSBuildNameIgnoreCaseComparer.Default.GetHashCode(""); // doesn't throw            
+            MSBuildNameIgnoreCaseComparer.Default.GetHashCode(""); // doesn't throw
             Assert.Equal(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("aBc"), MSBuildNameIgnoreCaseComparer.Default.GetHashCode("AbC"));
         }
 

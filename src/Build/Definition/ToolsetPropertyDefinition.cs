@@ -1,10 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
-
-using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using Microsoft.Build.Shared;
+using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -37,11 +38,11 @@ namespace Microsoft.Build.Evaluation
         /// <param name="source">The property source</param>
         public ToolsetPropertyDefinition(string name, string value, IElementLocation source)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(source, nameof(source));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(source);
 
             // value can be the empty string but not null
-            ErrorUtilities.VerifyThrowArgumentNull(value, nameof(value));
+            ErrorUtilities.VerifyThrowArgumentNull(value);
 
             _name = name;
             _value = value;
@@ -78,7 +79,7 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// A description of the location where the property was defined,
-        /// such as a registry key path or a path to a config file and 
+        /// such as a registry key path or a path to a config file and
         /// line number.
         /// </summary>
         public IElementLocation Source

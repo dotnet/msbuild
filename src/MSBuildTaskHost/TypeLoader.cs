@@ -1,11 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
 using System.Threading;
+using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -124,12 +127,12 @@ namespace Microsoft.Build.Shared
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
+        /// The unusued bool is to match the signature of the Shared copy of TypeLoader.
         /// </summary>
-        internal LoadedType Load
-        (
+        internal LoadedType Load(
             string typeName,
-            AssemblyLoadInfo assembly
-        )
+            AssemblyLoadInfo assembly,
+            bool _)
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
         }
@@ -140,11 +143,9 @@ namespace Microsoft.Build.Shared
         /// found will be returned.
         /// </summary>
         /// <returns>The loaded type, or null if the type was not found.</returns>
-        internal LoadedType ReflectionOnlyLoad
-        (
+        internal LoadedType ReflectionOnlyLoad(
             string typeName,
-            AssemblyLoadInfo assembly
-        )
+            AssemblyLoadInfo assembly)
         {
             return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly);
         }
@@ -156,7 +157,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private LoadedType GetLoadedType(Concurrent.ConcurrentDictionary<TypeFilter, Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
         {
-            // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
+            // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
             Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> loadInfoToType =
                 cache.GetOrAdd(_isDesiredType, (_) => new Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>());
@@ -171,14 +172,14 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Given a type filter and an asssemblyInfo object keep track of what types in a given assembly which match the typefilter.
         /// Also, use this information to determine if a given TypeName is in the assembly which is pointed to by the AssemblyLoadInfo object.
-        /// 
+        ///
         /// This type represents a combination of a type filter and an assemblyInfo object.
         /// </summary>
         private class AssemblyInfoToLoadedTypes
         {
             /// <summary>
             /// Lock to prevent two threads from using this object at the same time.
-            /// Since we fill up internal structures with what is in the assembly 
+            /// Since we fill up internal structures with what is in the assembly
             /// </summary>
             private readonly Object _lockObject = new Object();
 
@@ -220,7 +221,7 @@ namespace Microsoft.Build.Shared
             internal AssemblyInfoToLoadedTypes(TypeFilter typeFilter, AssemblyLoadInfo loadInfo)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
-                ErrorUtilities.VerifyThrowArgumentNull(loadInfo, nameof(loadInfo));
+                ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
 
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
@@ -233,7 +234,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal LoadedType GetLoadedTypeByTypeName(string typeName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeName, nameof(typeName));
+                ErrorUtilities.VerifyThrowArgumentNull(typeName);
 
                 // Only one thread should be doing operations on this instance of the object at a time.
 
@@ -282,11 +283,11 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly) : null;
+                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem)) : null;
             }
 
             /// <summary>
-            /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on 
+            /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on
             /// to find tasks, loggers, and task factories.
             /// </summary>
             private void ScanAssemblyForPublicTypes()

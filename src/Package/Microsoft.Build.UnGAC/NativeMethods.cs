@@ -1,13 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Runtime.InteropServices;
 
+#nullable disable
+
 namespace Microsoft.Build.UnGAC
 {
     // See: https://docs.microsoft.com/en-us/dotnet/framework/unmanaged-api/fusion/iassemblycache-interface
-    [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport]
+    [Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAssemblyCache
     {
         [PreserveSig]

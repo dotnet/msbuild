@@ -1,9 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.IO;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -77,8 +82,7 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of event sender</param>
-        public BuildErrorEventArgs
-            (
+        public BuildErrorEventArgs(
             string subcategory,
             string code,
             string file,
@@ -88,8 +92,7 @@ namespace Microsoft.Build.Framework
             int endColumnNumber,
             string message,
             string helpKeyword,
-            string senderName
-            )
+            string senderName)
             : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, DateTime.UtcNow)
         {
         }
@@ -108,8 +111,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of event sender</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        public BuildErrorEventArgs
-            (
+        public BuildErrorEventArgs(
             string subcategory,
             string code,
             string file,
@@ -120,8 +122,7 @@ namespace Microsoft.Build.Framework
             string message,
             string helpKeyword,
             string senderName,
-            DateTime eventTimestamp
-            )
+            DateTime eventTimestamp)
             : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, null, eventTimestamp, null)
         {
             // do nothing
@@ -143,8 +144,7 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of event sender</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">message arguments</param>
-        public BuildErrorEventArgs
-            (
+        public BuildErrorEventArgs(
             string subcategory,
             string code,
             string file,
@@ -152,12 +152,11 @@ namespace Microsoft.Build.Framework
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             DateTime eventTimestamp,
-            params object[] messageArgs
-            )
+            params object[] messageArgs)
             : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, null, eventTimestamp, messageArgs)
         {
             // do nothing
@@ -179,8 +178,7 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of event sender</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">message arguments</param>
-        public BuildErrorEventArgs
-            (
+        public BuildErrorEventArgs(
             string subcategory,
             string code,
             string file,
@@ -188,13 +186,12 @@ namespace Microsoft.Build.Framework
             int columnNumber,
             int endLineNumber,
             int endColumnNumber,
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
-            string helpLink,
+            [StringSyntax(StringSyntaxAttribute.Uri)] string helpLink,
             DateTime eventTimestamp,
-            params object[] messageArgs
-            )
+            params object[] messageArgs)
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
             this.subcategory = subcategory;
@@ -205,6 +202,28 @@ namespace Microsoft.Build.Framework
             this.endLineNumber = endLineNumber;
             this.endColumnNumber = endColumnNumber;
             this.helpLink = helpLink;
+        }
+
+        /// <summary>
+        /// This constructor allows event data without ends to be initialized.
+        /// </summary>
+        /// <param name="code">event code</param>
+        /// <param name="file">file associated with the event</param>
+        /// <param name="lineNumber">line number (0 if not applicable)</param>
+        /// <param name="columnNumber">column number (0 if not applicable)</param>
+        /// <param name="message">text message</param>
+        protected BuildErrorEventArgs(
+           string code,
+           string message,
+           string file,
+           int lineNumber,
+           int columnNumber)
+            : base(message, helpKeyword: null, senderName: null)
+        {
+            this.code = code;
+            this.file = file;
+            this.lineNumber = lineNumber;
+            this.columnNumber = columnNumber;
         }
 
         /// <summary>

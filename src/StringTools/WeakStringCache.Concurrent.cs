@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -14,6 +14,7 @@ namespace Microsoft.NET.StringTools
     internal sealed partial class WeakStringCache : IDisposable
     {
         private readonly ConcurrentDictionary<int, StringWeakHandle> _stringsByHashCode;
+        private int _count;
 
         public WeakStringCache()
         {
@@ -32,7 +33,7 @@ namespace Microsoft.NET.StringTools
         {
             int hashCode = internable.GetHashCode();
 
-            StringWeakHandle handle;
+            StringWeakHandle? handle;
             string? result;
 
             // Get the existing handle from the cache and lock it while we're dereferencing it to prevent a race with the Scavenge
@@ -62,11 +63,15 @@ namespace Microsoft.NET.StringTools
 
             handle = new StringWeakHandle();
             handle.SetString(result);
-            _stringsByHashCode.TryAdd(hashCode, handle);
+            if (_stringsByHashCode.TryAdd(hashCode, handle))
+            {
+                Interlocked.Increment(ref _count);
+            }
+
 
             // Remove unused handles if our heuristic indicates that it would be productive.
             int scavengeThreshold = _scavengeThreshold;
-            if (_stringsByHashCode.Count >= scavengeThreshold)
+            if (_count >= scavengeThreshold)
             {
                 // Before we start scavenging set _scavengeThreshold to a high value to effectively lock other threads from
                 // running Scavenge at the same time.
@@ -81,6 +86,12 @@ namespace Microsoft.NET.StringTools
                     {
                         // And do this again when the number of handles reaches double the current after-scavenge number.
                         _scavengeThreshold = _stringsByHashCode.Count * 2;
+
+                        // This count is not exact, since there can be some Interlocked.Increment(ref _count);
+                        // calls happening due to this not being behind a lock.
+                        // e.g. code checks if (_stringsByHashCode.TryAdd(hashCode, handle)), we set the _count here and the code increments
+                        // however since this is just a threshold to scavenge, it should be fine to be off by few even if that happens.
+                        _count = _stringsByHashCode.Count;
                     }
                 }
             }
@@ -98,7 +109,7 @@ namespace Microsoft.NET.StringTools
             foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
             {
                 // We can safely dereference entry.Value as the caller guarantees that Scavenge runs only on one thread.
-                if (!entry.Value.IsUsed && _stringsByHashCode.TryRemove(entry.Key, out StringWeakHandle removedHandle))
+                if (!entry.Value.IsUsed && _stringsByHashCode.TryRemove(entry.Key, out StringWeakHandle? removedHandle))
                 {
                     lock (removedHandle)
                     {

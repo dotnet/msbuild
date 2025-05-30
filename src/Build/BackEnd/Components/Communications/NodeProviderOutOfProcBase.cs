@@ -1,34 +1,29 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-#if FEATURE_PIPE_SECURITY
+using Microsoft.Build.BackEnd.Logging;
+
+#if NETFRAMEWORK
+using Microsoft.Build.Eventing;
 using System.Security.Principal;
 #endif
 
-#if FEATURE_APM
-using Microsoft.Build.Eventing;
-#endif
-using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 
-using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
-using Task = System.Threading.Tasks.Task;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -58,6 +53,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
 
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+        private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
+#endif
         /// <summary>
         /// The build component host.
         /// </summary>
@@ -65,8 +63,15 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Keeps track of the processes we've already checked for nodes so we don't check them again.
+        /// We decided to use ConcurrentDictionary of(string, byte) as common implementation of ConcurrentHashSet.
         /// </summary>
-        private HashSet<string> _processesToIgnore = new HashSet<string>();
+        private readonly ConcurrentDictionary<string, byte /*void*/> _processesToIgnore = new();
+
+        /// <summary>
+        /// Delegate used to tell the node provider that a context has been created.
+        /// </summary>
+        /// <param name="context">The created node context.</param>
+        internal delegate void NodeContextCreatedDelegate(NodeContext context);
 
         /// <summary>
         /// Delegate used to tell the node provider that a context has terminated.
@@ -90,7 +95,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
             context.SendData(packet);
         }
 
@@ -106,7 +111,7 @@ namespace Microsoft.Build.BackEnd
 
             // We wait for child nodes to exit to avoid them changing the terminal
             // after this process terminates.
-            bool waitForExit =  !enableReuse &&
+            bool waitForExit = !enableReuse &&
                                 !Console.IsInputRedirected &&
                                 Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
 
@@ -141,13 +146,13 @@ namespace Microsoft.Build.BackEnd
             // INodePacketFactory
             INodePacketFactory factory = new NodePacketFactory();
 
-            List<Process> nodeProcesses = GetPossibleRunningNodes().nodeProcesses;
+            List<Process> nodeProcesses = GetPossibleRunningNodes().nodeProcesses.ToList();
 
             // Find proper MSBuildTaskHost executable name
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
 
             // Search for all instances of msbuildtaskhost process and add them to the process list
-            nodeProcesses.AddRange(new List<Process>(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName))));
+            nodeProcesses.AddRange(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName)));
 
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
@@ -176,10 +181,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finds or creates a child process which can act as a node.
+        /// Finds or creates a child processes which can act as a node.
         /// </summary>
-        /// <returns>The pipe stream representing the node.</returns>
-        protected NodeContext GetNode(string msbuildLocation, string commandLineArgs, int nodeId, INodePacketFactory factory, Handshake hostHandshake, NodeContextTerminateDelegate terminateNode)
+        protected IList<NodeContext> GetNodes(string msbuildLocation,
+            string commandLineArgs,
+            int nextNodeId,
+            INodePacketFactory factory,
+            Handshake hostHandshake,
+            NodeContextCreatedDelegate createNode,
+            NodeContextTerminateDelegate terminateNode,
+            int numberOfNodesToCreate)
         {
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
@@ -204,94 +215,174 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
+            // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
+            //    trying to connect to them and reuse them. When queue is empty, no process to reuse left
+            //    new node process will be started.
+            string expectedProcessName = null;
+            ConcurrentQueue<Process> possibleRunningNodes = null;
 #if FEATURE_NODE_REUSE
             // Try to connect to idle nodes if node reuse is enabled.
             if (_componentHost.BuildParameters.EnableNodeReuse)
             {
-                (string expectedProcessName, List<Process> processes) runningNodesTuple = GetPossibleRunningNodes(msbuildLocation);
+                IList<Process> possibleRunningNodesList;
+                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation);
+                possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
 
-                CommunicationsUtilities.Trace("Attempting to connect to each existing {1} process in turn to establish node {0}...", nodeId, runningNodesTuple.expectedProcessName);
-                foreach (Process nodeProcess in runningNodesTuple.processes)
+                if (possibleRunningNodesList.Count > 0)
                 {
-                    if (nodeProcess.Id == Process.GetCurrentProcess().Id)
+                    CommunicationsUtilities.Trace("Attempting to connect to {1} existing processes '{0}'...", expectedProcessName, possibleRunningNodesList.Count);
+                }
+            }
+#endif
+            ConcurrentQueue<NodeContext> nodeContexts = new();
+            ConcurrentQueue<Exception> exceptions = new();
+            int currentProcessId = EnvironmentUtilities.CurrentProcessId;
+            Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, (nodeId) =>
+            {
+                try
+                {
+                    if (!TryReuseAnyFromPossibleRunningNodes(currentProcessId, nodeId) && !StartNewNode(nodeId))
+                    {
+                        // We were unable to reuse or launch a node.
+                        CommunicationsUtilities.Trace("FAILED TO CONNECT TO A CHILD NODE");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // It will be rethrown as aggregate exception
+                    exceptions.Enqueue(ex);
+                }
+            });
+            if (!exceptions.IsEmpty)
+            {
+                ErrorUtilities.ThrowInternalError("Cannot acquire required number of nodes.", new AggregateException(exceptions.ToArray()));
+            }
+
+            return nodeContexts.ToList();
+
+            bool TryReuseAnyFromPossibleRunningNodes(int currentProcessId, int nodeId)
+            {
+                while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
+                {
+                    CommunicationsUtilities.Trace("Trying to connect to existing process {2} with id {1} to establish node {0}...", nodeId, nodeToReuse.Id, nodeToReuse.ProcessName);
+                    if (nodeToReuse.Id == currentProcessId)
                     {
                         continue;
                     }
 
                     // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, nodeProcess.Id);
-                    if (_processesToIgnore.Contains(nodeLookupKey))
+                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, nodeToReuse.Id);
+                    if (_processesToIgnore.ContainsKey(nodeLookupKey))
                     {
                         continue;
                     }
 
                     // We don't need to check this again
-                    _processesToIgnore.Add(nodeLookupKey);
+                    _processesToIgnore.TryAdd(nodeLookupKey, default);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeProcess.Id, 0 /* poll, don't wait for connections */, hostHandshake);
+                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, hostHandshake);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
-                        CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeProcess.Id);
-                        return new NodeContext(nodeId, nodeProcess, nodeStream, factory, terminateNode);
+                        CommunicationsUtilities.Trace("Successfully connected to existed node {0} which is PID {1}", nodeId, nodeToReuse.Id);
+                        string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuse.Id);
+                        _componentHost.LoggingService.LogBuildEvent(new BuildMessageEventArgs(msg, null, null, MessageImportance.Low)
+                        {
+                            BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
+                        });
+
+                        CreateNodeContext(nodeId, nodeToReuse, nodeStream);
+                        return true;
                     }
                 }
-            }
-#endif
 
-            // None of the processes we tried to connect to allowed a connection, so create a new one.
-            // We try this in a loop because it is possible that there is another MSBuild multiproc
-            // host process running somewhere which is also trying to create nodes right now.  It might
-            // find our newly created node and connect to it before we get a chance.
-            CommunicationsUtilities.Trace("Could not connect to existing process, now creating a process...");
-            int retries = NodeCreationRetries;
-            while (retries-- > 0)
+                return false;
+            }
+
+            // Create a new node process.
+            bool StartNewNode(int nodeId)
             {
-#if FEATURE_NET35_TASKHOST
-                // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
-                // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
-                // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
-                // nodes because we should never be able to connect in this case.
-                string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
-                if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
+                CommunicationsUtilities.Trace("Could not connect to existing process, now creating a process...");
+
+                // We try this in a loop because it is possible that there is another MSBuild multiproc
+                // host process running somewhere which is also trying to create nodes right now.  It might
+                // find our newly created node and connect to it before we get a chance.
+                int retries = NodeCreationRetries;
+                while (retries-- > 0)
                 {
-                    if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
+#if FEATURE_NET35_TASKHOST
+                    // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
+                    // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
+                    // It's also a waste of time when we attempt several times to launch multiple MSBuildTaskHost.exe (CLR2 TaskHost)
+                    // nodes because we should never be able to connect in this case.
+                    string taskHostNameForClr2TaskHost = Path.GetFileNameWithoutExtension(NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost);
+                    if (Path.GetFileNameWithoutExtension(msbuildLocation).Equals(taskHostNameForClr2TaskHost, StringComparison.OrdinalIgnoreCase))
                     {
-                        CommunicationsUtilities.Trace
-                            (
+                        if (FrameworkLocationHelper.GetPathToDotNetFrameworkV35(DotNetFrameworkArchitecture.Current) == null)
+                        {
+                            CommunicationsUtilities.Trace(
                                 "Failed to launch node from {0}. The required .NET Framework v3.5 is not installed or enabled. CommandLine: {1}",
                                 msbuildLocation,
-                                commandLineArgs
-                            );
+                                commandLineArgs);
 
-                        string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
-                        throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
+                            string nodeFailedToLaunchError = ResourceUtilities.GetResourceString("TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled");
+                            throw new NodeFailedToLaunchException(null, nodeFailedToLaunchError);
+                        }
+                    }
+#endif
+                    // Create the node process
+                    INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
+                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
+                    _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
+
+                    // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
+                    // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
+                    // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
+
+                    // Now try to connect to it.
+                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake);
+                    if (nodeStream != null)
+                    {
+                        // Connection successful, use this node.
+                        CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
+
+                        CreateNodeContext(nodeId, msbuildProcess, nodeStream);
+                        return true;
+                    }
+
+                    if (msbuildProcess.HasExited)
+                    {
+                        if (Traits.Instance.DebugNodeCommunication)
+                        {
+                            try
+                            {
+                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup", msbuildProcess.Id, msbuildProcess.ExitCode);
+                            }
+                            catch (InvalidOperationException)
+                            {
+                                // This case is common on Windows where we called CreateProcess and the Process object
+                                // can't get the exit code.
+                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup", msbuildProcess.Id);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node", msbuildProcess.Id);
                     }
                 }
-#endif
 
-                // Create the node process
-                Process msbuildProcess = LaunchNode(msbuildLocation, commandLineArgs);
-                _processesToIgnore.Add(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id));
-
-                // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
-                // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
-                // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
-
-                // Now try to connect to it.
-                Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake);
-                if (nodeStream != null)
-                {
-                    // Connection successful, use this node.
-                    CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
-                    return new NodeContext(nodeId, msbuildProcess, nodeStream, factory, terminateNode);
-                }
+                return false;
             }
 
-            // We were unable to launch a node.
-            CommunicationsUtilities.Trace("FAILED TO CONNECT TO A CHILD NODE");
-            return null;
+            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream)
+            {
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode);
+                nodeContexts.Enqueue(nodeContext);
+                createNode(nodeContext);
+            }
         }
 
         /// <summary>
@@ -300,23 +391,21 @@ namespace Microsoft.Build.BackEnd
         /// <param name="msbuildLocation"></param>
         /// <returns>
         /// Item 1 is the name of the process being searched for.
-        /// Item 2 is the list of processes themselves.
+        /// Item 2 is the ConcurrentQueue of ordered processes themselves.
         /// </returns>
-        private (string expectedProcessName, List<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
+        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
         {
             if (String.IsNullOrEmpty(msbuildLocation))
             {
                 msbuildLocation = "MSBuild.exe";
             }
 
-            var expectedProcessName = Path.GetFileNameWithoutExtension(GetCurrentHost() ?? msbuildLocation);
+            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
 
-            List<Process> nodeProcesses = new List<Process>(Process.GetProcessesByName(expectedProcessName));
+            var processes = Process.GetProcessesByName(expectedProcessName);
+            Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
 
-            // Trivial sort to try to prefer most recently used nodes
-            nodeProcesses.Sort((left, right) => left.Id - right.Id);
-
-            return (expectedProcessName, nodeProcesses);
+            return (expectedProcessName, processes);
         }
 
         /// <summary>
@@ -325,15 +414,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
         {
-            return hostHandshake.ToString() + "|" + nodeProcessId.ToString(CultureInfo.InvariantCulture);
+#if NET
+            return string.Create(CultureInfo.InvariantCulture, $"{hostHandshake}|{nodeProcessId}");
+#else
+            return $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
+#endif
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-        //  This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
+        // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
-        private void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
+        private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+            SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
 #if FEATURE_PIPE_SECURITY
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
 #else
@@ -355,51 +448,24 @@ namespace Microsoft.Build.BackEnd
         private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
         {
             // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPipeNameOrPath(nodeProcessId);
+            string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
-            NamedPipeClientStream nodeStream = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.Asynchronous
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            NamedPipeClientStream nodeStream = new NamedPipeClientStream(
+                serverName: ".",
+                pipeName,
+                PipeDirection.InOut,
+                PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                                                                         | PipeOptions.CurrentUserOnly
+                | PipeOptions.CurrentUserOnly
 #endif
-                                                                         );
+            );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             CommunicationsUtilities.Trace("Attempting connect to PID {0} with pipe {1} with timeout {2} ms", nodeProcessId, pipeName, timeout);
 
             try
             {
-                nodeStream.Connect(timeout);
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                if (NativeMethodsShared.IsWindows && !NativeMethodsShared.IsMono)
-                {
-                    // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
-                    // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
-                    // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
-                    // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
-                    // remote node could set the owner to something else would also let it change owners on other objects, so
-                    // this would be a security flaw upstream of us.
-                    ValidateRemotePipeSecurityOnWindows(nodeStream);
-                }
-#endif
-
-                int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
-                for (int i = 0; i < handshakeComponents.Length; i++)
-                {
-                    CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                    nodeStream.WriteIntForHandshake(handshakeComponents[i]);
-                }
-
-                // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
-                nodeStream.WriteEndOfHandshakeSignal();
-
-                CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
-
-#if NETCOREAPP2_1_OR_GREATER || MONO
-                nodeStream.ReadEndOfHandshakeSignal(true, timeout);
-#else
-                nodeStream.ReadEndOfHandshakeSignal(true);
-#endif
-                // We got a connection.
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
                 return nodeStream;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -419,196 +485,47 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
-        private Process LaunchNode(string msbuildLocation, string commandLineArgs)
+        /// <remarks>
+        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
+        /// </remarks>
+        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
         {
-            // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
+            nodeStream.Connect(timeout);
 
-            if (!FileSystems.Default.FileExists(msbuildLocation))
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+            if (NativeMethodsShared.IsWindows)
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
-            }
-
-            // Repeat the executable name as the first token of the command line because the command line
-            // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
-
-            BackendNativeMethods.STARTUP_INFO startInfo = new();
-            startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
-
-            // Null out the process handles so that the parent process does not wait for the child process
-            // to exit before it can exit.
-            uint creationFlags = 0;
-            if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-            {
-                creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
-            }
-
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
-            {
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    startInfo.hStdError = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
-                    startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-                    creationFlags |= BackendNativeMethods.CREATENOWINDOW;
-                }
-            }
-            else
-            {
-                creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
-            }
-
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
-
-            string exeName = msbuildLocation;
-
-#if RUNTIME_TYPE_NETCORE || MONO
-            // Mono automagically uses the current mono, to execute a managed assembly
-            if (!NativeMethodsShared.IsMono)
-            {
-                // Run the child process with the same host as the currently-running process.
-                exeName = GetCurrentHost();
+                // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
+                // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
+                // us, potentially causing us to execute builds that do harmful or unexpected things.  The pipe owner can
+                // only be set to the user's own SID by a normal, unprivileged process.  The conditions where a faked up
+                // remote node could set the owner to something else would also let it change owners on other objects, so
+                // this would be a security flaw upstream of us.
+                ValidateRemotePipeSecurityOnWindows(nodeStream);
             }
 #endif
 
-            if (!NativeMethodsShared.IsWindows)
+            int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+            for (int i = 0; i < handshakeComponents.Length; i++)
             {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = exeName;
-                processStartInfo.Arguments = commandLineArgs;
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    processStartInfo.RedirectStandardInput = true;
-                    processStartInfo.RedirectStandardOutput = true;
-                    processStartInfo.RedirectStandardError = true;
-                    processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
-                }
-                processStartInfo.UseShellExecute = false;
-
-                Process process;
-                try
-                {
-                    process = Process.Start(processStartInfo);
-                }
-                catch (Exception ex)
-                {
-                    CommunicationsUtilities.Trace
-                       (
-                           "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                           msbuildLocation,
-                           commandLineArgs,
-                           ex.ToString()
-                       );
-
-                    throw new NodeFailedToLaunchException(ex);
-                }
-
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
-                return process;
-            }
-            else
-            {
-#if RUNTIME_TYPE_NETCORE
-                // Repeat the executable name in the args to suit CreateProcess
-                commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
-#endif
-
-                BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
-                processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-                threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-
-                bool result = BackendNativeMethods.CreateProcess
-                    (
-                        exeName,
-                        commandLineArgs,
-                        ref processSecurityAttributes,
-                        ref threadSecurityAttributes,
-                        false,
-                        creationFlags,
-                        BackendNativeMethods.NullPtr,
-                        null,
-                        ref startInfo,
-                        out processInfo
-                    );
-
-                if (!result)
-                {
-                    // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
-                    System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
-
-                    CommunicationsUtilities.Trace
-                        (
-                            "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                            msbuildLocation,
-                            e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                            e.Message,
-                            commandLineArgs
-                        );
-
-                    throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
-                }
-
-                int childProcessId = processInfo.dwProcessId;
-
-                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
-                {
-                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
-                }
-
-                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
-                {
-                    NativeMethodsShared.CloseHandle(processInfo.hThread);
-                }
-
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
-                return Process.GetProcessById(childProcessId);
-            }
-        }
-
-#if RUNTIME_TYPE_NETCORE || MONO
-        private static string CurrentHost;
-#endif
-
-        /// <summary>
-        /// Identify the .NET host of the current process.
-        /// </summary>
-        /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
-        private static string GetCurrentHost()
-        {
-#if RUNTIME_TYPE_NETCORE || MONO
-            if (CurrentHost == null)
-            {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
-                if (File.Exists(dotnetExe))
-                {
-                    CurrentHost = dotnetExe;
-                }
-                else
-                {
-                    using (Process currentProcess = Process.GetCurrentProcess())
-                    {
-                        CurrentHost = currentProcess.MainModule.FileName;
-                    }
-                }
+                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
+                nodeStream.WriteIntForHandshake(handshakeComponents[i]);
             }
 
-            return CurrentHost;
+            // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
+            nodeStream.WriteEndOfHandshakeSignal();
+
+            CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
+
+#if NETCOREAPP2_1_OR_GREATER
+            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
 #else
-            return null;
+            nodeStream.ReadEndOfHandshakeSignal(true);
 #endif
+            // We got a connection.
+            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
         }
 
         /// <summary>
@@ -616,7 +533,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal class NodeContext
         {
-            enum ExitPacketState
+            private enum ExitPacketState
             {
                 None,
                 ExitPacketQueued,
@@ -642,6 +559,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private readonly Process _process;
 
+            internal Process Process { get { return _process; } }
+
             /// <summary>
             /// An array used to store the header byte for each packet when read.
             /// </summary>
@@ -662,7 +581,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// A queue used for enqueuing packets to write to the stream asynchronously.
             /// </summary>
-            private BlockingCollection<INodePacket> _packetWriteQueue = new BlockingCollection<INodePacket>();
+            private ConcurrentQueue<INodePacket> _packetWriteQueue = new ConcurrentQueue<INodePacket>();
 
             /// <summary>
             /// A task representing the last packet write, so we can chain packet writes one after another.
@@ -684,7 +603,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Per node read buffers
             /// </summary>
-            private SharedReadBuffer _sharedReadBuffer;
+            private BinaryReaderFactory _binaryReaderFactory;
 
             /// <summary>
             /// Constructor.
@@ -702,8 +621,13 @@ namespace Microsoft.Build.BackEnd
                 _readBufferMemoryStream = new MemoryStream();
                 _writeBufferMemoryStream = new MemoryStream();
                 _terminateDelegate = terminateDelegate;
-                _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
+                _binaryReaderFactory = InterningBinaryReader.CreateSharedBuffer();
             }
+
+            /// <summary>
+            /// Id of node.
+            /// </summary>
+            public int NodeId => _nodeId;
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
@@ -792,7 +716,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _exitPacketState = ExitPacketState.ExitPacketQueued;
                 }
-                _packetWriteQueue.Add(packet);
+                _packetWriteQueue.Enqueue(packet);
                 DrainPacketQueue();
             }
 
@@ -814,64 +738,62 @@ namespace Microsoft.Build.BackEnd
                 {
                     // average latency between the moment this runs and when the delegate starts
                     // running is about 100-200 microseconds (unless there's thread pool saturation)
-                    _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(_ =>
+                    _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(
+                        SendDataCoreAsync,
+                        this,
+                        TaskScheduler.Default).Unwrap();
+
+                    static async Task SendDataCoreAsync(Task _, object state)
                     {
-                        while (_packetWriteQueue.TryTake(out var packet))
+                        NodeContext context = (NodeContext)state;
+                        while (context._packetWriteQueue.TryDequeue(out var packet))
                         {
-                            SendDataCore(packet);
+                            MemoryStream writeStream = context._writeBufferMemoryStream;
+
+                            // clear the buffer but keep the underlying capacity to avoid reallocations
+                            writeStream.SetLength(0);
+
+                            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                            try
+                            {
+                                writeStream.WriteByte((byte)packet.Type);
+
+                                // Pad for the packet length
+                                WriteInt32(writeStream, 0);
+                                packet.Translate(writeTranslator);
+
+                                int writeStreamLength = (int)writeStream.Position;
+
+                                // Now plug in the real packet length
+                                writeStream.Position = 1;
+                                WriteInt32(writeStream, writeStreamLength - 5);
+
+                                byte[] writeStreamBuffer = writeStream.GetBuffer();
+
+                                for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
+                                {
+                                    int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                                    await context._serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                                }
+
+                                if (IsExitPacket(packet))
+                                {
+                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                }
+                            }
+                            catch (IOException e)
+                            {
+                                // Do nothing here because any exception will be caught by the async read handler
+                                CommunicationsUtilities.Trace(context._nodeId, "EXCEPTION in SendData: {0}", e);
+                            }
+                            catch (ObjectDisposedException) // This happens if a child dies unexpectedly
+                            {
+                                // Do nothing here because any exception will be caught by the async read handler
+                            }
                         }
-                    }, TaskScheduler.Default);
-                }
-            }
-
-            /// <summary>
-            /// Actually writes and sends the packet. This can't be called in parallel
-            /// because it reuses the _writeBufferMemoryStream, and this is why we use
-            /// the _packetWriteDrainTask to serially chain invocations one after another.
-            /// </summary>
-            /// <param name="packet">The packet to send.</param>
-            private void SendDataCore(INodePacket packet)
-            {
-                MemoryStream writeStream = _writeBufferMemoryStream;
-
-                // clear the buffer but keep the underlying capacity to avoid reallocations
-                writeStream.SetLength(0);
-
-                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
-                try
-                {
-                    writeStream.WriteByte((byte)packet.Type);
-
-                    // Pad for the packet length
-                    WriteInt32(writeStream, 0);
-                    packet.Translate(writeTranslator);
-
-                    int writeStreamLength = (int)writeStream.Position;
-
-                    // Now plug in the real packet length
-                    writeStream.Position = 1;
-                    WriteInt32(writeStream, writeStreamLength - 5);
-
-                    byte[] writeStreamBuffer = writeStream.GetBuffer();
-
-                    for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
-                    {
-                        int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
-                        _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                     }
-                    if (IsExitPacket(packet))
-                    {
-                        _exitPacketState = ExitPacketState.ExitPacketSent;
-                    }
-                }
-                catch (IOException e)
-                {
-                    // Do nothing here because any exception will be caught by the async read handler
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in SendData: {0}", e);
-                }
-                catch (ObjectDisposedException) // This happens if a child dies unexpectedly
-                {
-                    // Do nothing here because any exception will be caught by the async read handler
                 }
             }
 
@@ -883,7 +805,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Avoid having a BinaryWriter just to write a 4-byte int
             /// </summary>
-            private void WriteInt32(MemoryStream stream, int value)
+            private static void WriteInt32(MemoryStream stream, int value)
             {
                 stream.WriteByte((byte)value);
                 stream.WriteByte((byte)(value >> 8));
@@ -913,8 +835,17 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Wait up to 100ms until all remaining packets are sent.
                     // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
-                    await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100));
+#if NET
+                    await _packetWriteDrainTask.WaitAsync(TimeSpan.FromMilliseconds(100)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+#else
+                    using (var cts = new CancellationTokenSource(100))
+                    {
+                        await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100, cts.Token));
+                        cts.Cancel();
+                    }
+#endif
                 }
+
                 if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {
                     CommunicationsUtilities.Trace("Waiting for node with pid = {0} to exit", _process.Id);
@@ -949,23 +880,6 @@ namespace Microsoft.Build.BackEnd
 
                 _process.KillTree(timeoutMilliseconds: 5000);
             }
-
-#if FEATURE_APM
-            /// <summary>
-            /// Completes the asynchronous packet write to the node.
-            /// </summary>
-            private void PacketWriteComplete(IAsyncResult result)
-            {
-                try
-                {
-                    _serverToClientStream.EndWrite(result);
-                }
-                catch (IOException)
-                {
-                    // Do nothing here because any exception will be caught by the async read handler
-                }
-            }
-#endif
 
             private bool ProcessHeaderBytesRead(int bytesRead)
             {
@@ -1055,7 +969,7 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            private bool ReadAndRoutePacket(NodePacketType packetType, byte [] packetData, int packetLength)
+            private bool ReadAndRoutePacket(NodePacketType packetType, byte[] packetData, int packetLength)
             {
                 try
                 {
@@ -1063,7 +977,7 @@ namespace Microsoft.Build.BackEnd
                     // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
                     using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
                     {
-                        ITranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _sharedReadBuffer);
+                        ITranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _binaryReaderFactory);
                         _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
                     }
                 }

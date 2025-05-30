@@ -1,42 +1,43 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// This class implements some static methods to assist with command-line parsing of 
+    /// This class implements some static methods to assist with command-line parsing of
     /// parameters that could be quoted, and thus could contain nested escaped quotes.
     /// </summary>
     internal static class QuotingUtilities
     {
         /*
          * Quoting Rules:
-         * 
+         *
          * A string is considered quoted if it is enclosed in double-quotes. A double-quote can be escaped with a backslash, or it
          * is automatically escaped if it is the last character in an explicitly terminated quoted string. A backslash itself can
          * be escaped with another backslash IFF it precedes a double-quote, otherwise it is interpreted literally.
-         * 
+         *
          * e.g.
          *      abc"cde"xyz         --> "cde" is quoted
          *      abc"xyz             --> "xyz" is quoted (the terminal double-quote is assumed)
          *      abc"xyz"            --> "xyz" is quoted (the terminal double-quote is explicit)
-         * 
+         *
          *      abc\"cde"xyz        --> "xyz" is quoted (the terminal double-quote is assumed)
          *      abc\\"cde"xyz       --> "cde" is quoted
          *      abc\\\"cde"xyz      --> "xyz" is quoted (the terminal double-quote is assumed)
-         * 
+         *
          *      abc"""xyz           --> """ is quoted
          *      abc""""xyz          --> """ and "xyz" are quoted (the terminal double-quote is assumed)
          *      abc"""""xyz         --> """ is quoted
          *      abc""""""xyz        --> """ and """ are quoted
          *      abc"cde""xyz        --> "cde"" is quoted
          *      abc"xyz""           --> "xyz"" is quoted (the terminal double-quote is explicit)
-         * 
+         *
          *      abc""xyz            --> nothing is quoted
          *      abc""cde""xyz       --> nothing is quoted
          */
@@ -59,15 +60,13 @@ namespace Microsoft.Build.Shared
         /// <param name="emptySplits">[out] a count of all pieces that were empty, and thus discarded, per remark (1) above</param>
         /// <param name="separator"></param>
         /// <returns>ArrayList of all the pieces the string was split into.</returns>
-        internal static List<string> SplitUnquoted
-        (
+        internal static List<string> SplitUnquoted(
             string input,
             int maxSplits,
             bool keepEmptySplits,
             bool unquote,
             out int emptySplits,
-            params char[] separator
-        )
+            params char[] separator)
         {
             ErrorUtilities.VerifyThrow(maxSplits >= 2, "There is no point calling this method for less than two splits.");
 

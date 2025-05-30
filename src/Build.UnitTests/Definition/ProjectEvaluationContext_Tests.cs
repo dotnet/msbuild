@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,8 @@ using Shouldly;
 using Xunit;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
@@ -32,8 +34,8 @@ namespace Microsoft.Build.UnitTests.Definition
             _resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new Dictionary<string, SdkResult>
                 {
-                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null)},
-                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null)}
+                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null) },
+                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null) }
                 });
         }
 
@@ -47,13 +49,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private static void SetResolverForContext(EvaluationContext context, SdkResolver resolver)
         {
-            var sdkService = (SdkResolverService) context.SdkResolverService;
+            var sdkService = (SdkResolverService)context.SdkResolverService;
 
-            sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
+            sdkService.InitializeForTests(null, new List<SdkResolver> { resolver });
         }
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void SharedContextShouldGetReusedWhereasIsolatedContextShouldNot(EvaluationContext.SharingPolicy policy)
         {
@@ -73,6 +76,9 @@ namespace Microsoft.Build.UnitTests.Definition
                     {
                         case EvaluationContext.SharingPolicy.Shared:
                             currentContext.ShouldBeSameAs(previousContext, $"Shared policy: usage {i} was not the same as usage {i - 1}");
+                            break;
+                        case EvaluationContext.SharingPolicy.SharedSDKCache:
+                            currentContext.ShouldNotBeSameAs(previousContext, $"SharedSDKCache policy: usage {i} was the same as usage {i - 1}");
                             break;
                         case EvaluationContext.SharingPolicy.Isolated:
                             currentContext.ShouldNotBeSameAs(previousContext, $"Isolated policy: usage {i} was the same as usage {i - 1}");
@@ -107,8 +113,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     {
                         ProjectCollection = projectCollection,
                         EvaluationContext = evaluationContext
-                    }
-                );
+                    });
             }
 
             fileSystem.ExistenceChecks.OrderBy(kvp => kvp.Key)
@@ -122,34 +127,53 @@ namespace Microsoft.Build.UnitTests.Definition
             fileSystem.FileOrDirectoryExistsCalls.ShouldBe(2);
         }
 
-        [Fact]
-        public void IsolatedContextShouldNotSupportBeingPassedAFileSystem()
+        [Theory]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
+        [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        public void NonSharedContextShouldNotSupportBeingPassedAFileSystem(EvaluationContext.SharingPolicy policy)
         {
             var fileSystem = new Helpers.LoggingFileSystem();
-            Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
+            Should.Throw<ArgumentException>(() => EvaluationContext.Create(policy, fileSystem));
         }
 
-        [Fact]
-        public void EvaluationShouldUseDirectoryCache()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationShouldUseDirectoryCache(bool useProjectInstance)
         {
-            var projectFile = _env.CreateFile("1.proj", @"<Project> <ItemGroup Condition=`Exists('1.file')`> <Compile Include='*.cs'/> </ItemGroup> </Project>".Cleanup()).Path;
+            var projectFile = _env.CreateFile("1.proj", @"<Project> <Import Project='1.file' Condition=`Exists('1.file')`/> <ItemGroup><Compile Include='*.cs'/></ItemGroup> </Project>".Cleanup()).Path;
 
             var projectCollection = _env.CreateProjectCollection().Collection;
             var directoryCacheFactory = new Helpers.LoggingDirectoryCacheFactory();
 
-            var project = Project.FromFile(
-                projectFile,
-                new ProjectOptions
-                {
-                    ProjectCollection = projectCollection,
-                    DirectoryCacheFactory = directoryCacheFactory,
-                }
-            );
+            int expectedEvaluationId;
+            if (useProjectInstance)
+            {
+                var projectInstance = ProjectInstance.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        DirectoryCacheFactory = directoryCacheFactory,
+                    });
+                expectedEvaluationId = projectInstance.EvaluationId;
+            }
+            else
+            {
+                var project = Project.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        DirectoryCacheFactory = directoryCacheFactory,
+                    });
+                expectedEvaluationId = project.LastEvaluationId;
+            }
 
             directoryCacheFactory.DirectoryCaches.Count.ShouldBe(1);
             var directoryCache = directoryCacheFactory.DirectoryCaches[0];
 
-            directoryCache.EvaluationId.ShouldBe(project.LastEvaluationId);
+            directoryCache.EvaluationId.ShouldBe(expectedEvaluationId);
 
             directoryCache.ExistenceChecks.OrderBy(kvp => kvp.Key).ShouldBe(
                 new Dictionary<string, int>
@@ -166,6 +190,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void ReevaluationShouldNotReuseInitialContext(EvaluationContext.SharingPolicy policy)
         {
@@ -177,8 +202,9 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 var context = EvaluationContext.Create(policy);
 
+                using var xmlReader = XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>"));
                 var project = Project.FromXmlReader(
-                    XmlReader.Create(new StringReader("<Project Sdk=\"foo\"></Project>")),
+                    xmlReader,
                     new ProjectOptions
                     {
                         ProjectCollection = collection,
@@ -202,6 +228,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
         public void ProjectInstanceShouldRespectSharingPolicy(EvaluationContext.SharingPolicy policy)
         {
@@ -249,6 +276,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Shared, 1, 1)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache, 1, 1)]
         [InlineData(EvaluationContext.SharingPolicy.Isolated, 4, 4)]
         public void ContextPinsSdkResolverCache(EvaluationContext.SharingPolicy policy, int sdkLookupsForFoo, int sdkLookupsForBar)
         {
@@ -305,17 +333,20 @@ namespace Microsoft.Build.UnitTests.Definition
                     }
                 };
 
-                yield return new object[]
+                foreach (var policy in new[] { EvaluationContext.SharingPolicy.SharedSDKCache, EvaluationContext.SharingPolicy.Isolated })
                 {
-                    EvaluationContext.SharingPolicy.Isolated,
-                    new[]
+                    yield return new object[]
                     {
-                        new[] {"0.cs"},
-                        new[] {"0.cs", "1.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
-                    }
-                };
+                        policy,
+                        new[]
+                        {
+                            new[] {"0.cs"},
+                            new[] {"0.cs", "1.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
+                        }
+                    };
+                }
             }
         }
 
@@ -357,8 +388,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         public static IEnumerable<object[]> ContextDisambiguatesRelativeGlobsData
@@ -377,17 +407,20 @@ namespace Microsoft.Build.UnitTests.Definition
                     }
                 };
 
-                yield return new object[]
+                foreach (var policy in new[] { EvaluationContext.SharingPolicy.SharedSDKCache, EvaluationContext.SharingPolicy.Isolated })
                 {
-                    EvaluationContext.SharingPolicy.Isolated,
-                    new[]
+                    yield return new object[]
                     {
-                        new[] {"0.cs"},
-                        new[] {"0.cs", "1.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs"},
-                        new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
-                    }
-                };
+                        policy,
+                        new[]
+                        {
+                            new[] {"0.cs"},
+                            new[] {"0.cs", "1.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs"},
+                            new[] {"0.cs", "1.cs", "2.cs", "3.cs"},
+                        }
+                    };
+                }
             }
         }
 
@@ -406,7 +439,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(projectDirectory1, "1"),
@@ -438,8 +471,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                     File.WriteAllText(Path.Combine(projectDirectory1, $"1.{evaluationCount}.cs"), "");
                     File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -462,7 +494,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(project1Directory, "1"),
@@ -496,8 +528,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                     File.WriteAllText(Path.Combine(project1GlobDirectory, $"1.{evaluationCount}.cs"), "");
                     File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -524,7 +555,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     // first project uses a relative path
                     new ProjectSpecification(
@@ -567,8 +598,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -592,7 +622,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(project1Directory.Path, "1"),
@@ -628,8 +658,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -640,7 +669,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        [Theory (Skip="https://github.com/dotnet/msbuild/issues/3889")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/3889")]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
@@ -659,12 +688,18 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Directory.CreateDirectory(globDirectory.Path);
 
-            // Globs with a directory part will produce items prepended with that directory part
-            foreach (var globExpansion in expectedGlobExpansions)
+            // Globs with a directory part will produce items prepended with that directory part.
+            // Make a deep copy of the argument to avoid writing to global variables.
+            string[][] prependedExpectedGlobExpansions = new string[expectedGlobExpansions.Length][];
+            for (int expIndex = 0; expIndex < expectedGlobExpansions.Length; expIndex++)
             {
+                string[] globExpansion = expectedGlobExpansions[expIndex];
+                string[] prependedGlobExpansion = new string[globExpansion.Length];
+
+                prependedExpectedGlobExpansions[expIndex] = prependedGlobExpansion;
                 for (var i = 0; i < globExpansion.Length; i++)
                 {
-                    globExpansion[i] = Path.Combine(itemSpecDirectoryPart, globExpansion[i]);
+                    prependedGlobExpansion[i] = Path.Combine(itemSpecDirectoryPart, globExpansion[i]);
                 }
             }
 
@@ -695,14 +730,13 @@ namespace Microsoft.Build.UnitTests.Definition
                 context,
                 project =>
                 {
-                    var expectedGlobExpansion = expectedGlobExpansions[evaluationCount];
+                    var expectedGlobExpansion = prependedExpectedGlobExpansions[evaluationCount];
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         private static string[] _projectsWithGlobImports =
@@ -739,8 +773,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.props"), $"<Project><ItemGroup><i Include=`{evaluationCount}.cs`/></ItemGroup></Project>".Cleanup());
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         private static string[] _projectsWithConditions =
@@ -760,6 +793,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         public void ContextCachesExistenceChecksInConditions(EvaluationContext.SharingPolicy policy)
         {
@@ -789,23 +823,26 @@ namespace Microsoft.Build.UnitTests.Definition
                         project.GetPropertyValue("p").ShouldBe("val");
                     }
                     else
+                    {
                         switch (policy)
                         {
                             case EvaluationContext.SharingPolicy.Shared:
                                 project.GetPropertyValue("p").ShouldBe("val");
                                 break;
+                            case EvaluationContext.SharingPolicy.SharedSDKCache:
                             case EvaluationContext.SharingPolicy.Isolated:
                                 project.GetPropertyValue("p").ShouldBeEmpty();
                                 break;
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
                         }
-                }
-                );
+                    }
+                });
         }
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         public void ContextCachesExistenceChecksInGetDirectoryNameOfFileAbove(EvaluationContext.SharingPolicy policy)
         {
@@ -818,7 +855,7 @@ namespace Microsoft.Build.UnitTests.Definition
             int evaluationCount = 0;
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     $@"<Project>
                       <PropertyGroup>
@@ -838,6 +875,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         case EvaluationContext.SharingPolicy.Shared:
                             searchedPath.EvaluatedValue.ShouldBe(subdirectory.Path);
                             break;
+                        case EvaluationContext.SharingPolicy.SharedSDKCache:
                         case EvaluationContext.SharingPolicy.Isolated:
                             searchedPath.EvaluatedValue.ShouldBe(
                                 evaluationCount == 1
@@ -860,6 +898,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
         [Theory]
         [InlineData(EvaluationContext.SharingPolicy.Isolated)]
+        [InlineData(EvaluationContext.SharingPolicy.SharedSDKCache)]
         [InlineData(EvaluationContext.SharingPolicy.Shared)]
         public void ContextCachesExistenceChecksInGetPathOfFileAbove(EvaluationContext.SharingPolicy policy)
         {
@@ -872,7 +911,7 @@ namespace Microsoft.Build.UnitTests.Definition
             int evaluationCount = 0;
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     $@"<Project>
                       <PropertyGroup>
@@ -892,6 +931,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         case EvaluationContext.SharingPolicy.Shared:
                             searchedPath.EvaluatedValue.ShouldBe(subdirectoryFile.Path);
                             break;
+                        case EvaluationContext.SharingPolicy.SharedSDKCache:
                         case EvaluationContext.SharingPolicy.Isolated:
                             searchedPath.EvaluatedValue.ShouldBe(
                                 evaluationCount == 1

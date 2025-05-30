@@ -1,9 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-//-----------------------------------------------------------------------
-// </copyright>
-// <summary>A packet which contains information needed for a node to configure itself for build.</summary>
-//-----------------------------------------------------------------------
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -11,12 +9,14 @@ namespace Microsoft.Build.BackEnd
     {
         private bool _includeEvaluationMetaprojects;
         private bool _includeEvaluationProfiles;
-        private bool _includeEvaluationPropertiesAndItems;
+        private bool _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+        private bool _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
         private bool _includeTaskInputs;
 
         public bool IncludeEvaluationMetaprojects => _includeEvaluationMetaprojects;
         public bool IncludeEvaluationProfiles => _includeEvaluationProfiles;
-        public bool IncludeEvaluationPropertiesAndItems => _includeEvaluationPropertiesAndItems;
+        public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent => _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+        public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent => _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
         public bool IncludeTaskInputs => _includeTaskInputs;
 
         public LoggingNodeConfiguration()
@@ -26,12 +26,14 @@ namespace Microsoft.Build.BackEnd
         public LoggingNodeConfiguration(
             bool includeEvaluationMetaprojects,
             bool includeEvaluationProfiles,
-            bool includeEvaluationPropertiesAndItems,
+            bool includeEvaluationPropertiesAndItemsInProjectStartedEvent,
+            bool includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
             bool includeTaskInputs)
         {
             _includeEvaluationMetaprojects = includeEvaluationMetaprojects;
             _includeEvaluationProfiles = includeEvaluationProfiles;
-            _includeEvaluationPropertiesAndItems = includeEvaluationPropertiesAndItems;
+            _includeEvaluationPropertiesAndItemsInProjectStartedEvent = includeEvaluationPropertiesAndItemsInProjectStartedEvent;
+            _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
             _includeTaskInputs = includeTaskInputs;
         }
 
@@ -39,7 +41,8 @@ namespace Microsoft.Build.BackEnd
         {
             translator.Translate(ref _includeEvaluationMetaprojects);
             translator.Translate(ref _includeEvaluationProfiles);
-            translator.Translate(ref _includeEvaluationPropertiesAndItems);
+            translator.Translate(ref _includeEvaluationPropertiesAndItemsInProjectStartedEvent);
+            translator.Translate(ref _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             translator.Translate(ref _includeTaskInputs);
         }
     }

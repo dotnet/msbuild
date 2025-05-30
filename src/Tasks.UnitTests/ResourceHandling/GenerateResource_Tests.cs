@@ -1,26 +1,25 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Collections;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
-
-using System.Text;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 {
-    [Trait("Category", "mono-osx-failing")]
-    [Trait("Category", "mono-windows-failing")]
     public sealed class RequiredTransformations : IDisposable
     {
         private readonly TestEnvironment _env;
@@ -74,7 +73,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", resxFile, resourcesFile);
@@ -135,7 +134,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(resxFile2);
             File.Delete(resxFile3);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -160,7 +161,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
                 resourcesFile = t.FilesWritten[0].ItemSpec;
                 Assert.Equal(".resources", Path.GetExtension(resourcesFile));
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 Utilities.AssertLogContainsResource(t, "GenerateResource.ProcessingFile", textFile, resourcesFile);
@@ -215,8 +216,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             finally
             {
                 File.Delete(systemDll);
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
@@ -226,7 +234,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
         [Fact]
 #else
-        [Fact (Skip = "ResGen.exe not supported on .NET Core MSBuild")]
+        [Fact(Skip = "ResGen.exe not supported on .NET Core MSBuild")]
 #endif
         public void BasicResources2ResX()
         {
@@ -264,7 +272,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.OutputResources[0].ItemSpec);
             File.Delete(t2a.OutputResources[0].ItemSpec);
             foreach (ITaskItem item in t2b.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -296,7 +306,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -312,7 +324,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             GenerateResource t = Utilities.CreateTask(_output);
             t.StateFile = new TaskItem(_env.GetTempFile(".cache").Path);
-            t.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
+            t.Sources = new ITaskItem[] { new TaskItem(resxFileInput) };
 
             Utilities.ExecuteTask(t);
 
@@ -321,13 +333,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Path.GetExtension(resourceOutput).ShouldBe(".resources");
             Path.GetExtension(t.FilesWritten[0].ItemSpec).ShouldBe(".resources");
 
+
+            /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+            Before:
             Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
-            
+
+            Utilities.AssertStateFileWasWritten(t);
+            After:
+            Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
+
+            Utilities.AssertStateFileWasWritten(t);
+            */
+            Utilities.AssertLogContainsResource(t, "GenerateResource.OutputDoesntExist", t.OutputResources[0].ItemSpec);
+
             Utilities.AssertStateFileWasWritten(t);
 
             GenerateResource t2 = Utilities.CreateTask(_output);
             t2.StateFile = new TaskItem(t.StateFile);
-            t2.Sources = new ITaskItem[] {new TaskItem(resxFileInput)};
+            t2.Sources = new ITaskItem[] { new TaskItem(resxFileInput) };
 
             // Execute the task again when the input (5m ago) is newer than the previous outputs (10m ago)
             File.SetLastWriteTime(resxFileInput, DateTime.Now.Subtract(TimeSpan.FromMinutes(5)));
@@ -423,6 +446,59 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
+        [Fact]
+        public void QuestionOutOfDateByDeletion()
+        {
+            var folder = _env.CreateFolder();
+            string resxFileInput = Utilities.WriteTestResX(false, null, null, _env.CreateFile(folder, ".resx").Path);
+            TaskItem stateFile = new TaskItem(_env.GetTempFile(".cache").Path);
+            ITaskItem[] sources = new ITaskItem[] { new TaskItem(resxFileInput) };
+            ITaskItem[] output;
+
+            GenerateResource t1 = Utilities.CreateTask(_output);
+            t1.Sources = sources;
+            t1.StateFile = stateFile;
+            Utilities.ExecuteTask(t1);
+
+            Utilities.AssertLogContainsResource(t1, "GenerateResource.OutputDoesntExist", t1.OutputResources[0].ItemSpec);
+
+            output = t1.OutputResources;
+
+            // Run again to ensure all files are up to date.
+            GenerateResource t2 = Utilities.CreateTask(_output);
+            t2.Sources = sources;
+            t2.StateFile = stateFile;
+            t2.FailIfNotIncremental = true;
+            Utilities.ExecuteTask(t2);
+
+            // Delete the file and verify that FailIfNotIncremental will print the missing file
+            GenerateResource t3 = Utilities.CreateTask(_output);
+            t3.StateFile = stateFile;
+            t3.Sources = sources;
+            t3.FailIfNotIncremental = true;
+
+            // Delete the output
+            File.Delete(output[0].ItemSpec);
+
+            t3.Execute().ShouldBeFalse();
+
+            Utilities.AssertLogContainsResource(t3, "GenerateResource.ProcessingFile", sources[0].ItemSpec, output[0].ItemSpec);
+
+            GenerateResource t4 = Utilities.CreateTask(_output);
+            t4.Sources = sources;
+            t4.StateFile = stateFile;
+            Utilities.ExecuteTask(t4);
+
+            Utilities.AssertLogContainsResource(t4, "GenerateResource.OutputDoesntExist", t4.OutputResources[0].ItemSpec);
+
+            // Run again to ensure all files are up to date.
+            GenerateResource t5 = Utilities.CreateTask(_output);
+            t5.Sources = sources;
+            t5.StateFile = stateFile;
+            t5.FailIfNotIncremental = true;
+            Utilities.ExecuteTask(t5);
+        }
+
         [Theory]
         [InlineData(false, false)]
         [InlineData(false, true)]
@@ -444,7 +520,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 usePreserialized,
                 _env,
                 useSystemResourcesExtensions);
- 
+
             try
             {
                 t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
@@ -602,7 +678,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             GenerateResource createResources = Utilities.CreateTask(_output);
             createResources.StateFile = new TaskItem(cache);
-            createResources.Sources = new ITaskItem[] {new TaskItem(firstResx), new TaskItem(secondResx)};
+            createResources.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
             _output.WriteLine("Transform both");
             Utilities.ExecuteTask(createResources);
@@ -614,7 +690,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             _output.WriteLine("Create a new task to transform them again");
             GenerateResource t2 = Utilities.CreateTask(_output);
             t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
-            t2.Sources = new ITaskItem[] {new TaskItem(firstResx), new TaskItem(secondResx)};
+            t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
             System.Threading.Thread.Sleep(200);
             if (!NativeMethodsShared.IsWindows)
@@ -728,7 +804,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[0].ItemSpec, resourcesFile1);
                 Assert.Equal(t.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t.FilesWritten[1].ItemSpec, resourcesFile2);
-                
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Repeat, and it should do nothing as they are up to date
@@ -747,7 +823,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t2.FilesWritten[0].ItemSpec, resourcesFile1);
                 Assert.Equal(t2.OutputResources[1].ItemSpec, resourcesFile2);
                 Assert.Equal(t2.FilesWritten[1].ItemSpec, resourcesFile2);
-                
+
                 Utilities.AssertStateFileWasWritten(t2);
 
                 Assert.True(time.Equals(File.GetLastWriteTime(t2.OutputResources[0].ItemSpec)));
@@ -755,10 +831,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -829,10 +920,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (stateFile != null) File.Delete(stateFile);
-                if (localSystemDll != null) File.Delete(localSystemDll);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (stateFile != null)
+                {
+                    File.Delete(stateFile);
+                }
+
+                if (localSystemDll != null)
+                {
+                    File.Delete(localSystemDll);
+                }
             }
         }
 
@@ -887,10 +993,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (additionalInputs?[0] != null && File.Exists(additionalInputs[0].ItemSpec)) File.Delete(additionalInputs[0].ItemSpec);
-                if (additionalInputs?[1] != null && File.Exists(additionalInputs[1].ItemSpec)) File.Delete(additionalInputs[1].ItemSpec);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (additionalInputs?[0] != null && File.Exists(additionalInputs[0].ItemSpec))
+                {
+                    File.Delete(additionalInputs[0].ItemSpec);
+                }
+
+                if (additionalInputs?[1] != null && File.Exists(additionalInputs[1].ItemSpec))
+                {
+                    File.Delete(additionalInputs[1].ItemSpec);
+                }
             }
         }
 
@@ -923,7 +1044,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -969,7 +1092,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.OutputResources[0].ItemSpec);
             File.Delete(t2a.OutputResources[0].ItemSpec);
             foreach (ITaskItem item in t2b.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1010,10 +1135,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
+
             File.Delete(t2.Sources[0].ItemSpec);
             foreach (ITaskItem item in t2.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1050,9 +1180,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -1110,9 +1244,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -1233,9 +1371,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (strFile != null) File.Delete(strFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (strFile != null)
+                {
+                    File.Delete(strFile);
+                }
             }
         }
 
@@ -1288,9 +1437,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (strFile != null) File.Delete(strFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (strFile != null)
+                {
+                    File.Delete(strFile);
+                }
             }
         }
 
@@ -1327,9 +1487,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string typeName = null;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
 
@@ -1409,8 +1573,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// <remarks>
         /// Regression test for legacy-codepath-resources case of https://github.com/dotnet/msbuild/issues/4582
         /// </remarks>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "https://github.com/dotnet/msbuild/issues/2272")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "https://github.com/dotnet/msbuild/issues/2272")]
         public void StronglyTypedResourcesEmitTypeIntoClass()
         {
             string bitmap = Utilities.CreateWorldsSmallestBitmap();
@@ -1446,10 +1609,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 string generatedSource = File.ReadAllText(t.StronglyTypedFileName);
 
-                generatedSource.ShouldNotContain("object Image1", "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
+                generatedSource.ShouldNotContain("object Image1", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `System.Drawing.Bitmap`");
                 generatedSource.ShouldContain("Bitmap Image1");
 
-                generatedSource.ShouldNotContain("object MyString", "Strongly-typed resource accessor is returning type `object` instead of `string`");
+                generatedSource.ShouldNotContain("object MyString", customMessage: "Strongly-typed resource accessor is returning type `object` instead of `string`");
                 generatedSource.ShouldContain("static string MyString");
                 generatedSource.ShouldMatch("//.*Looks up a localized string similar to MyValue", "Couldn't find a comment in the usual format for a string resource.");
             }
@@ -1504,7 +1667,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
     }
 
-    sealed public class TransformationErrors
+    public sealed class TransformationErrors
     {
         private readonly ITestOutputHelper _output;
 
@@ -1552,7 +1715,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // Done, so clean up.
                 File.Delete(t.Sources[0].ItemSpec);
                 foreach (ITaskItem item in t.FilesWritten)
+                {
                     File.Delete(item.ItemSpec);
+                }
             }
 
             // text file uses the strings token; since it's only a warning we have to have special asserts
@@ -1569,7 +1734,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1599,8 +1766,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 File.Delete(resourcesFile2);
                 bool success = t.Execute();
                 // Task should have failed
+
+                /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+                Before:
                 Assert.False(success);
-                
+
+                Utilities.AssertStateFileWasWritten(t);
+                After:
+                Assert.False(success);
+
+                Utilities.AssertStateFileWasWritten(t);
+                */
+                Assert.False(success);
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should not have created an output for the invalid resx
@@ -1616,10 +1794,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile1 != null) File.Delete(resxFile1);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile1 != null)
+                {
+                    File.Delete(resxFile1);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -1652,8 +1845,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 bool success = t.Execute();
                 // Task should have failed
+
+                /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+                Before:
                 Assert.False(success);
-                
+
+                Utilities.AssertStateFileWasWritten(t);
+                After:
+                Assert.False(success);
+
+                Utilities.AssertStateFileWasWritten(t);
+                */
+                Assert.False(success);
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Should not have created an output for the invalid resx
@@ -1673,10 +1877,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile1 != null) File.Delete(resxFile1);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resourcesFile1 != null) File.Delete(resourcesFile1);
-                if (resourcesFile2 != null) File.Delete(resourcesFile2);
+                if (resxFile1 != null)
+                {
+                    File.Delete(resxFile1);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resourcesFile1 != null)
+                {
+                    File.Delete(resourcesFile1);
+                }
+
+                if (resourcesFile2 != null)
+                {
+                    File.Delete(resourcesFile2);
+                }
             }
         }
 
@@ -1700,7 +1919,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1726,7 +1947,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.Sources[0].ItemSpec);
             File.Delete(bitmap);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1757,16 +1980,64 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
+        }
+
+        [Fact]
+        public void GenerateResourceWarnsWhenUsingBinaryFormatter()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile resource = env.CreateFile(".resx", @"<?xml version=""1.0"" encoding=""utf-8""?>
+<root>
+  <data name=""$this.Icon"" type=""System.Drawing.Icon, System.Drawing"" mimetype=""application/x-microsoft.net.object.binary.base64"">
+    <value>
+        AAABAAEAEBAAAAAAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAQAQAAAAAAAAAAAAAAAAAAAAA
+        AAD///8BoqKiDaKiotmioqL5oqKiK////wH///8B////Af///wH///8B////AaKioiGioqLxoqKi5aKi
+        ohn///8B////AbS0tBW0tLTz29vb/7Ozsu18Wi+Be1gswXtYLO17WCzte1gswXtYLIGzs7Lz2dnZ/7S0
+        tPu0tLQj////Af///wH///8BxsbGQdPT0//Cv739nGs7/6ZsNf+ubzf/rm83/6ZsNf+hdkr/xcTD/8bG
+        xf/GxsY/////Af///wH///8B////AYxlNmejiGn1r3hE/7uMXv/Ck3H/xJF0/8OPcf+/kGz/uIpd/7SG
+        Wf+hhWT1jGU2Z////wH///8B////AZZtOzWWbTvVs31G/8KZcf/Yqon/79/P//r28//69fP/79/R/9en
+        hf++lGz/s31G/5ZtO9WWbTs1////Af///wGhdUGBsIBK/8abb//Zqoj///7r///67v///fL///7y///8
+        7////ev/2aN6/8KZbP+wgEr/oXVBgf///wH///8BrH5Iwb+PWP/No4H/8NvB///35v/68uP/xcC2//Ht
+        3v///Oj///Xf/+/Ur//ImXL/v49Y/6x+SMH///8B////AbeHTu3JnGb/z5+A//rz4v/99un/8vDj/42M
+        hP+Bf3f/0s/C///76//67Mz/x5Bt/8mcZv+3h07t////Af///wHCkFTtzqZx/9Glif/69un//fju////
+        +f+BgHn/sa6k/4F/d//Jxrr/+vDT/8mWcv/OpnH/wpBU7f///wH///8BzZlbwdOsdf/Zt5j/8ePW//77
+        9f/19fP/n56V//Dw6f/4+PL/vrmt//Dawv/Sqof/06x1/82ZW8H///8B////AbOddIvTrXf/38Sa/969
+        qv//////8PDu/+fl2v////f////3///+8//ctJj/28CW/8Kqfv/Gn2qF////AQCZ3T0KmtjZLpzF9d6/
+        iv/iyaf/37+u//Hj3P/z8ez/9PHr//Hi2f/cuqP/38Oe/4yxqf84ptH5DprWzwCZ3ScAoON9fNHy7WHD
+        6O86pMb74seS/+bRqf/gwqb/1a6W/9Wrkv/evaD/5M+m/7/Bnv9Hstf9q+P2/Smw6NkAoOMnAKfpe13J
+        8eW16Pn/Ycfr7zqqzPPsxIj/6cuU/+fQnf/n0J3/6cuU/97Cjv8yqtD1gdPw9XPQ8+sAp+nNAKfpBQCu
+        7wUAru+LW8v05b/s+v9cy/HpTbLJxfq8dMH6vHTt+rx07fq8dMFRssjDac/y7XzW9u0Aru/JAK7vHf//
+        /wH///8BALX0AwC19IEAtfTRALX0ywC19Af///8B////Af///wH///8BALX0FwC19NEAtfTJALX0J///
+        /wH///8BAAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA//8AAP//AAD//wAA
+        //8AAP//AAD//w==
+</value>
+  </data>
+</root>
+");
+
+            GenerateResource gr = Utilities.CreateTask(_output, usePreserialized: true, env: env);
+            gr.Sources = new ITaskItem[] { new TaskItem(resource.Path) };
+            gr.WarnOnBinaryFormatterUse = true;
+
+            gr.Execute().ShouldBeTrue();
+
+            Utilities.AssertLogContainsResource(gr, "GenerateResource.BinaryFormatterUse", "$this.Icon");
         }
 
         /// <summary>
         ///  Cause failures in ResourceReader
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core MSBuild doesn't try to read binary input resources")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core MSBuild doesn't try to read binary input resources.")]
         public void FailedResourceReader()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -1790,13 +2061,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
-        [Theory]
+        [DotNetOnlyTheory(additionalMessage: "This error is .NET Core only.")]
         [InlineData(".resources")]
         [InlineData(".dll")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "This error is .NET Core only")]
         public void ResourceReaderRejectsNonCoreCompatFormats(string inputExtension)
         {
             using var env = TestEnvironment.Create(_output);
@@ -1846,15 +2118,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             File.Delete(t.Sources[0].ItemSpec);
             File.Delete(t.StronglyTypedFileName);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
         /// Reference passed in that can't be loaded should error
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp,
-            reason: ".NET Core MSBuild doesn't load refs so it pushes this failure to runtime")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core MSBuild doesn't load refs so it pushes this failure to runtime.")]
         public void InvalidReference()
         {
             string txtFile = null;
@@ -1880,12 +2152,15 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
     }
 
-    sealed public class PropertyHandling
+    public sealed class PropertyHandling
     {
         private readonly ITestOutputHelper _output;
 
@@ -1932,7 +2207,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1960,7 +2237,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             // Done, so clean up.
             File.Delete(t.Sources[0].ItemSpec);
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -1972,9 +2251,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             GenerateResource t = Utilities.CreateTask(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -1989,9 +2268,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
             // Done, so clean up.
             foreach (ITaskItem item in t.Sources)
+            {
                 File.Delete(item.ItemSpec);
+            }
+
             foreach (ITaskItem item in t.FilesWritten)
+            {
                 File.Delete(item.ItemSpec);
+            }
         }
 
         /// <summary>
@@ -2003,9 +2287,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             GenerateResource t = Utilities.CreateTask(_output);
 
             t.Sources = new ITaskItem[] {
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
-                new TaskItem( Utilities.WriteTestResX(false, null, null) ),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
+                new TaskItem( Utilities.WriteTestResX(false, null, null)),
                 new TaskItem( Utilities.WriteTestResX(false, null, null)),
             };
 
@@ -2021,7 +2305,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Assert.Equal(t.FilesWritten[i].ItemSpec, t.OutputResources[i].ItemSpec);
                 Assert.True(File.Exists(t.FilesWritten[i].ItemSpec));
             }
-            
+
             Utilities.AssertStateFileWasWritten(t);
 
             // Done, so clean up.
@@ -2047,9 +2331,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             try
             {
                 t.Sources = new ITaskItem[] {
-                    new TaskItem( Utilities.WriteTestText(null, null) ),
-                    new TaskItem( Utilities.WriteTestText(null, null) ),
-                    new TaskItem( Utilities.WriteTestText("goober", null) ),
+                    new TaskItem( Utilities.WriteTestText(null, null)),
+                    new TaskItem( Utilities.WriteTestText(null, null)),
+                    new TaskItem( Utilities.WriteTestText("goober", null)),
                     new TaskItem( Utilities.WriteTestText(null, null)),
                 };
 
@@ -2081,8 +2365,19 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 // FilesWritten should contain only the 3 successfully output .resources and the cache
                 Assert.Equal(t.FilesWritten[0].ItemSpec, Path.ChangeExtension(t.Sources[0].ItemSpec, ".resources"));
                 Assert.Equal(t.FilesWritten[1].ItemSpec, Path.ChangeExtension(t.Sources[1].ItemSpec, ".resources"));
+
+                /* Unmerged change from project 'Microsoft.Build.Tasks.UnitTests (net7.0)'
+                Before:
                 Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
-                
+
+                Utilities.AssertStateFileWasWritten(t);
+                After:
+                Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
+
+                Utilities.AssertStateFileWasWritten(t);
+                */
+                Assert.Equal(t.FilesWritten[2].ItemSpec, Path.ChangeExtension(t.Sources[3].ItemSpec, ".resources"));
+
                 Utilities.AssertStateFileWasWritten(t);
 
                 // Make sure there was an error on the second resource
@@ -2111,8 +2406,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  STR class name derived from output file transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
+
         public void StronglyTypedClassName()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2158,8 +2452,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  STR class file name derived from class name transformation
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         public void StronglyTypedFileName()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2203,7 +2495,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         }
     }
 
-    sealed public class PropertyErrors
+    public sealed class PropertyErrors
     {
         private readonly ITestOutputHelper _output;
 
@@ -2231,7 +2523,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2295,16 +2589,22 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
 
         /// <summary>
         ///  Read-only StateFile yields message
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [WindowsOnlyFact]
         public void StateFileUnwritable()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2331,7 +2631,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                     foreach (ITaskItem item in t.FilesWritten)
                     {
                         if (item.ItemSpec != null)
+                        {
                             File.Delete(item.ItemSpec);
+                        }
                     }
                 }
             }
@@ -2363,7 +2665,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2393,7 +2697,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2423,7 +2729,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2432,7 +2740,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         ///  Invalid StronglyTypedLanguage yields CodeDOM exception
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void UnknownStronglyTypedLanguage()
         {
             GenerateResource t = Utilities.CreateTask(_output);
@@ -2454,7 +2761,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 foreach (ITaskItem item in t.FilesWritten)
                 {
                     if (item.ItemSpec != null)
+                    {
                         File.Delete(item.ItemSpec);
+                    }
                 }
             }
         }
@@ -2487,10 +2796,25 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resxFile != null) File.Delete(resxFile);
-                if (resxFile2 != null) File.Delete(resxFile2);
-                if (resxFile != null) File.Delete(Path.ChangeExtension(resxFile, ".resources"));
-                if (resxFile2 != null) File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                if (resxFile != null)
+                {
+                    File.Delete(resxFile);
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(resxFile2);
+                }
+
+                if (resxFile != null)
+                {
+                    File.Delete(Path.ChangeExtension(resxFile, ".resources"));
+                }
+
+                if (resxFile2 != null)
+                {
+                    File.Delete(Path.ChangeExtension(resxFile2, ".resources"));
+                }
             }
         }
 
@@ -2527,7 +2851,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2561,7 +2888,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2595,7 +2925,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2629,7 +2962,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
             }
         }
 
@@ -2671,15 +3007,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (txtFile != null) File.Delete(txtFile);
-                if (resourcesFile != null) File.Delete(resourcesFile);
-                if (dir != null) FileUtilities.DeleteWithoutTrailingBackslash(dir);
+                if (txtFile != null)
+                {
+                    File.Delete(txtFile);
+                }
+
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
+
+                if (dir != null)
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(dir);
+                }
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;
@@ -2690,7 +3035,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 resourcesFile = Utilities.WriteTestResX(false, null, null);
 
                 t.Sources = new ITaskItem[] { new TaskItem(resourcesFile) };
-                t.OutputResources = new ITaskItem[] { new TaskItem( "||" ) };
+                t.OutputResources = new ITaskItem[] { new TaskItem("||") };
 
                 bool success = t.Execute();
 
@@ -2700,7 +3045,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
             finally
             {
-                if (resourcesFile != null) File.Delete(resourcesFile);
+                if (resourcesFile != null)
+                {
+                    File.Delete(resourcesFile);
+                }
             }
         }
     }
@@ -2714,9 +3062,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             _output = output;
         }
 
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -2892,9 +3238,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// which fails (LoadFile requires an absolute path).  The fix was to use
         /// Assembly.LoadFrom instead.
         /// </summary>
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
-        [SkipOnMono("https://github.com/dotnet/msbuild/issues/677")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Linked resources not supported on Core: https://github.com/dotnet/msbuild/issues/4094")]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3261,7 +3605,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
         }
 
-        //  Regression test for https://github.com/dotnet/msbuild/issues/2206
+        // Regression test for https://github.com/dotnet/msbuild/issues/2206
         [Theory]
         [InlineData("\n")]
         [InlineData("\r\n")]
@@ -3361,6 +3705,20 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.FileUpdated(resourcesFile, initialWriteTime).ShouldBeFalse();
             }
         }
+
+        /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/9199
+        /// </summary>
+        [Fact]
+        public void NotValidSources()
+        {
+            GenerateResource t = new GenerateResource { BuildEngine = new MockEngine(_output) };
+            t.Sources = new ITaskItem[] { new TaskItem("non-existent") };
+            t.OutputResources = new ITaskItem[] { new TaskItem("out") };
+            Assert.False(t.Execute());
+            ((MockEngine)t.BuildEngine).AssertLogContains("MSB3552");
+            Assert.Equal(1, ((MockEngine)t.BuildEngine).Errors);
+        }
     }
 }
 
@@ -3396,8 +3754,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         {
             Assert.Contains(
                 String.Format(AssemblyResources.GetString(messageID), replacements),
-                ((MockEngine) t.BuildEngine).Log
-            );
+                ((MockEngine)t.BuildEngine).Log);
         }
 
         /// <summary>
@@ -3491,9 +3848,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             string sourceFile;
             if (useResX)
+            {
                 sourceFile = WriteTestResX(false, null, null);
+            }
             else
+            {
                 sourceFile = WriteTestText(null, null);
+            }
 
             t.Sources = new ITaskItem[] { new TaskItem(sourceFile) };
 
@@ -3616,7 +3977,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             if (tagName != null)
             {
-                txt.Append("[");
+                txt.Append('[');
                 txt.Append(tagName);
                 txt.Append("]\xd\xa");
             }
@@ -3669,18 +4030,18 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 + "  </resheader>\xd\xa"
                 + "  <resheader name='writer'>\xd\xa"
                 + "    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\xd\xa"
-                + "  </resheader>\xd\xa"
-                );
+                + "  </resheader>\xd\xa");
 
             resgenFileContents.Append(
                  // A plain old string value.
                  "  <data name=\"MyString\">\xd\xa"
                 + "    <value>MyValue</value>\xd\xa"
-                + "  </data>\xd\xa"
-                );
+                + "  </data>\xd\xa");
 
             if (extraToken != null)
+            {
                 resgenFileContents.Append(extraToken);
+            }
 
             if (useType)
             {
@@ -3688,8 +4049,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 resgenFileContents.Append(
                      "  <data name='Label.Modifiers' type='System.CodeDom.MemberAttributes, System'>\xd\xa"
                     + "    <value>Assembly</value>\xd\xa"
-                    + "  </data>\xd\xa"
-                    );
+                    + "  </data>\xd\xa");
             }
 
             if (useInvalidType)
@@ -3698,8 +4058,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 resgenFileContents.Append(
                      "  <data name='xx' type='X, INVALID'>\xd\xa"
                     + "    <value>1</value>\xd\xa"
-                    + "  </data>\xd\xa"
-                    );
+                    + "  </data>\xd\xa");
             }
 
             if (linkedBitmap != null)
@@ -3707,8 +4066,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 // A linked-in bitmap.
                 resgenFileContents.Append(
                      "  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Forms'>\xd\xa"
-                    + "    <value>"
-                    );
+                    + "    <value>");
 
                 // The linked file may have a different case than reported by the filesystem
                 // simulate this by lower-casing our file before writing it into the resx.
@@ -3719,8 +4077,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 resgenFileContents.Append(
                      ";System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>\xd\xa"
-                    + "  </data>\xd\xa"
-                    );
+                    + "  </data>\xd\xa");
             }
 
             resgenFileContents.Append("</root>\xd\xa");
@@ -3736,7 +4093,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <returns>The name of the resx file</returns>
         public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null)
         {
-            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite:resxFileToWrite);
+            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite);
         }
 
         /// <summary>
@@ -3755,7 +4112,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
             {
                 if (string.IsNullOrEmpty(resgenFile))
                 {
-                        resgenFile = GetTempFileName(".resx");
+                    resgenFile = GetTempFileName(".resx");
                 }
 
                 File.WriteAllText(resgenFile, contents);
@@ -3824,9 +4181,8 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// </summary>
         public static string GetTempFileName(string extension)
         {
-            string f = FileUtilities.GetTemporaryFile();
+            string f = FileUtilities.GetTemporaryFileName();
             string filename = Path.ChangeExtension(f, extension);
-            File.Delete(f);
             // Make sure that the new file doesn't already exist, since the test is probably
             // expecting it not to
             File.Delete(filename);
@@ -3864,9 +4220,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 string codeFileExtension = null;
                 if (strLanguage == "CSharp")
+                {
                     codeFileExtension = ".cs";
+                }
                 else if (strLanguage == "VB")
+                {
                     codeFileExtension = ".vb";
+                }
 
                 // Execute task
                 Utilities.ExecuteTask(t);
@@ -3917,9 +4277,13 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
                 string typeName;
                 if (t.StronglyTypedNamespace != null)
+                {
                     typeName = t.StronglyTypedNamespace + ".";
+                }
                 else
+                {
                     typeName = "";
+                }
 
                 typeName += t.StronglyTypedClassName;
                 // Verify that the type is generated correctly

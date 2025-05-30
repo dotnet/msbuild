@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
 using System.Globalization;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -24,11 +26,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
                 catch (FormatException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}, returning {2}", value, typeof(bool).Name, defaultValue.ToString()));
+                    Debug.Fail($"Invalid value '{value}' for {typeof(bool).Name}, returning {defaultValue}");
                 }
                 catch (ArgumentException)
                 {
-                    Debug.Fail(String.Format(CultureInfo.CurrentCulture, "Invalid value '{0}' for {1}, returning {2}", value, typeof(bool).Name, defaultValue.ToString()));
+                    Debug.Fail($"Invalid value '{value}' for {typeof(bool).Name}, returning {defaultValue}");
                 }
             }
             return defaultValue;

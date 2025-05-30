@@ -1,16 +1,20 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
     /// <summary>
     /// This class contains a collection of ProductBuilder objects. Used for the BootstrapperBuilder's Build method.
     /// </summary>
-    [ComVisible(true), Guid("D25C0741-99CA-49f7-9460-95E5F25EEF43"), ClassInterface(ClassInterfaceType.None)]
+    [ComVisible(true)]
+    [Guid("D25C0741-99CA-49f7-9460-95E5F25EEF43")]
+    [ClassInterface(ClassInterfaceType.None)]
     public class ProductBuilderCollection : IProductBuilderCollection, IEnumerable
     {
         private readonly List<ProductBuilder> _list = new List<ProductBuilder>();

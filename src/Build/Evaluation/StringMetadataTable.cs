@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -13,7 +15,7 @@ namespace Microsoft.Build.Evaluation
     internal class StringMetadataTable : IMetadataTable
     {
         /// <summary>
-        /// Table of metadata values. 
+        /// Table of metadata values.
         /// Each key may be qualified ("itemtype.name") or unqualified ("name").
         /// Unqualified are considered to apply to all item types.
         /// May be null, if empty.
@@ -67,7 +69,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                key = itemType + "." + name;
+                key = $"{itemType}.{name}";
             }
 
             string value;

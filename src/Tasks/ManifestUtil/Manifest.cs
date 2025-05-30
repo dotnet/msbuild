@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -10,8 +10,9 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Serialization;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -231,7 +232,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public void ResolveFiles(string[] searchPaths)
         {
             if (searchPaths == null)
+            {
                 throw new ArgumentNullException(nameof(searchPaths));
+            }
+
             CollectionToArray();
             ResolveFiles_1(searchPaths);
             ResolveFiles_2(searchPaths);
@@ -371,15 +375,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         internal static void UpdateEntryPoint(string inputPath, string outputPath, string updatedApplicationPath, string applicationManifestPath, string targetFrameworkVersion)
         {
             var document = new XmlDocument();
-            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-            using (XmlReader xr = XmlReader.Create(inputPath, xrSettings))
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+            FileStream fs = File.OpenRead(inputPath);
+            using (XmlReader xr = XmlReader.Create(fs, xrSettings))
             {
                 document.Load(xr);
             }
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(document.NameTable);
             AssemblyIdentity appManifest = AssemblyIdentity.FromManifest(applicationManifestPath);
 
-            // update path to application manifest            
+            // update path to application manifest
             XmlNode codeBaseNode = null;
             foreach (string xpath in XPaths.codebasePaths)
             {
@@ -481,7 +486,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private void UpdateFileReference(BaseReference f, string targetFrameworkVersion)
         {
-            if (String.IsNullOrEmpty(f.ResolvedPath))
+            if (string.IsNullOrEmpty(f.ResolvedPath))
             {
                 throw new FileNotFoundException(null, f.SourcePath);
             }
@@ -500,22 +505,33 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             f.Size = size;
 
             //
-            // .NETCore Launcher.exe based Deployment: If the filereference is for apphost.exe, we need to change
-            // the ResolvedPath and TargetPath to {assemblyname}.exe before we write the manifest, so that the
-            // manifest does not have a file reference to apphost.exe
+            // .NET >= 5 ClickOnce: If the file reference is for apphost.exe, we need to change the filename
+            // in ResolvedPath to TargetPath so we don't end up publishing the file as apphost.exe.
+            // If the TargetPath is not present, we will fallback to AssemblyName.
             //
             string fileName = Path.GetFileName(f.ResolvedPath);
             if (LauncherBasedDeployment &&
-                fileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase) &&
-                !String.IsNullOrEmpty(AssemblyName))
+                fileName.Equals(Constants.AppHostExe, StringComparison.InvariantCultureIgnoreCase))
             {
-                f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), AssemblyName);
-                f.TargetPath = BaseReference.GetDefaultTargetPath(f.ResolvedPath);
+                if (!string.IsNullOrEmpty(f.TargetPath))
+                {
+                    f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), f.TargetPath);
+                }
+                else if (!string.IsNullOrEmpty(AssemblyName))
+                {
+                    f.ResolvedPath = Path.Combine(Path.GetDirectoryName(f.ResolvedPath), AssemblyName);
+                    f.TargetPath = BaseReference.GetDefaultTargetPath(f.ResolvedPath);
+                }
+                else
+                {
+                    Debug.Assert(false, "AssemblyName cannot be empty");
+                    OutputMessages.AddWarningMessage("GenerateManifest.InvalidValue", "AssemblyName");
+                }
             }
 
-            if (String.IsNullOrEmpty(f.TargetPath))
+            if (string.IsNullOrEmpty(f.TargetPath))
             {
-                if (!String.IsNullOrEmpty(f.SourcePath))
+                if (!string.IsNullOrEmpty(f.SourcePath))
                 {
                     f.TargetPath = BaseReference.GetDefaultTargetPath(f.SourcePath);
                 }
@@ -605,7 +621,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return;
             }
 
-            var identityList = new Dictionary<string, NGen<bool>>();
+            var identityList = new Dictionary<string, bool>();
             foreach (AssemblyReference assembly in AssemblyReferences)
             {
                 if (assembly.AssemblyIdentity != null)
@@ -613,11 +629,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     // Check for two or more assemblies with the same identity...
                     string identity = assembly.AssemblyIdentity.GetFullName(AssemblyIdentity.FullNameFlags.All);
                     string key = identity.ToLowerInvariant();
-                    if (!identityList.ContainsKey(key))
+                    if (!identityList.TryGetValue(key, out bool value))
                     {
                         identityList.Add(key, false);
                     }
-                    else if (!identityList[key])
+                    else if (!value)
                     {
                         OutputMessages.AddWarningMessage("GenerateManifest.DuplicateAssemblyIdentity", identity);
                         identityList[key] = true; // only warn once per identity
@@ -689,7 +705,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                 }
 
-                // Either we are looking at the entry point assembly or the assembly is not platform neutral. 
+                // Either we are looking at the entry point assembly or the assembly is not platform neutral.
                 // We need to compare the application's platform to the component's platform,
                 // if they don't match then flag component as a mismatch...
                 return !String.Equals(AssemblyIdentity.ProcessorArchitecture, assembly.AssemblyIdentity.ProcessorArchitecture, StringComparison.OrdinalIgnoreCase);
@@ -757,22 +773,20 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     Debug.Fail("Comparing null objects");
                     return 0;
                 }
-                if (!(x is BaseReference) || !(y is BaseReference))
+
+                if (x is BaseReference xRef && y is BaseReference yRef)
                 {
-                    Debug.Fail("Comparing objects that are not BaseReferences");
-                    return 0;
+                    if (xRef.SortName == null || yRef.SortName == null)
+                    {
+                        Debug.Fail("Objects do not have a SortName");
+                        return 0;
+                    }
+
+                    return xRef.SortName.CompareTo(yRef.SortName);
                 }
 
-                BaseReference xRef = x as BaseReference;
-                BaseReference yRef = y as BaseReference;
-
-                if (xRef.SortName == null || yRef.SortName == null)
-                {
-                    Debug.Fail("Objects do not have a SortName");
-                    return 0;
-                }
-
-                return xRef.SortName.CompareTo(yRef.SortName);
+                Debug.Fail("Comparing objects that are not BaseReferences");
+                return 0;
             }
         }
 

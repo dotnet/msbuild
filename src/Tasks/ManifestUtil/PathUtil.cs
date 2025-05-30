@@ -1,9 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
 using System;
 using System.IO;
+#if !NET
+using System.Linq;
+#else
+using System.Text;
+#endif
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -33,23 +40,69 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return path.Split(MSBuildConstants.DirectorySeparatorChar);
         }
 
-        //Resolves the path, and if path is a url also canonicalizes it.
+        // Resolves the path, and if path is a url also canonicalizes it.
         public static string Format(string path)
         {
-            if (String.IsNullOrEmpty(path)) return path;
+            if (String.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
             string resolvedPath = Resolve(path);
             Uri u = new Uri(resolvedPath);
+            //
+            // GB18030: Uri class does not correctly encode chars in the PUA range for implicit 
+            // file paths (paths without explicit scheme):
+            // https://github.com/dotnet/runtime/issues/89538
+            // Workaround is to use UriBuilder with the file scheme specified explicitly to 
+            // correctly encode the PUA chars.
+            //
+            if (Uri.UriSchemeFile.Equals(u.Scheme, StringComparison.OrdinalIgnoreCase) &&
+                !IsAsciiString(resolvedPath))
+            {
+                UriBuilder builder = new UriBuilder()
+                {
+                    Scheme = Uri.UriSchemeFile,
+                    Host = string.Empty,
+                    Path = resolvedPath,
+                };
+                u = builder.Uri;
+            }
             return u.AbsoluteUri;
         }
 
         public static bool IsAssembly(string path)
         {
-            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
-            if (String.Equals(Path.GetExtension(path), ".application", StringComparison.Ordinal)) return true;
-            if (String.Equals(Path.GetExtension(path), ".manifest", StringComparison.Ordinal)) return true;
-            if (!IsProgramFile(path)) return false; // optimization, don't want to sniff every every kind of file -- just dll's or exe's
-            if (IsManagedAssembly(path)) return true;
-            if (IsNativeAssembly(path)) return true;
+            if (String.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (String.Equals(Path.GetExtension(path), ".application", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (String.Equals(Path.GetExtension(path), ".manifest", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (!IsProgramFile(path))
+            {
+                return false; // optimization, don't want to sniff every every kind of file -- just dll's or exe's
+            }
+
+            if (IsManagedAssembly(path))
+            {
+                return true;
+            }
+
+            if (IsNativeAssembly(path))
+            {
+                return true;
+            }
+
             return false;
         }
 
@@ -73,21 +126,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             Uri u = new Uri(path, UriKind.RelativeOrAbsolute);
             if (!u.IsAbsoluteUri)
+            {
                 return true;
+            }
+
             return String.IsNullOrEmpty(u.Host);
         }
 
         public static bool IsManagedAssembly(string path)
         {
-            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
+            if (String.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
             using (MetadataReader r = MetadataReader.Create(path))
+            {
                 return r != null;
+            }
         }
 
         public static bool IsNativeAssembly(string path)
         {
-            if (String.IsNullOrEmpty(path)) throw new ArgumentNullException(nameof(path));
-            if (String.Equals(Path.GetExtension(path), ".manifest", StringComparison.Ordinal)) return true;
+            if (String.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (String.Equals(Path.GetExtension(path), ".manifest", StringComparison.Ordinal))
+            {
+                return true;
+            }
+
             return EmbeddedManifestReader.Read(path) != null;
         }
 
@@ -96,7 +166,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             byte[] buffer = new byte[2];
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                s.Read(buffer, 0, 2);
+                s.ReadExactly(buffer, 0, 2);
             }
 
             // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
@@ -114,23 +184,37 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             Uri u;
             if (!Uri.TryCreate(path, UriKind.Absolute, out u) || u == null)
+            {
                 return false;
+            }
+
             return u.IsUnc;
         }
 
         public static bool IsUrl(string path)
         {
             if (!Uri.TryCreate(path, UriKind.Absolute, out Uri u) || u == null)
+            {
                 return false;
+            }
+
             return !u.IsUnc && !String.IsNullOrEmpty(u.Host);
         }
 
-        //If path is a url and starts with "localhost", resolves to machine name.
-        //If path is a relative path, resolves to a full path.
+        // If path is a url and starts with "localhost", resolves to machine name.
+        // If path is a relative path, resolves to a full path.
         public static string Resolve(string path)
         {
-            if (String.IsNullOrEmpty(path)) return path;
-            if (IsUncPath(path)) return path; // if it's UNC then do nothing
+            if (String.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            if (IsUncPath(path))
+            {
+                return path; // if it's UNC then do nothing
+            }
+
             if (IsUrl(path)) // if it's a URL then need to check for "localhost"...
             {
                 // Replace "localhost" with the actual machine name...
@@ -138,9 +222,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 var u = new Uri(path);
                 if (String.Equals(u.Host, localHost, StringComparison.OrdinalIgnoreCase))
                 {
-                    // Unfortunatly Uri.Host is read-only, so we need to reconstruct it manually...
+                    // Unfortunately Uri.Host is read-only, so we need to reconstruct it manually...
                     int i = path.IndexOf(localHost, StringComparison.OrdinalIgnoreCase);
-                    return i >= 0 ? path.Substring(0, i) + Environment.MachineName.ToLowerInvariant() + path.Substring(i + localHost.Length) : path;
+                    return i >= 0 ?
+#if NET
+                        $"{path.AsSpan(0, i)}{Environment.MachineName.ToLowerInvariant()}{path.AsSpan(i + localHost.Length)}" :
+#else
+                        $"{path.Substring(0, i)}{Environment.MachineName.ToLowerInvariant()}{path.Substring(i + localHost.Length)}" :
+#endif
+                        path;
                 }
                 return path;
             }
@@ -148,5 +238,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // if not unc or url then it must be a local disk path...
             return Path.GetFullPath(path); // make sure it's a full path
         }
+
+        private static bool IsAsciiString(string str) =>
+#if NET
+            Ascii.IsValid(str);
+#else
+            str.All(c => c <= 127);
+#endif
     }
 }

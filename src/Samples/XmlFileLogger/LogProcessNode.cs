@@ -1,15 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Linq;
 
+#nullable disable
+
 namespace Microsoft.Build.Logging.StructuredLogger
 {
     /// <summary>
-    /// Base class to represent a log node (e.g. Project, or Target) that can contain child node sub nodes 
+    /// Base class to represent a log node (e.g. Project, or Target) that can contain child node sub nodes
     /// and properties defined at that scope. Properties defined will be inherited from the parent if possible.
     /// </summary>
     internal abstract class LogProcessNode : ILogNode
@@ -151,7 +153,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         /// </summary>
         /// <typeparam name="T">Generic ILogNode type</typeparam>
         /// <param name="parentElement">The parent element.</param>
-        /// <param name="subNodeFactory">Delegate to create a new element to contain children. Will not be called if 
+        /// <param name="subNodeFactory">Delegate to create a new element to contain children. Will not be called if
         /// there are no children of the specified type.</param>
         protected void WriteChildren<T>(XElement parentElement, Func<XElement> subNodeFactory) where T : ILogNode
         {

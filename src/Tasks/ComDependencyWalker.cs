@@ -1,18 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
 using System.Globalization;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
+using System.Runtime.InteropServices.ComTypes;
 using COMException = System.Runtime.InteropServices.COMException;
+using Marshal = System.Runtime.InteropServices.Marshal;
 using VarEnum = System.Runtime.InteropServices.VarEnum;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
-    // Abstract the method for releasing COM objects for unit testing. 
+    // Abstract the method for releasing COM objects for unit testing.
     // Our mocks are not actually COM objects and they would blow up if passed to the real Marshal.ReleaseComObject.
     internal delegate int MarshalReleaseComObject(object o);
 
@@ -65,7 +66,7 @@ namespace Microsoft.Build.Tasks
                 this.index = index;
             }
 
-            public override string ToString()
+            public override readonly string ToString()
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}.{1}.{2}.{3}:{4}",
                     this.guid, this.wMajorVerNum,
@@ -216,7 +217,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            // Is this the Guid type? If so we should be using the corresponding .NET type. 
+            // Is this the Guid type? If so we should be using the corresponding .NET type.
             if (typeLibAttributes.guid == NativeMethods.IID_StdOle)
             {
                 typeInfo.GetDocumentation(-1, out string typeName, out _, out _, out _);
@@ -398,7 +399,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Clear the dependency list so we can read dependencies incrementally but still have the advantage of 
+        /// Clear the dependency list so we can read dependencies incrementally but still have the advantage of
         /// not scanning previously seen types
         /// </summary>
         internal void ClearDependencyList()
@@ -407,8 +408,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Clear the analyzed type cache.  This is necessary if we have to resolve dependencies that are also 
-        /// COM references in the project, or we may get an inaccurate view of what their dependencies are. 
+        /// Clear the analyzed type cache.  This is necessary if we have to resolve dependencies that are also
+        /// COM references in the project, or we may get an inaccurate view of what their dependencies are.
         /// </summary>
         internal void ClearAnalyzedTypeCache()
         {

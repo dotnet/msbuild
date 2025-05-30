@@ -1,19 +1,27 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
 using System;
-using Microsoft.Build.Framework;
+
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+#endif
+
+using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
+#if NETFRAMEWORK
+
     /// <summary>
     /// This task generates the application trust from the base manifest
     /// and the TargetZone and ExcludedPermissions properties.
     /// </summary>
-    public sealed class GenerateTrustInfo : TaskExtension
+    public sealed class GenerateTrustInfo : TaskExtension, IGenerateTrustInfoTaskContract
     {
         private const string Custom = "Custom";
 
@@ -85,16 +93,9 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("GenerateManifest.NoPermissionSetForTargetZone", dotNetVersion);
                 return false;
             }
-            catch (ArgumentException ex)
+            catch (ArgumentException ex) when (String.Equals(ex.ParamName, "TargetZone", StringComparison.OrdinalIgnoreCase))
             {
-                if (String.Equals(ex.ParamName, "TargetZone", StringComparison.OrdinalIgnoreCase))
-                {
-                    Log.LogWarningWithCodeFromResources("GenerateManifest.InvalidItemValue", "TargetZone", TargetZone);
-                }
-                else
-                {
-                    throw;
-                }
+                Log.LogWarningWithCodeFromResources("GenerateManifest.InvalidItemValue", "TargetZone", TargetZone);
             }
 
             // Write trust-info back to a stand-alone trust file
@@ -102,5 +103,48 @@ namespace Microsoft.Build.Tasks
 
             return true;
         }
+    }
+
+#else
+
+    public sealed class GenerateTrustInfo : TaskRequiresFramework, IGenerateTrustInfoTaskContract
+    {
+        public GenerateTrustInfo()
+            : base(nameof(GenerateTrustInfo))
+        {
+        }
+
+        #region Properties
+
+        public ITaskItem BaseManifest { get; set; }
+
+        public string ExcludedPermissions { get; set; }
+
+        public string TargetFrameworkMoniker { get; set; }
+
+        public string TargetZone { get; set; }
+
+        public ITaskItem[] ApplicationDependencies { get; set; }
+
+        [Output]
+        public ITaskItem TrustInfoFile { get; set; }
+
+        #endregion
+    }
+
+#endif
+
+    internal interface IGenerateTrustInfoTaskContract
+    {
+        #region Properties
+
+        ITaskItem BaseManifest { get; set; }
+        string ExcludedPermissions { get; set; }
+        string TargetFrameworkMoniker { get; set; }
+        string TargetZone { get; set; }
+        ITaskItem[] ApplicationDependencies { get; set; }
+        ITaskItem TrustInfoFile { get; set; }
+
+        #endregion
     }
 }

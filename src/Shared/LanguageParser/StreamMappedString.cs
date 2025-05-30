@@ -1,16 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Text;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
     /// <summary>
     /// A class with string-like semantics mapped over a Stream.
     /// </summary>
-    sealed internal class StreamMappedString
+    internal sealed class StreamMappedString
     {
         /// <summary>
         /// The raw binary stream that's being read.
@@ -23,7 +25,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         private StreamReader _reader;
 
         /// <summary>
-        /// When false, try to guess the encoding of binaryStream. When true, force the 
+        /// When false, try to guess the encoding of binaryStream. When true, force the
         /// encoding to ANSI.
         /// </summary>
         private bool _forceANSI;
@@ -105,27 +107,23 @@ namespace Microsoft.Build.Shared.LanguageParser
 
             if (_forceANSI)
             {
-                _reader = new StreamReader // HIGHCHAR: Falling back to ANSI for VB source files.
-                    (
+                _reader = new StreamReader( // HIGHCHAR: Falling back to ANSI for VB source files.
                     _binaryStream,
 #if FEATURE_ENCODING_DEFAULT
-                    Encoding.Default,    // Default means ANSI. 
+                    Encoding.Default,    // Default means ANSI.
 #else
                     Encoding.ASCII,
 #endif
-                    false                // If the reader had been able to guess the encoding it would have done so already.
-                    );
+                    false);                // If the reader had been able to guess the encoding it would have done so already.
             }
             else
             {
                 Encoding utf8Encoding = new UTF8Encoding(false, true /* throw on illegal bytes */);
 
-                _reader = new StreamReader // HIGHCHAR: VB and C# source files are assumed to be UTF if there are no byte-order marks.
-                    (
+                _reader = new StreamReader( // HIGHCHAR: VB and C# source files are assumed to be UTF if there are no byte-order marks.
                         _binaryStream,
                         utf8Encoding,
-                        true            // Ask the reader to try to guess the file's encoding.
-                    );
+                        true);            // Ask the reader to try to guess the file's encoding.
             }
         }
 

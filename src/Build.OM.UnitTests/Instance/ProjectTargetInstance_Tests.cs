@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
-using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -110,7 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             try
             {
-                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                path = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                 ProjectRootElement projectXml = ProjectRootElement.Create(path);
                 projectXml.Save();
 
@@ -133,14 +134,15 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         private static ProjectTargetInstance GetSampleTargetInstance()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t' Inputs='i' Outputs='o' Condition='c' DependsOnTargets='d' BeforeTargets='b' AfterTargets='a' KeepDuplicateOutputs='k' Returns='r'>
                             <t1/>
                         </Target>
                     </Project>
                 ";
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             ProjectInstance instance = project.CreateProjectInstance();
             ProjectTargetInstance target = instance.Targets["t"];

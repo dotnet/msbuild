@@ -1,14 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.InteropUtilities
 {
     /// <summary>
-    /// Create an RCW for the current context/apartment. 
+    /// Create an RCW for the current context/apartment.
     /// This improves performance of cross apartment calls as the CLR will only
     /// cache marshalled pointers for an RCW created in the current context.
     /// </summary>
@@ -31,8 +33,8 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         /// <param name="rcw">The RCW created in the original context.</param>
         public RCWForCurrentContext(T rcw)
         {
-            // To improve performance we create a new RCW for the current context so we get 
-            // the caching behaviour of the marshaled pointer. 
+            // To improve performance we create a new RCW for the current context so we get
+            // the caching behaviour of the marshaled pointer.
             // See RCW::GetComIPForMethodTableFromCache in ndp\clr\src\VM\RuntimeCallableWrapper.cpp
             IntPtr iunknownPtr = Marshal.GetIUnknownForObject(rcw);
             Object objInCurrentCtx;
@@ -62,7 +64,7 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         }
 
         /// <summary>
-        /// Finalizer
+        /// Finalizes an instance of the <see cref="RCWForCurrentContext{T}"/> class.
         /// </summary>
         ~RCWForCurrentContext()
         {

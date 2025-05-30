@@ -1,19 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using System;
 using System.IO;
 using System.Text;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Appends a list of items to a file. One item per line with carriage returns in-between.
     /// </summary>
-    public class WriteLinesToFile : TaskExtension
+    public class WriteLinesToFile : TaskExtension, IIncrementalTask
     {
         // Default encoding taken from System.IO.WriteAllText()
         private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
@@ -45,6 +48,16 @@ namespace Microsoft.Build.Tasks
         /// timestamp will be preserved.
         /// </summary>
         public bool WriteOnlyWhenDifferent { get; set; }
+
+        /// <summary>
+        /// Question whether this task is incremental.
+        /// </summary>
+        /// <remarks>When question is true, then error out if WriteOnlyWhenDifferent would have
+        /// written to the file.</remarks>
+        public bool FailIfNotIncremental { get; set; }
+
+        [Obsolete]
+        public bool CanBeIncremental => WriteOnlyWhenDifferent;
 
         /// <summary>
         /// Execute the task.
@@ -107,6 +120,11 @@ namespace Microsoft.Build.Tasks
                                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(spec, true);
                                             return true;
                                         }
+                                        else if (FailIfNotIncremental)
+                                        {
+                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                            return false;
+                                        }
                                     }
                                 }
                             }
@@ -121,13 +139,19 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
+                        if (WriteOnlyWhenDifferent)
+                        {
+                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
+                        }
+
                         Directory.CreateDirectory(directoryPath);
                         System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(File.ItemSpec);
+                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message, lockedFileMessage);
                     success = false;
                 }
             }

@@ -1,13 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_STRONG_NAMES
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Runtime.Hosting
 {
@@ -43,11 +45,10 @@ namespace Microsoft.Runtime.Hosting
                     if (s_GetRuntimeInterfaceAsObjectMethod != null)
                     {
                         s_StrongName = (IClrStrongName)s_GetRuntimeInterfaceAsObjectMethod.Invoke(null,
-                            new object[]
-                            {
+                            [
                                 new Guid("B79B0ACD-F5CD-409b-B5A5-A16244610B92"),
                                 new Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")
-                            });
+                            ]);
                     }
                 }
                 return s_StrongName;
@@ -305,7 +306,10 @@ namespace Microsoft.Runtime.Hosting
     /// version of the interface.
     /// </summary>
     [System.Security.SecurityCritical]
-    [ComImport, ComConversionLoss, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
+    [ComImport]
+    [ComConversionLoss]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
     internal interface IClrStrongNameUsingIntPtr
     {
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
@@ -516,14 +520,17 @@ namespace Microsoft.Runtime.Hosting
 
     /// <summary>
     /// This is a managed wrapper for the IClrStrongName interface defined in metahost.idl
-    /// This is very similar to the standard RCWs provided in 
+    /// This is very similar to the standard RCWs provided in
     /// ndp/fx/src/hosting/interop/microsoft/runtime/hosting/interop, but we don't want to
     /// reference that assembly (part of the SDK only, not .NET redist).  Also, our version
     /// is designed specifically for easy migration from the old mscoree APIs, for example
     /// all APIs return HResults rather than throw exceptions.
-    /// </summary> 
+    /// </summary>
     [System.Security.SecurityCritical]
-    [ComImport, ComConversionLoss, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
+    [ComImport]
+    [ComConversionLoss]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
     internal interface IClrStrongName
     {
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
