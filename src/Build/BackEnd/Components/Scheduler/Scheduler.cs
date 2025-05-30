@@ -444,30 +444,38 @@ namespace Microsoft.Build.BackEnd
                         // There are other requests which we can satisfy based on this result, lets pull the result out of the cache
                         // and satisfy those requests.  Normally a skipped result would lead to the cache refusing to satisfy the
                         // request, because the correct response in that case would be to attempt to rebuild the target in case there
-                        // are state changes that would cause it to now excute.  At this point, however, we already know that the parent
+                        // are state changes that would cause it to now execute.  At this point, however, we already know that the parent
                         // request has completed, and we already know that this request has the same global request ID, which means that
                         // its configuration and set of targets are identical -- from MSBuild's perspective, it's the same.  So since
                         // we're not going to attempt to re-execute it, if there are skipped targets in the result, that's fine. We just
                         // need to know what the target results are so that we can log them.
                         ScheduleResponse response = TrySatisfyRequestFromCache(parentNode, unscheduledRequest.BuildRequest, skippedResultsDoNotCauseCacheMiss: true);
 
-                        // If we have a response we need to tell the loggers that we satisified that request from the cache.
+                        // If we have a response we need to tell the loggers that we satisfied that request from the cache.
                         if (response != null)
                         {
                             LogRequestHandledFromCache(unscheduledRequest.BuildRequest, response.BuildResult);
+
+                            // Mark the request as complete (and the parent is no longer blocked by this request.)
+                            unscheduledRequest.Complete(newResult);
+                            responses.Add(response);
                         }
                         else
                         {
-                            // Response may be null if the result was never added to the cache. This can happen if the result has
-                            // an exception in it. If that is the case, we should report the result directly so that the
-                            // build manager knows that it needs to shut down logging manually.
-                            response = GetResponseForResult(parentNode, unscheduledRequest.BuildRequest, newResult.Clone());
+                            // This is a critical error case where a result should be in the cache but isn't.
+                            // The result might be missing from the cache if:
+                            // 1. The result contained an exception that prevented it from being cached properly
+                            // 2. The result was for a skipped target that couldn't satisfy all dependencies
+
+                            // Now scheduler will handle this situation automatically - the unscheduled request remains
+                            // in the unscheduled queue (_schedulingData.UnscheduledRequests) and will be picked up
+                            // in the next ScheduleUnassignedRequests execution to be properly rebuilt.
+
+                            // IMPORTANT: In earlier versions, we would hit this code path and did not handle it properly,
+                            // which caused deadlocks/hangs in Visual Studio. Without completing the request's
+                            // logging lifecycle, VS would never receive the completion callback and would wait
+                            // indefinitely, freezing the UI.
                         }
-
-                        responses.Add(response);
-
-                        // Mark the request as complete (and the parent is no longer blocked by this request.)
-                        unscheduledRequest.Complete(newResult);
                     }
                 }
             }
