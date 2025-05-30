@@ -953,18 +953,30 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
-                    try
+                    // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
+                    bool shouldUseTaskHost = ShouldUseTaskHostForCustomFactory();
+
+                    if (shouldUseTaskHost)
                     {
-                        task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                            taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
-                            _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                        // Create a TaskHostTask to run the custom factory's task out of process
+                        task = CreateTaskHostTaskForCustomFactory(taskIdentityParameters);
                     }
-                    finally
+                    else
                     {
+                        // Normal in-process execution for custom task factories
+                        TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
+                        try
+                        {
+                            task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
+                                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
+                                _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                        }
+                        finally
+                        {
 #if FEATURE_APPDOMAIN
-                        loggingHost.MarkAsInactive();
+                            loggingHost.MarkAsInactive();
 #endif
+                        }
                     }
                 }
             }
@@ -1661,6 +1673,100 @@ namespace Microsoft.Build.BackEnd
                 // We can get an exception from this when we encounter a race between a task finishing and a cancel occurring.  In this situation
                 // if the task logging context is no longer valid, we choose to eat the exception because we can't log the message anyway.
             }
+        }
+
+        /// <summary>
+        /// Determines whether custom (non-AssemblyTaskFactory) task factories should use task host for out-of-process execution.
+        /// </summary>
+        /// <returns>True if tasks from custom factories should run out of process</returns>
+        private bool ShouldUseTaskHostForCustomFactory()
+        {
+            // Check the global environment variable that forces all tasks out of process
+            bool forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
+
+            if (!forceTaskHostLaunch)
+            {
+                return false;
+            }
+
+            // Exclude well-known tasks that are known to depend on IBuildEngine callbacks
+            // as forcing those out of proc would set them up for known failure
+            if (TypeLoader.IsPartialTypeNameMatch(_taskName, "MSBuild") ||
+                TypeLoader.IsPartialTypeNameMatch(_taskName, "CallTarget"))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Creates a TaskHostTask wrapper to run a custom factory's task out of process.
+        /// </summary>
+        /// <param name="taskIdentityParameters">Task identity parameters</param>
+        /// <returns>A TaskHostTask that will execute the real task out of process</returns>
+        private ITask CreateTaskHostTaskForCustomFactory(IDictionary<string, string> taskIdentityParameters)
+        {
+            // First, create the actual task using the custom factory
+            TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
+            ITask actualTask;
+
+            try
+            {
+                actualTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
+                    taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
+                    _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+            }
+            finally
+            {
+#if FEATURE_APPDOMAIN
+                loggingHost.MarkAsInactive();
+#endif
+            }
+
+            if (actualTask == null)
+            {
+                return null;
+            }
+
+            // Create a LoadedType for the actual task type so we can wrap it in TaskHostTask
+            Type taskType = actualTask.GetType();
+            LoadedType taskLoadedType = new LoadedType(
+                taskType,
+                AssemblyLoadInfo.Create(taskType.Assembly.FullName, taskType.Assembly.Location),
+                taskType.Assembly,
+                typeof(ITaskItem));
+
+            // Create task host parameters for out-of-process execution
+            IDictionary<string, string> taskHostParameters = new Dictionary<string, string>
+            {
+                [XMakeAttributes.runtime] = XMakeAttributes.GetCurrentMSBuildRuntime(),
+                [XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture()
+            };
+
+            // Merge with any existing task identity parameters
+            if (taskIdentityParameters != null)
+            {
+                foreach (var kvp in taskIdentityParameters)
+                {
+                    taskHostParameters[kvp.Key] = kvp.Value;
+                }
+            }
+
+            // Clean up the original task since we're going to wrap it
+            // _taskFactoryWrapper.TaskFactory.CleanupTask(actualTask);            // Create and return the TaskHostTask wrapper
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            return new TaskHostTask(
+                _taskLocation,
+                _taskLoggingContext,
+                _buildComponentHost,
+                taskHostParameters,
+                taskLoadedType
+#if FEATURE_APPDOMAIN
+                , AppDomainSetup
+#endif
+                );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         }
     }
 }
