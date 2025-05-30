@@ -13,7 +13,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Evaluation;
 
 #nullable disable
@@ -121,7 +120,7 @@ namespace Microsoft.Build.BackEnd
             _packetReceivedEvent = new AutoResetEvent(false);
             _shutdownEvent = new AutoResetEvent(false);
 
-            //_buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
+            // _buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
             var buildRequestEngine = BuildRequestEngine.CreateComponent(BuildComponentType.RequestEngine);
             buildRequestEngine.InitializeComponent(componentHost);
             _buildRequestEngine = (IBuildRequestEngine)buildRequestEngine;

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -20,7 +20,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// Set of files in ALL AssemblyFolderFromConfig directories
         /// </summary>
-        private readonly HashSet<string> _filesInDirectories;
+        private readonly ImmutableHashSet<string> _filesInDirectories;
 
         /// <summary>
         /// File exists delegate we are replacing

@@ -1,4 +1,7 @@
-﻿using Microsoft.Build.Framework;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -28,7 +31,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             _temp_directory = Path.GetTempPath();
             _test_assembly_name = Guid.NewGuid() + ".UnitTest.TestAssemply.dll";
             _test_assembly_path = Path.Combine(_temp_directory, _test_assembly_name);
-            File.Create(_test_assembly_path);
+            File.Create(_test_assembly_path).Dispose();
             _output = output;
         }
         public void Dispose()
@@ -140,7 +143,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 new TaskItem("System.Xml"), new TaskItem("System.Nonexistent")
             };
             rarTask.SearchPaths = new string[] {
-                Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
+                Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName) ?? string.Empty,
                 "{AssemblyFolders}",
                 "{HintPathFromItem}",
                 "{RawFileName}",

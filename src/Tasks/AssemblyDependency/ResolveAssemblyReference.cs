@@ -3292,7 +3292,7 @@ namespace Microsoft.Build.Tasks
             _concurrencyExecutionContext = executionContext;
         }
         
-        void AbsolutizePathsInInputs()
+        private void AbsolutizePathsInInputs()
         {
 
             for (int i = 0; i < _candidateAssemblyFiles.Length; i++)
@@ -3340,6 +3340,5 @@ namespace Microsoft.Build.Tasks
                 _resolvedSDKReferences[i].ItemSpec = _concurrencyExecutionContext.GetFullPath(_resolvedSDKReferences[i].ItemSpec);
             }
         }
-
     }
 }

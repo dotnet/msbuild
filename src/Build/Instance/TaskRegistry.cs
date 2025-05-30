@@ -23,7 +23,6 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
-using Microsoft.NET.StringTools;
 using System.Runtime.CompilerServices;
 
 #nullable disable

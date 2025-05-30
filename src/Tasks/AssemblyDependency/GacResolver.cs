@@ -39,8 +39,7 @@ namespace Microsoft.Build.Tasks
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVesion,
             GetAssemblyPathInGac getAssemblyPathInGac,
-            TaskExecutionContext executionContext
-        )
+            TaskExecutionContext executionContext)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, true, executionContext)
         {
             _getAssemblyPathInGac = getAssemblyPathInGac;

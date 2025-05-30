@@ -110,8 +110,7 @@ namespace Microsoft.Build.Tasks
             ProcessorArchitecture targetProcessorArchitecture,
             bool compareProcessorArchitecture,
             IBuildEngine buildEngine,
-            TaskExecutionContext executionContext
-        )
+            TaskExecutionContext executionContext)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, compareProcessorArchitecture, executionContext)
         {
             _buildEngine = buildEngine as IBuildEngine4;

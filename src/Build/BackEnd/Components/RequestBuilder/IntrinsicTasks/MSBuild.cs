@@ -385,7 +385,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", _skipNonexistentProjects);
+                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonExistProjects);
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", projectPath);
                         success = false;
                     }

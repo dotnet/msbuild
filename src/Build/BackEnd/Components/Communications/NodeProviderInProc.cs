@@ -6,14 +6,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Diagnostics;
 using System.Threading;
-using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #if FEATURE_THREAD_CULTURE
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
-#else
-using System.Globalization;
 #endif
 using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 
@@ -154,7 +151,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The data to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(nodeId == _inProcNodeId, "node");
             ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
 
             lock (_nodeContexts)

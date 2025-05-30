@@ -68,8 +68,7 @@ namespace Microsoft.Build.Tasks
             Version targetedRuntimeVersion,
             ProcessorArchitecture targetedProcessorArchitecture,
             bool compareProcessorArchitecture,
-            TaskExecutionContext executionContext
-        )
+            TaskExecutionContext executionContext)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;

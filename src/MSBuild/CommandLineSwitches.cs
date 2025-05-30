@@ -114,16 +114,12 @@ namespace Microsoft.Build.CommandLine
             LowPriority,
             Question,
             DetailedSummary,
-<<<<<<< HEAD
             MultiThreaded,
-=======
             GetProperty,
             GetItem,
             GetTargetResult,
             GetResultOutputFile,
             FeatureAvailability,
-            // This has to be kept as last enum value
->>>>>>> main
             NumberOfParameterizedSwitches,
         }
 

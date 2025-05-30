@@ -33,15 +33,6 @@ namespace Microsoft.Build.Tasks
             this.parentAssembly = parentAssembly;
         }
 
-        /// <summary>
-        /// Construct.
-        /// </summary>
-        public DirectoryResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, string parentAssembly)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
-        {
-            this.parentAssembly = parentAssembly;
-        }
-
         /// <inheritdoc/>
         public override bool Resolve(
             AssemblyNameExtension assemblyName,

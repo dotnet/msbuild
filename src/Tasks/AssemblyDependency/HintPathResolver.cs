@@ -25,11 +25,9 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVesion,
-            TaskExecutionContext executionContext
-        )
+            TaskExecutionContext executionContext)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false, executionContext)
-        {
-        }
+        { }
 
         /// <inheritdoc/>
         public override bool Resolve(

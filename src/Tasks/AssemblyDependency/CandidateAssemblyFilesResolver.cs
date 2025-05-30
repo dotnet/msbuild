@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Build.Shared;
-using System.Diagnostics;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -40,8 +39,7 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVesion,
-            TaskExecutionContext executionContext
-        )
+            TaskExecutionContext executionContext)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false, executionContext)
         {
             _candidateAssemblyFiles = candidateAssemblyFiles;

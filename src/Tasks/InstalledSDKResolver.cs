@@ -31,8 +31,7 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetAssemblyRuntimeVersion getRuntimeVersion,
             Version targetedRuntimeVesion,
-            TaskExecutionContext executionContext
-        )
+            TaskExecutionContext executionContext)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, executionContext)
         {
             _resolvedSDKs = resolvedSDKs;

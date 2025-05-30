@@ -3269,41 +3269,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
         
         /// <summary>
-        /// Generate a fake reference which has been resolved from the gac. We will use it to verify the creation of the exclusion list.
-        /// </summary>
-        /// <returns></returns>
-        private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
-        {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, new string[0], null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
-#if FEATURE_WIN32_REGISTRY
-                null, null, null,
-#endif
-                null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, new TaskExecutionContext());
-
-            AssemblyNameExtension assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
-            TaskItem taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-
-            Reference reference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
-            reference.MakePrimaryAssemblyReference(taskItem, false, ".dll");
-            // "Resolve the assembly from the gac"
-            reference.FullPath = "c:\\Microsoft.VisualStudio.Interopt.dll";
-            reference.ResolvedSearchPath = location;
-            referenceTable.AddReference(assemblyNameExtension, reference);
-
-            assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Team.System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
-            taskItem = new TaskItem("Team, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-
-            reference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
-            reference.MakePrimaryAssemblyReference(taskItem, false, ".dll");
-
-            // "Resolve the assembly from the gac"
-            reference.FullPath = "c:\\Team.System.dll";
-            reference.ResolvedSearchPath = location;
-            referenceTable.AddReference(assemblyNameExtension, reference);
-            return referenceTable;
-        }
-
-        /// <summary>
         /// Given a reference that resolves to a bad image, we should get a warning and
         /// no reference. We don't want an exception.
         /// </summary>
