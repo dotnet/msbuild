@@ -224,8 +224,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static Manifest Deserialize(Stream s)
         {
             s.Position = 0;
-            var r = new XmlTextReader(s) { DtdProcessing = DtdProcessing.Ignore };
-
+            var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = false };
+            using XmlReader r = XmlReader.Create(s, settings);
             do
             {
                 r.Read();
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var xs = new XmlSerializer(t);
 
             int t1 = Environment.TickCount;
-            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = false };
             using (XmlReader xr = XmlReader.Create(s, xrSettings))
             {
                 var m = (Manifest)xs.Deserialize(xr);

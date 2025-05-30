@@ -21,12 +21,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>A project instance.</returns>
         internal static ProjectInstance CreateEmptyProjectInstance()
         {
-            XmlReader reader = XmlReader.Create(new StringReader(
-                @"<Project>
+            using ProjectFromString projectFromString = new( @"<Project>
                       <Target Name='foo'/>
-                  </Project>"));
-
-            Project project = new Project(reader);
+                  </Project>");
+            Project project = projectFromString.Project;
             ProjectInstance instance = project.CreateProjectInstance();
 
             return instance;

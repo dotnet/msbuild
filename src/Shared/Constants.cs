@@ -203,6 +203,8 @@ namespace Microsoft.Build.Shared
         internal const string assemblyName = "AssemblyName";
         internal const string assemblyVersion = "AssemblyVersion";
         internal const string publicKeyToken = "PublicKeyToken";
+        internal const string culture = "Culture";
+        internal const string withCulture = "WithCulture";
 
         /// <summary>
         /// The output path for a given item.

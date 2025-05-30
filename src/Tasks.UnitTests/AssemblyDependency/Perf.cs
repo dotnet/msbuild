@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing Perf.AutoUnifyUsesMinimumIO() test");
 
-            StronglyNamedDependencyAutoUnify t = new StronglyNamedDependencyAutoUnify(_output);
+            using StronglyNamedDependencyAutoUnify t = new StronglyNamedDependencyAutoUnify(_output);
 
             try
             {

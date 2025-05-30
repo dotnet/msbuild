@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
@@ -33,6 +34,7 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
+            [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]
             protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 ImmutableArray<I>.Builder? itemsToAdd = null;
@@ -107,14 +109,14 @@ namespace Microsoft.Build.Evaluation
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
                             }
 
-                            using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                            using (_lazyEvaluator?._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                             {
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
                                     excludePatternsForGlobs,
                                     fileMatcher: FileMatcher,
-                                    loggingMechanism: _lazyEvaluator._loggingContext,
+                                    loggingMechanism: _lazyEvaluator?._loggingContext,
                                     includeLocation: _itemElement.IncludeLocation,
                                     excludeLocation: _itemElement.ExcludeLocation);
                             }

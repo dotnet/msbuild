@@ -730,13 +730,14 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
             // Should not throw ...
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry);
         }
@@ -757,13 +758,14 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
             // Should not throw ...
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry);
 
@@ -1004,13 +1006,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -1055,13 +1058,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.None);
 
@@ -1110,13 +1114,14 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry);
 
@@ -1165,13 +1170,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry);
 
@@ -1195,13 +1201,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Registry);
 
@@ -1273,13 +1280,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.ConfigurationFile);
 
@@ -1324,13 +1332,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -1620,11 +1629,12 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            null,
                                                            GetStandardConfigurationReader(),
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
 
                                                            ToolsetDefinitionLocations.ConfigurationFile);
@@ -1779,13 +1789,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                            values,
                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                            GetStandardConfigurationReader(),
 #endif
-                                           new ProjectCollection().EnvironmentProperties,
+                                           collection.EnvironmentProperties,
                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                            ToolsetDefinitionLocations.Registry);
 
@@ -1838,13 +1849,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                            values,
                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                            GetStandardConfigurationReader(),
 #endif
-                                           new ProjectCollection().EnvironmentProperties,
+                                           collection.EnvironmentProperties,
                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                            ToolsetDefinitionLocations.ConfigurationFile);
 
@@ -1880,13 +1892,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -1924,13 +1937,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -1972,13 +1986,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2006,7 +2021,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection projectCollection = new ProjectCollection();
+                using ProjectCollection projectCollection = new ProjectCollection();
 
                 string msbuildOverrideTasksPath = null;
                 projectCollection.AddToolset(new Toolset("2.0", "20toolsPath", projectCollection, msbuildOverrideTasksPath));
@@ -2055,13 +2070,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2085,13 +2101,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2108,13 +2125,14 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2236,13 +2254,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2279,13 +2298,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2327,13 +2347,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2374,13 +2395,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2412,13 +2434,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2452,13 +2475,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2492,13 +2516,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2532,13 +2557,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
+                                                           collection.EnvironmentProperties,
                                                            new PropertyDictionary<ProjectPropertyInstance>(),
                                                            ToolsetDefinitionLocations.Default);
 
@@ -2578,14 +2604,15 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new ProjectCollection().GlobalPropertiesCollection,
+                                                           collection.EnvironmentProperties,
+                                                           collection.GlobalPropertiesCollection,
                                                            ToolsetDefinitionLocations.Default);
 
             Assert.Equal("v1", values["4.0"].Properties["p1"].EvaluatedValue);
@@ -2626,14 +2653,15 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
+            using var collection = new ProjectCollection();
             ToolsetReader.ReadAllToolsets(
                                                            values,
                                                            GetStandardRegistryReader(),
 #if FEATURE_SYSTEM_CONFIGURATION
                                                            GetStandardConfigurationReader(),
 #endif
-                                                           new ProjectCollection().EnvironmentProperties,
-                                                           new ProjectCollection().GlobalPropertiesCollection,
+                                                           collection.EnvironmentProperties,
+                                                           collection.GlobalPropertiesCollection,
                                                            ToolsetDefinitionLocations.Default);
 
             Assert.Equal("Microsoft.NET", values["4.0"].Properties["p1"].EvaluatedValue);
@@ -2673,7 +2701,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Dictionary<string, string> globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globalProperties["gp1"] = "gv1";
-            ProjectCollection e = new ProjectCollection(globalProperties, null, ToolsetDefinitionLocations.None);
+            using ProjectCollection e = new ProjectCollection(globalProperties, null, ToolsetDefinitionLocations.None);
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
             ToolsetReader.ReadAllToolsets(
@@ -2694,13 +2722,18 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private ToolsetRegistryReader GetStandardRegistryReader()
         {
-            return new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new MockRegistryKey(testRegistryPath));
+            using var collection = new ProjectCollection();
+#pragma warning disable CA2000 // The return object depends on the registry key that should not be disposed in this scope.
+            var registryKey = new MockRegistryKey(testRegistryPath);
+#pragma warning restore CA2000 // The return object depends on the registry key that should not be disposed in this scope.
+            return new ToolsetRegistryReader(collection.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), registryKey);
         }
 
 #if FEATURE_SYSTEM_CONFIGURATION
         private ToolsetConfigurationReader GetStandardConfigurationReader()
         {
-            return new ToolsetConfigurationReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
+            using var collection = new ProjectCollection();
+            return new ToolsetConfigurationReader(collection.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest);
         }
 #endif
     }

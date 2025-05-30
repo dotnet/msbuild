@@ -52,6 +52,11 @@ internal sealed class Project
     public bool IsTestProject { get; set; }
 
     /// <summary>
+    /// True when the project has run target with name "_CachePluginRunStart" defined in <see cref="TerminalLogger._cachePluginStartTarget"/>.
+    /// </summary>
+    public bool IsCachePluginProject { get; set; }
+
+    /// <summary>
     /// A lazily initialized list of build messages/warnings/errors raised during the build.
     /// </summary>
     public List<BuildMessage>? BuildMessages { get; private set; }

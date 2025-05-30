@@ -372,6 +372,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     MSBuildEventSource.Log.SdkResolverResolveSdkStart();
                     result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
+
+                    // We have had issues, for example dotnet/msbuild/issues/9537, where the SDK resolver returned null as particular warnings or errors.
+                    // Since this can be caused by custom and 3rd party SDK resolvers, we want to log this information to help diagnose the issue.
+                    if (result?.Warnings?.Any(s => s is null) == true || result?.Errors?.Any(s => s is null) == true)
+                    {
+                        loggingContext.LogComment(MessageImportance.Low, "SDKResolverNullMessage", sdkResolver.Name, sdk.ToString());
+                    }
                 }
                 catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
@@ -481,7 +488,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             foreach (string warning in warnings)
             {
-                loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
+                // Do not fail on returned null messages
+                if (!string.IsNullOrWhiteSpace(warning))
+                {
+                    loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
+                }
             }
         }
 

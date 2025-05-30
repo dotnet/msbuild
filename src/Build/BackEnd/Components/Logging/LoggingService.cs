@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -1232,7 +1233,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent)
+        protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
@@ -1758,8 +1759,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
                 Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
 
-                // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
-                // where we must log everything. They can be ignored in inproc nodes.
+                // The BuildCheck connector logger consumes only high priority messages.
+                BuildCheckForwardingLogger => MessageImportance.High,
+                BuildCheckConnectorLogger => MessageImportance.High,
+
+                // If this is not an OutOfProc node, we can ignore the central forwarding logger, because we'll be
+                // setting the message importance to accurate level based on the exact needs of the central logger.
+                // That will happen in separate call to this method, with the central logger itself. This is because in the
+                // inproc case, we register the central loggers (that are the destination for the logging),
+                // wherease in the out-of-proc case, we register the forwarding loggers only - and those need to make sure
+                // to forward at minimum what is required by the central logger.
                 CentralForwardingLogger => (_nodeId > 1 ? MessageImportance.Low : null),
 
                 // The null logger has no effect on minimum verbosity.

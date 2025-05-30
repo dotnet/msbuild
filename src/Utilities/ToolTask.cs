@@ -1172,7 +1172,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.EventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveExitNotification(object sender, EventArgs e)
+        protected void ReceiveExitNotification(object sender, EventArgs e)
         {
             ErrorUtilities.VerifyThrow(_toolExited != null,
                 "The signalling event for tool exit must be available.");
@@ -1195,7 +1195,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
+        protected void ReceiveStandardErrorData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardErrorData, _standardErrorDataAvailable);
 
         /// <summary>
         /// Queues up the output from the stdout stream of the process executing
@@ -1206,7 +1206,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This method is used as a System.Diagnostics.DataReceivedEventHandler delegate.</remarks>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
+        protected void ReceiveStandardOutputData(object sender, DataReceivedEventArgs e) => ReceiveStandardErrorOrOutputData(e, _standardOutputData, _standardOutputDataAvailable);
 
         /// <summary>
         /// Queues up the output from either the stderr or stdout stream of the

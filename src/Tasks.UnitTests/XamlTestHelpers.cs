@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
 
             TaskGenerator tg = new TaskGenerator(tp);
             CodeCompileUnit compileUnit = tg.GenerateCode();
-            CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
+            using CodeDomProvider codeGenerator = CodeDomProvider.CreateProvider("CSharp");
 
             using (StringWriter sw = new StringWriter(CultureInfo.CurrentCulture))
             {
@@ -135,7 +135,7 @@ namespace Microsoft.Build.UnitTests
                 options.BracingStyle = "C";
 
                 codeGenerator.GenerateCodeFromCompileUnit(compileUnit, sw, options);
-                CSharpCodeProvider provider = new CSharpCodeProvider();
+                using CSharpCodeProvider provider = new CSharpCodeProvider();
                 // Build the parameters for source compilation.
                 CompilerParameters cp = new CompilerParameters();
 

@@ -475,6 +475,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
+
                 return new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,
@@ -698,9 +699,21 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (IsCacheable)
                     {
-                        using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
+                        string cacheFile = GetCacheFile();
+                        try
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+                            using Stream stream = File.Create(cacheFile);
+                            using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream, stream);
 
-                        _project.Cache(translator);
+                            _project.Cache(translator);
+                        }
+                        catch (Exception e) when (e is DirectoryNotFoundException or UnauthorizedAccessException)
+                        {
+                            ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
+                            throw;
+                        }
+
                         _baseLookup = null;
 
                         IsCached = true;
@@ -726,9 +739,19 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
+                string cacheFile = GetCacheFile();
+                try
+                {
+                    using Stream stream = File.OpenRead(cacheFile);
+                    using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream, stream);
 
-                _project.RetrieveFromCache(translator);
+                    _project.RetrieveFromCache(translator);
+                }
+                catch (Exception e) when (e is DirectoryNotFoundException or UnauthorizedAccessException)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
+                    throw;
+                }
 
                 IsCached = false;
             }
@@ -939,6 +962,7 @@ namespace Microsoft.Build.BackEnd
         internal string GetCacheFile()
         {
             string filename = Path.Combine(FileUtilities.GetCacheDirectory(), String.Format(CultureInfo.InvariantCulture, "Configuration{0}.cache", _configId));
+
             return filename;
         }
 
@@ -1024,27 +1048,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private ITranslator GetConfigurationTranslator(TranslationDirection direction)
-        {
-            string cacheFile = GetCacheFile();
-            try
-            {
-                if (direction == TranslationDirection.WriteToStream)
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                    return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
-                }
-                else
-                {
+        private ITranslator GetConfigurationTranslator(TranslationDirection direction, Stream stream) =>
+            direction == TranslationDirection.WriteToStream
+                    ? BinaryTranslator.GetWriteTranslator(stream)
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
-                }
-            }
-            catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)
-            {
-                ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
-                throw;
-            }
-        }
+                    : BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
     }
 }

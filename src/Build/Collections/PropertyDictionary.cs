@@ -135,16 +135,7 @@ namespace Microsoft.Build.Collections
         /// Returns the number of properties in the collection
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        int ICollection<KeyValuePair<string, T>>.Count
-        {
-            get
-            {
-                lock (_properties)
-                {
-                    return ((ICollection<T>)_properties).Count;
-                }
-            }
-        }
+        int ICollection<KeyValuePair<string, T>>.Count => Count;
 
         /// <summary>
         /// Whether the collection is read-only.
@@ -155,7 +146,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Returns the number of property in the collection.
         /// </summary>
-        internal int Count
+        public int Count
         {
             get
             {

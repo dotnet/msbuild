@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                     File.WriteAllText(path, content);
 
                     ProjectStringCache cache = new ProjectStringCache();
-                    ProjectCollection collection = new ProjectCollection();
+                    using ProjectCollection collection = new ProjectCollection();
                     int entryCount;
 
                     ProjectRootElement pre1 = ProjectRootElement.Create(collection);

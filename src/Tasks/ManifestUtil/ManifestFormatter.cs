@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public static Stream Format(Stream input)
         {
             int t1 = Environment.TickCount;
-
+#pragma warning disable CA2000 // Dispose objects before losing scope - caller needs underlying stream
             var r = new XmlTextReader(input)
             {
                 DtdProcessing = DtdProcessing.Ignore,
@@ -31,6 +31,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 Indentation = 2
             };
             w.WriteStartDocument();
+#pragma warning restore CA2000 // Dispose objects before losing scope
 
             while (r.Read())
             {

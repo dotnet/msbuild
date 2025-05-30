@@ -34,6 +34,8 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public TaskParameterEventArgs(
             TaskParameterMessageKind kind,
+            string parameterName,
+            string propertyName,
             string itemType,
             IList items,
             bool logItemMetadata,
@@ -41,14 +43,57 @@ namespace Microsoft.Build.Framework
             : base(null, null, null, MessageImportance.Low, eventTimestamp)
         {
             Kind = kind;
+            ParameterName = parameterName;
+            PropertyName = propertyName;
             ItemType = itemType;
             Items = items;
             LogItemMetadata = logItemMetadata;
         }
 
+        /// <summary>
+        /// Creates an instance of this class for the given task parameter.
+        /// </summary>
+        public TaskParameterEventArgs(
+            TaskParameterMessageKind kind,
+            string itemType,
+            IList items,
+            bool logItemMetadata,
+            DateTime eventTimestamp)
+            : this(kind, parameterName: null, propertyName: null, itemType, items, logItemMetadata, eventTimestamp)
+        { }
+
+        /// <summary>
+        /// The kind of event represented by this instance.
+        /// </summary>
         public TaskParameterMessageKind Kind { get; private set; }
+
+        /// <summary>
+        /// The name of the parameter if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskInput"/> or <see cref="TaskParameterMessageKind.TaskOutput"/>,
+        /// null otherwise.
+        /// </summary>
+        public string ParameterName { get; private set; }
+
+        /// <summary>
+        /// The name of the property if <see cref="Kind"/> is <see cref="TaskParameterMessageKind.TaskOutput"/> and the task output
+        /// is assigned to a property, null otherwise.
+        /// </summary>
+        public string PropertyName { get; private set; }
+
+        /// <summary>
+        /// The name of the item being manipulated, e.g. "Compile" if this is an item operation. If this object represents a task input, this property should be set
+        /// to the same value as <see cref="ParameterName"/> for backward compatibility. Similarly, if this object represents a task output assigned to a property,
+        /// this should be set to the same value as <see cref="PropertyName"/> for backward compatibility.
+        /// </summary>
         public string ItemType { get; private set; }
+
+        /// <summary>
+        /// The values being manipulated (added, removed, passed to/from task).
+        /// </summary>
         public IList Items { get; private set; }
+
+        /// <summary>
+        /// True if the <see cref="Message"/> string should include metadata.
+        /// </summary>
         public bool LogItemMetadata { get; private set; }
 
         /// <summary>
@@ -85,6 +130,8 @@ namespace Microsoft.Build.Framework
             RawTimestamp = reader.ReadTimestamp();
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             Kind = (TaskParameterMessageKind)reader.Read7BitEncodedInt();
+            ParameterName = reader.ReadOptionalString();
+            PropertyName = reader.ReadOptionalString();
             ItemType = reader.ReadOptionalString();
             LineNumber = reader.Read7BitEncodedInt();
             ColumnNumber = reader.Read7BitEncodedInt();
@@ -134,6 +181,8 @@ namespace Microsoft.Build.Framework
             writer.WriteTimestamp(RawTimestamp);
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.Write7BitEncodedInt((int)Kind);
+            writer.WriteOptionalString(ParameterName);
+            writer.WriteOptionalString(PropertyName);
             writer.WriteOptionalString(ItemType);
             writer.Write7BitEncodedInt(LineNumber);
             writer.Write7BitEncodedInt(ColumnNumber);

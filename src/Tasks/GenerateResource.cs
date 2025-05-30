@@ -974,8 +974,8 @@ namespace Microsoft.Build.Tasks
                 // XML files are only dangerous if there are unrecognized objects in them
                 dangerous = false;
 
-                FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
-                XmlTextReader reader = new XmlTextReader(stream);
+                using FileStream stream = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read);
+                using XmlTextReader reader = new XmlTextReader(stream);
                 reader.DtdProcessing = DtdProcessing.Ignore;
                 reader.XmlResolver = null;
                 try
@@ -1622,14 +1622,13 @@ namespace Microsoft.Build.Tasks
         private void GetStronglyTypedResourceToProcess(ref List<ITaskItem> inputsToProcess, ref List<ITaskItem> outputsToProcess)
         {
             bool needToRebuildSTR = false;
+            CodeDomProvider provider = null;
 
             // The resource file isn't out of date. So check whether the STR class file is.
             try
             {
                 if (StronglyTypedFileName == null)
                 {
-                    CodeDomProvider provider = null;
-
                     if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
                     {
                         StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(provider, OutputResources[0].ItemSpec);
@@ -1644,6 +1643,10 @@ namespace Microsoft.Build.Tasks
                 _unsuccessfullyCreatedOutFiles.Add(OutputResources[0].ItemSpec);
                 _stronglyTypedResourceSuccessfullyCreated = false;
                 return;
+            }
+            finally
+            {
+                provider?.Dispose();
             }
 
             // Now we have the filename, check if it's up to date
@@ -2153,11 +2156,18 @@ namespace Microsoft.Build.Tasks
             {
                 if (StronglyTypedFileName == null)
                 {
-                    CodeDomProvider provider;
-                    if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
+                    CodeDomProvider provider = null;
+                    try
                     {
-                        StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
-                            provider, OutputResources[0].ItemSpec);
+                        if (ProcessResourceFiles.TryCreateCodeDomProvider(Log, StronglyTypedLanguage, out provider))
+                        {
+                            StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(
+                                provider, OutputResources[0].ItemSpec);
+                        }
+                    }
+                    finally
+                    {
+                        provider?.Dispose();
                     }
                 }
 
@@ -3412,61 +3422,69 @@ namespace Microsoft.Build.Tasks
         /// <param name="sourceFile">The generated strongly typed filename</param>
         private void CreateStronglyTypedResources(ReaderInfo reader, String outFile, String inputFileName, out String sourceFile)
         {
-            CodeDomProvider provider;
-            if (!TryCreateCodeDomProvider(_logger, _stronglyTypedLanguage, out provider))
+            CodeDomProvider provider = null;
+            try
             {
-                sourceFile = null;
-                return;
-            }
-
-            // Default the class name if we need to
-            if (_stronglyTypedClassName == null)
-            {
-                _stronglyTypedClassName = Path.GetFileNameWithoutExtension(outFile);
-            }
-
-            // Default the filename if we need to
-            if (_stronglyTypedFilename == null)
-            {
-                _stronglyTypedFilename = GenerateDefaultStronglyTypedFilename(provider, outFile);
-            }
-            sourceFile = this.StronglyTypedFilename;
-
-            _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
-
-            // Generate the STR class
-            String[] errors;
-            bool generateInternalClass = !_stronglyTypedClassIsPublic;
-            // StronglyTypedResourcesNamespace can be null and this is ok.
-            // If it is null then the default namespace (=stronglyTypedNamespace) is used.
-            CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
-                    reader.resourcesHashTable,
-                    _stronglyTypedClassName,
-                    _stronglyTypedNamespace,
-                    _stronglyTypedResourcesNamespace,
-                    provider,
-                    generateInternalClass,
-                    out errors);
-
-            CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
-            using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
-            {
-                provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
-            }
-
-            if (errors.Length > 0)
-            {
-                _logger.LogErrorWithCodeFromResources("GenerateResource.ErrorFromCodeDom", inputFileName);
-                foreach (String error in errors)
+                if (!TryCreateCodeDomProvider(_logger, _stronglyTypedLanguage, out provider))
                 {
-                    _logger.LogErrorWithCodeFromResources("GenerateResource.CodeDomError", error);
+                    sourceFile = null;
+                    return;
+                }
+
+
+                // Default the class name if we need to
+                if (_stronglyTypedClassName == null)
+                {
+                    _stronglyTypedClassName = Path.GetFileNameWithoutExtension(outFile);
+                }
+
+                // Default the filename if we need to
+                if (_stronglyTypedFilename == null)
+                {
+                    _stronglyTypedFilename = GenerateDefaultStronglyTypedFilename(provider, outFile);
+                }
+                sourceFile = this.StronglyTypedFilename;
+
+                _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
+
+                // Generate the STR class
+                String[] errors;
+                bool generateInternalClass = !_stronglyTypedClassIsPublic;
+                // StronglyTypedResourcesNamespace can be null and this is ok.
+                // If it is null then the default namespace (=stronglyTypedNamespace) is used.
+                CodeCompileUnit ccu = StronglyTypedResourceBuilder.Create(
+                        reader.resourcesHashTable,
+                        _stronglyTypedClassName,
+                        _stronglyTypedNamespace,
+                        _stronglyTypedResourcesNamespace,
+                        provider,
+                        generateInternalClass,
+                        out errors);
+
+                CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
+                using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
+                {
+                    provider.GenerateCodeFromCompileUnit(ccu, output, codeGenOptions);
+                }
+
+                if (errors.Length > 0)
+                {
+                    _logger.LogErrorWithCodeFromResources("GenerateResource.ErrorFromCodeDom", inputFileName);
+                    foreach (String error in errors)
+                    {
+                        _logger.LogErrorWithCodeFromResources("GenerateResource.CodeDomError", error);
+                    }
+                }
+                else
+                {
+                    // No errors, and no exceptions - we presumably did create the STR class file
+                    // and it should get added to FilesWritten. So set a flag to indicate this.
+                    _stronglyTypedResourceSuccessfullyCreated = true;
                 }
             }
-            else
+            finally
             {
-                // No errors, and no exceptions - we presumably did create the STR class file
-                // and it should get added to FilesWritten. So set a flag to indicate this.
-                _stronglyTypedResourceSuccessfullyCreated = true;
+                provider?.Dispose();
             }
         }
 
@@ -3542,15 +3560,16 @@ namespace Microsoft.Build.Tasks
 #endif // FEATURE_RESXREADER_LIVEDESERIALIZATION
 
         /// <summary>
-        /// Read resources from a text format file
+        /// Read resources from a text format file.
         /// </summary>
-        /// <param name="reader">Reader info</param>
-        /// <param name="fileName">Input resources filename</param>
+        /// <param name="reader">Reader info.</param>
+        /// <param name="fileName">Input resources filename.</param>
         private void ReadTextResources(ReaderInfo reader, String fileName)
         {
             // Check for byte order marks in the beginning of the input file, but
             // default to UTF-8.
-            using (LineNumberStreamReader sr = new LineNumberStreamReader(fileName, new UTF8Encoding(true), true))
+            using var fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using (LineNumberStreamReader sr = new LineNumberStreamReader(fs, new UTF8Encoding(true), true))
             {
                 StringBuilder name = new StringBuilder(255);
                 StringBuilder value = new StringBuilder(2048);
@@ -3876,8 +3895,8 @@ namespace Microsoft.Build.Tasks
             private int _lineNumber;
             private int _col;
 
-            internal LineNumberStreamReader(String fileName, Encoding encoding, bool detectEncoding)
-                : base(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read), encoding, detectEncoding)
+            internal LineNumberStreamReader(Stream fileStream, Encoding encoding, bool detectEncoding)
+                : base(fileStream, encoding, detectEncoding)
             {
                 _lineNumber = 1;
                 _col = 0;

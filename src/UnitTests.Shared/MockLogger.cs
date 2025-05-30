@@ -124,6 +124,11 @@ namespace Microsoft.Build.UnitTests
         public List<TaskFinishedEventArgs> TaskFinishedEvents { get; } = new List<TaskFinishedEventArgs>();
 
         /// <summary>
+        /// List of TaskParameter events
+        /// </summary>
+        public List<TaskParameterEventArgs> TaskParameterEvents { get; } = new List<TaskParameterEventArgs>();
+
+        /// <summary>
         /// List of BuildMessage events
         /// </summary>
         public List<BuildMessageEventArgs> BuildMessageEvents { get; } = new List<BuildMessageEventArgs>();
@@ -360,6 +365,11 @@ namespace Microsoft.Build.UnitTests
                     case TaskFinishedEventArgs taskFinishedEventArgs:
                         {
                             TaskFinishedEvents.Add(taskFinishedEventArgs);
+                            break;
+                        }
+                    case TaskParameterEventArgs taskParameterEventArgs:
+                        {
+                            TaskParameterEvents.Add(taskParameterEventArgs);
                             break;
                         }
                     case BuildMessageEventArgs buildMessageEventArgs:

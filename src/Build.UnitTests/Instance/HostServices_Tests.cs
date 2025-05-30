@@ -452,10 +452,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             var moniker = Guid.NewGuid().ToString();
             var remoteHost = new MockRemoteHostObject(1);
-            rot.Register(moniker, remoteHost);
+            rot.Register(moniker, remoteHost).Dispose();
             var newMoniker = Guid.NewGuid().ToString();
             var newRemoteHost = new MockRemoteHostObject(2);
-            rot.Register(newMoniker, newRemoteHost);
+            rot.Register(newMoniker, newRemoteHost).Dispose();
             hostServices.RegisterHostObject(
                     "WithOutOfProc.targets",
                     "DisplayMessages",
@@ -480,8 +480,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
  </Target>
 </Project>
 ");
-
-            Project project = new Project(new XmlTextReader(new StringReader(contents)), new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            using ProjectFromString projectFromString = new(contents, new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            Project project = projectFromString.Project;
             project.FullPath = fileName;
             ProjectInstance instance = project.CreateProjectInstance();
 
@@ -503,9 +503,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Dictionary<string, string> globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             globals["UniqueDummy"] = Guid.NewGuid().ToString();
 
+            using var xmlReader = new XmlTextReader(new StringReader(contents));
             Project project =
                 ProjectCollection.GlobalProjectCollection.LoadProject(
-                    new XmlTextReader(new StringReader(contents)),
+                    xmlReader,
                     globals,
                     ObjectModelHelpers.MSBuildDefaultToolsVersion);
             project.FullPath = fileName;

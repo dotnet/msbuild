@@ -7,6 +7,7 @@ using System.IO;
 
 namespace Microsoft.Build.UnitTests
 {
+#pragma warning disable CA2000 // It needs to keep the StreamWriter open for the return Stream/StreamReader.
     public sealed class StreamHelpers
     {
         /// <summary>
@@ -62,4 +63,5 @@ namespace Microsoft.Build.UnitTests
             return m;
         }
     }
+#pragma warning restore CA2000 // It needs to keep the StreamWriter open for the return Stream/StreamReader.
 }

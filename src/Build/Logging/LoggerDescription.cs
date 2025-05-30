@@ -118,6 +118,10 @@ namespace Microsoft.Build.Logging
             {
                 return _loggerSwitchParameters;
             }
+            internal set
+            {
+                _loggerSwitchParameters = value;
+            }
         }
 
         public bool IsOptional

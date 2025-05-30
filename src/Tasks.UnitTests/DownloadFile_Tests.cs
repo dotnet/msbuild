@@ -89,7 +89,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             const string filename = "C6DDD10A99E149F78FA11F133127BF38.txt";
 
-            HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK)
+            using HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent("Success!")
                 {
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void AbortOnTimeout()
         {
-            CancellationTokenSource timeout = new CancellationTokenSource();
+            using CancellationTokenSource timeout = new CancellationTokenSource();
             timeout.Cancel();
             DownloadFile downloadFile = new DownloadFile()
             {

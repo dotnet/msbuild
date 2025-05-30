@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
+    <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <AssemblyName>Microsoft.Build.UnitTests.Shared</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
@@ -18,5 +18,21 @@
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+    <ProjectReference Include="..\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj">
+      <Private>false</Private>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\IsExternalInit.cs" />
+  </ItemGroup>
+
+  <Import Project="..\..\eng\BootStrapMsBuild.props" />
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.BootstrapLocationAttribute">
+      <_Parameter1>$(BootstrapBinaryDestination)</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 </Project>

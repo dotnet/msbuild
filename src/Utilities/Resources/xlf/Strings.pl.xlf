@@ -27,6 +27,11 @@
         <target state="translated">Polecenie zostało zakończone z kodem {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Plik jest zablokowany przez: „{0}”</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: nie można odnaleźć pliku manifestu platformy w lokalizacji „{0}”.</target>

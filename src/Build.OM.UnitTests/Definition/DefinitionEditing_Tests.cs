@@ -707,7 +707,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetMetadata_ItemOriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -715,9 +715,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
-
-            Project project = new Project(content);
+</Project>");
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Helpers.GetFirst(project.GetItems("i")).SetMetadataValue("m", "m2");
 
@@ -746,7 +746,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void SetMetadataUnevaluatedValue_ItemOriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -754,9 +754,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m");
             metadatum.UnevaluatedValue = "m2";
@@ -985,7 +986,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RenameItem_OriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -993,9 +994,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.GetItems("i"));
             item.Rename("h1b");
@@ -1319,7 +1321,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItem_OriginatingWithItemList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <h Include=""h1;h2"">
@@ -1327,9 +1329,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     </h>
     <i Include=""@(h)"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             project.RemoveItem(Helpers.GetFirst(project.GetItems("i")));
 
@@ -1421,14 +1424,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void RemoveItem_IncludingFromIgnoringConditionList()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup Condition=""false"">
     <i Include=""i1"" />
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             Assert.Empty(Helpers.MakeList(project.GetItems("i")));
             List<ProjectItem> itemsIgnoringCondition = Helpers.MakeList(project.GetItemsIgnoringCondition("i"));
@@ -1991,7 +1995,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void AddMetadata_Reevaluation()
         {
-            XmlReader content = XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(
+            var content = ObjectModelHelpers.CleanupFileContents(
 @"<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
   <ItemGroup>
     <i Include=""i1"">
@@ -1999,9 +2003,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
       <m>m1</m>
     </i>
   </ItemGroup>
-</Project>")));
+</Project>");
 
-            Project project = new Project(content);
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = Helpers.GetFirst(project.Items);
 
@@ -2583,8 +2588,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
             else
             {
-                var content = XmlReader.Create(new StringReader(projectContents));
-                project = new Project(content);
+                using ProjectFromString projectFromString = new(projectContents);
+                project = projectFromString.Project;
 
                 setupProject?.Invoke(project);
                 project.ReevaluateIfNecessary();

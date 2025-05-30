@@ -20,6 +20,10 @@ Run the [EnumerateMSBuild powershell script](https://github.com/dotnet/msbuild/b
     gacutil /u "Microsoft.Build.Tasks.Core, Version=15.1.0.0"
     gacutil /u "Microsoft.Build.Utilities.Core, Version=15.1.0.0"
     gacutil /u "Microsoft.Build.Framework, Version=15.1.0.0"
+    gacutil /u "Microsoft.NET.StringTools, Version=1.0.0.0"
+    gacutil /u "BuildXL.Processes, Version=1.0.0.0"
+    gacutil /u "BuildXL.Utilities.Core, Version=1.0.0.0"
+    gacutil /u "BuildXL.Native, Version=1.0.0.0"
     ```
 3. If you want to do this 'safely', move the folder out of the GAC and return it if it doesn't resolve the issue.
 

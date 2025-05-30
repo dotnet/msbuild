@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Environment.SetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION", "1");
                 InternalUtilities.RefreshInternalEnvironmentValues();
 
-                ProjectCollection collection = new ProjectCollection();
+                using ProjectCollection collection = new ProjectCollection();
                 collection.AddToolset(new Toolset("x", @"c:\y", collection, null));
 
                 collection.DefaultToolsVersion = "x";
@@ -52,7 +52,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     </Project>
                 ";
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)), null, null, collection);
+                using ProjectFromString projectFromString = new(content, null, null, collection);
+                Project project = projectFromString.Project;
 
                 Assert.Equal("x", project.ToolsVersion);
             }
@@ -88,7 +89,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     </Project>
                 ";
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 project.FullPath = "c:\\123.proj";
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
@@ -233,8 +235,8 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 var projectCollection = env.CreateProjectCollection().Collection;
 
-                var project = new Project(XmlReader.Create(new StringReader(projectContents)), new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection, ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
-
+                using ProjectFromString projectFromString = new(projectContents, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, projectCollection, ProjectLoadSettings.DoNotEvaluateElementsWithFalseCondition);
+                Project project = projectFromString.Project;
                 var data = project.TestOnlyGetPrivateData;
 
                 project.GetProperty("P1").ShouldBeNull();

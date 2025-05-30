@@ -291,9 +291,9 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.GetTarget(targetName);
             }
 
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext)
             {
-                _wrappedData.InitializeForEvaluation(toolsetProvider, evaluationContext);
+                _wrappedData.InitializeForEvaluation(toolsetProvider, evaluationContext, loggingContext);
             }
 
             public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)

@@ -1649,7 +1649,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Reload the existing project root element from the given <paramref name="reader"/>
         /// A reload operation completely replaces the state of this <see cref="ProjectRootElement"/> object. This operation marks the
-        /// object as dirty (see <see cref="ProjectRootElement.MarkDirty"/> for side effects).
+        /// object as dirty.
         ///
         /// If the new state has invalid XML or MSBuild syntax, then this method throws an <see cref="InvalidProjectFileException"/>.
         /// When this happens, the state of this object does not change.

@@ -166,7 +166,8 @@ jobs:
       Write-Host "Detected drop.exe path: $dropExePath"
 
       Write-Host "Downloading VS msbuild"
-      & "$dropExePath" get --patAuthEnvVar 'cloudbuild-token' -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
+      $patAuthEnvVar = "SYSTEM_ACCESSTOKEN"
+      & "$dropExePath" get --patAuthEnvVar $patAuthEnvVar -u "$(MSBuildDropPath)\$(VSVersion)" -d "$(System.ArtifactsDirectory)/VSMSBuildDrop"
       Write-Host "Download of VS msbuild finished"
 
       Write-Host "Copying VS msbuild to $(Pipeline.Workspace)/VSMSBuild"
@@ -174,7 +175,7 @@ jobs:
       Write-Host "Copy of VS msbuild finished"
     displayName: Download msbuild vs drop
     env:
-      cloudbuild-token: $(cloudbuild-token)
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
   - task: DownloadBuildArtifacts@1
     inputs:

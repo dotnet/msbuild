@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionGroupExistsInProject()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
@@ -39,7 +39,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "First", "1st"));
             Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "Second", "2nd"));
@@ -51,7 +52,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void MultipleItemDefinitionGroupExistsInProject()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
@@ -66,7 +67,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Link>
                     </ItemDefinitionGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "First", "1st"));
             Assert.True(ContainsMetadata(p.ItemDefinitions["Compile"].Metadata, "Second", "2nd"));
@@ -80,7 +82,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void EmptyItemsInheritValues()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
@@ -98,7 +100,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         <Compile Include='a.cs;b.cs' />
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "First", "1st"));
             Assert.True(ItemContainsMetadata(p, "Compile", "b.cs", "First", "1st"));
@@ -113,7 +116,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemMetadataOverridesInheritedValues()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
@@ -140,7 +143,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         <Link Include='a.o'/>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "First", "Not1st"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Second", "2nd"));
@@ -242,7 +246,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemMetadataReferringToDifferentItemGivesEmptyValue()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
@@ -269,7 +273,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         <Link Include='a.o'/>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(ItemContainsMetadata(p, "Link", "a.o", "Third", "----"));
         }
@@ -280,7 +285,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void EmptyItemDefinitionGroup()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                     </ItemDefinitionGroup>
@@ -288,7 +293,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         <Compile Include='a.cs;b.cs' />
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
         }
 
         /// <summary>
@@ -297,7 +303,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void EmptyItemDefinitions()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile />
@@ -308,7 +314,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
             Assert.True(ItemContainsMetadata(p, "Compile", "b.cs", "Foo", "Bar"));
@@ -318,7 +325,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void SelfReferencingMetadataReferencesUseItemDefinition()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
    <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
     <ItemDefinitionGroup>
@@ -336,7 +343,8 @@ namespace Microsoft.Build.UnitTests.Definition
     <Target Name='Build'>
       <Message Text='[{@(CppCompile)}{%(CppCompile.Defines)}]' />
     </Target>
-  </Project>")));
+  </Project>");
+            Project p = projectFromString.Project;
 
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
             logger.AssertLogContains("[{a.cpp}{DEBUG;CODEANALYSIS}]"); // Unexpected value after evaluation
@@ -347,7 +355,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void SelfReferencingMetadataReferencesUseItemDefinitionInTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
    <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
     <ItemDefinitionGroup>
@@ -365,7 +373,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
       <Message Text='[{@(CppCompile)}{%(CppCompile.Defines)}]' />
     </Target>
-  </Project>")));
+  </Project>");
+            Project p = projectFromString.Project;
 
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
             logger.AssertLogContains("[{a.cpp}{DEBUG;CODEANALYSIS}]"); // Unexpected value after evaluation
@@ -375,7 +384,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void SelfReferencingMetadataReferencesUseItemDefinitionInTargetModify()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
    <Project ToolsVersion='msbuilddefaulttoolsversion'>
 
     <ItemDefinitionGroup>
@@ -396,7 +405,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
       <Message Text='[{@(CppCompile)}{%(CppCompile.Defines)}]' />
     </Target>
-  </Project>")));
+  </Project>");
+            Project p = projectFromString.Project;
 
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
             logger.AssertLogContains("[{a.cpp}{DEBUG;CODEANALYSIS}]"); // Unexpected value after evaluation
@@ -408,7 +418,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionGroupWithFalseCondition()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup Condition=""'$(Foo)'!=''"">
                         <Compile>
@@ -421,7 +431,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.False(p.ItemDefinitions.ContainsKey("Compile"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
@@ -434,7 +445,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionGroupWithTrueCondition()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup Condition=""'$(Foo)'==''"">
                         <Compile>
@@ -447,7 +458,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
@@ -460,7 +472,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionWithFalseCondition()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile  Condition=""'$(Foo)'!=''"">
@@ -473,7 +485,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.False(p.ItemDefinitions.ContainsKey("Compile"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
@@ -486,7 +499,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionWithTrueCondition()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile Condition=""'$(Foo)'==''"">
@@ -499,7 +512,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
@@ -512,7 +526,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionMetadataWithFalseCondition()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
@@ -525,7 +539,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
@@ -538,7 +553,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionMetadataWithTrueCondition()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemDefinitionGroup>
                         <Compile>
@@ -551,7 +566,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         </Compile>
                     </ItemGroup>
 	                <Target Name='Build' />
-	            </Project>")));
+	            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(p.ItemDefinitions.ContainsKey("Compile"));
             Assert.True(ItemContainsMetadata(p, "Compile", "a.cs", "Foo", "Bar"));
@@ -564,7 +580,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionMetadataCopiedToTaskItem()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                 <ItemDefinitionGroup>
                     <ItemA>
@@ -572,7 +588,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         <MetaB>M-B(b)</MetaB>
                     </ItemA>
                 </ItemDefinitionGroup>
-            </Project>")));
+            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
@@ -599,7 +616,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionMetadataCopiedToTaskItem2()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                 <ItemDefinitionGroup>
                     <ItemA>
@@ -607,7 +624,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         <MetaB>M-B(b)</MetaB>
                     </ItemA>
                 </ItemDefinitionGroup>
-            </Project>")));
+            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
@@ -637,7 +655,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ItemDefinitionMetadataCopiedToTaskItem3()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(
+            using ProjectFromString projectFromString = new(
             @"<Project ToolsVersion='msbuilddefaulttoolsversion'>
                 <ItemDefinitionGroup>
                     <ItemA>
@@ -648,7 +666,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 <ItemGroup>
                     <ItemA Include='SomeItemA' />
                 </ItemGroup>
-            </Project>")));
+            </Project>");
+            Project p = projectFromString.Project;
 
             Assert.True(p.ItemDefinitions.ContainsKey("ItemA"));
 
@@ -680,7 +699,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void BasicItemDefinitionInProject()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <CppCompile Include='a.cpp'/>
@@ -697,7 +716,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.Defines)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[a.cpp==DEBUG]", "[b.cpp==DEBUG]");
@@ -707,7 +727,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void EscapingInItemDefinitionInProject()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -721,7 +741,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[$(xyz)]");
@@ -732,7 +753,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemDefinitionForOtherItemType()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -746,7 +767,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[]");
@@ -756,7 +778,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void RedefinitionLastOneWins()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -777,7 +799,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)-%(i.n)-%(i.o)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m2-n1-o1]");
@@ -837,7 +860,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MetadataConditionOnItemDefinition()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -865,7 +888,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(j.n)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m2]", "[n2]");
@@ -875,7 +899,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void QualifiedMetadataConditionOnItemDefinitionBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -894,7 +918,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m2]");
@@ -904,7 +929,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void FalseMetadataConditionOnItemDefinitionBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -923,7 +948,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m1]");
@@ -933,7 +959,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MetadataConditionOnItemDefinitionChildBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -953,7 +979,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m2]");
@@ -963,7 +990,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void FalseMetadataConditionOnItemDefinitionChildBothQualifiedAndUnqualified()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -983,7 +1010,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m1]");
@@ -993,7 +1021,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MetadataConditionOnItemDefinitionAndChildQualifiedWithUnrelatedItemType()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -1012,7 +1040,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m2]");
@@ -1064,7 +1093,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MetadataOnItemWins()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <CppCompile Include='a.cpp'>
@@ -1081,7 +1110,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.Defines)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[a.cpp==RETAIL]", "[b.cpp==DEBUG]");
@@ -1091,7 +1121,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MixtureOfItemAndDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <CppCompile Include='a.cpp'>
@@ -1108,7 +1138,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.WarningLevel)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[a.cpp==DEBUG]", "[a.cpp==4]");
@@ -1118,7 +1149,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void IntrinsicTaskModifyingDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -1137,7 +1168,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[m2]");
@@ -1147,7 +1179,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void IntrinsicTaskConsumingDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -1166,7 +1198,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.n)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
             p.Build("t", new ILogger[] { logger });
 
             logger.AssertLogContains("[n2]");
@@ -1190,7 +1223,7 @@ namespace Microsoft.Build.UnitTests.Definition
                   </ItemDefinitionGroup>
                 </Project>
             ");
-                Project p = new Project(XmlReader.Create(new StringReader(@"
+                using ProjectFromString projectFromString = new(@"
                     <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                       <ItemGroup>
                         <CppCompile Include='a.cpp'/>
@@ -1200,7 +1233,8 @@ namespace Microsoft.Build.UnitTests.Definition
                         <Message Text=""[%(CppCompile.Identity)==%(CppCompile.Defines)]""/>
                       </Target>
                     </Project>
-                ")));
+                ");
+                Project p = projectFromString.Project;
                 p.Build("t", new ILogger[] { logger });
 
                 logger.AssertLogContains("[a.cpp==DEBUG]");
@@ -1218,7 +1252,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ProjectAddNewItemPicksUpProjectItemDefinitions()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1226,7 +1260,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     </i>
                   </ItemDefinitionGroup>
                 </Project>
-                ")));
+                ");
+            Project p = projectFromString.Project;
 
             p.AddItem("i", "i1");
             p.ReevaluateIfNecessary();
@@ -1241,7 +1276,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [Fact]
         public void ProjectAddNewItemExistingGroupPicksUpProjectItemDefinitions()
         {
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1254,7 +1289,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     </i>
                   </ItemGroup>
                 </Project>
-                ")));
+                ");
+            Project p = projectFromString.Project;
 
             p.AddItem("i", "i1");
             p.ReevaluateIfNecessary();
@@ -1267,7 +1303,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemsEmittedByTaskPickUpItemDefinitions()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1282,7 +1318,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)][%(i.n)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1293,7 +1330,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemsEmittedByIntrinsicTaskPickUpItemDefinitions()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1310,7 +1347,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)][%(i.n)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1325,7 +1363,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_SourceDefaultMetadataPassed()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1342,7 +1380,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(j.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1356,7 +1395,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_DestinationExplicitMetadataBeatsSourceDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1375,7 +1414,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(j.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1394,7 +1434,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_DestinationDefaultMetadataOverriddenBySourceDefaultMetadata()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1416,7 +1456,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(j.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             Assert.Equal("m1", p.GetItems("j").First().GetMetadataValue("m"));
 
@@ -1434,7 +1475,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_Combination_OutsideTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1473,7 +1514,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     </k>
                   </ItemGroup>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             Assert.Equal("im1", p.GetItems("i").First().GetMetadataValue("m"));
             Assert.Equal("in1", p.GetItems("i").First().GetMetadataValue("n"));
@@ -1526,7 +1568,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ItemsEmittedByIntrinsicTaskConsumingItemExpression_Combination_InsideTarget()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1566,7 +1608,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""k:%(identity) [%(k.m)][%(k.n)][%(k.o)][%(k.p)][%(k.q)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1582,7 +1625,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MutualReferenceToDefinition1()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1597,7 +1640,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)][%(i.n)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1608,7 +1652,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MutualReferenceToDefinition2()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1623,7 +1667,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)][%(i.n)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1634,7 +1679,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void MutualReferenceToDefinition3()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemDefinitionGroup>
                     <i>
@@ -1650,7 +1695,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(i.m)][%(i.n)][%(i.o)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.Build("t", new ILogger[] { logger });
 
@@ -1661,7 +1707,7 @@ namespace Microsoft.Build.UnitTests.Definition
         public void ProjectReevaluationReevaluatesItemDefinitions()
         {
             MockLogger logger = new MockLogger();
-            Project p = new Project(XmlReader.Create(new StringReader(@"
+            using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <PropertyGroup>
                     <Defines>CODEANALYSIS</Defines>
@@ -1679,7 +1725,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[%(CppCompile.Identity)==%(CppCompile.Defines)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+            Project p = projectFromString.Project;
 
             p.SetProperty("BuildFlavor", "ret");
 
@@ -1723,7 +1770,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
 
                 MockLogger logger = new MockLogger();
-                Project p = new Project(XmlReader.Create(new StringReader(@"
+                using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include='i1'/>
@@ -1739,7 +1786,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[PARENT-after:%(i.m)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+                Project p = projectFromString.Project;
 
                 p.Build("t", new ILogger[] { logger });
 
@@ -1781,7 +1829,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
 
                 MockLogger logger = new MockLogger();
-                Project p = new Project(XmlReader.Create(new StringReader(@"
+                using ProjectFromString projectFromString = new(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <Target Name=""t"">
                     <MSBuild Projects=""" + otherProject + @""">
@@ -1790,7 +1838,8 @@ namespace Microsoft.Build.UnitTests.Definition
                     <Message Text=""[PARENT:%(i.Identity):m=%(i.m),n=%(i.n)]""/>
                   </Target>
                 </Project>
-            ")));
+            ");
+                Project p = projectFromString.Project;
 
                 p.Build("t", new ILogger[] { logger });
 

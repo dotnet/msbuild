@@ -27,6 +27,11 @@
         <target state="translated">Příkaz byl ukončen s kódem {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Soubor uzamkl(a): {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: Nepovedlo se najít soubor manifestu platformy v umístění {0}.</target>

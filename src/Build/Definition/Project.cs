@@ -4263,7 +4263,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext)
             {
                 DefaultTargets = null;
                 Properties = new PropertyDictionary<ProjectProperty>();
@@ -4271,7 +4271,7 @@ namespace Microsoft.Build.Evaluation
                 Items = new ItemDictionary<ProjectItem>();
                 ItemsIgnoringCondition = new ItemDictionary<ProjectItem>();
                 ItemsByEvaluatedIncludeCache = new MultiDictionary<string, ProjectItem>(StringComparer.OrdinalIgnoreCase);
-                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items, evaluationContext);
+                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items, evaluationContext, loggingContext);
                 ItemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinition>(MSBuildNameIgnoreCaseComparer.Default);
                 Targets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
                 ImportClosure = new List<ResolvedImport>();

@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             compilerParameters.GenerateInMemory = false;
             compilerParameters.TreatWarningsAsErrors = false;
 
-            CodeDomProvider codegenerator = CodeDomProvider.CreateProvider("cs");
+            using CodeDomProvider codegenerator = CodeDomProvider.CreateProvider("cs");
             CompilerResults results = codegenerator.CompileAssemblyFromSource(compilerParameters, taskContents);
             try
             {
