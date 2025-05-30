@@ -51,7 +51,7 @@ InitializeDotNetCli true
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
+	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --test --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties || exit $?
 fi
 
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
