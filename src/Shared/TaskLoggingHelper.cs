@@ -941,36 +941,7 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            string message;
-
-            if (!showDetail && (Environment.GetEnvironmentVariable("MSBUILDDIAGNOSTICS") == null)) // This env var is also used in ToolTask
-            {
-                message = exception.Message;
-
-                if (showStackTrace)
-                {
-                    message += Environment.NewLine + exception.StackTrace;
-                }
-            }
-            else
-            {
-                // The more comprehensive output, showing exception types
-                // and inner exceptions
-                var builder = new StringBuilder(200);
-                do
-                {
-                    builder.Append(exception.GetType().Name);
-                    builder.Append(": ");
-                    builder.AppendLine(exception.Message);
-                    if (showStackTrace)
-                    {
-                        builder.AppendLine(exception.StackTrace);
-                    }
-                    exception = exception.InnerException;
-                } while (exception != null);
-
-                message = builder.ToString();
-            }
+            string message = GetFormattedExceptionDetails(exception, showStackTrace, showDetail);
 
             LogError(null, null, null, file, 0, 0, 0, 0, message);
         }
@@ -1548,5 +1519,96 @@ namespace Microsoft.Build.Utilities
 
         #endregion
 #endif
+
+        /// <summary>
+        /// Logs an error using a resource string (with code extraction and help keyword) and appends exception details.
+        /// Thread safe.
+        /// </summary>
+        /// <param name="exception">Exception to log.</param>
+        /// <param name="showStackTrace">If true, callstack will be appended to message.</param>
+        /// <param name="showDetail">Whether to log exception types and any inner exceptions.</param>
+        /// <param name="file">File related to the exception, or null if the project file should be logged.</param>
+        /// <param name="messageResourceName">The name of the string resource containing the error message.</param>
+        /// <param name="messageArgs">Optional arguments for formatting the loaded string.</param>
+        public void LogErrorWithCodeAndException(
+            Exception exception,
+            bool showStackTrace,
+            bool showDetail,
+            string file,
+            string messageResourceName,
+            params object[] messageArgs)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(exception);
+            ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
+
+            // For an AggregateException, log each inner exception separately
+            if (exception is AggregateException aggregateException)
+            {
+                foreach (Exception innerException in aggregateException.Flatten().InnerExceptions)
+                {
+                    LogErrorWithCodeAndException(innerException, showStackTrace, showDetail, file, messageResourceName, messageArgs);
+                }
+                return;
+            }
+
+            // Format the resource string and extract the error code
+            string formattedResourceMessage = FormatResourceString(messageResourceName, messageArgs);
+            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, formattedResourceMessage, out string errorCode);
+
+            // Compose help keyword if prefix is set
+            string helpKeyword = HelpKeywordPrefix != null ? HelpKeywordPrefix + messageResourceName : null;
+
+            // Append exception details
+            string exceptionDetails = GetFormattedExceptionDetails(exception, showStackTrace, showDetail);
+
+            // Combine resource message and exception details
+            string fullMessage = string.IsNullOrEmpty(exceptionDetails)
+                ? message
+                : message + Environment.NewLine + exceptionDetails;
+
+            LogError(
+                null, // subcategory
+                errorCode,
+                helpKeyword,
+                file,
+                0, 0, 0, 0,
+                fullMessage);
+        }
+
+        /// <summary>
+        /// Formats exception details for logging.
+        /// </summary>
+        private static string GetFormattedExceptionDetails(Exception exception, bool showStackTrace, bool showDetail)
+        {
+            bool diagnostics = Environment.GetEnvironmentVariable("MSBUILDDIAGNOSTICS") != null;
+
+            if (!showDetail && !diagnostics)
+            {
+                string message = exception.Message;
+                if (showStackTrace)
+                {
+                    message += Environment.NewLine + exception.StackTrace;
+                }
+                return message;
+            }
+            else
+            {
+                var builder = new StringBuilder(200);
+                Exception currentException = exception;
+                do
+                {
+                    builder.Append(currentException.GetType().Name);
+                    builder.Append(": ");
+                    builder.AppendLine(currentException.Message);
+                    if (showStackTrace)
+                    {
+                        builder.AppendLine(currentException.StackTrace);
+                    }
+                    currentException = currentException.InnerException;
+                } while (currentException != null);
+
+                return builder.ToString();
+            }
+        }
     }
 }
