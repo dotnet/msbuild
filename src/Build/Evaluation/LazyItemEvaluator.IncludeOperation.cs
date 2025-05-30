@@ -39,7 +39,6 @@ namespace Microsoft.Build.Evaluation
             {
                 ImmutableArray<I>.Builder? itemsToAdd = null;
 
-                Func<string, bool>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (_excludes != null)
                 {
@@ -53,14 +52,10 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ISet<string>? excludePatternsForGlobs = null;
+                Func<string, bool>? excludeTester = excludePatterns.Count > 0 ? EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory) : null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
-                    if (excludeTester is null && excludePatterns.Count > 0)
-                    {
-                        excludeTester = EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory);
-                    }
-
                     if (fragment is ItemSpec<P, I>.ItemExpressionFragment itemReferenceFragment)
                     {
                         // STEP 3: If expression is "@(x)" copy specified list with its metadata, otherwise just treat as string
@@ -94,7 +89,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         string value = valueFragment.TextFragment;
 
-                        if (excludeTester is not null && !excludeTester(EscapingUtilities.UnescapeAll(value)))
+                        if (excludeTester is null || !excludeTester(EscapingUtilities.UnescapeAll(value)))
                         {
                             itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                             itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
