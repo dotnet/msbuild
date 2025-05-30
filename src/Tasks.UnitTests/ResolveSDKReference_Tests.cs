@@ -3733,7 +3733,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                 APPX ='AppxLocation'
                 SDKType ='External'
                 DisplayName = 'AnotherSDkWithManifest 2.0'
-                CopyRedistToSubDirectory='SomeOtherRedistDirectory'> 
+                CopyRedistToSubDirectory='SomeOtherRedistDirectory'>
                 <File WinMD = 'AnotherSDkWithManifest.Sprint, Version=8.0' />
                 <File AssemblyName = 'Assembly1, Version=8.0' />
                 <DependsOn Identity='Windows SDK, Version 8.0'/>
@@ -3755,7 +3755,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                      <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -3896,7 +3896,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                      <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -4018,7 +4018,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                       <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -4123,7 +4123,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                     <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>
@@ -4262,7 +4262,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
                  <PropertyGroup>
                     <Configuration>CAT</Configuration>" +
                     @"<OutputPath>" + testDirectoryRoot + "</OutputPath>" +
-                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier> 
+                    @"<TargetPlatformIdentifier>MyPlatform</TargetPlatformIdentifier>
                     <TargetPlatformVersion>8.0</TargetPlatformVersion>
                  </PropertyGroup>
                  <Import Project=""$(MSBuildBinPath)\Microsoft.Common.targets""/>

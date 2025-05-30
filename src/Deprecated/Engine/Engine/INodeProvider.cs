@@ -9,10 +9,10 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This interface is used by to provide an engine coordinating a build with access
-    /// to child engines which can execute parts of the build. The provider is entirely 
+    /// to child engines which can execute parts of the build. The provider is entirely
     /// responsible for establishing and maintaining the communication between the parent
-    /// engine and the child engines. The provider is also responsible for describing the 
-    /// capabilities of the communication channel and the machines on which the child engines 
+    /// engine and the child engines. The provider is also responsible for describing the
+    /// capabilities of the communication channel and the machines on which the child engines
     /// are running so that the parent engine can schedule and coordinate the work appropriately
     /// </summary>
     internal interface INodeProvider
@@ -31,9 +31,9 @@ namespace Microsoft.Build.BuildEngine
                         ToolsetDefinitionLocations toolsetSearchLocations, string startupDirectory);
 
         /// <summary>
-        /// This method is called by the NodeManager after the Initialize method to query 
+        /// This method is called by the NodeManager after the Initialize method to query
         /// the provider about number and capability of the nodes that it can make available to
-        /// the parent engine. 
+        /// the parent engine.
         /// </summary>
         /// <returns>Description of nodes that this provider</returns>
         INodeDescription[] QueryNodeDescriptions();
@@ -47,7 +47,7 @@ namespace Microsoft.Build.BuildEngine
         void AssignNodeIdentifiers(int[] nodeIdentifiers);
 
         /// <summary>
-        /// This method is called by the NodeManager to pass in a description of a forwarding logger 
+        /// This method is called by the NodeManager to pass in a description of a forwarding logger
         /// that should be loaded on the nodes exposed by the provider. This method can only be called
         /// after Initialize method has been called.
         /// </summary>
@@ -64,7 +64,7 @@ namespace Microsoft.Build.BuildEngine
         void PostBuildRequestToNode(int nodeIndex, BuildRequest buildRequest);
 
         /// <summary>
-        /// This method is called by the coordinating engine to send results requested by a 
+        /// This method is called by the coordinating engine to send results requested by a
         /// node during intermediate evaluation
         /// </summary>
         /// <param name="nodeIndex"></param>

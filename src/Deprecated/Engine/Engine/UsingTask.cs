@@ -139,7 +139,7 @@ namespace Microsoft.Build.BuildEngine
                         // ignore
                         break;
                     case XMakeElements.usingTaskParameterGroup:
-                        // ignore 
+                        // ignore
                         break;
                     default:
                         illegalChildElementFound = true;
@@ -153,9 +153,9 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            // UsingTask has no valid child elements in 3.5 syntax, but in 4.0 syntax it does. 
+            // UsingTask has no valid child elements in 3.5 syntax, but in 4.0 syntax it does.
             // So ignore any valid 4.0 child elements and try to load the project as usual, but
-            // still error out if something we don't expect is found. 
+            // still error out if something we don't expect is found.
             if (illegalChildElementFound)
             {
                 ProjectXmlUtilities.ThrowProjectInvalidChildElement(illegalChildElement);

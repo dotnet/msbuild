@@ -13,9 +13,9 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// Represents the logical negation of a boolean switch. 
+        /// Represents the logical negation of a boolean switch.
         /// </summary>
-        /// <example> 
+        /// <example>
         /// <para>
         /// For the VC++ CL task, <c>WholeProgramOptimization</c> is a boolean parameter. It's switch is <c>GL</c>. To
         /// disable whole program optimization, you need to pass the ReverseSwitch, which is <c>GL-</c>.

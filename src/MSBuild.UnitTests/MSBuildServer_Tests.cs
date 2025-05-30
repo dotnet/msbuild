@@ -315,7 +315,7 @@ namespace Microsoft.Build.Engine.UnitTests
         </ProcessIdTask>
         <Message Text=""Server ID is $(PID)"" Importance=""High"" />
 		<Message Text="":MSBuildStartupDirectory:$(MSBuildStartupDirectory):"" Importance=""high"" />
-	</Target> 
+	</Target>
 </Project>";
 
             TransientTestFile project = _env.CreateFile("testProject.proj", reportMSBuildStartupDirectoryProperty);

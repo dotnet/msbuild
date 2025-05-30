@@ -239,11 +239,11 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Throws an InvalidProjectFileException using the given data.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
-        /// 
+        ///
         /// </summary>
         /// <param name="errorSubCategoryResourceName">The resource string for the
         /// error sub-category (can be null).</param>

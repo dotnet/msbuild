@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                     Path.Combine(
                         new[] { tempPath, "Windows", "NotAVersion", "ExtensionSDKs", "Assembly", "1.0" }));
 
-                // Good but are in a different target platform 
+                // Good but are in a different target platform
                 // Doors does not have an sdk manifest but does have extensionsdks under it so they should be found
                 // when we are targeting doors
                 Directory.CreateDirectory(
