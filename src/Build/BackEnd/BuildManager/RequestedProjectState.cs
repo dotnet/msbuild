@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -75,21 +75,19 @@ namespace Microsoft.Build.Execution
             // Merge property filters
             if (PropertyFilters != null || other.PropertyFilters != null)
             {
-                HashSet<string> mergedProperties = new(StringComparer.OrdinalIgnoreCase);
+                HashSet<string> mergedProperties;
+
                 if (PropertyFilters != null)
                 {
-                    foreach (var prop in PropertyFilters)
+                    mergedProperties = new HashSet<string>(PropertyFilters, StringComparer.OrdinalIgnoreCase);
+                    if (other.PropertyFilters != null)
                     {
-                        mergedProperties.Add(prop);
+                        mergedProperties.UnionWith(other.PropertyFilters);
                     }
                 }
-
-                if (other.PropertyFilters != null)
+                else
                 {
-                    foreach (var prop in other.PropertyFilters)
-                    {
-                        mergedProperties.Add(prop);
-                    }
+                    mergedProperties = new HashSet<string>(other.PropertyFilters, StringComparer.OrdinalIgnoreCase);
                 }
 
                 if (mergedProperties.Count > 0)
@@ -127,15 +125,23 @@ namespace Microsoft.Build.Execution
                 {
                     if (!mergedItems.TryGetValue(itemType.Key, out List<string> metadataList))
                     {
-                        metadataList = new List<string>();
-                        mergedItems[itemType.Key] = metadataList;
+                        if (itemType.Value != null)
+                        {
+                            metadataList = new List<string>(itemType.Value);
+                            mergedItems[itemType.Key] = metadataList;
+                        }
+                        else
+                        {
+                            metadataList = new List<string>();
+                            mergedItems[itemType.Key] = metadataList;
+                        }
                     }
-
-                    if (itemType.Value != null)
+                    else if (itemType.Value != null)
                     {
+                        HashSet<string> existingMetadata = new HashSet<string>(metadataList, StringComparer.OrdinalIgnoreCase);
                         foreach (var metadata in itemType.Value)
                         {
-                            if (!metadataList.Contains(metadata, StringComparer.OrdinalIgnoreCase))
+                            if (existingMetadata.Add(metadata))
                             {
                                 metadataList.Add(metadata);
                             }
@@ -162,13 +168,12 @@ namespace Microsoft.Build.Execution
             }
             else if (another.PropertyFilters is not null)
             {
-                HashSet<string> anotherPropertyFilters = new(another.PropertyFilters);
-                foreach (string propertyFilter in PropertyFilters)
+                HashSet<string> thisPropertyFilters = new HashSet<string>(PropertyFilters, StringComparer.OrdinalIgnoreCase);
+                HashSet<string> anotherPropertyFilters = new HashSet<string>(another.PropertyFilters, StringComparer.OrdinalIgnoreCase);
+
+                if (!thisPropertyFilters.IsSubsetOf(anotherPropertyFilters))
                 {
-                    if (!anotherPropertyFilters.Contains(propertyFilter))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
@@ -200,13 +205,12 @@ namespace Microsoft.Build.Execution
                     }
                     else if (metadata is not null)
                     {
-                        HashSet<string> anotherMetadata = [.. metadata];
-                        foreach (string metadatum in kvp.Value)
+                        HashSet<string> thisMetadata = new HashSet<string>(kvp.Value, StringComparer.OrdinalIgnoreCase);
+                        HashSet<string> anotherMetadata = new HashSet<string>(metadata, StringComparer.OrdinalIgnoreCase);
+                        
+                        if (!thisMetadata.IsSubsetOf(anotherMetadata))
                         {
-                            if (!anotherMetadata.Contains(metadatum))
-                            {
-                                return false;
-                            }
+                            return false;
                         }
                     }
                 }

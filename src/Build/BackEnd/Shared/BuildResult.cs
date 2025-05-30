@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -813,19 +814,20 @@ namespace Microsoft.Build.Execution
 
             // Create a deep copy of the existing ProjectStateAfterBuild
             ProjectInstance mergedInstanceCandidate = _projectStateAfterBuild.DeepCopy(isImmutable: false);
-            MergeProperties(newProjectStateAfterBuild.Properties);
-            MergeItems(newProjectStateAfterBuild.Items);
+            MergeProperties(mergedInstanceCandidate, newProjectStateAfterBuild.Properties);
+            MergeItems(mergedInstanceCandidate, newProjectStateAfterBuild.Items);
 
             // Merge RequestedProjectStateFilter
             var sourceFilter = _projectStateAfterBuild.RequestedProjectStateFilter;
             var newFilter = newProjectStateAfterBuild.RequestedProjectStateFilter;
+
             if (sourceFilter != null || newFilter != null)
             {
                 RequestedProjectState mergedFilter;
 
                 if (sourceFilter == null)
                 {
-                    mergedFilter = newFilter.DeepClone();
+                    mergedFilter = newFilter!.DeepClone();
                 }
                 else if (newFilter == null)
                 {
@@ -840,28 +842,89 @@ namespace Microsoft.Build.Execution
             }
 
             return mergedInstanceCandidate;
+        }
 
-            void MergeProperties(ICollection<ProjectPropertyInstance> newProperties)
+        /// <summary>
+        /// Merges properties from newProperties into the mergedInstance, avoiding duplicates.
+        /// </summary>
+        /// <param name="mergedInstance">The target ProjectInstance to merge properties into.</param>
+        /// <param name="newProperties">The properties to merge in.</param>
+        private static void MergeProperties(ProjectInstance mergedInstance, ICollection<ProjectPropertyInstance> newProperties)
+        {
+            foreach (var property in newProperties)
             {
-                foreach (var property in newProperties)
+                if (mergedInstance.GetProperty(property.Name) == null)
                 {
-                    if (mergedInstanceCandidate.GetProperty(property.Name) == null)
-                    {
-                        mergedInstanceCandidate.SetProperty(property.Name, property.EvaluatedValue);
-                    }
+                    mergedInstance.SetProperty(property.Name, property.EvaluatedValue);
                 }
             }
+        }
 
-            void MergeItems(ICollection<ProjectItemInstance> newItems)
+        /// <summary>
+        /// Merges items from newItems into the mergedInstance, handling metadata merging for existing items
+        /// and avoiding copy-on-write performance issues.
+        /// </summary>
+        /// <param name="mergedInstance">The target ProjectInstance to merge items into.</param>
+        /// <param name="newItems">The items to merge in.</param>
+        private static void MergeItems(ProjectInstance mergedInstance, ICollection<ProjectItemInstance> newItems)
+        {
+            // Maps item types (e.g., "Compile") to a set of includes (e.g., "File1.cs")
+            var existingItemsByType = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+            // Maps a tuple of (item type, include) to the actual item instance
+            var existingItemsLookup = new Dictionary<(string, string), ProjectItemInstance>(ItemIdentityComparer.Instance);
+
+            // Build lookup structures for existing items
+            foreach (var item in mergedInstance.Items)
             {
-                // Maps item types (e.g., "Compile") to a set of includes (e.g., "File1.cs")
-                var existingItemsByType = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
-
-                // Maps a tuple of (item type, include) to the actual item instance
-                var existingItemsLookup = new Dictionary<(string, string), ProjectItemInstance>(ItemIdentityComparer.Instance);
-
-                foreach (var item in mergedInstanceCandidate.Items)
+                if (!existingItemsByType.TryGetValue(item.ItemType, out var itemSet))
                 {
+                    itemSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    existingItemsByType[item.ItemType] = itemSet;
+                }
+
+                itemSet.Add(item.EvaluatedInclude);
+                existingItemsLookup[(item.ItemType, item.EvaluatedInclude)] = item;
+            }
+
+            // Batch items to add separately to avoid collection modification during enumeration
+            var itemsToAdd = new List<(string itemType, string evaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)>();
+
+            // Process new items
+            foreach (var item in newItems)
+            {
+                if (existingItemsByType.TryGetValue(item.ItemType, out var itemsOfType) &&
+                    itemsOfType.Contains(item.EvaluatedInclude))
+                {
+                    var existingItem = existingItemsLookup[(item.ItemType, item.EvaluatedInclude)];
+
+                    // Batch metadata updates to avoid copy-on-write performance issues
+                    var metadataToMerge = item.EnumerateMetadata().ToList();
+
+                    if (metadataToMerge.Count > 0)
+                    {
+                        // Check if we can use batch operations for CopyOnWriteDictionary
+                        if (existingItem.Metadata is CopyOnWriteDictionary<string> cowDict && metadataToMerge.Count > 1)
+                        {
+                            // Use batch operation to avoid multiple ImmutableDictionary creations
+                            cowDict.SetItems(metadataToMerge);
+                        }
+                        else
+                        {
+                            // Fall back to individual updates for single items or non-COW dictionaries
+                            foreach (var metadata in metadataToMerge)
+                            {
+                                existingItem.SetMetadata(metadata.Key, metadata.Value);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Defer adding new items until after enumeration is complete
+                    itemsToAdd.Add((item.ItemType, item.EvaluatedInclude, item.EnumerateMetadata()));
+
+                    // Update tracking structures for future lookups
                     if (!existingItemsByType.TryGetValue(item.ItemType, out var itemSet))
                     {
                         itemSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -869,36 +932,13 @@ namespace Microsoft.Build.Execution
                     }
 
                     itemSet.Add(item.EvaluatedInclude);
-                    existingItemsLookup[(item.ItemType, item.EvaluatedInclude)] = item;
                 }
+            }
 
-                // Add new items that don't already exist and merge metadata for existing ones
-                foreach (var item in newProjectStateAfterBuild.Items)
-                {
-                    if (existingItemsByType.TryGetValue(item.ItemType, out var existingItems) && existingItems.Contains(item.EvaluatedInclude))
-                    {
-                        var existingItem = existingItemsLookup[(item.ItemType, item.EvaluatedInclude)];
-
-                        // Merge metadata from the new item into the existing one
-                        foreach (var metadata in item.EnumerateMetadata())
-                        {
-                            existingItem.SetMetadata(metadata.Key, metadata.Value);
-                        }
-                    }
-                    // If the item doesn't exist, add it to the merged instance candidate and update the existing items dictionary
-                    else
-                    {
-                        mergedInstanceCandidate.AddItem(item.ItemType, item.EvaluatedInclude, item.EnumerateMetadata());
-
-                        if (existingItems == null)
-                        {
-                            existingItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                            existingItemsByType[item.ItemType] = existingItems;
-                        }
-
-                        existingItems.Add(item.EvaluatedInclude);
-                    }
-                }
+            // Add all new items after enumeration is complete to avoid collection modification issues
+            foreach (var (itemType, evaluatedInclude, metadata) in itemsToAdd)
+            {
+                mergedInstance.AddItem(itemType, evaluatedInclude, metadata);
             }
         }
 
