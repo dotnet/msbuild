@@ -164,6 +164,47 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         }
 
         [Fact]
+        public void SystemIODirectoryExists_WhenDirectoryExists_ReturnsTrue()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string testDirPath = Path.Combine(env.DefaultTestDirectory.Path, "TestDir");
+
+            Directory.CreateDirectory(testDirPath);
+
+            string projectContent = $@"
+                <Project>
+                    <PropertyGroup>
+                        <TestDirPath>{testDirPath.Replace(@"\", @"\\")}</TestDirPath>
+                        <DirExists>$([System.IO.Directory]::Exists($(TestDirPath)))</DirExists>
+                    </PropertyGroup>
+                </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("DirExists");
+            actualProperty.EvaluatedValue.ShouldBe("True");
+        }
+
+        [Fact]
+        public void SystemIODirectoryExists_WhenDirectoryDoesNotExist_ReturnsFalse()
+        {
+            const string projectContent = @"
+            <Project>
+                <PropertyGroup>
+                    <TestDirPath>TestDir</TestDirPath>
+                    <DirExists>$([System.IO.Directory]::Exists($(TestDirPath)))</DirExists>
+                </PropertyGroup>
+            </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("DirExists");
+            actualProperty.EvaluatedValue.ShouldBe("False");
+        }
+
+        [Fact]
         public void DirectoryExists_WhenDirectoryExists_ReturnsTrue()
         {
             using TestEnvironment env = TestEnvironment.Create();
