@@ -110,7 +110,7 @@ jobs:
   - task: PublishCodeCoverageResults@2
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
+      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
       pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -217,7 +217,7 @@ jobs:
   - task: PublishCodeCoverageResults@2
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
+      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
       pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -310,7 +310,7 @@ jobs:
   - task: PublishCodeCoverageResults@2
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
+      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
       pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -389,7 +389,7 @@ jobs:
   - task: PublishCodeCoverageResults@2
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
+      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
       pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -480,7 +480,7 @@ jobs:
   - task: PublishCodeCoverageResults@2
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
-      summaryFileLocation: $(coverageArtifactsDir)/$(coverageReportName).cobertura.xml
+      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
       pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
