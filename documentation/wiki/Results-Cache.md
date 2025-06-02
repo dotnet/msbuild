@@ -35,7 +35,7 @@ It's an out-in feature that can be disabled with change wave `17.12`. See more d
 
 Here's how some important flags interact with caching:
 
-*   **Flags Affecting Build Behavior:** - if any of the flags is presented only in request or cache - cache miss is returned:
+*   **Flags Affecting Build Behavior:** (if any of the flags is presented only in request or cache) cache miss is returned:
     *   `IgnoreMissingEmptyAndInvalidImports`: This flag changes how MSBuild handles project imports. If a cached outcome was generated with a different setting for this flag than the current request, the cache will consider it a mismatch.
     *   `FailOnUnresolvedSdk`: Similar to the imports flag, this affects SDK resolution.
 
