@@ -474,7 +474,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Calculate all Exclude
                 var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
-                var filteredProjectItems = new List<ProjectItemInstance>();
+                var filteredProjectItems = new List<ProjectItemInstance>(items.Count);
                 foreach (ProjectItemInstance item in items)
                 {
                     if (!excludesUnescapedForComparison.Contains(((IItem)item).EvaluatedInclude.NormalizeForPathComparison()))
