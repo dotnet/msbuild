@@ -553,18 +553,7 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            string commandLineArgs;
-            if (msbuildAssemblyLocation != null)
-            {
-                // For dotnet.exe, the dll path must come first, then -- to separate application arguments
-                commandLineArgs = $"\"{msbuildAssemblyLocation}\" -- /nodemode:2 ";
-            }
-            else
-            {
-                // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
-                // want to start up an MSBuild task host node.
-                commandLineArgs = $"/nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /low:{ComponentHost.BuildParameters.LowPriority}";
-            }
+            string commandLineArgs = $"{msbuildAssemblyLocation ?? string.Empty} /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /low:{ComponentHost.BuildParameters.LowPriority} ";
 
             CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildExecutable ?? "MSBuild.exe");
 

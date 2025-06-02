@@ -665,7 +665,7 @@ namespace Microsoft.Build.Shared
         internal string MSBuildToolsDirectoryArm64 { get; }
 
         /// <summary>
-        /// Path to the NET tools directory.
+        /// Path to the NET tools directory. It's a temporary solution before path to dotnet is resolved from DOTNET_EXPERIMENTAL_HOST_PATH.
         /// </summary>
         internal string MSBuildToolsDirectoryNET { get; }
 

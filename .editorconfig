@@ -1,4 +1,4 @@
-﻿﻿﻿# editorconfig.org
+﻿﻿# editorconfig.org
 
 # top-most EditorConfig file
 root = true
@@ -435,7 +435,7 @@ dotnet_diagnostic.IDE0073.severity = error
 dotnet_diagnostic.IDE0330.severity = suggestion
 
 # Use implicitly typed lambda
-dotnet_diagnostic.IDE0350.severity = suggestion
+dotnet_diagnostic.IDE0350.severity = none
 
 # Value types are incompatible with null values. https://xunit.net/xunit.analyzers/rules/xUnit1012
 dotnet_diagnostic.xUnit1012.severity = warning

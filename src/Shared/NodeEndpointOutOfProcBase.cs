@@ -121,7 +121,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of property names from handshake responsible for node version./>
         /// </summary>
-        private readonly IList<string> _versionHandshakeGroup = ["fileVersionMajor", "fileVersionMinor", "fileVersionBuild", "fileVersionPrivate"];
+        private readonly List<string> _versionHandshakeGroup = [
+            nameof(HandshakeComponents.FileVersionMajor),
+            nameof(HandshakeComponents.FileVersionMinor),
+            nameof(HandshakeComponents.FileVersionBuild),
+            nameof(HandshakeComponents.FileVersionPrivate)];
 
         #endregion
 
@@ -401,34 +405,38 @@ namespace Microsoft.Build.BackEnd
                     Handshake handshake = GetHandshake();
                     try
                     {
-                        KeyValuePair<string, int>[] handshakeComponents = handshake.RetrieveHandshakeComponents();
-                        for (int i = 0; i < handshakeComponents.Length; i++)
+                        HandshakeComponents handshakeComponents = handshake.RetrieveHandshakeComponents();
+
+                        int index = 0;
+                        foreach (KeyValuePair<string, int> component in handshakeComponents.EnumerateComponents())
                         {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             int handshakePart = _pipeServer.ReadIntForHandshake(
-                                byteToAccept: i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
-                            if (handshakePart != handshakeComponents[i].Value)
+                            if (handshakePart != component.Value)
                             {
                                 // NET Task host allows to connect to MSBuild.dll with the different handshake version.
                                 // We agreed to hardcode a value of 99 to bypass the protection for this scenario.
-                                if (_versionHandshakeGroup.Contains(handshakeComponents[i].Key) && handshakeComponents[i].Value == Handshake.NetTaskHostHandshakeVersion)
+                                if (_versionHandshakeGroup.Contains(component.Key) && component.Value == Handshake.NetTaskHostHandshakeVersion)
                                 {
-                                    CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, handshakeComponents[i].Key);
+                                    CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, component.Key);
                                 }
                                 else
                                 {
-                                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
-                                    _pipeServer.WriteIntForHandshake(i + 1);
+                                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, component.Value);
+                                    _pipeServer.WriteIntForHandshake(index + 1);
                                     gotValidConnection = false;
                                     break;
                                 }
                             }
+
+                            index++;
                         }
 
                         if (gotValidConnection)

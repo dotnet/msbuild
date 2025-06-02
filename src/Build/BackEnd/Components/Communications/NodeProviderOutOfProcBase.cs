@@ -509,11 +509,11 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            KeyValuePair<string, int>[] handshakeComponents = handshake.RetrieveHandshakeComponents();
-            for (int i = 0; i < handshakeComponents.Length; i++)
+            HandshakeComponents handshakeComponents = handshake.RetrieveHandshakeComponents();
+            foreach (var component in handshakeComponents.EnumerateComponents())
             {
-                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                nodeStream.WriteIntForHandshake(handshakeComponents[i].Value);
+                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", component.Key, component.Value, pipeName);
+                nodeStream.WriteIntForHandshake(component.Value);
             }
 
             // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
