@@ -1,6 +1,6 @@
 # Multithreaded MSBuild
 
-Currently, MSBuild supports parallel builds (a critical feature for a build system) by spawning worker processes. This made adoption easier because it didn't impose any requirements on tasks: they continue to own the whole process while they are executing. But it's a pretty strange design decision in the modern age, where we assume things are mulithreaded and async.
+Currently, MSBuild supports parallel builds (a critical feature for a build system) by spawning worker processes. This made adoption easier because it didn't impose any requirements on tasks: they continue to own the whole process while they are executing. But it's a pretty strange design decision in the modern age, where we assume things are multithreaded and async.
 
 ## Current state
 
@@ -75,7 +75,7 @@ deactivate Project1
 
 ### Multi-proc builds
 
-In multi-proc builds, the scheduler assigns projects to worker processes (nodes). Each node is responsible for executing the projects assigned to it. The scheduler manages the distribution of projects and ensures that dependencies are respected. When a project is assigned to a node, it is not moved to another node, which means that the state of the project is maintained within that node.
+In multi-proc builds, the scheduler assigns projects to multiple worker processes (nodes). There is one in-process node running in the entry process, and multiple out-of-process nodes running in separate worker processes, with one node per worker process. Each node is responsible for executing the projects assigned to it. The scheduler manages the creation of the nodes, distribution of projects, and ensures that dependencies are respected. When a project is assigned to a node, it is not moved to another node, which means that the state of the project is maintained within that node.
 
 (This diagram is simplified: the scheduler will not create a new node for every project, so in a two-project build, the scheduler will assign both projects to the same node.)
 
@@ -128,7 +128,7 @@ The goal of multithreading MSBuild is to allow tasks to run concurrently within 
 
 But tasks are not currently designed to be multithreaded. They assume that they own the whole process while they are executing, and they mutate the process state (environment, working directory, etc.). To make MSBuild multithreaded while maintaining task compatibility, we need to consider what parts of the build process can be moved to a multithreaded model without breaking existing tasks, as well as allowing new tasks to opt into multithreading.
 
-The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs", so we will need to add a new type of node that is neither "the only in-proc node* nor "a process" but a "a thread in the in-proc node". This will allow us to run multiple projects concurrently within the same process.
+The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs", so we will need to add a new type of node that is neither "the only in-proc node" nor "a process" but a "a thread in the in-proc node". This will allow us to run multiple projects concurrently within the same process.
 
 Within that node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
 
@@ -140,9 +140,9 @@ Some tasks or sets of tasks will break if they are run in short-lived processes,
 
 ## Sidecar TaskHosts
 
-One feature addition that will suppor multithreading MSBuild is the ability to run tasks in sidecar TaskHosts. This means that tasks can be executed in separate processes, but these processes are long-lived and dedicated to a specific project-execution node, as opposed to short-lived TaskHost processes that are spawned for each task execution.
-
-This will also accrue to .NET (Core) tasks, which must run out of process in Visual Studio/MSBuild.exe on .NET Framework. Sidecar TaskHosts will reduce the overhead of pushing task execution out of process, as the process will already be running, ready to execute tasks, and have an established IPC connection to the main MSBuild process.
+One feature addition that will support multithreading MSBuild is the ability to run tasks in sidecar TaskHosts. This means that tasks can be executed in separate processes, but these processes are long-lived and dedicated to a specific project-execution node, as opposed to short-lived TaskHost processes that are spawned for each task execution.
+ 
+This will also apply to .NET (Core) tasks, which must run out of process in Visual Studio/MSBuild.exe on .NET Framework. Sidecar TaskHosts will reduce the overhead of pushing task execution out of process, as the process will already be running, ready to execute tasks, and have an established IPC connection to the main MSBuild process.
 
 ```mermaid
 sequenceDiagram
@@ -175,3 +175,7 @@ With a sidecar TaskHost per node, the fact that much of the MSBuild-level state 
 To mark that a task is multithreaded-MSBuild-aware, we will introduce a new interface that tasks can implement. We will provide an object with information about the task invocation, including the current environment and working directory, so that tasks can access the same information they would have in a single-threaded or out-of-process execution.
 
 To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the object provided by the engine.
+
+## Tasks transition
+
+In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to implement and use the new thread-safe task interface. As these tasks become thread-safe, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they implement the new interface.
