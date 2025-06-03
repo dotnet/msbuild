@@ -616,7 +616,7 @@ namespace Microsoft.Build.BackEnd
 #if NET451_OR_GREATER
                             readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length).AsTask();
+                            readTask = localReadPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #else
                             result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
