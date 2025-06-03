@@ -770,12 +770,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                // Load the compiled assembly
+                // Return the compiled assembly
                 assembly = Assembly.LoadFrom(assemblyPath);
-                if (assembly == null)
-                {
-                    return false;
-                }
 
                 CompiledAssemblyCache.TryAdd(taskInfo, assembly);
                 return true;
