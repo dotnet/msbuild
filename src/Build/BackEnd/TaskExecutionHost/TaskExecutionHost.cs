@@ -1681,10 +1681,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if tasks from custom factories should run out of process</returns>
         private bool ShouldUseTaskHostForCustomFactory()
         {
-            // Check the global environment variable that forces all tasks out of process
-            bool forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
-
-            if (!forceTaskHostLaunch)
+            if (!Traits.Instance.ForceTaskHostLaunch)
             {
                 return false;
             }

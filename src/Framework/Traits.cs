@@ -140,6 +140,14 @@ namespace Microsoft.Build.Framework
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
 
         /// <summary>
+        /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
+        /// a small well-known set of tasks that are known to depend on IBuildEngine
+        /// callbacks; as forcing those out of proc would be just setting them up for
+        /// known failure.
+        /// </summary>
+        public readonly bool ForceTaskHostLaunch = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
+
+        /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
         /// mirroring
         /// https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry

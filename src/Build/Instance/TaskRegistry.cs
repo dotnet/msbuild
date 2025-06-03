@@ -61,14 +61,6 @@ namespace Microsoft.Build.Execution
         private Toolset _toolset;
 
         /// <summary>
-        /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
-        /// a small well-known set of tasks that are known to depend on IBuildEngine
-        /// callbacks; as forcing those out of proc would be just setting them up for
-        /// known failure.
-        /// </summary>
-        private static readonly bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
-
-        /// <summary>
         /// Simple name for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
@@ -1277,7 +1269,7 @@ namespace Microsoft.Build.Execution
                          !FileClassifier.IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
                          // This condition will as well capture Microsoft tasks pulled from NuGet cache - since we decide based on assembly name.
-                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here 
+                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here
                          !FileClassifier.IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
                          !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
                     // and let's consider all tasks imported by common targets as non custom logic.
@@ -1477,7 +1469,7 @@ namespace Microsoft.Build.Execution
                         bool explicitlyLaunchTaskHost =
                             isTaskHostFactory ||
                             (
-                                s_forceTaskHostLaunch &&
+                                Traits.Instance.ForceTaskHostLaunch &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 
