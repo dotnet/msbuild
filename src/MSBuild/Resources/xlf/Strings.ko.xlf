@@ -2034,50 +2034,50 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
-                     By default the file is in the current directory and named
-                     "msbuild.binlog". The binary log is a detailed description
-                     of the build process that can later be used to reconstruct
-                     text logs and used by other analysis tools. A binary log
-                     is usually 10-20x smaller than the most detailed text
-                     diagnostic-level log, but it contains more information.
-                     (Short form: -bl)
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     모든 빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
+                     기본적으로 파일은 현재 디렉터리에 있으며 이름은
+                     "msbuild.binlog"입니다. 이진 로그는 나중에 텍스트 로그를 재구성하는 데
+                     사용할 수 있고 다른 분석 도구에서 사용할 수 있는 빌드 프로세스의
+                     자세한 설명입니다. 이진 로그는
+                     일반적으로 가장 자세한 텍스트 진단 수준 로그보다 10~20배
+                     작지만 더 많은 정보를 담고 있습니다.
+                     (약식: -bl)
 
-                     The optional LogFile specifies the path where the
-                     binary log is saved. To generate a distinct log file
-                     for each build, the token "{}" can be added into the
-                     path, for example: LogFile=output-{}-log.binlog. Each 
-                     "{}" in the log path is replaced with a unique string
-                     using the timestamp, running process Id and random
-                     string stamp.
+                     선택적 LogFile은 이진 로그가 저장되는
+                     경로를 지정합니다. 각 빌드에 고유한 로그 파일을 생성하려면
+                     토큰 "{}"를 경로에 추가할 수 있습니다.
+                     예: LogFile=output-{}-log.binlog. 로그 경로의 
+                     각 "{}"는 타임스탬프, 실행 프로세스 ID 및 임이의 문자열
+                     스탬프를 사용하여 고유한 문자열로
+                     대체됩니다.
 
-                     The binary logger by default collects the source text of
-                     project files, including all imported projects and target
-                     files encountered during the build. The optional
-                     ProjectImports switch controls this behavior:
+                     기본적으로 이진 로거는 빌드하는 동안 발견된
+                     가져온 모든 프로젝트 및 대상 파일을 포함한 프로젝트 파일의
+                     원본 텍스트를 수집합니다. 선택적
+                     ProjectImports 스위치는 다음 동작을 제어합니다.
 
-                      ProjectImports=None     - Don't collect the project
-                                                imports.
-                      ProjectImports=Embed    - Embed project imports in the
-                                                log file.
-                      ProjectImports=ZipFile  - Save project files to
-                                                output.projectimports.zip
-                                                where output is the same name
-                                                as the binary log file name.
+                      ProjectImports=None     - 프로젝트 가져오기를 수집하지
+                                                마세요.
+                      ProjectImports=Embed    - 로그 파일에 프로젝트 가져오기를
+                                                포함합니다.
+                      ProjectImports=ZipFile - 프로젝트 파일을
+                                                output.projectimports.zip에
+                                                저장하며 여기서 출력은 이진 로그 파일 이름과
+                                                같은 이름입니다.
 
-                     The default setting for ProjectImports is Embed.
-                     Note: the logger does not collect non-MSBuild source files
-                     such as .cs, .cpp etc.
+                     ProjectImports의 기본 설정은 Embed입니다.
+                     참고: 로거는 MSBuild가 아닌 소스 파일을 수집하지 않습니다.
+                     예: .cs, .cpp 등
 
-                     A .binlog file can be "played back" by passing it to
-                     msbuild.exe as an argument instead of a project/solution.
-                     Other loggers will receive the information contained
-                     in the log file as if the original build was happening.
-                     You can read more about the binary log and its usages at:
+                     .binlog 파일은 프로젝트/솔루션 대신 인수로
+                     msbuild.exe에 전달하여 “재생”될 수 있습니다.
+                     다른 로거는 원래 빌드가 발생하는 것처럼 로그 파일에
+                     포함된 정보를 받습니다.
+                     이진 로그 및 해당 사용에 대한 자세한 내용은 다음에서 확인할 수 있습니다.
                      https://aka.ms/msbuild/binlog
 
-                     Examples:
+                     예:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
