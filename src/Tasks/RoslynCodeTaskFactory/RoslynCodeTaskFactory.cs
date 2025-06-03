@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks
         /// A cache of <see cref="RoslynCodeTaskFactoryTaskInfo"/> objects and their corresponding compiled assembly.  This cache ensures that two of the exact same code task
         /// declarations are not compiled multiple times.
         /// </summary>
-        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, Assembly> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, Assembly>();
+        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, (string Path, Assembly Assembly)> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, (string, Assembly)>();
 
         /// <summary>
         /// Stores the path to the directory that this assembly is located in.
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Attempt to compile an assembly (or get one from the cache)
-            if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
+            if (!TryCompileAssembly(taskFactoryLoggingHost, taskInfo, out string assemblyPath, out Assembly assembly))
             {
                 return false;
             }
@@ -655,17 +655,23 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Attempts to compile the current source code and load the assembly into memory.
+        /// Attempts to compile the current source code.
         /// </summary>
         /// <param name="buildEngine">An <see cref="IBuildEngine"/> to use give to the compiler task so that messages can be logged.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object containing details about the task.</param>
-        /// <param name="assembly">The <see cref="Assembly"/> if the source code be compiled and loaded, otherwise <code>null</code>.</param>
-        /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>null</code>.</returns>
-        private bool TryCompileInMemoryAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
+        /// <param name="assemblyPath">The path to a dll if the source code be compiled, otherwise <code>null</code>.</param>
+        /// <param name="assembly">The loaded assembly if compilation and loading succeeded, otherwise <code>null</code>.</param>
+        /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>false</code>.</returns>
+        private bool TryCompileAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out string assemblyPath, out Assembly assembly)
         {
+            assembly = null;
+            assemblyPath = null;
+
             // First attempt to get a compiled assembly from the cache
-            if (CompiledAssemblyCache.TryGetValue(taskInfo, out assembly))
+            if (CompiledAssemblyCache.TryGetValue(taskInfo, out var cachedEntry))
             {
+                assemblyPath = cachedEntry.Path;
+                assembly = cachedEntry.Assembly;
                 return true;
             }
 
@@ -675,9 +681,9 @@ namespace Microsoft.Build.Tasks
             }
 
             // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
-            // the temp folder as well as the assembly.  After compilation, the source code and assembly are deleted.
+            // the temp folder as well as the assembly. After build, the source code and assembly are deleted.
             string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
-            string assemblyPath = FileUtilities.GetTemporaryFileName(".dll");
+            assemblyPath = FileUtilities.GetTemporaryFile(Path.Combine(FileUtilities.TempFileDirectory, MSBuildConstants.InlineTaskTempDllSubPath), null, ".dll", false);
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
@@ -759,12 +765,14 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                // Return the assembly which is loaded into memory
-                assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                // Load the compiled assembly
+                assembly = Assembly.LoadFrom(assemblyPath);
+                if (assembly == null)
+                {
+                    return false;
+                }
 
-                // Attempt to cache the compiled assembly
-                CompiledAssemblyCache.TryAdd(taskInfo, assembly);
-
+                CompiledAssemblyCache.TryAdd(taskInfo, (assemblyPath, assembly));
                 return true;
             }
             catch (Exception e)
@@ -774,11 +782,6 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                if (FileSystems.Default.FileExists(assemblyPath))
-                {
-                    File.Delete(assemblyPath);
-                }
-
                 if (deleteSourceCodeFile && FileSystems.Default.FileExists(sourceCodePath))
                 {
                     File.Delete(sourceCodePath);

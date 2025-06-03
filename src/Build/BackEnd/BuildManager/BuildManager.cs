@@ -1159,6 +1159,9 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            // clean up inline tasks
+            FileUtilities.DeleteDirectoryNoThrow(Path.Combine(FileUtilities.TempFileDirectory, MSBuildConstants.InlineTaskTempDllSubPath), recursive: true);
+
             void SerializeCaches()
             {
                 string errorMessage = CacheSerialization.SerializeCaches(

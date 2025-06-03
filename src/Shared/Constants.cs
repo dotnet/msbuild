@@ -114,6 +114,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal const string ProjectReferenceTargetsOrDefaultTargetsMarker = ".projectReferenceTargetsOrDefaultTargets";
 
+        /// <summary>
+        /// The sub-path within the temporary directory where compiled inline tasks are located.
+        /// </summary>
+        internal const string InlineTaskTempDllSubPath = nameof(InlineTaskTempDllSubPath);
+
         // One-time allocations to avoid implicit allocations for Split(), Trim().
         internal static readonly char[] SemicolonChar = [';'];
         internal static readonly char[] SpaceChar = [' '];
