@@ -60,9 +60,6 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
   - [ ] NuGet client
     - Based on VS version channel
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/nuget/nuget.client`
-  - [ ] Source Build Packages
-    - Based on .NET version channel
-    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/source-build-reference-packages`
   - [ ] Roslyn:
     - Based on VS version channel
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/roslyn`
