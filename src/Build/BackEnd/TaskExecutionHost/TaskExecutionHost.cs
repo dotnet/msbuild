@@ -954,9 +954,8 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
-                    bool shouldUseTaskHost = ShouldUseTaskHostForCustomFactory();
 
-                    if (shouldUseTaskHost)
+                    if (Traits.Instance.ForceTaskHostLaunch)
                     {
                         // Create a TaskHostTask to run the custom factory's task out of process
                         task = CreateTaskHostTaskForCustomFactory(taskIdentityParameters);
@@ -1676,41 +1675,20 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Determines whether custom (non-AssemblyTaskFactory) task factories should use task host for out-of-process execution.
-        /// </summary>
-        /// <returns>True if tasks from custom factories should run out of process</returns>
-        private bool ShouldUseTaskHostForCustomFactory()
-        {
-            if (!Traits.Instance.ForceTaskHostLaunch)
-            {
-                return false;
-            }
-
-            // Exclude well-known tasks that are known to depend on IBuildEngine callbacks
-            // as forcing those out of proc would set them up for known failure
-            if (TypeLoader.IsPartialTypeNameMatch(_taskName, "MSBuild") ||
-                TypeLoader.IsPartialTypeNameMatch(_taskName, "CallTarget"))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
         /// Creates a TaskHostTask wrapper to run a custom factory's task out of process.
+        /// This is used when Traits.Instance.ForceTaskHostLaunch is true to ensure
+        /// custom task factories's tasks run in isolation.
         /// </summary>
-        /// <param name="taskIdentityParameters">Task identity parameters</param>
-        /// <returns>A TaskHostTask that will execute the real task out of process</returns>
+        /// <param name="taskIdentityParameters">Task identity parameters. No internal implementations support this</param>
+        /// <returns>A TaskHostTask that will execute the inner task out of process, or null if task creation fails.</returns>
         private ITask CreateTaskHostTaskForCustomFactory(IDictionary<string, string> taskIdentityParameters)
         {
-            // First, create the actual task using the custom factory
             TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
-            ITask actualTask;
+            ITask innerTask;
 
             try
             {
-                actualTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
+                innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
                     taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
                     _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
             }
@@ -1721,20 +1699,20 @@ namespace Microsoft.Build.BackEnd
 #endif
             }
 
-            if (actualTask == null)
+            if (innerTask == null)
             {
                 return null;
             }
 
             // Create a LoadedType for the actual task type so we can wrap it in TaskHostTask
-            Type taskType = actualTask.GetType();
+            Type taskType = innerTask.GetType();
             LoadedType taskLoadedType = new LoadedType(
                 taskType,
-                AssemblyLoadInfo.Create(taskType.Assembly.FullName, taskType.Assembly.Location),
+                AssemblyLoadInfo.Create(null, taskType.Assembly.Location),
                 taskType.Assembly,
                 typeof(ITaskItem));
 
-            // Create task host parameters for out-of-process execution
+            // Default task host parameters for out-of-process execution for inline tasks
             IDictionary<string, string> taskHostParameters = new Dictionary<string, string>
             {
                 [XMakeAttributes.runtime] = XMakeAttributes.GetCurrentMSBuildRuntime(),
@@ -1742,16 +1720,17 @@ namespace Microsoft.Build.BackEnd
             };
 
             // Merge with any existing task identity parameters
-            if (taskIdentityParameters != null)
+            if (taskIdentityParameters?.Count > 0)
             {
-                foreach (var kvp in taskIdentityParameters)
+                foreach (var kvp in taskIdentityParameters.Where(kvp => !taskHostParameters.ContainsKey(kvp.Key)))
                 {
                     taskHostParameters[kvp.Key] = kvp.Value;
                 }
             }
 
             // Clean up the original task since we're going to wrap it
-            // _taskFactoryWrapper.TaskFactory.CleanupTask(actualTask);            // Create and return the TaskHostTask wrapper
+            _taskFactoryWrapper.TaskFactory.CleanupTask(innerTask);
+
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             return new TaskHostTask(
                 _taskLocation,
