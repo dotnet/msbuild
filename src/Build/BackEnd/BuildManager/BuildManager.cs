@@ -1160,7 +1160,11 @@ namespace Microsoft.Build.Execution
             }
 
             // clean up inline tasks
-            FileUtilities.DeleteDirectoryNoThrow(Path.Combine(FileUtilities.TempFileDirectory, MSBuildConstants.InlineTaskTempDllSubPath), recursive: true);
+            string processSpecificInlineTaskDir = Path.Combine(
+                FileUtilities.TempFileDirectory,
+                MSBuildConstants.InlineTaskTempDllSubPath,
+                $"pid_{EnvironmentUtilities.CurrentProcessId}");
+            FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
 
             void SerializeCaches()
             {

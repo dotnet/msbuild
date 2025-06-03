@@ -683,7 +683,16 @@ namespace Microsoft.Build.Tasks
             // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
             // the temp folder as well as the assembly. After build, the source code and assembly are deleted.
             string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
-            assemblyPath = FileUtilities.GetTemporaryFile(Path.Combine(FileUtilities.TempFileDirectory, MSBuildConstants.InlineTaskTempDllSubPath), null, ".dll", false);
+
+            string processSpecificInlineTaskDir = Path.Combine(
+                FileUtilities.TempFileDirectory,
+                MSBuildConstants.InlineTaskTempDllSubPath,
+                $"pid_{EnvironmentUtilities.CurrentProcessId}");
+
+            Directory.CreateDirectory(processSpecificInlineTaskDir);
+
+            assemblyPath = FileUtilities.GetTemporaryFile(processSpecificInlineTaskDir, null, ".dll", false);
+
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
