@@ -246,31 +246,31 @@ namespace Microsoft.Build.BackEnd
 
             List<string> taskParameters = new List<string>(_taskNode.ParametersForBuild.Count + _taskNode.Outputs.Count);
 
-            foreach (KeyValuePair<string, (string, ElementLocation)> taskParameter in (CopyOnWriteDictionary<(string, ElementLocation)>)_taskNode.ParametersForBuild)
+            foreach (KeyValuePair<string, (string, ElementLocation)> taskParameter in _taskNode.ParametersForBuild)
             {
                 taskParameters.Add(taskParameter.Value.Item1);
             }
 
             // Add parameters on any output tags
-            foreach (ProjectTaskInstanceChild taskOutputSpecification in (List<ProjectTaskInstanceChild>)_taskNode.Outputs)
+            for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
-                ProjectTaskOutputItemInstance outputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
+                ProjectTaskOutputItemInstance outputItemInstance = _taskNode.Outputs[i] as ProjectTaskOutputItemInstance;
                 if (outputItemInstance != null)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                ProjectTaskOutputPropertyInstance outputPropertyInstance = taskOutputSpecification as ProjectTaskOutputPropertyInstance;
+                ProjectTaskOutputPropertyInstance outputPropertyInstance = _taskNode.Outputs[i] as ProjectTaskOutputPropertyInstance;
                 if (outputPropertyInstance != null)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
                 }
 
-                if (!String.IsNullOrEmpty(taskOutputSpecification.Condition))
+                if (!String.IsNullOrEmpty(_taskNode.Outputs[i].Condition))
                 {
-                    taskParameters.Add(taskOutputSpecification.Condition);
+                    taskParameters.Add(_taskNode.Outputs[i].Condition);
                 }
             }
 
