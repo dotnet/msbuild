@@ -2385,6 +2385,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesStateFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectFile).AssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <AllowResolveAssemblyReferencesOutOfProcNode Condition="'$(AllowResolveAssemblyReferencesOutOfProcNode)' == ''">false</AllowResolveAssemblyReferencesOutOfProcNode>
+    </PropertyGroup>
+
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
     <ItemGroup>
       <_ResolveAssemblyReferencesApplicationConfigFileForExes Include="@(AppConfigWithTargetPath)" Condition="'$(AutoGenerateBindingRedirects)'=='true' or '$(AutoUnifyAssemblyReferences)'=='false'"/>
@@ -2476,6 +2480,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
         NonCultureResourceDirectories="@(NonCultureResourceDirectory)"
         EnableCustomCulture="$(EnableCustomCulture)"
+        AllowOutOfProcNode="$(AllowResolveAssemblyReferencesOutOfProcNode)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
@@ -2579,24 +2584,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_NewGenerateBindingRedirectsIntermediateAppConfig Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">true</_NewGenerateBindingRedirectsIntermediateAppConfig>
       <AppConfig Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
-
-    <PropertyGroup>
-      <ConfigFileExists Condition="Exists('@(AppConfigWithTargetPath->'$(OutDir)%(TargetPath)')')">true</ConfigFileExists>
-      <HasNoBindingRedirects Condition="'@(SuggestedBindingRedirects)' == ''">true</HasNoBindingRedirects>
-    </PropertyGroup>
-
-    <!-- Overwrites .config file with a App.config content if RAR returned empty @(SuggestedBindingRedirects). -->
-    <Copy
-      SourceFiles="@(AppConfigWithTargetPath->'%(FullPath)')"
-      DestinationFiles="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      SkipUnchangedFiles="true"
-      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true' and '$(DesignTimeBuild)' != 'true'">
-      <Output TaskParameter="CopiedFiles" ItemName="FileWrites"/>
-    </Copy>
-    <Touch
-      Files="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      AlwaysCreate="true"
-      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true' and '$(DesignTimeBuild)' != 'true'"/>
 
     <ItemGroup Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
@@ -3203,7 +3190,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       AssignTargetPaths;
       SplitResourcesByCulture;
       CreateManifestResourceNames;
-      CreateCustomManifestResourceNames
+      CreateCustomManifestResourceNames;
+      AssignEmbeddedResourceOutputPaths;
     </PrepareResourceNamesDependsOn>
   </PropertyGroup>
 
@@ -3259,6 +3247,17 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <Output TaskParameter="AssignedFiles" ItemName="_DeploymentBaseManifestWithTargetPath" />
     </AssignTargetPath>
 
+  </Target>
+
+  <!--
+    Sets OutputResource metadata on EmbeddedResource items. This metadata is used in design time build without running ResGen target.
+  -->
+  <Target Name="AssignEmbeddedResourceOutputPaths">
+    <ItemGroup>
+      <EmbeddedResource>
+        <OutputResource>$(IntermediateOutputPath)%(EmbeddedResource.ManifestResourceName).resources</OutputResource>
+      </EmbeddedResource>
+    </ItemGroup>
   </Target>
 
   <!--
@@ -3467,7 +3466,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         StronglyTypedNamespace="%(EmbeddedResource.StronglyTypedNamespace)"
         StronglyTypedManifestPrefix="%(EmbeddedResource.StronglyTypedManifestPrefix)"
         PublicClass="%(EmbeddedResource.PublicClass)"
-        OutputResources="@(EmbeddedResource->'$(IntermediateOutputPath)%(ManifestResourceName).resources')"
+        OutputResources="@(EmbeddedResource->'%(OutputResource)')"
         Condition="'%(EmbeddedResource.Type)' == 'Resx' and '%(EmbeddedResource.GenerateResource)' != 'false' and '$(GenerateResourceMSBuildRuntime)' != 'CLR2'"
         SdkToolsPath="$(ResgenToolPath)"
         ExecuteAsTool="$(ResGenExecuteAsTool)"
@@ -3677,7 +3676,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Create the _CoreCompileResourceInputs list of inputs to the CoreCompile target.
     ============================================================
     -->
-  <Target Name="_GenerateCompileInputs">
+  <Target Name="_GenerateCompileInputs" DependsOnTargets="PrepareResourceNames">
 
     <MSBuildInternalMessage
       Condition="'@(ManifestResourceWithNoCulture)'!='' and '%(ManifestResourceWithNoCulture.EmittedForCompatibilityOnly)'==''"
