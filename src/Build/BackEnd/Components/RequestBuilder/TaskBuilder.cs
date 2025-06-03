@@ -246,13 +246,13 @@ namespace Microsoft.Build.BackEnd
 
             List<string> taskParameters = new List<string>(_taskNode.ParametersForBuild.Count + _taskNode.Outputs.Count);
 
-            foreach (KeyValuePair<string, (string, ElementLocation)> taskParameter in _taskNode.ParametersForBuild)
+            foreach (KeyValuePair<string, (string, ElementLocation)> taskParameter in (CopyOnWriteDictionary<(string, ElementLocation)>)_taskNode.ParametersForBuild)
             {
                 taskParameters.Add(taskParameter.Value.Item1);
             }
 
             // Add parameters on any output tags
-            foreach (ProjectTaskInstanceChild taskOutputSpecification in _taskNode.Outputs)
+            foreach (ProjectTaskInstanceChild taskOutputSpecification in (List<ProjectTaskInstanceChild>)_taskNode.Outputs)
             {
                 ProjectTaskOutputItemInstance outputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
                 if (outputItemInstance != null)
@@ -273,6 +273,7 @@ namespace Microsoft.Build.BackEnd
                     taskParameters.Add(taskOutputSpecification.Condition);
                 }
             }
+
 
             if (!String.IsNullOrEmpty(_taskNode.Condition))
             {
