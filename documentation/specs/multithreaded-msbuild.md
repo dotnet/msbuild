@@ -180,7 +180,7 @@ Some tasks or sets of tasks will break if they are run in short-lived processes,
 ## Sidecar TaskHosts
 
 One feature addition that will support multithreading MSBuild is the ability to run tasks in sidecar TaskHosts. This means that tasks can be executed in separate processes, but these processes are long-lived and dedicated to a specific project-execution node, as opposed to short-lived TaskHost processes that are spawned for each task execution.
- 
+
 This will also apply to .NET (Core) tasks, which must run out of process in Visual Studio/MSBuild.exe on .NET Framework. Sidecar TaskHosts will reduce the overhead of pushing task execution out of process, as the process will already be running, ready to execute tasks, and have an established IPC connection to the main MSBuild process.
 
 ```mermaid
@@ -261,7 +261,8 @@ Thread1_Tasks ->> Thread1_Project1: Task Z state mutations
 deactivate Thread1_Tasks
 Thread1_Project1 ->> Scheduler: results
 deactivate Thread1_Project1
-``` 
+```
 
 ## MSBuild Server integration
-To avoid regressing CLI incremental build performance, it is essential to fully support the MSBuild server feature in multithreaded mode. Out-of-process nodes offer significant benefits by preserving caches across build command executions when node reuse is enabled. However, caches in the entry process are lost at the end of each build unless the MSBuild server feature is used. While typically few projects are built in the entry process, if all builds are executed there, as in multithreaded mode, the performance benefits of node reuse will be lost.
+
+To avoid regressing CLI incremental build performance, it is essential to fully support the MSBuild server feature in multithreaded mode. Out-of-process nodes offer significant benefits by preserving caches across build command executions when node reuse is enabled. However, caches in the entry process are lost at the end of each build unless the MSBuild server feature is used. In multiprocess execution, that is a fraction of the caches and processes, but with multithreading, it is the entire process. As a result, opting into multithreading on the command line should automatically enable MSBuild server.
