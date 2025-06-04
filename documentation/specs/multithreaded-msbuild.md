@@ -128,7 +128,7 @@ The goal of multithreading MSBuild is to allow tasks to run concurrently within 
 
 But tasks are not currently designed to be multithreaded. They assume that they own the whole process while they are executing, and they mutate the process state (environment, working directory, etc.). To make MSBuild multithreaded while maintaining task compatibility, we need to consider what parts of the build process can be moved to a multithreaded model without breaking existing tasks, as well as allowing new tasks to opt into multithreading.
 
-The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs". To support multithreading, we will introduce a new type of node, called a "thread node", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects concurrently within the same process.
+The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs" (`INodeProvider`). To support multithreading, we will introduce a new type of node, called a "thread node", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects concurrently within the same process.
 
 The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, cli or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode, we will create all the thread nodes in the entry process.
 
