@@ -130,7 +130,7 @@ But tasks are not currently designed to be multithreaded. They assume that they 
 
 The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs". To support multithreading, we will introduce a new type of node, called a "thread node", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects concurrently within the same process.
 
-The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multi-threaded, cli or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode, we will create all the thread nodes in the entry process.
+The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, cli or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode, we will create all the thread nodes in the entry process.
 
 ```mermaid
 sequenceDiagram
@@ -262,3 +262,6 @@ deactivate Thread1_Tasks
 Thread1_Project1 ->> Scheduler: results
 deactivate Thread1_Project1
 ``` 
+
+## MSBuild Server integration
+To avoid regressing CLI incremental build performance, it is essential to fully support the MSBuild server feature in multithreaded mode. Out-of-process nodes offer significant benefits by preserving caches across build command executions when node reuse is enabled. However, caches in the entry process are lost at the end of each build unless the MSBuild server feature is used. While typically few projects are built in the entry process, if all builds are executed there, as in multithreaded mode, the performance benefits of node reuse will be lost.
