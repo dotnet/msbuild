@@ -42,16 +42,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
-        /// <summary>
-        /// Task host runtime.
-        /// </summary>
-        private string _runtime;
-
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks.
         /// </summary>
         private AppDomainSetup _appDomainSetup;
+
+        /// <summary>
+        /// Task host runtime.
+        /// </summary>
+        private string _runtime;
 #endif
 
         /// <summary>
@@ -186,11 +186,11 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            _runtime = runtime;
             _culture = culture;
             _uiCulture = uiCulture;
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
+            _runtime = runtime;
 #endif
             _lineNumberOfTask = lineNumberOfTask;
             _columnNumberOfTask = columnNumberOfTask;

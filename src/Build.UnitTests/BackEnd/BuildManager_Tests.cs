@@ -21,6 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -64,14 +65,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private readonly TransientTestState _inProcEnvCheckTransientEnvironmentVariable;
 
+        private string MSBuildAssemblyPath = Path.Combine(RunnerUtilities.BootstrapMsBuildBinaryLocation, "sdk", RunnerUtilities.BootstrapLocationAttribute.BootstrapSdkVersion);
+
         /// <summary>
-        /// SetUp
+        /// SetUp.
         /// </summary>
         public BuildManager_Tests(ITestOutputHelper output)
         {
             _output = output;
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
+            _env = TestEnvironment.Create(output);
+
+            _env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", RunnerUtilities.BootstrapMsBuildBinaryLocation);
+            _env.SetEnvironmentVariable("MSBuildAssemblyDirectory", MSBuildAssemblyPath);
 
             _logger = new MockLogger(output);
             _parameters = new BuildParameters
@@ -80,10 +87,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Loggers = new ILogger[] { _logger },
                 EnableNodeReuse = false
             };
+
             _buildManager = new BuildManager();
             _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
-            _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
         }
 
@@ -1725,8 +1732,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.0 task, we should
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
-        public void CancelledBuildInTaskHostWithDelay40()
+        [Fact]
+        public void CanceledBuildInTaskHostWithDelay40()
         {
             string contents = CleanupFileContents(@$"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -4384,7 +4391,7 @@ $@"<Project InitialTargets=`Sleep`>
             }
         }
 
-        [WindowsFullFrameworkOnlyTheory]
+        [Theory]
         [InlineData("", false)] // regular task host, input logging disabled
         [InlineData("", true)] // regular task host, input logging enabled
         [InlineData("TaskHostFactory", false)] // OOP task host, input logging disabled

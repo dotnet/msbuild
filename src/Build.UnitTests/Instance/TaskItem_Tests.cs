@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -11,8 +13,10 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -20,9 +24,9 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
-    /// Tests for ProjectPropertyInstance internal members
+    /// Tests for ProjectPropertyInstance internal members.
     /// </summary>
-    public class TaskItem_Tests
+    public class TaskItem_Tests : IDisposable
     {
         internal static readonly string[] s_builtInMetadataNames =
         {
@@ -42,6 +46,26 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             "DefiningProjectName",
             "DefiningProjectExtension"
         };
+
+        private string MSBuildAssemblyPath = Path.Combine(RunnerUtilities.BootstrapMsBuildBinaryLocation, "sdk", RunnerUtilities.BootstrapLocationAttribute.BootstrapSdkVersion);
+
+        private readonly TestEnvironment _env;
+
+        /// <summary>
+        /// SetUp.
+        /// </summary>
+        public TaskItem_Tests(ITestOutputHelper output)
+        {
+            _env = TestEnvironment.Create(output);
+
+            _env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", RunnerUtilities.BootstrapMsBuildBinaryLocation);
+            _env.SetEnvironmentVariable("MSBuildAssemblyDirectory", MSBuildAssemblyPath);
+        }
+
+        /// <summary>
+        /// TearDown
+        /// </summary>
+        public void Dispose() => _env.Dispose();
 
         /// <summary>
         /// Test serialization
@@ -288,7 +312,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up special characters on the metadata.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [Fact]
         public void Escaping2()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -342,7 +366,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Flushing an item through a task run in the task host also should not mess up the escaping of the itemspec either.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [Fact]
         public void Escaping3()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"

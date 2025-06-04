@@ -85,9 +85,9 @@ namespace Microsoft.Build.Internal
     {
         public static int NetTaskHostHandshakeVersion = 99;
 
-        private const HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
+        public static HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
 
-        private readonly HandshakeComponents _handshakeComponents;
+        protected readonly HandshakeComponents _handshakeComponents;
 
         internal Handshake(HandshakeOptions nodeType)
             : this(nodeType, includeSessionId: true)

@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// Make sure I can define a property with escaped characters and pass it into
         /// a string parameter of a task, in this case the Message task.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [Fact]
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -603,7 +603,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// Do an item transform, where the transform expression contains an unescaped semicolon as well
         /// as an escaped percent sign.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [Fact]
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
@@ -730,7 +730,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// If %2A (escaped '*') or %3F (escaped '?') is in an item's Include, it should be treated
         /// literally, not as a wildcard
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [Fact]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
             MockLogger logger = new();

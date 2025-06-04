@@ -3,6 +3,7 @@
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #endif
 
@@ -26,8 +27,9 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE
             if (s_currentHost == null)
             {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
+                string dotnetExe = Path.Combine(
+                    FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
+                    Constants.DotnetProcessName);
                 if (File.Exists(dotnetExe))
                 {
                     s_currentHost = dotnetExe;

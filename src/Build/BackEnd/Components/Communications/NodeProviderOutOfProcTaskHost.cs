@@ -400,9 +400,15 @@ namespace Microsoft.Build.BackEnd
                 {
                     s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
 
-                    s_msbuildName ??= (hostContext & HandshakeOptions.NET) == HandshakeOptions.NET
-                            ? (NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet")
-                            : "MSBuild.exe";
+                    if (s_msbuildName == null)
+                    {
+                        s_msbuildName =
+                            (hostContext & Handshake.NetTaskHostFlags) == Handshake.NetTaskHostFlags
+                                ? Constants.DotnetProcessName
+                                : (hostContext & HandshakeOptions.NET) == HandshakeOptions.NET
+                                    ? "MSBuild.dll"
+                                    : "MSBuild.exe";
+                    }
                 }
 
                 return s_msbuildName;
