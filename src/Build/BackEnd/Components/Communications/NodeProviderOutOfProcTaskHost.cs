@@ -465,22 +465,24 @@ namespace Microsoft.Build.BackEnd
 
                 toolPath = s_pathToX32Clr2;
             }
-            else if (IsHandshakeOptionEnabled(HandshakeOptions.X64) && !IsHandshakeOptionEnabled(HandshakeOptions.NET))
+            else if (IsHandshakeOptionEnabled(HandshakeOptions.X64))
             {
-                s_pathToX64Clr4 ??= s_baseTaskHostPath64;
-
-                toolPath = s_pathToX64Clr4;
+                if (IsHandshakeOptionEnabled(HandshakeOptions.NET))
+                {
+                    msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, "MSBuild.dll");
+                    toolPath = s_baseTaskHostPathNet;
+                }
+                else
+                {
+                    s_pathToX64Clr4 ??= s_baseTaskHostPath64;
+                    toolPath = s_pathToX64Clr4;
+                }
             }
             else if (IsHandshakeOptionEnabled(HandshakeOptions.Arm64))
             {
                 s_pathToArm64Clr4 ??= s_baseTaskHostPathArm64;
 
                 toolPath = s_pathToArm64Clr4;
-            }
-            else if (IsHandshakeOptionEnabled(HandshakeOptions.NET))
-            {
-                msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, "MSBuild.dll");
-                toolPath = s_baseTaskHostPathNet;
             }
             else
             {
