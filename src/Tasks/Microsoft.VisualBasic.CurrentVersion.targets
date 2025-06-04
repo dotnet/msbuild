@@ -238,6 +238,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          ChecksumAlgorithm="$(ChecksumAlgorithm)"
          CodeAnalysisRuleSet="$(ResolvedCodeAnalysisRuleSet)"
          CodePage="$(CodePage)"
+         CompilerType="$(RoslynCompilerType)"
          DebugType="none"
          DefineConstants="$(FinalDefineConstants)"
          DelaySign="$(DelaySign)"

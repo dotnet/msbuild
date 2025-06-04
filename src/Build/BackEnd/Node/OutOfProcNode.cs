@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -542,7 +541,6 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Clears all the caches used during the build.
         /// </summary>
-        [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "Required because when calling this method, we want the memory back NOW.")]
         private void CleanupCaches()
         {
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
@@ -562,9 +560,6 @@ namespace Microsoft.Build.Execution
                 // We'll experiment here and ship with the best default.
                 s_projectRootElementCacheBase = null;
             }
-
-            // Since we aren't going to be doing any more work, lets clean up all our memory usage.
-            GC.Collect();
         }
 
         /// <summary>

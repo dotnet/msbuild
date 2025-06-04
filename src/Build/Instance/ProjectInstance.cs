@@ -827,7 +827,7 @@ namespace Microsoft.Build.Execution
                                 // any extant metadata.
                                 // UNDONE: This could be achieved at lower GC cost by applying
                                 // the metadata filter at DeepClone time above.
-                                foreach (var metadataName in filteredItem.MetadataNames)
+                                foreach (var metadataName in filteredItem.EnumerableMetadataNames)
                                 {
                                     if (!itemFilter.Value.Contains(metadataName, StringComparer.OrdinalIgnoreCase))
                                     {

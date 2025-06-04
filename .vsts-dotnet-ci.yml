@@ -110,11 +110,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -308,11 +312,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -375,11 +383,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:

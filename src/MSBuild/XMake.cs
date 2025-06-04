@@ -35,6 +35,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Tasks.AssemblyDependency;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -655,6 +656,9 @@ namespace Microsoft.Build.CommandLine
         {
             DebuggerLaunchCheck();
 
+            // Resets the build completion event, signaling that a new build process is starting.
+            s_buildComplete.Reset();
+
             // Initialize new build telemetry and record start of this build, if not initialized already
             KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry { StartAt = DateTime.UtcNow };
 
@@ -1042,6 +1046,13 @@ namespace Microsoft.Build.CommandLine
             {
                 Console.WriteLine(
                     $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
+
+                exitType = ExitType.Unexpected;
+            }
+            catch (PathTooLongException e)
+            {
+                Console.WriteLine(
+                    $"{e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
             }
@@ -1527,6 +1538,11 @@ namespace Microsoft.Build.CommandLine
                         {
                             parameters.MemoryUseLimit = parameters.MaxNodeCount;
                         }
+                    }
+
+                    if (Traits.Instance.EnableRarNode)
+                    {
+                        parameters.EnableRarNode = true;
                     }
 
                     List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
@@ -3431,6 +3447,21 @@ namespace Microsoft.Build.CommandLine
                     // whatever our priority is is correct.
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException);
+                }
+                else if (nodeModeNumber == 3)
+                {
+                    // The RAR service persists between builds, and will continue to process requests until terminated.
+                    OutOfProcRarNode rarNode = new();
+                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+
+                    shutdownReason = rarShutdownReason switch
+                    {
+                        RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
+                        RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
+                        RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
+                        RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
+                        _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
+                    };
                 }
                 else if (nodeModeNumber == 8)
                 {

@@ -282,22 +282,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*
-        * Method:  AssertTokenizeUnicode
-        *
-        * Tokenize a string ('source') and compare it to the expected set of tokens.
-        * Also, the source must be regenerated exactly when the tokens are concatenated
-        * back together,
-        */
-        private static void AssertTokenizeUnicode(
-           string source,
-           string expectedTokenKey,
-           int expectedLastLineNumber)
-        {
-            // Most of the time, we expect the rebuilt source to be the same as the input source.
-            AssertTokenizeUnicode(source, source, expectedTokenKey, expectedLastLineNumber);
-        }
-
-        /*
         * Method:  AssertTokenize
         *
         * Tokenize a string ('source') and compare it to the expected set of tokens.

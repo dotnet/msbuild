@@ -79,11 +79,12 @@ namespace Microsoft.Build.Eventing
         /// <summary>
         /// Call this method to notify listeners of information of how a project file built.
         /// <param name="projectPath">Filename of the project being built.</param>
+        /// <param name="targets">Names of the targets that built.</param>
         /// </summary>
-        [Event(5, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void BuildProjectStart(string projectPath)
+        [Event(5, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void BuildProjectStart(string projectPath, string targets)
         {
-            WriteEvent(5, projectPath);
+            WriteEvent(5, projectPath, targets);
         }
 
         /// <param name="projectPath">Filename of the project being built.</param>
@@ -671,6 +672,12 @@ namespace Microsoft.Build.Eventing
         public void ProjectCacheHandleBuildResultStop(string pluginTypeName, string projectPath, string targets)
         {
             WriteEvent(92, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(93, Keywords = Keywords.All)]
+        public void CancelSubmissionsStart()
+        {
+            WriteEvent(93);
         }
         #endregion
     }

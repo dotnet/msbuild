@@ -744,6 +744,22 @@ namespace Microsoft.Build.Evaluation.Expander
                     return true;
                 }
             }
+            else if (string.Equals(methodName, nameof(IntrinsicFunctions.FileExists), StringComparison.OrdinalIgnoreCase))
+            {
+                if (ParseArgs.TryGetArg(args, out string? arg0))
+                {
+                    returnVal = IntrinsicFunctions.FileExists(arg0);
+                    return true;
+                }
+            }
+            else if (string.Equals(methodName, nameof(IntrinsicFunctions.DirectoryExists), StringComparison.OrdinalIgnoreCase))
+            {
+                if (ParseArgs.TryGetArg(args, out string? arg0))
+                {
+                    returnVal = IntrinsicFunctions.DirectoryExists(arg0);
+                    return true;
+                }
+            }
             return false;
         }
 

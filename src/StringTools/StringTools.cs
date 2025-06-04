@@ -92,6 +92,11 @@ namespace Microsoft.NET.StringTools
             return WeakStringCacheInterner.Instance.FormatStatistics();
         }
 
+        public static void ClearCachedStrings()
+        {
+            WeakStringCacheInterner.Instance.Dispose();
+        }
+
         #endregion
 
         /// <summary>

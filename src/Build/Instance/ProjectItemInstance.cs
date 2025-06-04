@@ -285,6 +285,8 @@ namespace Microsoft.Build.Execution
             get { return new ReadOnlyCollection<string>(_taskItem.MetadataNames.Cast<string>()); }
         }
 
+        internal TaskItem.MetadataNamesEnumerable EnumerableMetadataNames => _taskItem.EnumerableMetadataNames;
+
         /// <summary>
         /// ITaskItem implementation
         /// </summary>
@@ -957,6 +959,8 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            public MetadataNamesEnumerable EnumerableMetadataNames => new MetadataNamesEnumerable(this);
+
             /// <summary>
             /// Gets the number of metadata set on the item.
             /// Computed, not necessarily fast.
@@ -1448,20 +1452,7 @@ namespace Microsoft.Build.Execution
                 else if (destinationItem is IMetadataContainer destinationItemAsMetadataContainer)
                 {
                     // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
-                    IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
-                    IEnumerable<KeyValuePair<string, string>> metadataToImport = metadataEnumerable
-                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
-                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
-
-#if FEATURE_APPDOMAIN
-                    if (RemotingServices.IsTransparentProxy(destinationItem))
-                    {
-                        // Linq is not serializable so materialize the collection before making the call.
-                        metadataToImport = metadataToImport.ToList();
-                    }
-#endif
-
-                    destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
+                    BulkImportMetadata(destinationItem, destinationItemAsMetadataContainer);
                 }
                 else
                 {
@@ -1486,6 +1477,25 @@ namespace Microsoft.Build.Execution
                         destinationItem.SetMetadata("OriginalItemSpec", _includeEscaped);
                     }
                 }
+            }
+
+            // PERF: Keep this method extracted to avoid unconditionally allocating a closure object
+            private void BulkImportMetadata(ITaskItem destinationItem, IMetadataContainer destinationItemAsMetadataContainer)
+            {
+                IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
+                IEnumerable<KeyValuePair<string, string>> metadataToImport = metadataEnumerable
+                    .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
+                    .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
+
+#if FEATURE_APPDOMAIN
+                if (RemotingServices.IsTransparentProxy(destinationItem))
+                {
+                    // Linq is not serializable so materialize the collection before making the call.
+                    metadataToImport = metadataToImport.ToList();
+                }
+#endif
+
+                destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
             }
 
             /// <summary>
@@ -1959,6 +1969,58 @@ namespace Microsoft.Build.Execution
                 }
 
                 return null;
+            }
+
+            internal readonly struct MetadataNamesEnumerable
+            {
+                private readonly TaskItem _item;
+
+                public MetadataNamesEnumerable(TaskItem taskItem) => _item = taskItem;
+
+                public readonly MetadataNamesEnumerator GetEnumerator() => new MetadataNamesEnumerator(_item.MetadataCollection);
+            }
+
+            internal struct MetadataNamesEnumerator
+            {
+                private readonly IEnumerator<ProjectMetadataInstance> _metadataCollectionEnumerator;
+                private bool _metadataNamesEnumerated;
+                private int _itemSpecModifiersIndex;
+
+                internal MetadataNamesEnumerator(ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadataCollection)
+                {
+                    _metadataCollectionEnumerator = ((IEnumerable<ProjectMetadataInstance>)metadataCollection).GetEnumerator();
+                    _metadataNamesEnumerated = false;
+                    _itemSpecModifiersIndex = 0;
+                }
+
+                public string Current { get; private set; }
+
+                public bool MoveNext()
+                {
+                    if (!_metadataNamesEnumerated)
+                    {
+                        if (_metadataCollectionEnumerator.MoveNext())
+                        {
+                            Current = _metadataCollectionEnumerator.Current.Name;
+
+                            return true;
+                        }
+                        else
+                        {
+                            _metadataNamesEnumerated = true;
+                        }
+                    }
+
+                    if (_itemSpecModifiersIndex < FileUtilities.ItemSpecModifiers.All.Length)
+                    {
+                        Current = FileUtilities.ItemSpecModifiers.All[_itemSpecModifiersIndex];
+                        ++_itemSpecModifiersIndex;
+
+                        return true;
+                    }
+
+                    return false;
+                }
             }
 
             /// <summary>

@@ -169,7 +169,7 @@ namespace Microsoft.Build.Tasks
 #endif
                     }
 
-                    if (!TryGetFileName(response, out string filename))
+                    if (!TryGetFileName(uri, out string filename))
                     {
                         Log.LogErrorWithCodeFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
                         return;
@@ -308,25 +308,24 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Attempts to get the file name to use when downloading the file.
         /// </summary>
-        /// <param name="response">The <see cref="HttpResponseMessage"/> with information about the response.</param>
+        /// <param name="requestUri">The uri we sent request to.</param>
         /// <param name="filename">Receives the name of the file.</param>
         /// <returns><code>true</code> if a file name could be determined, otherwise <code>false</code>.</returns>
-        private bool TryGetFileName(HttpResponseMessage response, out string filename)
+        private bool TryGetFileName(Uri requestUri, out string filename)
         {
-            if (response == null)
+            if (requestUri == null)
             {
-                throw new ArgumentNullException(nameof(response));
+                throw new ArgumentNullException(nameof(requestUri));
             }
 
             // Not all URIs contain a file name so users will have to specify one
             // Example: http://www.download.com/file/1/
 
-            filename = !String.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
+            filename = !string.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
                 ? DestinationFileName.ItemSpec // Get the file name from what the user specified
-                : response.Content?.Headers?.ContentDisposition?.FileName // Attempt to get the file name from the content-disposition header value
-                  ?? Path.GetFileName(response.RequestMessage.RequestUri.LocalPath); // Otherwise attempt to get a file name from the URI
+                : Path.GetFileName(requestUri.LocalPath); // Otherwise attempt to get a file name from the URI
 
-            return !String.IsNullOrWhiteSpace(filename);
+            return !string.IsNullOrWhiteSpace(filename);
         }
 
 #if !NET

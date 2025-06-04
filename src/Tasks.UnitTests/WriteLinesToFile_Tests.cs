@@ -319,7 +319,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        private void WritingNothingErasesExistingFile(bool useNullLines)
+        public void WritingNothingErasesExistingFile(bool useNullLines)
         {
             ITaskItem[] lines = useNullLines ? null : Array.Empty<ITaskItem>();
 
@@ -346,7 +346,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        private void WritingNothingCreatesNewFile(bool useNullLines)
+        public void WritingNothingCreatesNewFile(bool useNullLines)
         {
             ITaskItem[] lines = useNullLines ? null : Array.Empty<ITaskItem>();
 

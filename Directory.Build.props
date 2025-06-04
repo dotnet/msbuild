@@ -41,6 +41,8 @@
     <PackageTags>MSBuild</PackageTags>
 
     <TargetMSBuildToolsVersion>Current</TargetMSBuildToolsVersion>
+    <!-- When building in the VMR, we never need to publish Windows PDBs. Any conversion to Windows PDBs will be done during staging if necessary. -->
+    <PublishWindowsPdb Condition="'$(DotNetBuildOrchestrator)' == 'true'">false</PublishWindowsPdb>
   </PropertyGroup>
 
   <PropertyGroup>

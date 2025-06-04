@@ -262,64 +262,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private static void CreateFaultInjectionTypeLibs(MockTypeLibrariesFailurePoints failurePoint, out MockTypeLib mainTypeLib,
-            out MockTypeLib dependencyTypeLibGood1, out MockTypeLib dependencyTypeLibBad1,
-            out MockTypeLib dependencyTypeLibGood2, out MockTypeLib dependencyTypeLibBad2)
-        {
-            mainTypeLib = new MockTypeLib();
-            mainTypeLib.AddTypeInfo(new MockTypeInfo());
-            mainTypeLib.AddTypeInfo(new MockTypeInfo());
-
-            dependencyTypeLibGood1 = new MockTypeLib();
-            dependencyTypeLibGood1.AddTypeInfo(new MockTypeInfo());
-
-            // Make it the StdOle lib to exercise the ITypeInfo.GetDocumentation failure point
-            dependencyTypeLibBad1 = new MockTypeLib(NativeMethods.IID_StdOle);
-            dependencyTypeLibBad1.AddTypeInfo(new MockTypeInfo());
-
-            dependencyTypeLibGood2 = new MockTypeLib();
-            dependencyTypeLibGood2.AddTypeInfo(new MockTypeInfo());
-
-            // Make it the StdOle lib to exercise the ITypeInfo.GetDocumentation failure point
-            dependencyTypeLibBad2 = new MockTypeLib(NativeMethods.IID_StdOle);
-            dependencyTypeLibBad2.AddTypeInfo(new MockTypeInfo());
-
-            COMException failureException = new COMException("unhandled exception in " + failurePoint.ToString());
-
-            dependencyTypeLibBad1.InjectFailure(failurePoint, failureException);
-            dependencyTypeLibBad2.InjectFailure(failurePoint, failureException);
-        }
-
-        private void RunDependencyWalkerFaultInjection(MockTypeLibrariesFailurePoints failurePoint, MockTypeLib mainTypeLib, MockTypeLib dependencyTypeLibGood1, MockTypeLib dependencyTypeLibBad1, MockTypeLib dependencyTypeLibGood2, MockTypeLib dependencyTypeLibBad2)
-        {
-            ComDependencyWalker walker = new ComDependencyWalker(new MarshalReleaseComObject(MockReleaseComObject));
-            walker.AnalyzeTypeLibrary(mainTypeLib);
-
-            // Did the current failure point get hit for this test? If not then no point in checking anything
-            // The previous test (FaultInjectionMainLib) ensures that all defined failure points actually
-            // cause some sort of trouble
-            if (walker.EncounteredProblems.Count > 0)
-            {
-                TYPELIBATTR[] dependencies = walker.GetDependencies();
-                AssertDependenciesContainTypeLib("Test failed for failure point " + failurePoint.ToString(),
-                    dependencies, mainTypeLib, true);
-                AssertDependenciesContainTypeLib("Test failed for failure point " + failurePoint.ToString(),
-                    dependencies, dependencyTypeLibGood1, true);
-                AssertDependenciesContainTypeLib("Test failed for failure point " + failurePoint.ToString(),
-                    dependencies, dependencyTypeLibGood2, true);
-                AssertDependenciesContainTypeLib("Test failed for failure point " + failurePoint.ToString(),
-                    dependencies, dependencyTypeLibBad1, false);
-                AssertDependenciesContainTypeLib("Test failed for failure point " + failurePoint.ToString(),
-                    dependencies, dependencyTypeLibBad2, false);
-            }
-
-            mainTypeLib.AssertAllHandlesReleased();
-            dependencyTypeLibGood1.AssertAllHandlesReleased();
-            dependencyTypeLibGood2.AssertAllHandlesReleased();
-            dependencyTypeLibBad1.AssertAllHandlesReleased();
-            dependencyTypeLibBad2.AssertAllHandlesReleased();
-        }
-
         [Fact]
         public void FullDependenciesWithIncrementalAnalysis()
         {

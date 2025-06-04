@@ -76,6 +76,33 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        public void AssertSingleResolverErrorLoggedWhenSdkNotResolved()
+        {
+            var service = new SdkResolverService();
+
+            // Use mock loader that only provides a single resolver
+            service.InitializeForTests(new MockLoaderStrategy(includeSingleResolverOnly: true));
+
+            var sdk = new SdkReference("notfound", "referencedVersion", "minimumVersion");
+
+            var result = service.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeFalse();
+            result.ShouldNotBeNull();
+            result.SdkReference.ShouldNotBeNull();
+            result.SdkReference.Name.ShouldBe("notfound");
+
+            // Check that only the simplified error (no MSBuild wrapper) is logged
+            _logger.Errors.Count.ShouldBe(1);
+            _logger.Errors[0].Message.ShouldBe(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "SingleResolverFailedToResolveSDK",
+                    "notfound",
+                    "MockSdkResolver1",
+                    "ERROR1"));
+        }
+
+        [Fact]
         public void AssertResolutionWarnsIfResolvedVersionIsDifferentFromReferencedVersion()
         {
             var sdk = new SdkReference("foo", "1.0.0", null);
@@ -743,8 +770,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public bool ResolversHaveBeenLoaded { get; private set; } = false;
             public bool ManifestsHaveBeenLoaded { get; private set; } = false;
 
-            public MockLoaderStrategy(bool includeErrorResolver = false, bool includeResolversWithPatterns = false, bool includeDefaultResolver = false) : this()
+            public MockLoaderStrategy(bool includeErrorResolver = false, bool includeResolversWithPatterns = false, bool includeDefaultResolver = false , bool includeSingleResolverOnly = false) : this()
             {
+                if (includeSingleResolverOnly)
+                {
+                    _resolvers = new List<SdkResolver> { new MockSdkResolver1() };
+                    return; // Exit early so other ones aren't added
+                }
+
                 if (includeErrorResolver)
                 {
                     _resolvers.Add(new MockSdkResolverThrows());
