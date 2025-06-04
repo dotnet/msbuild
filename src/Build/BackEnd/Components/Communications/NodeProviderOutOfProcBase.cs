@@ -728,7 +728,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// We use a dedicated thread to
+            /// We use a dedicated thread to avoid blocking a threadpool thread.
             /// </summary>
             /// <remarks>Usually there'll be a single packet in the queue, but sometimes
             /// a burst of SendData comes in, with 10-20 packets scheduled.</remarks>
@@ -774,6 +774,8 @@ namespace Microsoft.Build.BackEnd
                             {
                                 context._exitPacketState = ExitPacketState.ExitPacketSent;
                                 context._packetQueueDrainDelayCancellation.Cancel();
+
+                                return;
                             }
                         }
                         catch (IOException e)
