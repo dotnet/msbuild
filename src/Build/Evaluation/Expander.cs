@@ -1108,12 +1108,18 @@ namespace Microsoft.Build.Evaluation
 
                         if (IsTruncationEnabled(_options) && metadataValue.Length > CharacterLimitPerExpansion)
                         {
-                            metadataValue =
-#if NET
-                                $"{metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
-#else
-                                $"{metadataValue.Substring(0, CharacterLimitPerExpansion - 3)}...";
-#endif
+                            // PERF: We need the formatted, truncated string. Using something like a StringBuilder avoids
+                            // needing to use an unsafe block, but this is more efficient.
+                            string truncatedMetadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion);
+                            unsafe
+                            {
+                                fixed (char* truncatedMetadataPointer = truncatedMetadataValue)
+                                {
+                                    Span<char> destination = new Span<char>(truncatedMetadataPointer, truncatedMetadataValue.Length);
+                                    "...".AsSpan().CopyTo(destination.Slice(CharacterLimitPerExpansion - 3));
+                                    metadataValue = truncatedMetadataValue;
+                                }
+                            }
                         }
                     }
 
