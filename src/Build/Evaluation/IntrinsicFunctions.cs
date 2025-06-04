@@ -502,19 +502,16 @@ namespace Microsoft.Build.Evaluation
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
             architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
 
-            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            parameters.Add(XMakeAttributes.runtime, runtime);
-            parameters.Add(XMakeAttributes.architecture, architecture);
+            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { XMakeAttributes.runtime, runtime },
+                { XMakeAttributes.architecture, architecture },
+            };
 
             HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(desiredContext);
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(desiredContext, parameters).buildExecutablePath;
 
-            if (taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation))
-            {
-                return true;
-            }
-
-            return false;
+            return taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation);
         }
 
         /// <summary>

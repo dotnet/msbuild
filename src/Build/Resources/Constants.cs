@@ -142,6 +142,26 @@ namespace Microsoft.Build.Internal
         internal const string Dev10SubToolsetValue = "10.0";
 
         /// <summary>
+        /// MSBuild executable name.
+        /// </summary>
+        internal const string MSBuildExecutableName = "MSBuild.exe";
+
+        /// <summary>
+        /// MSBuild assembly name.
+        /// </summary>
+        internal const string MSBuildAssemblyName = "MSBuild.dll";
+
+        /// <summary>
+        /// The constant for the storing full path to the resolved dotnet.
+        /// </summary>
+        internal const string DotnetHostPath = "DotnetHostPath";
+
+        /// <summary>
+        /// The constant for the storing the relative path to MSBuild assembly.
+        /// </summary>
+        internal const string MSBuildAssemblyPath = "MSBuildAssemblyPath";
+
+        /// <summary>
         /// Current version of this MSBuild Engine assembly in the
         /// form, e.g, "4.0"
         /// </summary>

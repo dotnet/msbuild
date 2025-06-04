@@ -183,7 +183,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Finds or creates a child processes which can act as a node.
         /// </summary>
-        protected IList<NodeContext> GetNodes(string msbuildLocation,
+        protected IList<NodeContext> GetNodes(
+            string msbuildLocation,
             string commandLineArgs,
             int nextNodeId,
             INodePacketFactory factory,
@@ -335,6 +336,7 @@ namespace Microsoft.Build.BackEnd
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
                     Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
+
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 
                     // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
@@ -397,7 +399,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (String.IsNullOrEmpty(msbuildLocation))
             {
-                msbuildLocation = "MSBuild.exe";
+                msbuildLocation = Constants.MSBuildExecutableName;
             }
 
             var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
@@ -507,11 +509,11 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
+            KeyValuePair<string, int>[] handshakeComponents = handshake.RetrieveHandshakeComponents();
             for (int i = 0; i < handshakeComponents.Length; i++)
             {
                 CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, handshakeComponents[i], pipeName);
-                nodeStream.WriteIntForHandshake(handshakeComponents[i]);
+                nodeStream.WriteIntForHandshake(handshakeComponents[i].Value);
             }
 
             // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
@@ -753,13 +755,20 @@ namespace Microsoft.Build.BackEnd
                             // clear the buffer but keep the underlying capacity to avoid reallocations
                             writeStream.SetLength(0);
 
-                            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                            NodePacketType packetType = packet.Type;
+                            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream, PacketTypeExtensions.PacketVersion);
                             try
                             {
-                                writeStream.WriteByte((byte)packet.Type);
+                                // Write packet type with extended header.
+                                byte rawPackageType = PacketTypeExtensions.CreateExtendedHeaderType(packetType);
+                                writeStream.WriteByte(rawPackageType);
 
                                 // Pad for the packet length
                                 WriteInt32(writeStream, 0);
+
+                                // Write extended header with version
+                                PacketTypeExtensions.WriteVersion(writeStream, PacketTypeExtensions.PacketVersion);
+
                                 packet.Translate(writeTranslator);
 
                                 int writeStreamLength = (int)writeStream.Position;

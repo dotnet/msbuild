@@ -42,6 +42,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
+        /// <summary>
+        /// Task host runtime.
+        /// </summary>
+        private readonly string _runtime;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks.
@@ -98,8 +103,9 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APPDOMAIN
         /// <summary>
-        /// Constructor
+        /// Constructor.
         /// </summary>
+        /// <param name="runtime">Task host runtime.</param>
         /// <param name="nodeId">The ID of the node being configured.</param>
         /// <param name="startupDirectory">The startup directory for the task being executed.</param>
         /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
@@ -120,8 +126,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #else
         /// <summary>
-        /// Constructor
+        /// Constructor.
         /// </summary>
+        /// <param name="runtime">Task host runtime.</param>
         /// <param name="nodeId">The ID of the node being configured.</param>
         /// <param name="startupDirectory">The startup directory for the task being executed.</param>
         /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
@@ -141,26 +148,27 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #endif
         public TaskHostConfiguration(
-                int nodeId,
-                string startupDirectory,
-                IDictionary<string, string> buildProcessEnvironment,
-                CultureInfo culture,
-                CultureInfo uiCulture,
+            string runtime,
+            int nodeId,
+            string startupDirectory,
+            IDictionary<string, string> buildProcessEnvironment,
+            CultureInfo culture,
+            CultureInfo uiCulture,
 #if FEATURE_APPDOMAIN
-                AppDomainSetup appDomainSetup,
+            AppDomainSetup appDomainSetup,
 #endif
-                int lineNumberOfTask,
-                int columnNumberOfTask,
-                string projectFileOfTask,
-                bool continueOnError,
-                string taskName,
-                string taskLocation,
-                bool isTaskInputLoggingEnabled,
-                IDictionary<string, object> taskParameters,
-                Dictionary<string, string> globalParameters,
-                ICollection<string> warningsAsErrors,
-                ICollection<string> warningsNotAsErrors,
-                ICollection<string> warningsAsMessages)
+            int lineNumberOfTask,
+            int columnNumberOfTask,
+            string projectFileOfTask,
+            bool continueOnError,
+            string taskName,
+            string taskLocation,
+            bool isTaskInputLoggingEnabled,
+            IDictionary<string, object> taskParameters,
+            Dictionary<string, string> globalParameters,
+            ICollection<string> warningsAsErrors,
+            ICollection<string> warningsNotAsErrors,
+            ICollection<string> warningsAsMessages)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));
@@ -178,6 +186,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            _runtime = runtime;
             _culture = culture;
             _uiCulture = uiCulture;
 #if FEATURE_APPDOMAIN
@@ -205,6 +214,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             _globalParameters = globalParameters ?? new Dictionary<string, string>();
+            _runtime = runtime;
         }
 
         /// <summary>
@@ -416,20 +426,27 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
-            byte[] appDomainConfigBytes = null;
 
-            // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
-            if (translator.Mode == TranslationDirection.WriteToStream)
+            // Skip AppDomain configuration when targeting .NET Task Host (Runtime="NET").
+            // Although MSBuild.exe runs under .NET Framework and has AppDomain support,
+            // we don't transmit AppDomain config when communicating with dotnet.exe (it is not supported in .NET 5+).
+            if(!StringComparer.OrdinalIgnoreCase.Equals(_runtime, XMakeAttributes.MSBuildRuntimeValues.net))
             {
-                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
-            }
+                byte[] appDomainConfigBytes = null;
 
-            translator.Translate(ref appDomainConfigBytes);
+                // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
+                if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                }
 
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                _appDomainSetup = new AppDomainSetup();
-                _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                translator.Translate(ref appDomainConfigBytes);
+
+                if (translator.Mode == TranslationDirection.ReadFromStream)
+                {
+                    _appDomainSetup = new AppDomainSetup();
+                    _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                }
             }
 #endif
             translator.Translate(ref _lineNumberOfTask);
