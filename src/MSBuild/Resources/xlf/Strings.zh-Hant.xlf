@@ -2034,50 +2034,50 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializes all build events to a compressed binary file.
-                     By default the file is in the current directory and named
-                     "msbuild.binlog". The binary log is a detailed description
-                     of the build process that can later be used to reconstruct
-                     text logs and used by other analysis tools. A binary log
-                     is usually 10-20x smaller than the most detailed text
-                     diagnostic-level log, but it contains more information.
-                     (Short form: -bl)
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     將所有組建活動序列化為壓縮的二進位檔案。
+                     根據預設，檔案位於目前的目錄中，且名為
+                     "msbuild.binlog"。二進位記錄檔是詳細描述
+                     說明建組程序，這稍後可用來重新建構
+                     文字記錄檔，並用於其他分析工具。二進位記錄檔
+                     通常比最詳細文字診斷層級記錄檔小 10-20x
+                     ，但它包含更多資訊。
+                     (簡短形式: -bl)
 
-                     The optional LogFile specifies the path where the
-                     binary log is saved. To generate a distinct log file
-                     for each build, the token "{}" can be added into the
-                     path, for example: LogFile=output-{}-log.binlog. Each 
-                     "{}" in the log path is replaced with a unique string
-                     using the timestamp, running process Id and random
-                     string stamp.
+                     選擇性的 LogFile 會指定儲存
+                     二進位記錄檔位置的路徑。若要針對每個組建，產生不同的記錄檔
+                     ，可以將權杖 "{}" 新增至
+                     路徑，例如: LogFile=output-{}-log.binlog。記錄檔路徑中的
+                     每個 "{}" 會使用時間戳記，取代為唯一字串
+                     執行程序識別碼和隨機
+                     字串戳記。
 
-                     The binary logger by default collects the source text of
-                     project files, including all imported projects and target
-                     files encountered during the build. The optional
-                     ProjectImports switch controls this behavior:
+                     二進位記錄程式預設會收集專案檔案的來源文字
+                     ，包括組建期間所發生的所有匯入的專案和目標
+                     檔案。選擇性
+                     ProjectImports 切換可控制此行為:
 
-                      ProjectImports=None     - Don't collect the project
-                                                imports.
-                      ProjectImports=Embed    - Embed project imports in the
-                                                log file.
-                      ProjectImports=ZipFile  - Save project files to
+                      ProjectImports=None     - 不要收集專案
+                                                匯入。
+                      ProjectImports=Embed    - 記錄檔中的
+                                                內嵌專案匯入。
+                      ProjectImports=ZipFile  - 將專案檔案儲存至
                                                 output.projectimports.zip
-                                                where output is the same name
-                                                as the binary log file name.
+                                                其中輸出與二進位檔案名稱具有
+                                                相同的名稱。
 
-                     The default setting for ProjectImports is Embed.
-                     Note: the logger does not collect non-MSBuild source files
-                     such as .cs, .cpp etc.
+                     ProjectImports 的預設設定為 [內嵌]。
+                     注意: 記錄程式不會收集非 MSBuild 來源檔案
+                     例如 .cs、.cpp 等。
 
-                     A .binlog file can be "played back" by passing it to
-                     msbuild.exe as an argument instead of a project/solution.
-                     Other loggers will receive the information contained
-                     in the log file as if the original build was happening.
-                     You can read more about the binary log and its usages at:
+                     .binlog 檔案可以藉由將其傳遞至
+                     msbuild.exe 作為引數 (而不是專案/解決方案) 來 "回放"。
+                     其他記錄程式將會收到記錄檔中包含的資訊，
+                     就像發生原始組建那樣。
+                     您可以在以下位置閱讀更多關於二進位記錄及其使用方式:
                      https://aka.ms/msbuild/binlog
 
-                     Examples:
+                     範例:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
