@@ -124,13 +124,52 @@ A task that needs to run out of process can spawn a new process, as in a single-
 
 ## Multithreading MSBuild
 
-The goal of multithreading MSBuild is to allow tasks to run concurrently within the same process, rather than spawning separate processes for each task. This would enable better resource utilization and potentially faster builds, as fewer processes would need to be created, reducing .NET runtime overhead and inter-process communication as well as increasing the efficacy of task-level caching.
+The goal of multithreading MSBuild is to allow tasks to run concurrently within the same process, rather than spawning separate processes for each node. This would enable better resource utilization and potentially faster builds, as fewer processes would need to be created, reducing .NET runtime overhead and inter-process communication as well as increasing the efficacy of task-level caching.
 
 But tasks are not currently designed to be multithreaded. They assume that they own the whole process while they are executing, and they mutate the process state (environment, working directory, etc.). To make MSBuild multithreaded while maintaining task compatibility, we need to consider what parts of the build process can be moved to a multithreaded model without breaking existing tasks, as well as allowing new tasks to opt into multithreading.
 
-The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs", so we will need to add a new type of node that is neither "the only in-proc node" nor "a process" but a "a thread in the in-proc node". This will allow us to run multiple projects concurrently within the same process.
+The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs". To support multithreading, we will introduce a new type of node, called a "thread node", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects concurrently within the same process.
 
-Within that node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
+The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multi-threaded, cli or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode, we will create all the thread nodes in the entry process.
+
+```mermaid
+sequenceDiagram
+
+box Entry Process
+    participant Scheduler
+    participant Thread1_Project1 as Project1 (Thread Node 1)
+    participant Thread1_Tasks as Tasks (Thread Node 1)
+    participant Thread2_Project2 as Project2 (Thread Node 2)
+    participant Thread2_Tasks as Tasks (Thread Node 2)
+end
+
+Scheduler ->> Thread1_Project1: start
+activate Thread1_Project1
+Thread1_Project1 ->> Thread1_Tasks: Run Task X
+activate Thread1_Tasks
+Thread1_Tasks ->> Thread1_Project1: Task X state mutations
+deactivate Thread1_Tasks
+Thread1_Project1 ->> Scheduler: Build Project2
+deactivate Thread1_Project1
+Scheduler -->> Thread2_Project2: start
+activate Thread2_Project2
+Thread2_Project2 ->> Thread2_Tasks: Run Task Y
+activate Thread2_Tasks
+Thread2_Tasks ->> Thread2_Project2: Task Y state mutations
+deactivate Thread2_Tasks
+Thread2_Project2 -->> Scheduler: results
+deactivate Thread2_Project2
+Scheduler ->> Thread1_Project1: Project2 outputs
+activate Thread1_Project1
+Thread1_Project1 ->> Thread1_Tasks: Run Task Z
+activate Thread1_Tasks
+Thread1_Tasks ->> Thread1_Project1: Task Z state mutations
+deactivate Thread1_Tasks
+Thread1_Project1 ->> Scheduler: results
+deactivate Thread1_Project1
+```
+
+Within thread node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
 
 This leaves us with tasks. Tasks will need to be modified to support multithreading (see [Thread-safe tasks]), but we need a way to maintain compatibility with existing tasks that do not implement the new interface, so they can still run in a process they "own" while allowing new tasks to take advantage of multithreading.
 
@@ -179,3 +218,47 @@ To ease task authoring, we will provide a Roslyn analyzer that will check for kn
 ## Tasks transition
 
 In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to implement and use the new thread-safe task interface. As these tasks become thread-safe, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they implement the new interface.
+
+## Visual Studio integration
+
+We need ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes. In multithreaded mode, all of the new thread nodes cannot reside in this process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
+
+```mermaid
+sequenceDiagram
+
+box devenv Process
+    participant Scheduler
+end
+
+box msbuild Worker Process
+    participant Thread1_Project1 as Project1 (Thread Node 1)
+    participant Thread1_Tasks as Tasks (Thread Node 1)
+    participant Thread2_Project2 as Project2 (Thread Node 2)
+    participant Thread2_Tasks as Tasks (Thread Node 2)
+end
+
+Scheduler ->> Thread1_Project1: start
+activate Thread1_Project1
+Thread1_Project1 ->> Thread1_Tasks: Run Task X
+activate Thread1_Tasks
+Thread1_Tasks ->> Thread1_Project1: Task X state mutations
+deactivate Thread1_Tasks
+Thread1_Project1 ->> Scheduler: Build Project2
+deactivate Thread1_Project1
+Scheduler -->> Thread2_Project2: start
+activate Thread2_Project2
+Thread2_Project2 ->> Thread2_Tasks: Run Task Y
+activate Thread2_Tasks
+Thread2_Tasks ->> Thread2_Project2: Task Y state mutations
+deactivate Thread2_Tasks
+Thread2_Project2 -->> Scheduler: results
+deactivate Thread2_Project2
+Scheduler ->> Thread1_Project1: Project2 outputs
+activate Thread1_Project1
+Thread1_Project1 ->> Thread1_Tasks: Run Task Z
+activate Thread1_Tasks
+Thread1_Tasks ->> Thread1_Project1: Task Z state mutations
+deactivate Thread1_Tasks
+Thread1_Project1 ->> Scheduler: results
+deactivate Thread1_Project1
+``` 
