@@ -173,6 +173,7 @@ namespace Microsoft.Build.CommandLine
 
             if (showStackTrace && e != null)
             {
+                errorMessage = ResourceUtilities.FormatString(errorMessage, loggerName, (e == null) ? String.Empty : e.Message);
                 errorMessage += Environment.NewLine + e.ToString();
             }
             else
@@ -180,7 +181,7 @@ namespace Microsoft.Build.CommandLine
                 // the exception message can contain a format item i.e.
                 // "{0}" to hold the given exception's message
                 // "{1}" to hold the logger name
-                errorMessage = ResourceUtilities.FormatString(errorMessage, (e == null) ? String.Empty : e.Message, loggerName);
+                errorMessage = ResourceUtilities.FormatString(errorMessage, loggerName, (e == null) ? String.Empty : e.Message);
             }
 
             InitializationException.Throw(errorMessage, invalidSwitch);

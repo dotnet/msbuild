@@ -2507,8 +2507,7 @@ $@"<Project>
             var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
             successfulExit.ShouldBe(false);
 
-            output.ShouldContain("Cannot create an instance of the logger");
-            output.ShouldContain(expectedLoggerName);
+            output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
         }
 
         [Theory]
@@ -2529,8 +2528,7 @@ $@"<Project>
             var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
             successfulExit.ShouldBe(false);
 
-            output.ShouldContain("Cannot create an instance of the logger");
-            output.ShouldContain(expectedLoggerName);
+            output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
         }
 
         [Theory]
@@ -2546,18 +2544,17 @@ $@"<Project>
                 (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, memberAccess);
 
                 string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(tempLoggerProjDir, $"CustomLogger.csproj")} -restore -verbosity:n", out bool success);
+                    $"\"{Path.Combine(tempLoggerProjDir, "CustomLogger.csproj")}\" -restore -verbosity:n", out bool success);
 
                 var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
-                var loggerSwitch = $"{loggerTemplate}{loggerDllPath}";
-                var mainBuildParameters = $"{projectFilePath} -restore {loggerSwitch} -verbosity:diagnostic";
+                var loggerSwitch = $"{loggerTemplate}\"{loggerDllPath}\"";
+                var mainBuildParameters = $"\"{projectFilePath}\" -restore {loggerSwitch} -verbosity:diagnostic";
 
                 string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                     mainBuildParameters,
                     out bool successfulExit);
 
-                mainBuildLog.ShouldContain("Cannot create an instance of the logger");
-                mainBuildLog.ShouldContain(expectedLoggerName);
+                mainBuildLog.ShouldContain($"Cannot create an instance of the logger {loggerDllPath}.", customMessage: mainBuildLog);
             }
         }
 
