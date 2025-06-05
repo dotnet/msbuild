@@ -171,17 +171,14 @@ namespace Microsoft.Build.CommandLine
 
             ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
 
+            // the exception message can contain a format item i.e.
+            // "{0}" to hold the given exception's message
+            // "{1}" to hold the logger name
+            errorMessage = ResourceUtilities.FormatString(errorMessage, loggerName, (e == null) ? String.Empty : e.Message);
+
             if (showStackTrace && e != null)
-            {
-                errorMessage = ResourceUtilities.FormatString(errorMessage, loggerName, (e == null) ? String.Empty : e.Message);
+            {            
                 errorMessage += Environment.NewLine + e.ToString();
-            }
-            else
-            {
-                // the exception message can contain a format item i.e.
-                // "{0}" to hold the given exception's message
-                // "{1}" to hold the logger name
-                errorMessage = ResourceUtilities.FormatString(errorMessage, loggerName, (e == null) ? String.Empty : e.Message);
             }
 
             InitializationException.Throw(errorMessage, invalidSwitch);
