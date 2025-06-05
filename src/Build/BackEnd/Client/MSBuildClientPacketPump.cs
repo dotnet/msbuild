@@ -210,6 +210,10 @@ namespace Microsoft.Build.BackEnd.Client
                 Task<int> readTask = localStream.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #endif
 
+                // Ordering of the wait handles is important. The first signalled wait handle in the array
+                // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
+                // terminate event triggered so that we cannot get into a situation where packets are being
+                // spammed to the client and it never gets an opportunity to shutdown.
                 WaitHandle[] handles =
                 [
                     localPacketPumpShutdownEvent,

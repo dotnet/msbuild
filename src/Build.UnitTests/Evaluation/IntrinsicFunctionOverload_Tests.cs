@@ -124,7 +124,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
         [Fact]
         public void FileExists_WhenFileExists_ReturnsTrue()
-        {
+        {          
             using TestEnvironment env = TestEnvironment.Create();
 
             string testFilePath = Path.Combine(env.DefaultTestDirectory.Path, "TestFile.txt");
