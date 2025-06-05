@@ -163,6 +163,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="messageResourceName"></param>
         /// <param name="invalidSwitch"></param>
         /// <param name="e"></param>
+        /// <param name="loggerName"></param>
         /// <param name="showStackTrace"></param>
         internal static void ThrowWithLoggerName(string messageResourceName, string invalidSwitch, Exception e, string loggerName, bool showStackTrace)
         {
@@ -176,7 +177,9 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                // the exception message can contain a format item i.e. "{0}" to hold the given exception's message
+                // the exception message can contain a format item i.e.
+                // "{0}" to hold the given exception's message
+                // "{1}" to hold the logger name
                 errorMessage = ResourceUtilities.FormatString(errorMessage, (e == null) ? String.Empty : e.Message, loggerName);
             }
 
