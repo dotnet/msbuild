@@ -17,6 +17,7 @@
     <PackageVersion Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
     <PackageVersion Include="NuGet.Build.Tasks.Console" Version="$(NuGetBuildTasksVersion)" />
     <PackageVersion Include="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="System.Buffers" Version="$(SystemBuffersVersion)" />
     <PackageVersion Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="$(SystemDiagnosticsDiagnosticSourceVersion)" />
@@ -24,6 +25,7 @@
     <PackageVersion Include="System.Formats.Asn1" Version="$(SystemFormatsAsn1Version)" />
     <PackageVersion Include="System.Formats.Nrbf" Version="$(SystemFormatsNrbfVersion)" />
     <PackageVersion Include="System.Memory" Version="$(SystemMemoryVersion)" />
+    <PackageVersion Include="System.Numerics.Vectors" Version="$(SystemNumericsVectorsVersion)" />
     <PackageVersion Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
     <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" />
