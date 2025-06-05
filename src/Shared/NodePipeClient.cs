@@ -1,11 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
 using System.IO.Pipes;
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+using System;
 using System.Security.Principal;
-using Microsoft.Build.BackEnd;
+#endif
 
 namespace Microsoft.Build.Internal
 {
@@ -84,7 +84,11 @@ namespace Microsoft.Build.Internal
             _pipeClient.WriteEndOfHandshakeSignal();
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", PipeName);
+#if NET
             _pipeClient.ReadEndOfHandshakeSignal(true, timeout);
+#else
+            _pipeClient.ReadEndOfHandshakeSignal(true);
+#endif
         }
     }
 }

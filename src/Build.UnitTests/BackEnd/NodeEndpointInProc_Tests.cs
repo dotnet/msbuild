@@ -8,9 +8,8 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using Xunit;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable
 
@@ -97,6 +96,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             public void UnregisterPacketHandler(NodePacketType packetType)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
             {
                 throw new NotImplementedException();
             }

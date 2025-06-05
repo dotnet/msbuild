@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+#if NETFRAMEWORK
 using System.Runtime.InteropServices;
+#endif
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
 using System.Security.Principal;
 #endif
@@ -21,6 +23,9 @@ using System.Text;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
+#endif
+#if !FEATURE_APM
+using System.Threading.Tasks;
 #endif
 
 #nullable disable
@@ -86,7 +91,12 @@ namespace Microsoft.Build.Internal
         protected readonly int fileVersionPrivate;
         private readonly int sessionId;
 
-        protected internal Handshake(HandshakeOptions nodeType)
+        internal Handshake(HandshakeOptions nodeType)
+            : this(nodeType, includeSessionId: true)
+        {
+        }
+
+        protected Handshake(HandshakeOptions nodeType, bool includeSessionId)
         {
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
 
@@ -105,8 +115,13 @@ namespace Microsoft.Build.Internal
             fileVersionMinor = fileVersion.Minor;
             fileVersionBuild = fileVersion.Build;
             fileVersionPrivate = fileVersion.Revision;
-            using Process currentProcess = Process.GetCurrentProcess();
-            sessionId = currentProcess.SessionId;
+
+            // This reaches out to NtQuerySystemInformation. Due to latency, allow skipping for derived handshake if unused.
+            if (includeSessionId)
+            {
+                using Process currentProcess = Process.GetCurrentProcess();
+                sessionId = currentProcess.SessionId;
+            }
         }
 
         // This is used as a key, so it does not need to be human readable.
@@ -144,7 +159,7 @@ namespace Microsoft.Build.Internal
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType)
+            : base(nodeType, includeSessionId: false)
         {
         }
 
@@ -469,9 +484,25 @@ namespace Microsoft.Build.Internal
             stream.Write(bytes, 0, bytes.Length);
         }
 
-        internal static void ReadEndOfHandshakeSignal(this PipeStream stream, bool isProvider, int timeout)
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        internal static void ReadEndOfHandshakeSignal(
+            this PipeStream stream,
+            bool isProvider
+#if NETCOREAPP2_1_OR_GREATER
+            , int timeout
+#endif
+            )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
-            int valueRead = stream.ReadIntForHandshake(byteToAccept: null, timeout);
+            // Accept only the first byte of the EndOfHandshakeSignal
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            int valueRead = stream.ReadIntForHandshake(
+                byteToAccept: null
+#if NETCOREAPP2_1_OR_GREATER
+            , timeout
+#endif
+                );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
             if (valueRead != EndOfHandshakeSignal)
             {
@@ -487,11 +518,17 @@ namespace Microsoft.Build.Internal
             }
         }
 
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static int ReadIntForHandshake(this PipeStream stream, byte? byteToAccept, int timeout)
+        internal static int ReadIntForHandshake(this PipeStream stream, byte? byteToAccept
+#if NETCOREAPP2_1_OR_GREATER
+            , int timeout
+#endif
+            )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             byte[] bytes = new byte[4];
 
@@ -560,6 +597,23 @@ namespace Microsoft.Build.Internal
             return result;
         }
 #nullable disable
+
+#if !FEATURE_APM
+        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
+        {
+            int totalBytesRead = 0;
+            while (totalBytesRead < bytesToRead)
+            {
+                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), CancellationToken.None);
+                if (bytesRead == 0)
+                {
+                    return totalBytesRead;
+                }
+                totalBytesRead += bytesRead;
+            }
+            return totalBytesRead;
+        }
+#endif
 
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.

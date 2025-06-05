@@ -9,7 +9,6 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
@@ -168,6 +167,11 @@ namespace Microsoft.Build.Utilities
         /// Visual Studio 2022 (Dev17)
         /// </summary>
         Version170,
+
+        /// <summary>
+        /// Dev18
+        /// </summary>
+        Version180,
 
         // keep this up-to-date; always point to the last entry.
         /// <summary>
@@ -2068,6 +2072,7 @@ namespace Microsoft.Build.Utilities
                 VisualStudioVersion.Version150 => FrameworkLocationHelper.visualStudioVersion150,
                 VisualStudioVersion.Version160 => FrameworkLocationHelper.visualStudioVersion160,
                 VisualStudioVersion.Version170 => FrameworkLocationHelper.visualStudioVersion170,
+                VisualStudioVersion.Version180 => FrameworkLocationHelper.visualStudioVersion180,
                 _ => Unsupported()
             };
 
@@ -3584,7 +3589,7 @@ namespace Microsoft.Build.Utilities
             {
                 toolPath = Path.Combine(toolPath, fileName);
 
-                // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132 
+                // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132
                 if (!File.Exists(toolPath))
                 {
                     toolPath = null;

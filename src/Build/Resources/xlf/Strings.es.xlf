@@ -221,6 +221,16 @@
         <target state="translated">Las propiedades "TargetFramework" y "TargetFrameworks" no se respetan y no deben especificarse en proyectos que no usen el SDK de .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
+        <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
+        <target state="translated">La tarea {0} del proyecto {1} compila un proyecto mediante la CLI {2}. En su lugar, se debe usar la tarea MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_Title">
+        <source>The 'Exec' task should not be used to build a project.</source>
+        <target state="translated">La tarea "Exec" no debe usarse para compilar un proyecto.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
         <target state="translated">Propiedad: se obtuvo acceso a "{0}", pero nunca se inicializó.</target>
@@ -620,6 +630,11 @@
         <target state="translated">No se puede llamar al método {0} con una colección que contiene nombres de destino nulos o vacíos.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Error al cargar las bibliotecas de telemetría con la excepción: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Propiedad de salida: </target>
@@ -843,6 +858,11 @@ Errores: {3}</target>
       <trans-unit id="SDKResolverReturnedNull">
         <source>SDK resolver "{0}" returned null.</source>
         <target state="translated">La resolución del SDK "{0}" devolvió null.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">El SDK '{0}' no se pudo resolver mediante la resolución de SDK '{1}'. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">

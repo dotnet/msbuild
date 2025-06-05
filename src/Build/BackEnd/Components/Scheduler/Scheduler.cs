@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -580,7 +579,7 @@ namespace Microsoft.Build.BackEnd
                 return Task.FromResult(0);
             }
 
-            Func<int, int> grantCores = (int availableCores) =>
+            Func<int, int> grantCores = (availableCores) =>
             {
                 int grantedCores = Math.Min(requestedCores, availableCores);
                 if (grantedCores > 0)
@@ -600,7 +599,7 @@ namespace Microsoft.Build.BackEnd
                 // We have no cores to grant at the moment, queue up the request.
                 TaskCompletionSource<int> completionSource = new TaskCompletionSource<int>();
                 _pendingRequestCoresCallbacks.Enqueue(completionSource);
-                return completionSource.Task.ContinueWith((Task<int> task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
+                return completionSource.Task.ContinueWith((task) => grantCores(task.Result), TaskContinuationOptions.ExecuteSynchronously);
             }
         }
 
@@ -2240,49 +2239,55 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Determines if we have a matching request somewhere, and if so, assigns the same request ID.  Otherwise
-        /// assigns a new request id.
+        /// Determines if we have a matching request somewhere, and if so, assigns the same request ID.
+        /// Otherwise assigns a new request id.
         /// </summary>
-        /// <remarks>
-        /// UNDONE: (Performance) This algorithm should be modified so we don't have to iterate over all of the
-        /// requests to find a matching one.  A HashSet with proper equality semantics and a good hash code for the BuildRequest
-        /// would speed this considerably, especially for large numbers of projects in a build.
-        /// </remarks>
         /// <param name="request">The request whose ID should be assigned</param>
         private void AssignGlobalRequestId(BuildRequest request)
         {
-            bool assignNewId = false;
-            if (request.GlobalRequestId == BuildRequest.InvalidGlobalRequestId && _schedulingData.GetRequestsAssignedToConfigurationCount(request.ConfigurationId) > 0)
+            // Quick exit if already assigned or if there are no requests for this configuration
+            if (request.GlobalRequestId != BuildRequest.InvalidGlobalRequestId
+                || _schedulingData.GetRequestsAssignedToConfigurationCount(request.ConfigurationId) == 0)
             {
-                foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
+                request.GlobalRequestId = _nextGlobalRequestId++;
+                return;
+            }
+
+            HashSet<string> requestTargetsSet = new(request.Targets, StringComparer.OrdinalIgnoreCase);
+
+            // Look for matching requests in the configuration
+            foreach (SchedulableRequest existingRequest in _schedulingData.GetRequestsAssignedToConfiguration(request.ConfigurationId))
+            {
+                if (TargetsMatch(requestTargetsSet, existingRequest.BuildRequest.Targets))
                 {
-                    if (existingRequest.BuildRequest.Targets.Count == request.Targets.Count)
-                    {
-                        List<string> leftTargets = new List<string>(existingRequest.BuildRequest.Targets);
-                        List<string> rightTargets = new List<string>(request.Targets);
-
-                        leftTargets.Sort(StringComparer.OrdinalIgnoreCase);
-                        rightTargets.Sort(StringComparer.OrdinalIgnoreCase);
-                        for (int i = 0; i < leftTargets.Count; i++)
-                        {
-                            if (!leftTargets[i].Equals(rightTargets[i], StringComparison.OrdinalIgnoreCase))
-                            {
-                                assignNewId = true;
-                                break;
-                            }
-                        }
-
-                        if (!assignNewId)
-                        {
-                            request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
-                            return;
-                        }
-                    }
+                    request.GlobalRequestId = existingRequest.BuildRequest.GlobalRequestId;
+                    return;
                 }
             }
 
-            request.GlobalRequestId = _nextGlobalRequestId;
-            _nextGlobalRequestId++;
+            // No matching request found, assign a new ID
+            request.GlobalRequestId = _nextGlobalRequestId++;
+        }
+
+        /// <summary>
+        /// Determines if two target collections contain the same targets, ignoring order and case.
+        /// </summary>
+        private bool TargetsMatch(HashSet<string> firstTargetsSet, List<string> secondTargetsList)
+        {
+            if (firstTargetsSet.Count != secondTargetsList.Count)
+            {
+                return false;
+            }
+
+            foreach (string target in secondTargetsList)
+            {
+                if (!firstTargetsSet.Contains(target))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

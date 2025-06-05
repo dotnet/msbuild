@@ -7,7 +7,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -24,11 +28,10 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
-using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
+using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
-using System.Buffers;
 
 #nullable disable
 
@@ -1370,7 +1373,7 @@ namespace Microsoft.Build.Evaluation
                 // if what we have is a function
                 if (!IsValidPropertyName(propertyBody))
                 {
-                    if (propertyBody.Contains(".") || propertyBody[0] == '[')
+                    if (propertyBody.Contains('.') || propertyBody[0] == '[')
                     {
                         if (BuildParameters.DebugExpansion)
                         {
@@ -1401,7 +1404,7 @@ namespace Microsoft.Build.Evaluation
                             return null;
                         }
                     }
-                    else if (propertyValue == null && propertyBody.Contains("[")) // a single property indexer
+                    else if (propertyValue == null && propertyBody.Contains('[')) // a single property indexer
                     {
                         int indexerStart = propertyBody.IndexOf('[');
                         int indexerEnd = propertyBody.IndexOf(']');
@@ -4093,7 +4096,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             coercedArguments[n] = args[n].ToString().ToCharArray();
                         }
-                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string v && v.Contains("."))
+                        else if (parameters[n].ParameterType.GetTypeInfo().IsEnum && args[n] is string v && v.Contains('.'))
                         {
                             Type enumType = parameters[n].ParameterType;
                             string typeLeafName = $"{enumType.Name}.";

@@ -11,7 +11,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -20,7 +19,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
@@ -1190,7 +1188,7 @@ namespace Microsoft.Build.Execution
 
                 public void ExecutionStarted()
                 {
-                    _memoryConsumptionOnStart = GC.GetTotalMemory(false);
+                    _memoryConsumptionOnStart = GetMemoryAllocated();
                     _executedSw.Start();
                     ExecutedCount++;
                 }
@@ -1198,7 +1196,16 @@ namespace Microsoft.Build.Execution
                 public void ExecutionStopped()
                 {
                     _executedSw.Stop();
-                    TotalMemoryConsumption += GC.GetTotalMemory(false) - _memoryConsumptionOnStart;
+                    TotalMemoryConsumption += GetMemoryAllocated() - _memoryConsumptionOnStart;
+                }
+
+                private static long GetMemoryAllocated()
+                {
+#if NET
+                    return GC.GetTotalAllocatedBytes(false);
+#else
+                    return GC.GetTotalMemory(false);
+#endif
                 }
 
                 public void Reset()

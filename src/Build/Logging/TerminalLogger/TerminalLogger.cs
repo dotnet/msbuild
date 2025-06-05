@@ -13,9 +13,7 @@ using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
 #if NET
-using System.Diagnostics.CodeAnalysis;
 using System.Buffers;
-
 #endif
 
 #if NETFRAMEWORK
@@ -381,7 +379,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
         else
         {
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, "InvalidVerbosity", parameterValue);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string? errorCode, out string? helpKeyword, "InvalidVerbosity", parameterValue);
             throw new LoggerException(message, null, errorCode, helpKeyword);
         }
     }

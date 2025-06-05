@@ -45,6 +45,21 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Creates and routes a packet with data from a binary stream.
+        /// </summary>
+        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+        {
+            // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
+            if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record))
+            {
+                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packetType);
+            }
+
+            INodePacket packet = record.DeserializePacket(translator);
+            record.RoutePacket(nodeId, packet);
+        }
+
+        /// <summary>
         /// Creates a packet with data from a binary stream.
         /// </summary>
         public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
@@ -82,12 +97,12 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The handler to invoke when the packet is deserialized.
             /// </summary>
-            private INodePacketHandler _handler;
+            private readonly INodePacketHandler _handler;
 
             /// <summary>
             /// The method used to construct a packet from a translator stream.
             /// </summary>
-            private NodePacketFactoryMethod _factoryMethod;
+            private readonly NodePacketFactoryMethod _factoryMethod;
 
             /// <summary>
             /// Constructor.
@@ -106,10 +121,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Routes the packet to the correct destination.
             /// </summary>
-            public void RoutePacket(int nodeId, INodePacket packet)
-            {
-                _handler.PacketReceived(nodeId, packet);
-            }
+            public void RoutePacket(int nodeId, INodePacket packet) => _handler.PacketReceived(nodeId, packet);
         }
     }
 }

@@ -4,9 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Collections;
 
@@ -890,6 +888,7 @@ namespace Microsoft.Build.BackEnd
                 return EnumerateMetadataLazy();
             }
 
+#if FEATURE_APPDOMAIN
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
             {
                 if (_customEscapedMetadata == null || _customEscapedMetadata.Count == 0)
@@ -907,6 +906,7 @@ namespace Microsoft.Build.BackEnd
 
                 return result;
             }
+#endif
 
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
             {

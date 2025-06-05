@@ -4,8 +4,10 @@
 using System;
 using System.IO;
 using System.IO.Pipes;
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
 using System.Security.AccessControl;
 using System.Security.Principal;
+#endif
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
@@ -23,11 +25,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private const int PipeBufferSize = 131_072;
 
+#if NET
         /// <summary>
         /// A timeout for the handshake. This is only used on Unix-like socket implementations, because the
         /// timeout on the PipeStream connection is ignore.
         /// </summary>
         private static readonly int s_handshakeTimeout = NativeMethodsShared.IsWindows ? 0 : 60_000;
+#endif
 
         private readonly NamedPipeServerStream _pipeServer;
 
@@ -43,7 +47,14 @@ namespace Microsoft.Build.Internal
             // SIDs or the client will reject this server.  This is used to avoid attacks where a
             // hacked server creates a less restricted pipe in an attempt to lure us into using it and
             // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-            PipeAccessRule rule = new(WindowsIdentity.GetCurrent().Owner, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+            PipeAccessRights pipeAccessRights = PipeAccessRights.ReadWrite;
+            if (maxNumberOfServerInstances > 1)
+            {
+                // Multi-instance pipes will fail without this flag.
+                pipeAccessRights |= PipeAccessRights.CreateNewInstance;
+            }
+
+            PipeAccessRule rule = new(WindowsIdentity.GetCurrent().Owner, pipeAccessRights, AccessControlType.Allow);
             PipeSecurity security = new();
             security.AddAccessRule(rule);
             security.SetOwner(rule.IdentityReference);
@@ -177,7 +188,11 @@ namespace Microsoft.Build.Internal
             for (int i = 0; i < HandshakeComponents.Length; i++)
             {
                 // This will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard.
+#if NET
                 int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: i == 0 ? CommunicationsUtilities.handshakeVersion : null, s_handshakeTimeout);
+#else
+                int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: i == 0 ? CommunicationsUtilities.handshakeVersion : null);
+#endif
 
                 if (handshakePart != HandshakeComponents[i])
                 {
@@ -188,7 +203,11 @@ namespace Microsoft.Build.Internal
             }
 
             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+#if NET
             _pipeServer.ReadEndOfHandshakeSignal(false, s_handshakeTimeout);
+#else
+            _pipeServer.ReadEndOfHandshakeSignal(false);
+#endif
 
             CommunicationsUtilities.Trace("Successfully connected to parent.");
             _pipeServer.WriteEndOfHandshakeSignal();

@@ -35,6 +35,14 @@ namespace Microsoft.Build.BackEnd
         void UnregisterPacketHandler(NodePacketType packetType);
 
         /// <summary>
+        /// Takes a serializer, deserializes the packet and routes it to the appropriate handler.
+        /// </summary>
+        /// <param name="nodeId">The node from which the packet was received.</param>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator);
+
+        /// <summary>
         /// Takes a serializer and deserializes the packet.
         /// </summary>
         /// <param name="packetType">The packet type.</param>
@@ -42,7 +50,7 @@ namespace Microsoft.Build.BackEnd
         INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator);
 
         /// <summary>
-        /// Routes the specified packet
+        /// Routes the specified packet.
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
         /// <param name="packet">The packet to route.</param>

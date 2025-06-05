@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -199,6 +197,17 @@ namespace Microsoft.Build.Experimental
         void INodePacketFactory.UnregisterPacketHandler(NodePacketType packetType)
         {
             _packetFactory.UnregisterPacketHandler(packetType);
+        }
+
+        /// <summary>
+        /// Deserializes and routes a packer to the appropriate handler.
+        /// </summary>
+        /// <param name="nodeId">The node from which the packet was received.</param>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        void INodePacketFactory.DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+        {
+            _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
         /// <summary>

@@ -23,7 +23,7 @@
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Collections.Immutable" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 

@@ -4,13 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #if FEATURE_THREAD_CULTURE
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
+#else
+using System.Globalization;
 #endif
 using NodeEngineShutdownReason = Microsoft.Build.Execution.NodeEngineShutdownReason;
 
@@ -277,6 +278,15 @@ namespace Microsoft.Build.BackEnd
         /// Unregisters a packet handler.  Not used in the in-proc node.
         /// </summary>
         public void UnregisterPacketHandler(NodePacketType packetType)
+        {
+            // Not used
+            ErrorUtilities.ThrowInternalErrorUnreachable();
+        }
+
+        /// <summary>
+        /// Deserializes and routes a packet.  Not used in the in-proc node.
+        /// </summary>
+        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             // Not used
             ErrorUtilities.ThrowInternalErrorUnreachable();

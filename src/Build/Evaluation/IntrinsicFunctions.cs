@@ -4,9 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if NETFRAMEWORK
+using System.Linq;
+#endif
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
@@ -18,12 +22,8 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
-using System.Linq;
-
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
-using System.Security.Cryptography;
-using System.Buffers.Text;
 
 #nullable disable
 
@@ -537,6 +537,26 @@ namespace Microsoft.Build.Evaluation
         internal static string NormalizeDirectory(params string[] path)
         {
             return EnsureTrailingSlash(NormalizePath(path));
+        }
+
+        /// <summary>
+        /// Returns if the file exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool FileExists(string path)
+        {
+            return FileUtilities.FileExistsNoThrow(path);
+        }
+
+        /// <summary>
+        /// Returns if the directory exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool DirectoryExists(string path)
+        {
+            return FileUtilities.DirectoryExistsNoThrow(path);
         }
 
         /// <summary>
