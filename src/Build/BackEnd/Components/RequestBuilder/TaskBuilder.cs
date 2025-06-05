@@ -254,23 +254,24 @@ namespace Microsoft.Build.BackEnd
             // Add parameters on any output tags
             for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
-                ProjectTaskOutputItemInstance outputItemInstance = _taskNode.Outputs[i] as ProjectTaskOutputItemInstance;
+                var projectTaskInstanceChild = _taskNode.Outputs[i];
+                ProjectTaskOutputItemInstance outputItemInstance = projectTaskInstanceChild as ProjectTaskOutputItemInstance;
                 if (outputItemInstance != null)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                ProjectTaskOutputPropertyInstance outputPropertyInstance = _taskNode.Outputs[i] as ProjectTaskOutputPropertyInstance;
+                ProjectTaskOutputPropertyInstance outputPropertyInstance = projectTaskInstanceChild as ProjectTaskOutputPropertyInstance;
                 if (outputPropertyInstance != null)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
                 }
 
-                if (!String.IsNullOrEmpty(_taskNode.Outputs[i].Condition))
+                if (!String.IsNullOrEmpty(projectTaskInstanceChild.Condition))
                 {
-                    taskParameters.Add(_taskNode.Outputs[i].Condition);
+                    taskParameters.Add(projectTaskInstanceChild.Condition);
                 }
             }
 
