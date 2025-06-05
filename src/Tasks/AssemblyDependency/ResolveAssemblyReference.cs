@@ -989,7 +989,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] SatelliteFiles
         {
             get => _satelliteFiles;
-            internal set => _serializationAssemblyFiles = value;
+            internal set => _satelliteFiles = value;
         }
 
         /// <summary>
