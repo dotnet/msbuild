@@ -290,7 +290,7 @@ namespace Microsoft.Build.Evaluation
                     // If there is bare metadata of any kind, and the Include involved an item list, we should
                     // run items individually, as even non-built-in metadata might differ between items
 
-                    if (_referencedItemLists.Count >= 0)
+                    if (_referencedItemLists.Count > 0)
                     {
                         needToExpandMetadataForEachItem = true;
                     }
