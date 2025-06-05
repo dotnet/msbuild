@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => serializeAllEnvironmentVariables ? TranslationHelpers.ToString(e.BuildEnvironment) : null,
                 e => e.HelpKeyword,
-                e => e.ThreadId.ToString(),
+                e => "0", // ThreadId is deprecated and always returns 0
                 e => e.SenderName);
 
             Traits.LogAllEnvironmentVariables = false;
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.ProjectId.ToString(),
                 e => TranslationHelpers.GetPropertiesString(e.Properties),
                 e => e.TargetNames,
-                e => e.ThreadId.ToString(),
+                e => "0", // ThreadId is deprecated and always returns 0
                 e => e.Timestamp.ToString(),
                 e => e.ToolsVersion);
         }
@@ -285,7 +285,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.ProjectFile,
                 e => e.TaskFile,
                 e => e.TaskName,
-                e => e.ThreadId.ToString());
+                e => "0"); // ThreadId is deprecated and always returns 0
         }
 
         [Theory]
