@@ -65,8 +65,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private readonly TransientTestState _inProcEnvCheckTransientEnvironmentVariable;
 
-        private string MSBuildAssemblyPath = Path.Combine(RunnerUtilities.BootstrapMsBuildBinaryLocation, "sdk", RunnerUtilities.BootstrapLocationAttribute.BootstrapSdkVersion);
-
         /// <summary>
         /// SetUp.
         /// </summary>
@@ -77,8 +75,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildManager.DefaultBuildManager.Dispose();
             _env = TestEnvironment.Create(output);
 
-            _env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", RunnerUtilities.BootstrapMsBuildBinaryLocation);
-            _env.SetEnvironmentVariable("MSBuildAssemblyDirectory", MSBuildAssemblyPath);
 
             _logger = new MockLogger(output);
             _parameters = new BuildParameters

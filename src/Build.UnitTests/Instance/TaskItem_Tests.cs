@@ -47,8 +47,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             "DefiningProjectExtension"
         };
 
-        private string MSBuildAssemblyPath = Path.Combine(RunnerUtilities.BootstrapMsBuildBinaryLocation, "sdk", RunnerUtilities.BootstrapLocationAttribute.BootstrapSdkVersion);
-
         private readonly TestEnvironment _env;
 
         /// <summary>
@@ -57,9 +55,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public TaskItem_Tests(ITestOutputHelper output)
         {
             _env = TestEnvironment.Create(output);
-
-            _env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", RunnerUtilities.BootstrapMsBuildBinaryLocation);
-            _env.SetEnvironmentVariable("MSBuildAssemblyDirectory", MSBuildAssemblyPath);
         }
 
         /// <summary>

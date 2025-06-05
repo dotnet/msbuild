@@ -2034,7 +2034,7 @@ arquivo de resposta.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="needs-review-translation">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializa todos os eventos da compilação em um arquivo binário compactado.
                      Por padrão, o arquivo está no diretório atual e é chamado de
                      "msbuild.binlog". O log binário é uma descrição detalhada
@@ -2044,16 +2044,24 @@ arquivo de resposta.
                      de diagnóstico do texto mais detalhado, mas contém mais informações.
                      (Forma abreviada: -bl)
 
+                     O LogFile opcional especifica o caminho em que o
+                     log binário é salvo. Para gerar um arquivo de log distinto
+                     para cada compilação, o token "{}" pode ser adicionado ao
+                     caminho, por exemplo: LogFile=output-{}-log.binlog. Cada 
+                     "{}" no caminho de log é substituído por uma cadeia de caracteres exclusiva
+                     usando o carimbo de data/hora, executando a ID do processo e aleatoriamente
+                     o aplicar selo de cadeia de caracteres.
+
                      O agente binário, por padrão, coleta o texto fonte dos
                      arquivos de projeto, incluindo todos os projetos importados e arquivos
                      de destino encontrados durante a compilação. A opção
-                     ProjectImports opcional controla este comportamento:
+                     ProjectImports controla este comportamento:
 
-                      ProjectImports=None     - Não coletar as importações
+                      ProjectImports=None     – Não coletar as importações
                                                 do projeto.
-                      ProjectImports=Embed    - Inserir as importações do projeto no
+                      ProjectImports=Embed    – Inserir as importações do projeto no
                                                 arquivo de log.
-                      ProjectImports=ZipFile  - Salvar os arquivos de projeto em
+                      ProjectImports=ZipFile  – Salvar os arquivos de projeto em
                                                 output.projectimports.zip
                                                 em que a saída tem o mesmo nome que o
                                                 nome do arquivo de log binário.

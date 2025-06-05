@@ -469,8 +469,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (IsHandshakeOptionEnabled(HandshakeOptions.NET))
                 {
-                    msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, "MSBuild.dll");
+                    var msbuildAssemblyName = Environment.GetEnvironmentVariable("MSBUILD_ASSEMBLY_NAME");
+                    msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, msbuildAssemblyName ?? "MSBuild.dll");
                     toolPath = s_baseTaskHostPathNet;
+
+                    Console.WriteLine($"!!! MSBUILD_ASSEMBLY_NAME: {msbuildAssemblyName} and msbuildAssemblyPath {msbuildAssemblyPath}");
                 }
                 else
                 {
