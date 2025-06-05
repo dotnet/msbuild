@@ -41,7 +41,7 @@ It tracks:
 
 Think of `BuildRequest` as the "what" and `SchedulableRequest` as the "how" to build a project.
 
-#### When SchedulableRequest has a parent?
+#### When does SchedulableRequest have a parent?
 In MSBuild, builds often have dependencies. When a project needs to build another project first, it creates a child request.
 The original one becomes the "parent request" of this new child request.
 For example:
