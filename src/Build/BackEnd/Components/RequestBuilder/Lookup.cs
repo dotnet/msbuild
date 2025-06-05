@@ -859,7 +859,7 @@ namespace Microsoft.Build.BackEnd
             if (modificationsToApply.KeepOnlySpecified)
             {
 
-                // Perf: Avoid boxing when possible by getting the underlying struct enumertor if available.
+                // Perf: Avoid boxing when possible by getting the underlying struct enumerator if available.
                 List<string> metadataToRemove;
                 if (itemToModify.Metadata is CopyOnWritePropertyDictionary<ProjectMetadataInstance> copyOnWritePropertyMetadata)
                 {
