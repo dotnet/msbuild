@@ -117,7 +117,7 @@ namespace Microsoft.Build.Internal
                         await _pipeServer.WaitForConnectionAsync(cts.Token).ConfigureAwait(false);
                         connected = true;
                     }
-                    catch (OperationCanceledException) when (cts.IsCancellationRequested)
+                    catch (OperationCanceledException)
                     {
                         connected = false;
                     }

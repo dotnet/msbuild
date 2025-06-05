@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -21,7 +22,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// The actual inputs for RAR should be kept simple since we're not aiming to test the full serialization format
     /// or RAR logic itself here.
     /// </summary>
-    public sealed class OutOfProcRarNode_ToEndTests(ITestOutputHelper output)
+    public sealed class OutOfProcRarNode_Tests(ITestOutputHelper output)
     {
         [Fact]
         public void RunsOutOfProcIfAllFlagsAreEnabled()
@@ -30,7 +31,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SetIsOutOfProcRarNodeEnabled = true,
             };
-            ResolveAssemblyReference t = new()
+            ResolveAssemblyReference rar = new()
             {
                 AllowOutOfProcNode = true,
                 BuildEngine = engine,
@@ -41,42 +42,51 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             using OutOfProcRarNodeEndpoint endpoint = new(
                     endpointId: 0,
                     OutOfProcRarNodeEndpoint.CreateConfig(maxNumberOfServerInstances: 1));
-            System.Threading.Tasks.Task runTask = endpoint.RunAsync();
-            bool result = t.Execute();
+            using CancellationTokenSource cts = new();
+            System.Threading.Tasks.Task runTask = endpoint.RunAsync(cts.Token);
 
-            OutOfProcRarClient? rarClient = engine.GetRegisteredTaskObject(OutOfProcRarClient.TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build) as OutOfProcRarClient;
+            bool result = rar.Execute();
+
+            // If the out-of-proc path was executed, a client should be registered.
+            using OutOfProcRarClient? rarClient = engine.GetRegisteredTaskObject(OutOfProcRarClient.TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build) as OutOfProcRarClient;
             Assert.NotNull(rarClient);
-
             Assert.True(result);
             Assert.Equal(0, engine.Warnings);
             Assert.Equal(0, engine.Errors);
-            _ = Assert.Single(t.ResolvedFiles);
+            _ = Assert.Single(rar.ResolvedFiles);
+
+            rarClient.Dispose();
+            cts.Cancel();
+            runTask.GetAwaiter().GetResult();
         }
 
-        [Fact]
-        public void SkipsOutOfProcNodeIfAnyFlagIsDisabled()
+        [Theory]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(false, false)]
+        public void SkipsOutOfProcNodeIfAnyFlagIsDisabled(bool buildEngineFlag, bool taskInputFlag)
         {
             MockEngine engine = new(output)
             {
-                SetIsOutOfProcRarNodeEnabled = true,
+                SetIsOutOfProcRarNodeEnabled = buildEngineFlag,
             };
-            ResolveAssemblyReference t = new()
+            ResolveAssemblyReference rar = new()
             {
-                AllowOutOfProcNode = false,
+                AllowOutOfProcNode = taskInputFlag,
                 BuildEngine = engine,
                 Assemblies = [new TaskItem("System")],
                 SearchPaths = [Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName)],
             };
 
-            bool result = t.Execute();
+            bool result = rar.Execute();
 
-            OutOfProcRarClient? rarClient = engine.GetRegisteredTaskObject(OutOfProcRarClient.TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build) as OutOfProcRarClient;
+            // If the out-of-proc path was skipped, no client should be registered.
+            using OutOfProcRarClient? rarClient = engine.GetRegisteredTaskObject(OutOfProcRarClient.TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build) as OutOfProcRarClient;
             Assert.Null(rarClient);
-
             Assert.True(result);
             Assert.Equal(0, engine.Warnings);
             Assert.Equal(0, engine.Errors);
-            _ = Assert.Single(t.ResolvedFiles);
+            _ = Assert.Single(rar.ResolvedFiles);
         }
 
         [Fact]
@@ -86,7 +96,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SetIsOutOfProcRarNodeEnabled = true,
             };
-            ResolveAssemblyReference t = new()
+            ResolveAssemblyReference rar = new()
             {
                 AllowOutOfProcNode = true,
                 BuildEngine = engine,
@@ -94,15 +104,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 SearchPaths = [Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName)],
             };
 
-            bool result = t.Execute();
+            bool result = rar.Execute();
 
-            OutOfProcRarClient? rarClient = engine.GetRegisteredTaskObject(OutOfProcRarClient.TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build) as OutOfProcRarClient;
+            // If the out-of-proc path was attempted but failed, a client should be registered.
+            using OutOfProcRarClient? rarClient = engine.GetRegisteredTaskObject(OutOfProcRarClient.TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build) as OutOfProcRarClient;
             Assert.NotNull(rarClient);
-
             Assert.True(result);
             Assert.Equal(0, engine.Warnings);
             Assert.Equal(0, engine.Errors);
-            _ = Assert.Single(t.ResolvedFiles);
+            _ = Assert.Single(rar.ResolvedFiles);
         }
     }
 }

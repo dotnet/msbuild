@@ -47,7 +47,6 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
             try
             {
-                // Ensure that the caller (either the main node or a unit test) doesn't block or begin running the loop.
                 await RunInternalAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
@@ -63,17 +62,22 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                while (!_pipeServer.IsConnected)
+                if (!_pipeServer.IsConnected)
                 {
-                    _ = await _pipeServer.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
-                }
+                    LinkStatus linkStatus = await _pipeServer.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
-                CommunicationsUtilities.Trace("({0}) Received RAR request.", _endpointId);
+                    if (linkStatus != LinkStatus.Active)
+                    {
+                        continue;
+                    }
+                }
 
                 try
                 {
                     INodePacket packet = await _pipeServer.ReadPacketAsync(cancellationToken).ConfigureAwait(false);
                     NodePacketType packetType = packet.Type;
+
+                    CommunicationsUtilities.Trace("({0}) Received request.", _endpointId);
 
                     switch (packet.Type)
                     {
