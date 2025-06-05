@@ -3064,7 +3064,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             _output = output;
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/11888")]
+        [Fact]
         public void DontLockP2PReferenceWhenResolvingSystemTypes()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -3240,7 +3240,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
         /// which fails (LoadFile requires an absolute path).  The fix was to use
         /// Assembly.LoadFrom instead.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/11888")]
+        [Fact]
         public void ReferencedAssemblySpecifiedUsingRelativePath()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
