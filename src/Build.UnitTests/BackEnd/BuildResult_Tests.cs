@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -343,9 +345,242 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
         }
 
-        private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
+        [Fact]
+        public void TestMergeResultsWithProjectItems()
         {
-            return new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
+            BuildResult result1 = new BuildResult(request);
+            BuildResult result2 = new BuildResult(request);
+
+            ProjectInstance project1 = new ProjectInstance(ProjectRootElement.Create());
+            var item1 = project1.AddItem("B", "test");
+            item1.SetMetadata("Meta1", "Value1");
+            result1.ProjectStateAfterBuild = project1;
+
+            ProjectInstance project2 = new ProjectInstance(ProjectRootElement.Create());
+            var item2 = project2.AddItem("B", "test");
+            item2.SetMetadata("Meta2", "Value2");
+            item2.SetMetadata("Meta1", "UpdatedValue2");
+            result2.ProjectStateAfterBuild = project2;
+
+            result1.MergeResults(result2);
+
+            var mergedItems = result1.ProjectStateAfterBuild.GetItems("B").ToList();
+            Assert.Equal(1, mergedItems.Count);
+
+            var mergedItem = mergedItems.FirstOrDefault(i => i.EvaluatedInclude == "test");
+            Assert.NotNull(mergedItem);
+            Assert.Equal("UpdatedValue2", mergedItem.GetMetadataValue("Meta1"));
+            Assert.Equal("Value2", mergedItem.GetMetadataValue("Meta2"));
         }
+
+        [Fact]
+        public void TestMergeResultsWithProjectProperties()
+        {
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
+            BuildResult result1 = new BuildResult(request);
+            BuildResult result2 = new BuildResult(request);
+
+            ProjectInstance project1 = new ProjectInstance(ProjectRootElement.Create());
+            var property1 = project1.SetProperty("A", "test1");
+            result1.ProjectStateAfterBuild = project1;
+
+            ProjectInstance project2 = new ProjectInstance(ProjectRootElement.Create());
+            var property2 = project2.SetProperty("B", "test2");
+            result2.ProjectStateAfterBuild = project2;
+
+            result1.MergeResults(result2);
+
+            var mergedProperty1 = result1.ProjectStateAfterBuild.GetProperty("A");
+            Assert.NotNull(mergedProperty1);
+            Assert.Equal("test1", mergedProperty1.EvaluatedValue);
+
+            var mergedProperty2 = result1.ProjectStateAfterBuild.GetProperty("B");
+            Assert.NotNull(mergedProperty2);
+            Assert.Equal("test2", mergedProperty2.EvaluatedValue);
+        }
+
+        [Fact]
+        public void TestMergeResultsWithRequestedProjectStatePropertyFilters()
+        {
+            // Create a request and two build results
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
+            BuildResult result1 = new BuildResult(request);
+            BuildResult result2 = new BuildResult(request);
+
+            var filter1 = new RequestedProjectState();
+            filter1.PropertyFilters = new List<string> { "Prop1" };
+            filter1.ItemFilters = new Dictionary<string, List<string>>() { };
+
+            var filter2 = new RequestedProjectState();
+            filter2.PropertyFilters = new List<string> { "Prop2" };
+            filter2.ItemFilters = new Dictionary<string, List<string>>() { };
+
+            ProjectInstance project1 = new ProjectInstance(ProjectRootElement.Create());
+            project1.SetProperty("Prop1", "Value1");
+            project1.DefaultTargets.Add("Build");
+
+            ProjectInstance project2 = new ProjectInstance(ProjectRootElement.Create());
+            project2.SetProperty("Prop2", "Value2");
+            project2.SetProperty("Prop3", "Value3");
+            project2.DefaultTargets.Add("Build");
+
+            result1.ProjectStateAfterBuild = project1.FilteredCopy(filter1);
+            result2.ProjectStateAfterBuild = project2.FilteredCopy(filter2);
+
+            result1.MergeResults(result2);
+
+            var mergedFilter = result1.ProjectStateAfterBuild.RequestedProjectStateFilter;
+            Assert.Contains("Prop1", mergedFilter.PropertyFilters);
+            Assert.Contains("Prop2", mergedFilter.PropertyFilters);
+            Assert.NotNull(result1.ProjectStateAfterBuild.GetProperty("Prop1"));
+            Assert.NotNull(result1.ProjectStateAfterBuild.GetProperty("Prop2"));
+
+            Assert.Null(result1.ProjectStateAfterBuild.GetProperty("Prop3"));
+        }
+
+        [Fact]
+        public void TestMergeResultsWithItemFilters()
+        {
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
+            BuildResult result1 = new BuildResult(request);
+            BuildResult result2 = new BuildResult(request);
+
+            ProjectInstance project1 = new ProjectInstance(ProjectRootElement.Create());
+            project1.AddItem("Compile", "File1.cs", new Dictionary<string, string> { { "CustomMetadata1", "Value1" }, });
+
+            ProjectInstance project2 = new ProjectInstance(ProjectRootElement.Create());
+            project2.AddItem("Resource1", "Resource1.resx", new Dictionary<string, string> { { "CustomMetadata2", "Value2" }, { "CustomMetadata3", "Value3" } });
+            project2.AddItem("Resource2", "Resource2.resx", new Dictionary<string, string> { });
+
+            var filter1 = new RequestedProjectState();
+            filter1.ItemFilters = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase) { { "Compile", new List<string>() { "CustomMetadata1" } }, };
+
+            var filter2 = new RequestedProjectState();
+            filter2.ItemFilters = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase) { { "Resource1", new List<string>() { "CustomMetadata3" } }, };
+
+            result1.ProjectStateAfterBuild = project1.FilteredCopy(filter1);
+            result2.ProjectStateAfterBuild = project2.FilteredCopy(filter2);
+
+            result1.MergeResults(result2);
+
+            // Validate merged filters
+            var mergedFilter = result1.ProjectStateAfterBuild.RequestedProjectStateFilter;
+            Assert.Contains("Compile", mergedFilter.ItemFilters.Keys);
+            Assert.Contains("Resource1", mergedFilter.ItemFilters.Keys);
+            Assert.DoesNotContain("Resource2", mergedFilter.ItemFilters.Keys);
+
+            // validate the filtered instance
+            var mergedCompileItem = result1.ProjectStateAfterBuild.GetItems("Compile").ToList();
+            Assert.Equal(1, mergedCompileItem.Count);
+            Assert.Equal("File1.cs", mergedCompileItem.First().EvaluatedInclude);
+            Assert.Equal("Value1", mergedCompileItem.First().GetMetadataValue("CustomMetadata1"));
+
+            var mergedResourceItem = result1.ProjectStateAfterBuild.GetItems("Resource1").ToList();
+            Assert.Equal(1, mergedResourceItem.Count);
+            Assert.Equal("Resource1.resx", mergedResourceItem.First().EvaluatedInclude);
+            Assert.Equal("Value3", mergedResourceItem.First().GetMetadataValue("CustomMetadata3"));
+            Assert.Empty(mergedResourceItem.First().GetMetadataValue("CustomMetadata2"));
+        }
+
+        [Fact]
+        public void TestMergeResultsWithOverlappingItemFilters()
+        {
+            // Create a request and two build results
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
+            BuildResult result1 = new BuildResult(request);
+            BuildResult result2 = new BuildResult(request);
+
+            ProjectInstance project1 = new ProjectInstance(ProjectRootElement.Create());
+            ProjectInstance project2 = new ProjectInstance(ProjectRootElement.Create());
+
+            // Create filters with overlapping item types but different metadata
+            var filter1 = new RequestedProjectState();
+            filter1.ItemFilters = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Compile", new List<string> { "CustomMetadata1" } }
+            };
+
+            var filter2 = new RequestedProjectState();
+            filter2.ItemFilters = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Compile", new List<string> { "CustomMetadata2" } }
+            };
+
+            // Create filtered copies
+            var filteredProject1 = project1.FilteredCopy(filter1);
+            var filteredProject2 = project2.FilteredCopy(filter2);
+
+            // Assign filtered projects to results
+            result1.ProjectStateAfterBuild = filteredProject1;
+            result2.ProjectStateAfterBuild = filteredProject2;
+
+            // Merge results
+            result1.MergeResults(result2);
+
+            // Verify the merged state has combined filters
+            Assert.NotNull(result1.ProjectStateAfterBuild);
+            Assert.NotNull(result1.ProjectStateAfterBuild.RequestedProjectStateFilter);
+
+            // The merged filter should contain both metadata for the Compile item type
+            var mergedFilter = result1.ProjectStateAfterBuild.RequestedProjectStateFilter;
+            Assert.Contains("CustomMetadata1", mergedFilter.ItemFilters["Compile"]);
+            Assert.Contains("CustomMetadata2", mergedFilter.ItemFilters["Compile"]);
+            Assert.Equal(2, mergedFilter.ItemFilters["Compile"].Count);
+        }
+
+        [Fact]
+        public void TestMergeResultsWithBothPropertyAndItemFilters()
+        {
+            // Create a request and two build results
+            BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
+            BuildResult result1 = new BuildResult(request);
+            BuildResult result2 = new BuildResult(request);
+
+            // Create ProjectInstances
+            ProjectInstance project1 = new ProjectInstance(ProjectRootElement.Create());
+            ProjectInstance project2 = new ProjectInstance(ProjectRootElement.Create());
+
+            // Create filter with property filters
+            var filter1 = new RequestedProjectState();
+            filter1.PropertyFilters = new List<string> { "Prop1", "Prop2" };
+
+            // Create filter with item filters
+            var filter2 = new RequestedProjectState();
+            filter2.ItemFilters = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Compile", new List<string> { "CustomMetadata1" } }
+            };
+
+            // Create filtered copies
+            var filteredProject1 = project1.FilteredCopy(filter1);
+            var filteredProject2 = project2.FilteredCopy(filter2);
+
+            // Assign filtered projects to results
+            result1.ProjectStateAfterBuild = filteredProject1;
+            result2.ProjectStateAfterBuild = filteredProject2;
+
+            // Merge results
+            result1.MergeResults(result2);
+
+            // Verify the merged state has both property and item filters
+            Assert.NotNull(result1.ProjectStateAfterBuild);
+            Assert.NotNull(result1.ProjectStateAfterBuild.RequestedProjectStateFilter);
+
+            // The merged filter should have both property and item filters
+            var mergedFilter = result1.ProjectStateAfterBuild.RequestedProjectStateFilter;
+            Assert.NotNull(mergedFilter.PropertyFilters);
+            Assert.NotNull(mergedFilter.ItemFilters);
+
+            // Check property filters
+            Assert.Contains("Prop1", mergedFilter.PropertyFilters);
+            Assert.Contains("Prop2", mergedFilter.PropertyFilters);
+
+            // Check item filters
+            Assert.Contains("Compile", mergedFilter.ItemFilters.Keys);
+            Assert.Contains("CustomMetadata1", mergedFilter.ItemFilters["Compile"]);
+        }
+
+        private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets) => new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);
     }
 }
