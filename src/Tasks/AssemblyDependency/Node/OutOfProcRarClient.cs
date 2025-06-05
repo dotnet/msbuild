@@ -58,13 +58,28 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 _pipeClient.ConnectToServer(0);
             }
 
-            // TODO: Use RAR task to create the request packet.
-            _pipeClient.WritePacket(new RarNodeExecuteRequest());
+            _pipeClient.WritePacket(new RarNodeExecuteRequest(rarTask));
 
-            // TODO: Use response packet to set RAR task outputs.
-            _ = (RarNodeExecuteResponse)_pipeClient.ReadPacket();
+            INodePacket packet = _pipeClient.ReadPacket();
 
-            return true;
+            while (packet.Type != NodePacketType.RarNodeExecuteResponse)
+            {
+                if (packet.Type == NodePacketType.RarNodeBufferedLogEvents)
+                {
+                    // TODO: Stub for replaying logs to the real build engine.
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalError($"Received unexpected packet type {packet.Type}");
+                }
+
+                packet = _pipeClient.ReadPacket();
+            }
+
+            RarNodeExecuteResponse response = (RarNodeExecuteResponse)packet;
+            response.SetTaskOutputs(rarTask);
+
+            return response.Success;
         }
     }
 }

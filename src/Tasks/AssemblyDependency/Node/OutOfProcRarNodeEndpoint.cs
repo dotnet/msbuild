@@ -64,26 +64,35 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 {
                     INodePacket packet = await _pipeServer.ReadPacketAsync(cancellationToken);
 
-                    if (packet.Type == NodePacketType.NodeShutdown)
+                    switch (packet.Type)
                     {
-                        // Although the client has already disconnected, it is still necessary to Diconnect() so the
-                        // pipe can transition into PipeState.Disonnected, which is treated as an intentional pipe break.
-                        // Otherwise, all future operations on the pipe will throw an exception.
-                        CommunicationsUtilities.Trace("({0}) RAR client disconnected.", _endpointId);
-                        _pipeServer.Disconnect();
-                        continue;
+                        case NodePacketType.RarNodeEndpointConfiguration:
+                            // TODO: Pass in client state such as immutable directories, environment variables, ect.
+                            break;
+                        case NodePacketType.RarNodeExecuteRequest:
+                            CommunicationsUtilities.Trace("({0}) Executing RAR...", _endpointId);
+
+                            RarNodeExecuteRequest request = (RarNodeExecuteRequest)packet;
+                            ResolveAssemblyReference rarTask = new();
+                            request.SetTaskInputs(rarTask, _buildEngine);
+
+                            bool success = rarTask.Execute();
+
+                            await _pipeServer.WritePacketAsync(new RarNodeExecuteResponse(rarTask, success), cancellationToken).ConfigureAwait(false);
+
+                            CommunicationsUtilities.Trace("({0}) Completed RAR request.", _endpointId);
+                            break;
+                        case NodePacketType.NodeShutdown:
+                            // Although the client has already disconnected, it is still necessary to Diconnect() so the
+                            // pipe can transition into PipeState.Disonnected, which is treated as an intentional pipe break.
+                            // Otherwise, all future operations on the pipe will throw an exception.
+                            CommunicationsUtilities.Trace("({0}) RAR client disconnected.", _endpointId);
+                            _pipeServer.Disconnect();
+                            break;
+                        default:
+                            ErrorUtilities.ThrowInternalError($"Received unexpected packet type {packetType}");
+                            break;
                     }
-
-                    RarNodeExecuteRequest request = (RarNodeExecuteRequest)packet;
-
-                    // TODO: Use request packet to set inputs on the RAR task.
-                    ResolveAssemblyReference rarTask = new();
-
-                    // TODO: bool success = rarTask.ExecuteInProcess();
-                    // TODO: Use RAR task outputs to create response packet.
-                    await _pipeServer.WritePacketAsync(new RarNodeExecuteResponse(), cancellationToken);
-
-                    CommunicationsUtilities.Trace("({0}) Completed RAR request.", _endpointId);
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
