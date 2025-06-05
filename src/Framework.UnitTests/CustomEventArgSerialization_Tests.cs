@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent.HelpKeyword.ShouldBe(genericEvent.HelpKeyword, StringCompareShould.IgnoreCase); // "Expected Help Keywords to Match"
             newGenericEvent.Message.ShouldBe(genericEvent.Message, StringCompareShould.IgnoreCase); // "Expected Message to Match"
             string.Compare(genericEvent.SenderName, newGenericEvent.SenderName, StringComparison.OrdinalIgnoreCase).ShouldBe(0); // "Expected Sender Name to Match"
-            newGenericEvent.ThreadId.ShouldBe(genericEvent.ThreadId); // "Expected ThreadId to Match"
+            // ThreadId comparison removed - property is deprecated and always returns 0
             newGenericEvent.Timestamp.ShouldBe(genericEvent.Timestamp); // "Expected TimeStamp to Match"
         }
 
