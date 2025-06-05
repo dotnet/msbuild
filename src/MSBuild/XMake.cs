@@ -4473,12 +4473,6 @@ namespace Microsoft.Build.CommandLine
             return true;
         }
 
-        private static void ReportOptionalLoggerCreation(string loggerName, string unquotedParameter, Exception e)
-        {
-            Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerName, e.Message));
-            InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
-        }
-
         private static void ReplayBinaryLog(
             string binaryLogFilePath,
             ILogger[] loggers,
