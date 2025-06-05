@@ -661,7 +661,7 @@ namespace Microsoft.Build.Logging
 
             if ((flags & BuildEventArgsFieldFlags.ThreadId) != 0)
             {
-                Write(e.ThreadId);
+                Write(0);
             }
 
             if ((flags & BuildEventArgsFieldFlags.HelpKeyword) != 0)
