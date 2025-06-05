@@ -301,10 +301,7 @@ namespace Microsoft.Build.Evaluation
 
                         // UNDONE: When batching is implemented for real, we need to make sure that
                         // item definition metadata is included in all metadata operations during evaluation
-                        if (itemsAndMetadataFound.Metadata.Values.Count > 0)
-                        {
-                            needToExpandMetadataForEachItem = true;
-                        }
+                        needToExpandMetadataForEachItem = true;
                     }
                 }
 
