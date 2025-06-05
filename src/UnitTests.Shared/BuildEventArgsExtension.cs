@@ -72,11 +72,6 @@ namespace Microsoft.Build.UnitTests
                 return false;
             }
 
-            if (args.ThreadId != other.ThreadId)
-            {
-                return false;
-            }
-
             return true;
         }
 
