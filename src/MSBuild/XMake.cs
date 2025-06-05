@@ -4420,27 +4420,26 @@ namespace Microsoft.Build.CommandLine
             }
             catch (IOException e) when (!loggerDescription.IsOptional)
             {
-                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
+                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name ,false);
             }
             catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
-                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
+                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
             }
             catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
-                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
+                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
-                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
+                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
-                ReportOptionalLoggerCreation(loggerDescription.Name, unquotedParameter, e);
+                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
             }
             catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OptionalLoggerCreationMessage", loggerDescription.Name, e.Message));
                 InitializationException.Throw("LoggerFatalError", unquotedParameter, e.InnerException, true);
             }
             catch (Exception e) when (loggerDescription.IsOptional)

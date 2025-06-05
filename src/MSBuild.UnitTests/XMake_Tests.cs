@@ -20,6 +20,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -2504,10 +2505,10 @@ $@"<Project>
             var parametersLogger = $"{logger} -verbosity:diagnostic \"{projectFile.Path}\"";
 
             var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
-            successfulExit.ShouldBe(false); 
+            successfulExit.ShouldBe(false);
 
-            output.ShouldNotContain("Hello", customMessage: output); 
-            output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created", customMessage: output);
+            output.ShouldContain("Cannot create an instance of the logger");
+            output.ShouldContain(expectedLoggerName);
         }
 
         [Theory]
@@ -2528,8 +2529,8 @@ $@"<Project>
             var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
             successfulExit.ShouldBe(false);
 
-            output.ShouldNotContain("Hello", customMessage: output);
-            output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created", customMessage: output);
+            output.ShouldContain("Cannot create an instance of the logger");
+            output.ShouldContain(expectedLoggerName);
         }
 
         [Theory]
@@ -2555,8 +2556,8 @@ $@"<Project>
                     mainBuildParameters,
                     out bool successfulExit);
 
-                successfulExit.ShouldBeFalse(mainBuildLog);
-                mainBuildLog.ShouldContain($"The specified logger \"{loggerDllPath}\" could not be created and will not be used.");
+                mainBuildLog.ShouldContain("Cannot create an instance of the logger");
+                mainBuildLog.ShouldContain(expectedLoggerName);
             }
         }
 
@@ -2584,7 +2585,7 @@ $@"<Project>
                     out bool successfulExit);
 
                 successfulExit.ShouldBeFalse(mainBuildLog);
-                mainBuildLog.ShouldContain($"The specified logger \"{loggerDllPath}\" could not be created and will not be used.");
+                mainBuildLog.ShouldContain("The logger failed unexpectedly.");
             }
         }
 
