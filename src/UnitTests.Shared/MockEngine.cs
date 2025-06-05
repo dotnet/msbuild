@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
 
         public override bool IsOutOfProcRarNodeEnabled => SetIsOutOfProcRarNodeEnabled;
 
-        public bool SetIsTaskInputLoggingEnabled { get; set; } = true;
+        public bool SetIsTaskInputLoggingEnabled { get; set; }
 
         public bool SetIsOutOfProcRarNodeEnabled { get; set; }
 
