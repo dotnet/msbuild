@@ -440,7 +440,7 @@ namespace Microsoft.Build.Tasks
         public bool EnableCustomCulture
         {
             get { return _enableCustomCulture; }
-            set { _enableCustomCulture = value; }     
+            set { _enableCustomCulture = value; }
         }
 
         /// <summary>
@@ -941,7 +941,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedFiles
         {
-            get { return _resolvedFiles; }
+            get => _resolvedFiles;
+            internal set => _resolvedFiles = value;
         }
 
         /// <summary>
@@ -960,7 +961,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedDependencyFiles
         {
-            get { return _resolvedDependencyFiles; }
+            get => _resolvedDependencyFiles;
+            internal set => _resolvedDependencyFiles = value;
         }
 
         /// <summary>
@@ -972,7 +974,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] RelatedFiles
         {
-            get { return _relatedFiles; }
+            get => _relatedFiles;
+            internal set => _relatedFiles = value;
         }
 
         /// <summary>
@@ -985,7 +988,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SatelliteFiles
         {
-            get { return _satelliteFiles; }
+            get => _satelliteFiles;
+            internal set => _serializationAssemblyFiles = value;
         }
 
         /// <summary>
@@ -996,7 +1000,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SerializationAssemblyFiles
         {
-            get { return _serializationAssemblyFiles; }
+            get => _serializationAssemblyFiles;
+            internal set => _serializationAssemblyFiles = value;
         }
 
         /// <summary>
@@ -1006,7 +1011,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ScatterFiles
         {
-            get { return _scatterFiles; }
+            get => _scatterFiles;
+            internal set => _scatterFiles = value;
         }
 
         /// <summary>
@@ -1017,7 +1023,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] CopyLocalFiles
         {
-            get { return _copyLocalFiles; }
+            get => _copyLocalFiles;
+            internal set => _copyLocalFiles = value;
         }
 
         /// <summary>
@@ -1032,7 +1039,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SuggestedRedirects
         {
-            get { return _suggestedRedirects; }
+            get => _suggestedRedirects;
+            internal set => _suggestedRedirects = value;
         }
 
         /// <summary>
@@ -1046,8 +1054,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] FilesWritten
         {
-            set { /*Do Nothing, Inputs not Allowed*/ }
-            get { return _filesWritten.ToArray(); }
+            get => [.. _filesWritten];
+            internal set => _filesWritten = [.. value];
         }
 
         /// <summary>
@@ -1057,7 +1065,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnSystemRuntime
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <summary>
@@ -1067,7 +1075,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnNETStandard
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <summary>
@@ -1075,7 +1083,11 @@ namespace Microsoft.Build.Tasks
         /// been outputted in MSB3277. Otherwise empty.
         /// </summary>
         [Output]
-        public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
+        public ITaskItem[] UnresolvedAssemblyConflicts
+        {
+            get => [.. _unresolvedConflicts];
+            internal set => _unresolvedConflicts = [.. value];
+        }
 
         #endregion
         #region Logging
