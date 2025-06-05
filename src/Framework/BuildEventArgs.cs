@@ -88,7 +88,7 @@ namespace Microsoft.Build.Framework
             this.helpKeyword = helpKeyword;
             this.senderName = senderName;
             timestamp = eventTimestamp;
-            threadId = System.Threading.Thread.CurrentThread.GetHashCode();
+            threadId = 0;
         }
 
         /// <summary>
@@ -126,6 +126,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The thread that raised event.
         /// </summary>
+        [Obsolete("ThreadId is not used and always returns 0. It will be removed in a future version.")]
         public int ThreadId => threadId;
 
         /// <summary>
