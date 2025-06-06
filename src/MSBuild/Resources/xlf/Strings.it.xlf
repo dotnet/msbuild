@@ -2006,6 +2006,14 @@ Nota: livello di dettaglio dei logger di file
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2047,7 +2055,16 @@ Nota: livello di dettaglio dei logger di file
                      seguito per ricostruire i log di testo e viene usato da altri strumenti di analisi. Un log binario è in genere
                      10-20 volte più piccolo del più dettagliato log di testo
                      di livello diagnostico, ma contiene maggiori informazioni.
-                     (Froma breve: -bl)
+                     (Forma breve: -bl)
+
+                     Il LogFile facoltativo specifica il percorso in cui il
+                     il log binario viene salvato. Per generare un file di log distinto
+                     per ogni compilazione, il token "{}" può essere aggiunto al
+                     percorso, ad esempio: LogFile=output-{}-log.binlog. Ogni 
+                     "{}" nel percorso del log viene sostituito con una stringa univoca
+                     usando il timestamp, l'ID del processo in esecuzione e
+timbro
+                     stringa casuale.
 
                      Per impostazione predefinita, il logger binario raccoglie il testo di origine di
                      file di progetto, inclusi tutti i
@@ -2060,8 +2077,8 @@ Nota: livello di dettaglio dei logger di file
                                                 file di log.
                       ProjectImports=ZipFile  - I file del progetto vengono salvati in
                                                 output.projectimports.zip
-                                                dove output corrisponde allo
-                                                as stesso nome del file di log binario.
+                                                dove output corrisponde allo stesso
+                                                nome del file di log binario.
 
                      L'impostazione predefinita di ProjectImports è Embed.
                      Nota: il logger non raccoglie i file di origine non-MSBuild,
