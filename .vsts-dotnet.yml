@@ -328,3 +328,4 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
+        requireDefaultChannels: true
