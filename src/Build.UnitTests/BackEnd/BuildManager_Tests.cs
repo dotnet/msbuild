@@ -21,6 +21,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -65,13 +66,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private readonly TransientTestState _inProcEnvCheckTransientEnvironmentVariable;
 
         /// <summary>
-        /// SetUp
+        /// SetUp.
         /// </summary>
         public BuildManager_Tests(ITestOutputHelper output)
         {
             _output = output;
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
+            _env = TestEnvironment.Create(output);
+
 
             _logger = new MockLogger(output);
             _parameters = new BuildParameters
@@ -80,10 +83,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Loggers = new ILogger[] { _logger },
                 EnableNodeReuse = false
             };
+
             _buildManager = new BuildManager();
             _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
-            _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
         }
 
@@ -1726,7 +1729,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
         /// </summary>
         [Fact]
-        public void CancelledBuildInTaskHostWithDelay40()
+        public void CanceledBuildInTaskHostWithDelay40()
         {
             string contents = CleanupFileContents(@$"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>

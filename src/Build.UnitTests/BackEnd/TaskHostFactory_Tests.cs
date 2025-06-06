@@ -8,7 +8,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
-
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -40,6 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         </ProcessIdTask>
     </Target>
 </Project>";
+
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
                 ProjectInstance projectInstance = new(project.Path);
                 projectInstance.Build().ShouldBeTrue();
