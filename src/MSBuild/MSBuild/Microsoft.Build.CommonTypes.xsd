@@ -1893,7 +1893,7 @@ elementFormDefault="qualified">
     <xs:element name="LinkIncremental" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestCertificateThumbprint" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="EnableCustomCulture" type="msb:boolean" substitutionGroup="msb:EnableCustomCulture"/>
+    <xs:element name="EnableCustomCulture" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="MapFileExtensions" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MapFileExtensions" _locComment="" -->boolean</xs:documentation>
