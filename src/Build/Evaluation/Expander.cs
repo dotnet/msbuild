@@ -2247,7 +2247,7 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// A cache of previously created item function delegates.
                 /// </summary>
-                private static readonly ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
+                private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, ItemTransformFunction>> s_transformFunctionDelegateCache = new(StringComparer.OrdinalIgnoreCase);
 
                 /// <summary>
                 /// Delegate that represents the signature of all item transformation functions
@@ -2262,10 +2262,14 @@ namespace Microsoft.Build.Evaluation
                 internal static ItemTransformFunction GetItemTransformFunction(IElementLocation elementLocation, string functionName, Type itemType)
                 {
                     ItemTransformFunction transformFunction = null;
-                    string qualifiedFunctionName = $"{itemType.FullName}::{functionName}";
 
                     // We may have seen this delegate before, if so grab the one we already created
-                    if (!s_transformFunctionDelegateCache.TryGetValue(qualifiedFunctionName, out transformFunction))
+                    if (!s_transformFunctionDelegateCache.TryGetValue(itemType.FullName, out ConcurrentDictionary<string, ItemTransformFunction> functionNameCache))
+                    {
+                        functionNameCache = s_transformFunctionDelegateCache.GetOrAdd(itemType.FullName, _ => new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase));
+                    }
+
+                    if (!functionNameCache.TryGetValue(functionName, out transformFunction))
                     {
                         if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
                         {
@@ -2306,7 +2310,7 @@ namespace Microsoft.Build.Evaluation
                         }
 
                         // record our delegate for future use
-                        s_transformFunctionDelegateCache[qualifiedFunctionName] = transformFunction;
+                        functionNameCache[functionName] = transformFunction;
                     }
 
                     return transformFunction;
