@@ -252,25 +252,27 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Add parameters on any output tags
-            foreach (ProjectTaskInstanceChild taskOutputSpecification in _taskNode.Outputs)
+            // Perf: Moved to indexed based for loop to avoid boxing of the enumerator for IList.
+            for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
-                ProjectTaskOutputItemInstance outputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
+                var projectTaskInstanceChild = _taskNode.Outputs[i];
+                ProjectTaskOutputItemInstance outputItemInstance = projectTaskInstanceChild as ProjectTaskOutputItemInstance;
                 if (outputItemInstance != null)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                ProjectTaskOutputPropertyInstance outputPropertyInstance = taskOutputSpecification as ProjectTaskOutputPropertyInstance;
+                ProjectTaskOutputPropertyInstance outputPropertyInstance = projectTaskInstanceChild as ProjectTaskOutputPropertyInstance;
                 if (outputPropertyInstance != null)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
                 }
 
-                if (!String.IsNullOrEmpty(taskOutputSpecification.Condition))
+                if (!String.IsNullOrEmpty(projectTaskInstanceChild.Condition))
                 {
-                    taskParameters.Add(taskOutputSpecification.Condition);
+                    taskParameters.Add(projectTaskInstanceChild.Condition);
                 }
             }
 
