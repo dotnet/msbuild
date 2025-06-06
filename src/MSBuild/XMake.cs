@@ -4411,7 +4411,6 @@ namespace Microsoft.Build.CommandLine
             out ILogger logger)
         {
             logger = null;
-
             try
             {
                 logger = loggerDescription.CreateLogger();
@@ -4420,23 +4419,23 @@ namespace Microsoft.Build.CommandLine
             }
             catch (IOException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {

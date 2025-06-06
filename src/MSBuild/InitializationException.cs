@@ -169,7 +169,7 @@ namespace Microsoft.Build.CommandLine
             // the exception message can contain a format item i.e.
             // "{0}" to hold the given exception's message
             // "{1}" to hold the logger name
-            errorMessage = ResourceUtilities.FormatString(errorMessage, formatArgs, (e == null) ? String.Empty : e.Message);
+            errorMessage = ResourceUtilities.FormatString(errorMessage, formatArgs);
 
             if (showStackTrace && e != null)
             {            
