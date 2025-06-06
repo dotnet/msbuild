@@ -705,7 +705,7 @@ namespace Microsoft.Build.Evaluation
         /// Also returns flags to indicate if a propertyfunction or registry property is likely
         /// to be found in the expression.
         /// </summary>
-        private static int ScanForClosingParenthesis(string expression, int index, out bool potentialPropertyFunction, out bool potentialRegistryFunction)
+        private static int ScanForClosingParenthesis(ReadOnlySpan<char> expression, int index, out bool potentialPropertyFunction, out bool potentialRegistryFunction)
         {
             int nestLevel = 1;
             int length = expression.Length;
@@ -768,10 +768,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Skip all characters until we find the matching quote character.
         /// </summary>
-        private static int ScanForClosingQuote(char quoteChar, string expression, int index)
+        private static int ScanForClosingQuote(char quoteChar, ReadOnlySpan<char> expression, int index)
         {
             // Scan for our closing quoteChar
-            return expression.IndexOf(quoteChar, index);
+            int foundIndex = expression.Slice(index).IndexOf(quoteChar);
+            return foundIndex < 0 ? -1 : foundIndex + index;
         }
 
         /// <summary>
@@ -824,9 +825,10 @@ namespace Microsoft.Build.Evaluation
         /// Returns an array of unexpanded arguments.
         /// If there are no arguments, returns an empty array.
         /// </summary>
-        private static string[] ExtractFunctionArguments(IElementLocation elementLocation, string expressionFunction, string argumentsString)
+        private static string[] ExtractFunctionArguments(IElementLocation elementLocation, string expressionFunction, ReadOnlyMemory<char> argumentsMemory)
         {
-            int argumentsContentLength = argumentsString.Length;
+            int argumentsContentLength = argumentsMemory.Length;
+            ReadOnlySpan<char> argumentsSpan = argumentsMemory.Span;
 
             List<string> arguments = new List<string>();
 
@@ -840,7 +842,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (argumentStartIndex.HasValue)
                 {
-                    argumentBuilder.Append(argumentsString, argumentStartIndex.Value, argumentEndIndex - argumentStartIndex.Value);
+                    argumentBuilder.Append(argumentsMemory.Slice(argumentStartIndex.Value, argumentEndIndex - argumentStartIndex.Value));
                     argumentStartIndex = null;
                 }
             }
@@ -850,13 +852,13 @@ namespace Microsoft.Build.Evaluation
             for (int n = 0; n < argumentsContentLength; n++)
             {
                 // We found a property expression.. skip over all of it.
-                if ((n < argumentsContentLength - 1) && (argumentsString[n] == '$' && argumentsString[n + 1] == '('))
+                if ((n < argumentsContentLength - 1) && (argumentsSpan[n] == '$' && argumentsSpan[n + 1] == '('))
                 {
                     int nestedPropertyStart = n;
                     n += 2; // skip over the opening '$('
 
                     // Scan for the matching closing bracket, skipping any nested ones
-                    n = ScanForClosingParenthesis(argumentsString, n, out _, out _);
+                    n = ScanForClosingParenthesis(argumentsSpan, n, out _, out _);
 
                     if (n == -1)
                     {
@@ -864,14 +866,14 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: nestedPropertyStart);
-                    argumentBuilder.Append(argumentsString, nestedPropertyStart, (n - nestedPropertyStart) + 1);
+                    argumentBuilder.Append(argumentsMemory.Slice(nestedPropertyStart, (n - nestedPropertyStart) + 1));
                 }
-                else if (argumentsString[n] == '`' || argumentsString[n] == '"' || argumentsString[n] == '\'')
+                else if (argumentsSpan[n] == '`' || argumentsSpan[n] == '"' || argumentsSpan[n] == '\'')
                 {
                     int quoteStart = n;
                     n++; // skip over the opening quote
 
-                    n = ScanForClosingQuote(argumentsString[quoteStart], argumentsString, n);
+                    n = ScanForClosingQuote(argumentsSpan[quoteStart], argumentsSpan, n);
 
                     if (n == -1)
                     {
@@ -879,9 +881,9 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: quoteStart);
-                    argumentBuilder.Append(argumentsString, quoteStart, (n - quoteStart) + 1);
+                    argumentBuilder.Append(argumentsMemory.Slice(quoteStart, (n - quoteStart) + 1));
                 }
-                else if (argumentsString[n] == ',')
+                else if (argumentsSpan[n] == ',')
                 {
                     FlushCurrentArgumentToArgumentBuilder(argumentEndIndex: n);
 
@@ -1237,7 +1239,7 @@ namespace Microsoft.Build.Evaluation
                     // Scan for the matching closing bracket, skipping any nested ones
                     // This is a very complete, fast validation of parenthesis matching including for nested
                     // function calls.
-                    propertyEndIndex = ScanForClosingParenthesis(expression, propertyStartIndex + 2, out bool tryExtractPropertyFunction, out bool tryExtractRegistryFunction);
+                    propertyEndIndex = ScanForClosingParenthesis(expression.AsSpan(), propertyStartIndex + 2, out bool tryExtractPropertyFunction, out bool tryExtractRegistryFunction);
 
                     if (propertyEndIndex == -1)
                     {
@@ -2166,7 +2168,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (argumentsExpression != null)
                     {
-                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression);
+                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression.AsMemory());
                     }
 
                     IntrinsicItemFunctions<S>.ItemTransformFunction transformFunction = IntrinsicItemFunctions<S>.GetItemTransformFunction(elementLocation, functionName, typeof(S));
@@ -3923,13 +3925,11 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private static void ConstructIndexerFunction(string expressionFunction, IElementLocation elementLocation, object propertyValue, int methodStartIndex, int indexerEndIndex, ref FunctionBuilder<T> functionBuilder)
             {
-                string argumentsContent = expressionFunction.Substring(1, indexerEndIndex - 1);
-                string remainder = expressionFunction.Substring(methodStartIndex);
-                string functionName;
+                ReadOnlyMemory<char> argumentsContent = expressionFunction.AsMemory().Slice(1, indexerEndIndex - 1);
                 string[] functionArguments;
 
                 // If there are no arguments, then just create an empty array
-                if (String.IsNullOrEmpty(argumentsContent))
+                if (argumentsContent.IsEmpty)
                 {
                     functionArguments = [];
                 }
@@ -3941,6 +3941,7 @@ namespace Microsoft.Build.Evaluation
 
                 // choose the name of the function based on the type of the object that we
                 // are using.
+                string functionName;
                 if (propertyValue is Array)
                 {
                     functionName = "GetValue";
@@ -3957,7 +3958,7 @@ namespace Microsoft.Build.Evaluation
                 functionBuilder.Name = functionName;
                 functionBuilder.Arguments = functionArguments;
                 functionBuilder.BindingFlags = BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.InvokeMethod;
-                functionBuilder.Remainder = remainder;
+                functionBuilder.Remainder = expressionFunction.Substring(methodStartIndex);
             }
 
             /// <summary>
@@ -3992,7 +3993,7 @@ namespace Microsoft.Build.Evaluation
                     argumentStartIndex++;
 
                     // Scan for the matching closing bracket, skipping any nested ones
-                    int argumentsEndIndex = ScanForClosingParenthesis(expressionFunction, argumentStartIndex, out _, out _);
+                    int argumentsEndIndex = ScanForClosingParenthesis(expressionFunctionAsSpan, argumentStartIndex, out _, out _);
 
                     if (argumentsEndIndex == -1)
                     {
@@ -4010,10 +4011,10 @@ namespace Microsoft.Build.Evaluation
                     else
                     {
                         // we have content within the '()' so let's extract and deal with it
-                        string argumentsContent = expressionFunction.Substring(argumentStartIndex, argumentsEndIndex - argumentStartIndex);
+                        ReadOnlyMemory<char> argumentsContent = expressionFunction.AsMemory().Slice(argumentStartIndex, argumentsEndIndex - argumentStartIndex);
 
                         // If there are no arguments, then just create an empty array
-                        if (string.IsNullOrEmpty(argumentsContent))
+                        if (argumentsContent.IsEmpty)
                         {
                             functionArguments = [];
                         }
