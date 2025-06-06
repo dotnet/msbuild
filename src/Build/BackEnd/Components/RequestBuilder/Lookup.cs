@@ -860,10 +860,9 @@ namespace Microsoft.Build.BackEnd
             {
 
                 // Perf: Avoid boxing when possible by getting the underlying struct enumerator if available.
-                List<string> metadataToRemove;
+                List<string> metadataToRemove = new List<string>(); ;
                 if (itemToModify.Metadata is CopyOnWritePropertyDictionary<ProjectMetadataInstance> copyOnWritePropertyMetadata)
                 {
-                    metadataToRemove = new List<string>(copyOnWritePropertyMetadata.Count);
                     foreach (var m in copyOnWritePropertyMetadata)
                     {
                         string name = m.Value.Name;
@@ -875,7 +874,6 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    metadataToRemove = new List<string>();
                     foreach (var m in itemToModify.Metadata)
                     {
                         if (modificationsToApply[m.Name].Remove)
