@@ -4420,23 +4420,23 @@ namespace Microsoft.Build.CommandLine
             }
             catch (IOException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name ,false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
             }
             catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
             }
             catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.ThrowWithLoggerName("XMake.LoggerCreationError", unquotedParameter, e, loggerDescription.Name, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, loggerDescription.Name);
             }
             catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {
