@@ -474,6 +474,9 @@ namespace Microsoft.Build.BackEnd
             {
                 // Calculate all Exclude
                 var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
+
+                // Perf: removing Linq to avoid closures.
+                // Note: this may not be optimal but decided to initialize the list with the same size as items to avoid resizing it later.
                 var filteredProjectItems = new List<ProjectItemInstance>(items.Count);
                 foreach (ProjectItemInstance item in items)
                 {
