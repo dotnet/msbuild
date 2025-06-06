@@ -521,8 +521,21 @@ namespace Microsoft.Build.Construction
 
                 if (TrySearchLeftSiblings(child.PreviousSibling, SiblingIsExplicitElement, out ProjectElement referenceSibling))
                 {
-                    // Add after previous sibling
-                    XmlElement.InsertAfter(child.XmlElement, referenceSibling.XmlElement);
+                    // Heuristic: If the reference element is immediately followed by a series of XML nodes, each of which
+                    // does not contain any line breaks and is whitespace, a comment, or a processing instruction,
+                    // then insert the new element after those nodes.
+                    XmlNode insertAfter = referenceSibling.XmlElement;
+                    XmlNode next = insertAfter.NextSibling;
+                    while (next != null &&
+                        (next.NodeType == XmlNodeType.Whitespace ||
+                         next.NodeType == XmlNodeType.Comment ||
+                         next.NodeType == XmlNodeType.ProcessingInstruction)
+                         && (next.Value == null || (!next.Value.Contains("\n") && !next.Value.Contains("\r"))))
+                    {
+                        insertAfter = next;
+                        next = insertAfter.NextSibling;
+                    }
+                    XmlElement.InsertAfter(child.XmlElement, insertAfter);
                     if (XmlDocument.PreserveWhitespace)
                     {
                         // Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
@@ -530,7 +543,7 @@ namespace Microsoft.Build.Construction
                         if (referenceSibling.XmlElement.PreviousSibling?.NodeType == XmlNodeType.Whitespace)
                         {
                             var newWhitespaceNode = XmlDocument.CreateWhitespace(referenceSibling.XmlElement.PreviousSibling.Value);
-                            XmlElement.InsertAfter(newWhitespaceNode, referenceSibling.XmlElement);
+                            XmlElement.InsertAfter(newWhitespaceNode, insertAfter);
                         }
                     }
                 }
