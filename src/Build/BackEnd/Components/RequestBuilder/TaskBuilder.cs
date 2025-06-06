@@ -252,6 +252,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Add parameters on any output tags
+            // Perf: Moved to indexed based for loop to avoid boxing of the enumerator for IList.
             for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
                 var projectTaskInstanceChild = _taskNode.Outputs[i];
@@ -274,7 +275,6 @@ namespace Microsoft.Build.BackEnd
                     taskParameters.Add(projectTaskInstanceChild.Condition);
                 }
             }
-
 
             if (!String.IsNullOrEmpty(_taskNode.Condition))
             {
