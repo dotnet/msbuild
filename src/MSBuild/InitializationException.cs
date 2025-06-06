@@ -167,8 +167,8 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
 
             // the exception message can contain a format item i.e.
-            // "{0}" to hold the given exception's message
-            // "{1}" to hold the logger name
+            // "{0}" to hold the logger name
+            // "{1}" to hold the given exception's message
             errorMessage = ResourceUtilities.FormatString(errorMessage, formatArgs);
 
             if (showStackTrace && e != null)
