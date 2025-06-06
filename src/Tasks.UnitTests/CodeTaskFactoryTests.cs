@@ -16,7 +16,10 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_CODETASKFACTORY
 
     using System.CodeDom.Compiler;
+    using System.IO.Compression;
+    using Microsoft.Build.Logging;
     using Microsoft.Build.Tasks.UnitTests;
+    using Shouldly;
 
     public sealed class CodeTaskFactoryTests
     {
@@ -1199,6 +1202,86 @@ namespace Microsoft.Build.UnitTests
 
             CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
                 FactoryType.CodeTaskFactory, "HelloTask", taskXml, false);
+        }
+
+        [Fact]
+        public void ShouldEmitSingleGeneratedFileIntoBinlog()
+        {
+            using var env = TestEnvironment.Create();
+
+            // Define task XML for Import.targets
+            string taskXml = @"
+                <Project>
+                  <UsingTask
+                    TaskName=""CustomTask""
+                    TaskFactory=""{0}""
+                    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+                    <ParameterGroup>
+                      <InputParameter ParameterType=""System.String"" />
+                      <OutputParameter ParameterType=""System.String"" Output=""True"" />
+                    </ParameterGroup>
+                    <Task>
+                      <Using Namespace=""System"" />
+                      <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                            Console.WriteLine(this.InputParameter);
+                            this.OutputParameter = ""Hello "" + this.InputParameter;
+                        ]]>
+                      </Code>
+                    </Task>
+                  </UsingTask>
+                </Project>";
+
+            // Inject factoryType into taskXml
+            taskXml = string.Format(taskXml, FactoryType.CodeTaskFactory);
+
+            TransientTestFile importTargetsFile = env.CreateFile("Import.targets", taskXml);
+
+            // Define CustomTask.proj content
+            string customTaskContent = $@"<Project>
+                <Import Project=""{importTargetsFile.Path.Replace("\\", "/")}"" />
+                <Target Name=""AnotherTarget"">
+                    <CustomTask InputParameter=""Foo"">
+                        <Output PropertyName=""TaskOutput"" TaskParameter=""OutputParameter"" />
+                    </CustomTask>
+                    <Message Text=""Output: $(TaskOutput)"" />
+                </Target>
+            </Project>";
+
+            TransientTestFile customTaskProjFile = env.CreateFile("Another.proj", customTaskContent);
+
+            // Define main.csproj content
+            string projectFileContent = $@"<Project>
+                <Import Project=""{importTargetsFile.Path.Replace("\\", "/")}"" />
+                <Target Name=""Build"">
+                    <MSBuild Projects=""{customTaskProjFile.Path.Replace("\\", "/")}"" Targets=""AnotherTarget"" />
+                    <CustomTask InputParameter=""Bar"" />
+                </Target>
+            </Project>";
+
+            TransientTestFile binlog = env.ExpectFile(".binlog");
+
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContent, binaryLogger, out bool result, out string projectDirectory);
+
+            Assert.True(result);
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // A path like "C:\path" in ZipArchive is saved as "C\path"
+            // For unix-based systems path uses '/'
+            projectDirectory = NativeMethodsShared.IsWindows ? projectDirectory.Replace(":\\", "\\") : projectDirectory.Replace("/", "\\");
+
+            // check to make sure that only 1 tmp file is created
+            var tmpFiles = zipArchive.Entries.Where(zE => zE.Name.EndsWith("CustomTask-compilation-file.tmp")).ToList();
+            tmpFiles.Count.ShouldBe(1, $"Expected exactly one file ending with 'CustomTask-compilation-file.tmp' in ProjectImports.zip, but found {tmpFiles.Count}.");
         }
     }
 #else
