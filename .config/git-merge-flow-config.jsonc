@@ -26,7 +26,7 @@
         "vs17.11": {
             "MergeToBranch": "vs17.12"
         },
-        // Automate opening PRs to merge msbuild's vs17.12 (SDK 9.0.1xx) into vs17.14 (SDK 9.0.3xx)
+        // Automate opening PRs to merge msbuild's vs17.12 (SDK 9.0.1xx) into vs17.14 (SDK 9.0.3xx, VS until 1/2032)
         "vs17.12": {
             "MergeToBranch": "vs17.14"
         },
