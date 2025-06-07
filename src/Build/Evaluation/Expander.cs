@@ -1841,6 +1841,8 @@ namespace Microsoft.Build.Evaluation
                     out bool brokeEarly)
                 where S : class, IItem
             {
+                // Each transform runs on the full set of transformed items from the previous result.
+                // We can reuse our buffers by just swapping the references after each transform.
                 List<KeyValuePair<string, S>> sourceItems = IntrinsicItemFunctions<S>.GetItemPairs(itemsOfType);
                 List<KeyValuePair<string, S>> transformedItems = new(itemsOfType.Count);
 
@@ -1943,6 +1945,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
 
+                    // If we have another transform, swap the source and transform lists.
                     if (i < captures.Count - 1)
                     {
                         (transformedItems, sourceItems) = (sourceItems, transformedItems);
