@@ -157,6 +157,16 @@ namespace Microsoft.Build.Tasks
         public string FactoryName => "Code Task Factory";
 
         /// <summary>
+        /// A collection of task specifications that have been logged to the binlog.
+        /// </summary>
+        private static readonly HashSet<FullTaskSpecification> _loggedCodeFiles = new HashSet<FullTaskSpecification>();
+
+        /// <summary>
+        /// Lock object for thread-safe access to _loggedCodeFiles.
+        /// </summary>
+        private static readonly object _lock = new object();
+
+        /// <summary>
         /// Gets the type of the generated task.
         /// </summary>
         public Type TaskType { get; private set; }
@@ -791,10 +801,6 @@ namespace Microsoft.Build.Tasks
                 // Our code generation is complete, grab the source from the builder ready for compilation
                 string fullCode = codeBuilder.ToString();
 
-                // Embed generated file in the binlog
-                string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
-                _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
-
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
                 {
@@ -820,6 +826,16 @@ namespace Microsoft.Build.Tasks
                         }
 
                         return null;
+                    }
+
+                    if (!_loggedCodeFiles.Contains(fullSpec))
+                    {
+                        string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
+                        _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
+                        lock (_lock)
+                        {
+                            _loggedCodeFiles.Add(fullSpec);
+                        }
                     }
 
                     // Add to the cache.  Failing to add is not a fatal error.
