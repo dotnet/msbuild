@@ -38,6 +38,10 @@ namespace Microsoft.Build.Shared
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
 
+        private ConcurrentDictionary<string, (Regex regex, bool needsRecursion, bool isLegalFileSpec)> regexCache =
+           new(StringComparer.Ordinal);
+
+
 #if NET
         private static readonly SearchValues<string> s_propertyAndItemReferences = SearchValues.Create(["$(", "@("], StringComparison.Ordinal);
 #else
@@ -1486,7 +1490,7 @@ namespace Microsoft.Build.Shared
         /// <param name="regexFileMatch">Receives the regular expression.</param>
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
-        internal void GetFileSpecInfoWithRegexObject(
+        internal void GetFileSpecInfoWithRegexObjectCore(
             string filespec,
             out Regex regexFileMatch,
             out bool needsRecursion,
@@ -1505,6 +1509,23 @@ namespace Microsoft.Build.Shared
             {
                 regexFileMatch = null;
             }
+        }
+
+        // PERF: Cache the Regex generation to avoid repeated allocations.
+        internal void GetFileSpecInfoWithRegexObject(
+           string filespec,
+           out Regex regexFileMatch,
+           out bool needsRecursion,
+           out bool isLegalFileSpec)
+        {
+            var result = regexCache.GetOrAdd(filespec, spec =>
+            {
+                GetFileSpecInfoWithRegexObjectCore(spec, out var regex, out var needsRec, out var isLegal);
+                return (regex, needsRec, isLegal);
+            });
+            regexFileMatch = result.regex;
+            needsRecursion = result.needsRecursion;
+            isLegalFileSpec = result.isLegalFileSpec;
         }
 
         internal delegate (string fixedDirectoryPart, string recursiveDirectoryPart, string fileNamePart) FixupParts(
