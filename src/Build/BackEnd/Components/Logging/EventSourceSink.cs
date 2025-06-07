@@ -351,7 +351,6 @@ namespace Microsoft.Build.BackEnd.Logging
                     ErrorUtilities.ThrowInternalError("Unknown event args type.");
                     break;
             }
-
         }
 
         /// <summary>
