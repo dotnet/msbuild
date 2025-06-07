@@ -7,8 +7,6 @@ using System.IO.Compression;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-#nullable disable
-
 namespace Microsoft.Build.Tasks
 {
     public sealed class ZipDirectory : TaskExtension, IIncrementalTask
@@ -17,7 +15,7 @@ namespace Microsoft.Build.Tasks
         /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the destination file to create.
         /// </summary>
         [Required]
-        public ITaskItem DestinationFile { get; set; }
+        public ITaskItem DestinationFile { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets a value indicating if the destination file should be overwritten.
@@ -28,13 +26,24 @@ namespace Microsoft.Build.Tasks
         /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the source directory to create a zip archive from.
         /// </summary>
         [Required]
-        public ITaskItem SourceDirectory { get; set; }
+        public ITaskItem SourceDirectory { get; set; } = null!;
 
         /// <summary>
         /// Question the incremental nature of this task.
         /// </summary>
         /// <remarks>This task does not support incremental build and will error out instead.</remarks>
         public bool FailIfNotIncremental { get; set; }
+
+        /// <summary>
+        /// Gets or sets the compression level to use when creating the zip archive.
+        /// Valid values are "Optimal", "Fastest", and "NoCompression".
+        /// This parameter is optional.
+        /// </summary>
+        /// <remarks>
+        /// Versions of MSBuild that run on .NET (not .NET Framework) additionally
+        /// support the "SmallestSize" compression level.
+        /// </remarks>
+        public CompressionLevel? CompressionLevel { get; set; }
 
         public override bool Execute()
         {
@@ -83,7 +92,14 @@ namespace Microsoft.Build.Tasks
                     else
                     {
                         Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
-                        ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
+                        if (CompressionLevel is null)
+                        {
+                            ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
+                        }
+                        else
+                        {
+                            ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName, CompressionLevel.Value, includeBaseDirectory: false);
+                        }
                     }
                 }
                 catch (Exception e)
