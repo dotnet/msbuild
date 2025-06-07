@@ -1159,6 +1159,13 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            // clean up inline tasks
+            string processSpecificInlineTaskDir = Path.Combine(
+                FileUtilities.TempFileDirectory,
+                MSBuildConstants.InlineTaskTempDllSubPath,
+                $"pid_{EnvironmentUtilities.CurrentProcessId}");
+            FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
+
             void SerializeCaches()
             {
                 string errorMessage = CacheSerialization.SerializeCaches(
