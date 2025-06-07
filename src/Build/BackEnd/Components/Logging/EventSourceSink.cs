@@ -1,4 +1,5 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+﻿
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -225,73 +226,127 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Raises the given event to all registered loggers.
         /// This method casts the events extracted from the queue to a more specific type.
         /// </summary>
+        /// <param name="buildEvent">event args</param>
+        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
+        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
+        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
         public void Consume(BuildEventArgs buildEvent)
         {
+            try
+            {
+                switch (buildEvent)
+                {
+                    case BuildMessageEventArgs buildMessageEvent:
+                        MessageRaised?.Invoke(null, buildMessageEvent);
+                        break;
+                    case TaskStartedEventArgs taskStartedEvent:
+                        TaskStarted?.Invoke(null, taskStartedEvent);
+                        StatusEventRaised?.Invoke(null, taskStartedEvent);
+                        break;
+                    case TaskFinishedEventArgs taskFinishedEvent:
+                        TaskFinished?.Invoke(null, taskFinishedEvent);
+                        StatusEventRaised?.Invoke(null, taskFinishedEvent);
+                        break;
+                    case TargetStartedEventArgs targetStartedEvent:
+                        TargetStarted?.Invoke(null, targetStartedEvent);
+                        StatusEventRaised?.Invoke(null, targetStartedEvent);
+                        break;
+                    case TargetFinishedEventArgs targetFinishedEvent:
+                        TargetFinished?.Invoke(null, targetFinishedEvent);
+                        StatusEventRaised?.Invoke(null, targetFinishedEvent);
+                        break;
+                    case ProjectStartedEventArgs projectStartedEvent:
+                        ProjectStarted?.Invoke(null, projectStartedEvent);
+                        StatusEventRaised?.Invoke(null, projectStartedEvent);
+                        break;
+                    case ProjectFinishedEventArgs projectFinishedEvent:
+                        ProjectFinished?.Invoke(null, projectFinishedEvent);
+                        StatusEventRaised?.Invoke(null, projectFinishedEvent);
+                        break;
+                    case BuildStartedEventArgs buildStartedEvent:
+                        HaveLoggedBuildStartedEvent = true;
+                        BuildStarted?.Invoke(null, buildStartedEvent);
+                        StatusEventRaised?.Invoke(null, buildStartedEvent);
+                        break;
+                    case BuildFinishedEventArgs buildFinishedEvent:
+                        HaveLoggedBuildFinishedEvent = true;
+                        BuildFinished?.Invoke(null, buildFinishedEvent);
+                        StatusEventRaised?.Invoke(null, buildFinishedEvent);
+                        break;
+                    case BuildCanceledEventArgs buildCanceledEvent:
+                        StatusEventRaised?.Invoke(null, buildCanceledEvent);
+                        break;
+                    case CustomBuildEventArgs customBuildEvent:
+                        CustomEventRaised?.Invoke(null, customBuildEvent);
+                        break;
+                    case BuildStatusEventArgs buildStatusEvent:
+                        StatusEventRaised?.Invoke(null, buildStatusEvent);
+                        break;
+                    case BuildWarningEventArgs buildWarningEvent:
+                        WarningRaised?.Invoke(null, buildWarningEvent);
+                        break;
+                    case BuildErrorEventArgs buildErrorEvent:
+                        ErrorRaised?.Invoke(null, buildErrorEvent);
+                        break;
+                    case TelemetryEventArgs telemetryEvent:
+                        TelemetryLogged?.Invoke(null, telemetryEvent);
+                        break;
+                    case BuildCheckEventArgs buildCheckEvent:
+                        BuildCheckEventRaised?.Invoke(null, buildCheckEvent);
+                        break;
+                    case WorkerNodeTelemetryEventArgs workerNodeTelemetryEvent:
+                        WorkerNodeTelemetryLogged?.Invoke(null, workerNodeTelemetryEvent);
+                        break;
+
+                    default:
+                        ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                        break;
+                }
+            }
+            catch (LoggerException)
+            {
+                // if a logger has failed politely, abort immediately
+                // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                // if a fellow logger is throwing in an event handler.
+                UnregisterAllEventHandlers();
+                throw;
+            }
+            catch (Exception exception) when (exception is not InternalErrorException)
+            {
+                // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
+                // if a fellow logger is throwing in an event handler.
+                UnregisterAllEventHandlers();
+
+                if (ExceptionHandling.IsCriticalException(exception))
+                {
+                    throw;
+                }
+
+                InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
+            }
 
             switch (buildEvent)
             {
-                case BuildMessageEventArgs buildMessageEvent:
-                    RaiseEvent(buildMessageEvent, args => MessageRaised?.Invoke(null, args), RaiseAnyEvent);
+                case BuildMessageEventArgs:
+                case TaskStartedEventArgs:
+                case TaskFinishedEventArgs:
+                case TargetStartedEventArgs:
+                case TargetFinishedEventArgs:
+                case ProjectStartedEventArgs:
+                case ProjectFinishedEventArgs:
+                case BuildStartedEventArgs:
+                case BuildFinishedEventArgs:
+                case BuildCanceledEventArgs:
+                case CustomBuildEventArgs:
+                case BuildStatusEventArgs:
+                case BuildWarningEventArgs:
+                case BuildErrorEventArgs:
+                case BuildCheckEventArgs:
+                    RaiseAnyEvent(buildEvent);
                     break;
-                case TaskStartedEventArgs taskStartedEvent:
-                    ArgsHandler<TaskStartedEventArgs> taskStartedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(taskStartedEvent, args => TaskStarted?.Invoke(null, args), taskStartedFollowUp);
+                case TelemetryEventArgs:
+                case WorkerNodeTelemetryEventArgs:
                     break;
-                case TaskFinishedEventArgs taskFinishedEvent:
-                    ArgsHandler<TaskFinishedEventArgs> taskFinishedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(taskFinishedEvent, args => TaskFinished?.Invoke(null, args), taskFinishedFollowUp);
-                    break;
-                case TargetStartedEventArgs targetStartedEvent:
-                    ArgsHandler<TargetStartedEventArgs> targetStartedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(targetStartedEvent, args => TargetStarted?.Invoke(null, args), targetStartedFollowUp);
-                    break;
-                case TargetFinishedEventArgs targetFinishedEvent:
-                    ArgsHandler<TargetFinishedEventArgs> targetFinishedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(targetFinishedEvent, args => TargetFinished?.Invoke(null, args), targetFinishedFollowUp);
-                    break;
-                case ProjectStartedEventArgs projectStartedEvent:
-                    ArgsHandler<ProjectStartedEventArgs> projectStartedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(projectStartedEvent, args => ProjectStarted?.Invoke(null, args), projectStartedFollowUp);
-                    break;
-                case ProjectFinishedEventArgs projectFinishedEvent:
-                    ArgsHandler<ProjectFinishedEventArgs> projectFinishedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(projectFinishedEvent, args => ProjectFinished?.Invoke(null, args), projectFinishedFollowUp);
-                    break;
-                case BuildStartedEventArgs buildStartedEvent:
-                    HaveLoggedBuildStartedEvent = true;
-                    ArgsHandler<BuildStartedEventArgs> BuildStartedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(buildStartedEvent, args => BuildStarted?.Invoke(null, args), BuildStartedFollowUp);
-                    break;
-                case BuildFinishedEventArgs buildFinishedEvent:
-                    HaveLoggedBuildFinishedEvent = true;
-                    ArgsHandler<BuildFinishedEventArgs> BuildFinishedFollowUp = args => RaiseEvent(args, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    RaiseEvent(buildFinishedEvent, args => BuildFinished?.Invoke(null, args), BuildFinishedFollowUp);
-                    break;
-                case BuildCanceledEventArgs buildCanceledEvent:
-                    RaiseEvent(buildCanceledEvent, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    break;
-                case CustomBuildEventArgs customBuildEvent:
-                    RaiseEvent(customBuildEvent, args => CustomEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    break;
-                case BuildStatusEventArgs buildStatusEvent:
-                    RaiseEvent(buildStatusEvent, args => StatusEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    break;
-                case BuildWarningEventArgs buildWarningEvent:
-                    RaiseEvent(buildWarningEvent, args => WarningRaised?.Invoke(null, args), RaiseAnyEvent);
-                    break;
-                case BuildErrorEventArgs buildErrorEvent:
-                    RaiseEvent(buildErrorEvent, args => ErrorRaised?.Invoke(null, args), RaiseAnyEvent);
-                    break;
-                case TelemetryEventArgs telemetryEvent:
-                    RaiseEvent(telemetryEvent, args => TelemetryLogged?.Invoke(null, args), null);
-                    break;
-                case BuildCheckEventArgs buildCheckEvent:
-                    RaiseEvent(buildCheckEvent, args => BuildCheckEventRaised?.Invoke(null, args), RaiseAnyEvent);
-                    break;
-                case WorkerNodeTelemetryEventArgs workerNodeTelemetryEvent:
-                    RaiseEvent(workerNodeTelemetryEvent, args => WorkerNodeTelemetryLogged?.Invoke(null, args), null);
-                    break;
-
                 default:
                     ErrorUtilities.ThrowInternalError("Unknown event args type.");
                     break;
@@ -335,48 +390,6 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
 
         #region Private Methods
-
-        public delegate void ArgsHandler<in TArgs>(TArgs e) where TArgs : BuildEventArgs;
-
-        /// <summary>
-        /// Raises a message event to all registered loggers.
-        /// </summary>
-        /// <param name="buildEvent">event args</param>
-        /// <param name="handler">argument handler that invokes the respective event</param>
-        /// <param name="followUpHandler"> either anyEvent or statusEvent, it is invoked after the Event has been processed</param>
-        /// <exception cref="LoggerException">When EventHandler raises an logger exception the LoggerException is rethrown</exception>
-        /// <exception cref="InternalLoggerException">Any exceptions which are not LoggerExceptions are wrapped in an InternalLoggerException</exception>
-        /// <exception cref="Exception">ExceptionHandling.IsCriticalException exceptions will not be wrapped</exception>
-        private void RaiseEvent<TArgs>(TArgs buildEvent, ArgsHandler<TArgs> handler, ArgsHandler<TArgs>? followUpHandler)
-            where TArgs : BuildEventArgs
-        {
-            try
-            {
-                handler(buildEvent);
-            }
-            catch (LoggerException)
-            {
-                // if a logger has failed politely, abort immediately
-                // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                // if a fellow logger is throwing in an event handler.
-                UnregisterAllEventHandlers();
-                throw;
-            }
-            catch (Exception exception)
-            {
-                // first unregister all loggers, since other loggers may receive remaining events in unexpected orderings
-                // if a fellow logger is throwing in an event handler.
-                UnregisterAllEventHandlers();
-
-                if (ExceptionHandling.IsCriticalException(exception))
-                {
-                    throw;
-                }
-
-                InternalLoggerException.Throw(exception, buildEvent, "FatalErrorWhileLogging", false);
-            }
-            followUpHandler?.Invoke(buildEvent);
-        }
 
         /// <summary>
         /// Raises a catch-all build event to all registered loggers.
@@ -432,3 +445,4 @@ namespace Microsoft.Build.BackEnd.Logging
         #endregion
     }
 }
+
