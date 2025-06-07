@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -57,6 +58,14 @@ namespace Microsoft.Build.BackEnd
         private const double DefaultCustomSchedulerForSQLConfigurationLimitMultiplier = 1.1;
 
         #region Scheduler Data
+
+        /// <summary>
+        /// Sometimes we will need to copy requests into a local buffer to avoid modifying the target collection while
+        /// we enumerate.
+        /// Avoid ArrayPool.Shared here as its backed by a different implementation which will evict our arrays (likely
+        /// due to exceeding the threshold from recursive calls).
+        /// </summary>
+        private readonly ArrayPool<SchedulableRequest> _requestBufferPool = ArrayPool<SchedulableRequest>.Create();
 
         /// <summary>
         /// Content of the environment variable  MSBUILDSCHEDULINGUNLIMITED
@@ -430,8 +439,9 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // This result may apply to a number of other unscheduled requests which are blocking active requests.  Report to them as well.
-                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequests);
-                foreach (SchedulableRequest unscheduledRequest in unscheduledRequests)
+                SchedulableRequest[] unscheduledRequests = _requestBufferPool.Rent(_schedulingData.UnscheduledRequestsCount);
+                int numRead = CopyRequestsToBuffer(_schedulingData.UnscheduledRequests, unscheduledRequests);
+                foreach (SchedulableRequest unscheduledRequest in new ReadOnlySpan<SchedulableRequest>(unscheduledRequests, 0, numRead))
                 {
                     if (unscheduledRequest.BuildRequest.GlobalRequestId == result.GlobalRequestId)
                     {
@@ -470,6 +480,8 @@ namespace Microsoft.Build.BackEnd
                         unscheduledRequest.Complete(newResult);
                     }
                 }
+
+                _requestBufferPool.Return(unscheduledRequests, clearArray: true);
             }
 
             // This node may now be free, so run the scheduler.
@@ -991,8 +1003,9 @@ namespace Microsoft.Build.BackEnd
         {
             if (idleNodes.Contains(InProcNodeId))
             {
-                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequestsWhichCanBeScheduled);
-                foreach (SchedulableRequest request in unscheduledRequests)
+                SchedulableRequest[] unscheduledRequests = _requestBufferPool.Rent(_schedulingData.UnscheduledRequestsCount);
+                int numRead = CopyRequestsToBuffer(_schedulingData.UnscheduledRequestsWhichCanBeScheduled, unscheduledRequests);
+                foreach (SchedulableRequest request in new ReadOnlySpan<SchedulableRequest>(unscheduledRequests, 0, numRead))
                 {
                     if (CanScheduleRequestToNode(request, InProcNodeId) && shouldBeScheduled(request))
                     {
@@ -1001,6 +1014,8 @@ namespace Microsoft.Build.BackEnd
                         break;
                     }
                 }
+
+                _requestBufferPool.Return(unscheduledRequests, clearArray: true);
             }
         }
 
@@ -1930,11 +1945,28 @@ namespace Microsoft.Build.BackEnd
 
             // Now determine which unscheduled requests have results.  Reporting these may cause an blocked request to become ready
             // and potentially allow us to continue it.
-            List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequests);
-            foreach (SchedulableRequest request in unscheduledRequests)
+            SchedulableRequest[] unscheduledRequests = _requestBufferPool.Rent(_schedulingData.UnscheduledRequestsCount);
+            int numRead = CopyRequestsToBuffer(_schedulingData.UnscheduledRequests, unscheduledRequests);
+            foreach (SchedulableRequest request in new ReadOnlySpan<SchedulableRequest>(unscheduledRequests, 0, numRead))
             {
                 ResolveRequestFromCacheAndResumeIfPossible(request, responses);
             }
+
+            _requestBufferPool.Return(unscheduledRequests, clearArray: true);
+        }
+
+        private int CopyRequestsToBuffer(IEnumerable<SchedulableRequest> requests, SchedulableRequest[] buffer)
+        {
+            IEnumerator<SchedulableRequest> requestsToRead = requests.GetEnumerator();
+
+            int numRead = 0;
+            while (numRead < buffer.Length && requestsToRead.MoveNext())
+            {
+                buffer[numRead] = requestsToRead.Current;
+                numRead++;
+            }
+
+            return numRead;
         }
 
         /// <summary>
