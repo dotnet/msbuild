@@ -58,7 +58,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The intern reader used in an intern scope.
             /// </summary>
-            private readonly InterningReadTranslator _interner;
+            private InterningReadTranslator _interner;
 
             /// <summary>
             /// The binary reader used in read mode.
@@ -77,7 +77,6 @@ namespace Microsoft.Build.BackEnd
             public BinaryReadTranslator(Stream packetStream, BinaryReaderFactory buffer)
             {
                 _reader = buffer.Create(packetStream);
-                _interner = new InterningReadTranslator(this);
             }
 #nullable disable
 
@@ -808,6 +807,7 @@ namespace Microsoft.Build.BackEnd
                 _isInterning = true;
 
                 // Deserialize the intern header before entering the intern scope.
+                _interner ??= new InterningReadTranslator(this);
                 _interner.Translate(this);
 
                 // No other setup is needed since we can parse the packet directly from the stream.
