@@ -11,16 +11,21 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
-#nullable disable
-
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class ZipDirectory_Tests
     {
         private readonly MockEngine _mockEngine = new MockEngine();
 
-        [Fact]
-        public void CanZipDirectory()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(CompressionLevel.Optimal)]
+        [InlineData(CompressionLevel.Fastest)]
+        [InlineData(CompressionLevel.NoCompression)]
+#if NET
+        [InlineData(CompressionLevel.SmallestSize)]
+#endif
+        public void CanZipDirectory(CompressionLevel? compressionLevel)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -34,8 +39,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 ZipDirectory zipDirectory = new ZipDirectory
                 {
                     BuildEngine = _mockEngine,
+                    CompressionLevel = compressionLevel,
                     DestinationFile = new TaskItem(zipFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.Path)
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
                 };
 
                 zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
@@ -61,7 +67,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void CanOvewriteExistingFile()
+        public void CanOverwriteExistingFile()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
