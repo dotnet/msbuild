@@ -659,7 +659,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="buildEngine">An <see cref="IBuildEngine"/> to use give to the compiler task so that messages can be logged.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object containing details about the task.</param>
-        /// <param name="assembly">The loaded assembly if compilation and loading succeeded, otherwise <code>null</code>.</param>
+        /// <param name="assembly">The <see cref="Assembly"/> if the source code be compiled and loaded, otherwise <code>null</code>.</param>
         /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>false</code>.</returns>
         private bool TryCompileAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
         {
@@ -771,7 +771,18 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Return the compiled assembly
-                assembly = Assembly.LoadFrom(assemblyPath);
+                if (Traits.Instance.ForceAllTasksOutOfProc)
+                {
+                    assembly = Assembly.LoadFrom(assemblyPath);
+                }
+                else
+                {
+                    assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                    if (FileSystems.Default.FileExists(assemblyPath))
+                    {
+                        File.Delete(assemblyPath);
+                    }
+                }
 
                 CompiledAssemblyCache.TryAdd(taskInfo, assembly);
                 return true;

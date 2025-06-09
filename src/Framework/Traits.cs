@@ -145,7 +145,7 @@ namespace Microsoft.Build.Framework
         /// callbacks; as forcing those out of proc would be just setting them up for
         /// known failure.
         /// </summary>
-        public readonly bool ForceTaskHostLaunch = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
+        public readonly bool ForceAllTasksOutOfProc = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
 
         /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.

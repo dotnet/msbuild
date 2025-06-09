@@ -1148,6 +1148,16 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
+                    if (Traits.Instance.ForceAllTasksOutOfProc)
+                    {
+                        // clean up inline tasks
+                        string processSpecificInlineTaskDir = Path.Combine(
+                            FileUtilities.TempFileDirectory,
+                            MSBuildConstants.InlineTaskTempDllSubPath,
+                            $"pid_{EnvironmentUtilities.CurrentProcessId}");
+                        FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
+                    }
+
                     MSBuildEventSource.Log.BuildStop();
 
                     _threadException?.Throw();
@@ -1159,12 +1169,6 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            // clean up inline tasks
-            string processSpecificInlineTaskDir = Path.Combine(
-                FileUtilities.TempFileDirectory,
-                MSBuildConstants.InlineTaskTempDllSubPath,
-                $"pid_{EnvironmentUtilities.CurrentProcessId}");
-            FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
 
             void SerializeCaches()
             {

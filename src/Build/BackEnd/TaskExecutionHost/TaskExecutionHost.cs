@@ -955,7 +955,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
 
-                    if (Traits.Instance.ForceTaskHostLaunch)
+                    if (Traits.Instance.ForceAllTasksOutOfProc)
                     {
                         // Create a TaskHostTask to run the custom factory's task out of process
                         task = CreateTaskHostTaskForCustomFactory(taskIdentityParameters);
