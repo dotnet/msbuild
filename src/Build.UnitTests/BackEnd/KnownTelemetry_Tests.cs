@@ -67,11 +67,10 @@ public class KnownTelemetry_Tests
         buildTelemetry.BuildEngineHost = "Host description";
         buildTelemetry.InitialMSBuildServerState = "hot";
         buildTelemetry.InnerStartAt = innerStartAt;
-        buildTelemetry.ProjectPath = @"C:\\dev\\theProject";
         buildTelemetry.ServerFallbackReason = "busy";
         buildTelemetry.StartAt = startAt;
         buildTelemetry.BuildSuccess = true;
-        buildTelemetry.BuildTarget = "clean";
+        buildTelemetry.SetProjectEntryPoint([@"C:\\dev\\theProject"], ["clean"]);
         buildTelemetry.BuildEngineVersion = new Version(1, 2, 3, 4);
 
         var properties = buildTelemetry.GetProperties();
