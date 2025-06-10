@@ -1237,8 +1237,8 @@ namespace Microsoft.Build.UnitTests
 
             TransientTestFile importTargetsFile = env.CreateFile("Import.targets", taskXml);
 
-            // Define CustomTask.proj content
-            string customTaskContent = $@"<Project>
+            // Define Another.proj content
+            string anotherContent = $@"<Project>
                 <Import Project=""{importTargetsFile.Path.Replace("\\", "/")}"" />
                 <Target Name=""AnotherTarget"">
                     <CustomTask InputParameter=""Foo"">
@@ -1248,7 +1248,7 @@ namespace Microsoft.Build.UnitTests
                 </Target>
             </Project>";
 
-            TransientTestFile customTaskProjFile = env.CreateFile("Another.proj", customTaskContent);
+            TransientTestFile customTaskProjFile = env.CreateFile("Another.proj", anotherContent);
 
             // Define main.csproj content
             string projectFileContent = $@"<Project>
