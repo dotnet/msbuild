@@ -1553,18 +1553,13 @@ namespace Microsoft.Build.Utilities
 
             // Format the resource string and extract the error code
             string formattedResourceMessage = FormatResourceString(messageResourceName, messageArgs);
-            string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, formattedResourceMessage, out string errorCode);
+            ResourceUtilities.ExtractMessageCode(false /* all codes */, formattedResourceMessage, out string errorCode);
 
             // Compose help keyword if prefix is set
             string helpKeyword = HelpKeywordPrefix != null ? HelpKeywordPrefix + messageResourceName : null;
 
             // Append exception details
-            string exceptionDetails = GetFormattedExceptionDetails(exception, showStackTrace, showDetail);
-
-            // Combine resource message and exception details
-            string fullMessage = string.IsNullOrEmpty(exceptionDetails)
-                ? message
-                : message + Environment.NewLine + exceptionDetails;
+            string message = GetFormattedExceptionDetails(exception, showStackTrace, showDetail);
 
             LogError(
                 null, // subcategory
@@ -1572,7 +1567,7 @@ namespace Microsoft.Build.Utilities
                 helpKeyword,
                 file,
                 0, 0, 0, 0,
-                fullMessage);
+                message);
         }
 
         /// <summary>
