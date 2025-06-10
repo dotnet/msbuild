@@ -2249,7 +2249,7 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// A cache of previously created item function delegates.
                 /// </summary>
-                private static readonly ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
+                private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, ItemTransformFunction>> s_transformFunctionDelegateCache = new(StringComparer.OrdinalIgnoreCase);
 
                 /// <summary>
                 /// Delegate that represents the signature of all item transformation functions
@@ -2263,55 +2263,56 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 internal static ItemTransformFunction GetItemTransformFunction(IElementLocation elementLocation, string functionName, Type itemType)
                 {
-                    ItemTransformFunction transformFunction = null;
-                    string qualifiedFunctionName = $"{itemType.FullName}::{functionName}";
-
                     // We may have seen this delegate before, if so grab the one we already created
-                    if (!s_transformFunctionDelegateCache.TryGetValue(qualifiedFunctionName, out transformFunction))
-                    {
-                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
-                        {
-                            // Create a delegate to the function we're going to call
-                            transformFunction = new ItemTransformFunction(ItemSpecModifierFunction);
-                        }
-                        else
-                        {
-                            MethodInfo itemFunctionInfo = typeof(IntrinsicItemFunctions<S>).GetMethod(functionName, BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Static);
+                    ConcurrentDictionary<string, ItemTransformFunction> functionNameCache = s_transformFunctionDelegateCache.GetOrAdd(itemType.FullName, static _ => new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase));
 
-                            if (itemFunctionInfo == null)
-                            {
-                                functionName = "ExecuteStringFunction";
-                                itemFunctionInfo = typeof(IntrinsicItemFunctions<S>).GetMethod(functionName, BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Static);
-                                if (itemFunctionInfo == null)
-                                {
-                                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
-                                    return null;
-                                }
-                            }
-                            try
+                    return functionNameCache.GetOrAdd(
+                        functionName,
+                        static (functionName, elementLocation) =>
+                        {
+                            ItemTransformFunction transformFunction = null;
+                            if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
                             {
                                 // Create a delegate to the function we're going to call
-                                transformFunction = (ItemTransformFunction)itemFunctionInfo.CreateDelegate(typeof(ItemTransformFunction));
+                                transformFunction = new ItemTransformFunction(ItemSpecModifierFunction);
                             }
-                            catch (ArgumentException)
+                            else
                             {
-                                // Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
-                                //  Since MethodInfo.CreateDelegate doesn't have this option, we catch the ArgumentException to preserve the previous behavior
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
+                                MethodInfo itemFunctionInfo = typeof(IntrinsicItemFunctions<S>).GetMethod(functionName, BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Static);
+
+                                if (itemFunctionInfo == null)
+                                {
+                                    functionName = "ExecuteStringFunction";
+                                    itemFunctionInfo = typeof(IntrinsicItemFunctions<S>).GetMethod(functionName, BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Static);
+                                    if (itemFunctionInfo == null)
+                                    {
+                                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
+                                        return null;
+                                    }
+                                }
+                                try
+                                {
+                                    // Create a delegate to the function we're going to call
+                                    transformFunction = (ItemTransformFunction)itemFunctionInfo.CreateDelegate(typeof(ItemTransformFunction));
+                                }
+                                catch (ArgumentException)
+                                {
+                                    // Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
+                                    //  Since MethodInfo.CreateDelegate doesn't have this option, we catch the ArgumentException to preserve the previous behavior
+                                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
+                                }
                             }
-                        }
 
-                        if (transformFunction == null)
-                        {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
-                            return null;
-                        }
+                            if (transformFunction == null)
+                            {
+                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
+                                return null;
+                            }
 
-                        // record our delegate for future use
-                        s_transformFunctionDelegateCache[qualifiedFunctionName] = transformFunction;
-                    }
-
-                    return transformFunction;
+                            // return delegate for future use to store for future use.
+                            return transformFunction;
+                        },
+                        elementLocation);
                 }
 
                 /// <summary>
