@@ -1214,7 +1214,7 @@ namespace Microsoft.Build.UnitTests
                 <Project>
                   <UsingTask
                     TaskName=""CustomTask""
-                    TaskFactory=""{0}""
+                    TaskFactory=""CodeTaskFactory""
                     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
                     <ParameterGroup>
                       <InputParameter ParameterType=""System.String"" />
@@ -1232,9 +1232,6 @@ namespace Microsoft.Build.UnitTests
                   </UsingTask>
                 </Project>";
 
-            // Inject factoryType into taskXml
-            taskXml = string.Format(taskXml, FactoryType.CodeTaskFactory);
-
             TransientTestFile importTargetsFile = env.CreateFile("Import.targets", taskXml);
 
             // Define Another.proj content
@@ -1248,13 +1245,13 @@ namespace Microsoft.Build.UnitTests
                 </Target>
             </Project>";
 
-            TransientTestFile customTaskProjFile = env.CreateFile("Another.proj", anotherContent);
+            TransientTestFile anotherProjFile = env.CreateFile("Another.proj", anotherContent);
 
             // Define main.csproj content
             string projectFileContent = $@"<Project>
                 <Import Project=""{importTargetsFile.Path.Replace("\\", "/")}"" />
                 <Target Name=""Build"">
-                    <MSBuild Projects=""{customTaskProjFile.Path.Replace("\\", "/")}"" Targets=""AnotherTarget"" />
+                    <MSBuild Projects=""{anotherProjFile.Path.Replace("\\", "/")}"" Targets=""AnotherTarget"" />
                     <CustomTask InputParameter=""Bar"" />
                 </Target>
             </Project>";
