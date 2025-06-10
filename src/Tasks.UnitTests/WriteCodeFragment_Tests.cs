@@ -1055,6 +1055,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// If the parameter type cannot be found,
+        /// then the name of positional parameter should be displayed in the log.
+        /// </summary>
+        [Fact]
+        public void MessageDisplayPositionalParameterNameWhenAttributeNotFound()
+        {
+            WriteCodeFragment task = new WriteCodeFragment();
+            MockEngine engine = new MockEngine(true);
+            task.BuildEngine = engine;
+            TaskItem attribute = new TaskItem("System.TheAttributeCannotFound");
+            attribute.SetMetadata("_Parameter1", "true");
+            task.AssemblyAttributes = new TaskItem[] { attribute };
+            task.Language = "C#";
+            task.OutputDirectory = new TaskItem(Path.GetTempPath());
+            bool result = task.Execute();
+
+            engine.AssertLogContains("Could not infer the type of parameter \"_Parameter1\" because the attribute type is unknown. The value will be treated as a string.");
+        }
+
+        /// <summary>
         /// Individual parameters can be typed differently.
         /// </summary>
         [Fact]
