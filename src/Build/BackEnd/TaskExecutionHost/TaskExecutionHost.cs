@@ -953,29 +953,38 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
-
-                    if (Traits.Instance.ForceAllTasksOutOfProc)
+                    TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
+                    try
                     {
-                        // Create a TaskHostTask to run the custom factory's task out of process
-                        task = CreateTaskHostTaskForCustomFactory(taskIdentityParameters);
-                    }
-                    else
-                    {
-                        // Normal in-process execution for custom task factories
-                        TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
-                        try
+                        // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
+                        if (Traits.Instance.ForceTaskFactoryOutOfProc)
                         {
+                            // Custom Task factories are not supported
+                            if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory)
+                            {
+                                _taskLoggingContext.LogError(
+                                    new BuildEventFileInfo(_taskLocation),
+                                    "TaskInstantiationFailureErrorCustomFactoryNotSupported",
+                                    _taskName,
+                                    _taskFactoryWrapper.TaskFactory.FactoryName);
+                                return null;
+                            }
+
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost);
+                        }
+                        else
+                        {
+                            // Normal in-process execution for custom task factories
                             task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
                                 taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
                                 _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
                         }
-                        finally
-                        {
+                    }
+                    finally
+                    {
 #if FEATURE_APPDOMAIN
-                            loggingHost.MarkAsInactive();
+                        loggingHost.MarkAsInactive();
 #endif
-                        }
                     }
                 }
             }
@@ -1676,28 +1685,19 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Creates a TaskHostTask wrapper to run a custom factory's task out of process.
-        /// This is used when Traits.Instance.ForceTaskHostLaunch is true to ensure
+        /// This is used when Traits.Instance.ForceTaskFactoryOutOfProc is true to ensure
         /// custom task factories's tasks run in isolation.
         /// </summary>
         /// <param name="taskIdentityParameters">Task identity parameters. No internal implementations support this</param>
+        /// <param name="loggingHost">The logging host to use for the task.</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or null if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForCustomFactory(IDictionary<string, string> taskIdentityParameters)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost)
         {
-            TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
             ITask innerTask;
 
-            try
-            {
-                innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                    taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
-                    _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
-            }
-            finally
-            {
-#if FEATURE_APPDOMAIN
-                loggingHost.MarkAsInactive();
-#endif
-            }
+            innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
+                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
+                _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
 
             if (innerTask == null)
             {

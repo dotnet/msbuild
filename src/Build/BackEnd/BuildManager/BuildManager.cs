@@ -1148,7 +1148,7 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
-                    if (Traits.Instance.ForceAllTasksOutOfProc)
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
                     {
                         // clean up inline tasks
                         string processSpecificInlineTaskDir = Path.Combine(

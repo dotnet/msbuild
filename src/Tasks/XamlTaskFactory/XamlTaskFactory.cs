@@ -24,7 +24,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// The task factory provider for XAML tasks.
     /// </summary>
-    public class XamlTaskFactory : ITaskFactory
+    public class XamlTaskFactory : ITaskFactory, IOutOfProcTaskFactory
     {
         /// <summary>
         /// The namespace we put the task in.
@@ -125,7 +125,8 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
                 ])
             {
-                GenerateInMemory = true,
+                GenerateInMemory = false,
+                OutputAssembly = Path.Combine(Path.GetTempPath(), $"{taskName}_XamlTask.dll"),
                 TreatWarningsAsErrors = false
             };
 
