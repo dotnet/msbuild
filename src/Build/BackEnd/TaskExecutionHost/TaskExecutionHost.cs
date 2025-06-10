@@ -959,14 +959,14 @@ namespace Microsoft.Build.BackEnd
                         // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
                         if (Traits.Instance.ForceTaskFactoryOutOfProc)
                         {
-                            // Custom Task factories are not supported
+                            // Custom Task factories are not supported, internal TaskFactories implement this marker interface
                             if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory)
                             {
                                 _taskLoggingContext.LogError(
                                     new BuildEventFileInfo(_taskLocation),
-                                    "TaskInstantiationFailureErrorCustomFactoryNotSupported",
-                                    _taskName,
-                                    _taskFactoryWrapper.TaskFactory.FactoryName);
+                                    "CustomTaskFactoryOutOfProcNotSupported",
+                                    _taskFactoryWrapper.TaskFactory.FactoryName,
+                                    _taskName);
                                 return null;
                             }
 

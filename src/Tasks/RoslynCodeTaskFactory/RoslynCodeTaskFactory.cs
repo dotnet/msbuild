@@ -663,8 +663,6 @@ namespace Microsoft.Build.Tasks
         /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>false</code>.</returns>
         private bool TryCompileAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
         {
-            assembly = null;
-
             // First attempt to get a compiled assembly from the cache
             if (CompiledAssemblyCache.TryGetValue(taskInfo, out assembly))
             {

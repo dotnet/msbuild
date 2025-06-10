@@ -1169,7 +1169,6 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-
             void SerializeCaches()
             {
                 string errorMessage = CacheSerialization.SerializeCaches(
