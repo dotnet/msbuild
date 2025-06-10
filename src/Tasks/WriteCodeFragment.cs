@@ -229,7 +229,7 @@ namespace Microsoft.Build.Tasks
                             }
 
                             // "_Parameter01" and "_Parameter1" would overwrite each other
-                            orderedParameters[index - 1] = new AttributeParameter { Type = type, Value = value };
+                            orderedParameters[index - 1] = new AttributeParameter { Type = type, Value = value, PositionalParameterName = name };
                         }
                         else
                         {
@@ -449,7 +449,7 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 constructorParameterTypes[i],
                                 parameter.Value,
-                                $"#{i + 1}"); /* back to 1 based */
+                                parameter.PositionalParameterName); 
                         }
                         else
                         {
@@ -624,6 +624,7 @@ namespace Microsoft.Build.Tasks
         {
             public ParameterType Type { get; init; }
             public string Name { get; init; }
+            public string PositionalParameterName { get; init; }
             public string Value { get; init; }
         }
     }
