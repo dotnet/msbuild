@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// If the parameter type cannot be found,
-        /// then the name positional parameter should be display in the log instead of the index.
+        /// then the name of positional parameter should be displayed in the log.
         /// </summary>
         [Fact]
         public void MessageDisplayPositionalParameterNameWhenAttributeNotFound()
