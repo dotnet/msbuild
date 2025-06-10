@@ -271,7 +271,7 @@ namespace Microsoft.Build.Tasks
 
             _taskParameterTypeInfo = taskParameters;
 
-            _compiledAssembly = CompileInMemoryAssembly();
+            _compiledAssembly = CompileAssembly();
 
             // If it wasn't compiled, it logged why.
             // If it was, continue.
@@ -706,13 +706,25 @@ namespace Microsoft.Build.Tasks
         /// Compile the assembly in memory and get a reference to the assembly itself.
         /// If compilation fails, returns null.
         /// </summary>
-        private Assembly CompileInMemoryAssembly()
+        private Assembly CompileAssembly()
         {
             // Combine our default assembly references with those specified
             var finalReferencedAssemblies = CombineReferencedAssemblies();
 
             // Combine our default using's with those specified
             string[] finalUsingNamespaces = CombineUsingNamespaces();
+
+            // for the out of proc execution
+            string taskAssemblyPath = null;
+            if (Traits.Instance.ForceTaskFactoryOutOfProc)
+            {
+                string processSpecificInlineTaskDir = Path.Combine(
+                    FileUtilities.TempFileDirectory,
+                    MSBuildConstants.InlineTaskTempDllSubPath,
+                    $"pid_{EnvironmentUtilities.CurrentProcessId}");
+                Directory.CreateDirectory(processSpecificInlineTaskDir);
+                taskAssemblyPath = FileUtilities.GetTemporaryFile(processSpecificInlineTaskDir, null, ".dll", false);
+            }
 
             // Language can be anything that has a codedom provider, in the standard naming method
             // "c#;cs;csharp", "vb;vbs;visualbasic;vbscript", "js;jscript;javascript", "vj#;vjs;vjsharp", "c++;mc;cpp"
@@ -729,8 +741,8 @@ namespace Microsoft.Build.Tasks
                         // We don't need debug information
                         IncludeDebugInformation = true,
 
-                        // Not a file based assembly
-                        GenerateInMemory = true,
+                        GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
+                        OutputAssembly = taskAssemblyPath,
 
                         // Indicates that a .dll should be generated.
                         GenerateExecutable = false

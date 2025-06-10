@@ -770,17 +770,13 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Return the compiled assembly
-                if (Traits.Instance.ForceAllTasksOutOfProc)
+                if (Traits.Instance.ForceTaskFactoryOutOfProc)
                 {
                     assembly = Assembly.LoadFrom(assemblyPath);
                 }
                 else
                 {
                     assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
-                    if (FileSystems.Default.FileExists(assemblyPath))
-                    {
-                        File.Delete(assemblyPath);
-                    }
                 }
 
                 CompiledAssemblyCache.TryAdd(taskInfo, assembly);
@@ -796,6 +792,11 @@ namespace Microsoft.Build.Tasks
                 if (deleteSourceCodeFile && FileSystems.Default.FileExists(sourceCodePath))
                 {
                     File.Delete(sourceCodePath);
+                }
+
+                if (!Traits.Instance.ForceTaskFactoryOutOfProc && FileSystems.Default.FileExists(assemblyPath))
+                {
+                    File.Delete(assemblyPath);
                 }
             }
         }

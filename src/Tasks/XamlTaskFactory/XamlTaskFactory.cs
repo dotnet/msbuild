@@ -115,6 +115,18 @@ namespace Microsoft.Build.Tasks
             // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
+            // for the out of proc execution
+            string taskAssemblyPath = null;
+            if (Traits.Instance.ForceTaskFactoryOutOfProc)
+            {
+                string processSpecificInlineTaskDir = Path.Combine(
+                    FileUtilities.TempFileDirectory,
+                    MSBuildConstants.InlineTaskTempDllSubPath,
+                    $"pid_{EnvironmentUtilities.CurrentProcessId}");
+                Directory.CreateDirectory(processSpecificInlineTaskDir);
+                taskAssemblyPath = FileUtilities.GetTemporaryFile(processSpecificInlineTaskDir, null, ".dll", false);
+            }
+
             // create the code generator options
             // Since we are running msbuild 12.0 these had better load.
             var compilerParameters = new CompilerParameters(
@@ -125,8 +137,8 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
                 ])
             {
-                GenerateInMemory = false,
-                OutputAssembly = Path.Combine(Path.GetTempPath(), $"{taskName}_XamlTask.dll"),
+                GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
+                OutputAssembly = taskAssemblyPath,
                 TreatWarningsAsErrors = false
             };
 
