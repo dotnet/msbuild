@@ -1684,13 +1684,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a TaskHostTask wrapper to run a custom factory's task out of process.
+        /// Creates a <see cref="TaskHostTask"/> wrapper to run a non-AssemblyTaskFactory task out of process.
         /// This is used when Traits.Instance.ForceTaskFactoryOutOfProc is true to ensure
-        /// custom task factories's tasks run in isolation.
+        /// non-AssemblyTaskFactory tasks run in isolation.
         /// </summary>
-        /// <param name="taskIdentityParameters">Task identity parameters. No internal implementations support this</param>
+        /// <param name="taskIdentityParameters">Task identity parameters.</param>
         /// <param name="loggingHost">The logging host to use for the task.</param>
-        /// <returns>A TaskHostTask that will execute the inner task out of process, or null if task creation fails.</returns>
+        /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
         private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost)
         {
             ITask innerTask;
