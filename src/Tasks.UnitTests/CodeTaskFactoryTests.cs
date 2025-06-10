@@ -1236,7 +1236,7 @@ namespace Microsoft.Build.UnitTests
 
             // Define Another.proj content
             string anotherContent = $@"<Project>
-                <Import Project=""{importTargetsFile.Path.Replace("\\", "/")}"" />
+                <Import Project=""{importTargetsFile.Path}"" />
                 <Target Name=""AnotherTarget"">
                     <CustomTask InputParameter=""Foo"">
                         <Output PropertyName=""TaskOutput"" TaskParameter=""OutputParameter"" />
@@ -1249,9 +1249,9 @@ namespace Microsoft.Build.UnitTests
 
             // Define main.csproj content
             string projectFileContent = $@"<Project>
-                <Import Project=""{importTargetsFile.Path.Replace("\\", "/")}"" />
+                <Import Project=""{importTargetsFile.Path}"" />
                 <Target Name=""Build"">
-                    <MSBuild Projects=""{anotherProjFile.Path.Replace("\\", "/")}"" Targets=""AnotherTarget"" />
+                    <MSBuild Projects=""{anotherProjFile.Path}"" Targets=""AnotherTarget"" />
                     <CustomTask InputParameter=""Bar"" />
                 </Target>
             </Project>";
@@ -1271,10 +1271,6 @@ namespace Microsoft.Build.UnitTests
             string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
-
-            // A path like "C:\path" in ZipArchive is saved as "C\path"
-            // For unix-based systems path uses '/'
-            projectDirectory = NativeMethodsShared.IsWindows ? projectDirectory.Replace(":\\", "\\") : projectDirectory.Replace("/", "\\");
 
             // check to make sure that only 1 tmp file is created
             var tmpFiles = zipArchive.Entries.Where(zE => zE.Name.EndsWith("CustomTask-compilation-file.tmp")).ToList();
