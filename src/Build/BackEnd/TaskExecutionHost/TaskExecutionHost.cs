@@ -957,7 +957,8 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
-                        if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                        // IntrinsicTaskFactory tasks run in proc always
+                        if (Traits.Instance.ForceTaskFactoryOutOfProc && _taskFactoryWrapper.TaskFactory is not IntrinsicTaskFactory)
                         {
                             // Custom Task factories are not supported, internal TaskFactories implement this marker interface
                             if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory)
