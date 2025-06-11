@@ -858,7 +858,31 @@ namespace Microsoft.Build.BackEnd
             // or if keepOnlySpecified == true and there is no entry for that name.
             if (modificationsToApply.KeepOnlySpecified)
             {
-                List<string> metadataToRemove = new List<string>(itemToModify.Metadata.Where(m => modificationsToApply[m.Name].Remove).Select(m => m.Name));
+
+                // Perf: Avoid boxing when possible by getting the underlying struct enumerator if available.
+                List<string> metadataToRemove = new List<string>(); ;
+                if (itemToModify.Metadata is CopyOnWritePropertyDictionary<ProjectMetadataInstance> copyOnWritePropertyMetadata)
+                {
+                    foreach (var m in copyOnWritePropertyMetadata)
+                    {
+                        string name = m.Value.Name;
+                        if (modificationsToApply[name].Remove)
+                        {
+                            metadataToRemove.Add(name);
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var m in itemToModify.Metadata)
+                    {
+                        if (modificationsToApply[m.Name].Remove)
+                        {
+                            metadataToRemove.Add(m.Name);
+                        }
+                    }
+                }
+
                 foreach (var metadataName in metadataToRemove)
                 {
                     itemToModify.RemoveMetadata(metadataName);

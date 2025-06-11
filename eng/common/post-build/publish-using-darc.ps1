@@ -34,6 +34,10 @@ try {
   if ("false" -eq $WaitPublishingFinish) {
     $optionalParams.Add("--no-wait") | Out-Null
   }
+  
+  if ("true" -eq $RequireDefaultChannels) {
+    $optionalParams.Add("--default-channels-required") | Out-Null
+  }
 
   if ("true" -eq $RequireDefaultChannels) {
     $optionalParams.Add("--default-channels-required") | Out-Null
