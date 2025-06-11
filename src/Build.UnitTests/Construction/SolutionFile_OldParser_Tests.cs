@@ -50,14 +50,12 @@ namespace Microsoft.Build.UnitTests.Construction
         /// extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         public void ParseFirstProjectLine_VC()
         {
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 SolutionFile p = new SolutionFile();
-                p.FullPath = "c:\\foo.sln";
+                p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
                 ProjectInSolution proj = new ProjectInSolution(p);
 
                 p.ParseFirstProjectLine(
@@ -609,7 +607,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"someproj2.etp");
-                solution.ProjectsInOrder[2].RelativePath.ShouldBe(@"ETPProjUpgradeTest\someproj3.etp");
+                // On Unix systems, directory separators should be forward slashes (fixes issue #1769)
+                string expectedPath3 = NativeMethodsShared.IsWindows ? @"ETPProjUpgradeTest\someproj3.etp" : "ETPProjUpgradeTest/someproj3.etp";
+                solution.ProjectsInOrder[2].RelativePath.ShouldBe(expectedPath3);
                 solution.ProjectsInOrder[3].RelativePath.ShouldBe(Path.Combine("ETPProjUpgradeTest", "..", "SomeFolder", "ClassLibrary1.csproj"));
             }
             // Delete the files created during the test
