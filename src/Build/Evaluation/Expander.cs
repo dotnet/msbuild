@@ -971,6 +971,7 @@ namespace Microsoft.Build.Evaluation
 
                         int start = 0;
                         MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
+                        MatchEvaluator matchEvaluatorDelegate = new MatchEvaluator(matchEvaluator.ExpandSingleMetadata);
 
                         if (itemVectorExpressions != null)
                         {
@@ -983,7 +984,7 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluatorDelegate);
 
                                 // Append the metadata replacement
                                 finalResultBuilder.Append(replacementResult);
@@ -991,7 +992,7 @@ namespace Microsoft.Build.Evaluation
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), -1, itemVectorExpressions[n].SeparatorStart);
+                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, matchEvaluatorDelegate, -1, itemVectorExpressions[n].SeparatorStart);
                                 }
 
                                 // Append the item vector expression as is
@@ -1008,7 +1009,7 @@ namespace Microsoft.Build.Evaluation
                         if (start < expression.Length)
                         {
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluatorDelegate);
 
                             finalResultBuilder.Append(replacementResult);
                         }
