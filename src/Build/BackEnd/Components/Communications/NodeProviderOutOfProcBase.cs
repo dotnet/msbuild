@@ -541,7 +541,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // The pipe(s) used to communicate with the node.
-            private readonly Stream _clientToServerStream;
+            private readonly Stream _pipeStream;
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
@@ -612,7 +612,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _nodeId = nodeId;
                 _process = process;
-                _clientToServerStream = nodePipe;
+                _pipeStream = nodePipe;
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
@@ -633,7 +633,7 @@ namespace Microsoft.Build.BackEnd
             public void BeginAsyncPacketRead()
             {
 #if FEATURE_APM
-                _clientToServerStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
+                _pipeStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
 #else
                 ThreadPool.QueueUserWorkItem(delegate
                 {
@@ -649,7 +649,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+                        int bytesRead = await CommunicationsUtilities.ReadAsync(_pipeStream, _headerByte, _headerByte.Length);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -671,7 +671,7 @@ namespace Microsoft.Build.BackEnd
 
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, packetData, packetLength);
+                        int bytesRead = await CommunicationsUtilities.ReadAsync(_pipeStream, packetData, packetLength);
                         if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
                         {
                             return;
@@ -772,7 +772,7 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
 #pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                                    await context._clientToServerStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
+                                    await context._pipeStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
 #pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
                                 }
 
@@ -816,7 +816,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private void Close()
             {
-                _clientToServerStream.Dispose();
+                _pipeStream.Dispose();
                 _terminateDelegate(_nodeId);
             }
 
@@ -915,7 +915,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _clientToServerStream.EndRead(result);
+                        bytesRead = _pipeStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async
@@ -947,7 +947,7 @@ namespace Microsoft.Build.BackEnd
                 _readBufferMemoryStream.SetLength(packetLength);
                 byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-                _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+                _pipeStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
             }
 #endif
 
@@ -998,7 +998,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _clientToServerStream.EndRead(result);
+                        bytesRead = _pipeStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async
