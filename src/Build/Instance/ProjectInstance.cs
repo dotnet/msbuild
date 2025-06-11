@@ -708,37 +708,44 @@ namespace Microsoft.Build.Execution
 
             if (filter == null)
             {
-                _properties = new PropertyDictionary<ProjectPropertyInstance>(that._properties.Count);
+                _properties = that._properties is null
+                    ? new PropertyDictionary<ProjectPropertyInstance>(0)
+                    : new PropertyDictionary<ProjectPropertyInstance>(that._properties.Count);
 
                 foreach (ProjectPropertyInstance property in that.Properties)
                 {
                     _properties.Set(property.DeepClone(_isImmutable));
                 }
 
-                _items = new ItemDictionary<ProjectItemInstance>(that._items.Count);
+                _items = that._items is null
+                    ? new ItemDictionary<ProjectItemInstance>(0)
+                    : new ItemDictionary<ProjectItemInstance>(that._items.Count);
 
                 foreach (ProjectItemInstance item in that.Items)
                 {
                     _items.Add(item.DeepClone(this));
                 }
 
-                _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(that._globalProperties.Count);
+                _globalProperties = that._globalProperties is null
+                    ? new PropertyDictionary<ProjectPropertyInstance>(0)
+                    : new PropertyDictionary<ProjectPropertyInstance>(that._globalProperties.Count);
 
-                foreach (ProjectPropertyInstance globalProperty in that.GlobalPropertiesDictionary)
+                foreach (ProjectPropertyInstance globalProperty in that.GlobalPropertiesDictionary ?? new PropertyDictionary<ProjectPropertyInstance>(0))
                 {
                     _globalProperties.Set(globalProperty.DeepClone(_isImmutable));
                 }
 
-                _environmentVariableProperties =
-                    new PropertyDictionary<ProjectPropertyInstance>(that._environmentVariableProperties.Count);
+                _environmentVariableProperties = that._environmentVariableProperties is null
+                    ? new PropertyDictionary<ProjectPropertyInstance>(0)
+                    : new PropertyDictionary<ProjectPropertyInstance>(that._environmentVariableProperties.Count);
 
-                foreach (ProjectPropertyInstance environmentProperty in that._environmentVariableProperties)
+                foreach (ProjectPropertyInstance environmentProperty in that._environmentVariableProperties ?? new PropertyDictionary<ProjectPropertyInstance>(0))
                 {
                     _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
                 }
 
-                this.DefaultTargets = new List<string>(that.DefaultTargets);
-                this.InitialTargets = new List<string>(that.InitialTargets);
+                this.DefaultTargets = [.. that.DefaultTargets ?? []];
+                this.InitialTargets = [.. that.InitialTargets ?? []];
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
                     ProjectItemDefinitionInstance>)this).BeforeTargets = CreateCloneDictionary(
                     ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
@@ -752,12 +759,12 @@ namespace Microsoft.Build.Execution
                 this.Toolset = that.Toolset;
                 this.SubToolsetVersion = that.SubToolsetVersion;
                 _targets = that._targets;
-                _itemDefinitions = that._itemDefinitions;
+                _itemDefinitions = that._itemDefinitions ?? new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(StringComparer.OrdinalIgnoreCase);
                 _explicitToolsVersionSpecified = that._explicitToolsVersionSpecified;
-                _importPaths = that._importPaths;
-                ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths);
+                _importPaths = that._importPaths ?? new List<string>();
+                ImportPaths = new ObjectModel.ReadOnlyCollection<string>(_importPaths ?? []);
                 _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
-                ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
+                ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates ?? []);
 
                 this.EvaluatedItemElements = that.EvaluatedItemElements;
 
@@ -1935,7 +1942,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Adds an item with no metadata to the project
+        /// Adds an item with no metadata to the project.
         /// </summary>
         /// <remarks>
         /// We don't take a ProjectItemInstance to make sure we don't have one that's already

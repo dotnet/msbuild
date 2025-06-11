@@ -35,26 +35,14 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates an empty results cache.
         /// </summary>
-        public ResultsCache()
-        {
-            _resultsByConfiguration = new ConcurrentDictionary<int, BuildResult>();
-        }
+        public ResultsCache() => _resultsByConfiguration = new ConcurrentDictionary<int, BuildResult>();
 
-        public ResultsCache(ITranslator translator)
-        {
-            Translate(translator);
-        }
+        public ResultsCache(ITranslator translator) => Translate(translator);
 
         /// <summary>
         /// Returns the internal cache for testing purposes.
         /// </summary>
-        internal IDictionary<int, BuildResult> ResultsDictionary
-        {
-            get
-            {
-                return _resultsByConfiguration;
-            }
-        }
+        internal IDictionary<int, BuildResult> ResultsDictionary => _resultsByConfiguration;
 
         #region IResultsCache Members
 
@@ -357,34 +345,26 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            BuildRequestDataFlags buildRequestDataFlags = buildRequest.BuildRequestDataFlags;
-            BuildRequestDataFlags buildResultDataFlags = (BuildRequestDataFlags)buildResult.BuildRequestDataFlags;
+            BuildRequestDataFlags requestFlags = buildRequest.BuildRequestDataFlags;
+            BuildRequestDataFlags resultFlags = (BuildRequestDataFlags)buildResult.BuildRequestDataFlags;
 
-            if ((buildRequestDataFlags & FlagsAffectingBuildResults) != (buildResultDataFlags & FlagsAffectingBuildResults))
+            if ((requestFlags & FlagsAffectingBuildResults) != (resultFlags & FlagsAffectingBuildResults))
             {
                 // Mismatch in flags that can affect build results -> not compatible.
                 return false;
             }
 
-            if (HasProvideProjectStateAfterBuild(buildRequestDataFlags))
+            // ProvideProjectStateAfterBuild represents full state.
+            // If full state is requested, we must have full state in the cache result.
+            if (HasFlag(requestFlags, BuildRequestDataFlags.ProvideProjectStateAfterBuild))
             {
-                // If full state is requested, we must have full state in the result.
-                return HasProvideProjectStateAfterBuild(buildResultDataFlags);
+                return HasFlag(resultFlags, BuildRequestDataFlags.ProvideProjectStateAfterBuild);
             }
 
-            if (HasProvideSubsetOfStateAfterBuild(buildRequestDataFlags))
+            // ProvideSubsetOfStateAfterBuild represents a subset of state.
+            // Verify that the requested subset is compatible with the cache result.
+            if (HasFlag(requestFlags, BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild))
             {
-                // If partial state is requested, we must have full or partial-and-compatible state in the result.
-                if (HasProvideProjectStateAfterBuild(buildResultDataFlags))
-                {
-                    return true;
-                }
-                if (!HasProvideSubsetOfStateAfterBuild(buildResultDataFlags))
-                {
-                    return false;
-                }
-
-                // Verify that the requested subset is compatible with the result.
                 return buildRequest.RequestedProjectState is not null &&
                     buildResult.ProjectStateAfterBuild?.RequestedProjectStateFilter is not null &&
                     buildRequest.RequestedProjectState.IsSubsetOf(buildResult.ProjectStateAfterBuild.RequestedProjectStateFilter);
@@ -392,21 +372,11 @@ namespace Microsoft.Build.BackEnd
 
             return true;
 
-            static bool HasProvideProjectStateAfterBuild(BuildRequestDataFlags flags)
-                => (flags & BuildRequestDataFlags.ProvideProjectStateAfterBuild) == BuildRequestDataFlags.ProvideProjectStateAfterBuild;
-
-            static bool HasProvideSubsetOfStateAfterBuild(BuildRequestDataFlags flags)
-                => (flags & BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild) == BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
+            static bool HasFlag(BuildRequestDataFlags flags, BuildRequestDataFlags flagToCheck) => (flags & flagToCheck) == flagToCheck;
         }
 
-        public IEnumerator<BuildResult> GetEnumerator()
-        {
-            return _resultsByConfiguration.Values.GetEnumerator();
-        }
+        public IEnumerator<BuildResult> GetEnumerator() => _resultsByConfiguration.Values.GetEnumerator();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
