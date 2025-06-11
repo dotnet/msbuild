@@ -2516,19 +2516,6 @@ EndGlobal
             
             project.ProjectName.ShouldBe("ProjectInSolutionRepro");
             
-            // Output debug information
-            TestOutputHelper.WriteLine($"RelativePath: '{project.RelativePath}'");
-            TestOutputHelper.WriteLine($"AbsolutePath: '{project.AbsolutePath}'");
-            TestOutputHelper.WriteLine($"SolutionFileDirectory: '{solution.SolutionFileDirectory}'");
-            TestOutputHelper.WriteLine($"Runtime: {System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}");
-            TestOutputHelper.WriteLine($"Platform: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}");
-            TestOutputHelper.WriteLine($"IsWindows: {NativeMethodsShared.IsWindows}");
-#if NETFRAMEWORK
-            TestOutputHelper.WriteLine("Build: NETFRAMEWORK");
-#else
-            TestOutputHelper.WriteLine("Build: NOT NETFRAMEWORK");
-#endif
-            
             // The AbsolutePath should not contain backslashes on Unix systems
             project.AbsolutePath.ShouldNotContain('\\', $"AbsolutePath '{project.AbsolutePath}' should not contain backslashes on Unix systems");
             
@@ -2537,6 +2524,82 @@ EndGlobal
             {
                 project.AbsolutePath.ShouldContain('/', $"AbsolutePath '{project.AbsolutePath}' should contain forward slashes on Unix systems");
             }
+        }
+        
+        /// <summary>
+        /// Test for edge case where RelativePath could be treated as an absolute URI
+        /// and bypass normalization, leading to backslashes in AbsolutePath on Unix.
+        /// </summary>
+        [Fact]
+        public void AbsolutePathShouldHandleUriLikeRelativePathsOnUnix()
+        {
+            // Skip test if running on Windows
+            if (NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+            
+            // Test with a path that might be interpreted as a URI
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'WebProject', 'http://localhost\path\to\project', '{GUID-HERE}'
+                EndProject
+                Global
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            
+            solution.ProjectsInOrder.Count.ShouldBe(1);
+            ProjectInSolution project = solution.ProjectsInOrder[0];
+            
+            // Even if the RelativePath looks like a URI, AbsolutePath should not contain backslashes on Unix
+            if (project.AbsolutePath.Contains('\\'))
+            {
+                project.AbsolutePath.ShouldNotContain('\\', $"AbsolutePath '{project.AbsolutePath}' should not contain backslashes on Unix systems, even for URI-like paths");
+            }
+        }
+        
+        /// <summary>
+        /// Test to verify that the fix for issue #1769 works by directly testing
+        /// FileUtilities.FixFilePath integration in AbsolutePath.
+        /// This test simulates scenarios where intermediate path processing might
+        /// leave backslashes in the AbsolutePath on Unix systems.
+        /// </summary>
+        [Fact]
+        public void AbsolutePathFixFilePathIntegrationTest()
+        {
+            // Skip test if running on Windows
+            if (NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+            
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'TestProject', 'Sub\Dir\Project.csproj', '{GUID-HERE}'
+                EndProject
+                Global
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            
+            solution.ProjectsInOrder.Count.ShouldBe(1);
+            ProjectInSolution project = solution.ProjectsInOrder[0];
+            
+            // This test verifies that regardless of what happens in intermediate processing,
+            // the final AbsolutePath result never contains backslashes on Unix
+            project.AbsolutePath.ShouldNotContain('\\', 
+                $"AbsolutePath '{project.AbsolutePath}' should not contain backslashes on Unix systems");
+                
+            // Verify that the path contains forward slashes as expected
+            project.AbsolutePath.ShouldContain('/');
+                
+            // Verify that the path structure is still correct (should contain the subdirectory)
+            project.AbsolutePath.ShouldContain("Sub");
         }
     }
 }
