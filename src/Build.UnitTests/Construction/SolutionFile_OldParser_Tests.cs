@@ -2517,12 +2517,12 @@ EndGlobal
             project.ProjectName.ShouldBe("ProjectInSolutionRepro");
             
             // The AbsolutePath should not contain backslashes on Unix systems
-            project.AbsolutePath.ShouldNotContain('\\', $"AbsolutePath '{project.AbsolutePath}' should not contain backslashes on Unix systems");
+            project.AbsolutePath.ShouldNotContain("\\");
             
             // The AbsolutePath should contain forward slashes (unless it's just a filename)
             if (project.AbsolutePath.Contains(Path.DirectorySeparatorChar))
             {
-                project.AbsolutePath.ShouldContain('/', $"AbsolutePath '{project.AbsolutePath}' should contain forward slashes on Unix systems");
+                project.AbsolutePath.ShouldContain("/");
             }
         }
         
@@ -2557,7 +2557,7 @@ EndGlobal
             // Even if the RelativePath looks like a URI, AbsolutePath should not contain backslashes on Unix
             if (project.AbsolutePath.Contains('\\'))
             {
-                project.AbsolutePath.ShouldNotContain('\\', $"AbsolutePath '{project.AbsolutePath}' should not contain backslashes on Unix systems, even for URI-like paths");
+                project.AbsolutePath.ShouldNotContain("\\");
             }
         }
         
@@ -2592,11 +2592,10 @@ EndGlobal
             
             // This test verifies that regardless of what happens in intermediate processing,
             // the final AbsolutePath result never contains backslashes on Unix
-            project.AbsolutePath.ShouldNotContain('\\', 
-                $"AbsolutePath '{project.AbsolutePath}' should not contain backslashes on Unix systems");
+            project.AbsolutePath.ShouldNotContain("\\");
                 
             // Verify that the path contains forward slashes as expected
-            project.AbsolutePath.ShouldContain('/');
+            project.AbsolutePath.ShouldContain("/");
                 
             // Verify that the path structure is still correct (should contain the subdirectory)
             project.AbsolutePath.ShouldContain("Sub");
