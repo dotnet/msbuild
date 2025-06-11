@@ -2520,7 +2520,7 @@ EndGlobal
             project.AbsolutePath.ShouldNotContain("\\");
             
             // The AbsolutePath should contain forward slashes (unless it's just a filename)
-            if (project.AbsolutePath.Contains(Path.DirectorySeparatorChar))
+            if (project.AbsolutePath.Contains(Path.DirectorySeparatorChar.ToString()))
             {
                 project.AbsolutePath.ShouldContain("/");
             }
@@ -2555,7 +2555,7 @@ EndGlobal
             ProjectInSolution project = solution.ProjectsInOrder[0];
             
             // Even if the RelativePath looks like a URI, AbsolutePath should not contain backslashes on Unix
-            if (project.AbsolutePath.Contains('\\'))
+            if (project.AbsolutePath.Contains("\\"))
             {
                 project.AbsolutePath.ShouldNotContain("\\");
             }
