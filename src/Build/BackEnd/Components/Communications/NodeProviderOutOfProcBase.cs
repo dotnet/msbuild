@@ -967,8 +967,6 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    // The buffer is publicly visible so that InterningBinaryReader doesn't have to copy to an intermediate buffer.
-                    // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
                     _readBufferMemoryStream.Position = 0;
                     _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, _readTranslator);
                 }
