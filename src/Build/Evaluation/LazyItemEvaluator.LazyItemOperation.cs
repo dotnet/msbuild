@@ -291,10 +291,6 @@ namespace Microsoft.Build.Evaluation
                     // This ensures correct results for:
                     // - Built-in metadata expressions (like %(FileName)) which vary between items
                     // - Custom metadata when item list references are involved
-                    //
-                    // UNDONE: When batching is implemented for real, we need to make sure that
-                    // item definition metadata is included in all metadata operations during evaluation
-                    // and distinguish between built-in vs custom metadata for better optimization.
                     needToExpandMetadataForEachItem = true;
                 }
 
