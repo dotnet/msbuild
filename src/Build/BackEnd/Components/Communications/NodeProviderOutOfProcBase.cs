@@ -399,7 +399,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (String.IsNullOrEmpty(msbuildLocation))
             {
-                msbuildLocation = "MSBuild.exe";
+                msbuildLocation = Constants.MSBuildExecutableName;
             }
 
             var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);

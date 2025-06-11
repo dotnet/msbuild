@@ -8,7 +8,6 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
-
 #if !TASKHOST
 using System.Buffers.Binary;
 using System.Threading.Tasks;

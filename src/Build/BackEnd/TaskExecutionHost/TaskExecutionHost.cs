@@ -337,8 +337,6 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // TODO ask why for net task host it returns false net472\MSBuild\Current\Bin\Microsoft.Build.dll instead of path to a custom task.
-            // Interestingly TaskInstance._taskType contains the correct path.
             string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
             if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) &&
                 realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)

@@ -1,9 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -13,10 +11,8 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
-using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -24,9 +20,9 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
-    /// Tests for ProjectPropertyInstance internal members.
+    /// Tests for ProjectPropertyInstance internal members
     /// </summary>
-    public class TaskItem_Tests : IDisposable
+    public class TaskItem_Tests
     {
         internal static readonly string[] s_builtInMetadataNames =
         {
@@ -46,21 +42,6 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             "DefiningProjectName",
             "DefiningProjectExtension"
         };
-
-        private readonly TestEnvironment _env;
-
-        /// <summary>
-        /// SetUp.
-        /// </summary>
-        public TaskItem_Tests(ITestOutputHelper output)
-        {
-            _env = TestEnvironment.Create(output);
-        }
-
-        /// <summary>
-        /// TearDown
-        /// </summary>
-        public void Dispose() => _env.Dispose();
 
         /// <summary>
         /// Test serialization

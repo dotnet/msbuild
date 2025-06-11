@@ -116,6 +116,16 @@ namespace Microsoft.Build.Internal
         internal static readonly string DotnetProcessName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";
 
         /// <summary>
+        /// Defines the name of MSBuild assembly.
+        /// </summary>
+        internal const string MSBuildAssemblyName = "MSBuild.dll";
+
+        /// <summary>
+        /// Defines the name of MSBuild executable.
+        /// </summary>
+        internal const string MSBuildExecutableName = "MSBuild.exe";
+
+        /// <summary>
         /// If no default tools version is specified in the config file or registry, we'll use 2.0.
         /// The engine will use its binpath for the matching toolset path.
         /// </summary>

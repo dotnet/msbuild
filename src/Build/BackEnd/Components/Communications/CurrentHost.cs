@@ -3,6 +3,7 @@
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #endif
 
@@ -24,18 +25,17 @@ internal static class CurrentHost
 #if RUNTIME_TYPE_NETCORE
         if (s_currentHost == null)
         {
-            string dotnetExeName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";
-
-            string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                dotnetExeName);
+            string dotnetExe = Path.Combine(
+                FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
+                Constants.DotnetProcessName);
             if (File.Exists(dotnetExe))
             {
                 s_currentHost = dotnetExe;
             }
             else
             {
-                if (EnvironmentUtilities.ProcessPath is string processPath &&
-                    Path.GetFileName(processPath) == dotnetExeName)
+                if (EnvironmentUtilities.ProcessPath is string processPath
+                    && Path.GetFileName(processPath) == Constants.DotnetProcessName)
                 {
                     // If the current process is already running in a general-purpose host, use its path.
                     s_currentHost = processPath;
@@ -47,7 +47,7 @@ internal static class CurrentHost
                     //                     ^4     ^3              ^2          ^1
                     dotnetExe = Path.Combine(
                         FileUtilities.GetFolderAbove(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), 4),
-                        dotnetExeName);
+                        Constants.DotnetProcessName);
                     if (File.Exists(dotnetExe))
                     {
                         s_currentHost = dotnetExe;

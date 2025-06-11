@@ -83,9 +83,10 @@ namespace Microsoft.Build.Internal
 
     internal class Handshake
     {
-        public static int NetTaskHostHandshakeVersion = 99;
+        // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
+        public const int NetTaskHostHandshakeVersion = 99;
 
-        public static HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
+        public const HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
 
         protected readonly HandshakeComponents _handshakeComponents;
 
@@ -96,46 +97,66 @@ namespace Microsoft.Build.Internal
 
         protected Handshake(HandshakeOptions nodeType, bool includeSessionId)
         {
+            // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
-
-            // We currently use 7 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
-            // This indicates in the first byte that we are a modern build.
             var options = (int)nodeType | (handshakeVersion << 24);
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
-            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            CommunicationsUtilities.Trace("Handshake salt is " + handshakeSalt);
+            // Calculate salt from environment and tools directory
             bool isNetTaskHost = (nodeType & NetTaskHostFlags) == NetTaskHostFlags;
-            string toolsDirectory = isNetTaskHost
-                ? BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory
-                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-            CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
-            var salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
+            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
+            string toolsDirectory = GetToolsDirectory(isNetTaskHost);
+            int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
+            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
+            CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
+
+            // Get session ID if needed (expensive call)
             int sessionId = 0;
-            // This reaches out to NtQuerySystemInformation. Due to latency, allow skipping for derived handshake if unused.
             if (includeSessionId)
             {
-                using Process currentProcess = Process.GetCurrentProcess();
+                using var currentProcess = Process.GetCurrentProcess();
                 sessionId = currentProcess.SessionId;
             }
 
-            if (isNetTaskHost)
-            {
-                _handshakeComponents = new HandshakeComponents(
-                    options,
-                    salt,
-                    NetTaskHostHandshakeVersion,
-                    NetTaskHostHandshakeVersion,
-                    NetTaskHostHandshakeVersion,
-                    NetTaskHostHandshakeVersion,
-                    sessionId);
-            }
-            else
-            {
-                Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-                _handshakeComponents = new HandshakeComponents(options, salt, fileVersion.Major, fileVersion.Minor, fileVersion.Build, fileVersion.Revision, sessionId);
-            }
+            _handshakeComponents = isNetTaskHost
+                ? CreateNetTaskHostComponents(options, salt, sessionId)
+                : CreateStandardComponents(options, salt, sessionId);
+        }
+
+        private static string GetToolsDirectory(bool isNetTaskHost) =>
+#if NETFRAMEWORK
+            isNetTaskHost
+
+                // For .NET TaskHost assembly directory sets the expectation for the child dotnet process to connect to.
+                // It's possible that MSBuild will attempt to connect to an incompatible version of MSBuild.
+                ? BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory
+                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+#else
+            BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+#endif
+
+        private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
+            options,
+            salt,
+            NetTaskHostHandshakeVersion,
+            NetTaskHostHandshakeVersion,
+            NetTaskHostHandshakeVersion,
+            NetTaskHostHandshakeVersion,
+            sessionId);
+
+        private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
+        {
+            var fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+
+            return new(
+                options,
+                salt,
+                fileVersion.Major,
+                fileVersion.Minor,
+                fileVersion.Build,
+                fileVersion.Revision,
+                sessionId);
         }
 
         public virtual HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
