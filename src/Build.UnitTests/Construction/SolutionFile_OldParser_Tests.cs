@@ -2482,5 +2482,61 @@ EndGlobal
 
             Should.NotThrow(() => ParseSolutionHelper(stringBuilder.ToString()));
         }
+
+        /// <summary>
+        /// Test for issue #1769 - ProjectInSolution.AbsolutePath contains '\' on Mac OS/Linux
+        /// Ensure that AbsolutePath uses forward slashes on Unix systems even when the solution
+        /// file contains project paths with backslashes.
+        /// </summary>
+        [Fact]
+        public void AbsolutePathShouldUseForwardSlashesOnUnix()
+        {
+            // Skip test if running on Windows
+            if (NativeMethodsShared.IsWindows)
+            {
+                return;
+            }
+            
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.30114.105
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ProjectInSolutionRepro', 'ProjectInSolutionRepro\ProjectInSolutionRepro.csproj', '{GUID-HERE}'
+                EndProject
+                Global
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            
+            solution.ProjectsInOrder.Count.ShouldBe(1);
+            ProjectInSolution project = solution.ProjectsInOrder[0];
+            
+            project.ProjectName.ShouldBe("ProjectInSolutionRepro");
+            
+            // Output debug information
+            TestOutputHelper.WriteLine($"RelativePath: '{project.RelativePath}'");
+            TestOutputHelper.WriteLine($"AbsolutePath: '{project.AbsolutePath}'");
+            TestOutputHelper.WriteLine($"SolutionFileDirectory: '{solution.SolutionFileDirectory}'");
+            TestOutputHelper.WriteLine($"Runtime: {System.Runtime.InteropServices.RuntimeInformation.RuntimeIdentifier}");
+            TestOutputHelper.WriteLine($"Platform: {System.Runtime.InteropServices.RuntimeInformation.OSDescription}");
+            TestOutputHelper.WriteLine($"IsWindows: {NativeMethodsShared.IsWindows}");
+#if NETFRAMEWORK
+            TestOutputHelper.WriteLine("Build: NETFRAMEWORK");
+#else
+            TestOutputHelper.WriteLine("Build: NOT NETFRAMEWORK");
+#endif
+            
+            // The AbsolutePath should not contain backslashes on Unix systems
+            project.AbsolutePath.ShouldNotContain('\\', $"AbsolutePath '{project.AbsolutePath}' should not contain backslashes on Unix systems");
+            
+            // The AbsolutePath should contain forward slashes (unless it's just a filename)
+            if (project.AbsolutePath.Contains(Path.DirectorySeparatorChar))
+            {
+                project.AbsolutePath.ShouldContain('/', $"AbsolutePath '{project.AbsolutePath}' should contain forward slashes on Unix systems");
+            }
+        }
     }
 }
