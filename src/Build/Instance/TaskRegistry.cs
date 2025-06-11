@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -1760,6 +1761,78 @@ namespace Microsoft.Build.Execution
                 }
 
                 /// <summary>
+                /// Extracts assembly references from the inline task XML body.
+                /// Returns a list of assembly names that can be used for type resolution.
+                /// </summary>
+                private static List<string> ExtractAssemblyReferencesFromTaskBody(string taskXmlBody)
+                {
+                    var assemblyReferences = new List<string>();
+                    
+                    if (string.IsNullOrEmpty(taskXmlBody))
+                    {
+                        return assemblyReferences;
+                    }
+
+                    try
+                    {
+                        // Parse the XML to look for Reference elements
+                        var xmlDoc = new XmlDocument();
+                        xmlDoc.LoadXml($"<root>{taskXmlBody}</root>");
+                        
+                        // Find all Reference elements with Include attributes
+                        var referenceNodes = xmlDoc.SelectNodes("//Reference[@Include]");
+                        if (referenceNodes != null)
+                        {
+                            foreach (XmlNode referenceNode in referenceNodes)
+                            {
+                                var includeAttr = referenceNode.Attributes["Include"];
+                                if (includeAttr != null && !string.IsNullOrEmpty(includeAttr.Value))
+                                {
+                                    assemblyReferences.Add(includeAttr.Value);
+                                }
+                            }
+                        }
+                    }
+                    catch (XmlException)
+                    {
+                        // If XML parsing fails, just return empty list and fall back to original behavior
+                    }
+
+                    return assemblyReferences;
+                }
+
+                /// <summary>
+                /// Try to resolve a type from referenced assemblies.
+                /// This method attempts to load assemblies mentioned in Reference tags and resolve the type from them.
+                /// </summary>
+                private static Type TryResolveTypeFromReferencedAssemblies(string typeName, List<string> assemblyReferences)
+                {
+                    if (assemblyReferences == null || assemblyReferences.Count == 0)
+                    {
+                        return null;
+                    }
+
+                    foreach (string assemblyReference in assemblyReferences)
+                    {
+                        try
+                        {
+                            // Try to resolve type using the assembly qualified name
+                            Type type = Type.GetType($"{typeName}, {assemblyReference}", false /* don't throw on error */, true /* case-insensitive */);
+                            if (type != null)
+                            {
+                                return type;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // Continue to next assembly reference if this one fails
+                        }
+                    }
+
+                    return null;
+                }
+
+                /// <summary>
                 /// Convert the UsingTaskParameterGroupElement into a list of parameter names and UsingTaskParameters
                 /// </summary>
                 /// <typeparam name="P">Property type</typeparam>
@@ -1800,6 +1873,16 @@ namespace Microsoft.Build.Execution
                         {
                             paramType = Type.GetType(expandedType) ??
                                         Type.GetType(expandedType + "," + typeof(ITaskItem).GetTypeInfo().Assembly.FullName, false /* don't throw on error */, true /* case-insensitive */);
+                        }
+
+                        // If type resolution failed with standard methods, try to resolve from referenced assemblies
+                        if (paramType == null)
+                        {
+                            List<string> assemblyReferences = ExtractAssemblyReferencesFromTaskBody(_inlineTaskXmlBody);
+                            if (assemblyReferences.Count > 0)
+                            {
+                                paramType = TryResolveTypeFromReferencedAssemblies(expandedType, assemblyReferences);
+                            }
                         }
 
                         ProjectErrorUtilities.VerifyThrowInvalidProject(

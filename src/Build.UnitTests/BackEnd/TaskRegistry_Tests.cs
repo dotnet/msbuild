@@ -1847,6 +1847,91 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
+
+        /// <summary>
+        /// Test that enum parameter types from arbitrary assemblies (specified in Reference tags) can be resolved.
+        /// This reproduces the issue described in https://github.com/dotnet/msbuild/issues/XXX
+        /// </summary>
+        [Fact]
+        public void EnumParameterFromArbitraryAssembly()
+        {
+            // This test reproduces the issue where enum types from assemblies referenced in
+            // <Reference> tags cannot be resolved for UsingTask parameters.
+            List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+            ProjectRootElement project = ProjectRootElement.Create();
+
+            ProjectUsingTaskElement element = project.AddUsingTask("TestTask", "TestAssembly", null);
+            element.TaskFactory = "CodeTaskFactory";
+
+            // Add parameter group with enum type from System.IO.Compression
+            UsingTaskParameterGroupElement parameterGroup = element.AddParameterGroup();
+            parameterGroup.AddParameter("CompressionLevel", "false", "false", "System.IO.Compression.CompressionLevel");
+
+            // Add task body with reference to the assembly containing the enum
+            element.AddUsingTaskBody("false", @"
+                <Reference Include=""System.IO.Compression""/>
+                <Code>
+                    Log.LogMessage(MessageImportance.High, ""Test task executed"");
+                </Code>
+            ");
+
+            elementList.Add(element);
+
+            // This should now succeed after the fix
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+            
+            // Verify that the parameter was registered successfully
+            Assert.NotNull(registry.TaskRegistrations);
+            var taskRegistrations = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("TestTask", null)];
+            Assert.NotNull(taskRegistrations);
+            Assert.Single(taskRegistrations);
+            
+            var parameterGroupRecord = taskRegistrations[0].ParameterGroupAndTaskBody;
+            Assert.NotNull(parameterGroupRecord);
+            Assert.NotEmpty(parameterGroupRecord.UsingTaskParameters);
+            Assert.True(parameterGroupRecord.UsingTaskParameters.ContainsKey("CompressionLevel"));
+            
+            // Verify the parameter type was resolved correctly
+            var compressionLevelParam = parameterGroupRecord.UsingTaskParameters["CompressionLevel"];
+            Assert.Equal("System.IO.Compression.CompressionLevel", compressionLevelParam.PropertyType.FullName);
+        }
+
+        /// <summary>
+        /// Test that demonstrates the issue: enum parameter types from arbitrary assemblies fail without Reference tags.
+        /// This should still fail because no Reference tag is provided for the assembly containing the enum.
+        /// </summary>
+        [Fact]
+        public void EnumParameterFromArbitraryAssemblyFailsWithoutReference()
+        {
+            // This test shows that enum types from assemblies not referenced fail as expected
+            List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+            ProjectRootElement project = ProjectRootElement.Create();
+
+            ProjectUsingTaskElement element = project.AddUsingTask("TestTask", "TestAssembly", null);
+            element.TaskFactory = "CodeTaskFactory";
+
+            // Add parameter group with enum type from System.IO.Compression but WITHOUT a reference
+            UsingTaskParameterGroupElement parameterGroup = element.AddParameterGroup();
+            parameterGroup.AddParameter("CompressionLevel", "false", "false", "System.IO.Compression.CompressionLevel");
+
+            // Add task body WITHOUT reference to the assembly containing the enum
+            element.AddUsingTaskBody("false", @"
+                <Code>
+                    Log.LogMessage(MessageImportance.High, ""Test task executed"");
+                </Code>
+            ");
+
+            elementList.Add(element);
+
+            // This should still fail because no reference is provided
+            Exception exception = Assert.Throws<InvalidProjectFileException>(() =>
+            {
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+            });
+
+            // The error message should indicate the enum type couldn't be resolved
+            Assert.Contains("System.IO.Compression.CompressionLevel", exception.Message);
+        }
         #endregion
 
         #region SerializationTests
