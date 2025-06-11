@@ -1812,6 +1812,18 @@ namespace Microsoft.Build.Execution
                         return null;
                     }
 
+                    // Handle nullable types (e.g., "System.IO.Compression.CompressionLevel?")
+                    if (typeName.EndsWith("?"))
+                    {
+                        string underlyingTypeName = typeName.Substring(0, typeName.Length - 1);
+                        Type underlyingType = TryResolveTypeFromReferencedAssemblies(underlyingTypeName, assemblyReferences);
+                        if (underlyingType != null)
+                        {
+                            return typeof(Nullable<>).MakeGenericType(underlyingType);
+                        }
+                        return null;
+                    }
+
                     foreach (string assemblyReference in assemblyReferences)
                     {
                         try

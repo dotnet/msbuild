@@ -1897,6 +1897,55 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Test that nullable enum parameter types from arbitrary assemblies (specified in Reference tags) can be resolved.
+        /// This tests the ZipDirectory CompressionLevel? use case from PR #11975.
+        /// </summary>
+        [Fact]
+        public void NullableEnumParameterFromArbitraryAssembly()
+        {
+            // This test reproduces the nullable enum scenario like ZipDirectory's CompressionLevel? parameter
+            List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+            ProjectRootElement project = ProjectRootElement.Create();
+
+            ProjectUsingTaskElement element = project.AddUsingTask("TestTask", "TestAssembly", null);
+            element.TaskFactory = "CodeTaskFactory";
+
+            // Add parameter group with nullable enum type from System.IO.Compression
+            UsingTaskParameterGroupElement parameterGroup = element.AddParameterGroup();
+            parameterGroup.AddParameter("CompressionLevel", "false", "false", "System.IO.Compression.CompressionLevel?");
+
+            // Add task body with reference to the assembly containing the enum
+            element.AddUsingTaskBody("false", @"
+                <Reference Include=""System.IO.Compression""/>
+                <Code>
+                    Log.LogMessage(MessageImportance.High, ""Test task executed"");
+                </Code>
+            ");
+
+            elementList.Add(element);
+
+            // This should now succeed after the fix
+            TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+            
+            // Verify that the parameter was registered successfully
+            Assert.NotNull(registry.TaskRegistrations);
+            var taskRegistrations = registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("TestTask", null)];
+            Assert.NotNull(taskRegistrations);
+            Assert.Single(taskRegistrations);
+            
+            var parameterGroupRecord = taskRegistrations[0].ParameterGroupAndTaskBody;
+            Assert.NotNull(parameterGroupRecord);
+            Assert.NotEmpty(parameterGroupRecord.UsingTaskParameters);
+            Assert.True(parameterGroupRecord.UsingTaskParameters.ContainsKey("CompressionLevel"));
+            
+            // Verify the parameter type was resolved correctly as nullable enum
+            var compressionLevelParam = parameterGroupRecord.UsingTaskParameters["CompressionLevel"];
+            Assert.True(compressionLevelParam.PropertyType.IsGenericType);
+            Assert.Equal(typeof(Nullable<>), compressionLevelParam.PropertyType.GetGenericTypeDefinition());
+            Assert.Equal("System.IO.Compression.CompressionLevel", compressionLevelParam.PropertyType.GetGenericArguments()[0].FullName);
+        }
+
+        /// <summary>
         /// Test that demonstrates the issue: enum parameter types from arbitrary assemblies fail without Reference tags.
         /// This should still fail because no Reference tag is provided for the assembly containing the enum.
         /// </summary>
