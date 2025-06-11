@@ -952,7 +952,22 @@ namespace Microsoft.Build.Evaluation
                         // if there are no item vectors in the string
                         // run a simpler Regex to find item metadata references
                         MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                        result = RegularExpressions.ItemMetadataRegex.Replace(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata));
+
+                        using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
+                        RegularExpressions.ReplaceAndAppend(expression, new MatchEvaluator(matchEvaluator.ExpandSingleMetadata), finalResultBuilder, RegularExpressions.ItemMetadataRegex);
+
+                        // Don't create more strings
+                        if (finalResultBuilder.Equals(expression.AsSpan()))
+                        {
+                            // If the final result is the same as the original expression, then just return the original expression
+                            result = expression;
+                        }
+                        else
+                        {
+                            // Otherwise, convert the final result to a string
+                            // and return that.
+                            result = finalResultBuilder.ToString();
+                        }
                     }
                     else
                     {
@@ -970,11 +985,11 @@ namespace Microsoft.Build.Evaluation
                         using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
 
                         int start = 0;
-                        MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                        MatchEvaluator matchEvaluatorDelegate = new MatchEvaluator(matchEvaluator.ExpandSingleMetadata);
+                        MatchEvaluator matchEvaluatorDelegate = null;
 
-                        if (itemVectorExpressions != null)
+                        if (itemVectorExpressions != null && itemVectorExpressions.Count > 0)
                         {
+                            matchEvaluatorDelegate ??= new MatchEvaluator(new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext).ExpandSingleMetadata);
                             // Move over the expression, skipping those that have been recognized as an item vector expression
                             // Anything other than an item vector expression we want to expand bare metadata in.
                             for (int n = 0; n < itemVectorExpressions.Count; n++)
@@ -984,20 +999,20 @@ namespace Microsoft.Build.Evaluation
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
                                 string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
-                                string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluatorDelegate);
 
-                                // Append the metadata replacement
-                                finalResultBuilder.Append(replacementResult);
+                                RegularExpressions.ReplaceAndAppend(subExpressionToReplaceIn, matchEvaluatorDelegate, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
 
                                 // Expand any metadata that appears in the item vector expression's separator
                                 if (itemVectorExpressions[n].Separator != null)
                                 {
-                                    vectorExpression = RegularExpressions.NonTransformItemMetadataRegex.Replace(itemVectorExpressions[n].Value, matchEvaluatorDelegate, -1, itemVectorExpressions[n].SeparatorStart);
+                                    RegularExpressions.ReplaceAndAppend(itemVectorExpressions[n].Value, matchEvaluatorDelegate, -1, itemVectorExpressions[n].SeparatorStart, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
                                 }
-
-                                // Append the item vector expression as is
-                                // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
-                                finalResultBuilder.Append(vectorExpression);
+                                else
+                                {
+                                    // Append the item vector expression as is
+                                    // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
+                                    finalResultBuilder.Append(vectorExpression);
+                                }
 
                                 // Move onto the next part of the expression that isn't an item vector expression
                                 start = (itemVectorExpressions[n].Index + itemVectorExpressions[n].Length);
@@ -1008,19 +1023,23 @@ namespace Microsoft.Build.Evaluation
                         // then we need to metadata replace and then append that
                         if (start < expression.Length)
                         {
+                            matchEvaluatorDelegate ??= new MatchEvaluator(new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext).ExpandSingleMetadata);
                             string subExpressionToReplaceIn = expression.Substring(start);
-                            string replacementResult = RegularExpressions.NonTransformItemMetadataRegex.Replace(subExpressionToReplaceIn, matchEvaluatorDelegate);
 
-                            finalResultBuilder.Append(replacementResult);
+                            RegularExpressions.ReplaceAndAppend(subExpressionToReplaceIn, matchEvaluatorDelegate, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
                         }
 
-                        result = finalResultBuilder.ToString();
-                    }
-
-                    // Don't create more strings
-                    if (String.Equals(result, expression, StringComparison.Ordinal))
-                    {
-                        result = expression;
+                        if (finalResultBuilder.Equals(expression.AsSpan()))
+                        {
+                            // If the final result is the same as the original expression, then just return the original expression
+                            result = expression;
+                        }
+                        else
+                        {
+                            // Otherwise, convert the final result to a string
+                            // and return that.
+                            result = finalResultBuilder.ToString();
+                        }
                     }
 
                     return result;
@@ -3172,6 +3191,107 @@ namespace Microsoft.Build.Evaluation
             /**************************************************************************************************************************
              * WARNING: The regular expressions above MUST be kept in sync with the expressions in the ProjectWriter class.
              *************************************************************************************************************************/
+
+            public static void ReplaceAndAppend(string input, MatchEvaluator evaluator, SpanBasedStringBuilder builder, Regex regex)
+            {
+                ReplaceAndAppend(input, evaluator, -1, regex.RightToLeft ? input.Length : 0, builder, regex);
+            }
+
+            public static void ReplaceAndAppend(string input, MatchEvaluator evaluator, int count, int startat, SpanBasedStringBuilder stringBuilder, Regex regex)
+            {
+                if (evaluator is null)
+                {
+                    throw new ArgumentNullException(nameof(evaluator));
+                }
+
+                if (stringBuilder is null)
+                {
+                    throw new ArgumentNullException(nameof(stringBuilder));
+                }
+
+                if (count < -1)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(count));
+                }
+
+                if (startat < 0 || startat > input.Length)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(count));
+                }
+
+                if (count == 0)
+                {
+                    stringBuilder.Append(input);
+
+                    return;
+                }
+
+                Match match = regex.Match(input, startat);
+                if (!match.Success)
+                {
+                    stringBuilder.Append(input);
+
+                    return;
+                }
+
+                if (!regex.RightToLeft)
+                {
+                    int num = 0;
+                    do
+                    {
+                        if (match.Index != num)
+                        {
+                            stringBuilder.Append(input, num, match.Index - num);
+                        }
+
+                        num = match.Index + match.Length;
+                        stringBuilder.Append(evaluator(match));
+                        if (--count == 0)
+                        {
+                            break;
+                        }
+
+                        match = match.NextMatch();
+                    }
+                    while (match.Success);
+                    if (num < input.Length)
+                    {
+                        stringBuilder.Append(input, num, input.Length - num);
+                    }
+                }
+                else
+                {
+                    List<string> list = new List<string>();
+                    int num2 = input.Length;
+                    do
+                    {
+                        if (match.Index + match.Length != num2)
+                        {
+                            list.Add(input.Substring(match.Index + match.Length, num2 - match.Index - match.Length));
+                        }
+
+                        num2 = match.Index;
+                        list.Add(evaluator(match));
+                        if (--count == 0)
+                        {
+                            break;
+                        }
+
+                        match = match.NextMatch();
+                    }
+                    while (match.Success);
+
+                    if (num2 > 0)
+                    {
+                        stringBuilder.Append(input, 0, num2);
+                    }
+
+                    for (int num3 = list.Count - 1; num3 >= 0; num3--)
+                    {
+                        stringBuilder.Append(list[num3]);
+                    }
+                }
+            }
         }
 
         private struct FunctionBuilder<T>
