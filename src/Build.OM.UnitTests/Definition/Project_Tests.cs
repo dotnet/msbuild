@@ -999,6 +999,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.GlobalProperties["p0"].ShouldBe("v0");
             collection.GlobalProperties["p1"].ShouldBe("v1");
         }
+#endif
 
         /// <summary>
         /// Changing global property to the same value should not dirty the project.
