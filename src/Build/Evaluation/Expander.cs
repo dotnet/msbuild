@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -28,10 +27,13 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
+using ItemSpecModifiers = Microsoft.Build.Shared.FileUtilities.ItemSpecModifiers;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
+using System.Collections.Frozen;
+using System.Collections.Concurrent;
 
 #nullable disable
 
@@ -2245,9 +2247,54 @@ namespace Microsoft.Build.Evaluation
                 where S : class, IItem
             {
                 /// <summary>
+                /// The number of characters added by a quoted expression.
+                /// 3 characters for %()
+                // </summary>
+                private const int QuotedExpressionSurroundCharCount = 3;
+
+                /// <summary>
+                /// A precomputed lookup of item spec modifiers wrapped in regex strings.
+                /// This allows us to completely skip of Regex parsing when the innter string matches a known modifier.
+                /// IsDerivableItemSpecModifier doesn't currently support Span lookups, so we have to manually map these.
+                /// </summary>
+                private static readonly FrozenDictionary<string, string> s_itemSpecModifiers = new Dictionary<string, string>()
+                {
+                    [$"%{{{ItemSpecModifiers.FullPath}}}"] = ItemSpecModifiers.FullPath,
+                    [$"%{{{ItemSpecModifiers.RootDir}}}"] = ItemSpecModifiers.RootDir,
+                    [$"%{{{ItemSpecModifiers.Filename}}}"] = ItemSpecModifiers.Filename,
+                    [$"%{{{ItemSpecModifiers.Extension}}}"] = ItemSpecModifiers.Extension,
+                    [$"%{{{ItemSpecModifiers.RelativeDir}}}"] = ItemSpecModifiers.RelativeDir,
+                    [$"%{{{ItemSpecModifiers.Directory}}}"] = ItemSpecModifiers.Directory,
+                    [$"%{{{ItemSpecModifiers.RecursiveDir}}}"] = ItemSpecModifiers.RecursiveDir,
+                    [$"%{{{ItemSpecModifiers.Identity}}}"] = ItemSpecModifiers.Identity,
+                    [$"%{{{ItemSpecModifiers.ModifiedTime}}}"] = ItemSpecModifiers.ModifiedTime,
+                    [$"%{{{ItemSpecModifiers.CreatedTime}}}"] = ItemSpecModifiers.CreatedTime,
+                    [$"%{{{ItemSpecModifiers.AccessedTime}}}"] = ItemSpecModifiers.AccessedTime,
+                    [$"%{{{ItemSpecModifiers.DefiningProjectFullPath}}}"] = ItemSpecModifiers.DefiningProjectFullPath,
+                    [$"%{{{ItemSpecModifiers.DefiningProjectDirectory}}}"] = ItemSpecModifiers.DefiningProjectDirectory,
+                    [$"%{{{ItemSpecModifiers.DefiningProjectName}}}"] = ItemSpecModifiers.DefiningProjectName,
+                    [$"%{{{ItemSpecModifiers.DefiningProjectExtension}}}"] = ItemSpecModifiers.DefiningProjectExtension,
+                }.ToFrozenDictionary(StringComparer.Ordinal);
+
+                /// <summary>
                 /// A cache of previously created item function delegates.
                 /// </summary>
                 private static readonly ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
+
+                /// <summary>
+                /// A thread-static string builder for use in ExpandQuotedExpressionFunction.
+                /// In theory we should be able to use shared instance, but in a profile it appears something higher in
+                /// the call-stack is already borrowing the instance, so it ends up always allocating.
+                /// This should not be used outside of ExpandQuotedExpressionFunction unless validated to not conflict.
+                /// <summary>
+                [ThreadStatic]
+                private static SpanBasedStringBuilder s_includeBuilder;
+
+                /// <summary>
+                /// A reference to the last extracted expression function to save on Regex-related allocations.
+                /// In many cases, the expression is exactly the same as the previous.
+                /// <summary>
+                private static string s_lastParsedQuotedExpression;
 
                 /// <summary>
                 /// Delegate that represents the signature of all item transformation functions
@@ -2717,19 +2764,57 @@ namespace Microsoft.Build.Evaluation
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
+                    string quotedExpressionFunction = arguments[0];
+                    OneOrMultipleMetadataMatches matches = GetQuotedExpressionMatches(quotedExpressionFunction, elementLocation);
+
+                    // This is just a sanity check in case a code change causes something in the call stack to take this reference.
+                    SpanBasedStringBuilder includeBuilder = s_includeBuilder ?? new SpanBasedStringBuilder();
+                    s_includeBuilder = null;
+
                     foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
-                        MetadataMatchEvaluator matchEvaluator;
                         string include = null;
 
-                        // If we've been handed a null entry by an uptream tranform
+                        // If we've been handed a null entry by an upstream tranform
                         // then we don't want to try to tranform it with an itempec modification.
                         // Simply allow the null to be passed along (if, we are including nulls as specified by includeNullEntries
                         if (item.Key != null)
                         {
-                            matchEvaluator = new MetadataMatchEvaluator(item.Key, item.Value, elementLocation);
+                            int curIndex = 0;
 
-                            include = RegularExpressions.ItemMetadataRegex.Replace(arguments[0], matchEvaluator.GetMetadataValueFromMatch);
+                            switch (matches.Type)
+                            {
+                                // If we matched on a full string, we don't have to concatenate anything.
+                                case MetadataMatchType.ExactString:
+                                    include = GetMetadataValueFromMatch(matches.Single, item.Key, item.Value, elementLocation, ref curIndex);
+                                    break;
+
+                                // If we matched on a partial string, just replace the single group.
+                                case MetadataMatchType.Single:
+                                    includeBuilder.Append(quotedExpressionFunction, 0, matches.Single.Index);
+                                    includeBuilder.Append(
+                                        GetMetadataValueFromMatch(matches.Single, item.Key, item.Value, elementLocation, ref curIndex));
+                                    includeBuilder.Append(quotedExpressionFunction, curIndex, quotedExpressionFunction.Length - curIndex);
+                                    include = includeBuilder.ToString();
+                                    includeBuilder.Clear();
+                                    break;
+
+                                // Otherwise, iteratively replace each match group.
+                                case MetadataMatchType.Multiple:
+                                    foreach (MetadataMatch match in matches.Multiple)
+                                    {
+                                        includeBuilder.Append(quotedExpressionFunction, curIndex, match.Index - curIndex);
+                                        includeBuilder.Append(
+                                            GetMetadataValueFromMatch(match, item.Key, item.Value, elementLocation, ref curIndex));
+                                    }
+
+                                    includeBuilder.Append(quotedExpressionFunction, curIndex, quotedExpressionFunction.Length - curIndex);
+                                    include = includeBuilder.ToString();
+                                    includeBuilder.Clear();
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
 
                         // Include may be empty. Historically we have created items with empty include
@@ -2747,6 +2832,111 @@ namespace Microsoft.Build.Evaluation
                             yield return new KeyValuePair<string, S>(null, item.Value);
                         }
                     }
+
+                    s_includeBuilder = includeBuilder;
+                }
+
+                /// <summary>
+                /// This is effectively an "unrolled" while loop, with several manual checks before we enter the full loop,
+                /// so there's an intentional amount of duplication. In the vast majority of cases, we'll only have
+                /// 1-2 matches, and within those we can avoid allocating the vast majority of Regex objects and return
+                /// a cached result.
+                /// </summary>
+                private static OneOrMultipleMetadataMatches GetQuotedExpressionMatches(string quotedExpressionFunction, IElementLocation elementLocation)
+                {
+                    // Start with fast paths to avoid any allocations.
+                    if (TryGetCachedMetadataMatch(quotedExpressionFunction, out string cachedName)
+                        || s_itemSpecModifiers.TryGetValue(quotedExpressionFunction, out cachedName))
+                    {
+                        return new OneOrMultipleMetadataMatches(cachedName);
+                    }
+
+                    Match match = RegularExpressions.ItemMetadataRegex.Match(quotedExpressionFunction);
+
+                    // GroupCollection + Groups are the most expensive source of allocations here, so we want to return
+                    // before ever accessing the property. Simply accessing it will trigger the full collection
+                    // allocation, so we avoid it unless absolutely necessary.
+                    // Unfortunately even .NET Core does not have a struct-based Group enumerator at this point.
+                    if (!match.Success)
+                    {
+                        return new OneOrMultipleMetadataMatches(string.Empty);
+                    }
+                    else if (s_itemSpecModifiers.TryGetValue(match.Value, out cachedName))
+                    {
+                        return new OneOrMultipleMetadataMatches(quotedExpressionFunction, match, cachedName);
+                    }
+
+                    // From here will either return:
+                    // 1. A single match.
+                    // 2. A list of multiple matches.
+                    GroupCollection groupCollection = match.Groups;
+                    string name = groupCollection[RegularExpressions.NameGroup].Value;
+
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(groupCollection[RegularExpressions.ItemSpecificationGroup].Length == 0, elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
+
+                    Match firstMatch = match;
+                    match = firstMatch.NextMatch();
+
+                    if (!match.Success)
+                    {
+                        OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, firstMatch, name);
+
+                        if (singleMatch.Type == MetadataMatchType.ExactString)
+                        {
+                            // Only cache full string matches.
+                            s_lastParsedQuotedExpression = name;
+                        }
+
+                        return singleMatch;
+                    }
+
+                    // Now we run the full loop.
+                    // This is a very hot path, so we avoid allocating this until after we know there are multiple matches.
+                    List<MetadataMatch> multipleMatches = [new MetadataMatch(firstMatch, name)];
+
+                    while (match.Success)
+                    {
+                        if (s_itemSpecModifiers.TryGetValue(match.Value, out cachedName))
+                        {
+                            multipleMatches.Add(new MetadataMatch(match, cachedName));
+                        }
+                        else
+                        {
+                            // Here is the worst case path which we've hopefully avoided at the point.
+                            groupCollection = match.Groups;
+                            name = groupCollection[RegularExpressions.NameGroup].Value;
+                            ProjectErrorUtilities.VerifyThrowInvalidProject(groupCollection[RegularExpressions.ItemSpecificationGroup].Length == 0, elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
+                            multipleMatches.Add(new MetadataMatch(match, name));
+                        }
+
+                        match = match.NextMatch();
+                    }
+
+                    return new OneOrMultipleMetadataMatches(multipleMatches);
+                }
+
+                private static bool TryGetCachedMetadataMatch(string stringToCheck, out string cachedMatch)
+                {
+                    // Pull a local reference first in case the cached value is swapped.
+                    cachedMatch = s_lastParsedQuotedExpression;
+                    if (string.IsNullOrEmpty(cachedMatch))
+                    {
+                        return false;
+                    }
+
+                    // Quickly cancel out of definite misses.
+                    int length = stringToCheck.Length;
+                    if (length == cachedMatch.Length + 3 && stringToCheck[0] == '%' && stringToCheck[1] == '(' && stringToCheck[length - 1] == ')')
+                    {
+                        // If the inner slice is a hit, don't allocate a string.
+                        ReadOnlySpan<char> span = stringToCheck.AsSpan(2, length - 3);
+                        if (span.SequenceEqual(cachedMatch.AsSpan()))
+                        {
+                            return true;
+                        }
+                    }
+
+                    return false;
                 }
 
                 /// <summary>
@@ -2956,6 +3146,128 @@ namespace Microsoft.Build.Evaluation
                         yield return new KeyValuePair<string, S>("false", null);
                     }
                 }
+
+                /// <summary>
+                /// Expands the metadata in the match provided into a string result.
+                /// The match is expected to be the content of a transform.
+                /// For example, representing "%(Filename.obj)" in the original expression "@(Compile->'%(Filename.obj)')".
+                /// </summary>
+                private static string GetMetadataValueFromMatch(
+                    MetadataMatch match,
+                    string itemSpec,
+                    IItem sourceOfMetadata,
+                    IElementLocation elementLocation,
+                    ref int curIndex)
+                {
+                    string value = null;
+                    try
+                    {
+                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(match.Name))
+                        {
+                            // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
+                            // In that case, we're safe to get the current directory as we'll be running on TaskItems which
+                            // only exist within a target where we can trust the current directory
+                            string directoryToUse = sourceOfMetadata.ProjectDirectory ?? Directory.GetCurrentDirectory();
+                            string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+
+                            value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, itemSpec, definingProjectEscaped, match.Name);
+                        }
+                        else
+                        {
+                            value = sourceOfMetadata.GetMetadataValueEscaped(match.Name);
+                        }
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", match.Name, ex.Message);
+                    }
+
+                    curIndex = match.Index + match.Length;
+                    return value;
+                }
+
+                /// <summary>
+                /// The type of match we found.
+                /// We use this to determine how to build the final output string.
+                /// </summary>
+                private enum MetadataMatchType
+                {
+                    ExactString,
+                    Single,
+                    Multiple,
+                }
+
+                /// <summary>
+                /// A discriminated union between one exact, one partial, or multiple matches.
+                /// </summary>
+                private readonly struct OneOrMultipleMetadataMatches
+                {
+                    public OneOrMultipleMetadataMatches(string name)
+                    {
+                        Type = MetadataMatchType.ExactString;
+                        Single = new MetadataMatch(name);
+                    }
+
+                    public OneOrMultipleMetadataMatches(string quotedExpressionFunction, Match match, string name)
+                    {
+                        // We know we have a full string match when our extracted name is the same length as the input
+                        // string minus the surrounding characters.
+                        Type = quotedExpressionFunction.Length == name.Length + QuotedExpressionSurroundCharCount
+                                ? MetadataMatchType.ExactString
+                                : MetadataMatchType.Single;
+                        Single = new MetadataMatch(match, name);
+                    }
+
+                    public OneOrMultipleMetadataMatches(List<MetadataMatch> allMatches)
+                    {
+                        Type = MetadataMatchType.Multiple;
+                        Multiple = allMatches;
+                    }
+
+                    internal MetadataMatch Single { get; }
+
+                    internal List<MetadataMatch> Multiple { get; }
+
+                    internal MetadataMatchType Type { get; }
+                }
+
+                /// <summary>
+                /// Represents a single match. Whether it was cached or from a Regex should be transparent
+                /// since we simulate the length calculation.
+                /// </summary>
+                private readonly struct MetadataMatch
+                {
+                    public MetadataMatch(string name)
+                    {
+                        Name = name;
+                        Index = 0;
+                        Length = name.Length + QuotedExpressionSurroundCharCount;
+                    }
+
+                    public MetadataMatch(Match match, string name)
+                    {
+                        Name = name;
+                        Index = match.Index;
+                        Length = match.Length;
+                    }
+
+                    /// <summary>
+                    /// The inner value of the match.
+                    /// </summary>
+                    internal string Name { get; }
+
+                    /// <summary>
+                    /// The index of the match in the original string.
+                    /// If we have an exact string match, this will be 0.
+                    /// </summary>
+                    internal int Index { get; }
+
+                    /// <summary>
+                    /// The length of the match in the original string.
+                    /// If we have an exact string match, this computed to match the original input.
+                    /// </summary>
+                    internal int Length { get; }
+                }
             }
 
             /// <summary>
@@ -3019,75 +3331,6 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Execute via the delegate
                     return _transform(expander, _elementLocation, includeNullEntries, _functionName, itemsOfType, _arguments);
-                }
-            }
-
-            /// <summary>
-            /// A functor that returns the value of the metadata in the match
-            /// that is on the item it was created with.
-            /// </summary>
-            private class MetadataMatchEvaluator
-            {
-                /// <summary>
-                /// The current ItemSpec of the item being matched.
-                /// </summary>
-                private string _itemSpec;
-
-                /// <summary>
-                /// Item used as the source of metadata.
-                /// </summary>
-                private IItem _sourceOfMetadata;
-
-                /// <summary>
-                /// Location of the match.
-                /// </summary>
-                private IElementLocation _elementLocation;
-
-                /// <summary>
-                /// Constructor.
-                /// </summary>
-                internal MetadataMatchEvaluator(string itemSpec, IItem sourceOfMetadata, IElementLocation elementLocation)
-                {
-                    _itemSpec = itemSpec;
-                    _sourceOfMetadata = sourceOfMetadata;
-                    _elementLocation = elementLocation;
-                }
-
-                /// <summary>
-                /// Expands the metadata in the match provided into a string result.
-                /// The match is expected to be the content of a transform.
-                /// For example, representing "%(Filename.obj)" in the original expression "@(Compile->'%(Filename.obj)')".
-                /// </summary>
-                internal string GetMetadataValueFromMatch(Match match)
-                {
-                    string name = match.Groups[RegularExpressions.NameGroup].Value;
-
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(match.Groups[RegularExpressions.ItemSpecificationGroup].Length == 0, _elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
-
-                    string value = null;
-                    try
-                    {
-                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
-                        {
-                            // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
-                            // In that case, we're safe to get the current directory as we'll be running on TaskItems which
-                            // only exist within a target where we can trust the current directory
-                            string directoryToUse = _sourceOfMetadata.ProjectDirectory ?? Directory.GetCurrentDirectory();
-                            string definingProjectEscaped = _sourceOfMetadata.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
-
-                            value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, _itemSpec, definingProjectEscaped, name);
-                        }
-                        else
-                        {
-                            value = _sourceOfMetadata.GetMetadataValueEscaped(name);
-                        }
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "CannotEvaluateItemMetadata", name, ex.Message);
-                    }
-
-                    return value;
                 }
             }
         }
