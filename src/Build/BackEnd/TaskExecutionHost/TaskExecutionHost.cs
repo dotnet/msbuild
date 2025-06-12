@@ -1226,8 +1226,9 @@ namespace Microsoft.Build.BackEnd
 
             parameter.Initialized = true;
 
-            string taskAndParameterName = _taskName + "_" + parameter.Name;
-            string key = "DisableLogTaskParameter_" + taskAndParameterName;
+            // PERF: Be careful to avoid unnecessary string allocations. Appending '_taskName + "_" + parameter.Name' happens in both paths,
+            // but we don't want to allocate the string if we don't need to.
+            string key = "DisableLogTaskParameter_" + _taskName + "_" + parameter.Name;
 
             if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
@@ -1235,7 +1236,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
+                string metadataKey = "DisableLogTaskParameterItemMetadata_" + _taskName + "_" + parameter.Name;
                 if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
                 {
                     parameter.LogItemMetadata = false;
