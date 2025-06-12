@@ -111,7 +111,7 @@ namespace Microsoft.Build.Collections
         /// Use AddItem or RemoveItem to modify items in this project.
         /// Using the return value from this in a multithreaded situation is unsafe.
         /// </summary>
-        public ICollection<T> this[string itemtype]
+        public IReadOnlyCollection<T> this[string itemtype]
         {
             get
             {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Collections
                     }
                 }
 
-                return new ReadOnlyCollection<T>(list);
+                return list;
             }
         }
 
@@ -213,11 +213,16 @@ namespace Microsoft.Build.Collections
         /// </summary>
         /// <param name="itemType">The item type to return</param>
         /// <returns>The list of matching items.</returns>
-        public ICollection<T> GetItems(string itemType)
+        public IReadOnlyCollection<T> GetItems(string itemType)
         {
-            ICollection<T> result = this[itemType];
+            IReadOnlyCollection<T> result = this[itemType];
 
             return result ?? Array.Empty<T>();
+        }
+
+        IReadOnlyCollection<T> IItemProvider<T>.GetItems(string itemType)
+        {
+            return this[itemType];
         }
 
         #endregion

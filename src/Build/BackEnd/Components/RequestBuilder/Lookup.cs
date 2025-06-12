@@ -461,7 +461,7 @@ namespace Microsoft.Build.BackEnd
         /// If no match is found, returns an empty list.
         /// Caller must not modify the group returned.
         /// </summary>
-        public ICollection<ProjectItemInstance> GetItems(string itemType)
+        public IReadOnlyCollection<ProjectItemInstance> GetItems(string itemType)
         {
             // The visible items consist of the adds (accumulated as we go down)
             // plus the first set of regular items we encounter
@@ -470,14 +470,14 @@ namespace Microsoft.Build.BackEnd
             List<ProjectItemInstance> allAdds = null;
             List<ProjectItemInstance> allRemoves = null;
             Dictionary<ProjectItemInstance, MetadataModifications> allModifies = null;
-            ICollection<ProjectItemInstance> groupFound = null;
+            IReadOnlyCollection<ProjectItemInstance> groupFound = null;
 
             foreach (Scope scope in _lookupScopes)
             {
                 // Accumulate adds while we look downwards
                 if (scope.Adds != null)
                 {
-                    ICollection<ProjectItemInstance> adds = scope.Adds[itemType];
+                    IReadOnlyCollection<ProjectItemInstance> adds = scope.Adds[itemType];
                     if (adds.Count != 0)
                     {
                         if (allAdds == null)
@@ -495,7 +495,7 @@ namespace Microsoft.Build.BackEnd
                 // Accumulate removes while we look downwards
                 if (scope.Removes != null)
                 {
-                    ICollection<ProjectItemInstance> removes = scope.Removes[itemType];
+                    IReadOnlyCollection<ProjectItemInstance> removes = scope.Removes[itemType];
                     if (removes.Count != 0)
                     {
                         if (allRemoves == null)
@@ -607,10 +607,10 @@ namespace Microsoft.Build.BackEnd
         /// Should be used only by batching buckets, and if no items are passed,
         /// explicitly stores a marker for this item type indicating this.
         /// </summary>
-        internal void PopulateWithItems(string itemType, ICollection<ProjectItemInstance> group)
+        internal void PopulateWithItems(string itemType, IReadOnlyCollection<ProjectItemInstance> group)
         {
             PrimaryTable ??= new ItemDictionary<ProjectItemInstance>();
-            ICollection<ProjectItemInstance> existing = PrimaryTable[itemType];
+            IReadOnlyCollection<ProjectItemInstance> existing = PrimaryTable[itemType];
             ErrorUtilities.VerifyThrow(existing.Count == 0, "Cannot add an itemgroup of this type.");
 
             if (group.Count > 0)
@@ -756,7 +756,7 @@ namespace Microsoft.Build.BackEnd
         /// Modifies items in this scope with the same set of metadata modifications.
         /// Assumes all the items in the group have the same, provided, type.
         /// </summary>
-        internal void ModifyItems(string itemType, ICollection<ProjectItemInstance> group, MetadataModifications metadataChanges)
+        internal void ModifyItems(string itemType, IReadOnlyCollection<ProjectItemInstance> group, MetadataModifications metadataChanges)
         {
             // Modifying in outer scope could be easily implemented, but our code does not do it at present
             MustNotBeOuterScope();
@@ -927,7 +927,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ApplyModificationsToTable(IItemDictionary<ProjectItemInstance> table, string itemType, ItemsMetadataUpdateDictionary modify)
         {
-            ICollection<ProjectItemInstance> existing = table[itemType];
+            IReadOnlyCollection<ProjectItemInstance> existing = table[itemType];
             if (existing != null)
             {
                 foreach (var kvPair in modify)
@@ -990,7 +990,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (table?.ItemTypes.Contains(item.ItemType) == true)
             {
-                ICollection<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
+                IReadOnlyCollection<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
                 {
                     ErrorUtilities.VerifyThrow(!tableOfItemsOfSameType.Contains(item), "Item should not be in table");

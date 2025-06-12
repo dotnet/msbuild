@@ -249,7 +249,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="matchingOptions">Options matching.</param>
         private void ExecuteRemove(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, HashSet<string> matchOnMetadata, MatchOnMetadataOptions matchingOptions)
         {
-            ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
             if (group == null)
             {
                 // No items of this type to remove
@@ -296,7 +296,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="loggingContext">Context for this operation.</param>
         private void ExecuteModify(ProjectItemGroupTaskItemInstance child, ItemBucket bucket, ISet<string> keepMetadata, ISet<string> removeMetadata, LoggingContext loggingContext = null)
         {
-            ICollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = bucket.Lookup.GetItems(child.ItemType);
             if (group == null || group.Count == 0)
             {
                 // No items of this type to modify
@@ -342,7 +342,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Now apply the changes.  This must be done after filtering, since explicitly set metadata overrides filters.
-            bucket.Lookup.ModifyItems(child.ItemType, group, metadataToSet);
+            bucket.Lookup.ModifyItems(child.ItemType, [..group], metadataToSet);
         }
 
         /// <summary>
@@ -585,7 +585,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="expander">The expander to use</param>
         /// <returns>A list of matching items</returns>
         private List<ProjectItemInstance> FindItemsMatchingSpecification(
-            ICollection<ProjectItemInstance> items,
+            IReadOnlyCollection<ProjectItemInstance> items,
             string specification,
             ElementLocation specificationLocation,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
@@ -653,7 +653,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         private List<ProjectItemInstance> FindItemsMatchingMetadataSpecification(
-            ICollection<ProjectItemInstance> group,
+            IReadOnlyCollection<ProjectItemInstance> group,
             ProjectItemGroupTaskItemInstance child,
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander,
             HashSet<string> matchOnMetadata,

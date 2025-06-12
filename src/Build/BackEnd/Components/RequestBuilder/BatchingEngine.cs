@@ -144,7 +144,7 @@ namespace Microsoft.Build.BackEnd
                 // that weren't represented in "consumedItemReferences"... this would happen if there
                 // were qualified metadata references in the consumedMetadataReferences table, such as
                 // %(EmbeddedResource.Culture).
-                Dictionary<string, ICollection<ProjectItemInstance>> itemListsToBeBatched = GetItemListsToBeBatched(consumedMetadataReferences, consumedItemReferences, lookup, elementLocation);
+                Dictionary<string, IReadOnlyCollection<ProjectItemInstance>> itemListsToBeBatched = GetItemListsToBeBatched(consumedMetadataReferences, consumedItemReferences, lookup, elementLocation);
 
                 // At this point, if there were any metadata references in the tag, but no item
                 // references to batch on, we've got a problem because we can't figure out which
@@ -203,7 +203,7 @@ namespace Microsoft.Build.BackEnd
         /// the entire list of items will be returned in the Value.  Otherwise, the Value will be empty, indicating only the
         /// qualified item set (in the Key) should be batched.
         /// </returns>
-        private static Dictionary<string, ICollection<ProjectItemInstance>> GetItemListsToBeBatched(
+        private static Dictionary<string, IReadOnlyCollection<ProjectItemInstance>> GetItemListsToBeBatched(
             Dictionary<string, MetadataReference> consumedMetadataReferences,   // Key is [string] potentially qualified metadata name
                                                                                 // Value is [struct MetadataReference]
             HashSet<string> consumedItemReferenceNames,
@@ -212,7 +212,7 @@ namespace Microsoft.Build.BackEnd
         {
             // The keys in this hashtable are the names of the items that we will batch on.
             // The values are always String.Empty (not used).
-            var itemListsToBeBatched = new Dictionary<string, ICollection<ProjectItemInstance>>(MSBuildNameIgnoreCaseComparer.Default);
+            var itemListsToBeBatched = new Dictionary<string, IReadOnlyCollection<ProjectItemInstance>>(MSBuildNameIgnoreCaseComparer.Default);
 
             // Loop through all the metadata references and find the ones that are qualified
             // with an item name.
@@ -254,7 +254,7 @@ namespace Microsoft.Build.BackEnd
                         foreach (string consumedItemName in consumedItemReferenceNames)
                         {
                             // Loop through all the items in the item list.
-                            ICollection<ProjectItemInstance> items = lookup.GetItems(consumedItemName);
+                            IReadOnlyCollection<ProjectItemInstance> items = lookup.GetItems(consumedItemName);
 
                             if (items != null)
                             {
@@ -299,7 +299,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>List containing ItemBucket objects (can be empty), each one representing an execution batch.</returns>
         private static List<ItemBucket> BucketConsumedItems(
             Lookup lookup,
-            Dictionary<string, ICollection<ProjectItemInstance>> itemListsToBeBatched,
+            Dictionary<string, IReadOnlyCollection<ProjectItemInstance>> itemListsToBeBatched,
             Dictionary<string, MetadataReference> consumedMetadataReferences,
             ElementLocation elementLocation,
             LoggingContext loggingContext)
@@ -310,12 +310,12 @@ namespace Microsoft.Build.BackEnd
             var buckets = new List<ItemBucket>();
 
             // Get and iterate through the list of item names that we're supposed to batch on.
-            foreach (KeyValuePair<string, ICollection<ProjectItemInstance>> entry in itemListsToBeBatched)
+            foreach (KeyValuePair<string, IReadOnlyCollection<ProjectItemInstance>> entry in itemListsToBeBatched)
             {
                 string itemName = entry.Key;
 
                 // Use the previously-fetched items, if possible
-                ICollection<ProjectItemInstance> items = entry.Value ?? lookup.GetItems(itemName);
+                IReadOnlyCollection<ProjectItemInstance> items = entry.Value ?? lookup.GetItems(itemName);
 
                 if (items != null)
                 {

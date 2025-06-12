@@ -33,7 +33,7 @@ namespace Microsoft.Build.Collections
         /// Use AddItem or RemoveItem to modify items in this project.
         /// Using the return value from this in a multithreaded situation is unsafe.
         /// </summary>
-        ICollection<T> this[string itemType] { get; }
+        IReadOnlyCollection<T> this[string itemType] { get; }
 
         /// <summary>
         /// Empty the collection.
