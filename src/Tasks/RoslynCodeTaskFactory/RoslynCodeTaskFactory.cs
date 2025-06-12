@@ -86,6 +86,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, Assembly> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, Assembly>();
 
+        // for tests
+        internal static void ClearAssemblyCache() => CompiledAssemblyCache.Clear();
+
         /// <summary>
         /// Stores the path to the directory that this assembly is located in.
         /// </summary>

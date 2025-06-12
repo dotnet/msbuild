@@ -162,6 +162,7 @@ Log.LogError(Class1.ToPrint());
         [InlineData(true)]
         public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
+            RoslynCodeTaskFactory.ClearAssemblyCache();
             string text1 = $@"
 <Project>
 
