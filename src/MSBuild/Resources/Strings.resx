@@ -1513,7 +1513,7 @@
     <comment>{StrBegin="MSBUILD : error MSB1059: "}</comment>
   </data>
   <data name="XMake.LoggerCreationError" xml:space="preserve">
-    <value>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</value>
+    <value>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</value>
     <comment>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

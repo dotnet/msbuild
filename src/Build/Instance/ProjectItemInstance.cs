@@ -1452,20 +1452,7 @@ namespace Microsoft.Build.Execution
                 else if (destinationItem is IMetadataContainer destinationItemAsMetadataContainer)
                 {
                     // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
-                    IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
-                    IEnumerable<KeyValuePair<string, string>> metadataToImport = metadataEnumerable
-                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
-                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
-
-#if FEATURE_APPDOMAIN
-                    if (RemotingServices.IsTransparentProxy(destinationItem))
-                    {
-                        // Linq is not serializable so materialize the collection before making the call.
-                        metadataToImport = metadataToImport.ToList();
-                    }
-#endif
-
-                    destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
+                    BulkImportMetadata(destinationItem, destinationItemAsMetadataContainer);
                 }
                 else
                 {
@@ -1490,6 +1477,25 @@ namespace Microsoft.Build.Execution
                         destinationItem.SetMetadata("OriginalItemSpec", _includeEscaped);
                     }
                 }
+            }
+
+            // PERF: Keep this method extracted to avoid unconditionally allocating a closure object
+            private void BulkImportMetadata(ITaskItem destinationItem, IMetadataContainer destinationItemAsMetadataContainer)
+            {
+                IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
+                IEnumerable<KeyValuePair<string, string>> metadataToImport = metadataEnumerable
+                    .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
+                    .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
+
+#if FEATURE_APPDOMAIN
+                if (RemotingServices.IsTransparentProxy(destinationItem))
+                {
+                    // Linq is not serializable so materialize the collection before making the call.
+                    metadataToImport = metadataToImport.ToList();
+                }
+#endif
+
+                destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
             }
 
             /// <summary>
