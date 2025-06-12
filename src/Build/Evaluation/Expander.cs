@@ -2286,14 +2286,14 @@ namespace Microsoft.Build.Evaluation
                 /// In theory we should be able to use shared instance, but in a profile it appears something higher in
                 /// the call-stack is already borrowing the instance, so it ends up always allocating.
                 /// This should not be used outside of ExpandQuotedExpressionFunction unless validated to not conflict.
-                /// <summary>
+                /// </summary>
                 [ThreadStatic]
                 private static SpanBasedStringBuilder s_includeBuilder;
 
                 /// <summary>
                 /// A reference to the last extracted expression function to save on Regex-related allocations.
                 /// In many cases, the expression is exactly the same as the previous.
-                /// <summary>
+                /// </summary>
                 private static string s_lastParsedQuotedExpression;
 
                 /// <summary>
