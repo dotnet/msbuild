@@ -2775,7 +2775,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         string include = null;
 
-                        // If we've been handed a null entry by an upstream tranform
+                        // If we've been handed a null entry by an upstream transform
                         // then we don't want to try to tranform it with an itempec modification.
                         // Simply allow the null to be passed along (if, we are including nulls as specified by includeNullEntries
                         if (item.Key != null)
