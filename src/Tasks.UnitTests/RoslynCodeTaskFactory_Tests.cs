@@ -754,6 +754,7 @@ namespace InlineTask
         [InlineData(true)]
         public void RoslynCodeTaskFactory_UsingAPI(bool forceOutOfProc)
         {
+            RoslynCodeTaskFactory.ClearAssemblyCache();
             string text = $@"
 <Project>
 
