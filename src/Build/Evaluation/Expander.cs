@@ -2248,8 +2248,8 @@ namespace Microsoft.Build.Evaluation
             {
                 /// <summary>
                 /// The number of characters added by a quoted expression.
-                /// 3 characters for %()
-                // </summary>
+                /// 3 characters for
+                ///  </summary>
                 private const int QuotedExpressionSurroundCharCount = 3;
 
                 /// <summary>
