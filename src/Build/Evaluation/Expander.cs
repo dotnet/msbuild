@@ -1867,7 +1867,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else if (argumentsExpression != null)
                     {
-                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression);
+                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression.AsMemory());
                     }
 
                     ItemTransformFunctions functionType;
