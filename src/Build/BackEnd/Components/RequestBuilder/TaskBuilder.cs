@@ -255,24 +255,22 @@ namespace Microsoft.Build.BackEnd
             // Perf: Moved to indexed based for loop to avoid boxing of the enumerator for IList.
             for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
-                var projectTaskInstanceChild = _taskNode.Outputs[i];
-                ProjectTaskOutputItemInstance outputItemInstance = projectTaskInstanceChild as ProjectTaskOutputItemInstance;
-                if (outputItemInstance != null)
+                ProjectTaskInstanceChild taskOutputSpecification = _taskNode.Outputs[i];
+                if (taskOutputSpecification is ProjectTaskOutputItemInstance outputItemInstance)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                ProjectTaskOutputPropertyInstance outputPropertyInstance = projectTaskInstanceChild as ProjectTaskOutputPropertyInstance;
-                if (outputPropertyInstance != null)
+                if (taskOutputSpecification is ProjectTaskOutputPropertyInstance outputPropertyInstance)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
                 }
 
-                if (!String.IsNullOrEmpty(projectTaskInstanceChild.Condition))
+                if (!String.IsNullOrEmpty(taskOutputSpecification.Condition))
                 {
-                    taskParameters.Add(projectTaskInstanceChild.Condition);
+                    taskParameters.Add(taskOutputSpecification.Condition);
                 }
             }
 
