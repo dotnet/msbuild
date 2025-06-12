@@ -162,12 +162,12 @@ Log.LogError(Class1.ToPrint());
         [InlineData(true)]
         public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
-            RoslynCodeTaskFactory.ClearAssemblyCache();
+            int num = forceOutOfProc ? 1 : 2;
             string text1 = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -183,8 +183,8 @@ Log.LogError(Class1.ToPrint());
 
     <Target Name=""Build"">
         <MSBuild Projects=""p2.proj"" Targets=""Build"" />
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -193,7 +193,7 @@ Log.LogError(Class1.ToPrint());
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -208,8 +208,8 @@ Log.LogError(Class1.ToPrint());
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -229,7 +229,7 @@ Log.LogError(Class1.ToPrint());
                 .BuildMessageEvents
                 .Where(m => m.Message == "Compiling task source code")
                 .ToArray();
-
+            
             // with broken cache we get two Compiling messages
             // as we fail to reuse the first assembly
             messages.Length.ShouldBe(1);
@@ -754,12 +754,12 @@ namespace InlineTask
         [InlineData(true)]
         public void RoslynCodeTaskFactory_UsingAPI(bool forceOutOfProc)
         {
-            RoslynCodeTaskFactory.ClearAssemblyCache();
+            int num = forceOutOfProc ? 3 : 4;
             string text = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -776,7 +776,7 @@ namespace InlineTask
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""World"" />
+        <Custom{num} SayHi=""World"" />
     </Target>
 
 </Project>";
