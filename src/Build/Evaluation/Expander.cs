@@ -2784,6 +2784,11 @@ namespace Microsoft.Build.Evaluation
 
                             switch (matches.Type)
                             {
+                                case MetadataMatchType.None:
+                                    // If we didn't match anything, just use the original string.
+                                    include = quotedExpressionFunction;
+                                    break;
+
                                 // If we matched on a full string, we don't have to concatenate anything.
                                 case MetadataMatchType.ExactString:
                                     include = GetMetadataValueFromMatch(matches.Single, item.Key, item.Value, elementLocation, ref curIndex);
@@ -2859,7 +2864,7 @@ namespace Microsoft.Build.Evaluation
                     // Unfortunately even .NET Core does not have a struct-based Group enumerator at this point.
                     if (!match.Success)
                     {
-                        return new OneOrMultipleMetadataMatches(string.Empty);
+                        return new OneOrMultipleMetadataMatches();
                     }
                     else if (s_itemSpecModifiers.TryGetValue(match.Value, out cachedName))
                     {
@@ -3192,6 +3197,7 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private enum MetadataMatchType
                 {
+                    None,
                     ExactString,
                     Single,
                     Multiple,
@@ -3202,6 +3208,11 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private readonly struct OneOrMultipleMetadataMatches
                 {
+                    public OneOrMultipleMetadataMatches()
+                    {
+                        Type = MetadataMatchType.None;
+                    }
+
                     public OneOrMultipleMetadataMatches(string name)
                     {
                         Type = MetadataMatchType.ExactString;
