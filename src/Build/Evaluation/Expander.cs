@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -1786,7 +1787,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private static class ItemExpander
         {
-            private static readonly Dictionary<string, ItemTransformFunctions> s_intrinsicItemFunctions = new(StringComparer.OrdinalIgnoreCase)
+            private static readonly FrozenDictionary<string, ItemTransformFunctions> s_intrinsicItemFunctions = new Dictionary<string, ItemTransformFunctions>(StringComparer.OrdinalIgnoreCase)
             {
                 { "Count", ItemTransformFunctions.Count },
                 { "Exists", ItemTransformFunctions.Exists },
@@ -1804,7 +1805,7 @@ namespace Microsoft.Build.Evaluation
                 { "WithMetadataValue", ItemTransformFunctions.WithMetadataValue },
                 { "WithoutMetadataValue", ItemTransformFunctions.WithoutMetadataValue },
                 { "AnyHaveMetadataValue", ItemTransformFunctions.AnyHaveMetadataValue },
-            };
+            }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
             private enum ItemTransformFunctions
             {
