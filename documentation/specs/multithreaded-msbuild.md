@@ -171,7 +171,7 @@ deactivate Thread1_Project1
 
 Within a thread node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
 
-This leaves us with tasks. Tasks will need to be modified to support multithreading (see [Thread-safe tasks]), but we need a way to maintain compatibility with existing tasks that do not implement the new interface, so they can still run in a process they "own" while allowing new tasks to take advantage of multithreading.
+This leaves us with tasks. Tasks will need to be modified to support multithreading (see [Thread-safe tasks]), but we need a way to maintain compatibility with existing tasks that do not implement the new interface, so they can still run in a process they "own" while allowing new tasks to take advantage of multithreading. This will be important while migrating first-party tasks to the new interface (especially while honing the interface definition) and for third-party custom and inline tasks that may not be actively maintained.
 
 For most tasks, an engine-level decision to push the tasks to a TaskHost process will maintain compatibility: the process will only run one task at a time, so the task will still "own" the process. When a task is pushed out of process this way, we will need to be careful to capture and preserve any global-process-state mutations that the task makes, so that they can be communicated back to the main MSBuild process and available to subsequent tasks in the same project.
 
