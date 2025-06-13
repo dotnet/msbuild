@@ -416,8 +416,9 @@ function InitializeVisualStudioMSBuild([bool]$install, [object]$vsRequirements =
   }
 
   # Locate Visual Studio installation or download x-copy msbuild.
+  Write-Host "Use specified VS in global.json: $($env:UseSpecifiedVS -eq 1)"
   $vsInfo = LocateVisualStudio $vsRequirements
-  if ($vsInfo -ne $null) {
+  if ($vsInfo -ne $null -and $env:UseSpecifiedVS -ne 1) {
     # Ensure vsInstallDir has a trailing slash
     $vsInstallDir = Join-Path $vsInfo.installationPath "\"
     $vsMajorVersion = $vsInfo.installationVersion.Split('.')[0]

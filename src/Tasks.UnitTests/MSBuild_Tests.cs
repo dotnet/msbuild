@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests
 #if RUNTIME_TYPE_NETCORE
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/259")]
 #else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/11888")]
+        [Fact]
 #endif
         public void PropertyOverridesContainSemicolon()
         {
