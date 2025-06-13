@@ -48,9 +48,9 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// After calling <see cref="Yield"/>, global process state like environment variables and current working directory 
         /// can change arbitrarily until <see cref="Reacquire"/> returns. As a result, if you are going to depend on any of 
-        /// that state, for instance by opening files by relative path rather than calling 
+        /// that state, for instance by opening files by relative path, rather than calling 
         /// <c>ITaskItem.GetMetadata("FullPath")</c>, you must do so before calling <see cref="Yield"/>. 
-        /// The common pattern is to figure out what all the long-running work is and start it before yielding.
+        /// The recommended pattern is to figure out what all the long-running work is and start it before yielding.
         /// </remarks>
         void Yield();
 
