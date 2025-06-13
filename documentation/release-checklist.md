@@ -69,7 +69,7 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/roslyn`
   - [ ] Arcade:
     - Based on .NET version channel--does not change every MSBuild release
-    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`    
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
 - [ ] Make sure the non-infrastructure dependencies (currently Roslyn and Nuget) are set to 'disabled' (`  - Enabled: False` in the `darc get-subscriptions` output) - we do not want to automatically bump them. The version updates should be explicitly driven by SDK or VS.
 - [ ] Any missing subscription need to be added via `darc add-subscription` command, any misconfigured subscription needs to be edit via `darc update-subscription` command (for additional required and optional parameters run with `--help`)
 
