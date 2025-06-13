@@ -159,6 +159,10 @@ configuration:
             action: Opened
         - isAction:
             action: Reopened
+      - not:
+          isActivitySender:
+            user: copilot
+            issueAuthor: False
       - or:
         - filesMatchPattern:
             pattern: ^.+\.swr$
