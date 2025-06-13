@@ -879,14 +879,6 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Combine our default referenced assemblies with those explicitly specified
         /// </summary>
-        private List<string> CombineReferencedAssemblies()
-        {
-            return CombineReferencedAssemblies(null);
-        }
-
-        /// <summary>
-        /// Combine our default referenced assemblies with those explicitly specified
-        /// </summary>
         private List<string> CombineReferencedAssemblies(List<string> directoriesToAddToManifest)
         {
             List<string> finalReferenceList = new List<string>(s_defaultReferencedFrameworkAssemblyNames.Length + 2 + _referencedAssemblies.Count);
