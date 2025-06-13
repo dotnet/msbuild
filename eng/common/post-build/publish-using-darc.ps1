@@ -39,6 +39,10 @@ try {
     $optionalParams.Add("--default-channels-required") | Out-Null
   }
 
+  if ("true" -eq $RequireDefaultChannels) {
+    $optionalParams.Add("--default-channels-required") | Out-Null
+  }
+
   & $darc add-build-to-channel `
     --id $buildId `
     --publishing-infra-version $PublishingInfraVersion `
