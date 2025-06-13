@@ -53,7 +53,7 @@ deactivate Project1
 
 ### Out-of-proc task execution
 
-Even in single-proc mode, MSBuild supports out-of-proc task execution. This is done by spawning a new process to execute the task, which allows the task to run in isolation from the main build process. MSBuild handles passing the necessary information to the task process, such as the current environment, working directory, and explicit inputs. The task process can then execute and return results back to the main build process.
+Even in single-proc mode, MSBuild supports out-of-proc task execution. This is done by spawning a new TaskHost process to execute the task, which allows the task to run in isolation from the main build process. MSBuild handles passing the necessary information to the TaskHost process, such as the current environment, working directory, and explicit inputs. The TaskHost process can then execute and return results back to the main build process.
 
 ```mermaid
 sequenceDiagram
@@ -119,18 +119,18 @@ Project1 ->> Scheduler: results
 deactivate Project1
 ```
 
-A task that needs to run out of process can spawn a new process, as in a single-proc build, with potentially many TaskHost processes running concurrently.
+A task that needs to run out of process can spawn a new TaskHost process, as in a single-proc build, with potentially many TaskHost processes running concurrently.
 
 
 ## Multithreading MSBuild
 
-The goal of multithreading MSBuild is to allow tasks to run concurrently within the same process, rather than spawning separate processes for each node. This would enable better resource utilization and potentially faster builds, as fewer processes would need to be created, reducing .NET runtime overhead and inter-process communication as well as increasing the efficacy of task-level caching.
+The goal of multithreading MSBuild is to allow execution of multiple projects concurrently within the same process, rather than spawning separate processes for each node. This would enable better resource utilization and potentially faster builds, as fewer processes would need to be created, reducing .NET runtime overhead and inter-process communication as well as increasing the efficacy of task-level caching.
 
 But tasks are not currently designed to be multithreaded. They assume that they own the whole process while they are executing, and they mutate the process state (environment, working directory, etc.). To make MSBuild multithreaded while maintaining task compatibility, we need to consider what parts of the build process can be moved to a multithreaded model without breaking existing tasks, as well as allowing new tasks to opt into multithreading.
 
-The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs" (`INodeProvider`). To support multithreading, we will introduce a new type of node, called a "thread node", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects concurrently within the same process.
+The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs" (`INodeProvider`). To support multithreading, we will introduce a new type of node, called a "**thread node**", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects concurrently within the same process.
 
-The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, cli or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode, we will create all the thread nodes in the entry process.
+The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, cli or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode. We will create all the thread nodes in the entry process.
 
 ```mermaid
 sequenceDiagram
@@ -169,7 +169,7 @@ Thread1_Project1 ->> Scheduler: results
 deactivate Thread1_Project1
 ```
 
-Within thread node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
+Within a thread node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
 
 This leaves us with tasks. Tasks will need to be modified to support multithreading (see [Thread-safe tasks]), but we need a way to maintain compatibility with existing tasks that do not implement the new interface, so they can still run in a process they "own" while allowing new tasks to take advantage of multithreading.
 
@@ -179,9 +179,9 @@ Some tasks or sets of tasks will break if they are run in short-lived processes,
 
 ## Sidecar TaskHosts
 
-One feature addition that will support multithreading MSBuild is the ability to run tasks in sidecar TaskHosts. This means that tasks can be executed in separate processes, but these processes are long-lived and dedicated to a specific project-execution node, as opposed to short-lived TaskHost processes that are spawned for each task execution.
+One feature addition that will support multithreading MSBuild is the ability to run tasks in sidecar TaskHost processes. With this feature tasks may be executed in separate sidecar TaskHost processes, which are long-lived and dedicated to a specific project-execution node, as opposed to the current implementation of short-lived TaskHost processes that are spawned for each task execution.
 
-This will also apply to .NET (Core) tasks, which must run out of process in Visual Studio/MSBuild.exe on .NET Framework. Sidecar TaskHosts will reduce the overhead of pushing task execution out of process, as the process will already be running, ready to execute tasks, and have an established IPC connection to the main MSBuild process.
+Sidecar TaskHosts will reduce the overhead of pushing task execution out of process, as the process will already be running, ready to execute tasks, and have an established IPC connection to the main MSBuild process.
 
 ```mermaid
 sequenceDiagram
@@ -221,7 +221,7 @@ In the initial phase of development of multithreaded execution mode, all tasks w
 
 ## Interaction with `DisableInProcNode`
 
-We need ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
+We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
 
 ```mermaid
 sequenceDiagram
