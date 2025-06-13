@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!--
-    Microsoft ResX Schema
-
+  <!-- 
+    Microsoft ResX Schema 
+    
     Version 2.0
-
-    The primary goals of this format is to allow a simple XML format
-    that is mostly human readable. The generation and parsing of the
-    various data types are done through the TypeConverter classes
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
     associated with the data types.
-
+    
     Example:
-
+    
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-
-    There are any number of "resheader" rows that contain simple
+                
+    There are any number of "resheader" rows that contain simple 
     name/value pairs.
-
-    Each data row contains a name, and value. The row also contains a
-    type or mimetype. Type corresponds to a .NET class that support
-    text/value conversion through the TypeConverter architecture.
-    Classes that don't support this are serialized and stored with the
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
     mimetype set.
-
-    The mimetype is used for serialized objects, and tells the
-    ResXResourceReader how to depersist the object. This is currently not
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
     extensible. For a given mimetype the value must be set accordingly:
-
-    Note - application/x-microsoft.net.object.binary.base64 is the format
-    that the ResXResourceWriter will generate, however the reader can
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
     read any of the formats listed below.
-
+    
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-
+    
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with
+    value   : The object must be serialized with 
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array
+    value   : The object must be serialized into a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -145,7 +145,7 @@
   <data name="WaitingForEndOfBuild" xml:space="preserve">
     <value>The operation cannot be completed because EndBuild has already been called but existing submissions have not yet completed.</value>
   </data>
-  <data name="EnvironmentDerivedPropertyRead">
+  <data name="EnvironmentDerivedPropertyRead" xml:space="preserve">
     <value>Property '{0}' with value '{1}' expanded from the environment.</value>
   </data>
   <data name="SubmissionAlreadyComplete" xml:space="preserve">
@@ -479,7 +479,7 @@
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
     special exception to abort the build.</comment>
   </data>
-  <data name="General.TwoVectorsMustHaveSameLength">
+  <data name="General.TwoVectorsMustHaveSameLength" xml:space="preserve">
     <value>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</value>
     <comment>{StrBegin="MSB3094: "}</comment>
   </data>
@@ -604,7 +604,7 @@
       LOCALIZATION: "{0}" is the expression that was bad. "{1}" is a message from an FX exception that describes why the expression is bad.
     </comment>
   </data>
-  <data name="CouldNotDifferentiateBetweenCompatibleMethods">
+  <data name="CouldNotDifferentiateBetweenCompatibleMethods" xml:space="preserve">
     <value>Found multiple overloads for method "{0}" with {1} parameter(s). That is currently not supported.</value>
   </data>
   <data name="InvalidFunctionPropertyExpression" xml:space="preserve">
@@ -1171,7 +1171,7 @@
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized
     </comment>
   </data>
-  <data name="TaskReturnedFalseButDidNotLogError">
+  <data name="TaskReturnedFalseButDidNotLogError" xml:space="preserve">
     <value>MSB4181: The "{0}" task returned false but did not log an error.</value>
     <comment>{StrBegin="MSB4181: "}</comment>
   </data>
@@ -1301,7 +1301,7 @@
     <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized.</value>
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
-  <data name="PropertyOutsidePropertyGroupInTarget" xml:space="preserve" Condition="$([MSBuild]::AreFeaturesEnabled('17.6'))">
+  <data name="PropertyOutsidePropertyGroupInTarget" xml:space="preserve">
     <value>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</value>
     <comment>{StrBegin="MSB4067: "}</comment>
   </data>
@@ -1761,7 +1761,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4231: ProjectRootElement can't reload if it contains unsaved changes.</value>
     <comment>{StrBegin="MSB4231: "}</comment>
   </data>
-  <data name="LogTaskInputs.Truncated">
+  <data name="LogTaskInputs.Truncated" xml:space="preserve">
     <value>The parameters have been truncated beyond this point. To view all parameters, clear the MSBUILDTRUNCATETASKINPUTLOGGING environment variable.</value>
   </data>
   <data name="MetaprojectGenerated" xml:space="preserve">
@@ -1989,9 +1989,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="ProjectCacheHitWithOutputs" xml:space="preserve">
-    <value>{0} -> Cache Hit</value>
+    <value>{0} -&gt; Cache Hit</value>
     <comment>
-      {StrBegin="{0} -> "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
     </comment>
   </data>
   <data name="ProjectCacheMissWithDefaultTargets" xml:space="preserve">
@@ -2060,7 +2060,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>Imported files archive exceeded 2GB limit and it's not embedded.</value>
   </data>
   <data name="Binlog_FwdCompatUnsupported" xml:space="preserve">
-    <value>Forward compatible reading is not supported for file format version {0} (needs >= 18).</value>
+    <value>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</value>
     <comment>
       LOCALIZATION: {0} is an integer number denoting version.
     </comment>
@@ -2179,19 +2179,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="BuildCheck_BC0105_Title" xml:space="preserve">
     <value>It is recommended to specify explicit 'Culture' metadata, or 'WithCulture=false' metadata with 'EmbeddedResource' item in order to avoid wrong or nondeterministic culture estimation.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0105_MessageFmt" xml:space="preserve">
     <value>Project {0} specifies 'EmbeddedResource' item '{1}', that has possibly a culture denoting extension ('{2}'), but explicit 'Culture' nor 'WithCulture=false' metadata are not specified.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0106_Title" xml:space="preserve">
     <value>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0106_MessageFmt" xml:space="preserve">
     <value>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</value>
-	  <comment>Terms in quotes are not to be translated.</comment>
+    <comment>Terms in quotes are not to be translated.</comment>
   </data>
   <data name="BuildCheck_BC0107_Title" xml:space="preserve">
     <value>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</value>
@@ -2398,11 +2398,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OpenTelemetryLoadFailed" xml:space="preserve">
     <value>Loading telemetry libraries failed with exception: {0}.</value>
   </data>
-  <!--
-        The Build message bucket is: MSB4000 - MSB4999
-
-        Next message code should be MSB4279
-
-        Don't forget to update this comment after using a new code.
-  -->
+  <data name="CustomTaskFactoryOutOfProcNotSupported" xml:space="preserve">
+    <value>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution.</value>
+  </data>
 </root>
