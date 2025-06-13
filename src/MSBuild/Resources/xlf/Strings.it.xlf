@@ -2211,7 +2211,7 @@ Esegue la profilatura della valutazione di MSBuild e scrive
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
+        <target state="translated">MSBUILD : error MSB1021: non è possibile creare un'istanza del logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
