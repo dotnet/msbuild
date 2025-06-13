@@ -1404,6 +1404,14 @@ namespace Microsoft.Build.BackEnd
         private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment)
         {
             IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            var sdkResolvedVars = (_requestEntry.RequestConfiguration.Project as IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>).SdkResolvedEnvironmentVariablePropertiesDictionary;
+            if (sdkResolvedVars is var dict)
+            {
+                foreach (var entry in dict)
+                {
+                    currentEnvironment.Add(entry.Name, entry.EvaluatedValue);
+                }
+            }
             ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
             UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
         }
