@@ -56,7 +56,11 @@ _(This is for the case where we create the branch too early and want it to be ba
 - [ ]  Ensure that the current release channel `VS {{THIS_RELEASE_VERSION}}` is associated with the correct release branch\
 `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch vs{{THIS_RELEASE_VERSION}}` \
 if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild`
-- [ ] Double check subscriptions from our repo `darc get-subscriptions --target-repo dotnet/msbuild` and update subscriptions to `VS{{THIS_RELEASE_VERSION}}` and `main` branches according to [supported versions of VS and SDK](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions):
+- [ ] Double check subscriptions from our repo `darc get-subscriptions --target-repo dotnet/msbuild` and update subscriptions to `VS{{THIS_RELEASE_VERSION}}` branch according to [supported versions of VS and SDK](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions):
+  - [ ] Arcade:
+    - Based on .NET version channel--does not change every MSBuild release
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
+- [ ] Double check subscriptions from our repo `darc get-subscriptions --target-repo dotnet/msbuild` and update subscriptions to `main` branch according to [supported versions of VS and SDK](https://learn.microsoft.com/en-us/dotnet/core/porting/versioning-sdk-msbuild-vs#supported-net-versions):
   - [ ] NuGet client
     - Based on VS version channel
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/nuget/nuget.client`
@@ -65,7 +69,7 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
     - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/roslyn`
   - [ ] Arcade:
     - Based on .NET version channel--does not change every MSBuild release
-    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`
+    - `darc get-subscriptions --exact --target-repo https://github.com/dotnet/msbuild --source-repo https://github.com/dotnet/arcade`    
 - [ ] Make sure the non-infrastructure dependencies (currently Roslyn and Nuget) are set to 'disabled' (`  - Enabled: False` in the `darc get-subscriptions` output) - we do not want to automatically bump them. The version updates should be explicitly driven by SDK or VS.
 - [ ] Any missing subscription need to be added via `darc add-subscription` command, any misconfigured subscription needs to be edit via `darc update-subscription` command (for additional required and optional parameters run with `--help`)
 
