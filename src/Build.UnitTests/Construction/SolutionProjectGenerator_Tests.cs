@@ -2137,7 +2137,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// When we have a bad framework moniker we expect the build to fail.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
+        [Fact]
         public void BadFrameworkMonkierExpectBuildToFail()
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();
@@ -2225,7 +2225,7 @@ EndGlobal
         /// When we have a bad framework moniker we expect the build to fail. In this case we are passing a poorly formatted framework moniker.
         /// This will test the exception path where the framework name is invalid rather than just not .netFramework
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
+        [Fact]
         public void BadFrameworkMonkierExpectBuildToFail2()
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();

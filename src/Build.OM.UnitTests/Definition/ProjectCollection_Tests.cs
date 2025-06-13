@@ -181,11 +181,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Loading a project from a file inherits the project collection's global properties
         /// </summary>
-#if FEATURE_INSTALLED_MSBUILD
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
-#endif
         public void GlobalPropertyInheritLoadFromFile2()
         {
             string path = null;
@@ -196,7 +192,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 using ProjectCollection collection = new ProjectCollection();
                 collection.SetGlobalProperty("p", "v");
-                Project project = collection.LoadProject(path, "4.0");
+                Project project = collection.LoadProject(path, "Current");
 
                 Assert.Equal("v", project.GlobalProperties["p"]);
             }
@@ -212,11 +208,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Loading a project from a file inherits the project collection's global properties
         /// </summary>
-#if FEATURE_INSTALLED_MSBUILD
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
-#endif
         public void GlobalPropertyInheritLoadFromFile3()
         {
             string path = null;
@@ -227,7 +219,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 using ProjectCollection collection = new ProjectCollection();
                 collection.SetGlobalProperty("p", "v");
-                Project project = collection.LoadProject(path, null, "4.0");
+                Project project = collection.LoadProject(path, null, "Current");
 
                 Assert.Equal("v", project.GlobalProperties["p"]);
             }
@@ -1095,11 +1087,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Current default from registry is 4.0 if 2.0 is not installed
         /// </summary>
-#if FEATURE_INSTALLED_MSBUILD
         [Fact]
-#else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
-#endif
         public void DefaultToolsVersion2()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) != null)
