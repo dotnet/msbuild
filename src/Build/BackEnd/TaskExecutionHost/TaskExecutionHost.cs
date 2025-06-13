@@ -337,11 +337,11 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            string realTaskAssemblyLoaction = TaskInstance.GetType().Assembly.Location;
-            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLoaction) &&
-                realTaskAssemblyLoaction != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+            string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
+            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) &&
+                realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
             {
-                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLoaction, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
             }
 
             TaskInstance.BuildEngine = _buildEngine;
