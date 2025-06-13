@@ -1,8 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -50,7 +51,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The saved environment for the process.
         /// </summary>
-        private IDictionary<string, string> _savedEnvironment;
+        private FrozenDictionary<string, string> _savedEnvironment;
 
         /// <summary>
         /// The component factories.
