@@ -1,10 +1,12 @@
 # Multithreaded MSBuild
 
-Currently, MSBuild supports parallel builds (a critical feature for a build system) by spawning worker processes. This made adoption easier because it didn't impose any requirements on tasks: they continue to own the whole process while they are executing. But it's a pretty strange design decision in the modern age, where we assume things are multithreaded and async.
+This is a description of changes that will enable MSBuild to run multiple projects concurrently within the same process, rather than spawning separate processes for each node. This will allow better resource utilization and potentially faster builds, as fewer processes will need to be created, reducing .NET runtime overhead and inter-process communication--but it's nontrivial to implement without breaking existing builds, which we must not do.
 
 ## Current state
 
-There are several components of MSBuild that are relevant to parallel builds:
+Currently, MSBuild supports parallel builds (a critical feature for a build system) by spawning worker processes. This made adoption easier because it didn't impose any requirements on tasks: they continue to own the whole process while they are executing, just like they did when the build was single-threaded and running one task at a time. But it's a pretty strange design decision in the modern age, where we assume things are multithreaded and async.
+
+There are several components of MSBuild that are relevant to parallel builds. In the following sections we'll describe how they interact in the current implementation, and how we will change them to support multithreading.
 
 * The **scheduler** decides what projects to build (and where, if there are options).
 * **Projects** maintain mutable state, especially Properties and Items.
@@ -14,6 +16,9 @@ There are several components of MSBuild that are relevant to parallel builds:
 ### Single-proc builds
 
 In the oldest MSBuild mode of operation, there is a single process that executes the build. When a project is started, the engine `cd`s into the project directory and begins executing. If the process environment or current working directory is mutated during the project, it is saved when the project yields (either because it's waiting on results from another project or because it has finished executing). When the project is resumed, the environment is restored to the saved state. Tasks are instantiated and executed in the same process, so they can access the environment and current working directory.
+
+> [!NOTE]
+> In the following diagrams, assume that Project1 and Project2 are eligible to run concurrently, and that Project1 has a project reference to Project2, but each diagram may highlight only a portion of the full process.
 
 ```mermaid
 sequenceDiagram
@@ -122,15 +127,15 @@ deactivate Project1
 A task that needs to run out of process can spawn a new TaskHost process, as in a single-proc build, with potentially many TaskHost processes running concurrently.
 
 
-## Multithreading MSBuild
+## Adding Multithreading to MSBuild
 
-The goal of multithreading MSBuild is to allow execution of multiple projects concurrently within the same process, rather than spawning separate processes for each node. This would enable better resource utilization and potentially faster builds, as fewer processes would need to be created, reducing .NET runtime overhead and inter-process communication as well as increasing the efficacy of task-level caching.
+The goal of multithreading MSBuild is to allow execution of multiple projects concurrently and in parallel within the same process, rather than spawning separate processes for each node. This would enable better resource utilization and potentially faster builds, as fewer processes would need to be created, reducing .NET runtime overhead and inter-process communication as well as increasing the efficacy of task-level caching.
 
-But tasks are not currently designed to be multithreaded. They assume that they own the whole process while they are executing, and they mutate the process state (environment, working directory, etc.). To make MSBuild multithreaded while maintaining task compatibility, we need to consider what parts of the build process can be moved to a multithreaded model without breaking existing tasks, as well as allowing new tasks to opt into multithreading.
+But tasks are not currently designed to operate in a multithreaded environment. They assume that they own the whole process while they are executing, and they mutate the process state (environment, working directory, etc.). To make MSBuild multithreaded while maintaining task compatibility, we need to consider what parts of the build process (both MSBuild engine state like "what projects are currently executing" and "what is the state of properties and items" and task execution) can be moved to a multithreaded model without breaking existing tasks, as well as allowing new tasks to opt into multithreading.
 
-The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs" (`INodeProvider`). To support multithreading, we will introduce a new type of node, called a "**thread node**", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects concurrently within the same process.
+The scheduler is already capable of juggling multiple projects, and there's already an abstraction layer for "where a project runs" (`INodeProvider`). To support multithreading, we will introduce a new type of node, called a "**thread node**", which represents a thread within either an in-process or out-of-process node. This will allow us to run multiple projects in parallel within the same process.
 
-The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, cli or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode. We will create all the thread nodes in the entry process.
+The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, CLI or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode creating all the thread nodes in the entry process for simplicity--in final production these will be in an [MSBuild Server process](#msbuild-server-integration).
 
 ```mermaid
 sequenceDiagram
@@ -170,8 +175,7 @@ deactivate Thread1_Project1
 ```
 
 Within a thread node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
-
-This leaves us with tasks. Tasks will need to be modified to support multithreading (see [Thread-safe tasks]), but we need a way to maintain compatibility with existing tasks that do not implement the new interface, so they can still run in a process they "own" while allowing new tasks to take advantage of multithreading.
+This leaves us with tasks. Tasks will need to be modified to support multithreading (see [Thread-safe tasks](#thread-safe-tasks)), but we need a way to maintain compatibility with existing tasks that do not implement the new interface, so they can still run in a process they "own" while allowing new tasks to take advantage of multithreading.
 
 For most tasks, an engine-level decision to push the tasks to a TaskHost process will maintain compatibility: the process will only run one task at a time, so the task will still "own" the process. When a task is pushed out of process this way, we will need to be careful to capture and preserve any global-process-state mutations that the task makes, so that they can be communicated back to the main MSBuild process and available to subsequent tasks in the same project.
 
@@ -207,7 +211,7 @@ Project1 ->> Scheduler: results
 deactivate Project1
 ```
 
-With a sidecar TaskHost per node, the fact that much of the MSBuild-level state is maintained and manipulated in a different process than the tasks themselves are running in should be transparent to the tasks, since they'll have the same "within a single project" view of the world.
+With a sidecar TaskHost per node, tasks will get the same constraints and freedoms they have today: while running, they will get a consistent view of process state including environment and current working directory, they are free to mutate that state, and they will not be disturbed by concurrent task execution in the same process unless they `Yield()`. The fact that much of the MSBuild-level state is maintained and manipulated in a different process than the tasks themselves are running in should not be observable by a task, since they are generally unable to observe that MSBuild-level state except through task inputs and `IBuildEngine` APIs that we will continue to support.
 
 ## Thread-safe tasks
 
