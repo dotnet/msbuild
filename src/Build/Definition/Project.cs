@@ -4265,6 +4265,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal MultiDictionary<string, ProjectItem> ItemsByEvaluatedIncludeCache { get; private set; }
 
+
+            public PropertyDictionary<ProjectPropertyInstance> ResolvedEnvironmentVariablesDictionary { get; private set; }
+
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
@@ -4285,6 +4288,7 @@ namespace Microsoft.Build.Evaluation
                 AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 AllEvaluatedItems = new List<ProjectItem>();
                 EvaluatedItemElements = new List<ProjectItemElement>();
+                ResolvedEnvironmentVariablesDictionary = new PropertyDictionary<ProjectPropertyInstance>();
                 EvaluationId = BuildEventContext.InvalidEvaluationId;
 
                 _globalPropertiesToTreatAsLocal?.Clear();
@@ -4498,6 +4502,13 @@ namespace Microsoft.Build.Evaluation
             public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
             {
                 ImportClosure.Add(new ResolvedImport(Project, importElement, import, versionEvaluated, sdkResult));
+                if (sdkResult.EnvironmentVariablesToAdd is var sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+                {
+                    foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                    {
+                        ResolvedEnvironmentVariablesDictionary.Set(new SdkResolvedEnvironmentVariablePropertyInstance(environmentVariable.Key, environmentVariable.Value));
+                    }
+                }
                 RecordImportWithDuplicates(importElement, import, versionEvaluated);
             }
 
