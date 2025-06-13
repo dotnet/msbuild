@@ -3111,7 +3111,8 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             public override ICollection<ProjectItem> GetItems(string itemType)
             {
-                ICollection<ProjectItem> items = _data.GetItems(itemType);
+                ICollection<ProjectItem> items = new ReadOnlyCollection<ProjectItem>(_data.GetItems(itemType));
+                
                 return items;
             }
 
@@ -3125,7 +3126,7 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             public override ICollection<ProjectItem> GetItemsIgnoringCondition(string itemType)
             {
-                ICollection<ProjectItem> items = _data.ItemsIgnoringCondition[itemType];
+                ICollection<ProjectItem> items = new ReadOnlyCollection<ProjectItem>(_data.ItemsIgnoringCondition[itemType]);
                 return items;
             }
 
@@ -4551,7 +4552,7 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             /// <param name="itemType">The type of items to return.</param>
             /// <returns>A list of matching items.</returns>
-            public ICollection<ProjectItem> GetItems(string itemType)
+            public IReadOnlyCollection<ProjectItem> GetItems(string itemType)
             {
                 return Items[itemType];
             }
