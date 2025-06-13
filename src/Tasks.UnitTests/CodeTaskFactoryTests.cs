@@ -23,28 +23,39 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
-        [Fact]
-        public void BuildTaskSimpleCodeFactory()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTaskSimpleCodeFactory(bool forceOutOfProc)
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            mockLogger.AssertLogContains("Hello, World!");
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                             <ParameterGroup>
+                                 <Text/>
+                              </ParameterGroup>
+                                <Task>
+                                    <Code>
+                                         Log.LogMessage(MessageImportance.High, Text);
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num} Text=`Hello, World!` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello, World!");
+            }
         }
 
         /// <summary>
@@ -53,29 +64,40 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v4.0.dll is expected to NOT be in MSBuildToolsPath, that
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [Fact]
-        public void BuildTaskSimpleCodeFactory_RedirectFrom4()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTaskSimpleCodeFactory_RedirectFrom4(bool forceOutOfProc)
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            mockLogger.AssertLogContains("Hello, World!");
-            mockLogger.AssertLogDoesntContain("Microsoft.Build.Tasks.v4.0.dll");
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll` >
+                             <ParameterGroup>
+                                 <Text/>
+                              </ParameterGroup>
+                                <Task>
+                                    <Code>
+                                         Log.LogMessage(MessageImportance.High, Text);
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num} Text=`Hello, World!` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello, World!");
+                mockLogger.AssertLogDoesntContain("Microsoft.Build.Tasks.v4.0.dll");
+            }
         }
 
         /// <summary>
@@ -84,29 +106,40 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
-        [Fact]
-        public void BuildTaskSimpleCodeFactory_RedirectFrom12()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTaskSimpleCodeFactory_RedirectFrom12(bool forceOutOfProc)
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            mockLogger.AssertLogContains("Hello, World!");
-            mockLogger.AssertLogDoesntContain("Microsoft.Build.Tasks.v12.0.dll");
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.v12.0.dll` >
+                             <ParameterGroup>
+                                 <Text/>
+                              </ParameterGroup>
+                                <Task>
+                                    <Code>
+                                         Log.LogMessage(MessageImportance.High, Text);
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num} Text=`Hello, World!` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello, World!");
+                mockLogger.AssertLogDoesntContain("Microsoft.Build.Tasks.v12.0.dll");
+            }
         }
 
         /// <summary>
@@ -116,29 +149,40 @@ namespace Microsoft.Build.UnitTests
         /// being in MSBuildToolsPath anymore, that this does NOT affect full fusion AssemblyNames --
         /// it's picked up from the GAC, where it is anyway, so there's no need to redirect.
         /// </summary>
-        [Fact]
-        public void BuildTaskSimpleCodeFactory_NoAssemblyNameRedirect()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTaskSimpleCodeFactory_NoAssemblyNameRedirect(bool forceOutOfProc)
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=15.1.0.0` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            mockLogger.AssertLogContains("Hello, World!");
-            mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=15.1.0.0");
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num}` TaskFactory=`CodeTaskFactory` AssemblyName=`Microsoft.Build.Tasks.Core, Version=15.1.0.0` >
+                             <ParameterGroup>
+                                 <Text/>
+                              </ParameterGroup>
+                                <Task>
+                                    <Code>
+                                         Log.LogMessage(MessageImportance.High, Text);
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory{num} Text=`Hello, World!` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello, World!");
+                mockLogger.AssertLogContains("Microsoft.Build.Tasks.Core, Version=15.1.0.0");
+            }
         }
 
         /// <summary>
@@ -483,62 +527,84 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have adding a using statement
         /// </summary>
-        [Fact]
-        public void BuildTaskSimpleCodeFactoryTestExtraUsing()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTaskSimpleCodeFactoryTestExtraUsing(bool forceOutOfProc)
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraUsing` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Using Namespace='System.Linq.Expressions'/>
-                                <Code>
-                                      string linqString = ExpressionType.Add.ToString();
-                                     Log.LogMessage(MessageImportance.High, linqString + Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraUsing Text=`:Hello, World!` />
-                        </Target>
-                    </Project>";
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            string linqString = nameof(System.Linq.Expressions.ExpressionType.Add);
-            mockLogger.AssertLogContains(linqString + ":Hello, World!");
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraUsing{num}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                             <ParameterGroup>
+                                 <Text/>
+                              </ParameterGroup>
+                                <Task>
+                                    <Using Namespace='System.Linq.Expressions'/>
+                                    <Code>
+                                          string linqString = ExpressionType.Add.ToString();
+                                         Log.LogMessage(MessageImportance.High, linqString + Text);
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraUsing{num} Text=`:Hello, World!` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                string linqString = nameof(System.Linq.Expressions.ExpressionType.Add);
+                mockLogger.AssertLogContains(linqString + ":Hello, World!");
+            }
         }
 
         /// <summary>
         /// Verify setting the output tag on the parameter causes it to be an output from the perspective of the targets
         /// </summary>
-        [Fact]
-        public void BuildTaskDateCodeFactory()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTaskDateCodeFactory(bool forceOutOfProc)
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`DateTaskFromCodeFactory_BuildTaskDateCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
-                            <ParameterGroup>
-                               <CurrentDate ParameterType=`System.String` Output=`true` />
-                            </ParameterGroup>
-                            <Task>
-                                <Code>
-                                    CurrentDate = DateTime.Now.ToString();
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <DateTaskFromCodeFactory_BuildTaskDateCodeFactory>
-                                <Output TaskParameter=`CurrentDate` PropertyName=`CurrentDate` />
-                            </DateTaskFromCodeFactory_BuildTaskDateCodeFactory>
-                            <Message Text=`Current Date and Time: [[$(CurrentDate)]]` Importance=`High` />
-                        </Target>
-                    </Project>";
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            mockLogger.AssertLogContains("Current Date and Time:");
-            mockLogger.AssertLogDoesntContain("[[]]");
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`DateTaskFromCodeFactory_BuildTaskDateCodeFactory{num}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
+                                <ParameterGroup>
+                                   <CurrentDate ParameterType=`System.String` Output=`true` />
+                                </ParameterGroup>
+                                <Task>
+                                    <Code>
+                                        CurrentDate = DateTime.Now.ToString();
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <DateTaskFromCodeFactory_BuildTaskDateCodeFactory{num}>
+                                    <Output TaskParameter=`CurrentDate` PropertyName=`CurrentDate` />
+                                </DateTaskFromCodeFactory_BuildTaskDateCodeFactory{num}>
+                                <Message Text=`Current Date and Time: [[$(CurrentDate)]]` Importance=`High` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Current Date and Time:");
+                mockLogger.AssertLogDoesntContain("[[]]");
+            }
         }
 
         /// <summary>
@@ -634,46 +700,56 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we can pass in extra references than the automatic ones. For example the c# compiler does not pass in
         /// system.dll. So lets test that case
         /// </summary>
-        [Fact]
-        public void BuildTaskSimpleCodeFactoryTestExtraReferenceCS()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void BuildTaskSimpleCodeFactoryTestExtraReference(bool forceOutOfProc)
         {
-            string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
-            if (netFrameworkDirectory == null)
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
             {
-                // "CouldNotFindRequiredTestDirectory"
-                return;
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
+                string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
+                if (netFrameworkDirectory == null)
+                {
+                    // "CouldNotFindRequiredTestDirectory"
+                    return;
+                }
+
+                string systemNETLocation = Path.Combine(netFrameworkDirectory, "System.Net.dll");
+
+                if (!File.Exists(systemNETLocation))
+                {
+                    // "CouldNotFindRequiredTestFile"
+                    return;
+                }
+
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraReferenceCS{num}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                             <ParameterGroup>
+                                 <Text/>
+                              </ParameterGroup>
+                                <Task>
+                                    <Using Namespace='System.Net'/>
+                                    <Reference Include='" + systemNETLocation + $@"'/>
+                                    <Code>
+                                         string netString = System.Net.HttpStatusCode.OK.ToString();
+                                         Log.LogMessage(MessageImportance.High, netString + Text);
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraReferenceCS{num} Text=`:Hello, World!` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("OK" + ":Hello, World!");
             }
-
-            string systemNETLocation = Path.Combine(netFrameworkDirectory, "System.Net.dll");
-
-            if (!File.Exists(systemNETLocation))
-            {
-                // "CouldNotFindRequiredTestFile"
-                return;
-            }
-
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraReferenceCS` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Using Namespace='System.Net'/>
-                                <Reference Include='" + systemNETLocation + @"'/>
-                                <Code>
-                                     string netString = System.Net.HttpStatusCode.OK.ToString();
-                                     Log.LogMessage(MessageImportance.High, netString + Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactoryTestExtraReferenceCS Text=`:Hello, World!` />
-                        </Target>
-                    </Project>";
-
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            mockLogger.AssertLogContains("OK" + ":Hello, World!");
         }
 
         /// <summary>
@@ -1099,80 +1175,135 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
-        [Fact]
-        public void RedundantMSBuildReferences()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RedundantMSBuildReferences(bool forceOutOfProc)
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_RedundantMSBuildReferences` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                              <Reference Include='$(MSBuildToolsPath)\Microsoft.Build.Framework.dll' />
-                              <Reference Include='$(MSBuildToolsPath)\Microsoft.Build.Utilities.Core.dll' />
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_RedundantMSBuildReferences Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
+                string projectFileContents = $@"
+                        <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                            <UsingTask TaskName=`CustomTaskFromCodeFactory_RedundantMSBuildReferences{num}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                             <ParameterGroup>
+                                 <Text/>
+                              </ParameterGroup>
+                                <Task>
+                                  <Reference Include='$(MSBuildToolsPath)\Microsoft.Build.Framework.dll' />
+                                  <Reference Include='$(MSBuildToolsPath)\Microsoft.Build.Utilities.Core.dll' />
 
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
-            mockLogger.AssertLogContains("Hello, World!");
+                                    <Code>
+                                         Log.LogMessage(MessageImportance.High, Text);
+                                    </Code>
+                                </Task>
+                            </UsingTask>
+                            <Target Name=`Build`>
+                                <CustomTaskFromCodeFactory_RedundantMSBuildReferences{num} Text=`Hello, World!` />
+                            </Target>
+                        </Project>";
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello, World!");
+            }
         }
 
-        [Fact]
-        public void EmbedsGeneratedFromSourceFileInBinlog()
+        /// <summary>
+        /// Verify that the generated code from source is embedded in the binlog
+        /// </summary>
+        /// <param name="forceOutOfProc"></param>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EmbedsGeneratedFromSourceFileInBinlog(bool forceOutOfProc)
         {
-            string taskName = "HelloTask";
-
-            string sourceContent = $$"""
-                namespace InlineTask
+            int num = forceOutOfProc ? 1 : 0;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
                 {
-                    using Microsoft.Build.Utilities;
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-                    public class {{taskName}} : Task
+                string taskName = $"HelloTask{num}";
+
+                string sourceContent = $$"""
+                    namespace InlineTask
                     {
-                        public override bool Execute()
+                        using Microsoft.Build.Utilities;
+
+                        public class {{taskName}} : Task
                         {
-                            Log.LogMessage("Hello, world!");
-                            return !Log.HasLoggedErrors;
+                            public override bool Execute()
+                            {
+                                Log.LogMessage("Hello, world!");
+                                return !Log.HasLoggedErrors;
+                            }
                         }
                     }
-                }
-                """;
+                    """;
 
-            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
-                FactoryType.CodeTaskFactory, taskName, sourceContent, true);
+                CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                    FactoryType.CodeTaskFactory, taskName, sourceContent, true);
+            }
         }
 
-        [Fact]
-        public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile()
+        /// <summary>
+        /// Verify that the generated code from source is embedded in the binlog even when it fails to compile
+        /// </summary>
+        /// <param name="forceOutOfProc"></param>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile(bool forceOutOfProc)
         {
-            string taskName = "HelloTask";
-
-            string sourceContent = $$"""
-                namespace InlineTask
+            int num = forceOutOfProc ? 3 : 2;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
                 {
-                    using Microsoft.Build.Utilities;
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
 
-                    public class {{taskName}} : Task
+                string taskName = $"HelloTask{num}";
+
+                string sourceContent = $$"""
+                    namespace InlineTask
                     {
+                        using Microsoft.Build.Utilities;
+
+                        public class {{taskName}} : Task
+                        {
                 """;
 
-            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
-                FactoryType.CodeTaskFactory, taskName, sourceContent, false);
+                CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                    FactoryType.CodeTaskFactory, taskName, sourceContent, false);
+            }
         }
 
-        [Fact]
-        public void EmbedsGeneratedFileInBinlog()
+        /// <summary>
+        /// Verify that the generated code is embedded in the binlog
+        /// </summary>
+        /// <param name="forceOutOfProc"></param>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EmbedsGeneratedFileInBinlog(bool forceOutOfProc)
         {
-            string taskXml = @"
+            int num = forceOutOfProc ? 5 : 4;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
+
+                string taskXml = @"
                 <Task>
                     <Code Type=""Fragment"" Language=""cs"">
                         <![CDATA[
@@ -1181,14 +1312,29 @@ namespace Microsoft.Build.UnitTests
                     </Code>
                 </Task>";
 
-            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
-                FactoryType.CodeTaskFactory, "HelloTask", taskXml, true);
+                CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                    FactoryType.CodeTaskFactory, $"HelloTask{num}", taskXml, true);
+            }
         }
 
-        [Fact]
-        public void EmbedsGeneratedFileInBinlogWhenFailsToCompile()
+        /// <summary>
+        /// Verify that the generated code is embedded in the binlog even when it fails to compile
+        /// </summary>
+        /// <param name="forceOutOfProc"></param>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EmbedsGeneratedFileInBinlogWhenFailsToCompile(bool forceOutOfProc)
         {
-            string taskXml = @"
+            int num = forceOutOfProc ? 7 : 6;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                }
+
+                string taskXml = @"
                 <Task>
                     <Code Type=""Fragment"" Language=""cs"">
                         <![CDATA[
@@ -1197,8 +1343,9 @@ namespace Microsoft.Build.UnitTests
                     </Code>
                 </Task>";
 
-            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
-                FactoryType.CodeTaskFactory, "HelloTask", taskXml, false);
+                CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                    FactoryType.CodeTaskFactory, $"HelloTask{num}", taskXml, false);
+            }
         }
     }
 #else

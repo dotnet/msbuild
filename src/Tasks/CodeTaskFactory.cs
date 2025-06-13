@@ -599,11 +599,16 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Stores the path to the compiled assembly when in out-of-process mode
+        /// </summary>
+        private string _assemblyPath;
+
+        /// <summary>
         /// Add a reference assembly to the list of references passed to the compiler. We will try and load the assembly to make sure it is found
         /// before sending it to the compiler. The reason we load here is that we will be using it in this appdomin anyways as soon as we are going to compile, which should be right away.
         /// </summary>
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Reflection.Assembly.LoadWithPartialName", Justification = "Necessary since we don't have the full assembly name. ")]
-        private void AddReferenceAssemblyToReferenceList(List<string> referenceAssemblyList, string referenceAssembly)
+        private void AddReferenceAssemblyToReferenceList(List<string> referenceAssemblyList, string referenceAssembly, List<string> directoriesToAddToManifest = null)
         {
             if (referenceAssemblyList != null)
             {
@@ -638,6 +643,16 @@ namespace Microsoft.Build.Tasks
                 if (candidateAssemblyLocation != null)
                 {
                     referenceAssemblyList.Add(candidateAssemblyLocation);
+
+                    // Collect directories for manifest file when in out-of-process mode
+                    if (directoriesToAddToManifest != null && FileSystems.Default.FileExists(candidateAssemblyLocation))
+                    {
+                        string directory = Path.GetDirectoryName(candidateAssemblyLocation);
+                        if (!directoriesToAddToManifest.Contains(directory))
+                        {
+                            directoriesToAddToManifest.Add(directory);
+                        }
+                    }
                 }
                 else
                 {
@@ -709,13 +724,12 @@ namespace Microsoft.Build.Tasks
         private Assembly CompileAssembly()
         {
             // Combine our default assembly references with those specified
-            var finalReferencedAssemblies = CombineReferencedAssemblies();
+            List<string> directoriesToAddToManifest = Traits.Instance.ForceTaskFactoryOutOfProc ? new List<string>() : null;
+            var finalReferencedAssemblies = CombineReferencedAssemblies(directoriesToAddToManifest);
 
             // Combine our default using's with those specified
             string[] finalUsingNamespaces = CombineUsingNamespaces();
 
-            // for the out of proc execution
-            string taskAssemblyPath = null;
             if (Traits.Instance.ForceTaskFactoryOutOfProc)
             {
                 string processSpecificInlineTaskDir = Path.Combine(
@@ -723,7 +737,7 @@ namespace Microsoft.Build.Tasks
                     MSBuildConstants.InlineTaskTempDllSubPath,
                     $"pid_{EnvironmentUtilities.CurrentProcessId}");
                 Directory.CreateDirectory(processSpecificInlineTaskDir);
-                taskAssemblyPath = FileUtilities.GetTemporaryFile(processSpecificInlineTaskDir, null, ".dll", false);
+                _assemblyPath = FileUtilities.GetTemporaryFile(processSpecificInlineTaskDir, null, ".dll", false);
             }
 
             // Language can be anything that has a codedom provider, in the standard naming method
@@ -742,7 +756,7 @@ namespace Microsoft.Build.Tasks
                         IncludeDebugInformation = true,
 
                         GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
-                        OutputAssembly = taskAssemblyPath,
+                        OutputAssembly = _assemblyPath,
 
                         // Indicates that a .dll should be generated.
                         GenerateExecutable = false
@@ -834,9 +848,26 @@ namespace Microsoft.Build.Tasks
                         return null;
                     }
 
+                    // Create manifest file for out-of-process execution
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc && directoriesToAddToManifest != null && directoriesToAddToManifest.Count > 0)
+                    {
+                        string manifestPath = _assemblyPath + ".loadmanifest";
+                        File.WriteAllLines(manifestPath, directoriesToAddToManifest);
+                    }
+
+                    Assembly compiledAssembly;
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        compiledAssembly = Assembly.LoadFrom(compilerResults.PathToAssembly);
+                    }
+                    else
+                    {
+                        compiledAssembly = compilerResults.CompiledAssembly;
+                    }
+
                     // Add to the cache.  Failing to add is not a fatal error.
-                    s_compiledTaskCache.TryAdd(fullSpec, compilerResults.CompiledAssembly);
-                    return compilerResults.CompiledAssembly;
+                    s_compiledTaskCache.TryAdd(fullSpec, compiledAssembly);
+                    return compiledAssembly;
                 }
                 else
                 {
@@ -850,6 +881,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<string> CombineReferencedAssemblies()
         {
+            return CombineReferencedAssemblies(null);
+        }
+
+        /// <summary>
+        /// Combine our default referenced assemblies with those explicitly specified
+        /// </summary>
+        private List<string> CombineReferencedAssemblies(List<string> directoriesToAddToManifest)
+        {
             List<string> finalReferenceList = new List<string>(s_defaultReferencedFrameworkAssemblyNames.Length + 2 + _referencedAssemblies.Count);
 
             // Set some default references:
@@ -858,7 +897,7 @@ namespace Microsoft.Build.Tasks
             // through the magic of unification
             foreach (string defaultReference in s_defaultReferencedFrameworkAssemblyNames)
             {
-                AddReferenceAssemblyToReferenceList(finalReferenceList, defaultReference);
+                AddReferenceAssemblyToReferenceList(finalReferenceList, defaultReference, directoriesToAddToManifest);
             }
 
             // We also want to add references to two MSBuild assemblies: Microsoft.Build.Framework.dll and
@@ -876,12 +915,28 @@ namespace Microsoft.Build.Tasks
             finalReferenceList.Add(_msbuildFrameworkPath);
             finalReferenceList.Add(_msbuildUtilitiesPath);
 
+            // Collect directories for MSBuild assemblies when creating manifest
+            if (directoriesToAddToManifest != null)
+            {
+                string frameworkDir = Path.GetDirectoryName(_msbuildFrameworkPath);
+                if (!directoriesToAddToManifest.Contains(frameworkDir))
+                {
+                    directoriesToAddToManifest.Add(frameworkDir);
+                }
+
+                string utilitiesDir = Path.GetDirectoryName(_msbuildUtilitiesPath);
+                if (!directoriesToAddToManifest.Contains(utilitiesDir))
+                {
+                    directoriesToAddToManifest.Add(utilitiesDir);
+                }
+            }
+
             // Now for the explicitly-specified references:
             if (_referencedAssemblies != null)
             {
                 foreach (string referenceAssembly in _referencedAssemblies)
                 {
-                    AddReferenceAssemblyToReferenceList(finalReferenceList, referenceAssembly);
+                    AddReferenceAssemblyToReferenceList(finalReferenceList, referenceAssembly, directoriesToAddToManifest);
                 }
             }
 
