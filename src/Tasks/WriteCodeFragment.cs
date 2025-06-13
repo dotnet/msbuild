@@ -449,7 +449,8 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 constructorParameterTypes[i],
                                 parameter.Value,
-                                parameter.PositionalParameterName); 
+                                parameter.PositionalParameterName,
+                                attribute.Name);
                         }
                         else
                         {
@@ -457,7 +458,8 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 attributeType.Value?.GetProperty(parameter.Name)?.PropertyType,
                                 parameter.Value,
-                                parameter.Name);
+                                parameter.Name,
+                                attribute.Name);
                         }
 
                         break;
@@ -565,13 +567,13 @@ namespace Microsoft.Build.Tasks
         /// Returns the converted value as a CodeExpression if successful, or the raw value
         /// as a CodeExpression if conversion fails. No errors are logged if the conversion fails.
         /// </summary>
-        private CodeExpression ConvertParameterValueToInferredType(Type inferredType, string rawValue, string parameterName)
+        private CodeExpression ConvertParameterValueToInferredType(Type inferredType, string rawValue, string parameterName, string attributeTypeName)
         {
             // If we don't know what type the parameter should be, then we
             // can't convert the type. We'll just treat is as a string.
             if (inferredType is null)
             {
-                Log.LogMessageFromResources("WriteCodeFragment.CouldNotInferParameterType", parameterName);
+                Log.LogMessageFromResources("WriteCodeFragment.CouldNotInferParameterType", parameterName, attributeTypeName);
                 return new CodePrimitiveExpression(rawValue);
             }
 
