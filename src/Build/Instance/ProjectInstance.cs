@@ -126,6 +126,11 @@ namespace Microsoft.Build.Execution
         private PropertyDictionary<ProjectPropertyInstance> _environmentVariableProperties;
 
         /// <summary>
+        /// Properties originating from SDK resolution-reported environment variables
+        /// </summary>
+        private PropertyDictionary<ProjectPropertyInstance> _sdkResolvedEnvironmentVariableProperties;
+
+        /// <summary>
         /// Items in the project. This is a dictionary of ordered lists of a single type of items keyed by item type.
         /// </summary>
         private IItemDictionary<ProjectItemInstance> _items;
@@ -541,6 +546,7 @@ namespace Microsoft.Build.Execution
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _environmentVariableProperties = projectToInheritFrom._environmentVariableProperties;
+            _sdkResolvedEnvironmentVariableProperties = projectToInheritFrom._sdkResolvedEnvironmentVariableProperties;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(projectToInheritFrom._itemDefinitions, MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = projectToInheritFrom._hostServices;
             this.ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
@@ -737,6 +743,14 @@ namespace Microsoft.Build.Execution
                     _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
                 }
 
+                _sdkResolvedEnvironmentVariableProperties =
+                    new PropertyDictionary<ProjectPropertyInstance>(that._sdkResolvedEnvironmentVariableProperties.Count);
+
+                foreach (ProjectPropertyInstance sdkResolvedEnvironmentVariable in that._sdkResolvedEnvironmentVariableProperties)
+                {
+                    _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentVariable.DeepClone(_isImmutable));
+                }
+
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
@@ -775,6 +789,8 @@ namespace Microsoft.Build.Execution
                     _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
                     _environmentVariableProperties =
                         new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
+                    _sdkResolvedEnvironmentVariableProperties =
+                        new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
 
                     // Filter each type of property.
                     foreach (var desiredProperty in filter.PropertyFilters)
@@ -791,10 +807,15 @@ namespace Microsoft.Build.Execution
                             _globalProperties.Set(globalProperty.DeepClone(isImmutable: true));
                         }
 
-                        var environmentProperty = that.GetProperty(desiredProperty);
+                        var environmentProperty = that._environmentVariableProperties.GetProperty(desiredProperty);
                         if (environmentProperty != null)
                         {
                             _environmentVariableProperties.Set(environmentProperty.DeepClone(isImmutable: true));
+                        }
+                        var sdkResolvedEnvironmentProperty = that._sdkResolvedEnvironmentVariableProperties.GetProperty(desiredProperty);
+                        if (sdkResolvedEnvironmentProperty != null)
+                        {
+                            _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentProperty.DeepClone(isImmutable: true));
                         }
                     }
                 }
@@ -1342,6 +1363,11 @@ namespace Microsoft.Build.Execution
             get => _environmentVariableProperties;
         }
 
+        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SdkResolvedEnvironmentVariablePropertiesDictionary
+        {
+            get => _sdkResolvedEnvironmentVariableProperties;
+        }
+
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>
@@ -1843,6 +1869,13 @@ namespace Microsoft.Build.Execution
             SdkResult sdkResult)
         {
             _importPaths.Add(import.FullPath);
+            if (sdkResult.EnvironmentVariablesToAdd is var sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+            {
+                foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                {
+                    _sdkResolvedEnvironmentVariableProperties.Set(ProjectPropertyInstance.Create(environmentVariable.Key, environmentVariable.Value, importElement.Location, isImmutable: true));
+                }
+            }
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).RecordImportWithDuplicates(importElement, import, versionEvaluated);
         }
 
@@ -2306,7 +2339,8 @@ namespace Microsoft.Build.Execution
                     // Only emit the property if it does not exist in the global or environment properties dictionaries or differs from them.
                     if (!_globalProperties.Contains(property.Name) || !String.Equals(_globalProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!_environmentVariableProperties.Contains(property.Name) || !String.Equals(_environmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
+                        if ((!_environmentVariableProperties.Contains(property.Name) || !String.Equals(_environmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
+                            && (!_sdkResolvedEnvironmentVariableProperties.Contains(property.Name) || !String.Equals(_sdkResolvedEnvironmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase)))
                         {
                             property.ToProjectPropertyElement(propertyGroupElement);
                         }

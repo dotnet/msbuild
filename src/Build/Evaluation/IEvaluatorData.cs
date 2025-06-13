@@ -213,7 +213,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// A dictionary of all discovered environment variables during Sdk Resolutions that occurred during evaluation.
         /// </summary>
-        PropertyDictionary<ProjectPropertyInstance> ResolvedEnvironmentVariablesDictionary { get; }
+        PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary { get; }
 
         /// <summary>
         /// Prepares the data block for a new evaluation pass
