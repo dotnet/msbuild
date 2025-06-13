@@ -58,10 +58,7 @@ namespace Microsoft.Build.Framework
         /// Waits to reacquire control after yielding.
         /// </summary>
         /// <remarks>
-        /// This method must be called to regain control after <see cref="Yield"/> has been called. 
-        /// After <see cref="Yield"/> is called, global process state like environment variables and current 
-        /// working directory can change arbitrarily until this method returns. Tasks should complete any work 
-        /// that depends on global process state before calling <see cref="Yield"/>.
+        /// This method must be called to regain control after <see cref="Yield"/> has been called.
         /// </remarks>
         void Reacquire();
     }
