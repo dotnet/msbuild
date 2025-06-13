@@ -159,20 +159,13 @@ configuration:
             action: Opened
         - isAction:
             action: Reopened
-      - and:
-        - or:
-          - filesMatchPattern:
-              pattern: ^.+\.swr$
-          - filesMatchPattern:
-              pattern: src/Package/MSBuild.VSSetup.*/.*
-        - not:
-            or:
-            - isActivitySender:
-                user: copilot
-                issueAuthor: False
-            - isActivitySender:
-                user: github-copilot[bot]
-                issueAuthor: False
+      - not:
+          isDraft
+      - or:
+        - filesMatchPattern:
+            pattern: ^.+\.swr$
+        - filesMatchPattern:
+            pattern: src/Package/MSBuild.VSSetup.*/.*
       then:
       - addReply:
           reply: Hello @${issueAuthor}, I noticed that you’re changing an *.swr file or any file under src/Package/MSBuild.VSSetup.*. Please make sure to validate this change by an experimental VS insertion. This is accomplished by pushing to an exp/* branch, which requires write permissions to this repo.
