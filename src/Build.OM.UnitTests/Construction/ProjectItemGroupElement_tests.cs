@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Xunit;
 
 #nullable disable
@@ -101,6 +103,37 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.Equal("c", itemGroup.Label);
             Assert.True(project.HasUnsavedChanges);
+        }
+
+        [Fact]
+        public void AddPackageReference_PreservesTrailingCommentOnSameLine()
+        {
+            string content =
+            """
+               <Project>
+                   <ItemGroup>
+                       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" /><!-- some comment -->
+                   </ItemGroup>
+               </Project>
+            """;
+            using ProjectRootElementFromString projectRootElementFromString = new(content, ProjectCollection.GlobalProjectCollection, true);
+            ProjectRootElement project = projectRootElementFromString.Project;
+            ProjectItemGroupElement group = project.ItemGroups.First();
+
+            // Add a new PackageReference
+            group.AddItem("PackageReference", "Serilog").AddMetadata("Version", "4.3.0", expressAsAttribute: true);
+
+            string expectedContent =
+            """
+               <Project>
+                   <ItemGroup>
+                       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" /><!-- some comment -->
+                       <PackageReference Include="Serilog" Version="4.3.0" />
+                   </ItemGroup>
+               </Project>
+            """;
+
+            Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
         }
     }
 }
