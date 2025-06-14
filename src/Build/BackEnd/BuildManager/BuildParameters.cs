@@ -717,7 +717,7 @@ namespace Microsoft.Build.Execution
             set => _buildId = value;
         }
 
-        internal FrozenDictionary<string, string> BuildProcessEnvironmentInternal => _buildProcessEnvironment ?? new Dictionary<string, string>(0).ToFrozenDictionary();
+        internal FrozenDictionary<string, string> BuildProcessEnvironmentInternal => _buildProcessEnvironment ?? FrozenDictionary<string, string>.Empty;
 
         /// <summary>
         /// Gets or sets the environment properties.
