@@ -7,9 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Resources;
 using System.Runtime.InteropServices;
-#if RUNTIME_TYPE_NETCORE
-using System.Runtime.InteropServices.ComTypes;
-#endif
+using ComTypes = System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Versioning;
 
 #nullable disable
@@ -55,64 +53,86 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             catch (COMException) { }
 
 #pragma warning disable 618
-#if RUNTIME_TYPE_NETCORE
-            ITypeLib tlib = (ITypeLib)obj;
-#else
-            UCOMITypeLib tlib = (UCOMITypeLib)obj;
-#endif
+            ComTypes.ITypeLib tlib = (ComTypes.ITypeLib)obj;
             if (tlib != null)
             {
                 IntPtr typeLibAttrPtr = IntPtr.Zero;
-                tlib.GetLibAttr(out typeLibAttrPtr);
-                var typeLibAttr = (TYPELIBATTR)Marshal.PtrToStructure(typeLibAttrPtr, typeof(TYPELIBATTR));
-                tlib.ReleaseTLibAttr(typeLibAttrPtr);
-                Guid tlbid = typeLibAttr.guid;
-
-                tlib.GetDocumentation(-1, out _, out string docString, out _, out string helpFile);
-                string helpdir = Util.FilterNonprintableChars(helpFile); // Path.GetDirectoryName(helpFile);
-
-                TypeLib = new TypeLib(tlbid, new Version(typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum), helpdir, typeLibAttr.lcid, Convert.ToInt32(typeLibAttr.wLibFlags, CultureInfo.InvariantCulture));
-
-                var comClassList = new List<ComClass>();
-                int count = tlib.GetTypeInfoCount();
-                for (int i = 0; i < count; ++i)
+                try
                 {
-                    tlib.GetTypeInfoType(i, out TYPEKIND tkind);
-                    if (tkind == TYPEKIND.TKIND_COCLASS)
+                    tlib.GetLibAttr(out typeLibAttrPtr);
+                    var typeLibAttr = (ComTypes.TYPELIBATTR)Marshal.PtrToStructure(typeLibAttrPtr, typeof(ComTypes.TYPELIBATTR));
+                    Guid tlbid = typeLibAttr.guid;
+
+                    tlib.GetDocumentation(-1, out _, out string docString, out _, out string helpFile);
+                    string helpdir = Util.FilterNonprintableChars(helpFile); // Path.GetDirectoryName(helpFile);
+
+                    TypeLib = new TypeLib(tlbid, new Version(typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum), helpdir, typeLibAttr.lcid, Convert.ToInt32(typeLibAttr.wLibFlags, CultureInfo.InvariantCulture));
+
+                    var comClassList = new List<ComClass>();
+                    int count = tlib.GetTypeInfoCount();
+                    for (int i = 0; i < count; ++i)
                     {
-#if RUNTIME_TYPE_NETCORE
-                        tlib.GetTypeInfo(i, out ITypeInfo tinfo);
-#else
-                        tlib.GetTypeInfo(i, out UCOMITypeInfo tinfo);
-#endif
-
-                        IntPtr tinfoAttrPtr = IntPtr.Zero;
-                        tinfo.GetTypeAttr(out tinfoAttrPtr);
-                        TYPEATTR tinfoAttr = (TYPEATTR)Marshal.PtrToStructure(tinfoAttrPtr, typeof(TYPEATTR));
-                        tinfo.ReleaseTypeAttr(tinfoAttrPtr);
-                        Guid clsid = tinfoAttr.guid;
-
-                        tlib.GetDocumentation(i, out _, out docString, out _, out helpFile);
-                        string description = Util.FilterNonprintableChars(docString);
-
-                        ClassInfo info = GetRegisteredClassInfo(clsid);
-                        if (info == null)
+                        tlib.GetTypeInfoType(i, out ComTypes.TYPEKIND tkind);
+                        if (tkind == ComTypes.TYPEKIND.TKIND_COCLASS)
                         {
-                            continue;
-                        }
+                            IntPtr tinfoAttrPtr = IntPtr.Zero;
+                            tlib.GetTypeInfo(i, out ComTypes.ITypeInfo tinfo);
+                            try
+                            {
+                                tinfo.GetTypeAttr(out tinfoAttrPtr);
+                                ComTypes.TYPEATTR tinfoAttr = (ComTypes.TYPEATTR)Marshal.PtrToStructure(tinfoAttrPtr, typeof(ComTypes.TYPEATTR));
+                                Guid clsid = tinfoAttr.guid;
 
-                        comClassList.Add(new ComClass(tlbid, clsid, info.Progid, info.ThreadingModel, description));
+                                tlib.GetDocumentation(i, out _, out docString, out _, out helpFile);
+                                string description = Util.FilterNonprintableChars(docString);
+
+                                ClassInfo info = GetRegisteredClassInfo(clsid);
+                                if (info == null)
+                                {
+                                    continue;
+                                }
+                                comClassList.Add(new ComClass(tlbid, clsid, info.Progid, info.ThreadingModel, description));
+                            }
+                            finally
+                            {
+                                try
+                                {
+                                    if (tinfoAttrPtr != IntPtr.Zero)
+                                    {
+                                        tinfo.ReleaseTypeAttr(tinfoAttrPtr);
+                                    }
+                                    Marshal.ReleaseComObject(tinfo);
+                                    tinfo = null;
+                                }
+                                // Ignore COM exceptions when releasing type attributes.
+                                catch (COMException) {}
+                            }
+                        }
+                    }
+                    if (comClassList.Count > 0)
+                    {
+                        ComClasses = comClassList.ToArray();
+                        Success = true;
+                    }
+                    else
+                    {
+                        outputMessages.AddErrorMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.NoRegisteredClasses"));
+                        Success = false;
                     }
                 }
-                if (comClassList.Count > 0)
+                finally
                 {
-                    ComClasses = comClassList.ToArray();
-                    Success = true;
-                }
-                else
-                {
-                    outputMessages.AddErrorMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.NoRegisteredClasses"));
-                    Success = false;
+                    try
+                    {
+                        if (typeLibAttrPtr != IntPtr.Zero) 
+                        {
+                            tlib.ReleaseTLibAttr(typeLibAttrPtr);
+                        }
+                        Marshal.ReleaseComObject(tlib);
+                        tlib = null;
+                    }
+                    // Ignore COM exceptions when releasing type attributes.
+                    catch (COMException) {}
                 }
             }
             else
