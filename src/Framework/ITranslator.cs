@@ -318,7 +318,7 @@ namespace Microsoft.Build.BackEnd
         /// This overload is needed for a workaround concerning serializing BuildResult with a version.
         /// It serializes/deserializes additional entries together with the main dictionary.
         /// </remarks>
-        void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
+        void TranslateDictionary(ref IDictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
 
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
 
