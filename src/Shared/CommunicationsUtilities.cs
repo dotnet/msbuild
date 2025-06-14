@@ -324,6 +324,7 @@ namespace Microsoft.Build.Internal
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
 #else
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         private static FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
         {
             // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
