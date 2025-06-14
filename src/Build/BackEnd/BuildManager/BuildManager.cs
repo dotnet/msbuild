@@ -2817,7 +2817,7 @@ namespace Microsoft.Build.Execution
                     // part of the import graph.
                     _buildParameters?.ProjectRootElementCache?.Clear();
 
-                    FileMatcher.ClearFileEnumerationsCache();
+                    FileMatcher.ClearCaches();
 #if !CLR2COMPATIBILITY
                     FileUtilities.ClearFileExistenceCache();
 #endif
