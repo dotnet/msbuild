@@ -4502,7 +4502,7 @@ namespace Microsoft.Build.Evaluation
             public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
             {
                 ImportClosure.Add(new ResolvedImport(Project, importElement, import, versionEvaluated, sdkResult));
-                if (sdkResult.EnvironmentVariablesToAdd is var sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+                if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
                 {
                     foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
                     {

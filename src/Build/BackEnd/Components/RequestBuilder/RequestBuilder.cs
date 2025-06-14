@@ -1377,8 +1377,18 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                // Restore the original build environment variables.
-                SetEnvironmentVariableBlock(_componentHost.BuildParameters.BuildProcessEnvironment);
+                // Restore the original build environment variables, and ensure any SDK resolver-supplied variables are applied
+                var currentEnv = _componentHost.BuildParameters.BuildProcessEnvironment;
+                var sdkResolvedVars = (_requestEntry.RequestConfiguration.Project as IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>).SdkResolvedEnvironmentVariablePropertiesDictionary;
+                if (sdkResolvedVars is not null)
+                {
+                    currentEnv = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironment);
+                    foreach (var entry in sdkResolvedVars)
+                    {
+                        currentEnv.Add(entry.Name, entry.EvaluatedValue);
+                    }
+                }
+                SetEnvironmentVariableBlock(currentEnv);
             }
         }
 
@@ -1404,14 +1414,6 @@ namespace Microsoft.Build.BackEnd
         private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment)
         {
             IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
-            var sdkResolvedVars = (_requestEntry.RequestConfiguration.Project as IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>).SdkResolvedEnvironmentVariablePropertiesDictionary;
-            if (sdkResolvedVars is var dict)
-            {
-                foreach (var entry in dict)
-                {
-                    currentEnvironment.Add(entry.Name, entry.EvaluatedValue);
-                }
-            }
             ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
             UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
         }

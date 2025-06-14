@@ -667,6 +667,7 @@ namespace Microsoft.Build.Execution
             this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, new ReadOnlyCollection<ProjectItem>(data.Items), projectItemToInstanceMap);
             this.CreateGlobalPropertiesSnapshot(data.GlobalPropertiesDictionary);
             this.CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
+            this.CreateSdkResolvedEnvironmentVariablePropertiesSnapshot(data.SdkResolvedEnvironmentVariablePropertiesDictionary);
             this.CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
             this.CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
 
@@ -685,6 +686,16 @@ namespace Microsoft.Build.Execution
             _explicitToolsVersionSpecified = data.ExplicitToolsVersion != null;
 
             _isImmutable = immutable;
+        }
+
+        private void CreateSdkResolvedEnvironmentVariablePropertiesSnapshot(PropertyDictionary<ProjectPropertyInstance> sdkResolvedEnvironmentVariablePropertiesDictionary)
+        {
+            _sdkResolvedEnvironmentVariableProperties = new PropertyDictionary<ProjectPropertyInstance>(sdkResolvedEnvironmentVariablePropertiesDictionary.Count);
+
+            foreach (ProjectPropertyInstance environmentProperty in sdkResolvedEnvironmentVariablePropertiesDictionary)
+            {
+                _sdkResolvedEnvironmentVariableProperties.Set(environmentProperty.DeepClone());
+            }
         }
 
         /// <summary>
@@ -1869,7 +1880,7 @@ namespace Microsoft.Build.Execution
             SdkResult sdkResult)
         {
             _importPaths.Add(import.FullPath);
-            if (sdkResult.EnvironmentVariablesToAdd is var sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+            if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
             {
                 foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
                 {
