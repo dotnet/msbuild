@@ -1007,7 +1007,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-
         private sealed class MockSdkResolverThrows : SdkResolver
         {
             public override string Name => nameof(MockSdkResolverThrows);
