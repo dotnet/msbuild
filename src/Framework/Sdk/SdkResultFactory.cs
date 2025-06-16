@@ -79,7 +79,11 @@ namespace Microsoft.Build.Framework
         /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
-        /// <param name="environmentVariablesToAdd">Environment variables to add to the evaluation process state</param>
+        /// <param name="environmentVariablesToAdd">
+        /// Environment variables to add to the project.
+        /// Environment variables set in this way are available as properties during evaluation, and
+        /// additionally set as environment variables during execution, including to tasks and launched processes.
+        /// </param>
         /// <returns></returns>
         public virtual SdkResult IndicateSuccess(string path,
             string version,
@@ -105,7 +109,11 @@ namespace Microsoft.Build.Framework
         /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
-        /// <param name="environmentVariablesToAdd">Environment variables to add to the evaluation process state</param>
+        /// <param name="environmentVariablesToAdd">
+        /// Environment variables to add to the project.
+        /// Environment variables set in this way are available as properties during evaluation, and
+        /// additionally set as environment variables during execution, including to tasks and launched processes.
+        /// </param>
         /// <returns></returns>
         public virtual SdkResult IndicateSuccess(IEnumerable<string> paths,
             string version,
