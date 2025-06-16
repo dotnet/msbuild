@@ -535,8 +535,8 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.AssertNoErrors();
             _logger.AssertNoWarnings();
 
-            instance.GetItems("ThingsAsEnvironment").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
             instance.GetItems("ThingsAsProperty").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
+            instance.GetItems("ThingsAsEnvironment").ShouldHaveSingleItem($"Should have a ThingsAsEnvironment. Log: {_logger.FullLog}").EvaluatedInclude.ShouldBe("TestEnvVarValue");
         }
         public void Dispose()
         {

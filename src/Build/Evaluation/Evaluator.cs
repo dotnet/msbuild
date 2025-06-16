@@ -1879,6 +1879,14 @@ namespace Microsoft.Build.Evaluation
                     projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
 
+                if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+                {
+                    foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                    {
+                        SetSdkResolvedEnvironmentVariable(environmentVariable);
+                    }
+                }
+
                 projects = projectList;
             }
             else
@@ -1886,6 +1894,18 @@ namespace Microsoft.Build.Evaluation
                 ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
                     throwOnFileNotExistsError: true, out projects);
             }
+        }
+
+        private void SetSdkResolvedEnvironmentVariable(KeyValuePair<string, string> environmentVariable)
+        {
+            SdkResolvedEnvironmentVariablePropertyInstance property = new(environmentVariable.Key, environmentVariable.Value);
+
+            _data.SdkResolvedEnvironmentVariablePropertiesDictionary.Set(property);
+
+            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
+            _data.EnvironmentVariablePropertiesDictionary.Set(property);
+
+            _data.SetProperty(property.Name, property.EvaluatedValue, isGlobalProperty: false, mayBeReserved: false, isEnvironmentVariable: true, loggingContext: _evaluationLoggingContext);
         }
 
         // Creates a project to set the properties and include the items from an SdkResult
