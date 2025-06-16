@@ -505,40 +505,38 @@ namespace Microsoft.Build.UnitTests.Evaluation
                             { "TestEnvVar", "TestEnvVarValue" }
                         })));
 
-            string projectContent = @"
-                    <Project Sdk=""envvarrsdk"">
-                        <Target Name=""TestTarget"" Returns=""@(Things)"">
-                            <ItemGroup>
-                                <Things Include=""$([System.Environment]::GetEnvironmentVariable('TestEnvVar'))"" />
-                            </ItemGroup>
-                        </Target>
-                    </Project>";
+            string projectContent = """
+                <Project Sdk="envvarrsdk">
+                    <ItemGroup>
+                        <ThingsAsEnvironment Include="$([System.Environment]::GetEnvironmentVariable('TestEnvVar'))" />
+                        <ThingsAsProperty Include="$(TestEnvVar)" />
+                    </ItemGroup>
+                    <Target Name="TestTarget" />
+                </Project>
+                """;
 
             string projectPath = Path.Combine(_testFolder, "project.proj");
             File.WriteAllText(projectPath, projectContent);
 
-            string sdkPropsContents = @"
-                    <Project>
-                    </Project>";
+            string sdkPropsContents = "<Project />";
 
             string sdkPropsPath = Path.Combine(_testFolder, "Sdk", "Sdk.props");
             Directory.CreateDirectory(Path.Combine(_testFolder, "Sdk"));
             File.WriteAllText(sdkPropsPath, sdkPropsContents);
 
-            string sdkTargetsContents = @"
-                    <Project>
-                    </Project>";
+            string sdkTargetsContents = @"<Project />";
 
             string sdkTargetsPath = Path.Combine(_testFolder, "Sdk", "Sdk.targets");
             File.WriteAllText(sdkTargetsPath, sdkTargetsContents);
 
             var project = CreateProject(projectPath, projectOptions);
             var instance = project.CreateProjectInstance();
-            instance.Build(["TestTarget"], null, out var targetOutputs);
-            instance.GetItems("Things").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
 
-            _logger.ErrorCount.ShouldBe(0);
-            _logger.WarningCount.ShouldBe(0);
+            _logger.AssertNoErrors();
+            _logger.AssertNoWarnings();
+
+            instance.GetItems("ThingsAsEnvironment").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
+            instance.GetItems("ThingsAsProperty").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
         }
         public void Dispose()
         {
