@@ -528,8 +528,7 @@ namespace Microsoft.Build.Construction
                     XmlNode next = insertAfter.NextSibling;
                     while (next != null &&
                         (next.NodeType == XmlNodeType.Whitespace ||
-                         next.NodeType == XmlNodeType.Comment ||
-                         next.NodeType == XmlNodeType.ProcessingInstruction)
+                         next.NodeType == XmlNodeType.Comment)
                          && (next.Value == null || (!next.Value.Contains("\n") && !next.Value.Contains("\r"))))
                     {
                         insertAfter = next;

@@ -135,5 +135,79 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
         }
+
+        private void AddItem_PreservesComments_Helper(string content, string expectedContent)
+        {
+            using ProjectRootElementFromString projectRootElementFromString = new(content, ProjectCollection.GlobalProjectCollection, true);
+            ProjectRootElement project = projectRootElementFromString.Project;
+            ProjectItemGroupElement group = project.ItemGroups.First();
+
+            // Insert a new item between the two existing items
+            var items = group.Items.ToList();
+            var newItem = project.CreateItemElement("PackageReference");
+            newItem.Include = "Inserted";
+            group.InsertBeforeChild(newItem, items[1]);
+            newItem.AddMetadata("Version", "1.5.0", true);
+
+            Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
+        }
+
+        [Fact]
+        public void AddItem_PreservesComments_VariousCases()
+        {
+            // Multi-line comment scenario
+            string content1 =
+            """
+            <Project>
+               <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" />
+                    <!--
+                    This is a multi-line
+                    comment before the next item
+                    -->
+                    <PackageReference Include="B" Version="2.0.0" />
+                </ItemGroup>
+            </Project>
+            """;
+            string expectedContent1 =
+            """
+            <Project>
+               <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" />
+                    <PackageReference Include="Inserted" Version="1.5.0" />
+                    <!--
+                    This is a multi-line
+                    comment before the next item
+                    -->
+                    <PackageReference Include="B" Version="2.0.0" />
+                </ItemGroup>
+            </Project>
+            """;
+            AddItem_PreservesComments_Helper(content1, expectedContent1);
+
+            // Single-line comment scenario
+            string content2 =
+            """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" />
+                <!-- comment before B -->
+                <PackageReference Include="B" Version="2.0.0" />
+              </ItemGroup>
+            </Project>
+            """;
+            string expectedContent2 =
+            """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" />
+                <PackageReference Include="Inserted" Version="1.5.0" />
+                <!-- comment before B -->
+                <PackageReference Include="B" Version="2.0.0" />
+              </ItemGroup>
+            </Project>
+            """;
+            AddItem_PreservesComments_Helper(content2, expectedContent2);
+        }
     }
 }
