@@ -2707,8 +2707,7 @@ namespace Microsoft.Build.CommandLine
                     globalProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property]);
 
                     // figure out which restore-only properties have been set on the command line
-                    // restoreProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.RestoreProperty]);
-                    restoreProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    restoreProperties = ProcessPropertySwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.RestoreProperty]);
                     restoreProperties["EnableDefaultItems"] = "$false";
 
                     // figure out if there was a max cpu count provided
