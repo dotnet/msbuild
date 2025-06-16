@@ -508,10 +508,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string projectContent = """
                 <Project Sdk="envvarrsdk">
                     <ItemGroup>
-                        <ThingsAsEnvironment Include="$([System.Environment]::GetEnvironmentVariable('TestEnvVar'))" />
-                        <ThingsAsProperty Include="$(TestEnvVar)" />
+                        <EvalThingsAsEnvironment Include="$([System.Environment]::GetEnvironmentVariable('TestEnvVar'))" />
+                        <EvalThingsAsProperty Include="$(TestEnvVar)" />
                     </ItemGroup>
-                    <Target Name="TestTarget" />
+                    <Target Name="TestTarget">
+                        <ItemGroup>
+                            <ExecThingsAsEnvironment Include="$([System.Environment]::GetEnvironmentVariable('TestEnvVar'))" />
+                            <ExecThingsAsProperty Include="$(TestEnvVar)" />
+                        </ItemGroup>
+                    </Target>
                 </Project>
                 """;
 
@@ -535,9 +540,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.AssertNoErrors();
             _logger.AssertNoWarnings();
 
-            instance.GetItems("ThingsAsProperty").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
-            instance.GetItems("ThingsAsEnvironment").ShouldHaveSingleItem($"Should have a ThingsAsEnvironment. Log: {_logger.FullLog}").EvaluatedInclude.ShouldBe("TestEnvVarValue");
+            instance.GetItems("EvalThingsAsProperty").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
+            instance.GetItems("EvalThingsAsEnvironment").ShouldBeEmpty("Unexpectedly able to access SDK-resolver set environment during eval");
+
+            instance.Build(["TestTarget"], [_logger], out var targetOutputs);
+
+            instance.GetItems("ExecThingsAsProperty").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
+            instance.GetItems("ExecThingsAsEnvironment").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
         }
+
         public void Dispose()
         {
             _env.Dispose();
