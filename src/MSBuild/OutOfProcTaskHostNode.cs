@@ -930,36 +930,8 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-                string[] directoriesToAddToAppDomain;
-                // if the tasklocation ends with inline_task.dll
-                if (taskLocation.EndsWith("inline_task.dll", StringComparison.OrdinalIgnoreCase))
-                {
-                    // load manifest of the task assembly
-                    string manifestPath = taskLocation + ".loadmanifest";
-                    // read all lines to list if it exists
-                    if (File.Exists(manifestPath))
-                    {
-                        directoriesToAddToAppDomain = File.ReadAllLines(manifestPath);
-                        if (directoriesToAddToAppDomain != null)
-                        {
-                            // let's do the appdomain magic here...
-                            AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
-                            {
-                                var assemblyName = new AssemblyName(args.Name);
-                                foreach (string directory in directoriesToAddToAppDomain)
-                                {
-                                    string assemblyPath = Path.Combine(directory, assemblyName.Name + ".dll");
-                                    if (File.Exists(assemblyPath))
-                                    {
-                                        return Assembly.LoadFrom(assemblyPath);
-                                    }
-                                }
 
-                                return null;
-                            };
-                        }
-                    }
-                }
+                RegisterDependencyLoadHandlersFromManifest();
 
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
@@ -1042,6 +1014,39 @@ namespace Microsoft.Build.CommandLine
 
                     // The task has now fully completed executing
                     _taskCompleteEvent.Set();
+                }
+            }
+
+            /// <summary>
+            /// Inline tasks may have dependencies that were resolved during TaskFactory initialization.
+            /// Recreate assembly resolve handlers for these dependencies.
+            /// </summary>
+            static void RegisterDependencyLoadHandlersFromManifest()
+            {
+                if (taskLocation.EndsWith("inline_task.dll", StringComparison.OrdinalIgnoreCase))
+                {
+                    string manifestPath = taskLocation + ".loadmanifest";
+                    if (File.Exists(manifestPath))
+                    {
+                        string[] directoriesToAddToAppDomain = File.ReadAllLines(manifestPath);
+                        if (directoriesToAddToAppDomain != null)
+                        {
+                            AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
+                            {
+                                var assemblyName = new AssemblyName(args.Name);
+                                foreach (string directory in directoriesToAddToAppDomain)
+                                {
+                                    string assemblyPath = Path.Combine(directory, assemblyName.Name + ".dll");
+                                    if (File.Exists(assemblyPath))
+                                    {
+                                        return Assembly.LoadFrom(assemblyPath);
+                                    }
+                                }
+
+                                return null;
+                            };
+                        }
+                    }
                 }
             }
         }

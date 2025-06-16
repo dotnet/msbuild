@@ -372,13 +372,11 @@ namespace Microsoft.Build.Tasks
                 HasSet = true
             };
 
-            // Add Output attribute if this is an output property
             if (isOutput)
             {
                 prop.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Output"));
             }
 
-            // Add Required attribute if this is a required property
             if (isRequired)
             {
                 prop.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Required"));
