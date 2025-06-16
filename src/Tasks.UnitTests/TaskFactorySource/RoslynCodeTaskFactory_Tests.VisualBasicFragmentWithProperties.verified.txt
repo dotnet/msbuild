@@ -26,6 +26,7 @@ Namespace InlineCode
         
         Private _Parameter1 As String
         
+        <Microsoft.Build.Framework.Required()>  _
         Public Overridable Property Parameter1() As String
             Get
                 Return _Parameter1
@@ -37,6 +38,7 @@ Namespace InlineCode
         
         Private _Parameter2 As String
         
+        <Microsoft.Build.Framework.Output()>  _
         Public Overridable Property Parameter2() As String
             Get
                 Return _Parameter2
@@ -48,6 +50,8 @@ Namespace InlineCode
         
         Private _Parameter3 As String
         
+        <Microsoft.Build.Framework.Output(),  _
+         Microsoft.Build.Framework.Required()>  _
         Public Overridable Property Parameter3() As String
             Get
                 Return _Parameter3
