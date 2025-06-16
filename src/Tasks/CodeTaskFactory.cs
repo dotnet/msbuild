@@ -350,7 +350,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Create a property (with the corresponding private field) from the given type information
         /// </summary>
-        private static void CreateProperty(CodeTypeDeclaration ctd, string propertyName, Type propertyType, object defaultValue)
+        private static void CreateProperty(CodeTypeDeclaration ctd, string propertyName, Type propertyType, object defaultValue = null, bool isOutput = false, bool isRequired = false)
         {
             var field = new CodeMemberField(new CodeTypeReference(propertyType), "_" + propertyName)
             {
@@ -371,6 +371,18 @@ namespace Microsoft.Build.Tasks
                 HasGet = true,
                 HasSet = true
             };
+
+            // Add Output attribute if this is an output property
+            if (isOutput)
+            {
+                prop.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Output"));
+            }
+
+            // Add Required attribute if this is a required property
+            if (isRequired)
+            {
+                prop.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Required"));
+            }
 
             var fieldRef = new CodeFieldReferenceExpression { FieldName = field.Name };
             prop.GetStatements.Add(new CodeMethodReturnStatement(fieldRef));
@@ -414,7 +426,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void CreateProperty(CodeTypeDeclaration codeTypeDeclaration, TaskPropertyInfo propInfo, object defaultValue)
         {
-            CreateProperty(codeTypeDeclaration, propInfo.Name, propInfo.PropertyType, defaultValue);
+            CreateProperty(codeTypeDeclaration, propInfo.Name, propInfo.PropertyType, defaultValue, propInfo.Output, propInfo.Required);
         }
 
         /// <summary>
@@ -737,7 +749,7 @@ namespace Microsoft.Build.Tasks
                     MSBuildConstants.InlineTaskTempDllSubPath,
                     $"pid_{EnvironmentUtilities.CurrentProcessId}");
                 Directory.CreateDirectory(processSpecificInlineTaskDir);
-                _assemblyPath = FileUtilities.GetTemporaryFile(processSpecificInlineTaskDir, null, ".dll", false);
+                _assemblyPath = FileUtilities.GetTemporaryFile(processSpecificInlineTaskDir, null, "inline_task.dll", false);
             }
 
             // Language can be anything that has a codedom provider, in the standard naming method
