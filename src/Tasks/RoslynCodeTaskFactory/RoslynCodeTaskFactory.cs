@@ -222,7 +222,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (TaskPropertyInfo propertyInfo in parameters)
             {
-                CreateProperty(codeTypeDeclaration, propertyInfo.Name, propertyInfo.PropertyType);
+                CreateProperty(codeTypeDeclaration, propertyInfo.Name, propertyInfo.PropertyType, null, propertyInfo.Output, propertyInfo.Required);
             }
 
             if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Fragment)
@@ -624,9 +624,7 @@ namespace Microsoft.Build.Tasks
 
                 return null;
             }
-        }
-
-        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null)
+        }        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null, bool isOutput = false, bool isRequired = false)
         {
             CodeMemberField field = new CodeMemberField(new CodeTypeReference(type), "_" + name)
             {
@@ -649,6 +647,18 @@ namespace Microsoft.Build.Tasks
                 HasGet = true,
                 HasSet = true
             };
+
+            // Add Output attribute if this is an output property
+            if (isOutput)
+            {
+                property.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Output"));
+            }
+
+            // Add Required attribute if this is a required property
+            if (isRequired)
+            {
+                property.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Required"));
+            }
 
             property.GetStatements.Add(new CodeMethodReturnStatement(fieldReference));
 
