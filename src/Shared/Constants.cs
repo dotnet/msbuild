@@ -63,7 +63,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild.
         /// </summary>
-        internal const string CurrentVisualStudioVersion = "17.0";
+        internal const string CurrentVisualStudioVersion = "18.0";
 
         /// <summary>
         /// The most current ToolsVersion known to this version of MSBuild.

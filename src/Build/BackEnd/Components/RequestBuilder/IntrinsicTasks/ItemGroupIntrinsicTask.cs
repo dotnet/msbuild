@@ -475,10 +475,18 @@ namespace Microsoft.Build.BackEnd
                 // Calculate all Exclude
                 var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
-                // Subtract any Exclude
-                items = items
-                    .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
-                    .ToList();
+                // Perf: removing Linq to avoid closures.
+                // Note: this may not be optimal but decided to initialize the list with the same size as items to avoid resizing it later.
+                var filteredProjectItems = new List<ProjectItemInstance>(items.Count);
+                foreach (ProjectItemInstance item in items)
+                {
+                    if (!excludesUnescapedForComparison.Contains(((IItem)item).EvaluatedInclude.NormalizeForPathComparison()))
+                    {
+                        filteredProjectItems.Add(item);
+                    }
+                }
+
+                items = filteredProjectItems;
             }
 
             // Filter the metadata as appropriate

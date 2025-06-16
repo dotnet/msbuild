@@ -3582,6 +3582,16 @@
         <target state="translated">MSB3942: 未能创建压缩文件“{0}”，因为它已经存在。请删除或重命名文件，然后重试。</target>
         <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
+        <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
+        <target state="new">MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</target>
+        <note>{StrBegin="MSB3944: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
+        <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
+        <target state="new">MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</target>
+        <note>{StrBegin="MSB3945: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

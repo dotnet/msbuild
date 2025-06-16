@@ -3582,6 +3582,16 @@
         <target state="translated">MSB3942: 파일이 이미 존재하기 때문에 Zip 파일 "{0}"을(를) 만들지 못했습니다. 파일을 삭제하거나 이름을 바꾸고 다시 시도하세요.</target>
         <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
+        <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
+        <target state="new">MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</target>
+        <note>{StrBegin="MSB3944: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
+        <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
+        <target state="new">MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</target>
+        <note>{StrBegin="MSB3945: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

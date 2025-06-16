@@ -2923,6 +2923,14 @@
     <value>MSB3943: Failed to zip directory "{0}" to file "{1}".  {2} {3}</value>
     <comment>{StrBegin="MSB3943: "}</comment>
   </data>
+  <data name="ZipDirectory.ErrorInvalidCompressionLevel">
+    <value>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</value>
+    <comment>{StrBegin="MSB3944: "}</comment>
+  </data>
+  <data name="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
+    <value>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</value>
+    <comment>{StrBegin="MSB3945: "}</comment>
+  </data>
   <data name="ZipDirectory.Comment">
     <value>Zipping directory "{0}" to "{1}".</value>
   </data>

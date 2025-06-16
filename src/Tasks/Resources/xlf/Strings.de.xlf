@@ -3582,6 +3582,16 @@
         <target state="translated">MSB3942: Fehler beim Erstellen der ZIP-Datei "{0}", weil sie bereits vorhanden ist. Löschen Sie die Datei, oder benennen Sie sie um, und versuchen Sie es dann noch mal.</target>
         <note>{StrBegin="MSB3942: "}</note>
       </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
+        <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
+        <target state="new">MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</target>
+        <note>{StrBegin="MSB3944: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
+        <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
+        <target state="new">MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</target>
+        <note>{StrBegin="MSB3945: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>

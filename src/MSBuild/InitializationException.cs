@@ -158,6 +158,28 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Throws the exception using the given exception context and can include the logger name.
+        /// </summary>
+        internal static void Throw(string messageResourceName, string invalidSwitch, Exception e, bool showStackTrace, params object[] formatArgs)
+        {
+            string errorMessage = AssemblyResources.GetString(messageResourceName);
+
+            ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
+
+            // the exception message can contain a format item i.e.
+            // "{0}" to hold the logger name
+            // "{1}" to hold the given exception's message
+            errorMessage = ResourceUtilities.FormatString(errorMessage, formatArgs);
+
+            if (showStackTrace && e != null)
+            {            
+                errorMessage += Environment.NewLine + e.ToString();
+            }
+
+            InitializationException.Throw(errorMessage, invalidSwitch);
+        }
+
+        /// <summary>
         /// Throws the exception if the specified condition is not met.
         /// </summary>
         internal static void VerifyThrow(bool condition, string messageResourceName, string invalidSwitch, params object[] args)
