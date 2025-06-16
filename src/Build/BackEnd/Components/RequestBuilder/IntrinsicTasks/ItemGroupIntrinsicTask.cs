@@ -353,11 +353,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="parameterValues">The list of batchable values</param>
         /// <param name="child">The item from which to find batchable values</param>
-        private void  GetBatchableValuesFromBuildItemGroupChild(List<string> parameterValues, ProjectItemGroupTaskItemInstance child)
+        private void GetBatchableValuesFromBuildItemGroupChild(List<string> parameterValues, ProjectItemGroupTaskItemInstance child)
         {
-            if (parameterValues.Capacity < child.Metadata.Count + 5)
+            if (parameterValues.Capacity < child.Metadata.Count + 4)
             {
-                parameterValues.Capacity = child.Metadata.Count + 5;
+                parameterValues.Capacity = child.Metadata.Count + 4;
             }
 
             AddIfNotEmptyString(parameterValues, child.Include);
