@@ -931,7 +931,7 @@ namespace Microsoft.Build.CommandLine
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
 
-                RegisterDependencyLoadHandlersFromManifest();
+                RegisterDependencyLoadHandlersFromManifest(taskLocation);
 
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
@@ -1021,7 +1021,7 @@ namespace Microsoft.Build.CommandLine
             /// Inline tasks may have dependencies that were resolved during TaskFactory initialization.
             /// Recreate assembly resolve handlers for these dependencies.
             /// </summary>
-            static void RegisterDependencyLoadHandlersFromManifest()
+            static void RegisterDependencyLoadHandlersFromManifest(string taskLocation)
             {
                 if (taskLocation.EndsWith("inline_task.dll", StringComparison.OrdinalIgnoreCase))
                 {
