@@ -6287,9 +6287,24 @@ elementFormDefault="qualified">
         <xs:complexType>
             <xs:complexContent>
                 <xs:extension base="msb:TaskType">
+                    <xs:attribute name="CompressionLevel">
+                        <xs:annotation>
+                            <xs:documentation>
+                                <!-- _locID_text="CompressionLevel" _locComment="" -->Specify the compression level to apply. Possible values are Optimal, Fastest, NoCompression and SmallestSize. In the .NET Framework version of MSBuild, the SmallestSize option is unavailable. Using it will on .NET Framework will log warning MSB3945 and use the default compression level instead.
+                            </xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="Optimal" />
+                                <xs:enumeration value="Fastest" />
+                                <xs:enumeration value="NoCompression" />
+                                <xs:enumeration value="SmallestSize" />
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
                     <xs:attribute name="DestinationFile" use="required" />
                     <xs:attribute name="Overwrite" type="msb:boolean" />
-                    <xs:attribute name="SourceDirectory" type="msb:boolean" />
+                    <xs:attribute name="SourceDirectory" use="required" />
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
