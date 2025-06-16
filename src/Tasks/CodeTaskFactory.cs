@@ -836,6 +836,12 @@ namespace Microsoft.Build.Tasks
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
                 {
+
+                    // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases
+                    // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists.
+                    // See: https://github.com/dotnet/msbuild/issues/328
+                    Directory.CreateDirectory(Path.GetTempPath());
+
                     // Invokes compilation.
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
