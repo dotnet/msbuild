@@ -1,7 +1,10 @@
 {
   "sdk": {
     "allowPrerelease": true,
-    "paths": [ ".dotnet", "$host$" ],
+    "paths": [
+      ".dotnet",
+      "$host$"
+    ],
     "errorMessage": "The .NET SDK could not be found, please run a command-line build with ./build.cmd."
   },
   "tools": {
