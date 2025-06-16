@@ -182,7 +182,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeAndException(e, true, true, null, "XslTransform.TransformError", e.Message);
+                Log.LogErrorWithCodeAndExceptionFromResources(e, true, true, "XslTransform.TransformError", e.Message);
                 return false;
             }
 
