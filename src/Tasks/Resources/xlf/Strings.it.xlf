@@ -3584,12 +3584,12 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
         <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
-        <target state="new">MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</target>
+        <target state="translated">MSB3944: Livello di compressione '{0}' non supportato. Verrà utilizzato il livello di compressione predefinito.</target>
         <note>{StrBegin="MSB3944: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
         <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
-        <target state="new">MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</target>
+        <target state="translated">MSB3945: Il livello di compressione '{0}' non è supportato nella versione .NET Framework di MSBuild. Verrà utilizzato il livello di compressione predefinito.</target>
         <note>{StrBegin="MSB3945: "}</note>
       </trans-unit>
     </body>
