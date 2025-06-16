@@ -1148,15 +1148,7 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
-                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
-                    {
-                        // clean up inline tasks
-                        string processSpecificInlineTaskDir = Path.Combine(
-                            FileUtilities.TempFileDirectory,
-                            MSBuildConstants.InlineTaskTempDllSubPath,
-                            $"pid_{EnvironmentUtilities.CurrentProcessId}");
-                        FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
-                    }
+                    CleanInlineTaskCaches();
 
                     MSBuildEventSource.Log.BuildStop();
 
@@ -1181,7 +1173,30 @@ namespace Microsoft.Build.Execution
                     LogErrorAndShutdown(errorMessage);
                 }
             }
+
+            void CleanInlineTaskCaches()
+            {
+                if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                {
+                    // we can't clean our own cache because we have it loaded, but we can clean caches from prior runs
+                    string inlineTaskDir = Path.Combine(
+                        FileUtilities.TempFileDirectory,
+                        MSBuildConstants.InlineTaskTempDllSubPath);
+
+                    if (Directory.Exists(inlineTaskDir))
+                    {
+                        foreach (string dir in Directory.EnumerateDirectories(inlineTaskDir))
+                        {
+                            // best effort, if it does not succeed now, it'll on a subsequent run
+                            FileUtilities.DeleteDirectoryNoThrow(dir, recursive: true, retryCount: 1);
+                        }
+                    }
+                }
+            }
         }
+
+
+
 
         [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads of System.Diagnostics.DiagnosticSource, TODO: when this is agreed to perf-wise enable instrumenting using activities anywhere...
         private void EndBuildTelemetry()
