@@ -1992,6 +1992,28 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
+        /// Test that ToolLocationHelper fast-path methods work correctly
+        /// </summary>
+        [Fact]
+        public void TestToolLocationHelperFastPaths()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            // Test GetPlatformSDKLocation with fast-path
+            string result1 = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('Windows', '10.0'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            // Test GetPlatformSDKDisplayName with fast-path
+            string result2 = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('Windows', '10.0'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            // The results should be non-null strings (actual values depend on system configuration)
+            // We're mainly testing that the methods execute without errors through the fast-path
+            Assert.True(result1 != null, "GetPlatformSDKLocation should not return null");
+            Assert.True(result2 != null, "GetPlatformSDKDisplayName should not return null");
+        }
+
+        /// <summary>
         /// Expand property function that takes a null argument
         /// </summary>
         [Fact]
