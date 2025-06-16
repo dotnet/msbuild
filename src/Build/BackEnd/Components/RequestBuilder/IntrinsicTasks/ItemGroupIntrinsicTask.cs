@@ -51,13 +51,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The lookup used for evaluation and as a destination for these items.</param>
         internal override void ExecuteTask(Lookup lookup)
         {
+            List<string> parameterValues = null;
             foreach (ProjectItemGroupTaskItemInstance child in _taskInstance.Items)
             {
                 List<ItemBucket> buckets = null;
 
                 try
                 {
-                    List<string> parameterValues = new List<string>();
+                    parameterValues ??= new List<string>();
                     GetBatchableValuesFromBuildItemGroupChild(parameterValues, child);
                     buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, child.ItemType, _taskInstance.Location, LoggingContext);
 
@@ -139,6 +140,7 @@ namespace Microsoft.Build.BackEnd
                             bucket.LeaveScope();
                         }
                     }
+                    parameterValues.Clear();
                 }
             }
         }
@@ -351,8 +353,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="parameterValues">The list of batchable values</param>
         /// <param name="child">The item from which to find batchable values</param>
-        private void GetBatchableValuesFromBuildItemGroupChild(List<string> parameterValues, ProjectItemGroupTaskItemInstance child)
+        private void  GetBatchableValuesFromBuildItemGroupChild(List<string> parameterValues, ProjectItemGroupTaskItemInstance child)
         {
+            if (parameterValues.Capacity < child.Metadata.Count + 5)
+            {
+                parameterValues.Capacity = child.Metadata.Count + 5;
+            }
+
             AddIfNotEmptyString(parameterValues, child.Include);
             AddIfNotEmptyString(parameterValues, child.Exclude);
             AddIfNotEmptyString(parameterValues, child.Remove);
