@@ -823,7 +823,7 @@ namespace Microsoft.Build.Execution
                         {
                             _environmentVariableProperties.Set(environmentProperty.DeepClone(isImmutable: true));
                         }
-                        var sdkResolvedEnvironmentProperty = that._sdkResolvedEnvironmentVariableProperties.GetProperty(desiredProperty);
+                        var sdkResolvedEnvironmentProperty = that._sdkResolvedEnvironmentVariableProperties?.GetProperty(desiredProperty);
                         if (sdkResolvedEnvironmentProperty != null)
                         {
                             _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentProperty.DeepClone(isImmutable: true));
