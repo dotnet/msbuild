@@ -310,7 +310,7 @@ namespace Microsoft.Build.Internal
         /// The environment block property will only be set on Windows, since on Unix we need to directly call
         /// Environment.GetEnvironmentVariables().
         /// </summary>
-        private sealed record class EnvironmentState(FrozenDictionary<string, string> EnvironmentVariables, string EnvironmentBlock = null);
+        private sealed record class EnvironmentState(FrozenDictionary<string, string> EnvironmentVariables, ReadOnlyMemory<char> EnvironmentBlock = default);
 #endif
 
         /// <summary>
@@ -358,7 +358,7 @@ namespace Microsoft.Build.Internal
                     // We speed this up by comparing the full block instead of individual key-value pairs.
                     ReadOnlySpan<char> stringBlock = new(pEnvironmentBlock, (int)stringBlockLength);
                     EnvironmentState lastState = s_environmentState;
-                    if (lastState?.EnvironmentBlock.AsSpan().SequenceEqual(stringBlock) == true)
+                    if (lastState?.EnvironmentBlock.Span.SequenceEqual(stringBlock) == true)
                     {
                         return lastState.EnvironmentVariables;
                     }
@@ -437,7 +437,7 @@ namespace Microsoft.Build.Internal
 #if !CLR2COMPATIBILITY
                     // Update with the current state.
                     EnvironmentState currentState =
-                        new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToString());
+                        new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToArray());
                     s_environmentState = currentState;
                     return currentState.EnvironmentVariables;
 #else
