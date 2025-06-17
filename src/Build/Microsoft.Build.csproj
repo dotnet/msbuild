@@ -33,6 +33,7 @@
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all"/>
     <PackageReference Include="System.Configuration.ConfigurationManager" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
 
@@ -513,6 +514,7 @@
     <Compile Include="Globbing\MSBuildGlobWithGaps.cs" />
     <Compile Include="Globbing\MSBuildGlob.cs" />
     <Compile Include="Globbing\IMSBuildGlob.cs" />
+    <Compile Include="Globbing\FileSystemGlobbingMSBuildGlob.cs" />
     <Compile Include="Globbing\Visitor\ParsedGlobCollector.cs" />
     <!-- #### INSTANCE MODEL ### -->
     <Compile Include="Instance\IImmutableInstanceProvider.cs" />

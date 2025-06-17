@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -50,6 +51,7 @@ namespace Microsoft.Build.Globbing
         private static readonly WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
 
         private readonly Lazy<GlobState> _state;
+        private readonly Lazy<FileSystemGlobbingMSBuildGlob> _fileSystemGlobbingImplementation;
 
         internal string TestOnlyGlobRoot => _state.Value.GlobRoot;
         internal string TestOnlyFileSpec => _state.Value.FileSpec;
@@ -86,6 +88,8 @@ namespace Microsoft.Build.Globbing
         private MSBuildGlob(Lazy<GlobState> state)
         {
             this._state = state;
+            this._fileSystemGlobbingImplementation = new Lazy<FileSystemGlobbingMSBuildGlob>(() =>
+                FileSystemGlobbingMSBuildGlob.Parse(_state.Value.GlobRoot, _state.Value.FileSpec));
         }
 
         /// <inheritdoc />
@@ -103,8 +107,14 @@ namespace Microsoft.Build.Globbing
                 return false;
             }
 
-            var normalizedString = NormalizeMatchInput(stringToMatch);
+            // Use Microsoft.Extensions.FileSystemGlobbing if the trait is enabled
+            if (Traits.Instance.UseFileSystemGlobbingForMSBuildGlob)
+            {
+                return _fileSystemGlobbingImplementation.Value.IsMatch(stringToMatch);
+            }
 
+            // Use the original implementation
+            var normalizedString = NormalizeMatchInput(stringToMatch);
             return _state.Value.Regex.IsMatch(normalizedString);
         }
 

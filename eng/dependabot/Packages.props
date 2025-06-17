@@ -56,6 +56,9 @@
     <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
     <PackageVersion Update="Microsoft.VisualStudio.SolutionPersistence" Condition="'$(MicrosoftVisualStudioSolutionPersistenceVersion)' != ''" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
 
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="6.0.0" />
+    <PackageVersion Update="Microsoft.Extensions.FileSystemGlobbing" Condition="'$(MicrosoftExtensionsFileSystemGlobbingVersion)' != ''" Version="$(MicrosoftExtensionsFileSystemGlobbingVersion)" />
+
     <PackageVersion Include="Verify.Xunit" Version="19.14.1" />
     <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
 
