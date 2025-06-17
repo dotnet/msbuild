@@ -2489,13 +2489,9 @@ EndGlobal
         /// file contains project paths with backslashes.
         /// </summary>
         [Fact]
+        [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathShouldUseForwardSlashesOnUnix()
         {
-            // Skip test if running on Windows
-            if (NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
             
             string solutionFileContents =
                 @"
@@ -2531,13 +2527,9 @@ EndGlobal
         /// and bypass normalization, leading to backslashes in AbsolutePath on Unix.
         /// </summary>
         [Fact]
+        [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathShouldHandleUriLikeRelativePathsOnUnix()
         {
-            // Skip test if running on Windows
-            if (NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
             
             // Test with a path that might be interpreted as a URI
             string solutionFileContents =
@@ -2568,13 +2560,9 @@ EndGlobal
         /// leave backslashes in the AbsolutePath on Unix systems.
         /// </summary>
         [Fact]
+        [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathFixFilePathIntegrationTest()
         {
-            // Skip test if running on Windows
-            if (NativeMethodsShared.IsWindows)
-            {
-                return;
-            }
             
             string solutionFileContents =
                 @"
