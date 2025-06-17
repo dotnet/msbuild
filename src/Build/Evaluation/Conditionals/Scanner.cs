@@ -772,7 +772,7 @@ namespace Microsoft.Build.Evaluation
         }
         private void SkipDigits()
         {
-            while (_parsePoint < _expression.Length && char.IsDigit(_expression[_parsePoint]))
+            while (_parsePoint < _expression.Length && CharacterUtilities.IsDigit(_expression[_parsePoint]))
             {
                 _parsePoint++;
             }
