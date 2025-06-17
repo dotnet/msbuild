@@ -1121,6 +1121,15 @@ namespace Microsoft.Build.BackEnd
                         RequestEntry.Request.BuildRequestDataFlags,
                         RequestEntry.Request.SubmissionId,
                         _nodeLoggingContext.BuildEventContext.NodeId);
+
+                    if (((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)_requestEntry.RequestConfiguration.Project)
+                        .SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
+                    {
+                        foreach (var propertyInstance in environmentProperties)
+                        {
+                            Environment.SetEnvironmentVariable(propertyInstance.Name, propertyInstance.EvaluatedValue, EnvironmentVariableTarget.Process);
+                        }
+                    }
                 }
             }
             catch
@@ -1377,11 +1386,8 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                // Restore the original build environment variables, and ensure any SDK resolver-supplied variables are applied
-                var currentEnv = _componentHost.BuildParameters.BuildProcessEnvironment;
-                PropertyDictionary<ProjectPropertyInstance> sdkResolvedVars = ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)_requestEntry.RequestConfiguration.Project).SdkResolvedEnvironmentVariablePropertiesDictionary;
-
-                SetEnvironmentVariableBlock(currentEnv, additionalEnvironment: sdkResolvedVars);
+                // Restore the original build environment variables.
+                SetEnvironmentVariableBlock(_componentHost.BuildParameters.BuildProcessEnvironment);
             }
         }
 
@@ -1404,21 +1410,21 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Sets the environment block to the set of saved variables.
         /// </summary>
-        private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment, PropertyDictionary<ProjectPropertyInstance> additionalEnvironment = null)
+        private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment)
         {
             IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
-            ClearVariablesNotInEnvironment(savedEnvironment, additionalEnvironment, currentEnvironment);
-            UpdateEnvironmentVariables(savedEnvironment, additionalEnvironment, currentEnvironment);
+            ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
+            UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
         }
 
         /// <summary>
         /// Clears from the current environment any variables which do not exist in the saved environment
         /// </summary>
-        private void ClearVariablesNotInEnvironment(IDictionary<string, string> savedEnvironment, PropertyDictionary<ProjectPropertyInstance> additionalEnvironment, IDictionary<string, string> currentEnvironment)
+        private void ClearVariablesNotInEnvironment(IDictionary<string, string> savedEnvironment, IDictionary<string, string> currentEnvironment)
         {
             foreach (KeyValuePair<string, string> entry in currentEnvironment)
             {
-                if (!savedEnvironment.ContainsKey(entry.Key) && !additionalEnvironment.Contains(entry.Key))
+                if (!savedEnvironment.ContainsKey(entry.Key))
                 {
                     Environment.SetEnvironmentVariable(entry.Key, null);
                 }
@@ -1428,26 +1434,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Updates the current environment with values in the saved environment which differ or are not yet set.
         /// </summary>
-        private void UpdateEnvironmentVariables(IDictionary<string, string> savedEnvironment, PropertyDictionary<ProjectPropertyInstance> additionalEnvironment, IDictionary<string, string> currentEnvironment)
+        private void UpdateEnvironmentVariables(IDictionary<string, string> savedEnvironment, IDictionary<string, string> currentEnvironment)
         {
             foreach (KeyValuePair<string, string> entry in savedEnvironment)
-            {
-                SetIfDifferent(currentEnvironment, entry.Key, entry.Value);
-            }
-
-            foreach (ProjectPropertyInstance entry in additionalEnvironment)
-            {
-                SetIfDifferent(currentEnvironment, entry.Name, entry.EvaluatedValue);
-            }
-
-            static void SetIfDifferent(IDictionary<string, string> currentEnvironment, string name, string newValue)
             {
                 // If the environment doesn't have the variable set, or if its value differs from what we have saved, set it
                 // to the saved value.  Doing the comparison before setting is faster than unconditionally setting it using
                 // the API.
-                if (!currentEnvironment.TryGetValue(name, out string current) || !string.Equals(newValue, current, StringComparison.Ordinal))
+                string value;
+                if (!currentEnvironment.TryGetValue(entry.Key, out value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
                 {
-                    Environment.SetEnvironmentVariable(name, newValue);
+                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                 }
             }
         }
