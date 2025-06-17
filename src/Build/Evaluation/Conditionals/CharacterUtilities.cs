@@ -9,7 +9,7 @@ namespace Microsoft.Build.Evaluation
     {
         internal static bool IsNumberStart(char candidate)
         {
-            return candidate == '+' || candidate == '-' || candidate == '.' || IsDigit(candidate);
+            return candidate == '+' || candidate == '-' || candidate == '.' || char.IsDigit(candidate);
         }
 
         internal static bool IsSimpleStringStart(char candidate)
@@ -19,17 +19,12 @@ namespace Microsoft.Build.Evaluation
 
         internal static bool IsSimpleStringChar(char candidate)
         {
-            return IsSimpleStringStart(candidate) || IsDigit(candidate);
-        }
-
-        internal static bool IsDigit(char candidate)
-        {
-            return candidate >= '0' && candidate <= '9';
+            return IsSimpleStringStart(candidate) || char.IsDigit(candidate);
         }
 
         internal static bool IsHexDigit(char candidate)
         {
-            return IsDigit(candidate) || ((uint)((candidate | 0x20) - 'a') <= 'f' - 'a');
+            return char.IsDigit(candidate) || ((uint)((candidate | 0x20) - 'a') <= 'f' - 'a');
         }
     }
 }

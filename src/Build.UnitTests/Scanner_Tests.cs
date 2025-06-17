@@ -562,26 +562,5 @@ namespace Microsoft.Build.UnitTests
             Scanner lexer = new Scanner("'$(DEBUG) == true", ParserOptions.AllowAll);
             Assert.False(lexer.Advance());
         }
-
-        /// <summary>
-        /// Tests the fast-path IsDigit method in CharacterUtilities.
-        /// </summary>
-        [Fact]
-        public void CharacterUtilities_IsDigit_WorksCorrectly()
-        {
-            // Test ASCII digits
-            for (char c = '0'; c <= '9'; c++)
-            {
-                Assert.True(CharacterUtilities.IsDigit(c), $"Character '{c}' should be identified as a digit");
-            }
-
-            // Test non-digit characters
-            Assert.False(CharacterUtilities.IsDigit('/'), "Character '/' should not be identified as a digit");
-            Assert.False(CharacterUtilities.IsDigit(':'), "Character ':' should not be identified as a digit");
-            Assert.False(CharacterUtilities.IsDigit('a'), "Character 'a' should not be identified as a digit");
-            Assert.False(CharacterUtilities.IsDigit('A'), "Character 'A' should not be identified as a digit");
-            Assert.False(CharacterUtilities.IsDigit(' '), "Character ' ' should not be identified as a digit");
-            Assert.False(CharacterUtilities.IsDigit('\0'), "Character '\\0' should not be identified as a digit");
-        }
     }
 }
