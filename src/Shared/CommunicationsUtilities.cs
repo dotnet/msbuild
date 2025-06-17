@@ -494,7 +494,7 @@ namespace Microsoft.Build.Internal
                 {
                     DictionaryEntry entry = enumerator.Entry;
                     if (!lastEnvironmentVariables.TryGetValue((string)entry.Key, out string value)
-                        || !string.Equals((string)entry.Value, value, StringComparison.OrdinalIgnoreCase))
+                        || !string.Equals((string)entry.Value, value, StringComparison.Ordinal))
                     {
                         sameState = false;
                     }
