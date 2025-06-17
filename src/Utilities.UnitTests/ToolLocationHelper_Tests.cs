@@ -149,11 +149,7 @@ namespace Microsoft.Build.UnitTests
             unversionedSDKValue.ShouldBe(expectedValue);
         }
 
-#if RUNTIME_TYPE_NETCORE
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/1250")]
-#else
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/2569")]
-#endif
+        [WindowsOnlyFact]
         public void GetUnversionedSDKUnionMetadataLocation()
         {
             string sdkRootPath = ToolLocationHelper.GetPlatformSDKLocation("Windows", "10.0");
