@@ -2259,22 +2259,22 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private static readonly FrozenDictionary<string, string> s_itemSpecModifiers = new Dictionary<string, string>()
                 {
-                    [$"%{{{ItemSpecModifiers.FullPath}}}"] = ItemSpecModifiers.FullPath,
-                    [$"%{{{ItemSpecModifiers.RootDir}}}"] = ItemSpecModifiers.RootDir,
-                    [$"%{{{ItemSpecModifiers.Filename}}}"] = ItemSpecModifiers.Filename,
-                    [$"%{{{ItemSpecModifiers.Extension}}}"] = ItemSpecModifiers.Extension,
-                    [$"%{{{ItemSpecModifiers.RelativeDir}}}"] = ItemSpecModifiers.RelativeDir,
-                    [$"%{{{ItemSpecModifiers.Directory}}}"] = ItemSpecModifiers.Directory,
-                    [$"%{{{ItemSpecModifiers.RecursiveDir}}}"] = ItemSpecModifiers.RecursiveDir,
-                    [$"%{{{ItemSpecModifiers.Identity}}}"] = ItemSpecModifiers.Identity,
-                    [$"%{{{ItemSpecModifiers.ModifiedTime}}}"] = ItemSpecModifiers.ModifiedTime,
-                    [$"%{{{ItemSpecModifiers.CreatedTime}}}"] = ItemSpecModifiers.CreatedTime,
-                    [$"%{{{ItemSpecModifiers.AccessedTime}}}"] = ItemSpecModifiers.AccessedTime,
-                    [$"%{{{ItemSpecModifiers.DefiningProjectFullPath}}}"] = ItemSpecModifiers.DefiningProjectFullPath,
-                    [$"%{{{ItemSpecModifiers.DefiningProjectDirectory}}}"] = ItemSpecModifiers.DefiningProjectDirectory,
-                    [$"%{{{ItemSpecModifiers.DefiningProjectName}}}"] = ItemSpecModifiers.DefiningProjectName,
-                    [$"%{{{ItemSpecModifiers.DefiningProjectExtension}}}"] = ItemSpecModifiers.DefiningProjectExtension,
-                }.ToFrozenDictionary(StringComparer.Ordinal);
+                    [$"%({ItemSpecModifiers.FullPath})"] = ItemSpecModifiers.FullPath,
+                    [$"%({ItemSpecModifiers.RootDir})"] = ItemSpecModifiers.RootDir,
+                    [$"%({ItemSpecModifiers.Filename})"] = ItemSpecModifiers.Filename,
+                    [$"%({ItemSpecModifiers.Extension})"] = ItemSpecModifiers.Extension,
+                    [$"%({ItemSpecModifiers.RelativeDir})"] = ItemSpecModifiers.RelativeDir,
+                    [$"%({ItemSpecModifiers.Directory})"] = ItemSpecModifiers.Directory,
+                    [$"%({ItemSpecModifiers.RecursiveDir})"] = ItemSpecModifiers.RecursiveDir,
+                    [$"%({ItemSpecModifiers.Identity})"] = ItemSpecModifiers.Identity,
+                    [$"%({ItemSpecModifiers.ModifiedTime})"] = ItemSpecModifiers.ModifiedTime,
+                    [$"%({ItemSpecModifiers.CreatedTime})"] = ItemSpecModifiers.CreatedTime,
+                    [$"%({ItemSpecModifiers.AccessedTime})"] = ItemSpecModifiers.AccessedTime,
+                    [$"%({ItemSpecModifiers.DefiningProjectFullPath})"] = ItemSpecModifiers.DefiningProjectFullPath,
+                    [$"%({ItemSpecModifiers.DefiningProjectDirectory})"] = ItemSpecModifiers.DefiningProjectDirectory,
+                    [$"%({ItemSpecModifiers.DefiningProjectName})"] = ItemSpecModifiers.DefiningProjectName,
+                    [$"%({ItemSpecModifiers.DefiningProjectExtension})"] = ItemSpecModifiers.DefiningProjectExtension,
+                }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
                 /// <summary>
                 /// A cache of previously created item function delegates.
