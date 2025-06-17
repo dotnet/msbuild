@@ -2856,18 +2856,19 @@ namespace Microsoft.Build.Evaluation
                         return new OneOrMultipleMetadataMatches(cachedName);
                     }
 
-                    Match match = RegularExpressions.ItemMetadataRegex.Match(quotedExpressionFunction);
-
                     // GroupCollection + Groups are the most expensive source of allocations here, so we want to return
                     // before ever accessing the property. Simply accessing it will trigger the full collection
                     // allocation, so we avoid it unless absolutely necessary.
                     // Unfortunately even .NET Core does not have a struct-based Group enumerator at this point.
+                    Match match = RegularExpressions.ItemMetadataRegex.Match(quotedExpressionFunction);
+
                     if (!match.Success)
                     {
                         return new OneOrMultipleMetadataMatches();
                     }
                     else if (s_itemSpecModifiers.TryGetValue(match.Value, out cachedName))
                     {
+                        // e.g. This is likely an interpolated string, e.g. NETCOREAPP%(Identity)_OR_GREATER
                         return new OneOrMultipleMetadataMatches(quotedExpressionFunction, match, cachedName);
                     }
 
@@ -2895,7 +2896,8 @@ namespace Microsoft.Build.Evaluation
                         return singleMatch;
                     }
 
-                    // Now we run the full loop.
+                    // We have multiple matches, so run the full loop.
+                    // e.g. %(Filename)%(Extension)
                     // This is a very hot path, so we avoid allocating this until after we know there are multiple matches.
                     List<MetadataMatch> multipleMatches = [new MetadataMatch(firstMatch, name)];
 
