@@ -46,39 +46,29 @@ namespace Microsoft.Build.Globbing
 
             try
             {
-                // Normalize the path for comparison
-                string normalizedPath = FileUtilities.NormalizePath(stringToMatch);
-
-                // Handle relative vs absolute paths similar to MSBuildGlob
-                if (!Path.IsPathRooted(normalizedPath))
-                {
-                    // Make it relative to the glob root
-                    string fullPath = Path.GetFullPath(Path.Combine(_globRoot, normalizedPath));
-                    
-                    // Check if the resolved path is under the glob root
-                    string normalizedGlobRoot = FileUtilities.NormalizePath(_globRoot);
-                    if (!fullPath.StartsWith(normalizedGlobRoot, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return false;
-                    }
-
-                    // Get the relative path from the glob root using a compatible method
-                    normalizedPath = FileUtilities.MakeRelative(normalizedGlobRoot, fullPath);
-                }
-                else
+                string pathToTest;
+                
+                if (Path.IsPathRooted(stringToMatch))
                 {
                     // For absolute paths, make them relative to the glob root
                     string normalizedGlobRoot = FileUtilities.NormalizePath(_globRoot);
-                    if (!normalizedPath.StartsWith(normalizedGlobRoot, StringComparison.OrdinalIgnoreCase))
+                    string normalizedStringToMatch = FileUtilities.NormalizePath(stringToMatch);
+                    
+                    if (!normalizedStringToMatch.StartsWith(normalizedGlobRoot, StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }
-
-                    normalizedPath = FileUtilities.MakeRelative(normalizedGlobRoot, normalizedPath);
+                    
+                    pathToTest = FileUtilities.MakeRelative(normalizedGlobRoot, normalizedStringToMatch);
+                }
+                else
+                {
+                    // For relative paths, use as-is
+                    pathToTest = stringToMatch;
                 }
 
                 // Use the matcher to test the pattern
-                return _matcher.Match(normalizedPath).HasMatches;
+                return _matcher.Match(pathToTest).HasMatches;
             }
             catch (Exception)
             {
