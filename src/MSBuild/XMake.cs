@@ -2862,6 +2862,14 @@ namespace Microsoft.Build.CommandLine
 
             static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
+                // TerminalLogger is not used in automated environments (CI, GitHub Actions, GitHub Copilot, etc.)
+                if (IsAutomatedEnvironment())
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated"), MessageImportance.Low));
+                    return false;
+                }
+
                 (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
                 if (!outputIsScreen)
@@ -3034,6 +3042,60 @@ namespace Microsoft.Build.CommandLine
 
                 useTerminalLogger = CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes();
             }
+        }
+
+        /// <summary>
+        /// Determines if the current environment is an automated environment where terminal logger should be disabled.
+        /// This includes CI systems, GitHub Actions, GitHub Copilot, and other automated build environments.
+        /// </summary>
+        /// <returns>True if running in an automated environment, false otherwise.</returns>
+        private static bool IsAutomatedEnvironment()
+        {
+            // Check for common CI environment indicators
+            string ci = Environment.GetEnvironmentVariable("CI");
+            if (!string.IsNullOrEmpty(ci) && (ci.Equals("true", StringComparison.OrdinalIgnoreCase) || ci.Equals("1")))
+            {
+                return true;
+            }
+
+            // Check for GitHub Actions
+            string githubActions = Environment.GetEnvironmentVariable("GITHUB_ACTIONS");
+            if (!string.IsNullOrEmpty(githubActions) && githubActions.Equals("true", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // Check for GitHub Copilot environment variables
+            string copilotApiUrl = Environment.GetEnvironmentVariable("COPILOT_API_URL");
+            if (!string.IsNullOrEmpty(copilotApiUrl))
+            {
+                return true;
+            }
+
+            // Check for other common CI systems
+            string[] ciEnvironmentVariables = 
+            {
+                "BUILD_ID",           // Jenkins, Google Cloud Build
+                "BUILDKITE",          // Buildkite
+                "CIRCLECI",           // CircleCI
+                "TEAMCITY_VERSION",   // TeamCity
+                "TF_BUILD",           // Azure DevOps
+                "APPVEYOR",           // AppVeyor
+                "TRAVIS",             // Travis CI
+                "GITLAB_CI",          // GitLab CI
+                "JENKINS_URL",        // Jenkins
+                "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
+            };
+
+            foreach (string envVar in ciEnvironmentVariables)
+            {
+                if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
