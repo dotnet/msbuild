@@ -3051,30 +3051,16 @@ namespace Microsoft.Build.CommandLine
         /// <returns>True if running in an automated environment, false otherwise.</returns>
         private static bool IsAutomatedEnvironment()
         {
-            // Check for common CI environment indicators
-            string ci = Environment.GetEnvironmentVariable("CI");
-            if (!string.IsNullOrEmpty(ci) && (ci.Equals("true", StringComparison.OrdinalIgnoreCase) || ci.Equals("1")))
+            // Check for common CI environment indicators that use boolean values
+            if (Traits.IsEnvVarOneOrTrue("CI") || Traits.IsEnvVarOneOrTrue("GITHUB_ACTIONS"))
             {
                 return true;
             }
 
-            // Check for GitHub Actions
-            string githubActions = Environment.GetEnvironmentVariable("GITHUB_ACTIONS");
-            if (!string.IsNullOrEmpty(githubActions) && githubActions.Equals("true", StringComparison.OrdinalIgnoreCase))
+            // Check for environment variables that indicate automated environments
+            string[] automatedEnvironmentVariables = 
             {
-                return true;
-            }
-
-            // Check for GitHub Copilot environment variables
-            string copilotApiUrl = Environment.GetEnvironmentVariable("COPILOT_API_URL");
-            if (!string.IsNullOrEmpty(copilotApiUrl))
-            {
-                return true;
-            }
-
-            // Check for other common CI systems
-            string[] ciEnvironmentVariables = 
-            {
+                "COPILOT_API_URL",    // GitHub Copilot
                 "BUILD_ID",           // Jenkins, Google Cloud Build
                 "BUILDKITE",          // Buildkite
                 "CIRCLECI",           // CircleCI
@@ -3087,15 +3073,7 @@ namespace Microsoft.Build.CommandLine
                 "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
             };
 
-            foreach (string envVar in ciEnvironmentVariables)
-            {
-                if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return automatedEnvironmentVariables.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
         }
 
         private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
