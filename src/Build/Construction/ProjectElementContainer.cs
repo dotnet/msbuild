@@ -521,16 +521,13 @@ namespace Microsoft.Build.Construction
 
                 if (TrySearchLeftSiblings(child.PreviousSibling, SiblingIsExplicitElement, out ProjectElement referenceSibling))
                 {
-                    // Heuristic: If the reference element is immediately followed by a series of XML nodes, each of which
-                    // does not contain any line breaks and is whitespace, a comment, or a processing instruction,
-                    // then insert the new element after those nodes.
                     XmlNode insertAfter = referenceSibling.XmlElement;
                     XmlNode next = insertAfter.NextSibling;
                     while (next != null &&
-                        (next.NodeType == XmlNodeType.Whitespace ||
-                         next.NodeType == XmlNodeType.Comment)
-                         && (next.Value == null || (!next.Value.Contains("\n") && !next.Value.Contains("\r"))))
+                    (next.NodeType == XmlNodeType.Comment||
+                    (next.NodeType == XmlNodeType.Whitespace && !next.Value.Contains("\n") && !next.Value.Contains("\r"))))
                     {
+                        // If the next node is a comment or whitespace that does not contain newlines, then insert after it
                         insertAfter = next;
                         next = insertAfter.NextSibling;
                     }

@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             var items = group.Items.ToList();
             var newItem = project.CreateItemElement("PackageReference");
             newItem.Include = "Inserted";
-            group.InsertBeforeChild(newItem, items[1]);
+            group.InsertAfterChild(newItem, items[0]);
             newItem.AddMetadata("Version", "1.5.0", true);
 
             Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
@@ -190,7 +190,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             """
             <Project>
               <ItemGroup>
-                <PackageReference Include="A" Version="1.0.0" />
+                <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
                 <!-- comment before B -->
                 <PackageReference Include="B" Version="2.0.0" />
               </ItemGroup>
@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             """
             <Project>
               <ItemGroup>
-                <PackageReference Include="A" Version="1.0.0" />
+                <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
                 <PackageReference Include="Inserted" Version="1.5.0" />
                 <!-- comment before B -->
                 <PackageReference Include="B" Version="2.0.0" />
@@ -208,6 +208,32 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             </Project>
             """;
             AddItem_PreservesComments_Helper(content2, expectedContent2);
+
+            // Adjacent multiple line Comment after item
+            string content3 =
+            """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" /><!--
+                    This is a multi-line
+                    comment across lines
+                    -->
+              </ItemGroup>
+            </Project>
+            """;
+            string expectedContent3 =
+            """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" /><!--
+                    This is a multi-line
+                    comment across lines
+                    -->
+                <PackageReference Include="Inserted" Version="1.5.0" />
+              </ItemGroup>
+            </Project>
+            """;
+            AddItem_PreservesComments_Helper(content3, expectedContent3);
         }
     }
 }
