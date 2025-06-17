@@ -2790,12 +2790,12 @@ namespace Microsoft.Build.Evaluation
                                     break;
 
                                 // If we matched on a full string, we don't have to concatenate anything.
-                                case MetadataMatchType.ExactString:
+                                case MetadataMatchType.ExactSingle:
                                     include = GetMetadataValueFromMatch(matches.Single, item.Key, item.Value, elementLocation, ref curIndex);
                                     break;
 
                                 // If we matched on a partial string, just replace the single group.
-                                case MetadataMatchType.Single:
+                                case MetadataMatchType.InexactSingle:
                                     includeBuilder.Append(quotedExpressionFunction, 0, matches.Single.Index);
                                     includeBuilder.Append(
                                         GetMetadataValueFromMatch(matches.Single, item.Key, item.Value, elementLocation, ref curIndex));
@@ -2887,7 +2887,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, firstMatch, name);
 
-                        if (singleMatch.Type == MetadataMatchType.ExactString)
+                        if (singleMatch.Type == MetadataMatchType.ExactSingle)
                         {
                             // Only cache full string matches.
                             s_lastParsedQuotedExpression = name;
@@ -3199,9 +3199,25 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private enum MetadataMatchType
                 {
+
+                    /// <summary>
+                    /// No matches found. The result will be empty.
+                    /// </summary>
                     None,
-                    ExactString,
-                    Single,
+
+                    /// <summary>
+                    /// An exact full string match, e.g. '%(FullPath)'.
+                    /// </summary>
+                    ExactSingle,
+
+                    /// <summary>
+                    /// A single match with surrounding characters, e.g. 'somedir/%(FileName)'.
+                    /// </summary>
+                    InexactSingle,
+
+                    /// <summary>
+                    /// Multiple matches found, e.g. '%(FullPath)%(Extension)'.
+                    /// </summary>
                     Multiple,
                 }
 
@@ -3217,7 +3233,7 @@ namespace Microsoft.Build.Evaluation
 
                     public OneOrMultipleMetadataMatches(string name)
                     {
-                        Type = MetadataMatchType.ExactString;
+                        Type = MetadataMatchType.ExactSingle;
                         Single = new MetadataMatch(name);
                     }
 
@@ -3226,8 +3242,8 @@ namespace Microsoft.Build.Evaluation
                         // We know we have a full string match when our extracted name is the same length as the input
                         // string minus the surrounding characters.
                         Type = quotedExpressionFunction.Length == name.Length + QuotedExpressionSurroundCharCount
-                                ? MetadataMatchType.ExactString
-                                : MetadataMatchType.Single;
+                                ? MetadataMatchType.ExactSingle
+                                : MetadataMatchType.InexactSingle;
                         Single = new MetadataMatch(match, name);
                     }
 
