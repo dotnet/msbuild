@@ -142,7 +142,8 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Forces execution of tasks coming from a different TaskFactory than AssemblyTaskFactory out of proc.
         /// </summary>
-        public readonly bool ForceTaskFactoryOutOfProc = Environment.GetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC") == "1";
+        // public readonly bool ForceTaskFactoryOutOfProc = Environment.GetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC") == "1";
+        public readonly bool ForceTaskFactoryOutOfProc = true;
 
         /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
