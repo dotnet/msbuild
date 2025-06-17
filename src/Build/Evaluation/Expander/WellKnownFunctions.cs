@@ -882,7 +882,7 @@ namespace Microsoft.Build.Evaluation.Expander
                         if (ParseArgs.TryGetArg(args, out string? arg0) && arg0?.Length == 1)
                         {
                             char c = arg0[0];
-                            returnVal = c >= '0' && c <= '9';
+                            returnVal = char.IsDigit(c);
                             return true;
                         }
                     }
