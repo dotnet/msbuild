@@ -885,6 +885,11 @@ namespace Microsoft.Build.Evaluation.Expander
                             returnVal = char.IsDigit(c);
                             return true;
                         }
+                        else if (ParseArgs.TryGetArgs(args, out string? str, out int index) && str != null)
+                        {
+                            returnVal = char.IsDigit(str, index);
+                            return true;
+                        }
                     }
                 }
                 else if (string.Equals(methodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)

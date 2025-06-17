@@ -4751,7 +4751,7 @@ $(
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            // Test with digit characters
+            // Test with digit characters - single char version
             string result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('5'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("True", result);
 
@@ -4761,7 +4761,7 @@ $(
             result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('9'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("True", result);
 
-            // Test with non-digit characters
+            // Test with non-digit characters - single char version
             result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('a'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("False", result);
 
@@ -4773,6 +4773,25 @@ $(
 
             result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit(':'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
             Assert.Equal("False", result);
+
+            // Test with string and index version
+            result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('abc123def', 3))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("True", result);
+
+            result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('abc123def', 4))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("True", result);
+
+            result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('abc123def', 5))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("True", result);
+
+            result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('abc123def', 0))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("False", result);
+
+            result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('abc123def', 2))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("False", result);
+
+            result = expander.ExpandIntoStringLeaveEscaped("$([System.Char]::IsDigit('hello789', 5))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            Assert.Equal("True", result);
         }
 
         private void TestPropertyFunction(string expression, string propertyName, string propertyValue, string expected)
