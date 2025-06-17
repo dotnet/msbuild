@@ -51,7 +51,6 @@ namespace Microsoft.Build.Globbing
         private static readonly WeakValueDictionary<string, Regex> s_regexCache = new WeakValueDictionary<string, Regex>();
 
         private readonly Lazy<GlobState> _state;
-        private readonly Lazy<FileSystemGlobbingMSBuildGlob> _fileSystemGlobbingImplementation;
 
         internal string TestOnlyGlobRoot => _state.Value.GlobRoot;
         internal string TestOnlyFileSpec => _state.Value.FileSpec;
@@ -88,8 +87,6 @@ namespace Microsoft.Build.Globbing
         private MSBuildGlob(Lazy<GlobState> state)
         {
             this._state = state;
-            this._fileSystemGlobbingImplementation = new Lazy<FileSystemGlobbingMSBuildGlob>(() =>
-                FileSystemGlobbingMSBuildGlob.Parse(_state.Value.GlobRoot, _state.Value.FileSpec));
         }
 
         /// <inheritdoc />
@@ -107,14 +104,8 @@ namespace Microsoft.Build.Globbing
                 return false;
             }
 
-            // Use Microsoft.Extensions.FileSystemGlobbing if the trait is enabled
-            if (Traits.Instance.UseFileSystemGlobbingForMSBuildGlob)
-            {
-                return _fileSystemGlobbingImplementation.Value.IsMatch(stringToMatch);
-            }
-
-            // Use the original implementation
             var normalizedString = NormalizeMatchInput(stringToMatch);
+
             return _state.Value.Regex.IsMatch(normalizedString);
         }
 
@@ -260,6 +251,35 @@ namespace Microsoft.Build.Globbing
         public static MSBuildGlob Parse(string fileSpec)
         {
             return Parse(string.Empty, fileSpec);
+        }
+
+        /// <summary>
+        ///     Internal factory method that can return either MSBuildGlob or FileSystemGlobbingMSBuildGlob
+        ///     based on the UseFileSystemGlobbingForMSBuildGlob trait.
+        /// </summary>
+        /// <param name="globRoot">The root directory for the glob</param>
+        /// <param name="fileSpec">The file specification pattern</param>
+        /// <returns>An IMSBuildGlob implementation</returns>
+        internal static IMSBuildGlob CreateGlob(string globRoot, string fileSpec)
+        {
+            // Use Microsoft.Extensions.FileSystemGlobbing if the trait is enabled
+            if (Traits.Instance.UseFileSystemGlobbingForMSBuildGlob)
+            {
+                return FileSystemGlobbingMSBuildGlob.Parse(globRoot, fileSpec);
+            }
+
+            return Parse(globRoot, fileSpec);
+        }
+
+        /// <summary>
+        ///     Internal factory method that can return either MSBuildGlob or FileSystemGlobbingMSBuildGlob
+        ///     based on the UseFileSystemGlobbingForMSBuildGlob trait.
+        /// </summary>
+        /// <param name="fileSpec">The file specification pattern</param>
+        /// <returns>An IMSBuildGlob implementation</returns>
+        internal static IMSBuildGlob CreateGlob(string fileSpec)
+        {
+            return CreateGlob(string.Empty, fileSpec);
         }
 
         /// <summary>

@@ -58,5 +58,39 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                 Traits.UpdateFromEnvironment();
             }
         }
+        
+        [Fact]
+        public void CreateGlobShouldReturnCorrectImplementationBasedOnTrait()
+        {
+            // This test verifies that MSBuildGlob.CreateGlob returns the correct implementation
+            var originalValue = Environment.GetEnvironmentVariable("MSBUILD_USE_FILESYSTEMGLOBBING");
+            
+            try
+            {
+                // Test with trait disabled (default)
+                Environment.SetEnvironmentVariable("MSBUILD_USE_FILESYSTEMGLOBBING", null);
+                Traits.UpdateFromEnvironment();
+                
+                var globDisabled = MSBuildGlob.CreateGlob("*.cs");
+                Assert.Equal("MSBuildGlob", globDisabled.GetType().Name);
+                Assert.True(globDisabled.IsMatch("test.cs"));
+                Assert.False(globDisabled.IsMatch("test.txt"));
+                
+                // Test with trait enabled
+                Environment.SetEnvironmentVariable("MSBUILD_USE_FILESYSTEMGLOBBING", "1");
+                Traits.UpdateFromEnvironment();
+                
+                var globEnabled = MSBuildGlob.CreateGlob("*.cs");
+                Assert.Equal("FileSystemGlobbingMSBuildGlob", globEnabled.GetType().Name);
+                Assert.True(globEnabled.IsMatch("test.cs"));
+                Assert.False(globEnabled.IsMatch("test.txt"));
+            }
+            finally
+            {
+                // Restore original value
+                Environment.SetEnvironmentVariable("MSBUILD_USE_FILESYSTEMGLOBBING", originalValue);
+                Traits.UpdateFromEnvironment();
+            }
+        }
     }
 }
