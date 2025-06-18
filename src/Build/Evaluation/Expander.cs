@@ -1833,6 +1833,17 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Execute the list of transform functions.
             /// </summary>
+            /// <remarks>
+            /// Each captured transform function will be mapped to to a either static method on
+            /// <see cref="IntrinsicItemFunctions{S}"/> or a known item spec modifier which operates on the item path.
+            ///
+            /// For each function, the full list of items will be iteratvely tranformed using the output of the previous.
+            ///
+            /// E.g. given functions f, g, h, the order of operations will look like:
+            /// results = h(g(f(items)))
+            ///
+            /// If no function name is found, we default to <see cref="IntrinsicItemFunctions{S}.ExpandQuotedExpressionFunction"/>.
+            /// </remarks>
             /// <typeparam name="S">class, IItem.</typeparam>
             internal static List<KeyValuePair<string, S>> Transform<S>(
                     Expander<P, I> expander,
@@ -2388,7 +2399,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the number of items in the list.
+                /// Intrinsic function that adds the number of items in the list.
                 /// </summary>
                 internal static void Count(List<KeyValuePair<string, S>> itemsOfType, List<KeyValuePair<string, S>> transformedItems)
                 {
@@ -2396,7 +2407,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the specified built-in modifer value of the items in itemsOfType
+                /// Intrinsic function that adds the specified built-in modifer value of the items in itemsOfType
                 /// Tuple is {current item include, item under transformation}.
                 /// </summary>
                 internal static void ItemSpecModifierFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
@@ -2445,7 +2456,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the subset of items that actually exist on disk.
+                /// Intrinsic function that adds the subset of items that actually exist on disk.
                 /// </summary>
                 internal static void Exists(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
@@ -2516,7 +2527,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns all ancestor directories of the given items.
+                /// Intrinsic function that adds all ancestor directories of the given items.
                 /// </summary>
                 internal static void GetPathsOfAllDirectoriesAbove(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
@@ -2591,7 +2602,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the DirectoryName of the items in itemsOfType
+                /// Intrinsic function that adds the DirectoryName of the items in itemsOfType
                 /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
                 /// </summary>
                 internal static void DirectoryName(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
@@ -2659,7 +2670,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the contents of the metadata in specified in argument[0].
+                /// Intrinsic function that adds the contents of the metadata in specified in argument[0].
                 /// </summary>
                 internal static void Metadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
@@ -2712,7 +2723,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
+                /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case sensitive comparison.
                 /// </summary>
                 internal static void DistinctWithCase(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
@@ -2721,7 +2732,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
+                /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison.
                 /// </summary>
                 internal static void Distinct(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
@@ -2730,7 +2741,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
+                /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison.
                 /// </summary>
                 internal static void DistinctWithComparer(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, StringComparer comparer, List<KeyValuePair<string, S>> transformedItems)
@@ -2847,7 +2858,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the items from itemsOfType with their metadata cleared, i.e. only the itemspec is retained.
+                /// Intrinsic function that adds the items from itemsOfType with their metadata cleared, i.e. only the itemspec is retained.
                 /// </summary>
                 internal static void ClearMetadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
@@ -2863,7 +2874,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only those items that have a not-blank value for the metadata specified
+                /// Intrinsic function that adds only those items that have a not-blank value for the metadata specified
                 /// Using a case insensitive comparison.
                 /// </summary>
                 internal static void HasMetadata(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
@@ -2897,7 +2908,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only those items have the given metadata value
+                /// Intrinsic function that adds only those items have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
                 internal static void WithMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
@@ -2930,7 +2941,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns those items don't have the given metadata value
+                /// Intrinsic function that adds those items don't have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
                 internal static void WithoutMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
@@ -2963,7 +2974,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns a boolean to indicate if any of the items have the given metadata value
+                /// Intrinsic function that adds a boolean to indicate if any of the items have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
                 internal static void AnyHaveMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
