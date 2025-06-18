@@ -174,6 +174,16 @@ namespace Microsoft.Build.BackEnd
         private int _loggedWarningsForProxyBuildsOnOutOfProcNodes = 0;
 
         /// <summary>
+        /// If we hit the path that prevents from completing build submission this flag is set. 
+        /// </summary>
+        private bool _hitNoLoggingCompleted;
+
+        /// <summary>
+        /// Information about the missed submission.
+        /// </summary>
+        private string _noLoggingCompletedSubmissionDetails;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public Scheduler()
@@ -475,6 +485,8 @@ namespace Microsoft.Build.BackEnd
                             // which caused deadlocks/hangs in Visual Studio. Without completing the request's
                             // logging lifecycle, VS would never receive the completion callback and would wait
                             // indefinitely, freezing the UI.
+                            _hitNoLoggingCompleted = true;
+                            _noLoggingCompletedSubmissionDetails = $"SubmissionId: {unscheduledRequest.BuildRequest.SubmissionId}; BuildRequestDataFlags: {unscheduledRequest.BuildRequest.BuildRequestDataFlags}";
                         }
                     }
                 }
