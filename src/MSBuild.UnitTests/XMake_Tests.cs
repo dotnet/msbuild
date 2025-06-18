@@ -20,6 +20,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -44,6 +45,8 @@ namespace Microsoft.Build.UnitTests
             _output = output;
             _env = UnitTests.TestEnvironment.Create(_output);
         }
+
+        private static string TestAssetsRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(XMakeAppTests).Assembly.Location) ?? AppContext.BaseDirectory), "TestAssets");
 
         private const string AutoResponseFileName = "MSBuild.rsp";
 
@@ -2491,6 +2494,99 @@ $@"<Project>
         }
 
         [Theory]
+        [InlineData("-logger:,CustomLogger.dll", "CustomLogger.dll")]
+        [InlineData("-logger:,Logger.dll", "Logger.dll")]
+        public void LoggerThrowsIOExceptionWhenDllNotFound(string logger, string expectedLoggerName)
+        {
+            string projectString ="<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+            var tempDir = _env.CreateFolder();
+            var projectFile = tempDir.CreateFile("iologgertest.proj", projectString);
+
+            var parametersLogger = $"{logger} -verbosity:diagnostic \"{projectFile.Path}\"";
+
+            var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
+            successfulExit.ShouldBe(false);
+
+            output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
+        }
+
+        [Theory]
+        [InlineData("-logger:,BadFile.dll", "BadFile.dll")]
+        [InlineData("-distributedlogger:,BadFile.dll", "BadFile.dll")]
+        public void LoggerThrowsBadImageFormatExceptionWhenFileIsInvalid(string logger, string expectedLoggerName)
+        {
+            string projectString ="<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+            var tempDir = _env.CreateFolder();
+            var projectFile = tempDir.CreateFile("badimagetest.proj", projectString);
+
+            var dllFilePath = Path.Combine(tempDir.Path, expectedLoggerName);
+            File.WriteAllText(dllFilePath, "Invalid content, not a valid .NET assembly.");
+
+            var loggerParam = $"\"{logger}\"";
+            var parametersLogger = $"{loggerParam} -verbosity:diagnostic \"{projectFile.Path}\"";
+
+            var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
+            successfulExit.ShouldBe(false);
+
+            output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
+        }
+
+        [Theory]
+        [InlineData("MemberAccessException", "-logger:,", "CustomLogger.dll")]
+        [InlineData("MemberAccessException", "-distributedlogger:,", "CustomLogger.dll")]
+        public void LoggerThrowsMemberAccessExceptionWhenClassIsInvalid(string memberAccess, string loggerTemplate, string expectedLoggerName)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                string projectContent = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+                var tempDir = _env.CreateFolder();
+
+                (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, memberAccess);
+
+                string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"\"{Path.Combine(tempLoggerProjDir, "CustomLogger.csproj")}\" -restore -verbosity:n", out bool success);
+
+                var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
+                var loggerSwitch = $"{loggerTemplate}\"{loggerDllPath}\"";
+                var mainBuildParameters = $"\"{projectFilePath}\" -restore {loggerSwitch} -verbosity:diagnostic";
+
+                string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                    mainBuildParameters,
+                    out bool successfulExit);
+
+                mainBuildLog.ShouldContain($"Cannot create an instance of the logger {loggerDllPath}.", customMessage: mainBuildLog);
+            }
+        }
+
+        [Theory]
+        [InlineData("TargetInvocationException", "-logger:,", "FaultyLogger.dll")]
+        [InlineData("TargetInvocationException", "-distributedlogger:,", "FaultyLogger.dll")]
+        public void LoggerThrowsTargetInvocationException(string targetInvocation, string loggerTemplate, string expectedLoggerName)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                string projectContent = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+                var tempDir = _env.CreateFolder();
+
+                (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, targetInvocation);
+
+                string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(tempLoggerProjDir, $"FaultyLogger.csproj")} -restore -verbosity:n", out bool success);
+
+                var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
+                var loggerSwitch = $"{loggerTemplate}{loggerDllPath}";
+                var mainBuildParameters = $"{projectFilePath} -restore {loggerSwitch} -verbosity:diagnostic";
+
+                string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                    mainBuildParameters,
+                    out bool successfulExit);
+
+                successfulExit.ShouldBeFalse(mainBuildLog);
+                mainBuildLog.ShouldContain("The logger failed unexpectedly.");
+            }
+        }
+
+        [Theory]
         [InlineData("/interactive")]
         [InlineData("/p:NuGetInteractive=true")]
         [InlineData("/interactive /p:NuGetInteractive=true")]
@@ -2847,6 +2943,26 @@ EndGlobal
             string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {string.Join(" ", arguments)}", out var success, _output);
 
             return (success, output);
+        }
+
+        private (string projectFilePath, string tempLoggerProjDir) CopyTestAssetsToTestEnv(TransientTestFolder tempDir, string projectContent, string folderName)
+        {
+            var testAssetsPath = Path.Combine(TestAssetsRootPath, folderName);
+            var loggerProjDir = Path.Combine(testAssetsPath, "LoggerProject");
+
+            var projectFile = tempDir.CreateFile("loggerproject.proj", projectContent);
+
+            var tempLoggerProjDir = Path.Combine(tempDir.Path, "LoggerProject");
+            Directory.CreateDirectory(tempLoggerProjDir);
+
+            foreach (var file in Directory.GetFiles(loggerProjDir, "*.*", SearchOption.AllDirectories))
+            {
+                var relativePath = file.Substring(loggerProjDir.Length + 1);
+                var destPath = Path.Combine(tempLoggerProjDir, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                File.Copy(file, destPath, true);
+            }
+            return (projectFile.Path, tempLoggerProjDir);
         }
 
         public void Dispose()
