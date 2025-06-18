@@ -6,42 +6,62 @@ using System.IO;
 using Microsoft.Build.Shared;
 #endif
 
-#nullable disable
+namespace Microsoft.Build.BackEnd;
 
-namespace Microsoft.Build.BackEnd
+internal static class CurrentHost
 {
-    internal static class CurrentHost
-    {
 
 #if RUNTIME_TYPE_NETCORE
-        private static string s_currentHost;
+    private static string? s_currentHost;
 #endif
 
-        /// <summary>
-        /// Identify the .NET host of the current process.
-        /// </summary>
-        /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
-        public static string GetCurrentHost()
-        {
+    /// <summary>
+    /// Identify the .NET host of the current process.
+    /// </summary>
+    /// <returns>The full path to the executable hosting the current process, or null if running on Full Framework on Windows.</returns>
+    public static string? GetCurrentHost()
+    {
 #if RUNTIME_TYPE_NETCORE
-            if (s_currentHost == null)
+        if (s_currentHost == null)
+        {
+            string dotnetExeName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";
+
+            string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
+                dotnetExeName);
+            if (File.Exists(dotnetExe))
             {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
-                if (File.Exists(dotnetExe))
+                s_currentHost = dotnetExe;
+            }
+            else
+            {
+                if (EnvironmentUtilities.ProcessPath is string processPath &&
+                    Path.GetFileName(processPath) == dotnetExeName)
                 {
-                    s_currentHost = dotnetExe;
+                    // If the current process is already running in a general-purpose host, use its path.
+                    s_currentHost = processPath;
                 }
                 else
                 {
-                    s_currentHost = EnvironmentUtilities.ProcessPath;
+                    // Otherwise, we don't know the host. Try to infer it from the current runtime, which will be something like
+                    // "C:\Program Files\dotnet\shared\Microsoft.NETCore.App\9.0.6\" on Windows.
+                    //                     ^4     ^3              ^2          ^1
+                    dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), 4),
+                        dotnetExeName);
+                    if (File.Exists(dotnetExe))
+                    {
+                        s_currentHost = dotnetExe;
+                    }
+                    else
+                    {
+                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                    }
                 }
             }
-
-            return s_currentHost;
-#else
-            return null;
-#endif
         }
+
+        return s_currentHost;
+#else
+        return null;
+#endif
     }
 }
