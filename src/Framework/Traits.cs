@@ -59,7 +59,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Use Microsoft.Extensions.FileSystemGlobbing for IMSBuildGlob implementation instead of the built-in implementation
         /// </summary>
-        public readonly bool UseFileSystemGlobbingForMSBuildGlob = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_USE_FILESYSTEMGLOBBING"));
+        public readonly bool UseFileSystemGlobbingForMSBuildGlob = true;
 
         public readonly bool EnableAllPropertyFunctions = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1";
 
