@@ -33,8 +33,6 @@ using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
-using System.Collections.Frozen;
-using System.Collections.Concurrent;
 
 #nullable disable
 
@@ -2378,7 +2376,7 @@ namespace Microsoft.Build.Evaluation
 
                 /// <summary>
                 /// A precomputed lookup of item spec modifiers wrapped in regex strings.
-                /// This allows us to completely skip of Regex parsing when the innter string matches a known modifier.
+                /// This allows us to completely skip of Regex parsing when the inner string matches a known modifier.
                 /// IsDerivableItemSpecModifier doesn't currently support Span lookups, so we have to manually map these.
                 /// </summary>
                 private static readonly FrozenDictionary<string, string> s_itemSpecModifiers = new Dictionary<string, string>()
@@ -2415,6 +2413,8 @@ namespace Microsoft.Build.Evaluation
                 /// </summary>
                 private static string s_lastParsedQuotedExpression;
 
+                /// <summary>
+                /// Create an enumerator from a base IEnumerable of items into an enumerable
                 /// of transformation result which includes the new itemspec and the base item.
                 /// </summary>
                 internal static List<KeyValuePair<string, S>> GetItemPairs(ICollection<S> itemsOfType)
