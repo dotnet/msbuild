@@ -314,6 +314,10 @@ namespace Microsoft.Build.Execution
             _loggingThreadExceptionEventHandler = OnLoggingThreadException;
             _legacyThreadingData = new LegacyThreadingData();
             _instantiationTimeUtc = DateTime.UtcNow;
+
+            // Interlocked.Increment will pre-increment this value before returning, so starting at -1
+            // means the first build will have an ID of 0.
+            _nextBuildSubmissionId = -1;
         }
 
         /// <summary>
@@ -958,7 +962,10 @@ namespace Microsoft.Build.Execution
             _buildTelemetry?.SetProjectEntryPoint(requestData.EntryProjectsFullPath, requestData.TargetNames);
 
             // SubmissionId should always be unique since GetNextSubmissionId() uses Interlocked.Increment.
-            _buildSubmissions.TryAdd(newSubmission.SubmissionId, newSubmission);
+            bool added = _buildSubmissions.TryAdd(newSubmission.SubmissionId, newSubmission);
+
+            Debug.Assert(added, "We expect adding a new submission to always succeed since it should have received a unique ID");
+
             _noActiveSubmissionsEvent!.Reset();
 
             return newSubmission;
@@ -1008,13 +1015,9 @@ namespace Microsoft.Build.Execution
                 lock (_syncLock)
                 {
                     // If there are any submissions which never started, remove them now.
-                    var submissionsToCheck = new List<BuildSubmissionBase>(_buildSubmissions.Count);
-                    foreach (KeyValuePair<int, BuildSubmissionBase> kvp in _buildSubmissions)
-                    {
-                        submissionsToCheck.Add(kvp.Value);
-                    }
-
-                    foreach (BuildSubmissionBase submission in submissionsToCheck)
+                    // The "Values" property on ConcurrentDictionary creates a copy, so we can safely iterate over it
+                    // even though CheckSubmissionCompletenessAndRemove() removes items from the dictionary.
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         CheckSubmissionCompletenessAndRemove(submission);
                     }
