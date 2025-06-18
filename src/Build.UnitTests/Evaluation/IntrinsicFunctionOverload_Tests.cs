@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -119,6 +120,129 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             Project project = projectFromString.Project;
             ProjectProperty? actualProperty = project.GetProperty("Actual");
             actualProperty.EvaluatedValue.ShouldBe(expected);
+        }
+
+        [Fact]
+        public void FileExists_WhenFileExists_ReturnsTrue()
+        {          
+            using TestEnvironment env = TestEnvironment.Create();
+
+            string testFilePath = Path.Combine(env.DefaultTestDirectory.Path, "TestFile.txt");
+            File.WriteAllText(testFilePath, "Test content");
+
+            string projectContent = $@"
+                <Project>
+                    <PropertyGroup>
+                        <TestFilePath>{testFilePath.Replace(@"\", @"\\")}</TestFilePath>
+                        <FileExists>$([MSBuild]::FileExists($(TestFilePath)))</FileExists>
+                    </PropertyGroup>
+                </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("FileExists");
+            actualProperty.EvaluatedValue.ShouldBe("True");
+        }
+
+        [Fact]
+        public void FileExists_WhenFileDoesNotExist_ReturnsFalse()
+        {
+            const string projectContent = @"
+            <Project>
+                <PropertyGroup>
+                    <TestFilePath>NonExistentFile.txt</TestFilePath>
+                    <FileExists>$([MSBuild]::FileExists($(TestFilePath)))</FileExists>
+                </PropertyGroup>
+            </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("FileExists");
+            actualProperty.EvaluatedValue.ShouldBe("False");
+        }
+
+        [Fact]
+        public void SystemIODirectoryExists_WhenDirectoryExists_ReturnsTrue()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string testDirPath = Path.Combine(env.DefaultTestDirectory.Path, "TestDir");
+
+            Directory.CreateDirectory(testDirPath);
+
+            string projectContent = $@"
+                <Project>
+                    <PropertyGroup>
+                        <TestDirPath>{testDirPath.Replace(@"\", @"\\")}</TestDirPath>
+                        <DirExists>$([System.IO.Directory]::Exists($(TestDirPath)))</DirExists>
+                    </PropertyGroup>
+                </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("DirExists");
+            actualProperty.EvaluatedValue.ShouldBe("True");
+        }
+
+        [Fact]
+        public void SystemIODirectoryExists_WhenDirectoryDoesNotExist_ReturnsFalse()
+        {
+            const string projectContent = @"
+            <Project>
+                <PropertyGroup>
+                    <TestDirPath>TestDir</TestDirPath>
+                    <DirExists>$([System.IO.Directory]::Exists($(TestDirPath)))</DirExists>
+                </PropertyGroup>
+            </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("DirExists");
+            actualProperty.EvaluatedValue.ShouldBe("False");
+        }
+
+        [Fact]
+        public void DirectoryExists_WhenDirectoryExists_ReturnsTrue()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            string testDirPath = Path.Combine(env.DefaultTestDirectory.Path, "TestDir");
+
+            Directory.CreateDirectory(testDirPath);
+
+            string projectContent = $@"
+            <Project>
+                <PropertyGroup>
+                    <TestDirPath>{testDirPath.Replace(@"\", @"\\")}</TestDirPath>
+                    <DirExists>$([MSBuild]::DirectoryExists($(TestDirPath)))</DirExists>
+                </PropertyGroup>
+            </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("DirExists");
+            actualProperty.EvaluatedValue.ShouldBe("True");
+        }
+
+        [Fact]
+        public void DirectoryExists_WhenDirectoryDoesNotExists_ReturnsFalse()
+        {
+            const string projectContent = @"
+            <Project>
+                <PropertyGroup>
+                    <TestDirPath>TestDir</TestDirPath>
+                    <DirExists>$([MSBuild]::DirectoryExists($(TestDirPath)))</DirExists>
+                </PropertyGroup>
+            </Project>";
+
+            using ProjectFromString projectFromString = new(projectContent.Cleanup());
+            Project project = projectFromString.Project;
+
+            ProjectProperty actualProperty = project.GetProperty("DirExists");
+            actualProperty.EvaluatedValue.ShouldBe("False");
         }
 
         [Fact]

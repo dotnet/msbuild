@@ -540,6 +540,26 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Returns if the file exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool FileExists(string path)
+        {
+            return FileUtilities.FileExistsNoThrow(path);
+        }
+
+        /// <summary>
+        /// Returns if the directory exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool DirectoryExists(string path)
+        {
+            return FileUtilities.DirectoryExistsNoThrow(path);
+        }
+
+        /// <summary>
         /// Gets the canonicalized full path of the provided path and ensures it contains the correct directory separator characters for the current operating system.
         /// </summary>
         /// <param name="path">One or more paths to combine and normalize.</param>
