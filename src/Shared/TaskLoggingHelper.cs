@@ -1633,26 +1633,24 @@ namespace Microsoft.Build.Utilities
                 }
                 return message;
             }
-            else
+            // The more comprehensive output, showing exception types
+            // and inner exceptions
+            var builder = new StringBuilder(200);
+            Exception currentException = exception;
+            do
             {
-                // The more comprehensive output, showing exception types
-                // and inner exceptions
-                var builder = new StringBuilder(200);
-                Exception currentException = exception;
-                do
+                builder.Append(currentException.GetType().Name);
+                builder.Append(": ");
+                builder.AppendLine(currentException.Message);
+                if (showStackTrace)
                 {
-                    builder.Append(currentException.GetType().Name);
-                    builder.Append(": ");
-                    builder.AppendLine(currentException.Message);
-                    if (showStackTrace)
-                    {
-                        builder.AppendLine(currentException.StackTrace);
-                    }
-                    currentException = currentException.InnerException;
-                } while (currentException != null);
-
-                return builder.ToString();
+                    builder.AppendLine(currentException.StackTrace);
+                }
+                currentException = currentException.InnerException;
             }
+            while (currentException != null);
+
+            return builder.ToString();
         }
     }
 }
