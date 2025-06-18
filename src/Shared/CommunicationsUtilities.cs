@@ -272,12 +272,14 @@ namespace Microsoft.Build.Internal
         /// Get environment block.
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         internal static extern unsafe char* GetEnvironmentStrings();
 
         /// <summary>
         /// Free environment block.
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
 #if NETFRAMEWORK
