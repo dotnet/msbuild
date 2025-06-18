@@ -200,6 +200,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         ProcessReport,
 
+        /// Notifies the RAR node to set a configuration for a particular build.
+        RarNodeEndpointConfiguration,
+
         /// <summary>
         /// A request contains the inputs to the RAR task.
         /// </summary>
@@ -209,6 +212,11 @@ namespace Microsoft.Build.BackEnd
         /// A request contains the outputs and log events of a completed RAR task.
         /// </summary>
         RarNodeExecuteResponse,
+
+        /// <summary>
+        /// A batch of log events emitted while the RAR task is executing.
+        /// </summary>
+        RarNodeBufferedLogEvents,
 
         /// <summary>
         /// Command in form of MSBuild command line for server node - MSBuild Server.
