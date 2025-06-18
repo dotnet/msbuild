@@ -3215,7 +3215,7 @@ namespace Microsoft.Build.Evaluation
 
                 if (startat < 0 || startat > input.Length)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(count));
+                    throw new ArgumentOutOfRangeException(nameof(startat));
                 }
 
                 if (count == 0)
@@ -3260,17 +3260,17 @@ namespace Microsoft.Build.Evaluation
                 }
                 else
                 {
-                    List<string> list = new List<string>();
+                    List<ReadOnlyMemory<char>> list = new List<ReadOnlyMemory<char>>();
                     int num2 = input.Length;
                     do
                     {
                         if (match.Index + match.Length != num2)
                         {
-                            list.Add(input.Substring(match.Index + match.Length, num2 - match.Index - match.Length));
+                            list.Add(input.AsMemory().Slice(match.Index + match.Length, num2 - match.Index - match.Length));
                         }
 
                         num2 = match.Index;
-                        list.Add(evaluator(match, metadataMatchEvaluator));
+                        list.Add(evaluator(match, metadataMatchEvaluator).AsMemory());
                         if (--count == 0)
                         {
                             break;
