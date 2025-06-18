@@ -177,6 +177,7 @@ namespace Microsoft.Build.BackEnd
         /// If we hit the path that prevents from completing build submission this flag is set. 
         /// </summary>
 #pragma warning disable IDE0052 // Remove unread private members because we need them for traceability only
+#pragma warning disable CS0414 // The field is assigned but its value is never used
         private bool _hitNoLoggingCompleted;
 
         /// <summary>
@@ -185,6 +186,7 @@ namespace Microsoft.Build.BackEnd
         private string _noLoggingCompletedSubmissionDetails;
 
 #pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore CS0414 // The field is assigned but its value is never used
 
         /// <summary>
         /// Constructor.
