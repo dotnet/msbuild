@@ -600,7 +600,7 @@ namespace Microsoft.Build.BackEnd
             /// This overload is needed for a workaround concerning serializing BuildResult with a version.
             /// It deserializes additional entries together with the main dictionary.
             /// </remarks>
-            public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -1383,7 +1383,7 @@ namespace Microsoft.Build.BackEnd
             /// This overload is needed for a workaround concerning serializing BuildResult with a version.
             /// It serializes additional entries together with the main dictionary.
             /// </remarks>
-            public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
                 // Translate whether object is null
                 if ((dictionary is null) && ((additionalEntries is null) || (additionalEntries.Count == 0)))
