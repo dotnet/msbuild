@@ -4293,6 +4293,46 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
 
+        /// <summary>
+        /// Verifies that an empty XML node with preserved formatting evaluates
+        /// correctly in a project when the element contains only new line and whitespace characters.
+        /// </summary>
+        [Fact]
+        public void VerifyNewLineInEmptyNodeHandlingWithPreserveFormatting()
+        {
+            string file = null;
+            try
+            {
+                using ProjectCollection collection = new();
+                MockLogger logger = new();
+                collection.RegisterLogger(logger);
+                file = FileUtilities.GetTemporaryFileName();
+                File.WriteAllText(file, """
+                                        <?xml version="1.0" encoding="utf-8"?>
+                                        <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                                          <PropertyGroup>
+                                            <Suffix>
+                                            </Suffix>
+                                            <TargetName>MyFile$(Suffix).exe</TargetName>
+                                            <TargetPath>$([System.IO.Path]::Combine($(ProjectDir),$(TargetName)))</TargetPath>
+                                          </PropertyGroup>
+                                        </Project>
+                                        """);
+                var projectRootElement = ProjectRootElement.Open(file, collection, true);
+                var project = new Project(projectRootElement, new Dictionary<string, string>(), null, collection, ProjectLoadSettings.Default);
+                project.Properties.Single(p => p.Name == "Suffix").EvaluatedValue.ShouldBe("");
+                project.Properties.Single(p => p.Name == "TargetName").EvaluatedValue.ShouldBe("MyFile.exe");
+                logger.Errors.ShouldBeEmpty();
+            }
+            finally
+            {
+                if (file != null)
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+
         private static void AssertGlobResult(GlobResultList expected, string project)
         {
             var globs = ObjectModelHelpers.CreateInMemoryProject(project).GetAllGlobs();
