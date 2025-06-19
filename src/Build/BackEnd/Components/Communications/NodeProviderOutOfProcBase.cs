@@ -531,7 +531,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Class which wraps up the communications infrastructure for a given node.
         /// </summary>
-        internal class NodeContext
+        internal sealed class NodeContext
         {
             private enum ExitPacketState
             {
@@ -541,18 +541,17 @@ namespace Microsoft.Build.BackEnd
             }
 
             // The pipe(s) used to communicate with the node.
-            private Stream _clientToServerStream;
-            private Stream _serverToClientStream;
+            private readonly Stream _pipeStream;
 
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
             /// </summary>
-            private INodePacketFactory _packetFactory;
+            private readonly INodePacketFactory _packetFactory;
 
             /// <summary>
             /// The node id assigned by the node provider.
             /// </summary>
-            private int _nodeId;
+            private readonly int _nodeId;
 
             /// <summary>
             /// The node process.
@@ -564,45 +563,54 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// An array used to store the header byte for each packet when read.
             /// </summary>
-            private byte[] _headerByte;
+            private readonly byte[] _headerByte;
 
             /// <summary>
             /// A buffer typically big enough to handle a packet body.
             /// We use this as a convenient way to manage and cache a byte[] that's resized
             /// automatically to fit our payload.
             /// </summary>
-            private MemoryStream _readBufferMemoryStream;
+            private readonly MemoryStream _readBufferMemoryStream;
 
             /// <summary>
             /// A reusable buffer for writing packets.
             /// </summary>
-            private MemoryStream _writeBufferMemoryStream;
+            private readonly MemoryStream _writeBufferMemoryStream;
+
+            private readonly ITranslator _readTranslator;
+
+            private readonly ITranslator _writeTranslator;
 
             /// <summary>
             /// A queue used for enqueuing packets to write to the stream asynchronously.
             /// </summary>
-            private ConcurrentQueue<INodePacket> _packetWriteQueue = new ConcurrentQueue<INodePacket>();
+            private readonly ConcurrentQueue<INodePacket> _packetWriteQueue;
 
             /// <summary>
             /// Delegate called when the context terminates.
             /// </summary>
-            private NodeContextTerminateDelegate _terminateDelegate;
+            private readonly NodeContextTerminateDelegate _terminateDelegate;
+
+            /// <summary>
+            /// A dedicated thread to consume enqueued packets.
+            /// </summary>
+            private readonly Thread _drainPacketQueueThread;
+
+            /// <summary>
+            /// Used to signal the consuming thread that a packet has been enqueued;
+            /// </summary>
+            private readonly AutoResetEvent _packetEnqueued;
+
+            /// <summary>
+            /// Used to signal that the exit packet has been sent and we no longer need to wait for the queue to drain.
+            /// </summary>
+            private readonly CancellationTokenSource _packetQueueDrainDelayCancellation;
 
             /// <summary>
             /// Tracks the state of the packet sent to terminate the node.
             /// </summary>
             private ExitPacketState _exitPacketState;
 
-            /// <summary>
-            /// Per node read buffers
-            /// </summary>
-            private BinaryReaderFactory _binaryReaderFactory;
-
-            private AutoResetEvent _packetEnqueued;
-
-            private CancellationTokenSource _packetQueueDrainDelayCancellation;
-
-            private Thread drainPacketQueueThread;
 
             /// <summary>
             /// Constructor.
@@ -613,22 +621,23 @@ namespace Microsoft.Build.BackEnd
             {
                 _nodeId = nodeId;
                 _process = process;
-                _clientToServerStream = nodePipe;
-                _serverToClientStream = nodePipe;
+                _pipeStream = nodePipe;
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
                 _writeBufferMemoryStream = new MemoryStream();
+                _readTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
+                _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
-                _binaryReaderFactory = InterningBinaryReader.CreateSharedBuffer();
 
+                _packetWriteQueue = new ConcurrentQueue<INodePacket>();
                 _packetEnqueued = new AutoResetEvent(false);
                 _packetQueueDrainDelayCancellation = new CancellationTokenSource();
 
                 // specify the smallest stack size - 64kb
-                drainPacketQueueThread = new Thread(DrainPacketQueue, 64 * 1024);
-                drainPacketQueueThread.IsBackground = true;
-                drainPacketQueueThread.Start(this);
+                _drainPacketQueueThread = new Thread(DrainPacketQueue, 64 * 1024);
+                _drainPacketQueueThread.IsBackground = true;
+                _drainPacketQueueThread.Start(this);
             }
 
             /// <summary>
@@ -642,7 +651,7 @@ namespace Microsoft.Build.BackEnd
             public void BeginAsyncPacketRead()
             {
 #if FEATURE_APM
-                _clientToServerStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
+                _pipeStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
 #else
                 ThreadPool.QueueUserWorkItem(delegate
                 {
@@ -658,7 +667,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, _headerByte, _headerByte.Length);
+                        int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -680,8 +689,19 @@ namespace Microsoft.Build.BackEnd
 
                     try
                     {
-                        int bytesRead = await CommunicationsUtilities.ReadAsync(_clientToServerStream, packetData, packetLength);
-                        if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
+                        int totalBytesRead = 0;
+                        while (totalBytesRead < packetLength)
+                        {
+                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            if (bytesRead == 0)
+                            {
+                                break;
+                            }
+
+                            totalBytesRead += bytesRead;
+                        }
+
+                        if (!ProcessBodyBytesRead(totalBytesRead, packetLength, packetType))
                         {
                             return;
                         }
@@ -695,7 +715,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     // Read and route the packet.
-                    if (!ReadAndRoutePacket(packetType, packetData, packetLength))
+                    if (!ReadAndRoutePacket(packetType))
                     {
                         return;
                     }
@@ -736,17 +756,17 @@ namespace Microsoft.Build.BackEnd
             {
                 NodeContext context = (NodeContext)state;
                 MemoryStream writeStream = context._writeBufferMemoryStream;
-                Stream serverToClientStream = context._serverToClientStream;
-                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                Stream serverToClientStream = context._pipeStream;
 
                 while (true)
                 {
                     context._packetEnqueued.WaitOne();
-                    while (context._packetWriteQueue.TryDequeue(out var packet))
+                    while (context._packetWriteQueue.TryDequeue(out INodePacket packet))
                     {
                         // clear the buffer but keep the underlying capacity to avoid reallocations
                         writeStream.SetLength(0);
 
+                        ITranslator writeTranslator = context._writeTranslator;
                         try
                         {
                             writeStream.WriteByte((byte)packet.Type);
@@ -812,11 +832,7 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private void Close()
             {
-                _clientToServerStream.Dispose();
-                if (!object.ReferenceEquals(_clientToServerStream, _serverToClientStream))
-                {
-                    _serverToClientStream.Dispose();
-                }
+                _pipeStream.Dispose();
                 _terminateDelegate(_nodeId);
             }
 
@@ -913,7 +929,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _clientToServerStream.EndRead(result);
+                        bytesRead = _pipeStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async
@@ -945,7 +961,7 @@ namespace Microsoft.Build.BackEnd
                 _readBufferMemoryStream.SetLength(packetLength);
                 byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-                _clientToServerStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+                _pipeStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
             }
 #endif
 
@@ -961,17 +977,12 @@ namespace Microsoft.Build.BackEnd
                 return true;
             }
 
-            private bool ReadAndRoutePacket(NodePacketType packetType, byte[] packetData, int packetLength)
+            private bool ReadAndRoutePacket(NodePacketType packetType)
             {
                 try
                 {
-                    // The buffer is publicly visible so that InterningBinaryReader doesn't have to copy to an intermediate buffer.
-                    // Since the buffer is publicly visible dispose right away to discourage outsiders from holding a reference to it.
-                    using (var packetStream = new MemoryStream(packetData, 0, packetLength, /*writeable*/ false, /*bufferIsPubliclyVisible*/ true))
-                    {
-                        ITranslator readTranslator = BinaryTranslator.GetReadTranslator(packetStream, _binaryReaderFactory);
-                        _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, readTranslator);
-                    }
+                    _readBufferMemoryStream.Position = 0;
+                    _packetFactory.DeserializeAndRoutePacket(_nodeId, packetType, _readTranslator);
                 }
                 catch (IOException e)
                 {
@@ -999,7 +1010,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        bytesRead = _clientToServerStream.EndRead(result);
+                        bytesRead = _pipeStream.EndRead(result);
                     }
 
                     // Workaround for CLR stress bug; it sporadically calls us twice on the same async
@@ -1024,7 +1035,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Read and route the packet.
-                if (!ReadAndRoutePacket(packetType, packetData, packetLength))
+                if (!ReadAndRoutePacket(packetType))
                 {
                     return;
                 }

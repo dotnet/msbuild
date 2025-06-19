@@ -2862,6 +2862,14 @@ namespace Microsoft.Build.CommandLine
 
             static bool CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes()
             {
+                // TerminalLogger is not used in automated environments (CI, GitHub Actions, GitHub Copilot, etc.)
+                if (IsAutomatedEnvironment())
+                {
+                    s_globalMessagesToLogInBuildLoggers.Add(
+                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated"), MessageImportance.Low));
+                    return false;
+                }
+
                 (var acceptAnsiColorCodes, var outputIsScreen, s_originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
 
                 if (!outputIsScreen)
@@ -3034,6 +3042,38 @@ namespace Microsoft.Build.CommandLine
 
                 useTerminalLogger = CheckIfTerminalIsSupportedAndTryEnableAnsiColorCodes();
             }
+        }
+
+        /// <summary>
+        /// Determines if the current environment is an automated environment where terminal logger should be disabled.
+        /// This includes CI systems, GitHub Actions, GitHub Copilot, and other automated build environments.
+        /// </summary>
+        /// <returns>True if running in an automated environment, false otherwise.</returns>
+        private static bool IsAutomatedEnvironment()
+        {
+            // Check for common CI environment indicators that use boolean values
+            if (Traits.IsEnvVarOneOrTrue("CI") || Traits.IsEnvVarOneOrTrue("GITHUB_ACTIONS"))
+            {
+                return true;
+            }
+
+            // Check for environment variables that indicate automated environments
+            string[] automatedEnvironmentVariables = 
+            {
+                "COPILOT_API_URL",    // GitHub Copilot
+                "BUILD_ID",           // Jenkins, Google Cloud Build
+                "BUILDKITE",          // Buildkite
+                "CIRCLECI",           // CircleCI
+                "TEAMCITY_VERSION",   // TeamCity
+                "TF_BUILD",           // Azure DevOps
+                "APPVEYOR",           // AppVeyor
+                "TRAVIS",             // Travis CI
+                "GITLAB_CI",          // GitLab CI
+                "JENKINS_URL",        // Jenkins
+                "BAMBOO_BUILD_NUMBER" // Atlassian Bamboo
+            };
+
+            return automatedEnvironmentVariables.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
         }
 
         private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
@@ -4435,7 +4475,6 @@ namespace Microsoft.Build.CommandLine
             out ILogger logger)
         {
             logger = null;
-
             try
             {
                 logger = loggerDescription.CreateLogger();
@@ -4444,23 +4483,23 @@ namespace Microsoft.Build.CommandLine
             }
             catch (IOException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false, [loggerDescription.Name, (e == null) ? String.Empty : e.Message]);
             }
             catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {
