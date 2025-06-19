@@ -46,7 +46,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            public ICollection<I> GetItems(string itemType)
+            public IReadOnlyCollection<I> GetItems(string itemType)
             {
                 return _itemsByType.TryGetValue(itemType, out LazyItemList items)
                     ? items.GetMatchedItems(globsToIgnore: ImmutableHashSet<string>.Empty)
