@@ -105,8 +105,8 @@
 
   <!-- Roslyn tasks are now in an assembly owned and shipped by Roslyn -->
   <!-- NOTE: Keep in sync with SDK: src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Sdk.targets -->
-  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.CopyRefAssembly"           AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
-  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
-  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Vbc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
+  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.CopyRefAssembly"           AssemblyFile="$(RoslynTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="$(RoslynTasksAssembly)" />
+  <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Vbc"                       AssemblyFile="$(RoslynTasksAssembly)" />
 
 </Project>
