@@ -2925,7 +2925,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (!match.Success)
                     {
-                       // No matches - the caller will use the original string.
+                        // No matches - the caller will use the original string.
                         return new OneOrMultipleMetadataMatches();
                     }
 
@@ -2984,10 +2984,11 @@ namespace Microsoft.Build.Evaluation
 
                     // Quickly cancel out of definite misses.
                     int length = stringToCheck.Length;
-                    if (length == cachedMatch.Length + 3 && stringToCheck[0] == '%' && stringToCheck[1] == '(' && stringToCheck[length - 1] == ')')
+                    if (length == cachedMatch.Length + QuotedExpressionSurroundCharCount
+                        && stringToCheck[0] == '%' && stringToCheck[1] == '(' && stringToCheck[length - 1] == ')')
                     {
                         // If the inner slice is a hit, don't allocate a string.
-                        ReadOnlySpan<char> span = stringToCheck.AsSpan(2, length - 3);
+                        ReadOnlySpan<char> span = stringToCheck.AsSpan(2, length - QuotedExpressionSurroundCharCount);
                         if (span.SequenceEqual(cachedMatch.AsSpan()))
                         {
                             return true;
