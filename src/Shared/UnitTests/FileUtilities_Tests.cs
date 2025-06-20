@@ -502,7 +502,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_LEGACY_GETFULLPATH
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/4205")]
+        [Fact]
         public void NormalizePathBadGlobalroot()
         {
             Assert.Throws<ArgumentException>(() =>
