@@ -10,6 +10,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 
@@ -871,6 +872,25 @@ namespace Microsoft.Build.Evaluation.Expander
                         if (args.Length == 0)
                         {
                             returnVal = Guid.NewGuid();
+                            return true;
+                        }
+                    }
+                }
+                else if (receiverType == typeof(ToolLocationHelper))
+                {
+                    if (string.Equals(methodName, nameof(ToolLocationHelper.GetPlatformSDKLocation), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (ParseArgs.TryGetArgs(args, out string? arg0, out string? arg1) && arg0 != null && arg1 != null)
+                        {
+                            returnVal = ToolLocationHelper.GetPlatformSDKLocation(arg0, arg1);
+                            return true;
+                        }
+                    }
+                    else if (string.Equals(methodName, nameof(ToolLocationHelper.GetPlatformSDKDisplayName), StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (ParseArgs.TryGetArgs(args, out string? arg0, out string? arg1) && arg0 != null && arg1 != null)
+                        {
+                            returnVal = ToolLocationHelper.GetPlatformSDKDisplayName(arg0, arg1);
                             return true;
                         }
                     }
