@@ -9,7 +9,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     /// <summary>
     /// Result types that a plugin can return for a given build request.
