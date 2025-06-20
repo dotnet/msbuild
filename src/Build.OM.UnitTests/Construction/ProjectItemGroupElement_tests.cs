@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Xunit;
 
 #nullable disable
@@ -101,6 +103,121 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.Equal("c", itemGroup.Label);
             Assert.True(project.HasUnsavedChanges);
+        }
+
+        [Fact]
+        public void AddPackageReference_PreservesTrailingCommentOnSameLine()
+        {
+            string content =
+            """
+               <Project>
+                   <ItemGroup>
+                       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" /><!-- some comment -->
+                   </ItemGroup>
+               </Project>
+            """;
+            using ProjectRootElementFromString projectRootElementFromString = new(content, ProjectCollection.GlobalProjectCollection, true);
+            ProjectRootElement project = projectRootElementFromString.Project;
+            ProjectItemGroupElement group = project.ItemGroups.First();
+
+            // Add a new PackageReference
+            group.AddItem("PackageReference", "Serilog").AddMetadata("Version", "4.3.0", expressAsAttribute: true);
+
+            string expectedContent =
+            """
+               <Project>
+                   <ItemGroup>
+                       <PackageReference Include="Newtonsoft.Json" Version="13.0.1" /><!-- some comment -->
+                       <PackageReference Include="Serilog" Version="4.3.0" />
+                   </ItemGroup>
+               </Project>
+            """;
+
+            Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
+        }
+
+        private void AddItem_PreservesComments_Helper(string content, string expectedContent)
+        {
+            using ProjectRootElementFromString projectRootElementFromString = new(content, ProjectCollection.GlobalProjectCollection, true);
+            ProjectRootElement project = projectRootElementFromString.Project;
+            ProjectItemGroupElement group = project.ItemGroups.First();
+
+            // Insert a new item between the two existing items
+            var items = group.Items.ToList();
+            var newItem = project.CreateItemElement("PackageReference");
+            newItem.Include = "Inserted";
+            group.InsertAfterChild(newItem, items[0]);
+            newItem.AddMetadata("Version", "1.5.0", true);
+
+            Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
+        }
+
+        [Theory]
+        [InlineData("""
+            <Project>
+               <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" />
+                    <!--
+                    This is a multi-line
+                    comment before the next item
+                    -->
+                    <PackageReference Include="B" Version="2.0.0" />
+                </ItemGroup>
+            </Project>
+            """, """
+            <Project>
+               <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" />
+                    <PackageReference Include="Inserted" Version="1.5.0" />
+                    <!--
+                    This is a multi-line
+                    comment before the next item
+                    -->
+                    <PackageReference Include="B" Version="2.0.0" />
+                </ItemGroup>
+            </Project>
+            """)]
+        [InlineData("""
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
+                <!-- comment before B -->
+                <PackageReference Include="B" Version="2.0.0" />
+              </ItemGroup>
+            </Project>
+            """, """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
+                <PackageReference Include="Inserted" Version="1.5.0" />
+                <!-- comment before B -->
+                <PackageReference Include="B" Version="2.0.0" />
+              </ItemGroup>
+            </Project>
+            """)]
+        [InlineData("""
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" /><!--
+                    This is a multi-line
+                    comment across lines
+                    -->
+              </ItemGroup>
+            </Project>
+            """, """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" /><!--
+                    This is a multi-line
+                    comment across lines
+                    -->
+                <PackageReference Include="Inserted" Version="1.5.0" />
+              </ItemGroup>
+            </Project>
+            """)]
+        public void AddItem_PreservesComments_VariousCases(string content, string expectedContent)
+        {
+            AddItem_PreservesComments_Helper(content, expectedContent);
         }
     }
 }
