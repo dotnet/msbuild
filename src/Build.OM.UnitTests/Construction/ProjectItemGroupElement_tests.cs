@@ -152,12 +152,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
         }
 
-        [Fact]
-        public void AddItem_PreservesComments_VariousCases()
-        {
-            // Multi-line comment scenario
-            string content1 =
-            """
+        [Theory]
+        [InlineData("""
             <Project>
                <ItemGroup>
                     <PackageReference Include="A" Version="1.0.0" />
@@ -168,9 +164,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     <PackageReference Include="B" Version="2.0.0" />
                 </ItemGroup>
             </Project>
-            """;
-            string expectedContent1 =
-            """
+            """, """
             <Project>
                <ItemGroup>
                     <PackageReference Include="A" Version="1.0.0" />
@@ -182,12 +176,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     <PackageReference Include="B" Version="2.0.0" />
                 </ItemGroup>
             </Project>
-            """;
-            AddItem_PreservesComments_Helper(content1, expectedContent1);
-
-            // Single-line comment scenario
-            string content2 =
-            """
+            """)]
+        [InlineData("""
             <Project>
               <ItemGroup>
                 <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
@@ -195,9 +185,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 <PackageReference Include="B" Version="2.0.0" />
               </ItemGroup>
             </Project>
-            """;
-            string expectedContent2 =
-            """
+            """, """
             <Project>
               <ItemGroup>
                 <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
@@ -206,12 +194,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 <PackageReference Include="B" Version="2.0.0" />
               </ItemGroup>
             </Project>
-            """;
-            AddItem_PreservesComments_Helper(content2, expectedContent2);
-
-            // Adjacent multiple line Comment after item
-            string content3 =
-            """
+            """)]
+        [InlineData("""
             <Project>
               <ItemGroup>
                 <PackageReference Include="A" Version="1.0.0" /><!--
@@ -220,9 +204,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     -->
               </ItemGroup>
             </Project>
-            """;
-            string expectedContent3 =
-            """
+            """, """
             <Project>
               <ItemGroup>
                 <PackageReference Include="A" Version="1.0.0" /><!--
@@ -232,8 +214,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 <PackageReference Include="Inserted" Version="1.5.0" />
               </ItemGroup>
             </Project>
-            """;
-            AddItem_PreservesComments_Helper(content3, expectedContent3);
+            """)]
+        public void AddItem_PreservesComments_VariousCases(string content, string expectedContent)
+        {
+            AddItem_PreservesComments_Helper(content, expectedContent);
         }
     }
 }
