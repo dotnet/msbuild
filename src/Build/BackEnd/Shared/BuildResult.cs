@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -589,6 +590,10 @@ namespace Microsoft.Build.Execution
                 _resultsByTarget![targetResult.Key] = targetResult.Value;
             }
 
+            _projectStateAfterBuild = MergeProjectStateAfterBuildInstances(results._buildRequestDataFlags, results._projectStateAfterBuild);
+
+            _buildRequestDataFlags = MergeBuildFlags(results._buildRequestDataFlags);
+
             // If there is an exception and we did not previously have one, add it in.
             _requestException ??= results.Exception;
         }
@@ -759,12 +764,191 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Merges two sets of BuildRequestDataFlags according to MSBuild's requirements.
+        /// </summary>
+        /// <param name="newFlags">The new flags to merge with the existing flags.</param>
+        /// <returns>The merged BuildRequestDataFlags.</returns>
+        private BuildRequestDataFlags MergeBuildFlags(BuildRequestDataFlags? newFlags)
+        {
+            // If we have ProvideProjectStateAfterBuild set, it means we have a full project instance, so we don't need to merge anything.
+            if ((_buildRequestDataFlags & Execution.BuildRequestDataFlags.ProvideProjectStateAfterBuild) != 0)
+            {
+                return _buildRequestDataFlags;
+            }
+
+            BuildRequestDataFlags mergedFlags = _buildRequestDataFlags | (newFlags ?? Execution.BuildRequestDataFlags.None);
+
+            // If ProvideProjectStateAfterBuild is set in new flags, it takes precedence over ProvideSubsetOfStateAfterBuild.
+            if (newFlags.HasValue && (newFlags.Value & Execution.BuildRequestDataFlags.ProvideProjectStateAfterBuild) != 0)
+            {
+                mergedFlags &= ~Execution.BuildRequestDataFlags.ProvideSubsetOfStateAfterBuild;
+            }
+
+            return mergedFlags;
+        }
+
+        /// <summary>
+        /// Merges properties, items and RequestedProjectState from a new ProjectStateAfterBuild instance into the existing one.
+        /// </summary>
+        /// <param name="newFlags">The request flags.</param>
+        /// <param name="newProjectStateAfterBuild">The new ProjectStateAfterBuild instance to merge.</param>
+        /// <returns>A merged ProjectInstance containing properties and items from both instances, or null if both instances are null.</returns>
+        private ProjectInstance? MergeProjectStateAfterBuildInstances(BuildRequestDataFlags? newFlags, ProjectInstance? newProjectStateAfterBuild)
+        {
+            if ((_buildRequestDataFlags & Execution.BuildRequestDataFlags.ProvideProjectStateAfterBuild) != 0)
+            {
+                return _projectStateAfterBuild;
+            }
+
+            if (newFlags.HasValue && (newFlags.Value & Execution.BuildRequestDataFlags.ProvideProjectStateAfterBuild) != 0)
+            {
+                return newProjectStateAfterBuild;
+            }
+
+            if (newProjectStateAfterBuild == null)
+            {
+                return _projectStateAfterBuild;
+            }
+
+            if (_projectStateAfterBuild == null)
+            {
+                return newProjectStateAfterBuild;
+            }
+
+            // Create a deep copy of the existing ProjectStateAfterBuild
+            ProjectInstance mergedInstanceCandidate = _projectStateAfterBuild.DeepCopy(isImmutable: false);
+            MergeProperties(mergedInstanceCandidate, newProjectStateAfterBuild.Properties);
+            MergeItems(mergedInstanceCandidate, newProjectStateAfterBuild.Items);
+
+            // Merge RequestedProjectStateFilter
+            var sourceFilter = _projectStateAfterBuild.RequestedProjectStateFilter;
+            var newFilter = newProjectStateAfterBuild.RequestedProjectStateFilter;
+
+            if (sourceFilter != null || newFilter != null)
+            {
+                RequestedProjectState mergedFilter;
+
+                if (sourceFilter == null)
+                {
+                    mergedFilter = newFilter!.DeepClone();
+                }
+                else if (newFilter == null)
+                {
+                    mergedFilter = sourceFilter.DeepClone();
+                }
+                else
+                {
+                    mergedFilter = sourceFilter.Merge(newFilter);
+                }
+
+                return mergedInstanceCandidate.FilteredCopy(mergedFilter);
+            }
+
+            return mergedInstanceCandidate;
+        }
+
+        /// <summary>
+        /// Merges properties from newProperties into the mergedInstance, avoiding duplicates.
+        /// </summary>
+        /// <param name="mergedInstance">The target ProjectInstance to merge properties into.</param>
+        /// <param name="newProperties">The properties to merge in.</param>
+        private static void MergeProperties(ProjectInstance mergedInstance, ICollection<ProjectPropertyInstance> newProperties)
+        {
+            foreach (var property in newProperties)
+            {
+                if (mergedInstance.GetProperty(property.Name) == null)
+                {
+                    mergedInstance.SetProperty(property.Name, property.EvaluatedValue);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Merges items from newItems into the mergedInstance, handling metadata merging for existing items
+        /// and avoiding copy-on-write performance issues.
+        /// </summary>
+        /// <param name="mergedInstance">The target ProjectInstance to merge items into.</param>
+        /// <param name="newItems">The items to merge in.</param>
+        private static void MergeItems(ProjectInstance mergedInstance, ICollection<ProjectItemInstance> newItems)
+        {
+            // Maps item types (e.g., "Compile") to a set of includes (e.g., "File1.cs")
+            var existingItemsByType = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+
+            // Maps a tuple of (item type, include) to the actual item instance
+            var existingItemsLookup = new Dictionary<(string, string), ProjectItemInstance>(ItemIdentityComparer.Instance);
+
+            // Build lookup structures for existing items
+            foreach (var item in mergedInstance.Items)
+            {
+                if (!existingItemsByType.TryGetValue(item.ItemType, out var itemSet))
+                {
+                    itemSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                    existingItemsByType[item.ItemType] = itemSet;
+                }
+
+                itemSet.Add(item.EvaluatedInclude);
+                existingItemsLookup[(item.ItemType, item.EvaluatedInclude)] = item;
+            }
+
+            // Batch items to add separately to avoid collection modification during enumeration
+            var itemsToAdd = new List<(string itemType, string evaluatedInclude, IEnumerable<KeyValuePair<string, string>> metadata)>();
+
+            // Process new items
+            foreach (var item in newItems)
+            {
+                if (existingItemsByType.TryGetValue(item.ItemType, out var itemsOfType) &&
+                    itemsOfType.Contains(item.EvaluatedInclude))
+                {
+                    var existingItem = existingItemsLookup[(item.ItemType, item.EvaluatedInclude)];
+
+                    // Batch metadata updates to avoid copy-on-write performance issues
+                    var metadataToMerge = item.EnumerateMetadata().ToList();
+
+                    if (metadataToMerge.Count > 0)
+                    {
+                        // Check if we can use batch operations for CopyOnWriteDictionary
+                        if (existingItem.Metadata is CopyOnWriteDictionary<string> cowDict && metadataToMerge.Count > 1)
+                        {
+                            // Use batch operation to avoid multiple ImmutableDictionary creations
+                            cowDict.SetItems(metadataToMerge);
+                        }
+                        else
+                        {
+                            // Fall back to individual updates for single items or non-COW dictionaries
+                            foreach (var metadata in metadataToMerge)
+                            {
+                                existingItem.SetMetadata(metadata.Key, metadata.Value);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    // Defer adding new items until after enumeration is complete
+                    itemsToAdd.Add((item.ItemType, item.EvaluatedInclude, item.EnumerateMetadata()));
+
+                    // Update tracking structures for future lookups
+                    if (!existingItemsByType.TryGetValue(item.ItemType, out var itemSet))
+                    {
+                        itemSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        existingItemsByType[item.ItemType] = itemSet;
+                    }
+
+                    itemSet.Add(item.EvaluatedInclude);
+                }
+            }
+
+            // Add all new items after enumeration is complete to avoid collection modification issues
+            foreach (var (itemType, evaluatedInclude, metadata) in itemsToAdd)
+            {
+                mergedInstance.AddItem(itemType, evaluatedInclude, metadata);
+            }
+        }
+
+        /// <summary>
         /// Creates the target result dictionary.
         /// </summary>
-        private static ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionary(int capacity)
-        {
-            return new ConcurrentDictionary<string, TargetResult>(1, capacity, StringComparer.OrdinalIgnoreCase);
-        }
+        private static ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionary(int capacity) => new(1, capacity, StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Creates the target result dictionary and populates it with however many target results are
@@ -783,6 +967,30 @@ namespace Microsoft.Build.Execution
             }
 
             return resultsByTarget;
+        }
+
+        /// <summary>
+        /// A specialized equality comparer for string tuples optimized for MSBuild item identity.
+        /// </summary>
+        private class ItemIdentityComparer : IEqualityComparer<(string, string)>
+        {
+            // Singleton instance for reuse
+            public static readonly ItemIdentityComparer Instance = new ItemIdentityComparer();
+
+            // Private constructor to enforce singleton pattern
+            private ItemIdentityComparer() { }
+
+            public bool Equals((string, string) x, (string, string) y) =>
+                StringComparer.OrdinalIgnoreCase.Equals(x.Item1, y.Item1) &&
+                StringComparer.OrdinalIgnoreCase.Equals(x.Item2, y.Item2);
+
+            public int GetHashCode((string, string) obj)
+            {
+                int hash = 17;
+                hash = hash * 23 + (obj.Item1 == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Item1));
+                hash = hash * 23 + (obj.Item2 == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.Item2));
+                return hash;
+            }
         }
     }
 }
