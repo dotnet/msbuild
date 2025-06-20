@@ -50,14 +50,12 @@ namespace Microsoft.Build.UnitTests.Construction
         /// extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         public void ParseFirstProjectLine_VC()
         {
             Should.Throw<InvalidProjectFileException>(() =>
             {
                 SolutionFile p = new SolutionFile();
-                p.FullPath = "c:\\foo.sln";
+                p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
                 ProjectInSolution proj = new ProjectInSolution(p);
 
                 p.ParseFirstProjectLine(
@@ -609,7 +607,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"someproj2.etp");
-                solution.ProjectsInOrder[2].RelativePath.ShouldBe(@"ETPProjUpgradeTest\someproj3.etp");
+                // On Unix systems, directory separators should be forward slashes (fixes issue #1769)
+                string expectedPath3 = NativeMethodsShared.IsWindows ? @"ETPProjUpgradeTest\someproj3.etp" : "ETPProjUpgradeTest/someproj3.etp";
+                solution.ProjectsInOrder[2].RelativePath.ShouldBe(expectedPath3);
                 solution.ProjectsInOrder[3].RelativePath.ShouldBe(Path.Combine("ETPProjUpgradeTest", "..", "SomeFolder", "ClassLibrary1.csproj"));
             }
             // Delete the files created during the test
@@ -2481,6 +2481,112 @@ EndGlobal
             stringBuilder.AppendLine(comment);
 
             Should.NotThrow(() => ParseSolutionHelper(stringBuilder.ToString()));
+        }
+
+        /// <summary>
+        /// Test for issue #1769 - ProjectInSolution.AbsolutePath contains '\' on Mac OS/Linux
+        /// Ensure that AbsolutePath uses forward slashes on Unix systems even when the solution
+        /// file contains project paths with backslashes.
+        /// </summary>
+        [Fact]
+        [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
+        public void AbsolutePathShouldUseForwardSlashesOnUnix()
+        {
+            
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.30114.105
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ProjectInSolutionRepro', 'ProjectInSolutionRepro\ProjectInSolutionRepro.csproj', '{GUID-HERE}'
+                EndProject
+                Global
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            
+            solution.ProjectsInOrder.Count.ShouldBe(1);
+            ProjectInSolution project = solution.ProjectsInOrder[0];
+            
+            project.ProjectName.ShouldBe("ProjectInSolutionRepro");
+            
+            // The AbsolutePath should not contain backslashes on Unix systems
+            project.AbsolutePath.ShouldNotContain("\\");
+            
+            // The AbsolutePath should contain forward slashes (unless it's just a filename)
+            if (project.AbsolutePath.Contains(Path.DirectorySeparatorChar.ToString()))
+            {
+                project.AbsolutePath.ShouldContain("/");
+            }
+        }
+        
+        /// <summary>
+        /// Test for edge case where RelativePath could be treated as an absolute URI
+        /// and bypass normalization, leading to backslashes in AbsolutePath on Unix.
+        /// </summary>
+        [Fact]
+        [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
+        public void AbsolutePathShouldHandleUriLikeRelativePathsOnUnix()
+        {
+            
+            // Test with a path that might be interpreted as a URI
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'WebProject', 'http://localhost\path\to\project', '{GUID-HERE}'
+                EndProject
+                Global
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            
+            solution.ProjectsInOrder.Count.ShouldBe(1);
+            ProjectInSolution project = solution.ProjectsInOrder[0];
+            
+            // Even if the RelativePath looks like a URI, AbsolutePath should not contain backslashes on Unix
+            if (project.AbsolutePath.Contains("\\"))
+            {
+                project.AbsolutePath.ShouldNotContain("\\");
+            }
+        }
+        
+        /// <summary>
+        /// Test to verify that the fix for issue #1769 works by directly testing
+        /// FileUtilities.FixFilePath integration in AbsolutePath.
+        /// This test simulates scenarios where intermediate path processing might
+        /// leave backslashes in the AbsolutePath on Unix systems.
+        /// </summary>
+        [Fact]
+        [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
+        public void AbsolutePathFixFilePathIntegrationTest()
+        {
+            
+            string solutionFileContents =
+                @"
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'TestProject', 'Sub\Dir\Project.csproj', '{GUID-HERE}'
+                EndProject
+                Global
+                EndGlobal
+                ";
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+            
+            solution.ProjectsInOrder.Count.ShouldBe(1);
+            ProjectInSolution project = solution.ProjectsInOrder[0];
+            
+            // This test verifies that regardless of what happens in intermediate processing,
+            // the final AbsolutePath result never contains backslashes on Unix
+            project.AbsolutePath.ShouldNotContain("\\");
+                
+            // Verify that the path contains forward slashes as expected
+            project.AbsolutePath.ShouldContain("/");
+                
+            // Verify that the path structure is still correct (should contain the subdirectory)
+            project.AbsolutePath.ShouldContain("Sub");
         }
     }
 }
