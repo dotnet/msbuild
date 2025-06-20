@@ -1798,7 +1798,7 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
+        <target state="translated">Il logger del terminale non è stato utilizzato perché è stato rilevato che la compilazione è in esecuzione in un ambiente automatizzato.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
