@@ -1277,7 +1277,7 @@ namespace Microsoft.Build.Execution
                          !FileClassifier.IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
                          // This condition will as well capture Microsoft tasks pulled from NuGet cache - since we decide based on assembly name.
-                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here 
+                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here
                          !FileClassifier.IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
                          !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
                     // and let's consider all tasks imported by common targets as non custom logic.
