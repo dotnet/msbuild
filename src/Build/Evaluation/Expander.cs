@@ -2904,10 +2904,9 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 /// <summary>
-                /// This is effectively an "unrolled" while loop, with several manual checks before we enter the full loop,
-                /// so there's an intentional amount of duplication. In the vast majority of cases, we'll only have
-                /// 1-2 matches, and within those we can avoid allocating the vast majority of Regex objects and return
-                /// a cached result.
+                /// Extracts a value from the input string based on a regular expression.
+                /// In the vast majority of cases, we'll only have 1-2 matches, and within those we can avoid allocating
+                /// the vast majority of Regex objects and return a cached result.
                 /// </summary>
                 private static OneOrMultipleMetadataMatches GetQuotedExpressionMatches(string quotedExpressionFunction, IElementLocation elementLocation)
                 {
@@ -2926,59 +2925,49 @@ namespace Microsoft.Build.Evaluation
 
                     if (!match.Success)
                     {
+                       // No matches - the caller will use the original string.
                         return new OneOrMultipleMetadataMatches();
-                    }
-                    else if (s_itemSpecModifiers.TryGetValue(match.Value, out cachedName))
-                    {
-                        // e.g. This is likely an interpolated string, e.g. NETCOREAPP%(Identity)_OR_GREATER
-                        return new OneOrMultipleMetadataMatches(quotedExpressionFunction, match, cachedName);
                     }
 
                     // From here will either return:
-                    // 1. A single match.
+                    // 1. A single match, which may be offset within the input string..
                     // 2. A list of multiple matches.
-                    GroupCollection groupCollection = match.Groups;
-                    string name = groupCollection[RegularExpressions.NameGroup].Value;
-
-                    ProjectErrorUtilities.VerifyThrowInvalidProject(groupCollection[RegularExpressions.ItemSpecificationGroup].Length == 0, elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
-
-                    Match firstMatch = match;
-                    match = firstMatch.NextMatch();
-
-                    if (!match.Success)
-                    {
-                        OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, firstMatch, name);
-
-                        if (singleMatch.Type == MetadataMatchType.ExactSingle)
-                        {
-                            // Only cache full string matches.
-                            s_lastParsedQuotedExpression = name;
-                        }
-
-                        return singleMatch;
-                    }
-
-                    // We have multiple matches, so run the full loop.
-                    // e.g. %(Filename)%(Extension)
-                    // This is a very hot path, so we avoid allocating this until after we know there are multiple matches.
-                    List<MetadataMatch> multipleMatches = [new MetadataMatch(firstMatch, name)];
-
+                    List<MetadataMatch> multipleMatches = null;
                     while (match.Success)
                     {
-                        if (s_itemSpecModifiers.TryGetValue(match.Value, out cachedName))
-                        {
-                            multipleMatches.Add(new MetadataMatch(match, cachedName));
-                        }
-                        else
+                        // If true, this is likely an interpolated string, e.g. NETCOREAPP%(Identity)_OR_GREATER
+                        bool isItemSpecModifier = s_itemSpecModifiers.TryGetValue(match.Value, out string name);
+                        if (!isItemSpecModifier)
                         {
                             // Here is the worst case path which we've hopefully avoided at the point.
-                            groupCollection = match.Groups;
+                            GroupCollection groupCollection = match.Groups;
                             name = groupCollection[RegularExpressions.NameGroup].Value;
                             ProjectErrorUtilities.VerifyThrowInvalidProject(groupCollection[RegularExpressions.ItemSpecificationGroup].Length == 0, elementLocation, "QualifiedMetadataInTransformNotAllowed", match.Value, name);
-                            multipleMatches.Add(new MetadataMatch(match, name));
                         }
 
-                        match = match.NextMatch();
+                        Match nextMatch = match.NextMatch();
+
+                        // If we only have a single match, return before allocating the list.
+                        bool isSingleMatch = multipleMatches == null && !nextMatch.Success;
+                        if (isSingleMatch)
+                        {
+                            OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, match, name);
+
+                            // Only cache full string matches - skip known modifiers since they are permenantly cached.
+                            if (singleMatch.Type == MetadataMatchType.ExactSingle && !isItemSpecModifier)
+                            {
+                                s_lastParsedQuotedExpression = name;
+                            }
+
+                            return singleMatch;
+                        }
+
+                        // We have multiple matches, so run the full loop.
+                        // e.g. %(Filename)%(Extension)
+                        // This is a very hot path, so we avoid allocating this until after we know there are multiple matches.
+                        multipleMatches ??= [];
+                        multipleMatches.Add(new MetadataMatch(match, name));
+                        match = nextMatch;
                     }
 
                     return new OneOrMultipleMetadataMatches(multipleMatches);
