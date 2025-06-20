@@ -102,7 +102,15 @@ namespace Microsoft.Build.Execution
             {
                 lock (_result)
                 {
-                    RetrieveItemsFromCache();
+                    if (_items == null)
+                    {
+                        string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
+                        using Stream stream = File.OpenRead(cacheFile);
+                        using ITranslator resultCacheTranslator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream);
+
+                        TranslateItems(resultCacheTranslator);
+                        _cacheInfo = new CacheInfo();
+                    }
 
                     return _items;
                 }
@@ -210,7 +218,16 @@ namespace Microsoft.Build.Execution
                 {
                     // Should we have cached these items but now want to send them to another node, we need to
                     // ensure they are loaded before doing so.
-                    RetrieveItemsFromCache();
+                    if (_items == null)
+                    {
+                        string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
+                        using Stream stream = File.OpenRead(cacheFile);
+                        using ITranslator resultCacheTranslator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream);
+
+                        TranslateItems(resultCacheTranslator);
+                        _cacheInfo = new CacheInfo();
+                    }
+
                     InternalTranslate(translator);
                 }
             }
@@ -299,25 +316,6 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _afterTargetsHaveFailed);
             translator.TranslateOptionalBuildEventContext(ref _originalBuildEventContext);
             TranslateItems(translator);
-        }
-
-        /// <summary>
-        /// Retrieve the items from the cache.
-        /// </summary>
-        private void RetrieveItemsFromCache()
-        {
-            lock (_result)
-            {
-                if (_items == null)
-                {
-                    string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
-                    using Stream stream = File.OpenRead(cacheFile);
-                    using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream);
-
-                    TranslateItems(translator);
-                    _cacheInfo = new CacheInfo();
-                }
-            }
         }
 
         private void TranslateItems(ITranslator translator)
