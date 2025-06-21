@@ -2838,8 +2838,8 @@
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
-        <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="translated">属性の型が不明なため、パラメーター "{0}" の型を推測できませんでした。値は文字列として扱われます。</target>
+        <source>Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</source>
+        <target state="new">Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
