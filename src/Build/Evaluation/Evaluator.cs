@@ -1879,12 +1879,51 @@ namespace Microsoft.Build.Evaluation
                     projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
 
+                if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+                {
+                    foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                    {
+                        SetSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                    }
+                }
+
                 projects = projectList;
             }
             else
             {
                 ExpandAndLoadImportsFromUnescapedImportExpression(directoryOfImportingFile, importElement, project,
                     throwOnFileNotExistsError: true, out projects);
+            }
+        }
+
+        private void SetSdkResolvedEnvironmentVariable(string name, string value)
+        {
+            // If the property has already been set as an environment variable, we do not overwrite it.
+            if (_data.EnvironmentVariablePropertiesDictionary.Contains(name))
+            {
+                // TODO: Log a warning that the environment variable is already set?
+                // _evaluationLoggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
+                return;
+            }
+            // If another SDK already set it, we do not overwrite it.
+            else if (_data.SdkResolvedEnvironmentVariablePropertiesDictionary.Contains(name))
+            {
+                // TODO: Log a warning that the environment variable is already set?
+                // _evaluationLoggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
+                return;
+            }
+
+            SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
+
+            _data.SdkResolvedEnvironmentVariablePropertiesDictionary.Set(property);
+
+            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
+            _data.EnvironmentVariablePropertiesDictionary.Set(property);
+
+            // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
+            if (_data.GetProperty(name) is null)
+            {
+                _data.SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _evaluationLoggingContext, isEnvironmentVariable: true);
             }
         }
 

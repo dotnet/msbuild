@@ -4265,6 +4265,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal MultiDictionary<string, ProjectItem> ItemsByEvaluatedIncludeCache { get; private set; }
 
+
+            public PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary { get; private set; }
+
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
@@ -4285,6 +4288,7 @@ namespace Microsoft.Build.Evaluation
                 AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 AllEvaluatedItems = new List<ProjectItem>();
                 EvaluatedItemElements = new List<ProjectItemElement>();
+                SdkResolvedEnvironmentVariablePropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>();
                 EvaluationId = BuildEventContext.InvalidEvaluationId;
 
                 _globalPropertiesToTreatAsLocal?.Clear();

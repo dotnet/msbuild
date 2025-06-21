@@ -155,6 +155,7 @@ namespace Microsoft.Build.Evaluation
         public IItemDictionary<I> Items => _wrapped.Items;
         public List<ProjectItemElement> EvaluatedItemElements => _wrapped.EvaluatedItemElements;
         public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrapped.EnvironmentVariablePropertiesDictionary;
+        public PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary => _wrapped.SdkResolvedEnvironmentVariablePropertiesDictionary;
         public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext) => _wrapped.InitializeForEvaluation(toolsetProvider, evaluationContext, loggingContext);
         public void FinishEvaluation() => _wrapped.FinishEvaluation();
         public void AddItem(I item) => _wrapped.AddItem(item);
@@ -459,7 +460,8 @@ namespace Microsoft.Build.Evaluation
                         location.File,
                         location.Line,
                         location.Column,
-                        message: null) { BuildEventContext = loggingContext.BuildEventContext };
+                        message: null)
+                    { BuildEventContext = loggingContext.BuildEventContext };
 
                     loggingContext.LogBuildEvent(args);
                 }
@@ -478,7 +480,8 @@ namespace Microsoft.Build.Evaluation
                             location.File,
                             location.Line,
                             location.Column,
-                            message: null) { BuildEventContext = loggingContext.BuildEventContext, };
+                            message: null)
+                        { BuildEventContext = loggingContext.BuildEventContext, };
 
                         loggingContext.LogBuildEvent(args);
                     }

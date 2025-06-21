@@ -1122,6 +1122,15 @@ namespace Microsoft.Build.BackEnd
                         RequestEntry.Request.BuildRequestDataFlags,
                         RequestEntry.Request.SubmissionId,
                         _nodeLoggingContext.BuildEventContext.NodeId);
+
+                    if (((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)_requestEntry.RequestConfiguration.Project)
+                        .SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
+                    {
+                        foreach (var propertyInstance in environmentProperties)
+                        {
+                            Environment.SetEnvironmentVariable(propertyInstance.Name, propertyInstance.EvaluatedValue, EnvironmentVariableTarget.Process);
+                        }
+                    }
                 }
             }
             catch
