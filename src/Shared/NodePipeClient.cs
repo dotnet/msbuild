@@ -74,10 +74,10 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private void PerformHandshake(int timeout)
         {
-            for (int i = 0; i < HandshakeComponents.Length; i++)
+            foreach (var component in HandshakeComponents.EnumerateComponents())
             {
-                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", i, HandshakeComponents[i], PipeName);
-                _pipeClient.WriteIntForHandshake(HandshakeComponents[i]);
+                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", component.Key, component.Value, PipeName);
+                _pipeClient.WriteIntForHandshake(component.Value);
             }
 
             // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
