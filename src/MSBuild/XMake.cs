@@ -26,7 +26,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
@@ -1024,7 +1024,8 @@ namespace Microsoft.Build.CommandLine
                     exitType = ExitType.InitializationError;
                 }
             }
-            catch (ProjectCacheException e)
+            // TODO PC
+            catch (ProjectCacheException e) // or Experimental.ProjectCache.ProjectCacheException
             {
                 Console.WriteLine($"MSBUILD : error {e.ErrorCode}: {e.Message}");
 
@@ -3038,7 +3039,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Check for environment variables that indicate automated environments
-            string[] automatedEnvironmentVariables = 
+            string[] automatedEnvironmentVariables =
             {
                 "COPILOT_API_URL",    // GitHub Copilot
                 "BUILD_ID",           // Jenkins, Google Cloud Build

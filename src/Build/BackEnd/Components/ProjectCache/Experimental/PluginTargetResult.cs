@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     ///     A cache hit can use this to instruct MSBuild to construct a BuildResult with the target result specified in this
     ///     type.
     /// </summary>
+    [System.Obsolete("This struct was moved to Microsoft.Build.ProjectCache namespace")]
     public readonly struct PluginTargetResult
     {
         public string TargetName { get; }

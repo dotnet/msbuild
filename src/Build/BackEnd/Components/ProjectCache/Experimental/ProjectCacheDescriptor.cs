@@ -3,22 +3,19 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
+    [System.Obsolete("This class was moved to Microsoft.Build.ProjectCache namespace")]
     public class ProjectCacheDescriptor
     {
         private ProjectCacheDescriptor(
             string? pluginAssemblyPath,
             IReadOnlyDictionary<string, string>? pluginSettings,
-            ProjectCachePluginBase? pluginInstance,
-#pragma warning disable CS0618 // Type or member is obsolete
-            Experimental.ProjectCache.ProjectCachePluginBase? experimentalPluginInstance = null)
-#pragma warning restore CS0618 // Type or member is obsolete
+            ProjectCachePluginBase? pluginInstance)
         {
             PluginAssemblyPath = pluginAssemblyPath;
             PluginSettings = pluginSettings ?? new Dictionary<string, string>(0);
             PluginInstance = pluginInstance;
-            ExperimentalPluginInstance = experimentalPluginInstance;
         }
 
         /// <summary>
@@ -30,27 +27,10 @@ namespace Microsoft.Build.ProjectCache
 
         public ProjectCachePluginBase? PluginInstance { get; }
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        internal Experimental.ProjectCache.ProjectCachePluginBase? ExperimentalPluginInstance { get; }
-#pragma warning restore CS0618 // Type or member is obsolete
-
         public static ProjectCacheDescriptor FromAssemblyPath(string pluginAssemblyPath, IReadOnlyDictionary<string, string>? pluginSettings = null)
             => new ProjectCacheDescriptor(pluginAssemblyPath, pluginSettings, pluginInstance: null);
 
         public static ProjectCacheDescriptor FromInstance(ProjectCachePluginBase pluginInstance, IReadOnlyDictionary<string, string>? pluginSettings = null)
             => new ProjectCacheDescriptor(pluginAssemblyPath: null, pluginSettings, pluginInstance);
-
-        internal static ProjectCacheDescriptor FromExperimentalInstance(
-#pragma warning disable CS0618 // Type or member is obsolete
-            Experimental.ProjectCache.ProjectCachePluginBase experimentalPluginInstance,
-#pragma warning restore CS0618 // Type or member is obsolete
-            IReadOnlyDictionary<string, string>? pluginSettings = null)
-        {
-            return new ProjectCacheDescriptor(
-                pluginAssemblyPath: null,
-                pluginSettings,
-                pluginInstance: null,
-                experimentalPluginInstance);
-        }
     }
 }
