@@ -1024,13 +1024,17 @@ namespace Microsoft.Build.CommandLine
                     exitType = ExitType.InitializationError;
                 }
             }
-            // TODO PC
-            catch (ProjectCacheException e) // or Experimental.ProjectCache.ProjectCacheException
+#pragma warning disable CS0618 // Experimental.ProjectCache.ProjectCacheException is obsolete, but we need to support both namespaces for now
+            catch (Exception e) when (e is ProjectCacheException || e is Experimental.ProjectCache.ProjectCacheException)
             {
-                Console.WriteLine($"MSBUILD : error {e.ErrorCode}: {e.Message}");
+
+                ProjectCacheException pce = e as ProjectCacheException;
+                Experimental.ProjectCache.ProjectCacheException exppce = e as Experimental.ProjectCache.ProjectCacheException;
+
+                Console.WriteLine($"MSBUILD : error {pce?.ErrorCode ?? exppce?.ErrorCode}: {e.Message}");
 
 #if DEBUG
-                if (!e.HasBeenLoggedByProjectCache && e.InnerException != null)
+                if (!(pce?.HasBeenLoggedByProjectCache ?? exppce.HasBeenLoggedByProjectCache) && e.InnerException != null)
                 {
                     Console.WriteLine("This is an unhandled exception from a project cache -- PLEASE OPEN A BUG AGAINST THE PROJECT CACHE OWNER.");
                 }
@@ -1043,6 +1047,7 @@ namespace Microsoft.Build.CommandLine
 
                 exitType = ExitType.ProjectCacheFailure;
             }
+#pragma warning restore CS0618 // Type is obsolete
             catch (BuildAbortedException e)
             {
                 Console.WriteLine(
