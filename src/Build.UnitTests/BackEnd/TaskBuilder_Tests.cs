@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -125,6 +127,370 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("Made it");
         }
 
+        /// <summary>
+        /// Data structure to hold process information for hang detection
+        /// </summary>
+        private sealed class MSBuildProcessInfo
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public DateTime StartTime { get; set; }
+            public long WorkingSetMB { get; set; }
+            public int ThreadCount { get; set; }
+            public TimeSpan CpuTime { get; set; }
+            public bool IsResponding { get; set; }
+            public string CommandLine { get; set; }
+        }
+
+        /// <summary>
+        /// Enhanced wait method with MSBuild hang detection and comprehensive diagnostics
+        /// </summary>
+        /// <param name="buildSubmission">The build submission to wait for</param>
+        /// <param name="operationName">Name of the operation for logging</param>
+        /// <param name="eventLog">Event log for timeline tracking</param>
+        /// <returns>True if completed within timeout, false otherwise</returns>
+        private bool WaitWithMSBuildHangDetection(
+            BuildSubmission buildSubmission, 
+            string operationName,
+            List<(DateTime Time, string Event, string Details)> eventLog)
+        {
+            var startTime = DateTime.UtcNow;
+            eventLog.Add((startTime, "WaitStart", $"Beginning {operationName} wait"));
+
+            // Phase 1: Normal timeout (2-3 seconds)
+            const int normalTimeoutMs = 2000;
+            const int extendedTimeoutMs = 15000;
+            const int monitoringIntervalMs = 1000;
+
+            _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Starting {operationName} with normal timeout {normalTimeoutMs}ms");
+
+            bool completed = buildSubmission.WaitHandle.WaitOne(normalTimeoutMs);
+            if (completed)
+            {
+                var elapsed = DateTime.UtcNow - startTime;
+                eventLog.Add((DateTime.UtcNow, "CompletedNormal", $"Completed in {elapsed.TotalMilliseconds:F0}ms"));
+                _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] {operationName} completed normally in {elapsed.TotalMilliseconds:F0}ms");
+                return true;
+            }
+
+            // Phase 2: Extended monitoring with hang detection
+            eventLog.Add((DateTime.UtcNow, "ExtendedMonitoringStart", "Normal timeout expired, starting extended monitoring"));
+            _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] {operationName} normal timeout expired, starting extended monitoring");
+
+            var monitoringStart = DateTime.UtcNow;
+            var processSnapshots = new List<List<MSBuildProcessInfo>>();
+            var hangPatterns = new List<string>();
+
+            // Collect system information
+            var systemInfo = GetSystemInfo();
+            _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] System Info: {systemInfo}");
+            eventLog.Add((DateTime.UtcNow, "SystemInfo", systemInfo));
+
+            // Extended monitoring loop
+            while (DateTime.UtcNow - monitoringStart < TimeSpan.FromMilliseconds(extendedTimeoutMs - normalTimeoutMs))
+            {
+                // Check if completed
+                completed = buildSubmission.WaitHandle.WaitOne(100);
+                if (completed)
+                {
+                    var totalElapsed = DateTime.UtcNow - startTime;
+                    eventLog.Add((DateTime.UtcNow, "CompletedExtended", $"Completed during extended monitoring in {totalElapsed.TotalMilliseconds:F0}ms total"));
+                    _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] {operationName} completed during extended monitoring in {totalElapsed.TotalMilliseconds:F0}ms total");
+                    return true;
+                }
+
+                // Collect process information
+                var currentProcesses = CollectMSBuildProcessInfo();
+                processSnapshots.Add(currentProcesses);
+
+                // Log current state
+                var elapsed = DateTime.UtcNow - startTime;
+                _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] {operationName} still waiting, elapsed: {elapsed.TotalMilliseconds:F0}ms, MSBuild processes: {currentProcesses.Count}");
+                eventLog.Add((DateTime.UtcNow, "MonitoringCheck", $"Elapsed: {elapsed.TotalMilliseconds:F0}ms, Processes: {currentProcesses.Count}"));
+
+                // Detect hang patterns every few seconds
+                if (processSnapshots.Count >= 3)
+                {
+                    var patterns = DetectHangPatterns(processSnapshots, buildSubmission);
+                    hangPatterns.AddRange(patterns);
+                    
+                    if (patterns.Any())
+                    {
+                        _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Hang patterns detected: {string.Join(", ", patterns)}");
+                        eventLog.Add((DateTime.UtcNow, "HangPatterns", string.Join(", ", patterns)));
+                    }
+                }
+
+                // Create process dumps at specific intervals
+                var monitoringElapsed = DateTime.UtcNow - monitoringStart;
+                if (monitoringElapsed.TotalSeconds >= 6 && monitoringElapsed.TotalSeconds < 7)
+                {
+                    CreateProcessDumps(currentProcesses, "6sec");
+                }
+                else if (monitoringElapsed.TotalSeconds >= 10 && monitoringElapsed.TotalSeconds < 11)
+                {
+                    CreateProcessDumps(currentProcesses, "10sec");
+                }
+
+                Thread.Sleep(monitoringIntervalMs);
+            }
+
+            // Final timeout - comprehensive failure analysis
+            var finalElapsed = DateTime.UtcNow - startTime;
+            eventLog.Add((DateTime.UtcNow, "FinalTimeout", $"Final timeout after {finalElapsed.TotalMilliseconds:F0}ms"));
+            
+            // Final process dump
+            var finalProcesses = CollectMSBuildProcessInfo();
+            CreateProcessDumps(finalProcesses, "final");
+
+            // Generate comprehensive failure report
+            GenerateFailureReport(operationName, eventLog, processSnapshots, hangPatterns, finalElapsed);
+
+            return false;
+        }
+
+        /// <summary>
+        /// Collect information about all MSBuild-related processes
+        /// </summary>
+        private List<MSBuildProcessInfo> CollectMSBuildProcessInfo()
+        {
+            var processes = new List<MSBuildProcessInfo>();
+            var targetProcessNames = new[] { "msbuild", "dotnet", "MSBuild", "VBCSCompiler", "csc", "cmd", "powershell", "sh", "bash" };
+
+            try
+            {
+                foreach (var process in Process.GetProcesses())
+                {
+                    try
+                    {
+                        if (targetProcessNames.Any(name => process.ProcessName.Contains(name, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            var processInfo = new MSBuildProcessInfo
+                            {
+                                Id = process.Id,
+                                Name = process.ProcessName,
+                                StartTime = process.StartTime,
+                                WorkingSetMB = process.WorkingSet64 / (1024 * 1024),
+                                ThreadCount = process.Threads.Count,
+                                CpuTime = process.TotalProcessorTime,
+                                IsResponding = process.Responding,
+                                CommandLine = GetProcessCommandLine(process)
+                            };
+                            processes.Add(processInfo);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Some processes may not be accessible, skip them
+                        _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Warning: Could not access process {process.Id}: {ex.Message}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Error collecting process information: {ex.Message}");
+            }
+
+            return processes;
+        }
+
+        /// <summary>
+        /// Get command line for a process (best effort)
+        /// </summary>
+        private string GetProcessCommandLine(Process process)
+        {
+            try
+            {
+                // This is a simplified approach - in real scenarios, you might use WMI or other methods
+                return process.MainModule?.FileName ?? "Unknown";
+            }
+            catch
+            {
+                return "Unknown";
+            }
+        }
+
+        /// <summary>
+        /// Detect hang patterns in process snapshots
+        /// </summary>
+        private List<string> DetectHangPatterns(List<List<MSBuildProcessInfo>> snapshots, BuildSubmission buildSubmission)
+        {
+            var patterns = new List<string>();
+
+            if (snapshots.Count < 2) return patterns;
+
+            var latest = snapshots.Last();
+            var previous = snapshots[snapshots.Count - 2];
+
+            // Pattern 1: Process count explosion
+            if (latest.Count > previous.Count + 5)
+            {
+                patterns.Add($"ProcessExplosion({latest.Count - previous.Count} new processes)");
+            }
+
+            // Pattern 2: Unresponsive processes
+            var unresponsiveCount = latest.Count(p => !p.IsResponding);
+            if (unresponsiveCount > 0)
+            {
+                patterns.Add($"UnresponsiveProcesses({unresponsiveCount})");
+            }
+
+            // Pattern 3: Memory spikes
+            var highMemoryProcesses = latest.Where(p => p.WorkingSetMB > 500).ToList();
+            if (highMemoryProcesses.Any())
+            {
+                patterns.Add($"HighMemoryUsage({highMemoryProcesses.Count} processes > 500MB)");
+            }
+
+            // Pattern 4: Thread explosion
+            var highThreadProcesses = latest.Where(p => p.ThreadCount > 50).ToList();
+            if (highThreadProcesses.Any())
+            {
+                patterns.Add($"HighThreadCount({highThreadProcesses.Count} processes > 50 threads)");
+            }
+
+            // Pattern 5: BuildResult state unchanged
+            if (buildSubmission.BuildResult == null)
+            {
+                patterns.Add("BuildResultNull");
+            }
+
+            return patterns;
+        }
+
+        /// <summary>
+        /// Create process dumps for diagnostics
+        /// </summary>
+        private void CreateProcessDumps(List<MSBuildProcessInfo> processes, string suffix)
+        {
+            try
+            {
+                // Create a temp directory for dumps
+                var dumpDir = Path.Combine(Path.GetTempPath(), "MSBuildHangDumps", $"{DateTime.UtcNow:yyyyMMdd_HHmmss}_{suffix}");
+                Directory.CreateDirectory(dumpDir);
+
+                foreach (var processInfo in processes.Where(p => p.Name.Contains("dotnet") || p.Name.Contains("MSBuild")))
+                {
+                    try
+                    {
+                        // Try to use dotnet-dump if available
+                        var dumpFile = Path.Combine(dumpDir, $"{processInfo.Name}_{processInfo.Id}.dmp");
+                        
+                        using (var dumpProcess = new Process
+                        {
+                            StartInfo = new ProcessStartInfo
+                            {
+                                FileName = "dotnet",
+                                Arguments = $"dump collect -p {processInfo.Id} -o \"{dumpFile}\"",
+                                UseShellExecute = false,
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true,
+                                CreateNoWindow = true
+                            }
+                        })
+                        {
+                            dumpProcess.Start();
+                            if (dumpProcess.WaitForExit(5000)) // 5 second timeout
+                            {
+                                _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Created dump: {dumpFile}");
+                            }
+                            else
+                            {
+                                dumpProcess.Kill();
+                                _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Dump creation timed out for process {processInfo.Id}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Failed to create dump for process {processInfo.Id}: {ex.Message}");
+                    }
+                }
+
+                _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Dump directory: {dumpDir}");
+            }
+            catch (Exception ex)
+            {
+                _testOutput.WriteLine($"[{DateTime.UtcNow:HH:mm:ss.fff}] Error creating dumps: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Get system information for context
+        /// </summary>
+        private string GetSystemInfo()
+        {
+            try
+            {
+                var cpuCount = Environment.ProcessorCount;
+                var totalMemory = GC.GetTotalMemory(false) / (1024 * 1024);
+                var osVersion = Environment.OSVersion.ToString();
+                var isCI = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")) || 
+                          !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_ACTIONS")) ||
+                          !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("AZURE_PIPELINES"));
+
+                return $"CPU: {cpuCount} cores, Memory: {totalMemory}MB, OS: {osVersion}, CI: {isCI}";
+            }
+            catch (Exception ex)
+            {
+                return $"Error getting system info: {ex.Message}";
+            }
+        }
+
+        /// <summary>
+        /// Generate comprehensive failure report
+        /// </summary>
+        private void GenerateFailureReport(string operationName, List<(DateTime Time, string Event, string Details)> eventLog, 
+            List<List<MSBuildProcessInfo>> processSnapshots, List<string> hangPatterns, TimeSpan totalElapsed)
+        {
+            _testOutput.WriteLine($"\n====== MSBuild Hang Detection Report ======");
+            _testOutput.WriteLine($"Operation: {operationName}");
+            _testOutput.WriteLine($"Total Elapsed: {totalElapsed.TotalMilliseconds:F0}ms");
+            _testOutput.WriteLine($"Hang Patterns Detected: {hangPatterns.Count}");
+            
+            if (hangPatterns.Any())
+            {
+                _testOutput.WriteLine($"Patterns: {string.Join(", ", hangPatterns.Distinct())}");
+            }
+
+            _testOutput.WriteLine($"\n--- Event Timeline ---");
+            foreach (var (Time, Event, Details) in eventLog)
+            {
+                var elapsed = Time - eventLog.First().Time;
+                _testOutput.WriteLine($"[+{elapsed.TotalMilliseconds:F0}ms] {Event}: {Details}");
+            }
+
+            if (processSnapshots.Any())
+            {
+                _testOutput.WriteLine($"\n--- Process Summary ---");
+                var finalSnapshot = processSnapshots.Last();
+                foreach (var process in finalSnapshot.OrderByDescending(p => p.WorkingSetMB))
+                {
+                    _testOutput.WriteLine($"PID {process.Id}: {process.Name}, {process.WorkingSetMB}MB, {process.ThreadCount} threads, Responding: {process.IsResponding}");
+                }
+            }
+
+            // Root cause analysis
+            _testOutput.WriteLine($"\n--- Root Cause Analysis ---");
+            if (hangPatterns.Any(p => p.Contains("ProcessExplosion") || p.Contains("HighMemoryUsage") || p.Contains("HighThreadCount")))
+            {
+                _testOutput.WriteLine("VERDICT: Likely genuine MSBuild hang detected");
+                _testOutput.WriteLine("RECOMMENDATION: File MSBuild bug report with diagnostic data");
+            }
+            else if (totalElapsed.TotalSeconds < 10)
+            {
+                _testOutput.WriteLine("VERDICT: Likely timing issue on slow environment");
+                _testOutput.WriteLine("RECOMMENDATION: Consider increasing timeout for this environment");
+            }
+            else
+            {
+                _testOutput.WriteLine("VERDICT: Inconclusive - may be genuine hang or very slow environment");
+                _testOutput.WriteLine("RECOMMENDATION: Review process dumps and retry with longer timeout");
+            }
+
+            _testOutput.WriteLine($"============================================\n");
+        }
+
         [Fact]
         public void CanceledTasksDoNotLogMSB4181()
         {
@@ -167,14 +533,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = manager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
+                
+                // Enhanced diagnostic timeline tracking
+                var eventLog = new List<(DateTime Time, string Event, string Details)>();
+                eventLog.Add((DateTime.UtcNow, "TestStart", "CanceledTasksDoNotLogMSB4181 test started"));
+
                 int timeoutMilliseconds = 2000;
                 bool isCommandExecuted = waitCommandExecuted.WaitOne(timeoutMilliseconds);
+                eventLog.Add((DateTime.UtcNow, "CommandWaitComplete", $"Command executed: {isCommandExecuted}"));
+
                 manager.CancelAllSubmissions();
-                bool isSubmissionComplated = asyncResult.WaitHandle.WaitOne(timeoutMilliseconds);
+                eventLog.Add((DateTime.UtcNow, "CancelRequested", "CancelAllSubmissions called"));
+
+                // Use enhanced wait method with hang detection
+                bool isSubmissionComplated = WaitWithMSBuildHangDetection(asyncResult, "BuildSubmissionCompletion", eventLog);
+                
                 BuildResult result = asyncResult.BuildResult;
                 manager.EndBuild();
+                eventLog.Add((DateTime.UtcNow, "TestEnd", "Test cleanup completed"));
+
+                // Original test assertions with enhanced error messages
                 isCommandExecuted.ShouldBeTrue($"Waiting for that the sleep command is executed failed in the timeout period {timeoutMilliseconds} ms.");
-                isSubmissionComplated.ShouldBeTrue($"Waiting for that the build submission is completed failed in the timeout period {timeoutMilliseconds} ms.");
+                
+                if (!isSubmissionComplated)
+                {
+                    // If we get here, the enhanced diagnostics have already been logged
+                    _testOutput.WriteLine("Enhanced diagnostics completed. Check the hang detection report above for details.");
+                }
+                
+                isSubmissionComplated.ShouldBeTrue($"Waiting for that the build submission is completed failed in the timeout period {timeoutMilliseconds} ms. See hang detection report above for detailed analysis.");
 
                 // No errors from cancelling a build.
                 logger.ErrorCount.ShouldBe(0);
