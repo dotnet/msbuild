@@ -18,7 +18,7 @@ namespace Microsoft.NET.StringTools
         {
             _weakHandlesByHashCode = new Dictionary<int, StringWeakHandle>(_initialCapacity);
 
-            // Unused since we need to take a coarse lock anyways - here becasue we share a partial class.
+            // Unused since we need to take a coarse lock anyways - here because we share a partial class.
             _stringsByHashCode = new Dictionary<int, StringWeakHandle>();
         }
 
