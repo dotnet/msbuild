@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     try
                     {
-                        if (targetProcessNames.Any(name => process.ProcessName.Contains(name, StringComparison.OrdinalIgnoreCase)))
+                        if (targetProcessNames.Any(name => process.ProcessName.IndexOf(name, StringComparison.OrdinalIgnoreCase) >= 0))
                         {
                             var processInfo = new MSBuildProcessInfo
                             {
@@ -317,7 +317,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             var patterns = new List<string>();
 
-            if (snapshots.Count < 2) return patterns;
+            if (snapshots.Count < 2) 
+            {
+                return patterns;
+            }
 
             var latest = snapshots.Last();
             var previous = snapshots[snapshots.Count - 2];
