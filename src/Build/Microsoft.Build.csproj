@@ -151,7 +151,6 @@
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\Experimental\*.cs" />
-    <Compile Include="BackEnd\Components\ProjectCache\Experimental\Wrappers\*.cs" />
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
     <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\SerializationContractInitializer.cs" />
