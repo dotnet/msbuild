@@ -43,22 +43,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetTemporaryTaskAssemblyPath_WithCustomParameters_ShouldUseCustomValues()
-        {
-            // Arrange
-            string fileName = "custom_task";
-            string extension = ".exe";
-
-            // Act
-            string assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath(fileName, extension);
-
-            // Assert
-            assemblyPath.ShouldNotBeNull();
-            assemblyPath.ShouldEndWith(extension);
-            Path.GetFileName(assemblyPath).ShouldContain(fileName);
-        }
-
-        [Fact]
         public void CreateLoadManifest_ShouldCreateFileWithDirectories()
         {
             // Arrange

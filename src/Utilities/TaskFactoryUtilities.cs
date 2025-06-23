@@ -45,13 +45,11 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Gets a temporary file path for an inline task assembly in the process-specific directory.
         /// </summary>
-        /// <param name="fileName">The base filename (without extension) to use. If null, a random name will be generated.</param>
-        /// <param name="extension">The file extension to use (e.g., ".dll").</param>
         /// <returns>The full path to the temporary file.</returns>
-        public static string GetTemporaryTaskAssemblyPath(string? fileName = null, string extension = ".dll")
+        public static string GetTemporaryTaskAssemblyPath()
         {
             string taskDir = CreateProcessSpecificTaskDirectory();
-            return FileUtilities.GetTemporaryFile(taskDir, null, fileName ?? "inline_task" + extension, false);
+            return FileUtilities.GetTemporaryFile(taskDir, null, "inline_task.dll", false);
         }
 
         /// <summary>
