@@ -544,8 +544,6 @@ namespace Microsoft.Build.Tasks
                 references = references.Union(value);
             }
 
-            List<string> directoriesToAddToAppDomain = new();
-
             // Loop through the user specified references as well as the default references
             foreach (string reference in references)
             {
@@ -554,7 +552,6 @@ namespace Microsoft.Build.Tasks
                 {
                     // The path could be relative like ..\Assembly.dll so we need to get the full path
                     string fullPath = Path.GetFullPath(reference);
-                    directoriesToAddToAppDomain.Add(Path.GetDirectoryName(fullPath));
                     resolvedAssemblyReferences.Add(fullPath);
                     continue;
                 }
@@ -587,43 +584,20 @@ namespace Microsoft.Build.Tasks
             // Transform the list of resolved assemblies to TaskItems if they were all resolved
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
-            handlerAddedToAppDomain = (_, eventArgs) => TryLoadAssembly(directoriesToAddToAppDomain, new AssemblyName(eventArgs.Name));
+            // Extract directories from resolved assemblies for assembly resolution and manifest creation
+            var directoriesToAddToAppDomain = TaskFactoryUtilities.ExtractUniqueDirectoriesFromAssemblyPaths(resolvedAssemblyReferences);
+
+            handlerAddedToAppDomain = TaskFactoryUtilities.CreateAssemblyResolver(directoriesToAddToAppDomain);
             AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
 
-            // in case of taskhost we cache the resolution to a file placed next to the task assembly
+            // In case of taskhost we cache the resolution to a file placed next to the task assembly
             // so the taskhost can recreate this tryloadassembly logic
             if (Traits.Instance.ForceTaskFactoryOutOfProc)
             {
-                // simply serialize the directories to a file next to the task assembly
-                string pth = _assemblyPath + ".loadmanifest";
-                File.WriteAllLines(pth, directoriesToAddToAppDomain);
+                TaskFactoryUtilities.CreateLoadManifest(_assemblyPath, directoriesToAddToAppDomain);
             }
 
             return !hasInvalidReference;
-
-            static Assembly TryLoadAssembly(List<string> directories, AssemblyName name)
-            {
-                foreach (string directory in directories)
-                {
-                    string path;
-                    if (!string.IsNullOrEmpty(name.CultureName))
-                    {
-                        path = Path.Combine(directory, name.CultureName, name.Name + ".dll");
-                        if (File.Exists(path))
-                        {
-                            return Assembly.LoadFrom(path);
-                        }
-                    }
-
-                    path = Path.Combine(directory, name.Name + ".dll");
-                    if (File.Exists(path))
-                    {
-                        return Assembly.LoadFrom(path);
-                    }
-                }
-
-                return null;
-            }
         }        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null, bool isOutput = false, bool isRequired = false)
         {
             CodeMemberField field = new CodeMemberField(new CodeTypeReference(type), "_" + name)
@@ -690,14 +664,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            string _taskDir = Path.Combine(
-                FileUtilities.TempFileDirectory,
-                MSBuildConstants.InlineTaskTempDllSubPath,
-                $"pid_{EnvironmentUtilities.CurrentProcessId}");
-
-            Directory.CreateDirectory(_taskDir);
-
-            _assemblyPath = FileUtilities.GetTemporaryFile(_taskDir, null, "inline_task.dll", false);
+            _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
 
             if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
             {
@@ -789,14 +756,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Return the compiled assembly
-                if (Traits.Instance.ForceTaskFactoryOutOfProc)
-                {
-                    assembly = Assembly.LoadFrom(_assemblyPath);
-                }
-                else
-                {
-                    assembly = Assembly.Load(File.ReadAllBytes(_assemblyPath));
-                }
+                assembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath, Traits.Instance.ForceTaskFactoryOutOfProc);
 
                 CompiledAssemblyCache.TryAdd(taskInfo, assembly);
                 return true;
