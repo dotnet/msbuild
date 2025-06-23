@@ -1300,7 +1300,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                FileMatcher.ClearFileEnumerationsCache();
+                FileMatcher.ClearCaches();
             }
         }
 
