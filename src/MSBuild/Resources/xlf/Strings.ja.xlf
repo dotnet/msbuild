@@ -1785,6 +1785,11 @@
         <target state="translated">MSBUILD : error MSB1059: ターゲットを出力できませんでした。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">ビルドは stdout ストリームへの直接アクセスを要求するプロセス (例: 'dotnet test') のコンテキストで実行されるため、ターミナル ロガーは使用されませんでした。</target>
@@ -2194,7 +2199,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
+        <target state="translated">MSBUILD : error MSB1021: Logger {0} のインスタンスを作成できません。{1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

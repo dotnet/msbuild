@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if !TASKHOST
+using System.Collections.Frozen;
+#endif
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
@@ -171,6 +174,22 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), collectionCreator);
         }
+
+#if !TASKHOST
+        public static void TranslateDictionary(
+            this ITranslator translator,
+            ref FrozenDictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            IDictionary<string, string> localDict = dictionary;
+            translator.TranslateDictionary(ref localDict, capacity => new Dictionary<string, string>(capacity, comparer));
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                dictionary = localDict?.ToFrozenDictionary(comparer);
+            }
+        }
+#endif
 
         public static void TranslateHashSet<T>(
             this ITranslator translator,

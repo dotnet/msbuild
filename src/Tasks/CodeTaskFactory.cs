@@ -791,15 +791,15 @@ namespace Microsoft.Build.Tasks
                 // Our code generation is complete, grab the source from the builder ready for compilation
                 string fullCode = codeBuilder.ToString();
 
-                // Embed generated file in the binlog
-                string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
-                _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
-
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
                 {
                     // Invokes compilation.
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
+
+                    // Embed generated file in the binlog
+                    string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
+                    _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
 
                     string outputPath = null;
                     if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)

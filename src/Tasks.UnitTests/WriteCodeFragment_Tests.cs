@@ -1071,7 +1071,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            engine.AssertLogContains("Could not infer the type of parameter \"_Parameter1\" because the attribute type is unknown. The value will be treated as a string.");
+            engine.AssertLogContains("Could not infer the type of parameter \"_Parameter1\" because the attribute type \"System.TheAttributeCannotFound\" is unknown. The value will be treated as a string.");
         }
 
         /// <summary>
