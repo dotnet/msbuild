@@ -105,7 +105,7 @@
 
   <!--
     Roslyn tasks are now in an assembly owned and shipped by Roslyn, see src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Sdk.targets.
-    This is imported by MSBuild outside project context (so it has access only to some properties), and is kept only for compatibility, it is not used in normal scenarios. Avoid changing this.
+    This file is imported by MSBuild outside project context (so it has access only to some properties), and is kept only for compatibility, it is not used in normal scenarios. Avoid changing this.
   -->
   <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.CopyRefAssembly"           AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
   <UsingTask TaskName="Microsoft.CodeAnalysis.BuildTasks.Csc"                       AssemblyFile="$(RoslynTargetsPath)\Microsoft.Build.Tasks.CodeAnalysis.dll" />
