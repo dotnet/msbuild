@@ -138,30 +138,13 @@ namespace Microsoft.Build.ProjectCache
 #pragma warning disable CS0618 // Type or member is obsolete
         internal static CacheResult FromExperimental(Experimental.ProjectCache.CacheResult experimentalResult)
         {
-            CacheResultType resultType;
-            switch (experimentalResult.ResultType)
-            {
-                case Experimental.ProjectCache.CacheResultType.CacheHit:
-                    resultType = CacheResultType.CacheHit;
-                    break;
-                case Experimental.ProjectCache.CacheResultType.CacheMiss:
-                    resultType = CacheResultType.CacheMiss;
-                    break;
-                case Experimental.ProjectCache.CacheResultType.CacheNotApplicable:
-                    resultType = CacheResultType.CacheNotApplicable;
-                    break;
-                case Experimental.ProjectCache.CacheResultType.None:
-                    resultType = CacheResultType.None;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(experimentalResult.ResultType), experimentalResult.ResultType, "Unknown cache result type");
-            }
             if (experimentalResult.Exception != null)
             {
                 return IndicateException(experimentalResult.Exception);
             }
+
             return new CacheResult(
-                    resultType,
+                    (CacheResultType)(int)experimentalResult.ResultType,
                     buildResult: experimentalResult.BuildResult,
                     proxyTargets: ProxyTargets.FromExperimental(experimentalResult.ProxyTargets));
         }

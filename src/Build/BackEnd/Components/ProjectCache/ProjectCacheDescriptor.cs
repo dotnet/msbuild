@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.ProjectCache
@@ -40,7 +41,8 @@ namespace Microsoft.Build.ProjectCache
         public static ProjectCacheDescriptor FromInstance(ProjectCachePluginBase pluginInstance, IReadOnlyDictionary<string, string>? pluginSettings = null)
             => new ProjectCacheDescriptor(pluginAssemblyPath: null, pluginSettings, pluginInstance);
 
-        internal static ProjectCacheDescriptor FromExperimentalInstance(
+        [Obsolete("Microsoft.Build.Experimental.ProjectCachePluginBase was moved to Microsoft.Build.ProjectCache, migrate your plugins and use the new type instead.")]
+        public static ProjectCacheDescriptor FromInstance(
 #pragma warning disable CS0618 // Type or member is obsolete
             Experimental.ProjectCache.ProjectCachePluginBase experimentalPluginInstance,
 #pragma warning restore CS0618 // Type or member is obsolete
