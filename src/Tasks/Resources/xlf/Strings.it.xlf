@@ -2838,8 +2838,8 @@
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
-        <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="translated">Non è stato possibile inferire il tipo di parametro "{0}" perché il tipo di attributo è sconosciuto. Il valore sarà tratto come una stringa.</target>
+        <source>Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</source>
+        <target state="new">Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
@@ -3584,12 +3584,12 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
         <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
-        <target state="new">MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</target>
+        <target state="translated">MSB3944: Livello di compressione '{0}' non supportato. Verrà utilizzato il livello di compressione predefinito.</target>
         <note>{StrBegin="MSB3944: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
         <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
-        <target state="new">MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</target>
+        <target state="translated">MSB3945: Il livello di compressione '{0}' non è supportato nella versione .NET Framework di MSBuild. Verrà utilizzato il livello di compressione predefinito.</target>
         <note>{StrBegin="MSB3945: "}</note>
       </trans-unit>
     </body>

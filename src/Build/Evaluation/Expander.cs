@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -1789,33 +1789,186 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         private static class ItemExpander
         {
+            private static readonly FrozenDictionary<string, ItemTransformFunctions> s_intrinsicItemFunctions = new Dictionary<string, ItemTransformFunctions>(StringComparer.OrdinalIgnoreCase)
+            {
+                { "Count", ItemTransformFunctions.Count },
+                { "Exists", ItemTransformFunctions.Exists },
+                { "Combine", ItemTransformFunctions.Combine },
+                { "GetPathsOfAllDirectoriesAbove", ItemTransformFunctions.GetPathsOfAllDirectoriesAbove },
+                { "DirectoryName", ItemTransformFunctions.DirectoryName },
+                { "Metadata", ItemTransformFunctions.Metadata },
+                { "DistinctWithCase", ItemTransformFunctions.DistinctWithCase },
+                { "Distinct", ItemTransformFunctions.Distinct },
+                { "Reverse", ItemTransformFunctions.Reverse },
+                { "ExpandQuotedExpressionFunction", ItemTransformFunctions.ExpandQuotedExpressionFunction },
+                { "ExecuteStringFunction", ItemTransformFunctions.ExecuteStringFunction },
+                { "ClearMetadata", ItemTransformFunctions.ClearMetadata },
+                { "HasMetadata", ItemTransformFunctions.HasMetadata },
+                { "WithMetadataValue", ItemTransformFunctions.WithMetadataValue },
+                { "WithoutMetadataValue", ItemTransformFunctions.WithoutMetadataValue },
+                { "AnyHaveMetadataValue", ItemTransformFunctions.AnyHaveMetadataValue },
+            }.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+            private enum ItemTransformFunctions
+            {
+                ItemSpecModifierFunction,
+                Count,
+                Exists,
+                Combine,
+                GetPathsOfAllDirectoriesAbove,
+                DirectoryName,
+                Metadata,
+                DistinctWithCase,
+                Distinct,
+                Reverse,
+                ExpandQuotedExpressionFunction,
+                ExecuteStringFunction,
+                ClearMetadata,
+                HasMetadata,
+                WithMetadataValue,
+                WithoutMetadataValue,
+                AnyHaveMetadataValue,
+            }
+
             /// <summary>
             /// Execute the list of transform functions.
             /// </summary>
+            /// <remarks>
+            /// Each captured transform function will be mapped to to a either static method on
+            /// <see cref="IntrinsicItemFunctions{S}"/> or a known item spec modifier which operates on the item path.
+            ///
+            /// For each function, the full list of items will be iteratvely tranformed using the output of the previous.
+            ///
+            /// E.g. given functions f, g, h, the order of operations will look like:
+            /// results = h(g(f(items)))
+            ///
+            /// If no function name is found, we default to <see cref="IntrinsicItemFunctions{S}.ExpandQuotedExpressionFunction"/>.
+            /// </remarks>
             /// <typeparam name="S">class, IItem.</typeparam>
-            internal static IEnumerable<KeyValuePair<string, S>> Transform<S>(Expander<P, I> expander, bool includeNullEntries, Stack<TransformFunction<S>> transformFunctionStack, IEnumerable<KeyValuePair<string, S>> itemsOfType)
+            internal static List<KeyValuePair<string, S>> Transform<S>(
+                    Expander<P, I> expander,
+                    IElementLocation elementLocation,
+                    ExpanderOptions options,
+                    bool includeNullEntries,
+                    List<ExpressionShredder.ItemExpressionCapture> captures,
+                    ICollection<S> itemsOfType,
+                    out bool brokeEarly)
                 where S : class, IItem
             {
-                // If we have transforms on our stack, then we'll execute those first
-                // This effectively runs backwards through the set
-                if (transformFunctionStack.Count > 0)
-                {
-                    TransformFunction<S> function = transformFunctionStack.Pop();
+                // Each transform runs on the full set of transformed items from the previous result.
+                // We can reuse our buffers by just swapping the references after each transform.
+                List<KeyValuePair<string, S>> sourceItems = IntrinsicItemFunctions<S>.GetItemPairs(itemsOfType);
+                List<KeyValuePair<string, S>> transformedItems = new(itemsOfType.Count);
 
-                    foreach (KeyValuePair<string, S> item in Transform(expander, includeNullEntries, transformFunctionStack, function.Execute(expander, includeNullEntries, itemsOfType)))
-                    {
-                        yield return item;
-                    }
-                }
-                else
+                // Create a TransformFunction for each transform in the chain by extracting the relevant information
+                // from the regex parsing results
+                for (int i = 0; i < captures.Count; i++)
                 {
-                    // When we have no more tranforms on the stack, iterate over the items
-                    // that we have to return them
-                    foreach (KeyValuePair<string, S> item in itemsOfType)
+                    ExpressionShredder.ItemExpressionCapture capture = captures[i];
+                    string function = capture.Value;
+                    string functionName = capture.FunctionName;
+                    string argumentsExpression = capture.FunctionArguments;
+
+                    string[] arguments = null;
+
+                    if (functionName == null)
                     {
-                        yield return item;
+                        functionName = "ExpandQuotedExpressionFunction";
+                        arguments = [function];
+                    }
+                    else if (argumentsExpression != null)
+                    {
+                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression.AsMemory());
+                    }
+
+                    ItemTransformFunctions functionType;
+
+                    if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
+                    {
+                        functionType = ItemTransformFunctions.ItemSpecModifierFunction;
+                    }
+                    else if (!s_intrinsicItemFunctions.TryGetValue(functionName, out functionType))
+                    {
+                        functionType = ItemTransformFunctions.ExecuteStringFunction;
+                    }
+
+                    switch (functionType)
+                    {
+                        case ItemTransformFunctions.ItemSpecModifierFunction:
+                            IntrinsicItemFunctions<S>.ItemSpecModifierFunction(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.Count:
+                            IntrinsicItemFunctions<S>.Count(sourceItems, transformedItems);
+                            break;
+                        case ItemTransformFunctions.Exists:
+                            IntrinsicItemFunctions<S>.Exists(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.Combine:
+                            IntrinsicItemFunctions<S>.Combine(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.GetPathsOfAllDirectoriesAbove:
+                            IntrinsicItemFunctions<S>.GetPathsOfAllDirectoriesAbove(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.DirectoryName:
+                            IntrinsicItemFunctions<S>.DirectoryName(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.Metadata:
+                            IntrinsicItemFunctions<S>.Metadata(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.DistinctWithCase:
+                            IntrinsicItemFunctions<S>.DistinctWithCase(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.Distinct:
+                            IntrinsicItemFunctions<S>.Distinct(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.Reverse:
+                            IntrinsicItemFunctions<S>.Reverse(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.ExpandQuotedExpressionFunction:
+                            IntrinsicItemFunctions<S>.ExpandQuotedExpressionFunction(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.ExecuteStringFunction:
+                            IntrinsicItemFunctions<S>.ExecuteStringFunction(expander, elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.ClearMetadata:
+                            IntrinsicItemFunctions<S>.ClearMetadata(elementLocation, includeNullEntries, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.HasMetadata:
+                            IntrinsicItemFunctions<S>.HasMetadata(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.WithMetadataValue:
+                            IntrinsicItemFunctions<S>.WithMetadataValue(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.WithoutMetadataValue:
+                            IntrinsicItemFunctions<S>.WithoutMetadataValue(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        case ItemTransformFunctions.AnyHaveMetadataValue:
+                            IntrinsicItemFunctions<S>.AnyHaveMetadataValue(elementLocation, functionName, sourceItems, arguments, transformedItems);
+                            break;
+                        default:
+                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
+                            break;
+                    }
+
+                    foreach (KeyValuePair<string, S> itemTuple in transformedItems)
+                    {
+                        if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
+                        {
+                            brokeEarly = true;
+                            return transformedItems; // break out early
+                        }
+                    }
+
+                    // If we have another transform, swap the source and transform lists.
+                    if (i < captures.Count - 1)
+                    {
+                        (transformedItems, sourceItems) = (sourceItems, transformedItems);
+                        transformedItems.Clear();
                     }
                 }
+
+                brokeEarly = false;
+                return transformedItems;
             }
 
             /// <summary>
@@ -1932,13 +2085,13 @@ namespace Microsoft.Build.Evaluation
 
                     expandedItemVector = builder.ToString();
 
-                    result = new List<T>(1);
+                    result = Array.Empty<T>();
 
                     if (expandedItemVector.Length > 0)
                     {
                         T newItem = itemFactory.CreateItem(expandedItemVector, elementLocation.File);
 
-                        result.Add(newItem);
+                        result = [newItem];
                     }
 
                     return result;
@@ -1950,6 +2103,11 @@ namespace Microsoft.Build.Evaluation
                 if (brokeEarlyNonEmpty)
                 {
                     return null;
+                }
+
+                if (itemsFromCapture == null || itemsFromCapture.Count == 0)
+                {
+                    return Array.Empty<T>();
                 }
 
                 result = new List<T>(itemsFromCapture.Count);
@@ -2019,56 +2177,56 @@ namespace Microsoft.Build.Evaluation
 
                 isTransformExpression = false;
 
-                var itemsOfType = evaluatedItems.GetItems(expressionCapture.ItemType);
+                ICollection<S> itemsOfType = evaluatedItems.GetItems(expressionCapture.ItemType);
+                List<ExpressionShredder.ItemExpressionCapture> captures = expressionCapture.Captures;
 
                 // If there are no items of the given type, then bail out early
                 if (itemsOfType.Count == 0)
                 {
                     // ... but only if there isn't a function "Count", since that will want to return something (zero) for an empty list
-                    if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
+                    if (captures?.Any(capture => string.Equals(capture.FunctionName, "Count", StringComparison.OrdinalIgnoreCase)) != true)
                     {
                         // ...or a function "AnyHaveMetadataValue", since that will want to return false for an empty list.
-                        if (expressionCapture.Captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
+                        if (captures?.Any(capture => string.Equals(capture.FunctionName, "AnyHaveMetadataValue", StringComparison.OrdinalIgnoreCase)) != true)
                         {
-                            itemsFromCapture = new List<KeyValuePair<string, S>>();
+                            itemsFromCapture = null;
                             return false;
                         }
                     }
                 }
 
-                if (expressionCapture.Captures != null)
+                if (captures != null)
                 {
                     isTransformExpression = true;
                 }
 
-                itemsFromCapture = new List<KeyValuePair<string, S>>(itemsOfType.Count);
-
                 if (!isTransformExpression)
                 {
+                    itemsFromCapture = null;
+
                     // No transform: expression is like @(Compile), so include the item spec without a transform base item
                     foreach (S item in itemsOfType)
                     {
-                        if ((item.EvaluatedIncludeEscaped.Length > 0) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
+                        string evaluatedIncludeEscaped = item.EvaluatedIncludeEscaped;
+                        if ((evaluatedIncludeEscaped.Length > 0) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
                             return true;
                         }
 
-                        itemsFromCapture.Add(new KeyValuePair<string, S>(item.EvaluatedIncludeEscaped, item));
+                        itemsFromCapture ??= new List<KeyValuePair<string, S>>(itemsOfType.Count);
+                        itemsFromCapture.Add(new KeyValuePair<string, S>(evaluatedIncludeEscaped, item));
                     }
                 }
                 else
                 {
-                    Stack<TransformFunction<S>> transformFunctionStack = PrepareTransformStackFromMatch<S>(elementLocation, expressionCapture);
+                    // There's something wrong with the expression, and we ended up with no function names
+                    ProjectErrorUtilities.VerifyThrowInvalidProject(captures.Count > 0, elementLocation, "InvalidFunctionPropertyExpression");
 
-                    // iterate over the tranform chain, creating the final items from its results
-                    foreach (KeyValuePair<string, S> itemTuple in Transform<S>(expander, includeNullEntries, transformFunctionStack, IntrinsicItemFunctions<S>.GetItemPairEnumerable(itemsOfType)))
+                    itemsFromCapture = Transform(expander, elementLocation, options, includeNullEntries, captures, itemsOfType, out bool brokeEarly);
+
+                    if (brokeEarly)
                     {
-                        if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
-                        {
-                            return true; // broke out early; result cannot be trusted
-                        }
-
-                        itemsFromCapture.Add(itemTuple);
+                        return true;
                     }
                 }
 
@@ -2138,49 +2296,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            /// Prepare the stack of transforms that will be executed on a given set of items.
-            /// </summary>
-            /// <typeparam name="S">class, IItem.</typeparam>
-            private static Stack<TransformFunction<S>> PrepareTransformStackFromMatch<S>(IElementLocation elementLocation, ExpressionShredder.ItemExpressionCapture match)
-                where S : class, IItem
-            {
-                // There's something wrong with the expression, and we ended up with no function names
-                ProjectErrorUtilities.VerifyThrowInvalidProject(match.Captures.Count > 0, elementLocation, "InvalidFunctionPropertyExpression");
-
-                Stack<TransformFunction<S>> transformFunctionStack = new Stack<TransformFunction<S>>(match.Captures.Count);
-
-                // Create a TransformFunction for each transform in the chain by extracting the relevant information
-                // from the regex parsing results
-                // Each will be pushed onto a stack in right to left order (i.e. the inner/right most will be on the
-                // bottom of the stack, the outer/left most will be on the top
-                for (int n = match.Captures.Count - 1; n >= 0; n--)
-                {
-                    string function = match.Captures[n].Value;
-                    string functionName = match.Captures[n].FunctionName;
-                    string argumentsExpression = match.Captures[n].FunctionArguments;
-
-                    string[] arguments = null;
-
-                    if (functionName == null)
-                    {
-                        functionName = "ExpandQuotedExpressionFunction";
-                        arguments = [function];
-                    }
-                    else if (argumentsExpression != null)
-                    {
-                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression.AsMemory());
-                    }
-
-                    IntrinsicItemFunctions<S>.ItemTransformFunction transformFunction = IntrinsicItemFunctions<S>.GetItemTransformFunction(elementLocation, functionName, typeof(S));
-
-                    // Push our tranform on to the stack
-                    transformFunctionStack.Push(new TransformFunction<S>(elementLocation, functionName, transformFunction, arguments));
-                }
-
-                return transformFunctionStack;
-            }
-
-            /// <summary>
             /// Expand the match provided into a string, and append that to the provided InternableString.
             /// Returns true if ExpanderOptions.BreakOnNotEmpty was passed, expression was going to be non-empty, and so it broke out early.
             /// </summary>
@@ -2201,6 +2316,12 @@ namespace Microsoft.Build.Evaluation
                 if (brokeEarlyNonEmpty)
                 {
                     return true;
+                }
+
+                if (itemsFromCapture == null)
+                {
+                    // No items to expand.
+                    return false;
                 }
 
                 int startLength = builder.Length;
@@ -2247,81 +2368,15 @@ namespace Microsoft.Build.Evaluation
                 where S : class, IItem
             {
                 /// <summary>
-                /// A cache of previously created item function delegates.
-                /// </summary>
-                private static readonly ConcurrentDictionary<string, ItemTransformFunction> s_transformFunctionDelegateCache = new ConcurrentDictionary<string, ItemTransformFunction>(StringComparer.OrdinalIgnoreCase);
-
-                /// <summary>
-                /// Delegate that represents the signature of all item transformation functions
-                /// This is used to support calling the functions by name.
-                /// </summary>
-                public delegate IEnumerable<KeyValuePair<string, S>> ItemTransformFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments);
-
-                /// <summary>
-                /// Get a delegate to the given item transformation function by supplying the name and the
-                /// Item type that should be used.
-                /// </summary>
-                internal static ItemTransformFunction GetItemTransformFunction(IElementLocation elementLocation, string functionName, Type itemType)
-                {
-                    ItemTransformFunction transformFunction = null;
-                    string qualifiedFunctionName = $"{itemType.FullName}::{functionName}";
-
-                    // We may have seen this delegate before, if so grab the one we already created
-                    if (!s_transformFunctionDelegateCache.TryGetValue(qualifiedFunctionName, out transformFunction))
-                    {
-                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
-                        {
-                            // Create a delegate to the function we're going to call
-                            transformFunction = new ItemTransformFunction(ItemSpecModifierFunction);
-                        }
-                        else
-                        {
-                            MethodInfo itemFunctionInfo = typeof(IntrinsicItemFunctions<S>).GetMethod(functionName, BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Static);
-
-                            if (itemFunctionInfo == null)
-                            {
-                                functionName = "ExecuteStringFunction";
-                                itemFunctionInfo = typeof(IntrinsicItemFunctions<S>).GetMethod(functionName, BindingFlags.IgnoreCase | BindingFlags.NonPublic | BindingFlags.Static);
-                                if (itemFunctionInfo == null)
-                                {
-                                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
-                                    return null;
-                                }
-                            }
-                            try
-                            {
-                                // Create a delegate to the function we're going to call
-                                transformFunction = (ItemTransformFunction)itemFunctionInfo.CreateDelegate(typeof(ItemTransformFunction));
-                            }
-                            catch (ArgumentException)
-                            {
-                                // Prior to porting to .NET Core, this code was passing false as the throwOnBindFailure parameter to Delegate.CreateDelegate.
-                                //  Since MethodInfo.CreateDelegate doesn't have this option, we catch the ArgumentException to preserve the previous behavior
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
-                            }
-                        }
-
-                        if (transformFunction == null)
-                        {
-                            ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "UnknownItemFunction", functionName);
-                            return null;
-                        }
-
-                        // record our delegate for future use
-                        s_transformFunctionDelegateCache[qualifiedFunctionName] = transformFunction;
-                    }
-
-                    return transformFunction;
-                }
-
-                /// <summary>
                 /// Create an enumerator from a base IEnumerable of items into an enumerable
                 /// of transformation result which includes the new itemspec and the base item.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> GetItemPairEnumerable(IEnumerable<S> itemsOfType)
+                internal static List<KeyValuePair<string, S>> GetItemPairs(ICollection<S> itemsOfType)
                 {
-                    // iterate over the items, and yield out items in the tuple format
-                    foreach (var item in itemsOfType)
+                    List<KeyValuePair<string, S>> itemsFromCapture = new(itemsOfType.Count);
+
+                    // iterate over the items, and add items in the tuple format
+                    foreach (S item in itemsOfType)
                     {
                         if (Traits.Instance.UseLazyWildCardEvaluation)
                         {
@@ -2331,29 +2386,31 @@ namespace Microsoft.Build.Evaluation
                                     item.EvaluatedIncludeEscaped,
                                     forceEvaluate: true))
                             {
-                                yield return new KeyValuePair<string, S>(resultantItem, item);
+                                itemsFromCapture.Add(new KeyValuePair<string, S>(resultantItem, item));
                             }
                         }
                         else
                         {
-                            yield return new KeyValuePair<string, S>(item.EvaluatedIncludeEscaped, item);
+                            itemsFromCapture.Add(new KeyValuePair<string, S>(item.EvaluatedIncludeEscaped, item));
                         }
                     }
+
+                    return itemsFromCapture;
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the number of items in the list.
+                /// Intrinsic function that adds the number of items in the list.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> Count(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void Count(List<KeyValuePair<string, S>> itemsOfType, List<KeyValuePair<string, S>> transformedItems)
                 {
-                    yield return new KeyValuePair<string, S>(Convert.ToString(itemsOfType.Count(), CultureInfo.InvariantCulture), null /* no base item */);
+                    transformedItems.Add(new KeyValuePair<string, S>(Convert.ToString(itemsOfType.Count, CultureInfo.InvariantCulture), null /* no base item */));
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the specified built-in modifer value of the items in itemsOfType
+                /// Intrinsic function that adds the specified built-in modifer value of the items in itemsOfType
                 /// Tuple is {current item include, item under transformation}.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> ItemSpecModifierFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void ItemSpecModifierFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2389,19 +2446,19 @@ namespace Microsoft.Build.Evaluation
                         {
                             // GetItemSpecModifier will have returned us an escaped string
                             // there is nothing more to do than yield it into the pipeline
-                            yield return new KeyValuePair<string, S>(result, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(result, item.Value));
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new KeyValuePair<string, S>(null, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the subset of items that actually exist on disk.
+                /// Intrinsic function that adds the subset of items that actually exist on disk.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> Exists(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void Exists(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2440,7 +2497,7 @@ namespace Microsoft.Build.Evaluation
 
                         if (File.Exists(rootedPath) || Directory.Exists(rootedPath))
                         {
-                            yield return item;
+                            transformedItems.Add(item);
                         }
                     }
                 }
@@ -2448,7 +2505,7 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function that combines the existing paths of the input items with a given relative path.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> Combine(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void Combine(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2465,14 +2522,14 @@ namespace Microsoft.Build.Evaluation
                         string unescapedPath = EscapingUtilities.UnescapeAll(item.Key);
                         string combinedPath = Path.Combine(unescapedPath, relativePath);
                         string escapedPath = EscapingUtilities.Escape(combinedPath);
-                        yield return new KeyValuePair<string, S>(escapedPath, null);
+                        transformedItems.Add(new KeyValuePair<string, S>(escapedPath, null));
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns all ancestor directories of the given items.
+                /// Intrinsic function that adds all ancestor directories of the given items.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> GetPathsOfAllDirectoriesAbove(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void GetPathsOfAllDirectoriesAbove(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2540,19 +2597,19 @@ namespace Microsoft.Build.Evaluation
                     foreach (string directoryPath in directories)
                     {
                         string escapedDirectoryPath = EscapingUtilities.Escape(directoryPath);
-                        yield return new KeyValuePair<string, S>(escapedDirectoryPath, null);
+                        transformedItems.Add(new KeyValuePair<string, S>(escapedDirectoryPath, null));
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the DirectoryName of the items in itemsOfType
+                /// Intrinsic function that adds the DirectoryName of the items in itemsOfType
                 /// UNDONE: This can be removed in favor of a built-in %(DirectoryName) metadata in future.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> DirectoryName(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void DirectoryName(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                    Dictionary<string, string> directoryNameTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    Dictionary<string, string> directoryNameTable = new Dictionary<string, string>(itemsOfType.Count, StringComparer.OrdinalIgnoreCase);
 
                     foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
@@ -2603,19 +2660,19 @@ namespace Microsoft.Build.Evaluation
                         if (!String.IsNullOrEmpty(directoryName))
                         {
                             // return a result through the enumerator
-                            yield return new KeyValuePair<string, S>(directoryName, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(directoryName, item.Value));
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new KeyValuePair<string, S>(null, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the contents of the metadata in specified in argument[0].
+                /// Intrinsic function that adds the contents of the metadata in specified in argument[0].
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> Metadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void Metadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2648,57 +2705,57 @@ namespace Microsoft.Build.Evaluation
                                     foreach (string itemSpec in splits)
                                     {
                                         // return a result through the enumerator
-                                        yield return new KeyValuePair<string, S>(itemSpec, item.Value);
+                                        transformedItems.Add(new KeyValuePair<string, S>(itemSpec, item.Value));
                                     }
                                 }
                                 else
                                 {
                                     // return a result through the enumerator
-                                    yield return new KeyValuePair<string, S>(metadataValue, item.Value);
+                                    transformedItems.Add(new KeyValuePair<string, S>(metadataValue, item.Value));
                                 }
                             }
                             else if (metadataValue != String.Empty && includeNullEntries)
                             {
-                                yield return new KeyValuePair<string, S>(metadataValue, item.Value);
+                                transformedItems.Add(new KeyValuePair<string, S>(metadataValue, item.Value));
                             }
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
+                /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case sensitive comparison.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> DistinctWithCase(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void DistinctWithCase(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
-                    return DistinctWithComparer(expander, elementLocation, includeNullEntries, functionName, itemsOfType, arguments, StringComparer.Ordinal);
+                    DistinctWithComparer(elementLocation, functionName, itemsOfType, arguments, StringComparer.Ordinal, transformedItems);
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
+                /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> Distinct(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void Distinct(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
-                    return DistinctWithComparer(expander, elementLocation, includeNullEntries, functionName, itemsOfType, arguments, StringComparer.OrdinalIgnoreCase);
+                    DistinctWithComparer(elementLocation, functionName, itemsOfType, arguments, StringComparer.OrdinalIgnoreCase, transformedItems);
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only the items from itemsOfType that have distinct Item1 in the Tuple
+                /// Intrinsic function that adds only the items from itemsOfType that have distinct Item1 in the Tuple
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> DistinctWithComparer(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments, StringComparer comparer)
+                internal static void DistinctWithComparer(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, StringComparer comparer, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
                     // This dictionary will ensure that we only return one result per unique itemspec
-                    HashSet<string> seenItems = new HashSet<string>(comparer);
+                    HashSet<string> seenItems = new HashSet<string>(itemsOfType.Count, comparer);
 
                     foreach (KeyValuePair<string, S> item in itemsOfType)
                     {
                         if (item.Key != null && seenItems.Add(item.Key))
                         {
-                            yield return item;
+                            transformedItems.Add(item);
                         }
                     }
                 }
@@ -2706,16 +2763,20 @@ namespace Microsoft.Build.Evaluation
                 /// <summary>
                 /// Intrinsic function reverses the item list.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> Reverse(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void Reverse(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
-                    return itemsOfType.Reverse();
+
+                    for (int i = itemsOfType.Count - 1; i >= 0; i--)
+                    {
+                        transformedItems.Add(itemsOfType[i]);
+                    }
                 }
 
                 /// <summary>
                 /// Intrinsic function that transforms expressions like the %(foo) in @(Compile->'%(foo)').
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> ExpandQuotedExpressionFunction(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void ExpandQuotedExpressionFunction(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2742,11 +2803,11 @@ namespace Microsoft.Build.Evaluation
                         // We pass in the existing item so we can copy over its metadata
                         if (!string.IsNullOrEmpty(include))
                         {
-                            yield return new KeyValuePair<string, S>(include, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(include, item.Value));
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new KeyValuePair<string, S>(null, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
                         }
                     }
                 }
@@ -2755,13 +2816,14 @@ namespace Microsoft.Build.Evaluation
                 /// Intrinsic function that transforms expressions by invoking methods of System.String on the itemspec
                 /// of the item in the pipeline.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> ExecuteStringFunction(
+                internal static void ExecuteStringFunction(
                     Expander<P, I> expander,
                     IElementLocation elementLocation,
                     bool includeNullEntries,
                     string functionName,
-                    IEnumerable<KeyValuePair<string, S>> itemsOfType,
-                    string[] arguments)
+                    List<KeyValuePair<string, S>> itemsOfType,
+                    string[] arguments,
+                    List<KeyValuePair<string, S>> transformedItems)
                 {
                     // Transform: expression is like @(Compile->'%(foo)'), so create completely new items,
                     // using the Include from the source items
@@ -2786,19 +2848,19 @@ namespace Microsoft.Build.Evaluation
                         // We pass in the existing item so we can copy over its metadata
                         if (include.Length > 0)
                         {
-                            yield return new KeyValuePair<string, S>(include, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(include, item.Value));
                         }
                         else if (includeNullEntries)
                         {
-                            yield return new KeyValuePair<string, S>(null, item.Value);
+                            transformedItems.Add(new KeyValuePair<string, S>(null, item.Value));
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns the items from itemsOfType with their metadata cleared, i.e. only the itemspec is retained.
+                /// Intrinsic function that adds the items from itemsOfType with their metadata cleared, i.e. only the itemspec is retained.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> ClearMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void ClearMetadata(IElementLocation elementLocation, bool includeNullEntries, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments == null || arguments.Length == 0, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2806,16 +2868,16 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (includeNullEntries || item.Key != null)
                         {
-                            yield return new KeyValuePair<string, S>(item.Key, null);
+                            transformedItems.Add(new KeyValuePair<string, S>(item.Key, null));
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only those items that have a not-blank value for the metadata specified
+                /// Intrinsic function that adds only those items that have a not-blank value for the metadata specified
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> HasMetadata(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void HasMetadata(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2840,16 +2902,16 @@ namespace Microsoft.Build.Evaluation
                         if (!string.IsNullOrEmpty(metadataValue))
                         {
                             // return a result through the enumerator
-                            yield return item;
+                            transformedItems.Add(item);
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns only those items have the given metadata value
+                /// Intrinsic function that adds only those items have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> WithMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void WithMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2873,16 +2935,16 @@ namespace Microsoft.Build.Evaluation
                         if (metadataValue != null && String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
-                            yield return item;
+                            transformedItems.Add(item);
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns those items don't have the given metadata value
+                /// Intrinsic function that adds those items don't have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> WithoutMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void WithoutMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2906,16 +2968,16 @@ namespace Microsoft.Build.Evaluation
                         if (!String.Equals(metadataValue, metadataValueToFind, StringComparison.OrdinalIgnoreCase))
                         {
                             // return a result through the enumerator
-                            yield return item;
+                            transformedItems.Add(item);
                         }
                     }
                 }
 
                 /// <summary>
-                /// Intrinsic function that returns a boolean to indicate if any of the items have the given metadata value
+                /// Intrinsic function that adds a boolean to indicate if any of the items have the given metadata value
                 /// Using a case insensitive comparison.
                 /// </summary>
-                internal static IEnumerable<KeyValuePair<string, S>> AnyHaveMetadataValue(Expander<P, I> expander, IElementLocation elementLocation, bool includeNullEntries, string functionName, IEnumerable<KeyValuePair<string, S>> itemsOfType, string[] arguments)
+                internal static void AnyHaveMetadataValue(IElementLocation elementLocation, string functionName, List<KeyValuePair<string, S>> itemsOfType, string[] arguments, List<KeyValuePair<string, S>> transformedItems)
                 {
                     ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 2, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
@@ -2944,10 +3006,10 @@ namespace Microsoft.Build.Evaluation
                                 metadataFound = true;
 
                                 // return a result through the enumerator
-                                yield return new KeyValuePair<string, S>("true", item.Value);
+                                transformedItems.Add(new KeyValuePair<string, S>("true", item.Value));
 
                                 // break out as soon as we found a match
-                                yield break;
+                                return;
                             }
                         }
                     }
@@ -2955,72 +3017,8 @@ namespace Microsoft.Build.Evaluation
                     if (!metadataFound)
                     {
                         // We did not locate an item with the required metadata
-                        yield return new KeyValuePair<string, S>("false", null);
+                        transformedItems.Add(new KeyValuePair<string, S>("false", null));
                     }
-                }
-            }
-
-            /// <summary>
-            /// Represents all the components of a transform function, including the ability to execute it.
-            /// </summary>
-            /// <typeparam name="S">class, IItem.</typeparam>
-            internal class TransformFunction<S>
-                where S : class, IItem
-            {
-                /// <summary>
-                /// The delegate that points to the transform function.
-                /// </summary>
-                private IntrinsicItemFunctions<S>.ItemTransformFunction _transform;
-
-                /// <summary>
-                /// Arguments to pass to the transform function as parsed out of the project file.
-                /// </summary>
-                private string[] _arguments;
-
-                /// <summary>
-                /// The element location of the transform expression.
-                /// </summary>
-                private IElementLocation _elementLocation;
-
-                /// <summary>
-                /// The name of the function that this class will call.
-                /// </summary>
-                private string _functionName;
-
-                /// <summary>
-                /// TransformFunction constructor.
-                /// </summary>
-                public TransformFunction(IElementLocation elementLocation, string functionName, IntrinsicItemFunctions<S>.ItemTransformFunction transform, string[] arguments)
-                {
-                    _elementLocation = elementLocation;
-                    _functionName = functionName;
-                    _transform = transform;
-                    _arguments = arguments;
-                }
-
-                /// <summary>
-                /// Arguments to pass to the transform function as parsed out of the project file.
-                /// </summary>
-                public string[] Arguments
-                {
-                    get { return _arguments; }
-                }
-
-                /// <summary>
-                /// The element location of the transform expression.
-                /// </summary>
-                public IElementLocation ElementLocation
-                {
-                    get { return _elementLocation; }
-                }
-
-                /// <summary>
-                /// Execute this transform function with the arguments contained within this TransformFunction instance.
-                /// </summary>
-                public IEnumerable<KeyValuePair<string, S>> Execute(Expander<P, I> expander, bool includeNullEntries, IEnumerable<KeyValuePair<string, S>> itemsOfType)
-                {
-                    // Execute via the delegate
-                    return _transform(expander, _elementLocation, includeNullEntries, _functionName, itemsOfType, _arguments);
                 }
             }
 
