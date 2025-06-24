@@ -887,7 +887,7 @@ namespace Microsoft.Build.Execution
         /// in addition to any potential project caches described in each project.
         /// </summary>
         /// <remarks>
-        /// This property had the type <see cref="Experimental.ProjectCache.ProjectCacheDescriptor"/> until 17.14 (inclusive).
+        /// This property had the type "Experimental.ProjectCache.ProjectCacheDescriptor" until 17.14 (inclusive).
         /// </remarks>
         public ProjectCacheDescriptor ProjectCacheDescriptor { get; set; }
 

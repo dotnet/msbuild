@@ -11,15 +11,11 @@ namespace Microsoft.Build.ProjectCache
         private ProjectCacheDescriptor(
             string? pluginAssemblyPath,
             IReadOnlyDictionary<string, string>? pluginSettings,
-            ProjectCachePluginBase? pluginInstance,
-#pragma warning disable CS0618 // Type or member is obsolete
-            Experimental.ProjectCache.ProjectCachePluginBase? experimentalPluginInstance = null)
-#pragma warning restore CS0618 // Type or member is obsolete
+            IProjectCachePluginBase? pluginInstance)
         {
             PluginAssemblyPath = pluginAssemblyPath;
             PluginSettings = pluginSettings ?? new Dictionary<string, string>(0);
             PluginInstance = pluginInstance;
-            ExperimentalPluginInstance = experimentalPluginInstance;
         }
 
         /// <summary>
@@ -29,11 +25,7 @@ namespace Microsoft.Build.ProjectCache
 
         public IReadOnlyDictionary<string, string> PluginSettings { get; }
 
-        public ProjectCachePluginBase? PluginInstance { get; }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-        internal Experimental.ProjectCache.ProjectCachePluginBase? ExperimentalPluginInstance { get; }
-#pragma warning restore CS0618 // Type or member is obsolete
+        public IProjectCachePluginBase? PluginInstance { get; }
 
         public static ProjectCacheDescriptor FromAssemblyPath(string pluginAssemblyPath, IReadOnlyDictionary<string, string>? pluginSettings = null)
             => new ProjectCacheDescriptor(pluginAssemblyPath, pluginSettings, pluginInstance: null);
@@ -51,7 +43,6 @@ namespace Microsoft.Build.ProjectCache
             return new ProjectCacheDescriptor(
                 pluginAssemblyPath: null,
                 pluginSettings,
-                pluginInstance: null,
                 experimentalPluginInstance);
         }
     }
