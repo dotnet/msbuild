@@ -355,6 +355,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="child">The item from which to find batchable values</param>
         private void GetBatchableValuesFromBuildItemGroupChild(List<string> parameterValues, ProjectItemGroupTaskItemInstance child)
         {
+            // Perf: Try to set capacity to avoid resizing the list later.
             if (parameterValues.Capacity < child.Metadata.Count + 4)
             {
                 parameterValues.Capacity = child.Metadata.Count + 4;
