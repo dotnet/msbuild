@@ -76,29 +76,12 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(config);
             ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
 
-            if (!configurations.ById.TryAdd(config.ConfigurationId, config)
-                || !configurations.ByMetadata.TryAdd(new ConfigurationMetadata(config), config))
+            if (!configurations.ById.TryAdd(config.ConfigurationId, config))
             {
                 ErrorUtilities.ThrowInternalError("Configuration {0} already cached", config.ConfigurationId);
             }
-        }
 
-        /// <summary>
-        /// Removes the specified configuration from the cache.
-        /// </summary>
-        /// <param name="configId">The id of the configuration to remove.</param>
-        public void RemoveConfiguration(int configId)
-        {
-            Configurations configurations = _configurations;
-            if (configurations.ById.TryRemove(configId, out BuildRequestConfiguration config))
-            {
-                if (!configurations.ByMetadata.TryRemove(new ConfigurationMetadata(config), out _))
-                {
-                    ErrorUtilities.ThrowInternalError("Removed Configuration {0} between concurrent adds", config.ConfigurationId);
-                }
-
-                config.ClearCacheFile();
-            }
+            _ = configurations.ByMetadata[new ConfigurationMetadata(config)] = config;
         }
 
         /// <summary>
