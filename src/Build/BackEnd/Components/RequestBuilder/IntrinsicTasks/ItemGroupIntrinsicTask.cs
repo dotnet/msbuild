@@ -476,9 +476,7 @@ namespace Microsoft.Build.BackEnd
                 var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
                 // Subtract any Exclude
-                items = items
-                    .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
-                    .ToList();
+                items.RemoveAll(i => excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()));
             }
 
             // Filter the metadata as appropriate
