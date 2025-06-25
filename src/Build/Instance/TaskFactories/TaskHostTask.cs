@@ -582,11 +582,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
         {
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNotNETContext(requiredContext);
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
 #if NETFRAMEWORK
-            if (NodeProviderOutOfProcTaskHost.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
+            if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETContext(requiredContext).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext).MSBuildAssemblyPath;
             }
 #endif
             string msbuildLocation = taskHostLocation ??

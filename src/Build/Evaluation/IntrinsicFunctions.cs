@@ -510,11 +510,11 @@ namespace Microsoft.Build.Evaluation
 
             HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
 
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNotNETContext(desiredContext);
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredContext);
 #if NETFRAMEWORK
-            if (NodeProviderOutOfProcTaskHost.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
+            if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETContext(desiredContext).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext).MSBuildAssemblyPath;
             }
 #endif
 

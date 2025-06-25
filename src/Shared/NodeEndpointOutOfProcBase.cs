@@ -3,7 +3,7 @@
 
 using System;
 #if NET
-using System.Collections.Generic;
+using System.Collections.Frozen;
 #endif
 using System.Diagnostics.CodeAnalysis;
 #if CLR2COMPATIBILITY
@@ -16,6 +16,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using System.IO.Pipes;
 using System.IO;
+using System.Collections.Generic;
 
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
@@ -124,7 +125,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of property names from handshake responsible for node version.
         /// </summary>
-        private readonly List<string> _versionHandshakeGroup = [
+        private readonly FrozenSet<string> _versionHandshakeGroup = [
             nameof(HandshakeComponents.FileVersionMajor),
             nameof(HandshakeComponents.FileVersionMinor),
             nameof(HandshakeComponents.FileVersionBuild),
@@ -423,28 +424,16 @@ namespace Microsoft.Build.BackEnd
                             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
-                            if (handshakePart != component.Value)
+                            if (!IsHandshakePartValid(component, handshakePart, index))
                             {
-                                // Check if this is a valid NET task host exception
-                                bool isAllowedVersionMismatch = false;
-#if NET
-                                // NET Task host allows connection to MSBuild.dll with different handshake version.
-                                isAllowedVersionMismatch = _versionHandshakeGroup.Contains(component.Key) && component.Value == Handshake.NetTaskHostHandshakeVersion;
-#endif
-                                if (isAllowedVersionMismatch)
-                                {
-                                    CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, component.Key);
-                                }
-                                else
-                                {
-                                    CommunicationsUtilities.Trace(
-                                        "Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.",
+                                CommunicationsUtilities.Trace(
+                                        "Handshake failed. Received {0} from host  for {1} but expected {2}. Probably the host is a different MSBuild build.",
                                         handshakePart,
+                                        component.Key,
                                         component.Value);
-                                    _pipeServer.WriteIntForHandshake(index + 1);
-                                    gotValidConnection = false;
-                                    break;
-                                }
+                                _pipeServer.WriteIntForHandshake(index + 1);
+                                gotValidConnection = false;
+                                break;
                             }
 
                             index++;
@@ -546,8 +535,67 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void RunReadLoop(BufferedReadStream localReadPipe, NamedPipeServerStream localWritePipe,
-            ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
+        /// <summary>
+        /// Method to verify that the handshake part received from the host matches the expected values.
+        /// </summary>
+        private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index)
+        {
+            if (handshakePart == component.Value)
+            {
+                return true;
+            }
+
+#if NET
+            // Check if this is a valid NET task host exception
+            bool isAllowedMismatch = false;
+
+            if (component.Key == nameof(HandshakeComponents.Options))
+            {
+                // NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
+                // 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+                isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
+            }
+            else
+            {
+                isAllowedMismatch = _versionHandshakeGroup.Contains(component.Key) && component.Value == Handshake.NetTaskHostHandshakeVersion;
+            }
+
+            if (isAllowedMismatch)
+            {
+                CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, component.Key);
+                return true;
+            }
+#endif
+            CommunicationsUtilities.Trace(
+                "Handshake failed. Received {0} from host for {1} but expected {2}. Probably the host is a different MSBuild build.",
+                handshakePart,
+                component.Key,
+                component.Value);
+
+            return false;
+        }
+
+#if NET
+        /// <summary>
+        /// NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
+        /// 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+        /// </summary>
+        private bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
+        {
+            var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
+            var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
+
+            return Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X86) &&
+                   Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+        }
+#endif
+
+        private void RunReadLoop(
+            BufferedReadStream localReadPipe,
+            NamedPipeServerStream localWritePipe,
+            ConcurrentQueue<INodePacket> localPacketQueue,
+            AutoResetEvent localPacketAvailable,
+            AutoResetEvent localTerminatePacketPump)
         {
             // Ordering of the wait handles is important.  The first signaled wait handle in the array
             // will be returned by WaitAny if multiple wait handles are signaled.  We prefer to have the

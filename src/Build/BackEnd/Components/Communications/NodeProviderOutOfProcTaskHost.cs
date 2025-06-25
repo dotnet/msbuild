@@ -389,8 +389,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
-            if (IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
                 return TaskHostNameForClr2TaskHost;
             }
@@ -405,7 +405,7 @@ namespace Microsoft.Build.BackEnd
 
 #if NETFRAMEWORK
                 // In .NET Framework, use dotnet for .NET task hosts
-                if (IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
                 {
                     s_msbuildName = Constants.DotnetProcessName;
 
@@ -413,7 +413,7 @@ namespace Microsoft.Build.BackEnd
                 }
 #endif
                 // Default based on whether it's .NET or Framework
-                s_msbuildName = IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
+                s_msbuildName = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
                     ? Constants.MSBuildAssemblyName
                     : Constants.MSBuildExecutableName;
             }
@@ -421,28 +421,26 @@ namespace Microsoft.Build.BackEnd
             return s_msbuildName;
         }
 
-        internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
-
         /// <summary>
         /// Given a TaskHostContext, returns the appropriate runtime host and MSBuild assembly locations
         /// based on the handshake options.
         /// </summary>
         /// <param name="hostContext">The handshake options specifying the desired task host configuration (architecture, CLR version, runtime).</param>
         /// <returns>
-        /// The full path to MSBuild.dll when using .NET hosts, or null for Framework-based hosts.
+        /// The full path to MSBuild.exe.
         /// </returns>
-        internal static string GetMSBuildLocationForNotNETContext(HandshakeOptions hostContext)
+        internal static string GetMSBuildExecutablePathForNonNETRuntimes(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             var toolName = GetTaskHostNameFromHostContext(hostContext);
             s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
             s_baseTaskHostPathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
 
-            bool isX64 = IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64);
-            bool isArm64 = IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
-            bool isCLR2 = IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+            bool isX64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64);
+            bool isArm64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
+            bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
 
             // Unsupported combinations
             if (isArm64 && isCLR2)
@@ -476,11 +474,11 @@ namespace Microsoft.Build.BackEnd
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
         /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETContext(HandshakeOptions hostContext)
+        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable(IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            s_baseTaskHostPathNet = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryNET;
+            s_baseTaskHostPathNet ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryNET;
 
             string msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, Constants.MSBuildAssemblyName);
             string runtimeHostPath = Path.Combine(s_baseTaskHostPathNet, Constants.DotnetProcessName);
@@ -583,9 +581,9 @@ namespace Microsoft.Build.BackEnd
 
             // Handle .NET task host context
 #if NETFRAMEWORK
-            if (IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+            if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
             {
-                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETContext(hostContext);
+                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext);
 
                 CommunicationsUtilities.Trace("For a host context of {0}, spawning dotnet.exe from {1}.", hostContext.ToString(), msbuildAssemblyPath);
 
@@ -604,7 +602,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            string msbuildLocation = GetMSBuildLocationForNotNETContext(hostContext);
+            string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
 
             // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
             if (msbuildLocation == null)

@@ -79,6 +79,11 @@ namespace Microsoft.Build.Internal
         /// ARM64 process.
         /// </summary>
         Arm64 = 128,
+
+        /// <summary>
+        /// 32-bit process.
+        /// </summary>
+        X86 = 256,
     }
 
     internal class Handshake
@@ -95,6 +100,9 @@ namespace Microsoft.Build.Internal
         {
         }
 
+        // Helper method to validate handshake option presense.
+        internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
+
         protected Handshake(HandshakeOptions nodeType, bool includeSessionId)
         {
             // Build handshake options with version in upper bits
@@ -103,7 +111,7 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             // Calculate salt from environment and tools directory
-            bool isNetTaskHost = (nodeType & NetTaskHostFlags) == NetTaskHostFlags;
+            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
             string toolsDirectory = GetToolsDirectory(isNetTaskHost);
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
@@ -683,7 +691,11 @@ namespace Microsoft.Build.Internal
 
             if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
-                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x86, StringComparison.OrdinalIgnoreCase))
+                {
+                    context |= HandshakeOptions.X86;
+                }
+                else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
                 {
                     context |= HandshakeOptions.X64;
                 }
