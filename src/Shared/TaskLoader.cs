@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if CLR2COMPATIBILITY
+#if FEATURE_APPDOMAIN
 using System.Reflection;
 #endif
 using Microsoft.Build.Framework;
