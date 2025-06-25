@@ -227,7 +227,7 @@ extends:
               $propsValue = $props -join ";"
               Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
               Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
-              
+
               # autocomplete main
               $autocomplete = "false"
               if ("$(InsertTargetBranch)" -eq "main")
