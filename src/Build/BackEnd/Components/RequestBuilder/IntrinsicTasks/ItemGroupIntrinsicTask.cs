@@ -356,9 +356,10 @@ namespace Microsoft.Build.BackEnd
         private void GetBatchableValuesFromBuildItemGroupChild(List<string> parameterValues, ProjectItemGroupTaskItemInstance child)
         {
             // Perf: Try to set capacity to avoid resizing the list later.
-            if (parameterValues.Capacity < child.Metadata.Count + 4)
+            const int AdditionalCapacityBuffer = 4; // Accounts for Include, Exclude, Remove, and Condition fields
+            if (parameterValues.Capacity < child.Metadata.Count + AdditionalCapacityBuffer)
             {
-                parameterValues.Capacity = child.Metadata.Count + 4;
+                parameterValues.Capacity = child.Metadata.Count + AdditionalCapacityBuffer;
             }
 
             AddIfNotEmptyString(parameterValues, child.Include);
