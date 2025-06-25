@@ -62,7 +62,7 @@ namespace Microsoft.Build.Shared
         /// 2 .Assembly loads are thread-safe and will no-op if loaded more than once..
         /// 3. On a race, we're okay to perform duplicate work and one thread will succeed in writing to the cache.
         /// </remarks>
-        private static ImmutableDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> s_cacheOfLoadedTypesByFilter =
+        private static ImmutableDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> s_cacheOfLoadedTypesByAssembly =
             ImmutableDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>.Empty;
 
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
@@ -283,10 +283,10 @@ namespace Microsoft.Build.Shared
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
             // Get an object which is able to take a typename and determine if it is in the assembly pointed to by the AssemblyInfo.
-            if (!s_cacheOfLoadedTypesByFilter.TryGetValue(assembly, out AssemblyInfoToLoadedTypes? typeNameToType))
+            if (!s_cacheOfLoadedTypesByAssembly.TryGetValue(assembly, out AssemblyInfoToLoadedTypes? typeNameToType))
             {
                 typeNameToType = new AssemblyInfoToLoadedTypes(assembly);
-                s_cacheOfLoadedTypesByFilter = s_cacheOfLoadedTypesByFilter.SetItem(assembly, typeNameToType);
+                s_cacheOfLoadedTypesByAssembly = s_cacheOfLoadedTypesByAssembly.SetItem(assembly, typeNameToType);
             }
 
             return typeNameToType.GetLoadedTypeByTypeName(typeKey, useTaskHost);
