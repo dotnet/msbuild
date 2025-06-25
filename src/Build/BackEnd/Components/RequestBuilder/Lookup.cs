@@ -148,38 +148,38 @@ namespace Microsoft.Build.BackEnd
 
         private IItemDictionary<ProjectItemInstance> SecondaryTable
         {
-            get { return _lookupScopes.Next.Items; }
-            set { _lookupScopes.Next.Items = value; }
+            get { return _lookupScopes.Parent.Items; }
+            set { _lookupScopes.Parent.Items = value; }
         }
 
         private ItemDictionary<ProjectItemInstance> SecondaryAddTable
         {
-            get { return _lookupScopes.Next.Adds; }
-            set { _lookupScopes.Next.Adds = value; }
+            get { return _lookupScopes.Parent.Adds; }
+            set { _lookupScopes.Parent.Adds = value; }
         }
 
         private ItemDictionary<ProjectItemInstance> SecondaryRemoveTable
         {
-            get { return _lookupScopes.Next.Removes; }
-            set { _lookupScopes.Next.Removes = value; }
+            get { return _lookupScopes.Parent.Removes; }
+            set { _lookupScopes.Parent.Removes = value; }
         }
 
         private ItemTypeToItemsMetadataUpdateDictionary SecondaryModifyTable
         {
-            get { return _lookupScopes.Next.Modifies; }
-            set { _lookupScopes.Next.Modifies = value; }
+            get { return _lookupScopes.Parent.Modifies; }
+            set { _lookupScopes.Parent.Modifies = value; }
         }
 
         private PropertyDictionary<ProjectPropertyInstance> SecondaryProperties
         {
-            get { return _lookupScopes.Next.Properties; }
-            set { _lookupScopes.Next.Properties = value; }
+            get { return _lookupScopes.Parent.Properties; }
+            set { _lookupScopes.Parent.Properties = value; }
         }
 
         private PropertyDictionary<ProjectPropertyInstance> SecondaryPropertySets
         {
-            get { return _lookupScopes.Next.PropertySets; }
-            set { _lookupScopes.Next.PropertySets = value; }
+            get { return _lookupScopes.Parent.PropertySets; }
+            set { _lookupScopes.Parent.PropertySets = value; }
         }
 
         #endregion
@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd
             _cloneTable = null;
 
             // Move all tables up one, discarding the primary tables
-            _lookupScopes = _lookupScopes.Next;
+            _lookupScopes = _lookupScopes.Parent;
         }
 
         /// <summary>
@@ -437,7 +437,7 @@ namespace Microsoft.Build.BackEnd
                     break;
                 }
 
-                scope = scope.Next;
+                scope = scope.Parent;
             }
 
             return null;
@@ -545,7 +545,7 @@ namespace Microsoft.Build.BackEnd
                     break;
                 }
 
-                scope = scope.Next;
+                scope = scope.Parent;
             }
 
             if ((allAdds == null) &&
@@ -776,7 +776,7 @@ namespace Microsoft.Build.BackEnd
                     MustNotBeInTable(scope.Removes, actualItem);
                 }
 
-                scope = scope.Next;
+                scope = scope.Parent;
             }
 #endif
 
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.BackEnd
                 MustNotBeInTable(scope.Adds, item);
                 MustNotBeInTable(scope.Removes, item);
                 MustNotBeInTable(scope.Modifies, item);
-                scope = scope.Next;
+                scope = scope.Parent;
             }
         }
 
@@ -1412,13 +1412,13 @@ namespace Microsoft.Build.BackEnd
                 _propertySets = null;
                 _threadIdThatEnteredScope = Environment.CurrentManagedThreadId;
                 _truncateLookupsAtThisScope = false;
-                Next = lookup._lookupScopes;
+                Parent = lookup._lookupScopes;
             }
 
             /// <summary>
-            /// The next scope in the stack, if any.
+            /// The parent scope in the stack, if any.
             /// </summary>
-            internal Scope Next { get; }
+            internal Scope Parent { get; }
 
             /// <summary>
             /// The total number of scopes in the chain.
@@ -1428,11 +1428,11 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     int count = 1;
-                    Scope scope = Next;
+                    Scope scope = Parent;
                     while (scope != null)
                     {
                         count++;
-                        scope = scope.Next;
+                        scope = scope.Parent;
                     }
 
                     return count;
