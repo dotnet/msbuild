@@ -2,13 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Threading;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 
@@ -19,8 +17,34 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// This class is used to load types from their assemblies.
     /// </summary>
-    internal class TypeLoader
+    internal static class TypeLoader
     {
+        /// <summary>
+        /// Determines which types to load from the assembly.
+        /// </summary>
+        internal enum TypeFilter
+        {
+            /// <summary>
+            /// Types which implement ITask.
+            /// </summary>
+            Task,
+
+            /// <summary>
+            /// Types which implement IForwardingLogger.
+            /// </summary>
+            ForwardingLogger,
+
+            /// <summary>
+            /// Types which implement ILogger.
+            /// </summary>
+            Logger,
+
+            /// <summary>
+            /// Types which impelment ITaskFactory.
+            /// </summary>
+            TaskFactory,
+        }
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// AssemblyContextLoader used to load DLLs outside of msbuild.exe directory
@@ -29,21 +53,17 @@ namespace Microsoft.Build.Shared
 #endif
 
         /// <summary>
-        /// Cache to keep track of the assemblyLoadInfos based on a given type filter.
+        /// Copy-on-write cache to keep track of the assemblyLoadInfos based on a given type filter.
         /// </summary>
-        private static readonly ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
-
-        /// <summary>
-        /// Cache to keep track of the assemblyLoadInfos based on a given type filter for assemblies which are to be loaded for reflectionOnlyLoads.
-        /// </summary>
-        private static readonly ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
-
-        /// <summary>
-        /// Type filter for this typeloader
-        /// </summary>
-        private Func<Type, object, bool> _isDesiredType;
-
-        private static MetadataLoadContext _context;
+        /// <remarks>
+        /// ImmutableDictionary is chosen for both the assembly and type caches because:
+        /// 1. These caches aren't expected to change often, and are mostly front-loaded with MSBuild types. Otherwise,
+        /// we'd be paying the cost of locks for the entire build.
+        /// 2 .Assembly loads are thread-safe and will no-op if loaded more than once..
+        /// 3. On a race, we're okay to perform duplicate work and one thread will succeed in writing to the cache.
+        /// </remarks>
+        private static ImmutableDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> s_cacheOfLoadedTypesByFilter =
+            ImmutableDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>.Empty;
 
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
         private static string microsoftBuildFrameworkPath;
@@ -60,13 +80,33 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Constructor.
+        /// Determines if the given type implements a known interface based on the type filter.
         /// </summary>
-        internal TypeLoader(Func<Type, object, bool> isDesiredType)
-        {
-            ErrorUtilities.VerifyThrow(isDesiredType != null, "need a type filter");
+        /// <returns>True if the type is a concrete class and implements the interface; otherwise, false.</returns>
+        private static bool IsDesiredType(Type type, TypeFilter typeFilter)
+            => IsDesiredType(type.GetTypeInfo(), typeFilter);
 
-            _isDesiredType = isDesiredType;
+        /// <summary>
+        /// Determines if the given type info implements a known interface based on the type filter.
+        /// </summary>
+        /// <returns>True if the type is a concrete class and implements the interface; otherwise, false.</returns>
+        private static bool IsDesiredType(TypeInfo typeInfo, TypeFilter typeFilter)
+        {
+            if (typeInfo.IsClass && !typeInfo.IsAbstract)
+            {
+                string interfaceName = typeFilter switch
+                {
+                    TypeFilter.Task => "Microsoft.Build.Framework.ITask",
+                    TypeFilter.ForwardingLogger => "IForwardingLogger",
+                    TypeFilter.Logger => "ILogger",
+                    TypeFilter.TaskFactory => "Microsoft.Build.Framework.ITaskFactory",
+                    _ => throw new InternalErrorException("Unknown type filter"),
+                };
+
+                return typeInfo.GetInterface(interfaceName) != null;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -183,9 +223,8 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
+        private static MetadataLoadContext LoadMetadataLoadContext(string path)
         {
-            string path = assemblyLoadInfo.AssemblyFile;
             string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
 
             // Deduplicate between MSBuild assemblies and task dependencies.
@@ -200,21 +239,24 @@ namespace Microsoft.Build.Shared
                 assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
             }
 
-            _context = new(new PathAssemblyResolver(assembliesDictionary.Values));
-            return _context.LoadFromAssemblyPath(path);
+            MetadataLoadContext context = new(new PathAssemblyResolver(assembliesDictionary.Values));
+            return context;
         }
+
+#nullable enable
 
         /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        internal LoadedType Load(
+        internal static LoadedType? Load(
             string typeName,
             AssemblyLoadInfo assembly,
+            TypeFilter typeFilter,
             bool useTaskHost = false)
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost);
+            return GetLoadedType(new LoadedTypeKey(typeFilter, typeName), assembly, useTaskHost);
         }
 
         /// <summary>
@@ -223,11 +265,12 @@ namespace Microsoft.Build.Shared
         /// found will be returned.
         /// </summary>
         /// <returns>The loaded type, or null if the type was not found.</returns>
-        internal LoadedType ReflectionOnlyLoad(
+        internal static LoadedType? ReflectionOnlyLoad(
             string typeName,
-            AssemblyLoadInfo assembly)
+            AssemblyLoadInfo assembly,
+            TypeFilter typeFilter)
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false);
+            return GetLoadedType(new LoadedTypeKey(typeFilter, typeName), assembly, useTaskHost: false);
         }
 
         /// <summary>
@@ -235,19 +278,21 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        private LoadedType GetLoadedType(ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly, bool useTaskHost)
+        private static LoadedType? GetLoadedType(LoadedTypeKey typeKey, AssemblyLoadInfo assembly, bool useTaskHost)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
-            ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> loadInfoToType =
-                cache.GetOrAdd(_isDesiredType, (_) => new ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>());
-
             // Get an object which is able to take a typename and determine if it is in the assembly pointed to by the AssemblyInfo.
-            AssemblyInfoToLoadedTypes typeNameToType =
-                loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
+            if (!s_cacheOfLoadedTypesByFilter.TryGetValue(assembly, out AssemblyInfoToLoadedTypes? typeNameToType))
+            {
+                typeNameToType = new AssemblyInfoToLoadedTypes(assembly);
+                s_cacheOfLoadedTypesByFilter = s_cacheOfLoadedTypesByFilter.SetItem(assembly, typeNameToType);
+            }
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost);
+            return typeNameToType.GetLoadedTypeByTypeName(typeKey, useTaskHost);
         }
+
+        private readonly record struct LoadedTypeKey(TypeFilter Filter, string Name);
 
         /// <summary>
         /// Given a type filter and an asssemblyInfo object keep track of what types in a given assembly which match the type filter.
@@ -255,88 +300,64 @@ namespace Microsoft.Build.Shared
         ///
         /// This type represents a combination of a type filter and an assemblyInfo object.
         /// </summary>
-        [DebuggerDisplay("Types in {_assemblyLoadInfo} matching {_isDesiredType}")]
         private class AssemblyInfoToLoadedTypes
         {
             /// <summary>
-            /// Lock to prevent two threads from using this object at the same time.
-            /// Since we fill up internal structures with what is in the assembly
-            /// </summary>
-            private readonly Object _lockObject = new Object();
-
-            /// <summary>
-            /// Type filter to pick the correct types out of an assembly
-            /// </summary>
-            private Func<Type, object, bool> _isDesiredType;
-
-            /// <summary>
             /// Assembly load information so we can load an assembly
             /// </summary>
-            private AssemblyLoadInfo _assemblyLoadInfo;
+            private readonly AssemblyLoadInfo _assemblyLoadInfo;
 
             /// <summary>
-            /// What is the type for the given type name, this may be null if the typeName does not map to a type.
+            /// What is the type for the given type name and filter, this may be null if the typeName does not map to a type.
             /// </summary>
-            private ConcurrentDictionary<string, Type> _typeNameToType;
+            private ImmutableDictionary<LoadedTypeKey, LoadedType?> _loadedTypes = ImmutableDictionary<LoadedTypeKey, LoadedType?>.Empty;
 
             /// <summary>
-            /// List of public types in the assembly which match the type filter and their corresponding types
+            /// A separate cache for types loaded via MetadataLoadContext, so that they don't pollute reflection-only loads.
             /// </summary>
-            private Dictionary<string, Type> _publicTypeNameToType;
-
-            private ConcurrentDictionary<string, LoadedType> _publicTypeNameToLoadedType;
+            private ImmutableDictionary<LoadedTypeKey, LoadedType?> _loadedTypesFromMetadataLoadContext = ImmutableDictionary<LoadedTypeKey, LoadedType?>.Empty;
 
             /// <summary>
-            /// Have we scanned the public types for this assembly yet.
+            /// List of public types in the assembly which match any type filter and their corresponding types
             /// </summary>
-            private long _haveScannedPublicTypes;
-
-            /// <summary>
-            /// Assembly, if any, that we loaded for this type.
-            /// We use this information to set the LoadedType.LoadedAssembly so that this object can be used
-            /// to help created AppDomains to resolve those that it could not load successfully
-            /// </summary>
-            private Assembly _loadedAssembly;
+            private PublicTypes? _publicTypes;
 
             /// <summary>
             /// Given a type filter, and an assembly to load the type information from determine if a given type name is in the assembly or not.
             /// </summary>
-            internal AssemblyInfoToLoadedTypes(Func<Type, object, bool> typeFilter, AssemblyLoadInfo loadInfo)
+            internal AssemblyInfoToLoadedTypes(AssemblyLoadInfo loadInfo)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
                 ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
 
-                _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
-                _typeNameToType = new(StringComparer.OrdinalIgnoreCase);
-                _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-                _publicTypeNameToLoadedType = new(StringComparer.OrdinalIgnoreCase);
             }
 
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost)
+            internal LoadedType? GetLoadedTypeByTypeName(LoadedTypeKey typeKey, bool useTaskHost)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeName);
+                ErrorUtilities.VerifyThrowArgumentNull(typeKey.Name);
 
                 if (useTaskHost && _assemblyLoadInfo.AssemblyFile is not null)
                 {
-                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeKey);
                 }
 
-                // Only one thread should be doing operations on this instance of the object at a time.
-                Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
+                // If multiple threads are doing operations on this instance, one thread will succeed in updating the
+                // cache, and the rest will just perform duplicated work.
+                if (!_loadedTypes.TryGetValue(typeKey, out LoadedType? loadedType))
                 {
-                    if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
+                    Type? type = null;
+                    if ((_assemblyLoadInfo.AssemblyName != null) && (typeKey.Name.Length > 0))
                     {
                         try
                         {
                             // try to load the type using its assembly qualified name
-                            Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
+                            Type? t2 = Type.GetType(typeKey.Name + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
                             if (t2 != null)
                             {
-                                return !_isDesiredType(t2, null) ? null : t2;
+                                type = !IsDesiredType(t2, typeKey.Filter) ? null : t2;
                             }
                         }
                         catch (ArgumentException)
@@ -347,79 +368,126 @@ namespace Microsoft.Build.Shared
                         }
                     }
 
-                    if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                    if (type == null)
                     {
-                        lock (_lockObject)
+                        _publicTypes ??= new PublicTypes(_assemblyLoadInfo);
+                        foreach (Type desiredTypeInAssembly in _publicTypes.GetTypes(typeKey.Filter))
                         {
-                            if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                            // if type matches partially on its name
+                            if (typeKey.Name.Length == 0 || IsPartialTypeNameMatch(desiredTypeInAssembly.FullName, typeKey.Name))
                             {
-                                ScanAssemblyForPublicTypes();
-                                Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
+                                type = desiredTypeInAssembly;
+                                break;
                             }
                         }
                     }
 
-                    foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
-                    {
-                        // if type matches partially on its name
-                        if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
-                        {
-                            return desiredTypeInAssembly.Value;
-                        }
-                    }
+                    loadedType = type != null ? new LoadedType(type, _assemblyLoadInfo, _publicTypes?.LoadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false) : null;
+                    _loadedTypes = _loadedTypes.SetItem(typeKey, loadedType);
+                }
 
-                    return null;
-                });
-
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false) : null;
+                return loadedType;
             }
 
-            private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
+            /// <summary>
+            /// Searches all public types from an assembly for a type that matches the given type name and filter.
+            /// </summary>
+            /// <remarks>
+            /// Unlike reflection-loaded types, we can't cache the loaded Assembly or list of public Type objects.
+            /// They will be invalid as soon as the MetadataLoadContext is disposed.
+            /// </remarks>
+            private LoadedType? GetLoadedTypeFromTypeNameUsingMetadataLoadContext(LoadedTypeKey typeKey)
             {
-                return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
+                if (!_loadedTypesFromMetadataLoadContext.TryGetValue(typeKey, out LoadedType? loadedType))
                 {
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
-                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    string path = _assemblyLoadInfo.AssemblyFile;
+                    using MetadataLoadContext context = LoadMetadataLoadContext(path);
+                    Assembly loadedAssembly = context.LoadFromAssemblyPath(path);
                     int numberOfTypesSearched = 0;
                     foreach (Type publicType in loadedAssembly.GetExportedTypes())
                     {
                         numberOfTypesSearched++;
-                        if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                        if (IsDesiredType(publicType, typeKey.Filter) && (typeKey.Name.Length == 0 || IsPartialTypeNameMatch(publicType.FullName, typeKey.Name)))
                         {
-                            MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName), loadedViaMetadataLoadContext: true);
-                            _context?.Dispose();
-                            _context = null;
-                            MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
-                            return loadedType;
+                            MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName!);
+                            loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName!)!, loadedViaMetadataLoadContext: true);
+                            MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName!);
                         }
                     }
 
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
 
-                    return null;
-                });
+                    _loadedTypesFromMetadataLoadContext = _loadedTypesFromMetadataLoadContext.SetItem(typeKey, loadedType);
+                }
+
+                return loadedType;
             }
+        }
+
+        /// <summary>
+        /// Container for all public types from an assembly that match on any type filter.
+        /// </summary>
+        private class PublicTypes
+        {
+            private readonly List<Type> _taskTypes = [];
+            private readonly List<Type> _forwardingLoggerTypes = [];
+            private readonly List<Type> _loggerTypes = [];
+            private readonly List<Type> _taskFactoryTypes = [];
 
             /// <summary>
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on
             /// to find tasks, loggers, and task factories.
             /// </summary>
-            private void ScanAssemblyForPublicTypes()
+            internal PublicTypes(AssemblyLoadInfo assemblyLoadInfo)
             {
                 // we need to search the assembly for the type...
-                _loadedAssembly = LoadAssembly(_assemblyLoadInfo);
+                LoadedAssembly = LoadAssembly(assemblyLoadInfo);
 
                 // only look at public types
-                Type[] allPublicTypesInAssembly = _loadedAssembly.GetExportedTypes();
+                Type[] allPublicTypesInAssembly = LoadedAssembly.GetExportedTypes();
                 foreach (Type publicType in allPublicTypesInAssembly)
                 {
-                    if (_isDesiredType(publicType, null))
+                    TypeInfo typeInfo = publicType.GetTypeInfo();
+
+                    if (IsDesiredType(typeInfo, TypeFilter.Task))
                     {
-                        _publicTypeNameToType.Add(publicType.FullName, publicType);
+                        _taskTypes.Add(publicType);
+                    }
+
+                    if (IsDesiredType(typeInfo, TypeFilter.ForwardingLogger))
+                    {
+                        _forwardingLoggerTypes.Add(publicType);
+                    }
+
+                    if (IsDesiredType(typeInfo, TypeFilter.Logger))
+                    {
+                        _loggerTypes.Add(publicType);
+                    }
+
+                    if (IsDesiredType(typeInfo, TypeFilter.TaskFactory))
+                    {
+                        _taskFactoryTypes.Add(publicType);
                     }
                 }
             }
+
+            /// <summary>
+            /// Gets the assembly loaded from the original AsssemblyLoadInfo.
+            /// </summary>
+            internal Assembly LoadedAssembly { get; }
+
+            /// <summary>
+            /// Returns the cached list of public types which match the type filter.
+            /// </summary>
+            internal List<Type> GetTypes(TypeFilter typeFilter) => typeFilter switch
+            {
+                TypeFilter.Task => _taskTypes,
+                TypeFilter.ForwardingLogger => _forwardingLoggerTypes,
+                TypeFilter.Logger => _loggerTypes,
+                TypeFilter.TaskFactory => _taskFactoryTypes,
+                _ => throw new InternalErrorException("Unknown type filter"),
+            };
         }
     }
 }

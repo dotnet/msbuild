@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if CLR2COMPATIBILITY
 using System.Reflection;
+#endif
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
@@ -25,6 +27,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal delegate void LogError(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs);
 
+#if CLR2COMPATIBILITY
         /// <summary>
         /// Checks if the given type is a task factory.
         /// </summary>
@@ -35,6 +38,7 @@ namespace Microsoft.Build.Shared
             return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
                 type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
         }
+#endif
 
         /// <summary>
         /// Creates an ITask instance and returns it.

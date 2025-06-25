@@ -199,7 +199,7 @@ namespace Microsoft.Build.Logging
                 if (forwardingLogger)
                 {
                     // load the logger from its assembly
-                    LoadedType loggerClass = (new TypeLoader(s_forwardingLoggerClassFilter)).Load(_loggerClassName, _loggerAssembly);
+                    LoadedType loggerClass = TypeLoader.Load(_loggerClassName, _loggerAssembly, TypeLoader.TypeFilter.ForwardingLogger);
 
                     if (loggerClass != null)
                     {
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Logging
                 else
                 {
                     // load the logger from its assembly
-                    LoadedType loggerClass = (new TypeLoader(s_loggerClassFilter)).Load(_loggerClassName, _loggerAssembly);
+                    LoadedType loggerClass = TypeLoader.Load(_loggerClassName, _loggerAssembly, TypeLoader.TypeFilter.Logger);
 
                     if (loggerClass != null)
                     {
@@ -237,40 +237,6 @@ namespace Microsoft.Build.Logging
             }
 
             return logger;
-        }
-
-        /// <summary>
-        /// Used for finding loggers when reflecting through assemblies.
-        /// </summary>
-        private static readonly Func<Type, object, bool> s_forwardingLoggerClassFilter = IsForwardingLoggerClass;
-
-        /// <summary>
-        /// Used for finding loggers when reflecting through assemblies.
-        /// </summary>
-        private static readonly Func<Type, object, bool> s_loggerClassFilter = IsLoggerClass;
-
-        /// <summary>
-        /// Checks if the given type is a logger class.
-        /// </summary>
-        /// <remarks>This method is used as a Type Filter delegate.</remarks>
-        /// <returns>true, if specified type is a logger</returns>
-        private static bool IsForwardingLoggerClass(Type type, object unused)
-        {
-            return type.GetTypeInfo().IsClass &&
-                !type.GetTypeInfo().IsAbstract &&
-                (type.GetTypeInfo().GetInterface("IForwardingLogger") != null);
-        }
-
-        /// <summary>
-        /// Checks if the given type is a logger class.
-        /// </summary>
-        /// <remarks>This method is used as a TypeFilter delegate.</remarks>
-        /// <returns>true, if specified type is a logger</returns>
-        private static bool IsLoggerClass(Type type, object unused)
-        {
-            return type.GetTypeInfo().IsClass &&
-                !type.GetTypeInfo().IsAbstract &&
-                (type.GetTypeInfo().GetInterface("ILogger") != null);
         }
 
         /// <summary>

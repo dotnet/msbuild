@@ -28,11 +28,6 @@ namespace Microsoft.Build.BackEnd
         #region Data
 
         /// <summary>
-        /// The type loader to load types which derrive from ITask or ITask2
-        /// </summary>
-        private readonly TypeLoader _typeLoader = new TypeLoader(TaskLoader.IsTaskClass);
-
-        /// <summary>
         /// Name of the task wrapped by the task factory
         /// </summary>
         private string _taskName = null;
@@ -275,7 +270,7 @@ namespace Microsoft.Build.BackEnd
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
 
-                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
+                _loadedType = TypeLoader.Load(taskName, loadInfo, TypeLoader.TypeFilter.Task, _taskHostFactoryExplicitlyRequested);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -427,7 +422,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowArgumentLength(taskName, "TaskName");
                 // Parameters match, so now we check to see if the task exists.
-                return _typeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly) != null;
+                return TypeLoader.ReflectionOnlyLoad(taskName, _loadedType.Assembly, TypeLoader.TypeFilter.Task) != null;
             }
             catch (TargetInvocationException e)
             {
