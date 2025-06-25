@@ -1797,7 +1797,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
+        <target state="translated">Rejestrator terminali nie został użyty, ponieważ wykryto, że kompilacja jest uruchomiona w zautomatyzowanym środowisku.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">

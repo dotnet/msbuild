@@ -1799,7 +1799,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
+        <target state="translated">Terminálový protokolovací nástroj nebyl použit, protože bylo zjištěno, že sestavení běží v automatizovaném prostředí.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
