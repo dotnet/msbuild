@@ -1054,8 +1054,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] FilesWritten
         {
-            get => [.. _filesWritten];
-            set => _filesWritten.ToArray();
+            set { /*Do Nothing, Inputs not Allowed*/ }
+            get { return _filesWritten.ToArray(); }
         }
 
         /// <summary>
@@ -3269,7 +3269,17 @@ namespace Microsoft.Build.Tasks
                 {
 #pragma warning disable CA2000 // The OutOfProcRarClient is disposable but its disposal is handled by RegisterTaskObject.
                     OutOfProcRarClient rarClient = OutOfProcRarClient.GetInstance(buildEngine10);
-                    return rarClient.Execute(this);
+                    bool success = rarClient.Execute(this);
+
+                    // FilesWritten already defines a public setter which no-ops. Changing its visiblity is a breaking
+                    // change, so we can't set it outside of RAR when we check for properties with OutputAttribute.
+                    // It only has two possible states, so we can just compute it here.
+                    if (_stateFile != null && FileUtilities.FileExistsNoThrow(_stateFile))
+                    {
+                        _filesWritten.Add(new TaskItem(_stateFile));
+                    }
+
+                    return success;
 #pragma warning restore CA2000 // Dispose objects before losing scope
                 }
                 catch (Exception ex)

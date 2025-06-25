@@ -153,8 +153,9 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                     if (property.GetCustomAttribute<OutputAttribute>() != null)
                     {
                         // Exclude CopyLocalFiles since it is a list of references - otherwise we'll end up with duplicated task item instances.
-                        // We can reconstruct the set on our own.
-                        if (!string.Equals(property.Name, nameof(ResolveAssemblyReference.CopyLocalFiles), StringComparison.Ordinal))
+                        // Also exclude FilesWritten since we can't externally set it due to visibility. RAR will derive it before returning our result.
+                        if (!string.Equals(property.Name, nameof(ResolveAssemblyReference.CopyLocalFiles), StringComparison.Ordinal)
+                            && !string.Equals(property.Name, nameof(ResolveAssemblyReference.FilesWritten), StringComparison.Ordinal))
                         {
                             outputs.Add(reflectedProperty);
                         }
