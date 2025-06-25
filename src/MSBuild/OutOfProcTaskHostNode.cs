@@ -930,9 +930,9 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-
-                RegisterDependencyLoadHandlersFromManifest(taskLocation);
-
+#if !CLR2COMPATIBILITY
+                TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
+#endif
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
@@ -1014,39 +1014,6 @@ namespace Microsoft.Build.CommandLine
 
                     // The task has now fully completed executing
                     _taskCompleteEvent.Set();
-                }
-            }
-
-            /// <summary>
-            /// Inline tasks may have dependencies that were resolved during TaskFactory initialization.
-            /// Recreate assembly resolve handlers for these dependencies.
-            /// </summary>
-            static void RegisterDependencyLoadHandlersFromManifest(string taskLocation)
-            {
-                if (taskLocation.EndsWith("inline_task.dll", StringComparison.OrdinalIgnoreCase))
-                {
-                    string manifestPath = taskLocation + ".loadmanifest";
-                    if (File.Exists(manifestPath))
-                    {
-                        string[] directoriesToAddToAppDomain = File.ReadAllLines(manifestPath);
-                        if (directoriesToAddToAppDomain != null)
-                        {
-                            AppDomain.CurrentDomain.AssemblyResolve += (_, args) =>
-                            {
-                                var assemblyName = new AssemblyName(args.Name);
-                                foreach (string directory in directoriesToAddToAppDomain)
-                                {
-                                    string assemblyPath = Path.Combine(directory, assemblyName.Name + ".dll");
-                                    if (File.Exists(assemblyPath))
-                                    {
-                                        return Assembly.LoadFrom(assemblyPath);
-                                    }
-                                }
-
-                                return null;
-                            };
-                        }
-                    }
                 }
             }
         }

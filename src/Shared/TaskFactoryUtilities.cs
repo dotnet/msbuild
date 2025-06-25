@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Utilities
+namespace Microsoft.Build.Shared
 {
     /// <summary>
     /// Utilities class that provides common functionality for task factories such as
@@ -25,8 +23,17 @@ namespace Microsoft.Build.Utilities
     /// 3. Loading assemblies based on execution mode (in-process vs out-of-process)
     /// 4. Assembly resolution for custom reference locations
     /// </summary>
-    public static class TaskFactoryUtilities
+    internal static class TaskFactoryUtilities
     {
+
+        /// <summary>
+        /// The sub-path within the temporary directory where compiled inline tasks are located.
+        /// </summary>
+        public const string InlineTaskTempDllSubPath = nameof(InlineTaskTempDllSubPath);
+        public const string InlineTaskSuffix = "inline_task.dll";
+        public const string InlineTaskLoadManifestSuffix = ".loadmanifest";
+
+
         /// <summary>
         /// Creates a process-specific temporary directory for inline task assemblies.
         /// </summary>
@@ -35,7 +42,7 @@ namespace Microsoft.Build.Utilities
         {
             string processSpecificInlineTaskDir = Path.Combine(
                 FileUtilities.TempFileDirectory,
-                MSBuildConstants.InlineTaskTempDllSubPath,
+                InlineTaskTempDllSubPath,
                 $"pid_{EnvironmentUtilities.CurrentProcessId}");
 
             Directory.CreateDirectory(processSpecificInlineTaskDir);
@@ -59,7 +66,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="assemblyPath">The path to the task assembly.</param>
         /// <param name="directoriesToAdd">The list of directories to include in the manifest.</param>
         /// <returns>The path to the created manifest file.</returns>
-        public static string CreateLoadManifest(string assemblyPath, IEnumerable<string> directoriesToAdd)
+        public static string CreateLoadManifest(string assemblyPath, List<string> directoriesToAdd)
         {
             if (string.IsNullOrEmpty(assemblyPath))
             {
@@ -71,7 +78,7 @@ namespace Microsoft.Build.Utilities
                 throw new ArgumentNullException(nameof(directoriesToAdd));
             }
 
-            string manifestPath = assemblyPath + ".loadmanifest";
+            string manifestPath = assemblyPath + InlineTaskLoadManifestSuffix;
             File.WriteAllLines(manifestPath, directoriesToAdd);
             return manifestPath;
         }
@@ -83,7 +90,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="assemblyPath">The path to the task assembly.</param>
         /// <param name="referenceAssemblyPaths">The list of reference assembly paths to extract directories from.</param>
         /// <returns>The path to the created manifest file, or null if no valid directories were found.</returns>
-        public static string? CreateLoadManifestFromReferences(string assemblyPath, IEnumerable<string> referenceAssemblyPaths)
+        public static string? CreateLoadManifestFromReferences(string assemblyPath, List<string> referenceAssemblyPaths)
         {
             if (string.IsNullOrEmpty(assemblyPath))
             {
@@ -110,29 +117,30 @@ namespace Microsoft.Build.Utilities
         /// Only includes directories for assemblies that actually exist on disk.
         /// </summary>
         /// <param name="assemblyPaths">The collection of assembly file paths.</param>
-        /// <returns>A list of unique directory paths.</returns>
-        public static IList<string> ExtractUniqueDirectoriesFromAssemblyPaths(IEnumerable<string> assemblyPaths)
+        /// <returns>A list of unique directory paths in order of first occurrence.</returns>
+        public static List<string> ExtractUniqueDirectoriesFromAssemblyPaths(List<string> assemblyPaths)
         {
             if (assemblyPaths == null)
             {
                 throw new ArgumentNullException(nameof(assemblyPaths));
             }
 
-            var directories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var directories = new List<string>();
+            var seenDirectories = new HashSet<string>(FileUtilities.PathComparer);
 
             foreach (string assemblyPath in assemblyPaths)
             {
                 if (!string.IsNullOrEmpty(assemblyPath) && File.Exists(assemblyPath))
                 {
                     string? directory = Path.GetDirectoryName(assemblyPath);
-                    if (!string.IsNullOrEmpty(directory))
+                    if (!string.IsNullOrEmpty(directory) && seenDirectories.Add(directory))
                     {
                         directories.Add(directory);
                     }
                 }
             }
 
-            return directories.ToList();
+            return directories;
         }
 
         /// <summary>
@@ -159,12 +167,48 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
+        /// Registers assembly resolution handlers for inline tasks based on their load manifest file.
+        /// This enables out-of-process task execution to resolve dependencies that were identified
+        /// during TaskFactory initialization.
+        /// </summary>
+        /// <param name="taskLocation">The path to the task assembly.</param>
+        /// <returns>True if a manifest was found and handlers were registered, false otherwise.</returns>
+        public static bool RegisterAssemblyResolveHandlersFromManifest(string taskLocation)
+        {
+            if (string.IsNullOrEmpty(taskLocation))
+            {
+                throw new ArgumentException("Task location cannot be null or empty.", nameof(taskLocation));
+            }
+
+            if (!taskLocation.EndsWith(InlineTaskSuffix, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            string manifestPath = taskLocation + InlineTaskLoadManifestSuffix;
+            if (!File.Exists(manifestPath))
+            {
+                return false;
+            }
+
+            string[] directories = File.ReadAllLines(manifestPath);
+            if (directories?.Length > 0)
+            {
+                var resolver = CreateAssemblyResolver(new List<string>(directories));
+                AppDomain.CurrentDomain.AssemblyResolve += resolver;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Creates an assembly resolution event handler that can resolve assemblies from a list of directories.
         /// This is typically used for in-memory compiled task assemblies that have custom reference locations.
         /// </summary>
         /// <param name="searchDirectories">The directories to search for assemblies.</param>
         /// <returns>A ResolveEventHandler that can be used with AppDomain.CurrentDomain.AssemblyResolve.</returns>
-        public static ResolveEventHandler CreateAssemblyResolver(IList<string> searchDirectories)
+        public static ResolveEventHandler CreateAssemblyResolver(List<string> searchDirectories)
         {
             if (searchDirectories == null)
             {
@@ -174,13 +218,22 @@ namespace Microsoft.Build.Utilities
             return (sender, args) => TryLoadAssembly(searchDirectories, new AssemblyName(args.Name));
         }
 
+        public static void CleanInlineTaskCaches()
+        {
+            // we can't clean our own cache because we have it loaded, but we can clean caches from prior runs
+            string inlineTaskDir = Path.Combine(
+                FileUtilities.TempFileDirectory,
+                InlineTaskTempDllSubPath);
+            FileUtilities.DeleteSubdirectoriesNoThrow(inlineTaskDir);
+        }
+
         /// <summary>
         /// Attempts to load an assembly by searching in the specified directories.
         /// </summary>
         /// <param name="directories">The directories to search in.</param>
         /// <param name="assemblyName">The name of the assembly to load.</param>
         /// <returns>The loaded assembly if found, otherwise null.</returns>
-        private static Assembly? TryLoadAssembly(IList<string> directories, AssemblyName assemblyName)
+        private static Assembly? TryLoadAssembly(List<string> directories, AssemblyName assemblyName)
         {
             foreach (string directory in directories)
             {

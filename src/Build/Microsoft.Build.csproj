@@ -43,7 +43,7 @@
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
@@ -96,6 +96,7 @@
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
+    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />

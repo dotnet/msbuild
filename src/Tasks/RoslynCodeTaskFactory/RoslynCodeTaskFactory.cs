@@ -585,7 +585,7 @@ namespace Microsoft.Build.Tasks
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
             // Extract directories from resolved assemblies for assembly resolution and manifest creation
-            var directoriesToAddToAppDomain = TaskFactoryUtilities.ExtractUniqueDirectoriesFromAssemblyPaths(resolvedAssemblyReferences);
+            var directoriesToAddToAppDomain = TaskFactoryUtilities.ExtractUniqueDirectoriesFromAssemblyPaths(resolvedAssemblyReferences.ToList());
 
             handlerAddedToAppDomain = TaskFactoryUtilities.CreateAssemblyResolver(directoriesToAddToAppDomain);
             AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
@@ -598,7 +598,9 @@ namespace Microsoft.Build.Tasks
             }
 
             return !hasInvalidReference;
-        }        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null, bool isOutput = false, bool isRequired = false)
+        }
+
+        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null, bool isOutput = false, bool isRequired = false)
         {
             CodeMemberField field = new CodeMemberField(new CodeTypeReference(type), "_" + name)
             {

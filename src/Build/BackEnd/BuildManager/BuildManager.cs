@@ -1148,7 +1148,10 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
-                    CleanInlineTaskCaches();
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        TaskFactoryUtilities.CleanInlineTaskCaches();
+                    }
 
                     MSBuildEventSource.Log.BuildStop();
 
@@ -1171,26 +1174,6 @@ namespace Microsoft.Build.Execution
                 if (!string.IsNullOrEmpty(errorMessage))
                 {
                     LogErrorAndShutdown(errorMessage);
-                }
-            }
-
-            void CleanInlineTaskCaches()
-            {
-                if (Traits.Instance.ForceTaskFactoryOutOfProc)
-                {
-                    // we can't clean our own cache because we have it loaded, but we can clean caches from prior runs
-                    string inlineTaskDir = Path.Combine(
-                        FileUtilities.TempFileDirectory,
-                        MSBuildConstants.InlineTaskTempDllSubPath);
-
-                    if (Directory.Exists(inlineTaskDir))
-                    {
-                        foreach (string dir in Directory.EnumerateDirectories(inlineTaskDir))
-                        {
-                            // best effort, if it does not succeed now, it'll on a subsequent run
-                            FileUtilities.DeleteDirectoryNoThrow(dir, recursive: true, retryCount: 1);
-                        }
-                    }
                 }
             }
         }

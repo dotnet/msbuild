@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             // Assert
             directory.ShouldNotBeNull();
             Directory.Exists(directory).ShouldBeTrue();
-            directory.ShouldContain(MSBuildConstants.InlineTaskTempDllSubPath);
+            directory.ShouldContain(TaskFactoryUtilities.InlineTaskTempDllSubPath);
             directory.ShouldContain($"pid_{EnvironmentUtilities.CurrentProcessId}");
         }
 
@@ -39,23 +39,23 @@ namespace Microsoft.Build.UnitTests
             // Assert
             assemblyPath.ShouldNotBeNull();
             assemblyPath.ShouldEndWith(".dll");
-            Path.GetDirectoryName(assemblyPath).ShouldContain(MSBuildConstants.InlineTaskTempDllSubPath);
+            Path.GetDirectoryName(assemblyPath).ShouldContain(TaskFactoryUtilities.InlineTaskTempDllSubPath);
         }
 
         [Fact]
         public void CreateLoadManifest_ShouldCreateFileWithDirectories()
         {
-            // Arrange
-            string tempAssemblyPath = Path.GetTempFileName();
-            var directories = new List<string> { "dir1", "dir2", "dir3" };
-
-            try
+            using (var env = TestEnvironment.Create())
             {
+                // Arrange
+                var tempAssemblyFile = env.CreateFile(".dll");
+                var directories = new List<string> { "dir1", "dir2", "dir3" };
+
                 // Act
-                string manifestPath = TaskFactoryUtilities.CreateLoadManifest(tempAssemblyPath, directories);
+                string manifestPath = TaskFactoryUtilities.CreateLoadManifest(tempAssemblyFile.Path, directories);
 
                 // Assert
-                manifestPath.ShouldBe(tempAssemblyPath + ".loadmanifest");
+                manifestPath.ShouldBe(tempAssemblyFile.Path + TaskFactoryUtilities.InlineTaskLoadManifestSuffix);
                 File.Exists(manifestPath).ShouldBeTrue();
 
                 string[] manifestContent = File.ReadAllLines(manifestPath);
@@ -63,18 +63,6 @@ namespace Microsoft.Build.UnitTests
                 manifestContent.ShouldContain("dir1");
                 manifestContent.ShouldContain("dir2");
                 manifestContent.ShouldContain("dir3");
-            }
-            finally
-            {
-                // Cleanup
-                if (File.Exists(tempAssemblyPath))
-                {
-                    File.Delete(tempAssemblyPath);
-                }
-                if (File.Exists(tempAssemblyPath + ".loadmanifest"))
-                {
-                    File.Delete(tempAssemblyPath + ".loadmanifest");
-                }
             }
         }
 
