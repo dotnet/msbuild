@@ -1055,7 +1055,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] FilesWritten
         {
             get => [.. _filesWritten];
-            internal set => _filesWritten = [.. value];
+            set => _filesWritten.ToArray();
         }
 
         /// <summary>
