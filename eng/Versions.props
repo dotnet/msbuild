@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>17.15.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.14.0-preview-25161-14</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <!--
@@ -82,7 +82,7 @@
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25323.2</MicrosoftDotNetXUnitExtensionsVersion>
     <NuGetBuildTasksVersion>6.15.0-preview.1.86</NuGetBuildTasksVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25262.10</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25321.2</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
     <BootstrapSdkVersion>9.0.301</BootstrapSdkVersion>
