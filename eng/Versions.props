@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>17.15.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.14.0-preview-25161-14</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <!--
