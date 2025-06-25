@@ -40,7 +40,7 @@ namespace Microsoft.Build.Shared
             Logger,
 
             /// <summary>
-            /// Types which impelment ITaskFactory.
+            /// Types which implement ITaskFactory.
             /// </summary>
             TaskFactory,
         }
