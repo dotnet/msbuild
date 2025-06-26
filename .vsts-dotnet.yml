@@ -84,6 +84,9 @@ extends:
         enabled: true
         break: true
         additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
+        # If build is a test signed build, use the test signing policy file.
+        ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'), startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/')) }}:
+          policyFile: $(MBSIGN_APPFOLDER)\CSVTestSignPolicy.xml
       credscan:
         suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
