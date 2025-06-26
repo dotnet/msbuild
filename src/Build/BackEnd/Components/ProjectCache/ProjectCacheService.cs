@@ -424,34 +424,6 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
-        /// <summary>
-        /// sets either pluginInstance or experimentalPluginInstance based on the type of pluginType
-        /// </summary>
-        [Obsolete("Use CreatePluginInstanceFromType instead")]
-        private static void GetPluginInstanceFromType(Type pluginType, out ProjectCachePluginBase? pluginInstance, out Experimental.ProjectCache.ProjectCachePluginBase? experimentalPluginInstance)
-        {
-            try
-            {
-                if (typeof(Experimental.ProjectCache.ProjectCachePluginBase).IsAssignableFrom(pluginType))
-                {
-                    experimentalPluginInstance = (Experimental.ProjectCache.ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
-                    pluginInstance = null;
-                }
-                else
-                {
-                    pluginInstance = (ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
-                    experimentalPluginInstance = null;
-                }
-            }
-            catch (TargetInvocationException e) when (e.InnerException != null)
-            {
-                HandlePluginException(e.InnerException, "Constructor");
-                // Initialize out parameters to null in the catch block
-                pluginInstance = null;
-                experimentalPluginInstance = null;
-            }
-        }
-
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
         {
             Assembly assembly = LoadAssembly(pluginAssemblyPath);
