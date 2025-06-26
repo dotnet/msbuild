@@ -1121,7 +1121,11 @@ namespace Microsoft.Build.BackEnd
                         RequestEntry.Request.BuildRequestDataFlags,
                         RequestEntry.Request.SubmissionId,
                         _nodeLoggingContext.BuildEventContext.NodeId);
+                }
 
+                // Set SDK-resolved environment variables if they haven't been set yet for this configuration
+                if (!_requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet && _requestEntry.RequestConfiguration.Project != null)
+                {
                     if (((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)_requestEntry.RequestConfiguration.Project)
                         .SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
                     {
@@ -1130,6 +1134,7 @@ namespace Microsoft.Build.BackEnd
                             Environment.SetEnvironmentVariable(propertyInstance.Name, propertyInstance.EvaluatedValue, EnvironmentVariableTarget.Process);
                         }
                     }
+                    _requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet = true;
                 }
             }
             catch
