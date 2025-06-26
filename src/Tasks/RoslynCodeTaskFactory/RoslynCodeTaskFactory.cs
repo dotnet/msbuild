@@ -777,8 +777,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!Traits.Instance.ForceTaskFactoryOutOfProc && FileSystems.Default.FileExists(_assemblyPath))
                 {
-                    // also delete the process-specific temporary directory containing the assembly
-                    Directory.Delete(Path.GetDirectoryName(_assemblyPath), true);
+                    File.Delete(_assemblyPath);
                 }
             }
         }
