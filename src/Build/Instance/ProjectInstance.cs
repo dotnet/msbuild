@@ -754,12 +754,14 @@ namespace Microsoft.Build.Execution
                     _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
                 }
 
-                _sdkResolvedEnvironmentVariableProperties =
-                    new PropertyDictionary<ProjectPropertyInstance>(that._sdkResolvedEnvironmentVariableProperties.Count);
-
-                foreach (ProjectPropertyInstance sdkResolvedEnvironmentVariable in that._sdkResolvedEnvironmentVariableProperties)
+                if (that._sdkResolvedEnvironmentVariableProperties is PropertyDictionary<ProjectPropertyInstance> thatEnvProps)
                 {
-                    _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentVariable.DeepClone(_isImmutable));
+                    _sdkResolvedEnvironmentVariableProperties = new(thatEnvProps.Count);
+
+                    foreach (ProjectPropertyInstance sdkResolvedEnvironmentVariable in thatEnvProps)
+                    {
+                        _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentVariable.DeepClone(_isImmutable));
+                    }
                 }
 
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
