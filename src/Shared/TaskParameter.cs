@@ -565,10 +565,6 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private string _fullPath;
 
-            // Although we preserve escaped state for engine purposes, tasks most commonly request the unescaped ItemSpec value.
-            // Keep a cache which is lazily populated and invalidated any time the unescaped ItemSpec is requested.
-            private ItemSpecCache _itemSpecCache;
-
             /// <summary>
             /// Constructor for serialization
             /// </summary>
@@ -630,20 +626,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    if (_escapedItemSpec == null)
-                    {
-                        return string.Empty;
-                    }
-
-                    // Only return if the unescaped ItemSpec still matches the object which produced the cached value.
-                    // We only check for reference equality since this value is rarely set outside of initialization.
-                    if (!string.IsNullOrEmpty(_itemSpecCache.UnescapedItemSpec) && ReferenceEquals(_escapedItemSpec, _itemSpecCache.LastEscapedItemSpec))
-                    {
-                        return _itemSpecCache.UnescapedItemSpec;
-                    }
-
-                    _itemSpecCache.LastEscapedItemSpec = _escapedItemSpec;
-                    return _itemSpecCache.UnescapedItemSpec = EscapingUtilities.UnescapeAll(_escapedItemSpec);
+                    return (_escapedItemSpec == null) ? String.Empty : EscapingUtilities.UnescapeAll(_escapedItemSpec);
                 }
 
                 set
@@ -946,13 +929,6 @@ namespace Microsoft.Build.BackEnd
                 TaskParameterTaskItem taskItem = new();
                 taskItem.Translate(translator);
                 return taskItem;
-            }
-
-            private struct ItemSpecCache
-            {
-                internal string LastEscapedItemSpec { get; set; }
-
-                internal string UnescapedItemSpec { get; set; }
             }
         }
     }
