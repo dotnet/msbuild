@@ -4450,7 +4450,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             /// <param name="name"></param>
             /// <param name="value"></param>
-            public void AddProjectSpecificEnvironmentVariable(string name, string value)
+            public void AddSdkResolvedEnvironmentVariable(string name, string value)
             {
                 // If the property has already been set as an environment variable or by another SDK, we do not overwrite it.
                 if (EnvironmentVariablePropertiesDictionary?.Contains(name) == true

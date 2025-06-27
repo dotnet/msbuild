@@ -1381,7 +1381,7 @@ namespace Microsoft.Build.Execution
             get => _sdkResolvedEnvironmentVariableProperties;
         }
 
-        public void AddProjectSpecificEnvironmentVariable(string name, string value)
+        public void AddSdkResolvedEnvironmentVariable(string name, string value)
         {
             // If the property has already been set as an environment variable, we do not overwrite it.
             if (_environmentVariableProperties.Contains(name))

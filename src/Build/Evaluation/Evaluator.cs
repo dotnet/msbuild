@@ -1883,7 +1883,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
                     {
-                        _data.AddProjectSpecificEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                        _data.AddSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
                     }
                 }
 
