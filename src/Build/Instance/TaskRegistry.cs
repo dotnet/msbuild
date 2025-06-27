@@ -1469,7 +1469,7 @@ namespace Microsoft.Build.Execution
                         bool explicitlyLaunchTaskHost =
                             isTaskHostFactory ||
                             (
-                                Traits.s_forceTaskHostLaunch &&
+                                Traits.Instance.s_forceTaskHostLaunch &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 
