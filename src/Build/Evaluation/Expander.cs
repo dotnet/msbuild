@@ -2973,6 +2973,15 @@ namespace Microsoft.Build.Evaluation
                     return new OneOrMultipleMetadataMatches(multipleMatches);
                 }
 
+                /// <summary>
+                /// Given a string such as %(ReferenceAssembly), check if the inner substring matches the cached value.
+                /// If so, return the cached substring without allocating.
+                /// </summary>
+                /// <remarks>
+                /// <see cref="ExpandQuotedExpressionFunction"/> often receives the same expression for multiple calls.
+                /// To save on regex overhead, we cache the last substring extracted from a regex match.
+                /// This is thread-safe as long as all checks work on a consistent local reference.
+                /// </remarks>
                 private static bool TryGetCachedMetadataMatch(string stringToCheck, out string cachedMatch)
                 {
                     // Pull a local reference first in case the cached value is swapped.
