@@ -83,7 +83,7 @@ namespace Microsoft.Build.Internal
         
         
         /// <summary>
-        /// 
+        /// Using a long-running sidecar TaskHost process to reduce startup overhead and reuse in-memory caches.
         /// </summary>
         SidecarTaskHost = 512,
     }
