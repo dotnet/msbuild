@@ -16,6 +16,8 @@ namespace Microsoft.NET.StringTools
     /// </summary>
     internal sealed partial class WeakStringCache : IDisposable
     {
+        private const int WeakHandleMinimumLength = 500;
+
         /// <summary>
         /// Debug stats returned by GetDebugInfo().
         /// </summary>
@@ -52,9 +54,10 @@ namespace Microsoft.NET.StringTools
             /// <returns>The string matching the internable or null if the handle is referencing a collected string or the string is different.</returns>
             public string? GetString(ref InternableString internable)
             {
-                if (referencedString is not null && internable.Equals(referencedString))
+                string? localReferenceString = referencedString;
+                if (localReferenceString is not null && internable.Equals(localReferenceString))
                 {
-                    return referencedString;
+                    return localReferenceString;
                 }
 
                 if (!WeakHandle.IsAllocated)
@@ -81,8 +84,7 @@ namespace Microsoft.NET.StringTools
             /// <param name="str">The string to set.</param>
             public void SetString(string str)
             {
-                const int stringLengthLimit = 500;
-                if (str.Length > stringLengthLimit)
+                if (str.Length > WeakHandleMinimumLength)
                 {
                     if (WeakHandle.IsAllocated)
                     {
@@ -133,11 +135,13 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private void DisposeImpl()
         {
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 entry.Value.Free();
             }
+
             _stringsByHashCode.Clear();
+            _weakHandlesByHashCode.Clear();
         }
 
         public void Dispose()
@@ -150,9 +154,9 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private DebugInfo GetDebugInfoImpl()
         {
-            DebugInfo debugInfo = new DebugInfo();
+            DebugInfo debugInfo = new() { LiveStringCount = _stringsByHashCode.Count };
 
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 if (entry.Value.IsUsed)
                 {

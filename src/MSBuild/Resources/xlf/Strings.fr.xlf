@@ -1787,7 +1787,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
+        <target state="translated">L'enregistreur de terminal n'a pas été utilisé, car il a été détecté que la build s'exécute dans un environnement automatisé.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
