@@ -1386,13 +1386,13 @@ namespace Microsoft.Build.Execution
             // If the property has already been set as an environment variable, we do not overwrite it.
             if (_environmentVariableProperties.Contains(name))
             {
-                _loggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value);
                 return;
             }
             // If another SDK already set it, we do not overwrite it.
             else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
-                _loggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value);
                 return;
             }
 
@@ -1411,6 +1411,8 @@ namespace Microsoft.Build.Execution
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
                    .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);
             }
+
+            _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableSet", name, value);
         }
 
         /// <summary>
