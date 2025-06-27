@@ -1381,7 +1381,39 @@ namespace Microsoft.Build.Execution
             get => _sdkResolvedEnvironmentVariableProperties;
         }
 
-        public void AddProjectSpecificEnvironmentVariable(string name, string value) => throw new NotSupportedException();
+        public void AddProjectSpecificEnvironmentVariable(string name, string value)
+        {
+            // If the property has already been set as an environment variable, we do not overwrite it.
+            if (_environmentVariableProperties.Contains(name))
+            {
+                // TODO: Log a warning that the environment variable is already set?
+                _loggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
+                return;
+            }
+            // If another SDK already set it, we do not overwrite it.
+            else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
+            {
+                // TODO: Log a warning that the environment variable is already set?
+                _loggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
+                return;
+            }
+
+            _sdkResolvedEnvironmentVariableProperties ??= new();
+
+            ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
+
+            _sdkResolvedEnvironmentVariableProperties.Set(property);
+
+            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
+            _environmentVariableProperties.Set(property);
+
+            // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
+            if (GetProperty(name) is null)
+            {
+                ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
+                   .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);
+            }
+        }
 
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable
