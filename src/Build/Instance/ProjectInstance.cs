@@ -1386,14 +1386,12 @@ namespace Microsoft.Build.Execution
             // If the property has already been set as an environment variable, we do not overwrite it.
             if (_environmentVariableProperties.Contains(name))
             {
-                // TODO: Log a warning that the environment variable is already set?
                 _loggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
                 return;
             }
             // If another SDK already set it, we do not overwrite it.
             else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
-                // TODO: Log a warning that the environment variable is already set?
                 _loggingContext.LogWarning("SdkEnvironmentVariableAlreadySet", name, value);
                 return;
             }
