@@ -17,19 +17,9 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
-    [CollectionDefinition("TaskHostTests", DisableParallelization = true)]
-    public class SequentialTestCollection
-    {
-        // This class has no code, and is never created. Its purpose is just
-        // to be the place to apply [CollectionDefinition] and the interfaces.
-    }
-
-    [Collection("TaskHostTests")]
     public sealed class TaskHostFactory_Tests
     {
         private ITestOutputHelper _output;
-
-        private static object _lock = new object();
 
         public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
         {
@@ -70,23 +60,26 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 string.IsNullOrEmpty(processId).ShouldBeFalse();
                 Int32.TryParse(processId, out int pid).ShouldBeTrue();
                 Process.GetCurrentProcess().Id.ShouldNotBe(pid);
-                try
+
+                if (taskHostFactorySpecified)
                 {
-                    Process taskHostNode = Process.GetProcessById(pid);
-                    if (taskHostFactorySpecified)
+                    try
                     {
+                        Process taskHostNode = Process.GetProcessById(pid);
                         taskHostNode.WaitForExit(2000).ShouldBeTrue();
                     }
-                    else
+                    // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
+                    catch (ArgumentException e)
                     {
-                        taskHostNode.WaitForExit(2000).ShouldBeFalse();
-                        taskHostNode.Kill();
+                        e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
                     }
                 }
-                // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
-                catch (ArgumentException e)
+                else
                 {
-                    e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
+                    // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
+                    Process taskHostNode = Process.GetProcessById(pid);
+                    taskHostNode.WaitForExit(2000).ShouldBeFalse();
+                    taskHostNode.Kill();
                 }
             }           
         }
