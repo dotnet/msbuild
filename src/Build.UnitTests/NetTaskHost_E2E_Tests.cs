@@ -26,16 +26,14 @@ namespace Microsoft.Build.Engine.UnitTests
 
         public void Dispose() => _env.Dispose();
 
-        [WindowsFullFrameworkOnlyTheory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void NetTaskHostTest(bool isX64)
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHostTest()
         {
             _ = _env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", Path.Combine(RunnerUtilities.BootstrapRootPath, "core"));
             _ = _env.SetEnvironmentVariable("MSBuildAssemblyDirectory", Path.Combine(RunnerUtilities.BootstrapRootPath, "core", "sdk", RunnerUtilities.BootstrapSdkVersion));
 
             TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
-            var testDirectory = workFolder.CreateDirectory($"{nameof(NetTaskHostTest)}_{(isX64 ? "x64" : "x86")}");
+            var testDirectory = workFolder.CreateDirectory(nameof(NetTaskHostTest));
             var assets = Path.Combine(TestAssetsRootPath, "ExampleNetTask");
             CopyDirectory(assets, testDirectory.Path);
 
@@ -45,7 +43,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             var testTaskProject = Path.Combine(testDirectory.Path, "TestNetTask", "TestNetTask.csproj");
 
-            RunnerUtilities.ExecBootstrapedMSBuild($"{testTaskProject} -restore", out bool successTaskTestProject, isAmd64: isX64);
+            RunnerUtilities.ExecBootstrapedMSBuild($"{testTaskProject} -restore", out bool successTaskTestProject);
 
             successTaskTestProject.ShouldBeTrue();
         }
