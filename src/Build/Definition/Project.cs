@@ -4445,12 +4445,26 @@ namespace Microsoft.Build.Evaluation
                 return itemDefinition;
             }
 
+            /// <summary>
+            ///
+            /// </summary>
+            /// <param name="name"></param>
+            /// <param name="value"></param>
             public void AddProjectSpecificEnvironmentVariable(string name, string value)
             {
-                SdkResolvedEnvironmentVariablePropertiesDictionary ??= new();
-                SdkResolvedEnvironmentVariablePropertiesDictionary.Set(new ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance(name, value));
+                // If the property has already been set as an environment variable or by another SDK, we do not overwrite it.
+                if (EnvironmentVariablePropertiesDictionary?.Contains(name) == true
+                    || SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
+                {
+                    return;
+                }
 
-                throw new NotImplementedException();
+                ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
+
+                SdkResolvedEnvironmentVariablePropertiesDictionary ??= new();
+                SdkResolvedEnvironmentVariablePropertiesDictionary.Set(property);
+
+                SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: null);
             }
 
             /// <summary>
