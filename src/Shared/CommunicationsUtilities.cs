@@ -80,6 +80,12 @@ namespace Microsoft.Build.Internal
         /// ARM64 process
         /// </summary>
         Arm64 = 128,
+        
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        SidecarTaskHost = 512,
     }
 
     internal class Handshake

@@ -60,13 +60,19 @@ namespace Microsoft.Build.BackEnd
         /// the task host even if the requested runtime / architecture match that of the
         /// current MSBuild process.
         /// </summary>
-        private bool _taskHostFactoryExplicitlyRequested;
+        private bool _taskHostFactoryExplicitlyRequested 
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
         /// TaskLoader will be able to call back with errors.
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
+
+        private bool _isTaskHostFactory;
 
         #endregion
 
@@ -253,6 +259,7 @@ namespace Microsoft.Build.BackEnd
                 string taskElementContents,
                 IDictionary<string, string> taskFactoryIdentityParameters,
                 bool taskHostFactoryExplicitlyRequested,
+                bool isTaskHostFactory,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
                 string taskProjectFile)
@@ -266,6 +273,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
+            _isTaskHostFactory = isTaskHostFactory;
 
             try
             {
@@ -364,7 +372,8 @@ namespace Microsoft.Build.BackEnd
                     taskLoggingContext,
                     buildComponentHost,
                     mergedParameters,
-                    _loadedType
+                    _loadedType,
+                    _isTaskHostFactory
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif
