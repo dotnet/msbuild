@@ -1656,6 +1656,9 @@
   <data name="TerminalLoggerNotUsedRedirected" xml:space="preserve">
     <value>Terminal Logger was not used because the output is being redirected to a file.</value>
   </data>
+  <data name="TerminalLoggerNotUsedAutomated" xml:space="preserve">
+    <value>Terminal Logger was not used because it was detected that the build is running in an automated environment.</value>
+  </data>
   <data name="LongPaths" xml:space="preserve">
     <value>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</value>
     <comment>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</comment>
