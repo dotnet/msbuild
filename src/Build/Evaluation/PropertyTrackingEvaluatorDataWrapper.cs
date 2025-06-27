@@ -159,8 +159,12 @@ namespace Microsoft.Build.Evaluation
 
         public void AddProjectSpecificEnvironmentVariable(string name, string value)
         {
+            if (_wrapped.EnvironmentVariablePropertiesDictionary.Contains(name))
+            {
+                TrackEnvironmentVariableRead(name);
+            }
+
             _wrapped.AddProjectSpecificEnvironmentVariable(name, value);
-            throw new NotImplementedException();
         }
 
         public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext) => _wrapped.InitializeForEvaluation(toolsetProvider, evaluationContext, loggingContext);
