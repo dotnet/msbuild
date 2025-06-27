@@ -4445,6 +4445,14 @@ namespace Microsoft.Build.Evaluation
                 return itemDefinition;
             }
 
+            public void AddProjectSpecificEnvironmentVariable(string name, string value)
+            {
+                SdkResolvedEnvironmentVariablePropertiesDictionary ??= new();
+                SdkResolvedEnvironmentVariablePropertiesDictionary.Set(new ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance(name, value));
+
+                throw new NotImplementedException();
+            }
+
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>

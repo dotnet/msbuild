@@ -156,6 +156,13 @@ namespace Microsoft.Build.Evaluation
         public List<ProjectItemElement> EvaluatedItemElements => _wrapped.EvaluatedItemElements;
         public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrapped.EnvironmentVariablePropertiesDictionary;
         public PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary => _wrapped.SdkResolvedEnvironmentVariablePropertiesDictionary;
+
+        public void AddProjectSpecificEnvironmentVariable(string name, string value)
+        {
+            _wrapped.AddProjectSpecificEnvironmentVariable(name, value);
+            throw new NotImplementedException();
+        }
+
         public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext) => _wrapped.InitializeForEvaluation(toolsetProvider, evaluationContext, loggingContext);
         public void FinishEvaluation() => _wrapped.FinishEvaluation();
         public void AddItem(I item) => _wrapped.AddItem(item);

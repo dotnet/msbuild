@@ -1381,6 +1381,8 @@ namespace Microsoft.Build.Execution
             get => _sdkResolvedEnvironmentVariableProperties;
         }
 
+        public void AddProjectSpecificEnvironmentVariable(string name, string value) => throw new NotSupportedException();
+
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>

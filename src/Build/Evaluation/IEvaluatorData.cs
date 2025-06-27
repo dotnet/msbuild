@@ -215,6 +215,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary { get; }
 
+        void AddProjectSpecificEnvironmentVariable(string name, string value);
+
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>

@@ -139,6 +139,8 @@ namespace Microsoft.Build.Evaluation
 
             public PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary => _wrappedData.SdkResolvedEnvironmentVariablePropertiesDictionary;
 
+            public void AddProjectSpecificEnvironmentVariable(string name, string value) => throw new NotSupportedException();
+
             public void AddItem(I item)
             {
                 throw new NotSupportedException();
