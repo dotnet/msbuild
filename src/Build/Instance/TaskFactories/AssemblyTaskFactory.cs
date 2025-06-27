@@ -60,11 +60,7 @@ namespace Microsoft.Build.BackEnd
         /// the task host even if the requested runtime / architecture match that of the
         /// current MSBuild process.
         /// </summary>
-        private bool _taskHostFactoryExplicitlyRequested 
-        {
-            get;
-            set;
-        }
+        private bool _taskHostFactoryExplicitlyRequested;
 
         /// <summary>
         /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
