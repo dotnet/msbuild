@@ -996,28 +996,28 @@ namespace Microsoft.Build.Evaluation
                             // Anything other than an item vector expression we want to expand bare metadata in.
                             for (int n = 0; n < itemVectorExpressions.Count; n++)
                             {
-                                string vectorExpression = itemVectorExpressions[n].Value;
+                                ExpressionShredder.ItemExpressionCapture itemExpressionCapture = itemVectorExpressions[n];
 
                                 // Extract the part of the expression that appears before the item vector expression
                                 // e.g. the ABC in ABC@(foo->'%(FullPath)')
-                                string subExpressionToReplaceIn = expression.Substring(start, itemVectorExpressions[n].Index - start);
+                                string subExpressionToReplaceIn = expression.Substring(start, itemExpressionCapture.Index - start);
 
                                 RegularExpressions.ReplaceAndAppend(subExpressionToReplaceIn, MetadataMatchEvaluator.ExpandSingleMetadata, matchEvaluator, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
 
                                 // Expand any metadata that appears in the item vector expression's separator
-                                if (itemVectorExpressions[n].Separator != null)
+                                if (itemExpressionCapture.Separator != null)
                                 {
-                                    RegularExpressions.ReplaceAndAppend(itemVectorExpressions[n].Value, MetadataMatchEvaluator.ExpandSingleMetadata, matchEvaluator, -1, itemVectorExpressions[n].SeparatorStart, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
+                                    RegularExpressions.ReplaceAndAppend(itemExpressionCapture.Value, MetadataMatchEvaluator.ExpandSingleMetadata, matchEvaluator, -1, itemVectorExpressions[n].SeparatorStart, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
                                 }
                                 else
                                 {
                                     // Append the item vector expression as is
                                     // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
-                                    finalResultBuilder.Append(vectorExpression);
+                                    finalResultBuilder.Append(itemExpressionCapture.Value);
                                 }
 
                                 // Move onto the next part of the expression that isn't an item vector expression
-                                start = (itemVectorExpressions[n].Index + itemVectorExpressions[n].Length);
+                                start = (itemExpressionCapture.Index + itemExpressionCapture.Length);
                             }
                         }
 
@@ -1100,16 +1100,8 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrow(itemMetadataMatch.Success, "Need a valid item metadata.");
 
                 string metadataName = itemMetadataMatch.Groups[RegularExpressions.NameGroup].Value;
-                string itemType = null;
 
-                // check if the metadata is qualified with the item type
-                if (itemMetadataMatch.Groups[RegularExpressions.ItemSpecificationGroup].Length > 0)
-                {
-                    itemType = itemMetadataMatch.Groups[RegularExpressions.ItemTypeGroup].Value;
-                }
-
-                // look up the metadata - we may not have a value for it
-                string metadataValue = itemMetadataMatch.Value;
+                string metadataValue = null;
 
                 bool isBuiltInMetadata = FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName);
 
@@ -1117,6 +1109,14 @@ namespace Microsoft.Build.Evaluation
                     (isBuiltInMetadata && ((evaluator._options & ExpanderOptions.ExpandBuiltInMetadata) != 0)) ||
                    (!isBuiltInMetadata && ((evaluator._options & ExpanderOptions.ExpandCustomMetadata) != 0)))
                 {
+                    string itemType = null;
+
+                    // check if the metadata is qualified with the item type
+                    if (itemMetadataMatch.Groups[RegularExpressions.ItemSpecificationGroup].Length > 0)
+                    {
+                        itemType = itemMetadataMatch.Groups[RegularExpressions.ItemTypeGroup].Value;
+                    }
+
                     metadataValue = evaluator._metadata.GetEscapedValue(itemType, metadataName);
 
                     if ((evaluator._options & ExpanderOptions.LogOnItemMetadataSelfReference) != 0 &&
@@ -1133,11 +1133,16 @@ namespace Microsoft.Build.Evaluation
                     {
                         metadataValue =
 #if NET
-                                $"{metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
+                            $"{metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
 #else
                             $"{metadataValue.Substring(0, CharacterLimitPerExpansion - 3)}...";
 #endif
                     }
+                }
+                else
+                {
+                    // look up the metadata - we may not have a value for it
+                    metadataValue = itemMetadataMatch.Value;
                 }
 
                 return metadataValue;
@@ -3461,12 +3466,32 @@ namespace Microsoft.Build.Evaluation
              * WARNING: The regular expressions above MUST be kept in sync with the expressions in the ProjectWriter class.
              *************************************************************************************************************************/
 
-            public static void ReplaceAndAppend(string input, Func<Match, MetadataMatchEvaluator, string> evaluator, MetadataMatchEvaluator metadataMatchEvaluator, SpanBasedStringBuilder builder, Regex regex)
+            /// <summary>
+            /// Copied from <see cref="Regex.Replace(string, MatchEvaluator, int, int)"/> and modified to use a <see cref="SpanBasedStringBuilder"/> rather than repeatedly allocating a <see cref="System.Text.StringBuilder"/>. This
+            /// allows us to avoid intermediate string allocations when repeatedly doing replacements. 
+            /// </summary>
+            /// <param name="input">The string to operate on.</param>
+            /// <param name="evaluator">A function to transform any matches found.</param>
+            /// <param name="metadataMatchEvaluator">State used in the transform function.</param>
+            /// <param name="stringBuilder">The <see cref="SpanBasedStringBuilder"/> that will accumulate the results.</param>
+            /// <param name="regex">The <see cref="Regex"/> that will perform the matching.</param>
+            public static void ReplaceAndAppend(string input, Func<Match, MetadataMatchEvaluator, string> evaluator, MetadataMatchEvaluator metadataMatchEvaluator, SpanBasedStringBuilder stringBuilder, Regex regex)
             {
-                ReplaceAndAppend(input, evaluator, metadataMatchEvaluator, -1, regex.RightToLeft ? input.Length : 0, builder, regex);
+                ReplaceAndAppend(input, evaluator, metadataMatchEvaluator, -1, regex.RightToLeft ? input.Length : 0, stringBuilder, regex);
             }
 
-            public static void ReplaceAndAppend(string input, Func<Match, MetadataMatchEvaluator, string> evaluator, MetadataMatchEvaluator metadataMatchEvaluator, int count, int startat, SpanBasedStringBuilder stringBuilder, Regex regex)
+            /// <summary>
+            /// Copied from <see cref="Regex.Replace(string, MatchEvaluator, int, int)"/> and modified to use a <see cref="SpanBasedStringBuilder"/> rather than repeatedly allocating a <see cref="System.Text.StringBuilder"/>. This
+            /// allows us to avoid intermediate string allocations when repeatedly doing replacements.
+            /// </summary>
+            /// <param name="input">The string to operate on.</param>
+            /// <param name="evaluator">A function to transform any matches found.</param>
+            /// <param name="matchEvaluatorState">State used in the transform function.</param>
+            /// <param name="count">The number of replacements.</param>
+            /// <param name="startat">Index to start when doing replacements.</param>
+            /// <param name="stringBuilder">The <see cref="SpanBasedStringBuilder"/> that will accumulate the results.</param>
+            /// <param name="regex">The <see cref="Regex"/> that will perform the matching.</param>
+            public static void ReplaceAndAppend(string input, Func<Match, MetadataMatchEvaluator, string> evaluator, MetadataMatchEvaluator matchEvaluatorState, int count, int startat, SpanBasedStringBuilder stringBuilder, Regex regex)
             {
                 if (evaluator is null)
                 {
@@ -3488,6 +3513,11 @@ namespace Microsoft.Build.Evaluation
                     throw new ArgumentOutOfRangeException(nameof(startat));
                 }
 
+                if (regex is null)
+                {
+                    throw new ArgumentNullException(nameof(regex));
+                }
+
                 if (count == 0)
                 {
                     stringBuilder.Append(input);
@@ -3505,16 +3535,16 @@ namespace Microsoft.Build.Evaluation
 
                 if (!regex.RightToLeft)
                 {
-                    int num = 0;
+                    int prevat = 0;
                     do
                     {
-                        if (match.Index != num)
+                        if (match.Index != prevat)
                         {
-                            stringBuilder.Append(input, num, match.Index - num);
+                            stringBuilder.Append(input, prevat, match.Index - prevat);
                         }
 
-                        num = match.Index + match.Length;
-                        stringBuilder.Append(evaluator(match, metadataMatchEvaluator));
+                        prevat = match.Index + match.Length;
+                        stringBuilder.Append(evaluator(match, matchEvaluatorState));
                         if (--count == 0)
                         {
                             break;
@@ -3523,24 +3553,24 @@ namespace Microsoft.Build.Evaluation
                         match = match.NextMatch();
                     }
                     while (match.Success);
-                    if (num < input.Length)
+                    if (prevat < input.Length)
                     {
-                        stringBuilder.Append(input, num, input.Length - num);
+                        stringBuilder.Append(input, prevat, input.Length - prevat);
                     }
                 }
                 else
                 {
                     List<ReadOnlyMemory<char>> list = new List<ReadOnlyMemory<char>>();
-                    int num2 = input.Length;
+                    int prevat = input.Length;
                     do
                     {
-                        if (match.Index + match.Length != num2)
+                        if (match.Index + match.Length != prevat)
                         {
-                            list.Add(input.AsMemory().Slice(match.Index + match.Length, num2 - match.Index - match.Length));
+                            list.Add(input.AsMemory().Slice(match.Index + match.Length, prevat - match.Index - match.Length));
                         }
 
-                        num2 = match.Index;
-                        list.Add(evaluator(match, metadataMatchEvaluator).AsMemory());
+                        prevat = match.Index;
+                        list.Add(evaluator(match, matchEvaluatorState).AsMemory());
                         if (--count == 0)
                         {
                             break;
@@ -3550,14 +3580,14 @@ namespace Microsoft.Build.Evaluation
                     }
                     while (match.Success);
 
-                    if (num2 > 0)
+                    if (prevat > 0)
                     {
-                        stringBuilder.Append(input, 0, num2);
+                        stringBuilder.Append(input, 0, prevat);
                     }
 
-                    for (int num3 = list.Count - 1; num3 >= 0; num3--)
+                    for (int i = list.Count - 1; i >= 0; i--)
                     {
-                        stringBuilder.Append(list[num3]);
+                        stringBuilder.Append(list[i]);
                     }
                 }
             }
