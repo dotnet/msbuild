@@ -7,7 +7,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -16,13 +15,6 @@ namespace Microsoft.Build.Tasks.UnitTests
     /// </summary>
     public class ResolveAssemblyReference_CustomCultureTests
     {
-        private readonly ITestOutputHelper _output;
-
-        public ResolveAssemblyReference_CustomCultureTests(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-
         private static string TestAssetsRootPath { get; } = Path.Combine(
             Path.GetDirectoryName(typeof(AddToWin32Manifest_Tests).Assembly.Location) ?? AppContext.BaseDirectory,
             "TestResources",
@@ -38,7 +30,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(true, "euy;yue")]
         public void E2EScenarioTests(bool enableCustomCulture, string customCultureExclusions = "", bool isYueCultureExpected = false, bool isEuyCultureExpected = false)
         {
-            using (TestEnvironment env = TestEnvironment.Create(_output))
+            using (TestEnvironment env = TestEnvironment.Create())
             {
                 // Set up project paths
                 var testAssetsPath = TestAssetsRootPath;
@@ -65,12 +57,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 env.SetCurrentDirectory(projectBFolder);
                 var output = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
 
-                if (!buildSucceeded)
-                {
-                    _output.WriteLine(output);
-                }
-
-                buildSucceeded.ShouldBeTrue("MSBuild should complete successfully.");
+                buildSucceeded.ShouldBeTrue($"MSBuild should complete successfully. Build output: {output}");
 
                 var yueCultureResourceDll = Path.Combine(projBOutputPath, "yue", "ProjectA.resources.dll");
                 AssertCustomCulture(isYueCultureExpected, "yue", yueCultureResourceDll);
