@@ -337,6 +337,11 @@ extends:
             name: $(DncEngInternalBuildPool)
             image: $(WindowsImage)
             os: windows
+          additionalSteps:
+            - task: MicroBuildSigningPlugin@4
+              inputs:
+                signType: test
+                zipSources: false
 
     - template: eng\common\templates-official\post-build\post-build.yml@self
       parameters:
