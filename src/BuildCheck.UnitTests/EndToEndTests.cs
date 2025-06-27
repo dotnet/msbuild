@@ -984,7 +984,31 @@ public class EndToEndTests : IDisposable
             // MSBuild packages are placed in a separate folder, so we need to add it as a package source.
             AddPackageSource(doc, packageSourcesNode, "MSBuildTestPackagesSource", RunnerUtilities.ArtifactsLocationAttribute.ArtifactsLocation);
 
+            // PackageSourceMapping is enabled at the repository level. For the test packages we need to add the PackageSourceMapping as well.
+            XmlNode? packageSourceMapping = doc.CreateElement("packageSourceMapping");
+            string[] packagePatterns = new string[] { "*" };
+            AddPackageSourceMapping(doc, packageSourceMapping, "CustomCheckSource", packagePatterns);
+            AddPackageSourceMapping(doc, packageSourceMapping, "MSBuildTestPackagesSource", packagePatterns);
+            doc.DocumentElement.AppendChild(packageSourceMapping);
+
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
+        }
+    }
+
+    private void AddPackageSourceMapping(XmlDocument doc, XmlNode? packageSourceMapping, string key, string[] packagePatterns)
+    {
+        if (packageSourceMapping != null)
+        {
+            XmlElement packageSourceNode = doc.CreateElement("packageSource");
+            PopulateXmlAttribute(doc, packageSourceNode, "key", key);
+            foreach (var pattern in packagePatterns)
+            {
+                XmlElement packageNode = doc.CreateElement("package");
+                PopulateXmlAttribute(doc, packageNode, "pattern", pattern);
+                packageSourceNode.AppendChild(packageNode);
+            }
+
+            packageSourceMapping.AppendChild(packageSourceNode);
         }
     }
 
