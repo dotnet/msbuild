@@ -4446,10 +4446,10 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
-            ///
+            /// Add an environment variable (and property) based on the result of an SDK resolver.
             /// </summary>
-            /// <param name="name"></param>
-            /// <param name="value"></param>
+            /// <param name="name">Environment variable name.</param>
+            /// <param name="value">Environment variable value.</param>
             public void AddSdkResolvedEnvironmentVariable(string name, string value)
             {
                 // If the property has already been set as an environment variable or by another SDK, we do not overwrite it.
