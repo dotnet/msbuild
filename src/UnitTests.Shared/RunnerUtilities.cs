@@ -25,6 +25,11 @@ namespace Microsoft.Build.UnitTests.Shared
                                                    ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
         public static string BootstrapMsBuildBinaryLocation => BootstrapLocationAttribute.BootstrapMsBuildBinaryLocation;
+
+        public static string BootstrapSdkVersion => BootstrapLocationAttribute.BootstrapSdkVersion;
+
+        public static string BootstrapRootPath => BootstrapLocationAttribute.BootstrapRoot;
+
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
 
@@ -66,13 +71,14 @@ namespace Microsoft.Build.UnitTests.Shared
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
             bool attachProcessId = true,
+            bool isAmd64 = false,
             int timeoutMilliseconds = 30_000)
         {
 #if NET
             string pathToExecutable = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
             msbuildParameters = Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildAssemblyName) + " " + msbuildParameters;
 #else
-            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
+            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, isAmd64 ? "amd64" : string.Empty, Constants.MSBuildExecutableName);
 #endif
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
         }
