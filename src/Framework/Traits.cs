@@ -37,6 +37,8 @@ namespace Microsoft.Build.Framework
 
         internal readonly string? MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
+        public static readonly bool s_forceTaskHostLaunch = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
+
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>

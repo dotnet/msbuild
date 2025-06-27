@@ -29,6 +29,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private ITestOutputHelper _output;
 
+        private static object _lock = new object();
+
         public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
         {
             _output = testOutputHelper;
@@ -40,11 +42,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            if (envVariableSpecified)
             {
-                
-                string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
-                string pidTaskProject = $@"
+                Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+            }
+
+            try
+            {
+                using (TestEnvironment env = TestEnvironment.Create())
+                {
+
+                    string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
+                    string pidTaskProject = $@"
 <Project>
     <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""{taskFactory}"" />
     <Target Name='AccessPID'>
@@ -53,38 +62,39 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         </ProcessIdTask>
     </Target>
 </Project>";
-                pidTaskProject = pidTaskProject.Format(taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory");
-                TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
-                if (envVariableSpecified)
-                {
-                    env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
-                }
-                ProjectInstance projectInstance = new(project.Path);
-               
-                projectInstance.Build().ShouldBeTrue();
-                env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "0");
-                string processId = projectInstance.GetPropertyValue("PID");
-                string.IsNullOrEmpty(processId).ShouldBeFalse();
-                Int32.TryParse(processId, out int pid).ShouldBeTrue();
-                Process.GetCurrentProcess().Id.ShouldNotBe(pid);
-                try
-                {
-                    Process taskHostNode = Process.GetProcessById(pid);
-                    if (taskHostFactorySpecified)
+                    pidTaskProject = pidTaskProject.Format(taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory");
+                    TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
+
+                    ProjectInstance projectInstance = new(project.Path);
+
+                    projectInstance.Build().ShouldBeTrue();
+                    string processId = projectInstance.GetPropertyValue("PID");
+                    string.IsNullOrEmpty(processId).ShouldBeFalse();
+                    Int32.TryParse(processId, out int pid).ShouldBeTrue();
+                    Process.GetCurrentProcess().Id.ShouldNotBe(pid);
+                    try
                     {
-                        taskHostNode.WaitForExit(2000).ShouldBeTrue();
+                        Process taskHostNode = Process.GetProcessById(pid);
+                        if (taskHostFactorySpecified)
+                        {
+                            taskHostNode.WaitForExit(2000).ShouldBeTrue();
+                        }
+                        else
+                        {
+                            taskHostNode.WaitForExit(2000).ShouldBeFalse();
+                            taskHostNode.Kill();
+                        }
                     }
-                    else
+                    // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
+                    catch (ArgumentException e)
                     {
-                        taskHostNode.WaitForExit(2000).ShouldBeFalse();
-                        taskHostNode.Kill();
+                        e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
                     }
                 }
-                // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
-                catch (ArgumentException e)
-                {
-                    e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
-                }
+            }
+            finally 
+            {
+                Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", null);
             }
         }
 
