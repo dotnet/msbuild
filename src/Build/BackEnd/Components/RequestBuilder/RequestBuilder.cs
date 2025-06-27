@@ -1124,16 +1124,17 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Set SDK-resolved environment variables if they haven't been set yet for this configuration
-                if (!_requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet && _requestEntry.RequestConfiguration.Project != null)
+                if (!_requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet &&
+                     _requestEntry.RequestConfiguration.Project is IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> project)
                 {
-                    if (((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)_requestEntry.RequestConfiguration.Project)
-                        .SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
+                    if (project.SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
                     {
-                        foreach (var propertyInstance in environmentProperties)
+                        foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
                         {
-                            Environment.SetEnvironmentVariable(propertyInstance.Name, propertyInstance.EvaluatedValue, EnvironmentVariableTarget.Process);
+                            Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
                         }
                     }
+
                     _requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet = true;
                 }
             }
