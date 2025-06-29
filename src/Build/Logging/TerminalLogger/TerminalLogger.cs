@@ -1050,7 +1050,7 @@ public sealed partial class TerminalLogger : INodeLogger
         else
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(FormatErrorMessage(e, Indentation));
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: false));
             _buildErrorsCount++;
         }
     }
@@ -1223,7 +1223,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent);
     }
 
-    private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true)
     {
         return FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
@@ -1235,12 +1235,13 @@ public sealed partial class TerminalLogger : INodeLogger
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent);
+                indent,
+                requireFileAndLinePortion: requireFileAndLinePortion);
     }
 
     private string FormatEventMessage(
             string category,
-            string subcategory,
+            string? subcategory,
             string? message,
             string code,
             string? file,
@@ -1248,44 +1249,54 @@ public sealed partial class TerminalLogger : INodeLogger
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            string indent)
+            string indent,
+            bool requireFileAndLinePortion = true,
+            bool prependIndentation = false)
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
 
-        if (string.IsNullOrEmpty(file))
+        if (prependIndentation)
         {
-            builder.Append("MSBUILD : ");    // Should not be localized.
+            builder.Append(indent);
         }
-        else
-        {
-            builder.Append(file);
 
-            if (lineNumber == 0)
+        if (requireFileAndLinePortion)
+        {
+            if (string.IsNullOrEmpty(file))
             {
-                builder.Append(" : ");
+                builder.Append("MSBUILD : ");    // Should not be localized.
             }
             else
             {
-                if (columnNumber == 0)
+                builder.Append(file);
+
+                if (lineNumber == 0)
                 {
-                    builder.Append(endLineNumber == 0 ?
-                        $"({lineNumber}): " :
-                        $"({lineNumber}-{endLineNumber}): ");
+                    builder.Append(" : ");
                 }
                 else
                 {
-                    if (endLineNumber == 0)
+                    if (columnNumber == 0)
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        builder.Append(endLineNumber == 0 ?
+                            $"({lineNumber}): " :
+                            $"({lineNumber}-{endLineNumber}): ");
                     }
                     else
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber}-{endLineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        if (endLineNumber == 0)
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        }
+                        else
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber}-{endLineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        }
                     }
                 }
             }
