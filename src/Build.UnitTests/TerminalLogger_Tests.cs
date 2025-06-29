@@ -596,6 +596,23 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public Task LogEvaluationErrorFromEngine()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Normal;
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                ErrorRaised?.Invoke(_eventSender, new BuildErrorEventArgs(
+                    "MSB0001", "EvaluationError", "MSBUILD", 0, 0, 0, 0,
+                    "An error occurred during evaluation.", null, null)
+                {
+                    BuildEventContext = new BuildEventContext(1, -1, -1, -1) // context that belongs to no project
+                });
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
         public Task PrintBuildSummaryNormalVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
