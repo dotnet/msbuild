@@ -321,6 +321,11 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
 
+        if (eventSource is IEventSource3 eventSource3)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
+
         if (eventSource is IEventSource4 eventSource4)
         {
             eventSource4.IncludeEvaluationPropertiesAndItems();
@@ -855,6 +860,17 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         string? message = e.Message;
+
+        if (e is TaskParameterEventArgs taskArgs)
+        {
+            if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
+            {
+                if (taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
+                {
+                    TryReadSourceControlInformationForProject(taskArgs.BuildEventContext, taskArgs.Items as IList<Execution.ProjectItemInstance>);
+                }
+            }
+        }
         if (message is not null && e.Importance == MessageImportance.High)
         {
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
@@ -1001,6 +1017,33 @@ public sealed partial class TerminalLogger : INodeLogger
             // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
             RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             _buildWarningsCount++;
+        }
+    }
+
+
+    private void TryReadSourceControlInformationForProject(BuildEventContext? context, IEnumerable<ITaskItem>? sourceRoots)
+    {
+        if (context is null || sourceRoots is null)
+        {
+            return;
+        }
+
+        var projectContext = new ProjectContext(context);
+        if (_projects.TryGetValue(projectContext, out TerminalProjectInfo? project))
+        {
+            if (project.SourceRoot is not null)
+            {
+                return;
+            }
+            var sourceControlSourceRoot = sourceRoots.FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")));
+            if (sourceControlSourceRoot is not null)
+            {
+                // This takes the first root from source control the first time it's added to the build.
+                // This seems to be the Target InitializeSourceControlInformationFromSourceControlManager.
+                // So far this has been acceptable, but if a SourceRoot would be modified by a task later on
+                // (e.g. TranslateGitHubUrlsInSourceControlInformation) we would lose that modification.
+                project.SourceRoot = sourceControlSourceRoot.ItemSpec.AsMemory();
+            }
         }
     }
 
