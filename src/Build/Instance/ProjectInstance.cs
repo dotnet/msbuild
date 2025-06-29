@@ -1673,7 +1673,7 @@ namespace Microsoft.Build.Execution
         /// <comments>
         /// Already a readonly collection
         /// </comments>
-        ICollection<ProjectItemInstance> IItemProvider<ProjectItemInstance>.GetItems(string itemType)
+        IReadOnlyCollection<ProjectItemInstance> IItemProvider<ProjectItemInstance>.GetItems(string itemType)
         {
             return _items[itemType];
         }
@@ -1987,7 +1987,7 @@ namespace Microsoft.Build.Execution
         public ICollection<ProjectItemInstance> GetItems(string itemType)
         {
             // GetItems already returns a readonly collection
-            return ((IItemProvider<ProjectItemInstance>)this).GetItems(itemType);
+            return new ReadOnlyCollection<ProjectItemInstance>(((IItemProvider<ProjectItemInstance>)this).GetItems(itemType));
         }
 
         /// <summary>
@@ -2508,7 +2508,7 @@ namespace Microsoft.Build.Execution
 
                 foreach (string itemType in _items.ItemTypes)
                 {
-                    ICollection<ProjectItemInstance> itemList = _items[itemType];
+                    IReadOnlyCollection<ProjectItemInstance> itemList = _items[itemType];
                     int itemCount = itemList.Count;
                     translator.Translate(ref itemCount);
                     foreach (ProjectItemInstance item in itemList)
