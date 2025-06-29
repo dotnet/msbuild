@@ -1050,7 +1050,9 @@ public sealed partial class TerminalLogger : INodeLogger
         else
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: false));
+            // For nicer formatting, any messages from the engine we strip the file portion from.
+            var hasMSBuildPlaceholderLocation = e.File.Equals("MSBUILD", StringComparison.Ordinal);
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: !hasMSBuildPlaceholderLocation));
             _buildErrorsCount++;
         }
     }
@@ -1230,7 +1232,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
-                file: HighlightFileName(e.File),
+                file: requireFileAndLinePortion ? HighlightFileName(e.File) : null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
@@ -1265,7 +1267,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             if (string.IsNullOrEmpty(file))
             {
-                builder.Append("MSBUILD : ");    // Should not be localized.
+                builder.Append("MSBUILD : ");  // Should not be localized.
             }
             else
             {
