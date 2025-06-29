@@ -471,6 +471,16 @@ public sealed partial class TerminalLogger : INodeLogger
         _shutdown = true;
     }
 
+    public MessageImportance GetMinimumMessageImportance()
+    {
+        if (Verbosity == LoggerVerbosity.Quiet)
+        {
+            // If the verbosity is quiet, we don't want to log anything.
+            return MessageImportance.High - 1;
+        }
+        return MessageImportance.High;
+    }
+
     #endregion
 
     #region Logger callbacks
