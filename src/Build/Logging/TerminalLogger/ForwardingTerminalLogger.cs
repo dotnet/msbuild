@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging;
@@ -85,18 +84,6 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         if (e.BuildEventContext is null)
         {
             return;
-        }
-
-        if (e is TaskParameterEventArgs taskArgs)
-        {
-            if (taskArgs.Kind == TaskParameterMessageKind.AddItem)
-            {
-                if (taskArgs.ItemType.Equals("SourceRoot", StringComparison.OrdinalIgnoreCase))
-                {
-                    BuildEventRedirector?.ForwardEvent(taskArgs);
-                    return;
-                }
-            }
         }
 
         if (e.Message is not null &&
