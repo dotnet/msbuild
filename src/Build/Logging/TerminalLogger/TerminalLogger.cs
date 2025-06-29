@@ -283,7 +283,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return new TerminalLogger(verbosity, originalConsoleMode);
         }
-        
+
         // If explicitly disabled, always use console logger
         if (isDisabled)
         {
@@ -1188,7 +1188,7 @@ public sealed partial class TerminalLogger : INodeLogger
             return null;
         }
     }
-    
+
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
@@ -1205,7 +1205,7 @@ public sealed partial class TerminalLogger : INodeLogger
         else
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(FormatErrorMessage(e, Indentation));
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: false));
             _buildErrorsCount++;
         }
     }
@@ -1420,7 +1420,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 prependIndentation: true);
     }
 
-    private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true)
     {
         return FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
@@ -1433,7 +1433,8 @@ public sealed partial class TerminalLogger : INodeLogger
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
                 indent,
-                terminalWidth: Terminal.Width);
+                terminalWidth: Terminal.Width,
+                requireFileAndLinePortion: requireFileAndLinePortion);
     }
 
     private static string FormatEventMessage(
@@ -1453,6 +1454,7 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
+
         if (prependIndentation)
         {
             builder.Append(indent);
