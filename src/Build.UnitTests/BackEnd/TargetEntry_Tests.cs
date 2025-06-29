@@ -652,7 +652,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Project>
         ";
 
-            // Only log critical event is false by default
             MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content, enableTargetOutputLogging: allowTargetOutputsLogging);
 
             Assert.Equal(3, log.TargetFinishedEvents.Count);
@@ -679,29 +678,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Assert.Null(targetOutputsB);
                 Assert.Null(targetOutputsC);
             }
-
-            if (returnsEnabledForThisProject)
-            {
-                // b should have stuff, c should not have stuff, because only B has Returns
-                Assert.NotNull(targetOutputsB);
-                List<ITaskItem> outputListB = [.. targetOutputsB as List<ITaskItem> ];
-                Assert.Single(outputListB);
-                Assert.Equal("item1", outputListB[0].ItemSpec);
-                Assert.Null(targetOutputsC);
-            }
             else
             {
-                // b and c should have stuff because everything has Outputs
-                Assert.NotNull(targetOutputsB);
-                Assert.NotNull(targetOutputsC);
 
-                List<ITaskItem> outputListB = [.. targetOutputsB as List<ITaskItem> ];
-                Assert.Single(outputListB);
-                Assert.Equal("item1", outputListB[0].ItemSpec);
+                if (returnsEnabledForThisProject)
+                {
+                    // b should have stuff, c should not have stuff, because only B has Returns
+                    Assert.NotNull(targetOutputsB);
+                    List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
+                    Assert.Single(outputListB);
+                    Assert.Equal("item1", outputListB[0].ItemSpec);
 
-                List<ITaskItem> outputListC = [.. targetOutputsC as List<ITaskItem> ];
-                Assert.Single(outputListC);
-                Assert.Equal("item2", outputListC[0].ItemSpec);
+                    Assert.Null(targetOutputsC);
+                }
+                else
+                {
+                    // b and c should have stuff because everything has Outputs
+                    Assert.NotNull(targetOutputsB);
+                    Assert.NotNull(targetOutputsC);
+
+                    List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
+                    Assert.Single(outputListB);
+                    Assert.Equal("item1", outputListB[0].ItemSpec);
+
+                    List<ITaskItem> outputListC = [.. targetOutputsC as IEnumerable<ITaskItem> ];
+                    Assert.Single(outputListC);
+                    Assert.Equal("item2", outputListC[0].ItemSpec);
+                }
             }
         }
 

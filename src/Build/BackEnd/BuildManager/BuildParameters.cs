@@ -964,6 +964,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _isTelemetryEnabled);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
+            translator.Translate(ref _enableTargetOutputLogging);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

@@ -1361,7 +1361,7 @@ namespace Microsoft.Build.UnitTests
             {
                 // need to use a separate project collection so we can set the logging service flags required to make this work
                 projectCollection = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false);
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: enableTargetOutputLogging);
                 disposable = projectCollection;
             }
             // ensure we clean up, but only if we made a new project collection
@@ -1370,11 +1370,13 @@ namespace Microsoft.Build.UnitTests
             Project project = projectFromString.Project;
             logger ??= new MockLogger
             {
-                AllowTaskCrashes = allowTaskCrash
+                AllowTaskCrashes = allowTaskCrash,
             };
-            List<ILogger> loggers = new List<ILogger>();
-            loggers.Add(logger);
-            result = project.Build(loggers);
+            if (enableTargetOutputLogging)
+            {
+                logger.Verbosity = LoggerVerbosity.Diagnostic;
+            }
+            result = project.Build([logger]);
         }
 
         public static void BuildProjectWithNewOMAndBinaryLogger([StringSyntax(StringSyntaxAttribute.Xml)] string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
