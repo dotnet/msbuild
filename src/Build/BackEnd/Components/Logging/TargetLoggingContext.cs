@@ -35,7 +35,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             _projectLoggingContext = projectLoggingContext;
             _target = target;
-            EnableTargetOutputLogging = projectLoggingContext.LoggingService.EnableTargetOutputLogging;
             this.IsValid = true;
         }
 
@@ -56,17 +55,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal TargetLoggingContext(ILoggingService loggingService, BuildEventContext outOfProcContext)
             : base(loggingService, outOfProcContext, true)
         {
-            EnableTargetOutputLogging = loggingService.EnableTargetOutputLogging;
             this.IsValid = true;
-        }
-
-        /// <summary>
-        /// Should target outputs be logged also.
-        /// </summary>
-        internal static bool EnableTargetOutputLogging
-        {
-            get;
-            set;
         }
 
         /// <summary>
@@ -101,7 +90,7 @@ namespace Microsoft.Build.BackEnd.Logging
             TargetOutputItemsInstanceEnumeratorProxy targetOutputWrapper = null;
 
             // Only log target outputs if we are going to log a target finished event and the environment variable is set and the target outputs are not null
-            if (!LoggingService.OnlyLogCriticalEvents && EnableTargetOutputLogging && targetOutputs != null)
+            if (!LoggingService.OnlyLogCriticalEvents && LoggingService.EnableTargetOutputLogging && targetOutputs != null)
             {
                 targetOutputWrapper = new TargetOutputItemsInstanceEnumeratorProxy(targetOutputs);
             }
