@@ -2792,6 +2792,11 @@ namespace Microsoft.Build.Execution
                     parameters.LogTaskInputs ||
                     loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
                     loggingService?.IncludeTaskInputs == true;
+
+                parameters.EnableTargetOutputLogging =
+                    parameters.EnableTargetOutputLogging ||
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggingService?.EnableTargetOutputLogging == true;
             }
 
             if (remoteLoggers != null)
