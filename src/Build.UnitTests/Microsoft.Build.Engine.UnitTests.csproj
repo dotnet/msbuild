@@ -24,6 +24,7 @@
     <PackageReference Include="FakeItEasy" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
