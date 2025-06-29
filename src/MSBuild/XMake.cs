@@ -1307,7 +1307,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
-            bool isTaskInputLoggingRequired,
+            bool isTaskAndTargetItemLoggingRequired,
             bool isBuildCheckEnabled,
             string[] inputResultsCaches,
             string outputResultsCache,
@@ -1368,7 +1368,7 @@ namespace Microsoft.Build.CommandLine
                 // This is a hack for now to make sure the perf hit only happens
                 // on diagnostic. This should be changed to pipe it through properly,
                 // perhaps as part of a fuller tracing feature.
-                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic || isTaskInputLoggingRequired;
+                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic || isTaskAndTargetItemLoggingRequired;
 
                 if (!logTaskInputs)
                 {
@@ -1410,6 +1410,7 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
+                    enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
@@ -1517,6 +1518,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
+                    parameters.EnableTargetOutputLogging = isTaskAndTargetItemLoggingRequired;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up

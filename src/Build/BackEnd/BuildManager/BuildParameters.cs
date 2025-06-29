@@ -176,6 +176,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private bool _onlyLogCriticalEvents;
 
+        private bool _enableTargetOutputLogging;
+
         /// <summary>
         /// The UI culture.
         /// </summary>
@@ -253,6 +255,7 @@ namespace Microsoft.Build.Execution
 
             _maxNodeCount = projectCollection.MaxNodeCount;
             _onlyLogCriticalEvents = projectCollection.OnlyLogCriticalEvents;
+            _enableTargetOutputLogging = projectCollection.EnableTargetOutputLogging;
             ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
             _defaultToolsVersion = projectCollection.DefaultToolsVersion;
 
@@ -324,6 +327,7 @@ namespace Microsoft.Build.Execution
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
+            _enableTargetOutputLogging = other.EnableTargetOutputLogging;
         }
 
         /// <summary>
@@ -569,6 +573,15 @@ namespace Microsoft.Build.Execution
         {
             get => _onlyLogCriticalEvents;
             set => _onlyLogCriticalEvents = value;
+        }
+
+        /// <summary>
+        /// When true, target outputs (and returns) are logged as well.
+        /// </summary>
+        public bool EnableTargetOutputLogging
+        {
+            get => _enableTargetOutputLogging;
+            set => _enableTargetOutputLogging = value;
         }
 
         /// <summary>
