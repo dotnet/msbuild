@@ -76,7 +76,7 @@ internal sealed class Terminal : ITerminal
                 return BigUnknownDimension;
             }
 
-            return Console.BufferHeight == 0 ? BigUnknownDimension : Console.BufferWidth;
+            return Console.BufferWidth == 0 ? BigUnknownDimension : Console.BufferWidth;
         }
     }
 
