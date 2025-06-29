@@ -1053,7 +1053,7 @@ public sealed partial class TerminalLogger : INodeLogger
         else
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(FormatErrorMessage(e, Indentation));
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: false));
             _buildErrorsCount++;
         }
     }
@@ -1249,7 +1249,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 prependIndentation: true);
     }
 
-    private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true)
     {
         return FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
@@ -1261,7 +1261,8 @@ public sealed partial class TerminalLogger : INodeLogger
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent);
+                indent,
+                requireFileAndLinePortion: requireFileAndLinePortion);
     }
 
     private string FormatEventMessage(
