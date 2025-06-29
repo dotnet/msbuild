@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging;
@@ -35,7 +36,7 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         eventSource.ProjectStarted += ForwardEventUnconditionally;
         eventSource.ProjectFinished += ForwardEventUnconditionally;
         eventSource.TargetStarted += ForwardEventUnconditionally;
-        eventSource.TargetFinished += ForwardEventUnconditionally;
+        eventSource.TargetFinished += ScrubOutputsFromIrrelevantTargets;
         eventSource.TaskStarted += TaskStarted;
 
         eventSource.MessageRaised += MessageRaised;
@@ -60,6 +61,25 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
             e is ProjectEvaluationFinishedEventArgs)
         {
             // Forward evaluation events unconditionally
+            BuildEventRedirector?.ForwardEvent(e);
+        }
+    }
+
+    private static HashSet<string> _targetsWeCareAbout = [
+        "GetTargetPath",
+        "InitializeSourceRootMappedPaths"
+    ];
+
+    private void ScrubOutputsFromIrrelevantTargets(object sender, TargetFinishedEventArgs e)
+    {
+        // If the target is not relevant to the terminal logger, scrub the outputs
+        if (_targetsWeCareAbout.Contains(e.TargetName))
+        {
+            BuildEventRedirector?.ForwardEvent(e);
+        }
+        else
+        {
+            e.TargetOutputs = null;
             BuildEventRedirector?.ForwardEvent(e);
         }
     }
