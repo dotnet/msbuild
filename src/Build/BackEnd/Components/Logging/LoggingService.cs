@@ -1846,11 +1846,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // The terminal logger consumes only high priority messages.
-                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger.TerminalLogger"
-                    ? MessageImportance.High
+                Build.Logging.TerminalLogger terminalLogger => terminalLogger.GetMinimumMessageImportance(),
+                _ =>
                     // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
-                    : MessageImportance.Low,
+                    MessageImportance.Low,
             };
 
             if (minimumImportance != null)
