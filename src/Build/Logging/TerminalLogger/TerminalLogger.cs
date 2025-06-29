@@ -332,13 +332,21 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public string? Parameters { get; set; } = null;
 
+    private bool _initialized = false;
+
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
+        if (_initialized)
+        {
+            // This is a no-op, but we need to ensure that the logger is initialized only once.
+            return;
+        }
         // When MSBUILDNOINPROCNODE enabled, NodeId's reported by build start with 2. We need to reserve an extra spot for this case.
         _nodes = new TerminalNodeStatus[nodeCount + 1];
 
         Initialize(eventSource);
+        _initialized = true;
     }
 
     /// <inheritdoc/>
@@ -346,18 +354,18 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         ParseParameters();
 
-        eventSource.BuildStarted += BuildStarted;
-        eventSource.BuildFinished += BuildFinished;
-        eventSource.ProjectStarted += ProjectStarted;
-        eventSource.ProjectFinished += ProjectFinished;
-        eventSource.TargetStarted += TargetStarted;
-        eventSource.TargetFinished += TargetFinished;
-        eventSource.TaskStarted += TaskStarted;
-        eventSource.StatusEventRaised += StatusEventRaised;
+        eventSource.HandleBuildStarted(BuildStarted);
+        eventSource.HandleBuildFinished(BuildFinished);
+        eventSource.HandleProjectStarted(ProjectStarted);
+        eventSource.HandleProjectFinished(ProjectFinished);
+        eventSource.HandleTargetStarted(TargetStarted);
+        eventSource.HandleTargetFinished(TargetFinished);
+        eventSource.HandleTaskStarted(TaskStarted);
+        eventSource.HandleStatusEventRaised(StatusEventRaised);
 
-        eventSource.MessageRaised += MessageRaised;
-        eventSource.WarningRaised += WarningRaised;
-        eventSource.ErrorRaised += ErrorRaised;
+        eventSource.HandleMessageRaised(MessageRaised);
+        eventSource.HandleWarningRaised(WarningRaised);
+        eventSource.HandleErrorRaised(ErrorRaised);
 
         if (eventSource is IEventSource3 eventSource3)
         {
@@ -444,16 +452,23 @@ public sealed partial class TerminalLogger : INodeLogger
         return true;
     }
 
+    private bool _shutdown = false;
 
     /// <inheritdoc/>
     public void Shutdown()
     {
+        if (_shutdown)
+        {
+            // Already shut down.
+            return;
+        }
         NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
         _cts.Cancel();
         _refresher?.Join();
         Terminal.Dispose();
         _cts.Dispose();
+        _shutdown = true;
     }
 
     #endregion
