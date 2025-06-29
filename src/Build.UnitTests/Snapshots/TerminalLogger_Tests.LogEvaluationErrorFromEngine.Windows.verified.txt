@@ -1,0 +1,5 @@
+﻿]9;4;3;\MSB0001 [31;1merror[m [31;1mEvaluationError[m: An error occurred during evaluation.
+[?25l[1F
+[?25h
+Build [31;1mfailed with 1 error(s)[m in 5.0s
+]9;4;0;\
