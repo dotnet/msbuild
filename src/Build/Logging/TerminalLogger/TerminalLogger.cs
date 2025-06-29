@@ -762,7 +762,7 @@ public sealed partial class TerminalLogger : INodeLogger
                                 }
                             }
 
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(uri, outputPathSpan.ToString())));
+                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(uri, projectDisplayPathSpan.ToString())));
                         }
                         else
                         {
