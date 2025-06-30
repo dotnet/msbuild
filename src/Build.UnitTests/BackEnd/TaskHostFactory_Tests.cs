@@ -78,7 +78,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 {
                     // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
                     Process taskHostNode = Process.GetProcessById(pid);
-                    taskHostNode.WaitForExit(2000).ShouldBeFalse();
+                    taskHostNode.WaitForExit(2000).ShouldBeFalse($"The executed MSBuild Version: {projectInstance.GetProperty("MSBuildVersion")}");
                     taskHostNode.Kill();
                 }
             }
