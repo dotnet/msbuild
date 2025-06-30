@@ -3,11 +3,12 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     ///     Events logged with this logger will get pushed into MSBuild's logging infrastructure.
     /// </summary>
+    [System.Obsolete("This class was moved to Microsoft.Build.ProjectCache namespace")]
     public abstract class PluginLoggerBase
     {
         public abstract bool HasLoggedErrors { get; protected set; }

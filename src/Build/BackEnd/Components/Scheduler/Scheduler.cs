@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
@@ -174,7 +174,7 @@ namespace Microsoft.Build.BackEnd
         private int _loggedWarningsForProxyBuildsOnOutOfProcNodes = 0;
 
         /// <summary>
-        /// If we hit the path that prevents from completing build submission this flag is set. 
+        /// If we hit the path that prevents from completing build submission this flag is set.
         /// </summary>
 #pragma warning disable IDE0052 // Remove unread private members because we need them for traceability only
 #pragma warning disable CS0414 // The field is assigned but its value is never used

@@ -9,11 +9,12 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     /// Result types that a plugin can return for a given build request.
     /// </summary>
+    [Obsolete("This class was moved to Microsoft.Build.ProjectCache namespace")]
     public enum CacheResultType
     {
         /// <summary>
@@ -44,6 +45,7 @@ namespace Microsoft.Build.ProjectCache
     ///     contain information about what <see cref="Execution.BuildResult"/> MSBuild should use for the queried project.
     ///     It is assumed that all cache hits result in a successful <see cref="Execution.BuildResult"/>.
     /// </summary>
+    [Obsolete("This class was moved to Microsoft.Build.ProjectCache namespace")]
     public class CacheResult
     {
         public CacheResultType ResultType { get; }
@@ -133,20 +135,6 @@ namespace Microsoft.Build.ProjectCache
             var taskItem = new ProjectItemInstance.TaskItem(taskItemInterface.EvaluatedIncludeEscaped, definingFileEscaped: null);
             taskItemInterface.CopyMetadataTo(taskItem);
             return taskItem;
-        }
-
-#pragma warning disable CS0618 // Type or member is obsolete
-        internal static CacheResult FromExperimental(Experimental.ProjectCache.CacheResult experimentalResult)
-        {
-            if (experimentalResult.Exception != null)
-            {
-                return IndicateException(experimentalResult.Exception);
-            }
-
-            return new CacheResult(
-                    (CacheResultType)(int)experimentalResult.ResultType,
-                    buildResult: experimentalResult.BuildResult,
-                    proxyTargets: ProxyTargets.FromExperimental(experimentalResult.ProxyTargets));
         }
     }
 }
