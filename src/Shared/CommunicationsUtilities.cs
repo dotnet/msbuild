@@ -80,11 +80,6 @@ namespace Microsoft.Build.Internal
         /// ARM64 process.
         /// </summary>
         Arm64 = 128,
-
-        /// <summary>
-        /// 32-bit process.
-        /// </summary>
-        X86 = 256,
     }
 
     internal class Handshake
@@ -790,11 +785,7 @@ namespace Microsoft.Build.Internal
 
             if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
-                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x86, StringComparison.OrdinalIgnoreCase))
-                {
-                    context |= HandshakeOptions.X86;
-                }
-                else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
                 {
                     context |= HandshakeOptions.X64;
                 }

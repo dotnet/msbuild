@@ -585,8 +585,13 @@ namespace Microsoft.Build.BackEnd
             var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
             var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
 
-            return Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X86) &&
-                   Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+            // not X64 or Arm64 means we are running on x86
+            bool receivedIsX86 = !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
+                                 !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
+
+            bool expectedIsX64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+
+            return receivedIsX86 && expectedIsX64;
         }
 #endif
 

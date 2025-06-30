@@ -1,22 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFramework>net9.0</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\ExampleTask\ExampleTask.csproj" />
-  </ItemGroup>
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(AssemblyLocation)', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
 
   <UsingTask
 	    TaskName="ExampleTask"
-      AssemblyFile="$(OutDir)ExampleTask.dll"
+      AssemblyFile="$(ExampleTaskPath)"
 	    Runtime="NET"/>
 	
   <Target Name="TestTask" BeforeTargets="Build">
 	  <ExampleTask />
   </Target>
-	
+
 </Project>
