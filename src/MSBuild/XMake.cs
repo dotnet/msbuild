@@ -734,6 +734,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                bool isTaskInputLoggingRequired = false;
                 bool isBuildCheckEnabled = false;
                 string[] getProperty = [];
                 string[] getItem = [];
@@ -782,6 +783,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
+                                            ref isTaskInputLoggingRequired,
                                             ref isBuildCheckEnabled,
                                             ref getProperty,
                                             ref getItem,
@@ -898,6 +900,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    isTaskInputLoggingRequired,
                                     isBuildCheckEnabled,
                                     inputResultsCaches,
                                     outputResultsCache,
@@ -1304,6 +1307,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            bool isTaskAndTargetItemLoggingRequired,
             bool isBuildCheckEnabled,
             string[] inputResultsCaches,
             string outputResultsCache,
@@ -1364,7 +1368,7 @@ namespace Microsoft.Build.CommandLine
                 // This is a hack for now to make sure the perf hit only happens
                 // on diagnostic. This should be changed to pipe it through properly,
                 // perhaps as part of a fuller tracing feature.
-                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic || isBuildCheckEnabled;
+                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic || isTaskAndTargetItemLoggingRequired;
 
                 if (!logTaskInputs)
                 {
@@ -1406,6 +1410,7 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
+                    enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
@@ -1513,6 +1518,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
+                    parameters.EnableTargetOutputLogging = isTaskAndTargetItemLoggingRequired;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -2533,6 +2539,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
+            ref bool isTaskInputLoggingRequired,
             ref bool isBuildCheckEnabled,
             ref string[] getProperty,
             ref string[] getItem,
@@ -2562,10 +2569,11 @@ namespace Microsoft.Build.CommandLine
 #endif
 
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
+            isTaskInputLoggingRequired = useTerminalLogger;
 
             // This is temporary until we can remove the need for the environment variable.
-            // DO NOT use this environment variable for any new features as it will be removed without further notice.
-            Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
+                // DO NOT use this environment variable for any new features as it will be removed without further notice.
+                Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
 
             DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
 
@@ -2672,6 +2680,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref isTaskInputLoggingRequired,
                                                            ref isBuildCheckEnabled,
                                                            ref getProperty,
                                                            ref getItem,
@@ -2757,8 +2766,8 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
-
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
+                    isTaskInputLoggingRequired = isTaskInputLoggingRequired || isBuildCheckEnabled;
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
@@ -3038,7 +3047,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Check for environment variables that indicate automated environments
-            string[] automatedEnvironmentVariables = 
+            string[] automatedEnvironmentVariables =
             {
                 "COPILOT_API_URL",    // GitHub Copilot
                 "BUILD_ID",           // Jenkins, Google Cloud Build
@@ -4111,25 +4120,24 @@ namespace Microsoft.Build.CommandLine
                     /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
                     /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
                     /// so changing this list may impact the minimum message importance logging optimization.
-                    string[] configurableForwardingLoggerParameters =
-                    [
-                        "BUILDSTARTEDEVENT",
-                        "BUILDFINISHEDEVENT",
-                        "PROJECTSTARTEDEVENT",
-                        "PROJECTFINISHEDEVENT",
-                        "TARGETSTARTEDEVENT",
-                        "TARGETFINISHEDEVENT",
-                        "TASKSTARTEDEVENT",
-                        "HIGHMESSAGEEVENT",
-                        "WARNINGEVENT",
-                        "ERROREVENT"
-                    ];
-
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", configurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
-                    distributedLoggerRecords.Add(forwardingLoggerRecord);
+                    distributedLoggerRecords.Add(CreateTerminalLoggerForwardingLoggerRecord(logger, aggregatedLoggerParameters, verbosity));
                 }
             }
+        }
+
+        private static DistributedLoggerRecord CreateTerminalLoggerForwardingLoggerRecord(TerminalLogger centralLogger, string loggerParameters, LoggerVerbosity inputVerbosity)
+        {
+            string verbosityParameter = ExtractAnyLoggerParameter(loggerParameters, "verbosity", "v");
+            string verbosityValue = ExtractAnyParameterValue(verbosityParameter);
+            LoggerVerbosity effectiveVerbosity = inputVerbosity;
+            if (!string.IsNullOrEmpty(verbosityValue))
+            {
+                effectiveVerbosity = ProcessVerbositySwitch(verbosityValue);
+            }
+            var tlForwardingType = typeof(ForwardingTerminalLogger);
+            LoggerDescription forwardingLoggerDescription = new LoggerDescription(tlForwardingType.FullName, tlForwardingType.Assembly.FullName, null, loggerParameters, effectiveVerbosity);
+            return new DistributedLoggerRecord(centralLogger, forwardingLoggerDescription);
         }
 
         /// <summary>
