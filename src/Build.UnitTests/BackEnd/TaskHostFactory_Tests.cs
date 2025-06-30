@@ -66,7 +66,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     try
                     {
                         Process taskHostNode = Process.GetProcessById(pid);
-                        taskHostNode.WaitForExit(2000).ShouldBeTrue();
+                        taskHostNode.WaitForExit(2000).ShouldBeTrue($"The executed MSBuild Version: {projectInstance.GetProperty("MSBuildVersion")}");
                     }
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
                     catch (ArgumentException e)
