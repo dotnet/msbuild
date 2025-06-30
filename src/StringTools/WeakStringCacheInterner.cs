@@ -26,6 +26,11 @@ namespace Microsoft.NET.StringTools
         internal static WeakStringCacheInterner Instance = new WeakStringCacheInterner();
 
         /// <summary>
+        /// Lock to protect recreation of the instance after disposal.
+        /// </summary>
+        private static readonly object s_recreationLock = new object();
+
+        /// <summary>
         /// The cache to keep strings in.
         /// </summary>
         private readonly WeakStringCache _weakStringCache = new WeakStringCache();
@@ -78,6 +83,21 @@ namespace Microsoft.NET.StringTools
             if (candidate.Length == 0)
             {
                 return string.Empty;
+            }
+
+            // Check if cache has been disposed and recreate if necessary
+            if (_weakStringCache.IsDisposed)
+            {
+                lock (s_recreationLock)
+                {
+                    // Double-check after acquiring lock
+                    if (_weakStringCache.IsDisposed)
+                    {
+                        // Recreate the static instance to get a fresh cache
+                        Instance = new WeakStringCacheInterner();
+                        return Instance.InternableToString(ref candidate);
+                    }
+                }
             }
 
             InternResult resultForStatistics = Intern(ref candidate, out string internedString);

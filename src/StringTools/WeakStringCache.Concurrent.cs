@@ -33,6 +33,13 @@ namespace Microsoft.NET.StringTools
         /// <returns>A string matching the given internable.</returns>
         public string GetOrCreateEntry(ref InternableString internable, out bool cacheHit)
         {
+            // Defensive check: if the cache has been disposed, just create the string directly
+            if (_disposed)
+            {
+                cacheHit = false;
+                return internable.ExpensiveConvertToString();
+            }
+
             int hashCode = internable.GetHashCode();
 
             StringWeakHandle? handle;
@@ -42,6 +49,14 @@ namespace Microsoft.NET.StringTools
             // on the handle.
             bool usingWeakHandle = internable.Length > WeakHandleMinimumLength;
             ConcurrentDictionary<int, StringWeakHandle> stringsByHashCode = usingWeakHandle ? _weakHandlesByHashCode : _stringsByHashCode;
+            
+            // Defensive null check: if the dictionary is somehow null, just create the string directly
+            if (stringsByHashCode == null)
+            {
+                cacheHit = false;
+                return internable.ExpensiveConvertToString();
+            }
+            
             if (stringsByHashCode.TryGetValue(hashCode, out handle))
             {
                 // Lock a weak handle while we're dereferencing it to prevent a race with the Scavenge
@@ -81,7 +96,9 @@ namespace Microsoft.NET.StringTools
 
             handle = new StringWeakHandle();
             handle.SetString(result);
-            if (stringsByHashCode.TryAdd(hashCode, handle))
+            
+            // Defensive null check before trying to add to the dictionary
+            if (stringsByHashCode != null && stringsByHashCode.TryAdd(hashCode, handle))
             {
                 // Scavenge only clears out weak handles.
                 if (usingWeakHandle)

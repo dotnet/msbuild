@@ -131,10 +131,22 @@ namespace Microsoft.NET.StringTools
         private int _scavengeThreshold = _initialCapacity;
 
         /// <summary>
+        /// Flag to track whether this cache has been disposed.
+        /// </summary>
+        private volatile bool _disposed = false;
+
+        /// <summary>
+        /// Gets a value indicating whether this cache has been disposed.
+        /// </summary>
+        public bool IsDisposed => _disposed;
+
+        /// <summary>
         /// Frees all GC handles and clears the cache.
         /// </summary>
         private void DisposeImpl()
         {
+            _disposed = true;
+            
             foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 entry.Value.Free();

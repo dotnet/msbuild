@@ -59,5 +59,32 @@ namespace Microsoft.NET.StringTools.Tests
             report.ShouldNotContain(statisticsNotEnabledString);
             report.ShouldContain("Eliminated Strings");
         }
+
+        [Fact]
+        public void HandlesDisposalGracefully()
+        {
+            // Use the interner normally
+            string result1 = Strings.WeakIntern("test string 1");
+            result1.ShouldBe("test string 1");
+
+            // Clear cached strings (this disposes the static instance)
+            Strings.ClearCachedStrings();
+
+            // Try to use the interner again - this should not throw an exception
+            // and should recreate the interner instance automatically
+            string result2 = Strings.WeakIntern("test string 2");
+            result2.ShouldBe("test string 2");
+
+            // Should work multiple times after disposal
+            string result3 = Strings.WeakIntern("test string 3");
+            result3.ShouldBe("test string 3");
+
+            // Multiple disposal calls should not cause issues
+            Strings.ClearCachedStrings();
+            Strings.ClearCachedStrings();
+
+            string result4 = Strings.WeakIntern("test string 4");
+            result4.ShouldBe("test string 4");
+        }
     }
 }
