@@ -647,16 +647,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Is the class being loaded a task factory class
-        /// </summary>
-        private static bool IsTaskFactoryClass(Type type, object unused)
-        {
-            return type.GetTypeInfo().IsClass &&
-                !type.GetTypeInfo().IsAbstract &&
-                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type);
-        }
-
-        /// <summary>
         /// Searches all task declarations for the given task name.
         /// If no exact match is found, looks for partial matches.
         /// A task name that is not fully qualified may produce several partial matches.
@@ -1096,11 +1086,6 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal const string XamlTaskFactory = "XamlTaskFactory";
 
-            /// <summary>
-            /// Lock for the taskFactoryTypeLoader
-            /// </summary>
-            private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
-
 #if DEBUG
             /// <summary>
             /// Inform users that this is a problem from a task factory, a bug should be opened against the factory user
@@ -1109,19 +1094,9 @@ namespace Microsoft.Build.Execution
 #endif
 
             /// <summary>
-            /// Type filter to make sure we only look for taskFactoryClasses
-            /// </summary>
-            private static readonly Func<Type, object, bool> s_taskFactoryTypeFilter = IsTaskFactoryClass;
-
-            /// <summary>
             /// Identity of this task.
             /// </summary>
             private RegisteredTaskIdentity _taskIdentity;
-
-            /// <summary>
-            /// Typeloader for taskFactories
-            /// </summary>
-            private static TypeLoader s_taskFactoryTypeLoader;
 
             /// <summary>
             /// The task name this record was registered with from the using task element
@@ -1277,7 +1252,7 @@ namespace Microsoft.Build.Execution
                          !FileClassifier.IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
                         (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
                          // This condition will as well capture Microsoft tasks pulled from NuGet cache - since we decide based on assembly name.
-                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here 
+                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here
                          !FileClassifier.IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
                          !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
                     // and let's consider all tasks imported by common targets as non custom logic.
@@ -1500,16 +1475,8 @@ namespace Microsoft.Build.Execution
 
                             try
                             {
-                                lock (s_taskFactoryTypeLoaderLock)
-                                {
-                                    if (s_taskFactoryTypeLoader == null)
-                                    {
-                                        s_taskFactoryTypeLoader = new TypeLoader(s_taskFactoryTypeFilter);
-                                    }
-                                }
-
                                 // Make sure we only look for task factory classes when loading based on the name
-                                loadedType = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo);
+                                loadedType = TypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo, TypeLoader.TypeFilter.TaskFactory);
 
                                 if (loadedType == null)
                                 {
