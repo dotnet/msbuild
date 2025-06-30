@@ -723,7 +723,7 @@ namespace Microsoft.Build.BackEnd
 
             // Resume any work available which has already been assigned to specific nodes.
             ResumeRequiredWork(responses);
-            HashSet<int> idleNodes = new HashSet<int>();
+            HashSet<int> idleNodes = new HashSet<int>(_availableNodes.Count);
             foreach (int availableNodeId in _availableNodes.Keys)
             {
                 if (!_schedulingData.IsNodeWorking(availableNodeId))
