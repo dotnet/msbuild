@@ -552,7 +552,6 @@ namespace Microsoft.Build.BackEnd
 
             string msbuildLocation = GetMSBuildLocationFromHostContext(hostContext);
 
-
             // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
             if (msbuildLocation == null)
             {
