@@ -337,6 +337,9 @@ extends:
             name: $(DncEngInternalBuildPool)
             image: $(WindowsImage)
             os: windows
+          sdl:
+            codeSignValidation:
+              enabled: false
 
     - template: eng\common\templates-official\post-build\post-build.yml@self
       parameters:
