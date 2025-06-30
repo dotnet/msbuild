@@ -81,7 +81,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     taskHostNode.WaitForExit(2000).ShouldBeFalse();
                     taskHostNode.Kill();
                 }
-            }           
+            }
         }
 
 
