@@ -85,7 +85,7 @@
     <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25321.2</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
   <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <BootstrapSdkVersion>9.0.301</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.100-preview.5.25277.114</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
