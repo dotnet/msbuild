@@ -1084,6 +1084,26 @@ namespace Microsoft.Build.BackEnd
 
                 ReleaseAllCores();
 
+                // If the task called Yield() but not Reacquire(), we need to automatically reacquire
+                // to prevent MSBuild from hanging waiting for a Reacquire() call that will never come.
+                if (_yieldThreadId != -1)
+                {
+#if FEATURE_REPORTFILEACCESSES
+                    // If file accesses are being reported yielding is a no-op so reacquire should be too.
+                    if (!_host.BuildParameters.ReportFileAccesses)
+                    {
+#endif
+                        IRequestBuilderCallback builderCallback = _requestEntry.Builder as IRequestBuilderCallback;
+                        MSBuildEventSource.Log.ExecuteTaskYieldStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
+                        MSBuildEventSource.Log.ExecuteTaskReacquireStart(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
+                        builderCallback.Reacquire();
+                        MSBuildEventSource.Log.ExecuteTaskReacquireStop(_taskLoggingContext.TaskName, _taskLoggingContext.BuildEventContext.TaskId);
+#if FEATURE_REPORTFILEACCESSES
+                    }
+#endif
+                    _yieldThreadId = -1;
+                }
+
                 // Since the task has a pointer to this class it may store it in a static field. Null out
                 // internal data so the leak of this object doesn't lead to a major memory leak.
                 _host = null;
