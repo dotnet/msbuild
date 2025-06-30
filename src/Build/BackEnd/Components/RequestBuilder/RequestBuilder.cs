@@ -1123,6 +1123,21 @@ namespace Microsoft.Build.BackEnd
                         RequestEntry.Request.SubmissionId,
                         _nodeLoggingContext.BuildEventContext.NodeId);
                 }
+
+                // Set SDK-resolved environment variables if they haven't been set yet for this configuration
+                if (!_requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet &&
+                     _requestEntry.RequestConfiguration.Project is IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> project)
+                {
+                    if (project.SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
+                    {
+                        foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
+                        {
+                            Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
+                        }
+                    }
+
+                    _requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet = true;
+                }
             }
             catch
             {
