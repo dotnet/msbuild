@@ -26,39 +26,64 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _output = testOutputHelper;
         }
 
-        [Fact]
-        public void TaskNodesDieAfterBuild()
+        [Theory]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(true, true)]
+        public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+
+                string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
                 string pidTaskProject = $@"
 <Project>
-    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""TaskHostFactory"" />
-    <Target Name='AccessPID'>
-        <ProcessIdTask>
-            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
-        </ProcessIdTask>
-    </Target>
+<UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""{taskFactory}"" />
+<Target Name='AccessPID'>
+    <ProcessIdTask>
+        <Output PropertyName=""PID"" TaskParameter=""Pid"" />
+    </ProcessIdTask>
+</Target>
 </Project>";
+                pidTaskProject = pidTaskProject.Format(taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory");
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
+                    
+                if (envVariableSpecified)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+                }
+                Traits.UpdateFromEnvironment();
                 ProjectInstance projectInstance = new(project.Path);
+
                 projectInstance.Build().ShouldBeTrue();
                 string processId = projectInstance.GetPropertyValue("PID");
                 string.IsNullOrEmpty(processId).ShouldBeFalse();
                 Int32.TryParse(processId, out int pid).ShouldBeTrue();
-                Process.GetCurrentProcess().Id.ShouldNotBe<int>(pid);
-                try
+                Process.GetCurrentProcess().Id.ShouldNotBe(pid);
+
+                if (taskHostFactorySpecified)
                 {
+                    try
+                    {
+                        Process taskHostNode = Process.GetProcessById(pid);
+                        taskHostNode.WaitForExit(2000).ShouldBeTrue();
+                    }
+                    // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
+                    catch (ArgumentException e)
+                    {
+                        e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
+                    }
+                }
+                else
+                {
+                    // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
                     Process taskHostNode = Process.GetProcessById(pid);
-                    taskHostNode.WaitForExit(2000).ShouldBeTrue();
+                    taskHostNode.WaitForExit(2000).ShouldBeFalse();
+                    taskHostNode.Kill();
                 }
-                // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
-                catch (ArgumentException e)
-                {
-                    e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
-                }
-            }
+            }           
         }
+
 
         [Fact]
         private void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()

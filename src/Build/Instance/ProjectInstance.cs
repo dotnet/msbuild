@@ -3103,6 +3103,13 @@ namespace Microsoft.Build.Execution
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>((globalProperties == null) ? 0 : globalProperties.Count);
             _environmentVariableProperties = buildParameters.EnvironmentPropertiesInternal;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
+            foreach (var v in _environmentVariableProperties)
+            {
+                if (v.Name.Contains("MSBUILDTERMINALLOGGER"))
+                {
+                    Console.WriteLine("test");
+                }
+            }
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
             _loggingContext = new GenericLoggingContext(loggingService, buildEventContext);

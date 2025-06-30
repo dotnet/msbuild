@@ -68,6 +68,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
 
+        private bool _isTaskHostFactory;
+
         #endregion
 
         /// <summary>
@@ -253,6 +255,7 @@ namespace Microsoft.Build.BackEnd
                 string taskElementContents,
                 IDictionary<string, string> taskFactoryIdentityParameters,
                 bool taskHostFactoryExplicitlyRequested,
+                bool isTaskHostFactory,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
                 string taskProjectFile)
@@ -266,6 +269,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
+            _isTaskHostFactory = isTaskHostFactory;
 
             try
             {
@@ -364,7 +368,8 @@ namespace Microsoft.Build.BackEnd
                     taskLoggingContext,
                     buildComponentHost,
                     mergedParameters,
-                    _loadedType
+                    _loadedType,
+                    _isTaskHostFactory
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif

@@ -124,6 +124,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _taskExecutionSucceeded = false;
 
+        private bool _taskHostFactoryExplicitlyRequested = false;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -134,10 +136,12 @@ namespace Microsoft.Build.BackEnd
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             IDictionary<string, string> taskHostParameters,
-            LoadedType taskType
+            LoadedType taskType,
+            bool isTaskHostFactory
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
 #endif
+            
             )
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
@@ -151,6 +155,7 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _taskHostParameters = taskHostParameters;
+            _taskHostFactoryExplicitlyRequested = isTaskHostFactory;
 
             _packetFactory = new NodePacketFactory();
 
@@ -255,6 +260,7 @@ namespace Microsoft.Build.BackEnd
             // log that we are about to spawn the task host
             string runtime = _taskHostParameters[XMakeAttributes.runtime];
             string architecture = _taskHostParameters[XMakeAttributes.architecture];
+        
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
 
             // set up the node
@@ -291,7 +297,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: !_taskHostFactoryExplicitlyRequested, taskHostParameters: _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
                 }
 

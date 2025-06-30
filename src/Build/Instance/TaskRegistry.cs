@@ -61,14 +61,6 @@ namespace Microsoft.Build.Execution
         private Toolset _toolset;
 
         /// <summary>
-        /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
-        /// a small well-known set of tasks that are known to depend on IBuildEngine
-        /// callbacks; as forcing those out of proc would be just setting them up for
-        /// known failure.
-        /// </summary>
-        private static readonly bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
-
-        /// <summary>
         /// Simple name for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
@@ -1474,16 +1466,16 @@ namespace Microsoft.Build.Execution
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
-                        bool explicitlyLaunchTaskHost =
+                        bool launchTaskHost =
                             isTaskHostFactory ||
                             (
-                                s_forceTaskHostLaunch &&
+                                Traits.Instance.s_forceTaskHostLaunch &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, isTaskHostFactory, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
                     else

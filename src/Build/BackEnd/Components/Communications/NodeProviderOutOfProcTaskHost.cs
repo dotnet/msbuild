@@ -548,9 +548,10 @@ namespace Microsoft.Build.BackEnd
 
             // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
             // want to start up an MSBuild task host node.
-            string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /low:{ComponentHost.BuildParameters.LowPriority} ";
+            string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse && ((hostContext & HandshakeOptions.NodeReuse) != 0)} /low:{ComponentHost.BuildParameters.LowPriority} ";
 
             string msbuildLocation = GetMSBuildLocationFromHostContext(hostContext);
+
 
             // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
             if (msbuildLocation == null)
