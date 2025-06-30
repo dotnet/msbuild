@@ -216,8 +216,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(request1, response[0].BuildRequest);
         }
 
+        /// <summary>
+        /// Verify the logs of Scheduler contains Project and Target, in addition, SchedulerState must exist description for explain special characters.
+        /// </summary>
         [Fact]
-        public void TestMultipleRequests1()
+        public void TestSchedulerLogs()
         {
             string debugPath = Path.Combine(Path.GetTempPath(), "MSBuildTestLogs", Guid.NewGuid().ToString());
             Directory.CreateDirectory(debugPath);
@@ -247,7 +250,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string[] schedulerStateLines = File.ReadAllLines(schedulerStateFile);
             Assert.Contains(schedulerStateLines, line => line.Contains("! - Blocked request: A build request waiting for dependencies or resources."));
             Assert.Contains(schedulerStateLines, line => line.Contains("> - Executing request: A build request currently being processed by a node."));
-
         }
 
         /// <summary>
