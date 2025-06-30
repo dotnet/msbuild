@@ -84,7 +84,7 @@
     <NuGetBuildTasksVersion>6.15.0-preview.1.86</NuGetBuildTasksVersion>
     <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25321.2</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+  <PropertyGroup>
     <BootstrapSdkVersion>9.0.301</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
