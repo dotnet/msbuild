@@ -120,6 +120,32 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         public int Capacity => _spans.Capacity;
 
+        public bool Equals(ReadOnlySpan<char> other)
+        {
+            if (_spans.Count == 0 && other.IsEmpty)
+            {
+                return true;
+            }
+
+            if (_spans.Count == 0 || other.IsEmpty || Length != other.Length)
+            {
+                return false;
+            }
+
+            int otherIndex = 0;
+            foreach (ReadOnlyMemory<char> internalSpan in _spans)
+            {
+                if (!MemoryExtensions.Equals(other.Slice(otherIndex, internalSpan.Length), internalSpan.Span, StringComparison.Ordinal))
+                {
+                    return false;
+                }
+
+                otherIndex += internalSpan.Length;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Creates a new enumerator for enumerating characters in this string. Does not allocate.
         /// </summary>
