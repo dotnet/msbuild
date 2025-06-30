@@ -515,6 +515,8 @@ namespace Microsoft.Build.Tasks
                     AssemblyEntry entry = _assemblyList[_index];
                     if (!String.Equals(_simpleName, entry.SimpleName, StringComparison.OrdinalIgnoreCase))
                     {
+                        // Because _assemblyList is sorted by SimpleName then version,
+                        // once we find a SimpleName that doesn't match we can stop iterating.
                         _index = int.MaxValue;
                         return false;
                     }
