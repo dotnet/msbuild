@@ -2398,6 +2398,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OpenTelemetryLoadFailed" xml:space="preserve">
     <value>Loading telemetry libraries failed with exception: {0}.</value>
   </data>
+  <data name="CustomTaskFactoryOutOfProcNotSupported" xml:space="preserve">
+    <value>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
