@@ -43,6 +43,11 @@ namespace Microsoft.Build.BackEnd
         private static string s_baseTaskHostPathArm64;
 
         /// <summary>
+        /// Store the NET path for MSBuildTaskHost so that we don't have to keep recalculating it.
+        /// </summary>
+        private static string s_baseTaskHostPathNet;
+
+        /// <summary>
         /// Store the path for the 32-bit MSBuildTaskHost so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX32Clr2;
@@ -384,111 +389,133 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static string GetTaskHostNameFromHostContext(HandshakeOptions hostContext)
         {
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable((hostContext & HandshakeOptions.TaskHost) == HandshakeOptions.TaskHost);
-            if ((hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+            if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
             {
                 return TaskHostNameForClr2TaskHost;
             }
-            else
-            {
-                if (s_msbuildName == null)
-                {
-                    s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
 
-                    if (s_msbuildName == null)
-                    {
-                        s_msbuildName = (hostContext & HandshakeOptions.NET) == HandshakeOptions.NET
-                            ? "MSBuild.dll"
-                            : "MSBuild.exe";
-                    }
+            if (string.IsNullOrEmpty(s_msbuildName))
+            {
+                s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+                if (!string.IsNullOrEmpty(s_msbuildName))
+                {
+                    return s_msbuildName;
                 }
 
-                return s_msbuildName;
+#if NETFRAMEWORK
+                // In .NET Framework, use dotnet for .NET task hosts
+                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+                {
+                    s_msbuildName = Constants.DotnetProcessName;
+
+                    return s_msbuildName;
+                }
+#endif
+                // Default based on whether it's .NET or Framework
+                s_msbuildName = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
+                    ? Constants.MSBuildAssemblyName
+                    : Constants.MSBuildExecutableName;
             }
+
+            return s_msbuildName;
         }
 
         /// <summary>
-        /// Given a TaskHostContext, return the appropriate location of the
-        /// executable (MSBuild or MSBuildTaskHost) that we wish to use, or null
-        /// if that location cannot be resolved.
+        /// Given a TaskHostContext, returns the appropriate runtime host and MSBuild assembly locations
+        /// based on the handshake options.
         /// </summary>
-        internal static string GetMSBuildLocationFromHostContext(HandshakeOptions hostContext)
+        /// <param name="hostContext">The handshake options specifying the desired task host configuration (architecture, CLR version, runtime).</param>
+        /// <returns>
+        /// The full path to MSBuild.exe.
+        /// </returns>
+        internal static string GetMSBuildExecutablePathForNonNETRuntimes(HandshakeOptions hostContext)
         {
-            string toolName = GetTaskHostNameFromHostContext(hostContext);
-            string toolPath = null;
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
+            var toolName = GetTaskHostNameFromHostContext(hostContext);
             s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
             s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
             s_baseTaskHostPathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
 
-            ErrorUtilities.VerifyThrowInternalErrorUnreachable((hostContext & HandshakeOptions.TaskHost) == HandshakeOptions.TaskHost);
+            bool isX64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64);
+            bool isArm64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
+            bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
 
-            if ((hostContext & HandshakeOptions.Arm64) == HandshakeOptions.Arm64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+            // Unsupported combinations
+            if (isArm64 && isCLR2)
             {
-                // Unsupported, throw.
                 ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
             }
-            else if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64 && (hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
+
+            if (isCLR2)
             {
-                if (s_pathToX64Clr2 == null)
+                return isX64 ? Path.Combine(GetOrInitializeX64Clr2Path(toolName), toolName) : Path.Combine(GetOrInitializeX32Clr2Path(toolName), toolName);
+            }
+
+            if (isX64)
+            {
+                return Path.Combine(s_pathToX64Clr4 ??= s_baseTaskHostPath64, toolName);
+            }
+
+            if (isArm64)
+            {
+                return Path.Combine(s_pathToArm64Clr4 ??= s_baseTaskHostPathArm64, toolName);
+            }
+
+            return Path.Combine(s_pathToX32Clr4 ??= s_baseTaskHostPath, toolName);
+        }
+
+        /// <summary>
+        /// Handles the handshake scenario where a .NET task host is requested from a .NET Framework process.
+        /// </summary>
+        /// <returns>
+        /// A tuple containing:
+        /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
+        /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
+        /// </returns>
+        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext)
+        {
+            ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
+
+            s_baseTaskHostPathNet ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryNET;
+
+            string msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, Constants.MSBuildAssemblyName);
+            string runtimeHostPath = Path.Combine(s_baseTaskHostPathNet, Constants.DotnetProcessName);
+
+            // Current process is .NET Framework, but handshake requests .NET
+            // Launch dotnet host and path to MSBuild.dll
+            return (runtimeHostPath, msbuildAssemblyPath);
+        }
+
+        private static string GetOrInitializeX64Clr2Path(string toolName)
+        {
+            s_pathToX64Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION64", s_baseTaskHostPath64, toolName);
+
+            return s_pathToX64Clr2;
+        }
+
+        private static string GetOrInitializeX32Clr2Path(string toolName)
+        {
+            s_pathToX32Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION", s_baseTaskHostPath, toolName);
+
+            return s_pathToX32Clr2;
+        }
+
+        private static string GetPathFromEnvironmentOrDefault(string environmentVariable, string defaultPath, string toolName)
+        {
+            string envPath = Environment.GetEnvironmentVariable(environmentVariable);
+
+            if (!string.IsNullOrEmpty(envPath))
+            {
+                string fullPath = Path.Combine(envPath, toolName);
+                if (FileUtilities.FileExistsNoThrow(fullPath))
                 {
-                    s_pathToX64Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION64");
-
-                    if (s_pathToX64Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX64Clr2, toolName)))
-                    {
-                        s_pathToX64Clr2 = s_baseTaskHostPath64;
-                    }
+                    return envPath;
                 }
-
-                toolPath = s_pathToX64Clr2;
-            }
-            else if ((hostContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2)
-            {
-                if (s_pathToX32Clr2 == null)
-                {
-                    s_pathToX32Clr2 = Environment.GetEnvironmentVariable("MSBUILDTASKHOSTLOCATION");
-                    if (s_pathToX32Clr2 == null || !FileUtilities.FileExistsNoThrow(Path.Combine(s_pathToX32Clr2, toolName)))
-                    {
-                        s_pathToX32Clr2 = s_baseTaskHostPath;
-                    }
-                }
-
-                toolPath = s_pathToX32Clr2;
-            }
-            else if ((hostContext & HandshakeOptions.X64) == HandshakeOptions.X64)
-            {
-                if (s_pathToX64Clr4 == null)
-                {
-                    s_pathToX64Clr4 = s_baseTaskHostPath64;
-                }
-
-                toolPath = s_pathToX64Clr4;
-            }
-            else if ((hostContext & HandshakeOptions.Arm64) == HandshakeOptions.Arm64)
-            {
-                if (s_pathToArm64Clr4 == null)
-                {
-                    s_pathToArm64Clr4 = s_baseTaskHostPathArm64;
-                }
-
-                toolPath = s_pathToArm64Clr4;
-            }
-            else
-            {
-                if (s_pathToX32Clr4 == null)
-                {
-                    s_pathToX32Clr4 = s_baseTaskHostPath;
-                }
-
-                toolPath = s_pathToX32Clr4;
             }
 
-            if (toolName != null && toolPath != null)
-            {
-                return Path.Combine(toolPath, toolName);
-            }
-
-            return null;
+            return defaultPath;
         }
 
         /// <summary>
@@ -546,11 +573,36 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // Start the new process.  We pass in a node mode with a node number of 2, to indicate that we
-            // want to start up an MSBuild task host node.
-            string commandLineArgs = $" /nologo /nodemode:2 /nodereuse:{ComponentHost.BuildParameters.EnableNodeReuse} /low:{ComponentHost.BuildParameters.LowPriority} ";
+            // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
+            string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
-            string msbuildLocation = GetMSBuildLocationFromHostContext(hostContext);
+            IList<NodeContext> nodeContexts;
+            int nodeId = (int)hostContext;
+
+            // Handle .NET task host context
+#if NETFRAMEWORK
+            if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+            {
+                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext);
+
+                CommunicationsUtilities.Trace("For a host context of {0}, spawning dotnet.exe from {1}.", hostContext.ToString(), msbuildAssemblyPath);
+
+                // There is always one task host per host context so we always create just 1 one task host node here.      
+                nodeContexts = GetNodes(
+                    runtimeHostPath,
+                    string.Format(commandLineArgsPlaceholder, msbuildAssemblyPath, ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
+                    nodeId,
+                    this,
+                    new Handshake(hostContext),
+                    NodeContextCreated,
+                    NodeContextTerminated,
+                    1);
+
+                return nodeContexts.Count == 1;
+            }
+#endif
+
+            string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
 
             // we couldn't even figure out the location we're trying to launch ... just go ahead and fail.
             if (msbuildLocation == null)
@@ -558,13 +610,11 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? "MSBuild.exe");
+            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? Constants.MSBuildExecutableName);
 
-            // There is always one task host per host context so we always create just 1 one task host node here.
-            int nodeId = (int)hostContext;
-            IList<NodeContext> nodeContexts = GetNodes(
+            nodeContexts = GetNodes(
                 msbuildLocation,
-                commandLineArgs,
+                string.Format(commandLineArgsPlaceholder, string.Empty, ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
                 nodeId,
                 this,
                 new Handshake(hostContext),
@@ -617,9 +667,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        public IEnumerable<Process> GetProcesses()
-        {
-            return _nodeContexts.Values.Select(context => context.Process);
-        }
+        public IEnumerable<Process> GetProcesses() => _nodeContexts.Values.Select(context => context.Process);
     }
 }

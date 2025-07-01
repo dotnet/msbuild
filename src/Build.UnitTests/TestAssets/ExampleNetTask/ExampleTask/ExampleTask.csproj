@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+  	<PackageReference Include="Microsoft.Build.Framework" />
+  	<PackageReference Include="Microsoft.Build.Utilities.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Build.Framework" Version="17.0.0" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.0.0" />
+  </ItemGroup>
+
+</Project>

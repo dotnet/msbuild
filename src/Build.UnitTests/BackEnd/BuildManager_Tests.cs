@@ -1136,9 +1136,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EndWithoutBegin()
         {
             Assert.Throws<InvalidOperationException>(() =>
-                {
-                    _buildManager.EndBuild();
-                });
+            {
+                _buildManager.EndBuild();
+            });
         }
 
         [Fact]
