@@ -666,11 +666,6 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
-            {
-                return false;
-            }
-
             // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
             // the temp folder as well as the assembly. After build, the source code and assembly are deleted.
             string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
@@ -682,6 +677,11 @@ namespace Microsoft.Build.Tasks
             else
             {
                 _assemblyPath = FileUtilities.GetTemporaryFileName(".dll"); // dll in the root of the temp directory, removed immediately after compilation
+            }
+
+            if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
+            {
+                return false;
             }
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
