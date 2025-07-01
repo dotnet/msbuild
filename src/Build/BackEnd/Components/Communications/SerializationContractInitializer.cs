@@ -31,6 +31,7 @@ namespace Microsoft.Build.BackEnd
                 new(typeof(InvalidToolsetDefinitionException), (msg, inner) => new InvalidToolsetDefinitionException(msg, inner)),
                 new(typeof(ProjectCache.ProjectCacheException), (msg, inner) => new ProjectCache.ProjectCacheException(msg, inner)),
 #pragma warning disable CS0618 // Type or member is obsolete
+                // convert Exception type from Experimental namespace to the current namespace
                 new(typeof(Experimental.ProjectCache.ProjectCacheException), (msg, inner) => new ProjectCache.ProjectCacheException(msg, inner)),
 #pragma warning restore CS0618 // Type or member is obsolete
                 new(typeof(InternalErrorException), InternalErrorException.CreateFromRemote),

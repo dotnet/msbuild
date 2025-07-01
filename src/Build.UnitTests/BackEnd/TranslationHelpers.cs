@@ -92,7 +92,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             if (left == null || right == null)
             {
                 return false;
-            }            // Experimental ProjectCacheException -> ProjectCacheException conversion
+            }
+
+            // Experimental ProjectCacheException -> ProjectCacheException conversion
             // This is intentional behavior defined in SerializationContractInitializer.cs
 #pragma warning disable CS0618 // Type or member is obsolete
             if (left.GetType() == typeof(Experimental.ProjectCache.ProjectCacheException) &&
