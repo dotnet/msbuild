@@ -156,10 +156,11 @@ namespace Microsoft.NET.StringTools
             return new Enumerator(_spans);
         }
 
-        public bool Equals(ReadOnlySpan<char> other)
-        {
-            return Equals(other, StringComparison.Ordinal);
-        }
+        public bool Equals(string other) => Equals(other.AsSpan(), StringComparison.Ordinal);
+
+        public bool Equals(string other, StringComparison comparison) => Equals(other.AsSpan(), comparison);
+
+        public bool Equals(ReadOnlySpan<char> other) => Equals(other, StringComparison.Ordinal);
 
         public bool Equals(ReadOnlySpan<char> other, StringComparison comparison)
         {
@@ -182,31 +183,6 @@ namespace Microsoft.NET.StringTools
                 }
 
                 otherIndex += internalSpan.Length;
-            }
-
-            return true;
-        }
-
-        public bool Equals(string other)
-        {
-            return Equals(other, StringComparison.Ordinal);
-        }
-
-        public bool Equals(string other, StringComparison comparison)
-        {
-            if (other.Length != Length)
-            {
-                return false;
-            }
-
-            int index = 0;
-            ReadOnlySpan<char> inputSpan = other.AsSpan();
-            foreach (ReadOnlyMemory<char> memory in _spans)
-            {
-                if (!MemoryExtensions.Equals(memory.Span, inputSpan.Slice(index, memory.Length), comparison))
-                {
-                    return false;
-                }
             }
 
             return true;
