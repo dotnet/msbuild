@@ -1791,6 +1791,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">MSBUILD : error MSB1059: No se pudieron imprimir los destinos. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">No se usó el registrador de terminal porque se detectó que la compilación se está ejecutando en un entorno automatizado.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">No se usó el terminal de Logger porque la compilación se ejecuta en el contexto de un proceso (por ejemplo, "dotnet test") que solicita acceso directo a la secuencia stdout.</target>
