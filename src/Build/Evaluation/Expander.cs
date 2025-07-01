@@ -280,9 +280,6 @@ namespace Microsoft.Build.Evaluation
         /// Enabled by ExpanderOptions.Truncate.
         /// </summary>
         private const int ItemLimitPerExpansion = 3;
-        private static readonly char[] s_singleQuoteChar = { '\'' };
-        private static readonly char[] s_backtickChar = { '`' };
-        private static readonly char[] s_doubleQuoteChar = { '"' };
 
         /// <summary>
         /// The CultureInfo from the invariant culture. Used to avoid allocations for

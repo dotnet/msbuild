@@ -146,8 +146,22 @@ namespace Microsoft.NET.StringTools
                 throw new IndexOutOfRangeException();
             }
         }
-        
+
+        /// <summary>
+        /// Creates a new enumerator for enumerating characters in this string. Does not allocate.
+        /// </summary>
+        /// <returns>The enumerator.</returns>
+        public Enumerator GetEnumerator()
+        {
+            return new Enumerator(_spans);
+        }
+
         public bool Equals(ReadOnlySpan<char> other)
+        {
+            return Equals(other, StringComparison.Ordinal);
+        }
+
+        public bool Equals(ReadOnlySpan<char> other, StringComparison comparison)
         {
             if (_spans.Count == 0 && other.IsEmpty)
             {
@@ -162,7 +176,7 @@ namespace Microsoft.NET.StringTools
             int otherIndex = 0;
             foreach (ReadOnlyMemory<char> internalSpan in _spans)
             {
-                if (!MemoryExtensions.Equals(other.Slice(otherIndex, internalSpan.Length), internalSpan.Span, StringComparison.Ordinal))
+                if (!MemoryExtensions.Equals(other.Slice(otherIndex, internalSpan.Length), internalSpan.Span, comparison))
                 {
                     return false;
                 }
@@ -173,13 +187,9 @@ namespace Microsoft.NET.StringTools
             return true;
         }
 
-        /// <summary>
-        /// Creates a new enumerator for enumerating characters in this string. Does not allocate.
-        /// </summary>
-        /// <returns>The enumerator.</returns>
-        public Enumerator GetEnumerator()
+        public bool Equals(string other)
         {
-            return new Enumerator(_spans);
+            return Equals(other, StringComparison.Ordinal);
         }
 
         public bool Equals(string other, StringComparison comparison)
