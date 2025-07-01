@@ -1788,6 +1788,11 @@
         <target state="translated">MSBUILD : error MSB1059: Hedefler yazdırılamadı. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Terminal Günlükçüsü, derlemenin otomatik bir ortamda çalıştığı tespit edildiğinden kullanılmadı.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Derleme StdOut akışına doğrudan erişim isteyen bir işlem (ör. 'dotnet test') bağlamında çalıştığı için Terminal Günlükçüsü kullanılmadı.</target>
