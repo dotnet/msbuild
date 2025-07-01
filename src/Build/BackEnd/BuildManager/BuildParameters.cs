@@ -912,7 +912,7 @@ namespace Microsoft.Build.Execution
 
         internal bool UsesInputCaches() => InputResultsCacheFiles != null;
 
-        internal bool SkippedResultsDoNotCauseCacheMiss() => ProjectIsolationMode == ProjectIsolationMode.True;
+        internal bool SkippedResultsDoNotCauseCacheMiss() => (ProjectIsolationMode == ProjectIsolationMode.True) || Traits.Instance.SkippedResultsDoNotCauseCacheMiss;
 
         /// <summary>
         /// Implementation of the serialization mechanism.
