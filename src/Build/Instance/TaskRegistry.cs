@@ -1527,13 +1527,8 @@ namespace Microsoft.Build.Execution
                             }
                             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                             {
-                                string message =
-#if DEBUG
-                                UnhandledFactoryError +
-#endif
-                                e.Message;
-
-                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskFactoryLoadFailure", TaskFactoryAttributeName, taskFactoryLoadInfo.AssemblyLocation, message);
+                                targetLoggingContext.LogFatalBuildError(e, new BuildEventFileInfo(elementLocation.File, elementLocation.Line, elementLocation.Column));
+                                return false;
                             }
                         }
                         finally
