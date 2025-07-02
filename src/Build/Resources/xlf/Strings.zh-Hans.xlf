@@ -904,6 +904,11 @@ Errors: {3}</source>
         <target state="translated">静态图形已在 {0} 秒内加载: {1} 个节点、{2} 个边</target>
         <note />
       </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="new">Static graph construction started.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
         <source>MSB4263: Project "{0}" has a reference to solution file "{1}". Referencing solutions is not supported in static graph.
     </source>
