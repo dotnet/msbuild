@@ -17,7 +17,7 @@ parameters:
   type: string
   default: 'default'
 - name: EnableOptProf
-  displayName: Enable OptProf tasks
+  displayName: Enable OptProf data collection for this build
   type: boolean
   default: true
 
