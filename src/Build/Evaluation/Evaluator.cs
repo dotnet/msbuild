@@ -1879,6 +1879,14 @@ namespace Microsoft.Build.Evaluation
                     projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
                 }
 
+                if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+                {
+                    foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                    {
+                        _data.AddSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                    }
+                }
+
                 projects = projectList;
             }
             else
