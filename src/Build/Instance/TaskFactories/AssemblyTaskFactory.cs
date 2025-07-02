@@ -254,8 +254,8 @@ namespace Microsoft.Build.BackEnd
                 IDictionary<string, TaskPropertyInfo> taskParameters,
                 string taskElementContents,
                 IDictionary<string, string> taskFactoryIdentityParameters,
+                bool taskHostExplicitlyRequested,
                 bool taskHostFactoryExplicitlyRequested,
-                bool isTaskHostFactory,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
                 string taskProjectFile)
@@ -268,8 +268,8 @@ namespace Microsoft.Build.BackEnd
                 _factoryIdentityParameters = new Dictionary<string, string>(taskFactoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
             }
 
-            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
-            _isTaskHostFactory = isTaskHostFactory;
+            _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
+            _isTaskHostFactory = taskHostFactoryExplicitlyRequested;
 
             try
             {

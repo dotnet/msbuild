@@ -13,7 +13,7 @@ namespace Microsoft.Build.CommandLine
     /// </summary>
     internal class NodeEndpointOutOfProcTaskHost : NodeEndpointOutOfProcBase
     {
-        internal bool _reuseNode;
+        internal bool _nodeReuse;
         
         #region Constructors and Factories
 
@@ -22,7 +22,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal NodeEndpointOutOfProcTaskHost(bool nodeReuse)
         {
-            _reuseNode = nodeReuse;
+            _nodeReuse = nodeReuse;
             InternalConstruct();
         }
 
@@ -33,7 +33,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         protected override Handshake GetHandshake()
         {
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: _reuseNode));
+            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: _nodeReuse));
         }
     }
 }

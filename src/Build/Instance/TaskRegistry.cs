@@ -1466,10 +1466,14 @@ namespace Microsoft.Build.Execution
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
+                        /// If ForceAllTasksOutOfProc is true, we will force all tasks to run in the MSBuild task host
+                        /// "EXCEPT a small well-known set of tasks that are known to depend on IBuildEngine callbacks
+                        /// as forcing those out of proc would be just setting them up for known failure"
+
                         bool launchTaskHost =
                             isTaskHostFactory ||
                             (
-                                Traits.Instance.s_forceTaskHostLaunch &&
+                                Traits.Instance.ForceAllTasksOutOfProcToTaskHost &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 

@@ -124,6 +124,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _taskExecutionSucceeded = false;
 
+
+        /// <summary>
+        /// This separates the cause where we force all tasks to run in a task host via environment variables and TaskHostFactory
+        /// The difference is that TaskHostFactory requires the TaskHost to be transiend e.g. to expire after build.
+        /// </summary>
         private bool _taskHostFactoryExplicitlyRequested = false;
 
         /// <summary>
@@ -137,11 +142,10 @@ namespace Microsoft.Build.BackEnd
             IBuildComponentHost buildComponentHost,
             IDictionary<string, string> taskHostParameters,
             LoadedType taskType,
-            bool isTaskHostFactory
+            bool taskHostFactoryExplicitlyRequested
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
 #endif
-            
             )
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
@@ -155,7 +159,7 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _taskHostParameters = taskHostParameters;
-            _taskHostFactoryExplicitlyRequested = isTaskHostFactory;
+            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
 
             _packetFactory = new NodePacketFactory();
 
