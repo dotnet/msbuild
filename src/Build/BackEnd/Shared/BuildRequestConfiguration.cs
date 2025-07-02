@@ -331,6 +331,11 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Flag indicating whether SDK-resolved environment variables have been set for this configuration.
+        /// </summary>
+        internal bool SdkResolvedEnvironmentVariablesSet { get; set; }
+
+        /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.
         /// </summary>
         public bool WasGeneratedByNode => _configId < InvalidConfigurationId;
