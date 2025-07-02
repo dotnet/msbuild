@@ -1960,6 +1960,10 @@ namespace Microsoft.Build.Execution
                 throw new BuildAbortedException();
             }
 
+            LogMessage(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "StaticGraphConstructionStarted"));
+
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
