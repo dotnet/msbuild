@@ -875,6 +875,29 @@ namespace Microsoft.Build.Evaluation.Expander
                         }
                     }
                 }
+                else if (receiverType == typeof(char))
+                {
+                    if (string.Equals(methodName, nameof(char.IsDigit), StringComparison.OrdinalIgnoreCase))
+                    {
+                        bool? result = null;
+                        
+                        if (ParseArgs.TryGetArg(args, out string? arg0) && arg0?.Length == 1)
+                        {
+                            char c = arg0[0];
+                            result = char.IsDigit(c);
+                        }
+                        else if (ParseArgs.TryGetArgs(args, out string? str, out int index) && str != null)
+                        {
+                            result = char.IsDigit(str, index);
+                        }
+                        
+                        if (result.HasValue)
+                        {
+                            returnVal = result.Value;
+                            return true;
+                        }
+                    }
+                }
                 else if (string.Equals(methodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
                 {
                     if (ParseArgs.TryGetArgs(args, out string? arg1, out string? arg2, out string? arg3) && arg1 != null && arg2 != null && arg3 != null)

@@ -860,6 +860,21 @@ Errors: {3}</source>
         <target state="translated">SDK 확인자 "{0}"이(가) null을 반환했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">SDK 확인자 '{1}'에서 SDK '{0}'을(를) 확인할 수 없습니다. {2}</target>
@@ -887,6 +902,11 @@ Errors: {3}</source>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">정적 그래프가 {0}초 안에 로드됨: {1}개 노드, {2}개 에지</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="new">Static graph construction started.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

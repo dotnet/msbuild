@@ -2838,8 +2838,8 @@
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
-        <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="translated">No se puede inferir el tipo de parámetro "{0}" porque el tipo de atributo es desconocido. El valor se tratará como una cadena.</target>
+        <source>Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</source>
+        <target state="translated">No se puede inferir el tipo de parámetro "{0}" porque el tipo de atributo "{1}" es desconocido. El valor se tratará como una cadena.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
@@ -3581,6 +3581,16 @@
         <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
         <target state="translated">MSB3942: No se pudo crear el archivo comprimido "{0}" porque ya existe. Elimine el archivo, o cámbiele el nombre, e inténtelo de nuevo.</target>
         <note>{StrBegin="MSB3942: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
+        <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
+        <target state="translated">MSB3944: El nivel de compresión '{0}' no es compatible. Se utilizará el nivel de compresión predeterminado.</target>
+        <note>{StrBegin="MSB3944: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
+        <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
+        <target state="translated">MSB3945: El nivel de compresión '{0}' no es compatible con la versión de .NET Framework de MSBuild. Se utilizará el nivel de compresión predeterminado.</target>
+        <note>{StrBegin="MSB3945: "}</note>
       </trans-unit>
     </body>
   </file>

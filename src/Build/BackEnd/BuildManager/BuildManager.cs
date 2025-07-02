@@ -1960,6 +1960,10 @@ namespace Microsoft.Build.Execution
                 throw new BuildAbortedException();
             }
 
+            LogMessage(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "StaticGraphConstructionStarted"));
+
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
@@ -2427,8 +2431,8 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            IEnumerable<ScheduleResponse> response = _scheduler!.ReportRequestBlocked(node, blocker);
-            PerformSchedulingActions(response);
+            IEnumerable<ScheduleResponse> responses = _scheduler!.ReportRequestBlocked(node, blocker);
+            PerformSchedulingActions(responses);
         }
 
         /// <summary>
@@ -2817,7 +2821,7 @@ namespace Microsoft.Build.Execution
                     // part of the import graph.
                     _buildParameters?.ProjectRootElementCache?.Clear();
 
-                    FileMatcher.ClearFileEnumerationsCache();
+                    FileMatcher.ClearCaches();
 #if !CLR2COMPATIBILITY
                     FileUtilities.ClearFileExistenceCache();
 #endif
