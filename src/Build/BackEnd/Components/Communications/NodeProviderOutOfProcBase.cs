@@ -583,6 +583,12 @@ namespace Microsoft.Build.BackEnd
 
             private readonly ITranslator _writeTranslator;
 
+#if FEATURE_APM
+            // cached delegates for pipe stream read callbacks
+            private readonly AsyncCallback _headerReadCompleteCallback;
+            private readonly AsyncCallback _bodyReadCompleteCallback;
+#endif
+
             /// <summary>
             /// A queue used for enqueuing packets to write to the stream asynchronously.
             /// </summary>
@@ -613,6 +619,10 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private ExitPacketState _exitPacketState;
 
+#if FEATURE_APM
+            // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
+            private int _currentPacketLength;
+#endif
 
             /// <summary>
             /// Constructor.
@@ -631,6 +641,11 @@ namespace Microsoft.Build.BackEnd
                 _readTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
+#if FEATURE_APM
+                _headerReadCompleteCallback = HeaderReadComplete;
+                _bodyReadCompleteCallback = BodyReadComplete;
+                _currentPacketLength = 0;
+#endif
 
                 _packetWriteQueue = new ConcurrentQueue<INodePacket>();
                 _packetEnqueued = new AutoResetEvent(false);
@@ -653,7 +668,7 @@ namespace Microsoft.Build.BackEnd
             public void BeginAsyncPacketRead()
             {
 #if FEATURE_APM
-                _pipeStream.BeginRead(_headerByte, 0, _headerByte.Length, HeaderReadComplete, this);
+                _pipeStream.BeginRead(_headerByte, 0, _headerByte.Length, _headerReadCompleteCallback, this);
 #else
                 ThreadPool.QueueUserWorkItem(delegate
                 {
@@ -955,15 +970,15 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
-                MSBuildEventSource.Log.PacketReadSize(packetLength);
+                _currentPacketLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
+                MSBuildEventSource.Log.PacketReadSize(_currentPacketLength);
 
                 // Ensures the buffer is at least this length.
                 // It avoids reallocations if the buffer is already large enough.
-                _readBufferMemoryStream.SetLength(packetLength);
+                _readBufferMemoryStream.SetLength(_currentPacketLength);
                 byte[] packetData = _readBufferMemoryStream.GetBuffer();
 
-                _pipeStream.BeginRead(packetData, 0, packetLength, BodyReadComplete, new Tuple<byte[], int>(packetData, packetLength));
+                _pipeStream.BeginRead(packetData, 0, _currentPacketLength, _bodyReadCompleteCallback, this);
             }
 #endif
 
@@ -993,6 +1008,7 @@ namespace Microsoft.Build.BackEnd
                     Close();
                     return false;
                 }
+
                 return true;
             }
 
@@ -1003,9 +1019,6 @@ namespace Microsoft.Build.BackEnd
             private void BodyReadComplete(IAsyncResult result)
             {
                 NodePacketType packetType = (NodePacketType)_headerByte[0];
-                var state = (Tuple<byte[], int>)result.AsyncState;
-                byte[] packetData = state.Item1;
-                int packetLength = state.Item2;
                 int bytesRead;
 
                 try
@@ -1023,7 +1036,7 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (!ProcessBodyBytesRead(bytesRead, packetLength, packetType))
+                    if (!ProcessBodyBytesRead(bytesRead, _currentPacketLength, packetType))
                     {
                         return;
                     }
