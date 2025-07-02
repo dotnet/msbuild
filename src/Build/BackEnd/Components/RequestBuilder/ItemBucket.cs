@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// This class represents a collection of items that are homogeneous w.r.t.
     /// a certain set of metadata.
     /// </summary>
-    internal sealed class ItemBucket : IComparable
+    internal struct ItemBucket : IComparable
     {
         #region Member data
 

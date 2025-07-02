@@ -331,13 +331,15 @@ namespace Microsoft.Build.BackEnd
                         // this item for all metadata consumed by the batchable object
                         int matchingBucketIndex = buckets.BinarySearch(dummyBucket);
 
-                        ItemBucket matchingBucket = (matchingBucketIndex >= 0)
-                            ? buckets[matchingBucketIndex]
-                            : null;
+                        ItemBucket matchingBucket;
 
                         // If we didn't find a bucket that matches this item, create a new one, adding
                         // this item to the bucket.
-                        if (matchingBucket == null)
+                        if (matchingBucketIndex >= 0)
+                        {
+                            matchingBucket = buckets[matchingBucketIndex];
+                        }
+                        else
                         {
                             matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
                             if (loggingContext != null)
@@ -365,7 +367,7 @@ namespace Microsoft.Build.BackEnd
             var orderedBuckets = new List<ItemBucket>(buckets.Count);
             for (int i = 0; i < buckets.Count; ++i)
             {
-                orderedBuckets.Add(null);
+                orderedBuckets.Add(default);
             }
 
             foreach (ItemBucket bucket in buckets)
