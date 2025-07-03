@@ -2855,7 +2855,8 @@ namespace Microsoft.Build.Execution
                     loggingService.IncludeEvaluationProfile,
                     loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
                     loggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
-                    loggingService.IncludeTaskInputs));
+                    loggingService.IncludeTaskInputs,
+                    loggingService.EnableTargetOutputLogging));
             }
 
             return _nodeConfiguration;
@@ -3043,6 +3044,12 @@ namespace Microsoft.Build.Execution
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
+
+            if (_buildParameters.EnableTargetOutputLogging)
+            {
+                loggingService.EnableTargetOutputLogging = true;
+            }
+
 
             try
             {
