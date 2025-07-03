@@ -1463,6 +1463,8 @@ namespace Microsoft.Build.Execution
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
+                    _taskFactoryParameters ??= new();
+                    TaskFactoryParameters.Add("TaskHostExplicitlyRequested", isTaskHostFactory ? "true" : "false");
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
@@ -1479,7 +1481,7 @@ namespace Microsoft.Build.Execution
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, isTaskHostFactory, targetLoggingContext, elementLocation, taskProjectFile);
+                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
                     else

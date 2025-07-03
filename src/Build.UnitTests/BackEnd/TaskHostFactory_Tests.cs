@@ -139,7 +139,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Process taskHostNode2 = Process.GetProcessById(pidSidecar);
                 taskHostNode2.WaitForExit(3000).ShouldBeFalse($"The node should be alife since it is the sidecar node.");
                 taskHostNode2.Kill();
-
             }
         }
 

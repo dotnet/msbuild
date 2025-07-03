@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                taskFactory.InitializeFactory(null, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(null, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
             });
         }
         /// <summary>
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                taskFactory.InitializeFactory(_loadInfo, null, new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(_loadInfo, null, new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
             });
         }
         /// <summary>
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                taskFactory.InitializeFactory(_loadInfo, String.Empty, new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(_loadInfo, String.Empty, new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
             });
         }
         /// <summary>
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                taskFactory.InitializeFactory(_loadInfo, "RandomTask", new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, false, null, ElementLocation.Create("NONE"), String.Empty);
+                taskFactory.InitializeFactory(_loadInfo, "RandomTask", new Dictionary<string, TaskPropertyInfo>(), string.Empty, null, false, null, ElementLocation.Create("NONE"), String.Empty);
             });
         }
         /// <summary>
@@ -688,7 +688,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #else
             _loadInfo = AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, null);
 #endif
-            _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, isTaskHostFactory, null, ElementLocation.Create("NONE"), String.Empty);
+            if (explicitlyLaunchTaskHost)
+            {
+                factoryParameters.Add("TaskHostExplicitlyRequested", "true");
+            }
+            _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
         }
 
