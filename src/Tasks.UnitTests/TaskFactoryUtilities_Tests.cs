@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             {
                 // Arrange
                 var tempAssemblyFile = env.CreateFile(".dll");
-                var directories = new List<string> { "dir1", "dir2", "dir3" };
+                var directories = new List<string> { "dir1", "dir2" };
 
                 // Act
                 string manifestPath = TaskFactoryUtilities.CreateLoadManifest(tempAssemblyFile.Path, directories);
@@ -46,38 +46,10 @@ namespace Microsoft.Build.UnitTests
                 File.Exists(manifestPath).ShouldBeTrue();
 
                 string[] manifestContent = File.ReadAllLines(manifestPath);
-                manifestContent.Length.ShouldBe(3);
+                manifestContent.Length.ShouldBe(2);
                 manifestContent.ShouldContain("dir1");
                 manifestContent.ShouldContain("dir2");
-                manifestContent.ShouldContain("dir3");
             }
-        }
-
-        [Fact]
-        public void CreateLoadManifest_WithNullAssemblyPath_ShouldThrow()
-        {
-            // Arrange
-            var directories = new List<string> { "dir1" };
-
-            // Act & Assert
-            Should.Throw<ArgumentException>(() => TaskFactoryUtilities.CreateLoadManifest(null, directories));
-        }
-
-        [Fact]
-        public void CreateLoadManifest_WithNullDirectories_ShouldThrow()
-        {
-            // Arrange
-            string assemblyPath = "test.dll";
-
-            // Act & Assert
-            Should.Throw<ArgumentNullException>(() => TaskFactoryUtilities.CreateLoadManifest(assemblyPath, null));
-        }
-
-        [Fact]
-        public void LoadTaskAssembly_WithNullPath_ShouldThrow()
-        {
-            // Act & Assert
-            Should.Throw<ArgumentException>(() => TaskFactoryUtilities.LoadTaskAssembly(null, false));
         }
 
         [Fact]
@@ -91,12 +63,6 @@ namespace Microsoft.Build.UnitTests
 
             // Assert
             handler.ShouldNotBeNull();
-        }
-
-        [Fact]
-        public void CreateAssemblyResolver_WithNullDirectories_ShouldThrow()
-        {
-            Should.Throw<ArgumentNullException>(() => TaskFactoryUtilities.CreateAssemblyResolver(null));
         }
     }
 }

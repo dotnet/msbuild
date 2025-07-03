@@ -4,7 +4,9 @@
 namespace Microsoft.Build.Framework;
 
 /// <summary>
-/// Interface that a task factory Instance should implement if its tasks can run out of proc.
+/// Marker interface for Task Factory which creates tasks in a way compatible with out-of-process execution.
+/// Currently only TaskFactories shipped with MSBuild support out-of-process execution. 
+/// They are marked with this intrerface to distinguish them from exterally defined TaskFactories.
 /// </summary>
 internal interface IOutOfProcTaskFactory
 {
