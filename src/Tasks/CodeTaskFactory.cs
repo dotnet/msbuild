@@ -848,15 +848,10 @@ namespace Microsoft.Build.Tasks
                         return null;
                     }
 
-                    // Create manifest file for out-of-process execution
-                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
-                    {
-                        TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
-                    }
-
                     Assembly compiledAssembly;
                     if (Traits.Instance.ForceTaskFactoryOutOfProc)
                     {
+                        TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
                         compiledAssembly = Assembly.LoadFrom(compilerResults.PathToAssembly);
                     }
                     else

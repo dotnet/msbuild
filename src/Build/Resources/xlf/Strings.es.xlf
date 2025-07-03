@@ -447,8 +447,8 @@
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
-        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution.</source>
-        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution.</target>
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">

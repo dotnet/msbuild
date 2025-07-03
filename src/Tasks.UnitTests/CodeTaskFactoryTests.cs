@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string projectFileContents = $@"
@@ -77,7 +77,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string projectFileContents = $@"
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string projectFileContents = $@"
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string projectFileContents = $@"
@@ -540,7 +540,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string projectFileContents = $@"
@@ -581,7 +581,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string projectFileContents = $@"
@@ -713,7 +713,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
                 string netFrameworkDirectory = ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version45);
                 if (netFrameworkDirectory == null)
@@ -1188,7 +1188,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string projectFileContents = $@"
@@ -1230,7 +1230,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string taskName = $"HelloTask{num}";
@@ -1270,7 +1270,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string taskName = $"HelloTask{num}";
@@ -1303,7 +1303,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string taskXml = @"
@@ -1334,7 +1334,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 string taskXml = @"

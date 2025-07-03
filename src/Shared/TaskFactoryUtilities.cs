@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared
         /// Creates a process-specific temporary directory for inline task assemblies.
         /// </summary>
         /// <returns>The path to the created temporary directory.</returns>
-        public static string CreateProcessSpecificTaskDirectory()
+        public static string CreateProcessSpecificTemporaryTaskDirectory()
         {
             string processSpecificInlineTaskDir = Path.Combine(
                 FileUtilities.TempFileDirectory,
@@ -55,8 +55,8 @@ namespace Microsoft.Build.Shared
         /// <returns>The full path to the temporary file.</returns>
         public static string GetTemporaryTaskAssemblyPath()
         {
-            string taskDir = CreateProcessSpecificTaskDirectory();
-            return FileUtilities.GetTemporaryFile(taskDir, null, "inline_task.dll", false);
+            string taskDir = CreateProcessSpecificTemporaryTaskDirectory();
+            return FileUtilities.GetTemporaryFile(taskDir, fileName: null, extension: "inline_task.dll", createFile: false);
         }
 
         /// <summary>
@@ -172,8 +172,7 @@ namespace Microsoft.Build.Shared
         /// during TaskFactory initialization.
         /// </summary>
         /// <param name="taskLocation">The path to the task assembly.</param>
-        /// <returns>True if a manifest was found and handlers were registered, false otherwise.</returns>
-        public static bool RegisterAssemblyResolveHandlersFromManifest(string taskLocation)
+        public static void RegisterAssemblyResolveHandlersFromManifest(string taskLocation)
         {
             if (string.IsNullOrEmpty(taskLocation))
             {
@@ -182,24 +181,21 @@ namespace Microsoft.Build.Shared
 
             if (!taskLocation.EndsWith(InlineTaskSuffix, StringComparison.OrdinalIgnoreCase))
             {
-                return false;
+                return;
             }
 
             string manifestPath = taskLocation + InlineTaskLoadManifestSuffix;
             if (!File.Exists(manifestPath))
             {
-                return false;
+                return;
             }
 
             string[] directories = File.ReadAllLines(manifestPath);
             if (directories?.Length > 0)
             {
-                var resolver = CreateAssemblyResolver(new List<string>(directories));
+                ResolveEventHandler resolver = CreateAssemblyResolver([.. directories]);
                 AppDomain.CurrentDomain.AssemblyResolve += resolver;
-                return true;
             }
-
-            return false;
         }
 
         /// <summary>
@@ -218,9 +214,18 @@ namespace Microsoft.Build.Shared
             return (sender, args) => TryLoadAssembly(searchDirectories, new AssemblyName(args.Name));
         }
 
+        /// <summary>
+        /// Cleans up inline task caches by deleting the temporary directories used for inline task assemblies.
+        /// This is typically called when the build process is completed.
+        /// </summary>
+        /// <remarks>
+        /// This has different behavior on windows and non-windows platforms:
+        /// - On Windows it will fail to delete the directory that contains the inline task assembly for this process because it is locked by the current process.
+        /// Therefore, it only deletes directories from prior builds.
+        /// - On non-Windows platforms, it will delete all inline task directories, including the one for the current process.
+        /// </remarks>
         public static void CleanInlineTaskCaches()
         {
-            // we can't clean our own cache because we have it loaded, but we can clean caches from prior runs
             string inlineTaskDir = Path.Combine(
                 FileUtilities.TempFileDirectory,
                 InlineTaskTempDllSubPath);

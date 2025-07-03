@@ -45,7 +45,7 @@ Task factories create instances of tasks. They implement [`ITaskFactory`](https:
 This interface defines `bool Initialize(...)` and `ITask CreateTask(...)`.
 They are e.g. responsible for loading a task from an assembly and initializing it.
 
-The trait `MSBUILDFORCETASKFACTORYOUTOFPROC` allows running inline tasks in an out of process TaskHost and is not compatible with custom TaskFactories.
+The trait `MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC` allows running inline tasks in an out of process TaskHost and is not compatible with custom TaskFactories.
 
 ### Built-in Task Factories
 

@@ -18,19 +18,6 @@ namespace Microsoft.Build.UnitTests
     public sealed class TaskFactoryUtilities_Tests
     {
         [Fact]
-        public void CreateProcessSpecificTaskDirectory_ShouldCreateValidDirectory()
-        {
-            // Act
-            string directory = TaskFactoryUtilities.CreateProcessSpecificTaskDirectory();
-
-            // Assert
-            directory.ShouldNotBeNull();
-            Directory.Exists(directory).ShouldBeTrue();
-            directory.ShouldContain(TaskFactoryUtilities.InlineTaskTempDllSubPath);
-            directory.ShouldContain($"pid_{EnvironmentUtilities.CurrentProcessId}");
-        }
-
-        [Fact]
         public void GetTemporaryTaskAssemblyPath_ShouldReturnValidPath()
         {
             // Act

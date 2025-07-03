@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
@@ -98,7 +98,7 @@ Log.LogError(Alpha.GetString());
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
 
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
@@ -217,7 +217,7 @@ Log.LogError(Class1.ToPrint());
             using var env = TestEnvironment.Create();
             if (forceOutOfProc)
             {
-                env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
             }
 
             var p2 = env.CreateTestProjectWithFiles("p2.proj", text2);
@@ -665,7 +665,7 @@ namespace InlineTask
             {
                 if (forceOutOfProc)
                 {
-                    env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
                 }
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
                 var logger = proj.BuildProjectExpectFailure();
@@ -784,7 +784,7 @@ namespace InlineTask
             using var env = TestEnvironment.Create();
             if (forceOutOfProc)
             {
-                env.SetEnvironmentVariable("MSBUILDFORCETASKFACTORYOUTOFPROC", "1");
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
             }
             
             RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
