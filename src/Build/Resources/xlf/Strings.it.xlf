@@ -860,6 +860,21 @@ Errori: {3}</target>
         <target state="translated">Il resolver SDK "{0}" ha restituito null.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">Il resolver SDK '{0}' non è riuscito a risolvere l'SDK '{1}'. {2}</target>
@@ -887,6 +902,11 @@ Errori: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Il grafo statico è stato caricato in {0} secondi: {1} nodi, {2} vertici</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="new">Static graph construction started.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

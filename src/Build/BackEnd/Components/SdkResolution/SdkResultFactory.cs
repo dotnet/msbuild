@@ -12,7 +12,7 @@ using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
-    /// An internal implementation of <see cref="Microsoft.Build.Framework.SdkResultFactory"/>.
+    /// An internal implementation of <see cref="Framework.SdkResultFactory"/>.
     /// </summary>
     internal class SdkResultFactory : SdkResultFactoryBase
     {
@@ -49,6 +49,26 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                                                       IEnumerable<string> warnings = null)
         {
             return new SdkResult(_sdkReference, paths, version, propertiesToAdd, itemsToAdd, warnings);
+        }
+
+        public override SdkResultBase IndicateSuccess(string path,
+                                                      string version,
+                                                      IDictionary<string, string> propertiesToAdd,
+                                                      IDictionary<string, SdkResultItem> itemsToAdd,
+                                                      IEnumerable<string> warnings = null,
+                                                      IDictionary<string, string> environmentVariablesToAdd = null)
+        {
+            return new SdkResult(_sdkReference, path, version, warnings, propertiesToAdd, itemsToAdd, environmentVariablesToAdd);
+        }
+
+        public override SdkResultBase IndicateSuccess(IEnumerable<string> paths,
+                                                      string version,
+                                                      IDictionary<string, string> propertiesToAdd = null,
+                                                      IDictionary<string, SdkResultItem> itemsToAdd = null,
+                                                      IEnumerable<string> warnings = null,
+                                                      IDictionary<string, string> environmentVariablesToAdd = null)
+        {
+            return new SdkResult(_sdkReference, paths, version, propertiesToAdd, itemsToAdd, warnings, environmentVariablesToAdd);
         }
     }
 }

@@ -126,6 +126,11 @@ namespace Microsoft.Build.Execution
         private PropertyDictionary<ProjectPropertyInstance> _environmentVariableProperties;
 
         /// <summary>
+        /// Properties originating from SDK resolution-reported environment variables
+        /// </summary>
+        private PropertyDictionary<ProjectPropertyInstance> _sdkResolvedEnvironmentVariableProperties;
+
+        /// <summary>
         /// Items in the project. This is a dictionary of ordered lists of a single type of items keyed by item type.
         /// </summary>
         private IItemDictionary<ProjectItemInstance> _items;
@@ -541,6 +546,7 @@ namespace Microsoft.Build.Execution
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _environmentVariableProperties = projectToInheritFrom._environmentVariableProperties;
+            _sdkResolvedEnvironmentVariableProperties = projectToInheritFrom._sdkResolvedEnvironmentVariableProperties;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(projectToInheritFrom._itemDefinitions, MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = projectToInheritFrom._hostServices;
             this.ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
@@ -661,6 +667,7 @@ namespace Microsoft.Build.Execution
             this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, new ReadOnlyCollection<ProjectItem>(data.Items), projectItemToInstanceMap);
             this.CreateGlobalPropertiesSnapshot(data.GlobalPropertiesDictionary);
             this.CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
+            this.CreateSdkResolvedEnvironmentVariablePropertiesSnapshot(data.SdkResolvedEnvironmentVariablePropertiesDictionary);
             this.CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
             this.CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
 
@@ -679,6 +686,16 @@ namespace Microsoft.Build.Execution
             _explicitToolsVersionSpecified = data.ExplicitToolsVersion != null;
 
             _isImmutable = immutable;
+        }
+
+        private void CreateSdkResolvedEnvironmentVariablePropertiesSnapshot(PropertyDictionary<ProjectPropertyInstance> sdkResolvedEnvironmentVariablePropertiesDictionary)
+        {
+            _sdkResolvedEnvironmentVariableProperties = new PropertyDictionary<ProjectPropertyInstance>(sdkResolvedEnvironmentVariablePropertiesDictionary.Count);
+
+            foreach (ProjectPropertyInstance environmentProperty in sdkResolvedEnvironmentVariablePropertiesDictionary)
+            {
+                _sdkResolvedEnvironmentVariableProperties.Set(environmentProperty.DeepClone());
+            }
         }
 
         /// <summary>
@@ -737,6 +754,16 @@ namespace Microsoft.Build.Execution
                     _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
                 }
 
+                if (that._sdkResolvedEnvironmentVariableProperties is PropertyDictionary<ProjectPropertyInstance> thatEnvProps)
+                {
+                    _sdkResolvedEnvironmentVariableProperties = new(thatEnvProps.Count);
+
+                    foreach (ProjectPropertyInstance sdkResolvedEnvironmentVariable in thatEnvProps)
+                    {
+                        _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentVariable.DeepClone(_isImmutable));
+                    }
+                }
+
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
@@ -775,6 +802,8 @@ namespace Microsoft.Build.Execution
                     _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
                     _environmentVariableProperties =
                         new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
+                    _sdkResolvedEnvironmentVariableProperties =
+                        new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
 
                     // Filter each type of property.
                     foreach (var desiredProperty in filter.PropertyFilters)
@@ -791,10 +820,15 @@ namespace Microsoft.Build.Execution
                             _globalProperties.Set(globalProperty.DeepClone(isImmutable: true));
                         }
 
-                        var environmentProperty = that.GetProperty(desiredProperty);
+                        var environmentProperty = that._environmentVariableProperties.GetProperty(desiredProperty);
                         if (environmentProperty != null)
                         {
                             _environmentVariableProperties.Set(environmentProperty.DeepClone(isImmutable: true));
+                        }
+                        var sdkResolvedEnvironmentProperty = that._sdkResolvedEnvironmentVariableProperties?.GetProperty(desiredProperty);
+                        if (sdkResolvedEnvironmentProperty != null)
+                        {
+                            _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentProperty.DeepClone(isImmutable: true));
                         }
                     }
                 }
@@ -1342,6 +1376,45 @@ namespace Microsoft.Build.Execution
             get => _environmentVariableProperties;
         }
 
+        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SdkResolvedEnvironmentVariablePropertiesDictionary
+        {
+            get => _sdkResolvedEnvironmentVariableProperties;
+        }
+
+        public void AddSdkResolvedEnvironmentVariable(string name, string value)
+        {
+            // If the property has already been set as an environment variable, we do not overwrite it.
+            if (_environmentVariableProperties.Contains(name))
+            {
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value);
+                return;
+            }
+            // If another SDK already set it, we do not overwrite it.
+            else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
+            {
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value);
+                return;
+            }
+
+            _sdkResolvedEnvironmentVariableProperties ??= new();
+
+            ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
+
+            _sdkResolvedEnvironmentVariableProperties.Set(property);
+
+            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
+            _environmentVariableProperties.Set(property);
+
+            // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
+            if (GetProperty(name) is null)
+            {
+                ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
+                   .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);
+            }
+
+            _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableSet", name, value);
+        }
+
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable
         /// </summary>
@@ -1843,6 +1916,13 @@ namespace Microsoft.Build.Execution
             SdkResult sdkResult)
         {
             _importPaths.Add(import.FullPath);
+            if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+            {
+                foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                {
+                    _sdkResolvedEnvironmentVariableProperties.Set(ProjectPropertyInstance.Create(environmentVariable.Key, environmentVariable.Value, importElement.Location, isImmutable: true));
+                }
+            }
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).RecordImportWithDuplicates(importElement, import, versionEvaluated);
         }
 
@@ -2306,7 +2386,9 @@ namespace Microsoft.Build.Execution
                     // Only emit the property if it does not exist in the global or environment properties dictionaries or differs from them.
                     if (!_globalProperties.Contains(property.Name) || !String.Equals(_globalProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!_environmentVariableProperties.Contains(property.Name) || !String.Equals(_environmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
+                        if ((!_environmentVariableProperties.Contains(property.Name) || !String.Equals(_environmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
+                            && _sdkResolvedEnvironmentVariableProperties is not null
+                            && (!_sdkResolvedEnvironmentVariableProperties.Contains(property.Name) || !String.Equals(_sdkResolvedEnvironmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase)))
                         {
                             property.ToProjectPropertyElement(propertyGroupElement);
                         }
