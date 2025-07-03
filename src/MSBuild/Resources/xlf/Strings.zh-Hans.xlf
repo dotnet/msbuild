@@ -1784,6 +1784,11 @@
         <target state="translated">MSBUILD : error MSB1059: 无法打印目标。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">未使用终端记录器，因为检测到生成正在自动化环境中运行。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">未使用终端记录器，因为生成是在请求直接访问 stdout 流的进程的上下文中运行的(如“dotnet test”)。</target>

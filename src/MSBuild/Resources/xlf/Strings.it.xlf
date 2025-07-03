@@ -1796,6 +1796,11 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">MSBUILD : error MSB1059: non è stato possibile stampare le destinazioni. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Il logger del terminale non è stato utilizzato perché è stato rilevato che la compilazione è in esecuzione in un ambiente automatizzato.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Il logger di terminale non è stato usato perché la compilazione viene eseguita nel contesto di un processo (ad esempio 'dotnet test') che richiede l'accesso diretto al flusso stdout.</target>
