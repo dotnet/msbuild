@@ -690,6 +690,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             if (explicitlyLaunchTaskHost)
             {
+                factoryParameters ??= new Dictionary<string, string>();
                 factoryParameters.Add("TaskHostExplicitlyRequested", "true");
             }
             _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
