@@ -37,6 +37,10 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
+  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
+  - ${{ if eq(parameters.EnableOptProf, false) }}:
+    - name: SkipApplyOptimizationData
+      value: true
   - name: EnableReleaseOneLocBuild
     value: false # disable loc for vs17.11
   - name: Codeql.Enabled
