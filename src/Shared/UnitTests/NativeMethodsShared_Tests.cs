@@ -164,6 +164,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(
                 status == NativeMethodsShared.DevDriveStatus.NotOnDevDrive ||
                 status == NativeMethodsShared.DevDriveStatus.OnDevDrive ||
+                status == NativeMethodsShared.DevDriveStatus.OnRefsNotConfirmedDevDrive ||
                 status == NativeMethodsShared.DevDriveStatus.NotApplicable,
                 "IsOnDevDrive should return a valid DevDriveStatus");
 

@@ -1682,6 +1682,9 @@
   <data name="DevDrive_NotOnDevDrive" xml:space="preserve">
     <value>not detected</value>
   </data>
+  <data name="DevDrive_OnRefsNotConfirmedDevDrive" xml:space="preserve">
+    <value>on ReFS but not confirmed as Dev Drive</value>
+  </data>
   <data name="DevDrive_NotApplicable" xml:space="preserve">
     <value>not applicable</value>
   </data>

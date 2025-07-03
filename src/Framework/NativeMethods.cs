@@ -632,6 +632,11 @@ internal static class NativeMethods
         OnDevDrive,
 
         /// <summary>
+        /// The current directory is on ReFS but we cannot confirm it's a Dev Drive.
+        /// </summary>
+        OnRefsNotConfirmedDevDrive,
+
+        /// <summary>
         /// Not on Windows or unable to determine.
         /// </summary>
         NotApplicable,
@@ -729,13 +734,44 @@ internal static class NativeMethods
 
         string fileSystemName = new string(fileSystemNameBuffer).TrimEnd('\0');
         
-        // Dev Drive uses the ReFS file system
+        // Dev Drive uses the ReFS file system, but not all ReFS volumes are Dev Drives
         if (string.Equals(fileSystemName, "ReFS", StringComparison.OrdinalIgnoreCase))
         {
-            return DevDriveStatus.OnDevDrive;
+            // Additional checks to determine if this ReFS volume is specifically a Dev Drive
+            // For now, we conservatively report ReFS but not confirmed as Dev Drive
+            // until we can implement more specific Dev Drive detection
+            return IsLikelyDevDrive(fileSystemFlags) ? DevDriveStatus.OnDevDrive : DevDriveStatus.OnRefsNotConfirmedDevDrive;
         }
 
         return DevDriveStatus.NotOnDevDrive;
+    }
+
+    /// <summary>
+    /// Attempts to determine if a ReFS volume is specifically a Dev Drive.
+    /// This is a heuristic approach as there's no direct API to distinguish Dev Drive from regular ReFS.
+    /// </summary>
+    /// <param name="fileSystemFlags">File system flags from GetVolumeInformation</param>
+    /// <returns>True if the ReFS volume appears to be a Dev Drive</returns>
+    [SupportedOSPlatform("windows")]
+    private static bool IsLikelyDevDrive(uint fileSystemFlags)
+    {
+        // Dev Drive volumes typically have specific characteristics:
+        // - They are optimized for developer scenarios
+        // - They may have specific flag combinations
+        
+        // For now, we implement a conservative approach
+        // This could be enhanced with more specific detection logic
+        // such as checking for specific registry entries or volume properties
+        
+        // As a conservative measure, we only return true if we have strong indicators
+        // For the initial implementation, we'll be conservative and require additional
+        // confirmation beyond just being ReFS
+        
+        // TODO: Implement more specific Dev Drive detection logic
+        // This might involve checking registry entries, specific volume flags,
+        // or other Dev Drive-specific indicators
+        
+        return false; // Conservative approach until we have better detection
     }
 
     private static SAC_State? s_sacState;
