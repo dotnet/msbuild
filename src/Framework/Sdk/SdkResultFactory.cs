@@ -54,13 +54,13 @@ namespace Microsoft.Build.Framework
         /// <param name="version">SDK version which should be imported</param>
         /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
-        /// <param name="warnings">Optional warnings to display during resolution.</param>
+        /// <param name="warnings">Warnings to display during resolution.</param>
         /// <returns></returns>
         public virtual SdkResult IndicateSuccess(IEnumerable<string> paths,
             string version,
-            IDictionary<string, string> propertiesToAdd = null,
-            IDictionary<string, SdkResultItem> itemsToAdd = null,
-            IEnumerable<string> warnings = null)
+            IDictionary<string, string> propertiesToAdd,
+            IDictionary<string, SdkResultItem> itemsToAdd,
+            IEnumerable<string> warnings)
         {
             throw new NotImplementedException();
         }
