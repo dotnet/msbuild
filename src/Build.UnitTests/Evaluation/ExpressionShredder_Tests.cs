@@ -571,11 +571,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorTransform1()
         {
             string expression = "@(i->'%(Meta0)'->'%(Filename)'->Substring($(Val)))";
-            List<ExpressionShredder.ItemExpressionCapture> expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            expressions.MoveNext();
 
-            ExpressionShredder.ItemExpressionCapture capture = expressions[0];
+            ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
 
-            Assert.Single(expressions);
+            Assert.False(expressions.MoveNext());
             Assert.Null(capture.Separator);
             Assert.Equal("i", capture.ItemType);
             Assert.Equal("%(Meta0)", capture.Captures[0].Value);
@@ -591,21 +592,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ItemExpressionMedleyRegressionTestAgainstOldRegex()
         {
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
 
             foreach (string expression in _medleyTests)
             {
                 expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
                 MatchCollection matches = s_itemVectorPattern.Matches(expression);
 
-                if (expressions != null)
+                if (expressions.MoveNext())
                 {
-                    Assert.Equal(matches.Count, expressions.Count);
+                    int expressionCount = 1;
 
-                    for (int n = 0; n < matches.Count; n++)
+                    do
                     {
-                        Match match = matches[n];
-                        ExpressionShredder.ItemExpressionCapture capture = expressions[n];
+                        Match match = matches[expressionCount - 1];
+                        ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
 
                         Assert.Equal(match.Value, capture.Value);
 
@@ -622,7 +623,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                         {
                             Assert.Equal(0, transformGroup.Length);
                         }
+
+                        ++expressionCount;
                     }
+                    while (expressions.MoveNext());
+
+                    Assert.Equal(matches.Count, expressionCount);
                 }
                 else
                 {
@@ -635,24 +641,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpressionInvalid1()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
 
             expression = "@(type-&gt;'%($(a)), '%'')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.Null(expressions);
+            Assert.False(expressions.MoveNext());
         }
 
         [Fact]
         public void ExtractItemVectorExpressionsSingleExpression1()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            expressions.MoveNext();
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Null(capture.Separator);
             Assert.Null(capture.Captures);
             Assert.Equal("Foo", capture.ItemType);
@@ -663,13 +670,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression2()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo, ';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            expressions.MoveNext();
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Null(capture.Captures);
             Assert.Equal(";", capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -680,13 +688,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression3()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Fullpath)')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -698,13 +706,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression4()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Fullpath)',';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
             Assert.Equal(";", capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -716,13 +724,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression5()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->Bar(a,b))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -736,13 +744,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression6()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->Bar(a,b),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
             Assert.Equal(";", capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -756,13 +764,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression7()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->Metadata('Meta0')->Directory())";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -778,13 +786,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression8()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->Metadata('Meta0')->Directory(),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Equal(";", capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -800,13 +808,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression9()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Fullpath)'->Directory(), '|')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Equal("|", capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -822,13 +830,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression10()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Fullpath)'->Directory(),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Equal(";", capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -844,13 +852,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression11()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'$(SOMEPROP)%(Fullpath)')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -863,13 +871,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression12()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Filename)'->Substring($(Val), $(Boo)))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -885,13 +893,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression13()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Filename)'->Substring(\"AA\", 'BB', `cc`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -907,13 +915,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression14()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Filename)'->Substring('()', $(Boo), ')('))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -929,13 +937,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression15()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Filename)'->Substring(`()`, $(Boo), \"AA\"))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -951,13 +959,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression16()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Filename)'->Substring(`()`, $(Boo), \")(\"))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -973,13 +981,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsSingleExpression17()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Single(expressions);
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -995,15 +1003,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsMultipleExpression1()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
+            ExpressionShredder.ItemExpressionCapture firstCapture;
             ExpressionShredder.ItemExpressionCapture capture;
 
             expression = "@(Bar);@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[1];
-            Assert.Equal(2, expressions.Count);
-            Assert.Equal("Bar", expressions[0].ItemType);
-            Assert.Null(expressions[0].Captures);
+            Assert.True(expressions.MoveNext());
+            firstCapture = expressions.Current;
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("Bar", firstCapture.ItemType);
+            Assert.Null(firstCapture.Captures);
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -1019,39 +1031,47 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsMultipleExpression2()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
-            ExpressionShredder.ItemExpressionCapture capture;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
+            ExpressionShredder.ItemExpressionCapture firstCapture;
+            ExpressionShredder.ItemExpressionCapture secondCapture;
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`));@(Bar)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Equal(2, expressions.Count);
-            Assert.Equal("Bar", expressions[1].ItemType);
-            Assert.Null(expressions[1].Captures);
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(\"()\", $(Boo), `)(`)", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
+            Assert.True(expressions.MoveNext());
+            firstCapture = expressions.Current;
+            Assert.True(expressions.MoveNext());
+            secondCapture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("Bar", secondCapture.ItemType);
+            Assert.Null(secondCapture.Captures);
+            Assert.Equal(2, firstCapture.Captures.Count);
+            Assert.Null(firstCapture.Separator);
+            Assert.Equal("Foo", firstCapture.ItemType);
+            Assert.Equal("%(Filename)", firstCapture.Captures[0].Value);
+            Assert.Null(firstCapture.Captures[0].FunctionName);
+            Assert.Null(firstCapture.Captures[0].FunctionArguments);
+            Assert.Equal("Substring(\"()\", $(Boo), `)(`)", firstCapture.Captures[1].Value);
+            Assert.Equal("Substring", firstCapture.Captures[1].FunctionName);
+            Assert.Equal("\"()\", $(Boo), `)(`", firstCapture.Captures[1].FunctionArguments);
         }
 
         [Fact]
         public void ExtractItemVectorExpressionsMultipleExpression3()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
+            ExpressionShredder.ItemExpressionCapture secondCapture;
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`));AAAAAA;@(Bar)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Equal(2, expressions.Count);
-            Assert.Equal("Bar", expressions[1].ItemType);
-            Assert.Null(expressions[1].Captures);
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.True(expressions.MoveNext());
+            secondCapture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("Bar", secondCapture.ItemType);
+            Assert.Null(secondCapture.Captures);
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -1067,15 +1087,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsMultipleExpression4()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
             ExpressionShredder.ItemExpressionCapture capture;
+            ExpressionShredder.ItemExpressionCapture secondCapture;
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(\"`));@(;);@(aaa->;b);@(bbb->'d);@(`Foo->'%(Filename)'->Distinct());@(Bar)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            capture = expressions[0];
-            Assert.Equal(2, expressions.Count);
-            Assert.Equal("Bar", expressions[1].ItemType);
-            Assert.Null(expressions[1].Captures);
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.True(expressions.MoveNext());
+            secondCapture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("Bar", secondCapture.ItemType);
+            Assert.Null(secondCapture.Captures);
             Assert.Equal(2, capture.Captures.Count);
             Assert.Null(capture.Separator);
             Assert.Equal("Foo", capture.ItemType);
@@ -1091,25 +1115,32 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ExtractItemVectorExpressionsMultipleExpression5()
         {
             string expression;
-            List<ExpressionShredder.ItemExpressionCapture> expressions;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
 
             expression = "@(foo);@(foo,'-');@(foo);@(foo,',');@(foo)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.Equal(5, expressions.Count);
-            Assert.Equal("foo", expressions[0].ItemType);
-            Assert.Null(expressions[0].Separator);
 
-            Assert.Equal("foo", expressions[1].ItemType);
-            Assert.Equal("-", expressions[1].Separator);
+            Assert.True(expressions.MoveNext());
+            Assert.Equal("foo", expressions.Current.ItemType);
+            Assert.Null(expressions.Current.Separator);
 
-            Assert.Equal("foo", expressions[2].ItemType);
-            Assert.Null(expressions[2].Separator);
+            Assert.True(expressions.MoveNext());
+            Assert.Equal("foo", expressions.Current.ItemType);
+            Assert.Equal("-", expressions.Current.Separator);
 
-            Assert.Equal("foo", expressions[3].ItemType);
-            Assert.Equal(",", expressions[3].Separator);
+            Assert.True(expressions.MoveNext());
+            Assert.Equal("foo", expressions.Current.ItemType);
+            Assert.Null(expressions.Current.Separator);
 
-            Assert.Equal("foo", expressions[4].ItemType);
-            Assert.Null(expressions[4].Separator);
+            Assert.True(expressions.MoveNext());
+            Assert.Equal("foo", expressions.Current.ItemType);
+            Assert.Equal(",", expressions.Current.Separator);
+
+            Assert.True(expressions.MoveNext());
+            Assert.Equal("foo", expressions.Current.ItemType);
+            Assert.Null(expressions.Current.Separator);
+
+            Assert.False(expressions.MoveNext());
         }
 
         #region Original code to produce canonical results
