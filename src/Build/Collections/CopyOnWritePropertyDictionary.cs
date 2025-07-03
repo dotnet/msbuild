@@ -354,28 +354,29 @@ namespace Microsoft.Build.Collections
         /// <param name="other">An enumerator over the properties to add.</param>
         public void ImportProperties(IEnumerable<T> other)
         {
-            ImmutableDictionary<string, T>.Builder builder = null;
-
             if (other is CopyOnWritePropertyDictionary<T> copyOnWriteDictionary)
             {
-                foreach (KeyValuePair<string, T> kvp in copyOnWriteDictionary)
-                {
-                    builder ??= _backing.ToBuilder();
-                    builder[kvp.Value.Key] = kvp.Value;
-                }
+                _backing = _backing.SetItems(DictionaryItems(copyOnWriteDictionary));
             }
             else
             {
-                foreach (T property in other)
+                _backing = _backing.SetItems(Items(other));
+            }
+
+            static IEnumerable<KeyValuePair<string, T>> DictionaryItems(CopyOnWritePropertyDictionary<T> copyOnWriteDictionary)
+            {
+                foreach (KeyValuePair<string, T> kvp in copyOnWriteDictionary)
                 {
-                    builder ??= _backing.ToBuilder();
-                    builder[property.Key] = property;
+                    yield return new(kvp.Value.Key, kvp.Value);
                 }
             }
 
-            if (builder is not null)
+            static IEnumerable<KeyValuePair<string, T>> Items(IEnumerable<T> other)
             {
-                _backing = builder.ToImmutable();
+                foreach (T property in other)
+                {
+                    yield return new(property.Key, property);
+                }
             }
         }
 
