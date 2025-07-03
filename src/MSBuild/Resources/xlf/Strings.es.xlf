@@ -33,6 +33,26 @@
         <target state="translated">MSBUILD : error MSB1027: El modificador -noAutoResponse no puede especificarse en el archivo de respuesta automática MSBuild.rsp ni en ningún archivo de respuesta al que el archivo de respuesta automática haga referencia.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DevDrive">
+        <source>Based on the current directory file system, Dev Drive is {0}.</source>
+        <target state="new">Based on the current directory file system, Dev Drive is {0}.</target>
+        <note>Dev Drive is a Windows feature, {0} will be "detected"/"not detected"/"not applicable"</note>
+      </trans-unit>
+      <trans-unit id="DevDrive_NotApplicable">
+        <source>not applicable</source>
+        <target state="new">not applicable</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevDrive_NotOnDevDrive">
+        <source>not detected</source>
+        <target state="new">not detected</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DevDrive_OnDevDrive">
+        <source>detected</source>
+        <target state="new">detected</target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.

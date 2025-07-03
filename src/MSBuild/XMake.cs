@@ -1809,6 +1809,18 @@ namespace Microsoft.Build.CommandLine
                         MessageImportance.Low));
             }
 
+            NativeMethodsShared.DevDriveStatus devDriveStatus = NativeMethodsShared.IsOnDevDrive();
+            if (devDriveStatus != NativeMethodsShared.DevDriveStatus.NotApplicable)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "DevDrive",
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                $"DevDrive_{devDriveStatus}")),
+                        MessageImportance.Low));
+            }
+
             if (Traits.Instance.DebugEngine)
             {
                 messages.Add(

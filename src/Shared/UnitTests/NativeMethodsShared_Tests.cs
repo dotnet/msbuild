@@ -152,6 +152,28 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Verifies that NativeMethodsShared.IsOnDevDrive() returns a valid DevDriveStatus
+        /// </summary>
+        [Fact]
+        public void IsOnDevDriveReturnsValidStatus()
+        {
+            NativeMethodsShared.DevDriveStatus status = NativeMethodsShared.IsOnDevDrive();
+            
+            // The result should be one of the defined enum values
+            Assert.True(
+                status == NativeMethodsShared.DevDriveStatus.NotOnDevDrive ||
+                status == NativeMethodsShared.DevDriveStatus.OnDevDrive ||
+                status == NativeMethodsShared.DevDriveStatus.NotApplicable,
+                "IsOnDevDrive should return a valid DevDriveStatus");
+
+            // On non-Windows platforms, it should return NotApplicable
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Equal(NativeMethodsShared.DevDriveStatus.NotApplicable, status);
+            }
+        }
+
         #endregion
     }
 }

@@ -619,6 +619,24 @@ internal static class NativeMethods
         NotApplicable,
     }
 
+    internal enum DevDriveStatus
+    {
+        /// <summary>
+        /// The current directory is not on a Dev Drive.
+        /// </summary>
+        NotOnDevDrive,
+
+        /// <summary>
+        /// The current directory is on a Dev Drive.
+        /// </summary>
+        OnDevDrive,
+
+        /// <summary>
+        /// Not on Windows or unable to determine.
+        /// </summary>
+        NotApplicable,
+    }
+
     internal static LongPathsStatus IsLongPathsEnabled()
     {
         if (!IsWindows)
@@ -661,6 +679,63 @@ internal static class NativeMethods
                 return LongPathsStatus.Disabled;
             }
         }
+    }
+
+    internal static DevDriveStatus IsOnDevDrive()
+    {
+        if (!IsWindows)
+        {
+            return DevDriveStatus.NotApplicable;
+        }
+
+        try
+        {
+            return IsOnDevDriveInternal();
+        }
+        catch
+        {
+            return DevDriveStatus.NotApplicable;
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static DevDriveStatus IsOnDevDriveInternal()
+    {
+        string currentDirectory = Environment.CurrentDirectory;
+        string rootPath = Path.GetPathRoot(currentDirectory);
+        
+        if (string.IsNullOrEmpty(rootPath))
+        {
+            return DevDriveStatus.NotApplicable;
+        }
+
+        char[] volumeNameBuffer = new char[256];
+        char[] fileSystemNameBuffer = new char[256];
+        
+        bool result = GetVolumeInformation(
+            rootPath,
+            volumeNameBuffer,
+            volumeNameBuffer.Length,
+            out uint volumeSerialNumber,
+            out uint maximumComponentLength,
+            out uint fileSystemFlags,
+            fileSystemNameBuffer,
+            fileSystemNameBuffer.Length);
+
+        if (!result)
+        {
+            return DevDriveStatus.NotApplicable;
+        }
+
+        string fileSystemName = new string(fileSystemNameBuffer).TrimEnd('\0');
+        
+        // Dev Drive uses the ReFS file system
+        if (string.Equals(fileSystemName, "ReFS", StringComparison.OrdinalIgnoreCase))
+        {
+            return DevDriveStatus.OnDevDrive;
+        }
+
+        return DevDriveStatus.NotOnDevDrive;
     }
 
     private static SAC_State? s_sacState;
@@ -1689,6 +1764,19 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
     [SupportedOSPlatform("windows")]
     internal static extern IntPtr LoadLibrary(string fileName);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [SupportedOSPlatform("windows")]
+    internal static extern bool GetVolumeInformation(
+        string rootPathName,
+        char[] volumeNameBuffer,
+        int volumeNameSize,
+        out uint volumeSerialNumber,
+        out uint maximumComponentLength,
+        out uint fileSystemFlags,
+        char[] fileSystemNameBuffer,
+        int nFileSystemNameSize);
 
     /// <summary>
     /// Gets the fully qualified filename of the currently executing .exe.
