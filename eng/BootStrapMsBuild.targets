@@ -231,6 +231,7 @@
 
     <PropertyGroup>
       <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
+      <DotNetRoot Condition="'$(DotNetRoot)' == ''">$(MSBuildThisFileDirectory)..\.dotnet</DotNetRoot>
     </PropertyGroup>
 
     <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>

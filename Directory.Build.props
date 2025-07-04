@@ -27,7 +27,7 @@
      -->
      <!-- When building in source-only modes, let the TFM float based on what arcade is in use.
           When building in normal modes (independent build or a dotnet product build), set explicitly. -->
-    <LatestDotNetCoreForMSBuild>net9.0</LatestDotNetCoreForMSBuild>
+    <LatestDotNetCoreForMSBuild>net10.0</LatestDotNetCoreForMSBuild>
     <LatestDotNetCoreForMSBuild Condition="'$(DotNetBuildSourceOnly)' == 'true'">$(NetCurrent)</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 

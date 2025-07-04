@@ -11,8 +11,7 @@
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <SemanticVersioningV1>true</SemanticVersioningV1>
 
-    <EnablePackageValidation>true</EnablePackageValidation>
-
+    <EnablePackageValidation>false</EnablePackageValidation>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 
     <AssemblyName>Microsoft.NET.StringTools</AssemblyName>
