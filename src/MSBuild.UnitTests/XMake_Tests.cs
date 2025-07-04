@@ -2722,7 +2722,8 @@ EndGlobal
                 bool shouldLogHigh = Log.LogsMessagesOfImportance(MessageImportance.High);
                 bool shouldLogNormal = Log.LogsMessagesOfImportance(MessageImportance.Normal);
                 bool shouldLogLow = Log.LogsMessagesOfImportance(MessageImportance.Low);
-                return (MessageImportance)ExpectedMinimumMessageImportance switch
+                var value = (MessageImportance)ExpectedMinimumMessageImportance;
+                var result = value switch
                 {
                     MessageImportance.High - 1 => !shouldLogHigh && !shouldLogNormal && !shouldLogLow,
                     MessageImportance.High => shouldLogHigh && !shouldLogNormal && !shouldLogLow,
@@ -2730,6 +2731,21 @@ EndGlobal
                     MessageImportance.Low => shouldLogHigh && shouldLogNormal && shouldLogLow,
                     _ => false
                 };
+                if (!result)
+                {
+                    var enumName =
+                        value == MessageImportance.High - 1
+                        ? "Nothing"
+#if NET
+                        : Enum.GetName(value);
+#else
+                        : Enum.GetName(typeof(MessageImportance), value);
+#endif
+
+                    Log.LogError($"Expected minimum message importance {enumName} did not match actual logging behavior:\n" +
+                                 $"\tShouldLogHigh={shouldLogHigh}, ShouldLogNormal={shouldLogNormal}, ShouldLogLow={shouldLogLow}");
+                }
+                return result;
             }
         }
 
@@ -2769,11 +2785,11 @@ EndGlobal
         }
 
         [Theory]
-        [InlineData("/v:diagnostic", MessageImportance.Low)]
-        [InlineData("/v:detailed", MessageImportance.Low)]
-        [InlineData("/v:normal", MessageImportance.Normal)]
-        [InlineData("/v:minimal", MessageImportance.High)]
-        [InlineData("/v:quiet", MessageImportance.High - 1)]
+        [InlineData("/v:diagnostic /tl:off", MessageImportance.Low)]
+        [InlineData("/v:detailed /tl:off", MessageImportance.Low)]
+        [InlineData("/v:normal /tl:off", MessageImportance.Normal)]
+        [InlineData("/v:minimal /tl:off", MessageImportance.High)]
+        [InlineData("/v:quiet /tl:off", MessageImportance.High - 1)]
 
         [InlineData("/v:diagnostic /bl", MessageImportance.Low)]
         [InlineData("/v:detailed /bl", MessageImportance.Low)]
@@ -2787,9 +2803,9 @@ EndGlobal
         [InlineData("/v:minimal /check", MessageImportance.High)]
         [InlineData("/v:quiet /check", MessageImportance.High)]
 
-        [InlineData("/v:diagnostic /tl", MessageImportance.Low)]
-        [InlineData("/v:detailed /tl", MessageImportance.Low)]
-        [InlineData("/v:normal /tl", MessageImportance.Normal)]
+        [InlineData("/v:diagnostic /tl", MessageImportance.High)]
+        [InlineData("/v:detailed /tl", MessageImportance.High)]
+        [InlineData("/v:normal /tl", MessageImportance.High)]
         [InlineData("/v:minimal /tl", MessageImportance.High)]
         [InlineData("/v:quiet /tl", MessageImportance.High - 1)]
         public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
