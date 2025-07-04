@@ -6,13 +6,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
+using IProjectCachePluginBase = Microsoft.Build.ProjectCache.IProjectCachePluginBase;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     ///     Only one plugin instance can exist for a given BuildManager BeginBuild / EndBuild session.
     ///     Any exceptions thrown by the plugin will cause MSBuild to fail the build.
     /// </summary>
+    [Obsolete("This class was moved to Microsoft.Build.ProjectCache namespace")]
     public abstract class ProjectCachePluginBase : IProjectCachePluginBase
     {
         /// <summary>

@@ -12,7 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Shared;
@@ -1727,3 +1727,4 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
     }
 }
+
