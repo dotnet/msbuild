@@ -456,11 +456,9 @@ namespace Microsoft.Build.Tasks
             {
                 if (!string.IsNullOrEmpty(path) && path.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
                 {
-                    IEnumerable<AssemblyEntry> assemblyNames = redistList.FindAssemblyNameFromSimpleName(
-                            Path.GetFileNameWithoutExtension(path));
                     string filename = Path.GetFileName(path);
 
-                    foreach (AssemblyEntry a in assemblyNames)
+                    foreach (AssemblyEntry a in redistList.FindAssemblyNameFromSimpleName(Path.GetFileNameWithoutExtension(path)))
                     {
                         string pathFromRedistList = Path.Combine(a.FrameworkDirectory, filename);
 
