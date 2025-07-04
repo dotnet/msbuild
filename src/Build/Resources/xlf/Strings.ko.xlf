@@ -862,17 +862,17 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 환경 변수로 설정되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 다른 SDK에 의해 설정되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -906,7 +906,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionStarted">
         <source>Static graph construction started.</source>
-        <target state="new">Static graph construction started.</target>
+        <target state="translated">정적 그래프 생성이 시작되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

@@ -862,17 +862,17 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
+        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но она уже была настроена в качестве переменной среды.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
+        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но она уже была настроена другим пакетом SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
+        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -906,7 +906,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionStarted">
         <source>Static graph construction started.</source>
-        <target state="new">Static graph construction started.</target>
+        <target state="translated">Начато построение статического графа.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
