@@ -148,27 +148,27 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
 #endif
         public TaskHostConfiguration(
-                string runtime,
-                int nodeId,
-                string startupDirectory,
-                IDictionary<string, string> buildProcessEnvironment,
-                CultureInfo culture,
-                CultureInfo uiCulture,
+            string runtime,
+            int nodeId,
+            string startupDirectory,
+            IDictionary<string, string> buildProcessEnvironment,
+            CultureInfo culture,
+            CultureInfo uiCulture,
 #if FEATURE_APPDOMAIN
-                AppDomainSetup appDomainSetup,
+            AppDomainSetup appDomainSetup,
 #endif
-                int lineNumberOfTask,
-                int columnNumberOfTask,
-                string projectFileOfTask,
-                bool continueOnError,
-                string taskName,
-                string taskLocation,
-                bool isTaskInputLoggingEnabled,
-                IDictionary<string, object> taskParameters,
-                Dictionary<string, string> globalParameters,
-                ICollection<string> warningsAsErrors,
-                ICollection<string> warningsNotAsErrors,
-                ICollection<string> warningsAsMessages)
+            int lineNumberOfTask,
+            int columnNumberOfTask,
+            string projectFileOfTask,
+            bool continueOnError,
+            string taskName,
+            string taskLocation,
+            bool isTaskInputLoggingEnabled,
+            IDictionary<string, object> taskParameters,
+            Dictionary<string, string> globalParameters,
+            ICollection<string> warningsAsErrors,
+            ICollection<string> warningsNotAsErrors,
+            ICollection<string> warningsAsMessages)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
             ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));

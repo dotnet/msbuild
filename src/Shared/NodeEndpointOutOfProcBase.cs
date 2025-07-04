@@ -684,11 +684,22 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            NodePacketType packetType = (NodePacketType)headerByte[0];
+                            // Check if this packet has an extended header that includes a version part.
+                            byte rawType = headerByte[0];
+
+                            bool hasExtendedHeader = PacketTypeExtensions.HasExtendedHeader(rawType);
+
+                            byte version = 0;
+                            if (hasExtendedHeader)
+                            {
+                                version = PacketTypeExtensions.ReadVersion(localReadPipe);
+                            }
+
+                            NodePacketType packetType = hasExtendedHeader ? PacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer, version));
                             }
                             catch (Exception e)
                             {
@@ -774,8 +785,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }

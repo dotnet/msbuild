@@ -67,6 +67,11 @@ namespace Microsoft.Build.BackEnd
     internal interface ITranslator : IDisposable
     {
         /// <summary>
+        /// The packet version associated with the stream.
+        /// </summary>
+        byte PacketVersion { get; }
+
+        /// <summary>
         /// Returns the current serialization mode.
         /// </summary>
         TranslationDirection Mode

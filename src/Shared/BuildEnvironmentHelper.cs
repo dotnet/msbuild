@@ -610,7 +610,6 @@ namespace Microsoft.Build.Shared
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
                 MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;
-                MSBuildToolsDirectoryNET = Environment.GetEnvironmentVariable("MSBuildToolsDirectoryNET") ?? "";
                 MSBuildAssemblyDirectory = Environment.GetEnvironmentVariable("MSBuildAssemblyDirectory") ?? "";
 #if RUNTIME_TYPE_NETCORE
                 // Fall back to "current" for any architecture since .NET SDK doesn't
@@ -663,11 +662,6 @@ namespace Microsoft.Build.Shared
         /// <see langword="null" /> if ARM64 tools are not installed.
         /// </summary>
         internal string MSBuildToolsDirectoryArm64 { get; }
-
-        /// <summary>
-        /// Path to the NET tools directory. It's a temporary solution before path to dotnet is resolved from DOTNET_EXPERIMENTAL_HOST_PATH.
-        /// </summary>
-        internal string MSBuildToolsDirectoryNET { get; }
 
         /// <summary>
         /// Path to the MSBuild assembly.
