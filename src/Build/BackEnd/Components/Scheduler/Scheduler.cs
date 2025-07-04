@@ -1706,6 +1706,7 @@ namespace Microsoft.Build.BackEnd
             Stack<BuildRequest> requestsToAdd = new Stack<BuildRequest>(blocker.BuildRequests.Length);
             foreach (BuildRequest request in blocker.BuildRequests)
             {
+                TraceScheduler("Project {0} Target {1}", _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets));
                 // Assign a global request id to this request.
                 if (request.GlobalRequestId == BuildRequest.InvalidGlobalRequestId)
                 {
@@ -2625,10 +2626,21 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+                        string logFilePath = string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId);
+                        bool isFirstWrite = !File.Exists(logFilePath);
                         using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------");
+
+                        
+                        if (isFirstWrite)
+                        {
+                            file.WriteLine("SchedulerState Log Symbols:");
+                            file.WriteLine("! - Blocked request: A build request waiting for dependencies or resources.");
+                            file.WriteLine("> - Executing request: A build request currently being processed by a node.");
+                            file.WriteLine("------------------------------------------------");
+                        }
 
                         foreach (int nodeId in _availableNodes.Keys)
                         {
