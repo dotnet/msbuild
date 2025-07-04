@@ -11,6 +11,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
+using System.Collections;
 
 #if NET
 using System.Buffers;
@@ -64,6 +65,7 @@ public sealed partial class TerminalLogger : INodeLogger
     internal const string TripleIndentation = $"{Indentation}{Indentation}{Indentation}";
 
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
+    internal const TerminalColor RuntimeIdentifierColor = TerminalColor.Magenta;
 
     internal Func<StopwatchAbstraction>? CreateStopwatch = null;
 
@@ -573,16 +575,37 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
             {
-                targetFramework = null;
+                if (e.Properties?.Cast<DictionaryEntry>().FirstOrDefault(p => p.Key is string key && key == "TargetFramework") is DictionaryEntry entry
+                    && entry.Value is string tfm)
+                {
+                    targetFramework = tfm;
+                }
+                else
+                {
+                    targetFramework = null;
+                }
             }
-            _projects[c] = new(e.ProjectFile!, targetFramework, CreateStopwatch?.Invoke());
+            if (e.GlobalProperties?.TryGetValue("RuntimeIdentifier", out string? runtimeIdentifier) != true)
+            {
+                if (e.Properties?.Cast<DictionaryEntry>().FirstOrDefault(p => p.Key is string key && key == "RuntimeIdentifier") is DictionaryEntry entry
+                    && entry.Value is string rid)
+                {
+                    runtimeIdentifier = rid;
+                }
+                else
+                {
+                    runtimeIdentifier = null;
+                }
+            }
+
+            _projects[c] = new(e.ProjectFile!, targetFramework, runtimeIdentifier, e.TargetNames?.Split(';'), CreateStopwatch?.Invoke());
 
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(buildEventContext);
-                _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+                _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
     }
@@ -773,27 +796,48 @@ public sealed partial class TerminalLogger : INodeLogger
             Path.GetFileNameWithoutExtension(project.File) :
             string.Empty;
 
-        if (string.IsNullOrEmpty(project.TargetFramework))
+        return (project.TargetFramework, project.RuntimeIdentifier, project.IsTestProject) switch
         {
-            string resourceName = project.IsTestProject ? "TestProjectFinished_NoTF" : "ProjectFinished_NoTF";
-
-            return ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName,
+            (string tfm, null, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
                 Indentation,
                 projectFile,
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
                 buildResult,
-                duration);
-        }
-        else
-        {
-            string resourceName = project.IsTestProject ? "TestProjectFinished_WithTF" : "ProjectFinished_WithTF";
-
-            return ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName,
+                duration),
+            (string tfm, null, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
                 buildResult,
-                duration);
-        }
+                duration),
+            (null, string rid, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (null, string rid, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (string tfm, string rid, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTFAndRID",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (string tfm, string rid, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTFAndRID",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (null, null, _) => "" // this is a weird pattern - what should we do?
+        };
     }
 
     /// <summary>
@@ -828,7 +872,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 project.IsTestProject = true;
             }
 
-            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, targetName, project.Stopwatch);
+            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, targetName, project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
@@ -965,7 +1009,7 @@ public sealed partial class TerminalLogger : INodeLogger
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Green, indicator, displayName, project.Stopwatch);
+                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
@@ -975,7 +1019,7 @@ public sealed partial class TerminalLogger : INodeLogger
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
+                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }

@@ -51,6 +51,7 @@ internal sealed class TerminalNodesFrame
 
         string project = status.Project;
         string? targetFramework = status.TargetFramework;
+        string? runtimeIdentifier = status.RuntimeIdentifier;
         string target = status.Target;
         string? targetPrefix = status.TargetPrefix;
         TerminalColor targetPrefixColor = status.TargetPrefixColor;

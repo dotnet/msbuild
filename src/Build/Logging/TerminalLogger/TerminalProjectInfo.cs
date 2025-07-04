@@ -27,11 +27,15 @@ internal sealed class TerminalProjectInfo
     /// </summary>
     /// <param name="projectFile">The full path to the project file.</param>
     /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
+    /// <param name="runtimeIdentifier">The runtime identifier of the project or null if not specified.</param>
+    /// <param name="entryTargets">The entry targets of the project or null if not specified.</param>
     /// <param name="stopwatch">A stopwatch to time the build of the project.</param>
-    public TerminalProjectInfo(string projectFile, string? targetFramework, StopwatchAbstraction? stopwatch)
+    public TerminalProjectInfo(string projectFile, string? targetFramework, string? runtimeIdentifier, string[]? entryTargets, StopwatchAbstraction? stopwatch)
     {
         File = projectFile;
         TargetFramework = targetFramework;
+        RuntimeIdentifier = runtimeIdentifier;
+        EntryTargets = entryTargets;
 
         if (stopwatch is not null)
         {
@@ -65,6 +69,12 @@ internal sealed class TerminalProjectInfo
     /// The target framework of the project or null if not multi-targeting.
     /// </summary>
     public string? TargetFramework { get; }
+    public string? RuntimeIdentifier { get; }
+
+    /// <summary>
+    /// If null, default targets are being built
+    /// </summary>
+    public string[]? EntryTargets { get; }
 
     /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
