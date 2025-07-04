@@ -19,15 +19,13 @@
         When updating the version of .NET Core for MSBuild, this property is the 'source of truth'.
         Other locations to update the version number:
           global.json
-          eng/cibuild_bootstrapped_msbuild.ps1
-          eng/cibuild_bootstrapped_msbuild.sh
           scripts/Deploy-MSBuild.ps1
           src/Framework/README.md
           src/Utilities/README.md
      -->
      <!-- When building in source-only modes, let the TFM float based on what arcade is in use.
           When building in normal modes (independent build or a dotnet product build), set explicitly. -->
-    <LatestDotNetCoreForMSBuild>net9.0</LatestDotNetCoreForMSBuild>
+    <LatestDotNetCoreForMSBuild>net10.0</LatestDotNetCoreForMSBuild>
     <LatestDotNetCoreForMSBuild Condition="'$(DotNetBuildSourceOnly)' == 'true'">$(NetCurrent)</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 

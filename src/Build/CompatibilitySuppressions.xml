@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!--
+  Since we are dropping the .net 9 and retarrgetting to .net 10, we need to suppress the following errors.
+  The comparison ref/net.9 with ref/netstandard2.0 is not valid anymore.
+  -->
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
@@ -11,22 +15,8 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
-    <Left>lib/net9.0/Microsoft.Build.dll</Left>
-    <Right>lib/net9.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
-    <Left>ref/net9.0/Microsoft.Build.dll</Left>
-    <Right>ref/net9.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -39,22 +29,12 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Microsoft.Build.Execution.BuildParameters.get_ProjectCacheDescriptor</Target>
-    <Left>lib/net9.0/Microsoft.Build.dll</Left>
-    <Right>lib/net9.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Microsoft.Build.Execution.BuildParameters.get_ProjectCacheDescriptor</Target>
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Microsoft.Build.Execution.BuildParameters.get_ProjectCacheDescriptor</Target>
-    <Left>ref/net9.0/Microsoft.Build.dll</Left>
-    <Right>ref/net9.0/Microsoft.Build.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net9.0</Target>
   </Suppression>
 </Suppressions>

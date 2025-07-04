@@ -80,7 +80,7 @@ try {
   {
     $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
     $buildToolCommand = "";
-    $buildToolFramework = "net472"
+    $buildToolFramework = "netframework"
   }
   else
   {
@@ -88,7 +88,7 @@ try {
     $propsFile = Join-Path $PSScriptRoot "Versions.props"
     $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
     $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
-    $buildToolFramework = "net9.0"
+    $buildToolFramework = "net"
   }
 
   # Use separate artifacts folder for stage 2
