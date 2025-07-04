@@ -15,6 +15,7 @@ using System.IO;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -271,7 +272,7 @@ namespace Microsoft.Build.BackEnd
             _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
 
             string isTaskHostFactory = null;
-            var taskHostKeyPresent = taskFactoryIdentityParameters == null ? false : taskFactoryIdentityParameters.TryGetValue("TaskHostExplicitlyRequested", out isTaskHostFactory);
+            var taskHostKeyPresent = taskFactoryIdentityParameters == null ? false : taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out isTaskHostFactory);
             _isTaskHostFactory = (taskHostKeyPresent && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase));
 
             try

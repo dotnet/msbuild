@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
@@ -1464,7 +1465,7 @@ namespace Microsoft.Build.Execution
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
                     _taskFactoryParameters ??= new();
-                    TaskFactoryParameters.Add("TaskHostExplicitlyRequested", isTaskHostFactory ? "true" : "false");
+                    TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
@@ -1566,7 +1567,7 @@ namespace Microsoft.Build.Execution
                                         initialized = factory.Initialize(RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
-                                        if (initialized && TaskFactoryParameters != null)
+                                        if (initialized && TaskFactoryParameters != null && TaskFactoryParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out _))
                                         {
                                             targetLoggingContext.LogWarning(
                                                 null,

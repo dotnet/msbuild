@@ -691,7 +691,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             if (explicitlyLaunchTaskHost)
             {
                 factoryParameters ??= new Dictionary<string, string>();
-                factoryParameters.Add("TaskHostExplicitlyRequested", "true");
+                factoryParameters.Add(Internal.Constants.TaskHostExplicitlyRequested, "true");
             }
             _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
