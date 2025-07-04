@@ -271,9 +271,9 @@ namespace Microsoft.Build.BackEnd
 
             _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
 
-            string isTaskHostFactory = null;
-            var taskHostKeyPresent = taskFactoryIdentityParameters == null ? false : taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out isTaskHostFactory);
-            _isTaskHostFactory = (taskHostKeyPresent && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase));
+            _isTaskHostFactory = (taskFactoryIdentityParameters != null
+                 && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
+                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase));
 
             try
             {
