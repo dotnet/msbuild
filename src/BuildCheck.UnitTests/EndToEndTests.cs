@@ -21,7 +21,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class EndToEndTests : IDisposable
 {
     private const string EditorConfigFileName = ".editorconfig";
-    private const string LatestDotNetCoreForMSBuild = "net8.0";
+    private const string LatestDotNetCoreForMSBuild = "net10.0";
 
     private readonly TestEnvironment _env;
 
