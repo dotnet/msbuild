@@ -7,6 +7,14 @@ using System.Linq;
 
 namespace Microsoft.Build.Logging;
 
+internal enum ProjectOutputKind
+{
+    Unknown,
+    Library,
+    Executable,
+    Package
+}
+
 /// <summary>
 /// Represents a project being built.
 /// </summary>
@@ -44,9 +52,9 @@ internal sealed class TerminalProjectInfo
     public StopwatchAbstraction Stopwatch { get; }
 
     /// <summary>
-    /// Full path to the primary output of the project, if known.
+    /// The primary output(s) of the project, if known.
     /// </summary>
-    public ReadOnlyMemory<char>? OutputPath { get; set; }
+    public List<(ReadOnlyMemory<char> absolutePath, ProjectOutputKind kind)>? Outputs { get; set; }
 
     /// <summary>
     /// Full path to the 'root' of this project's source control repository, if known.

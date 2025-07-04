@@ -624,8 +624,6 @@ public sealed partial class TerminalLogger : INodeLogger
                     EraseNodes();
 
                     string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
                     // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
                     // reported during build.
                     string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
@@ -659,73 +657,25 @@ public sealed partial class TerminalLogger : INodeLogger
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
                     // and it is hard to see if project finished, or did not run at all.
-                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
+                    else if (project.Outputs is not null || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
                         string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
                         Terminal.Write(projectFinishedHeader);
 
                         // Print the output path as a link if we have it.
-                        if (outputPath is not null)
+                        if (project.Outputs is not null)
                         {
-                            ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
-                            ReadOnlySpan<char> url = outputPathSpan;
-                            try
-                            {
-                                // If possible, make the link point to the containing directory of the output.
-                                url = Path.GetDirectoryName(url);
+                            if (project.Outputs.Count == 1)
+                            {   (ReadOnlyMemory<char> path, var kind) = project.Outputs[0];
+                                (var projectDisplayPath, var urlLink) = DetermineOutputPathToRender(path, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
+                                var glyph = GetGlyphForKind(kind);
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
+                                    $"{glyph}{AnsiCodes.LinkPrefix}{urlLink}{AnsiCodes.LinkInfix}{projectDisplayPath}{AnsiCodes.LinkSuffix}"));
                             }
-                            catch
+                            else
                             {
-                                // Ignore any GetDirectoryName exceptions.
                             }
-
-                            // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
-                            string urlString = url.ToString();
-                            if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
-                            {
-                                // url.ToString() un-escapes the URL which is needed for our case file://
-                                // but not valid for http://
-                                urlString = uri.ToString();
-                            }
-
-                            // now we compute the path to show the user for this project.
-                            // some options:
-                            // * the raw, full output path from the MSBuild logic (OutputPath property)
-                            // * the output path relative to the initial working directory, if it is under it
-                            // * the output path relative to the source root, if it is under it
-
-                            // full path fallback
-                            var projectDisplayPathSpan = outputPathSpan;
-                            var workingDirectorySpan = _initialWorkingDirectory.AsSpan();
-                            // under working dir case
-                            if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
-                            {
-                                if (outputPathSpan.Length > workingDirectorySpan.Length
-                                    && (outputPathSpan[workingDirectorySpan.Length] == Path.DirectorySeparatorChar
-                                        || outputPathSpan[workingDirectorySpan.Length] == Path.AltDirectorySeparatorChar))
-                                {
-                                    projectDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
-                                }
-                            }
-                            // under source root case
-                            else if (project.SourceRoot is { Span: var sourceRootSpan } )
-                            {
-                                var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
-                                if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
-                                {
-                                    if (outputPathSpan.Length > sourceRootSpan.Length
-                                        // offsets are -1 here compared to above for ***reasons***
-                                        && (outputPathSpan[sourceRootSpan.Length - 1] == Path.DirectorySeparatorChar
-                                            || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
-                                    {
-                                        projectDisplayPathSpan = Path.Combine(relativePathFromWorkingDirToSourceRoot.ToString(), outputPathSpan.Slice(sourceRootSpan.Length).ToString()).AsSpan();
-                                    }
-                                }
-                            }
-
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{projectDisplayPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
                         }
                         else
                         {
@@ -753,6 +703,68 @@ public sealed partial class TerminalLogger : INodeLogger
                 }
             }
         }
+    }
+
+    private string GetGlyphForKind(ProjectOutputKind kind) => kind switch
+    {
+        ProjectOutputKind.Library => "🗄️",
+        ProjectOutputKind.Executable => "🏃",
+        ProjectOutputKind.Package => "📦",
+        ProjectOutputKind.Unknown => "❓",
+        _ => throw new NotImplementedException(),
+    };
+
+    private static (string outputPathToRender, Uri? linkToAssign) DetermineOutputPathToRender(ReadOnlyMemory<char> outputPath, ReadOnlyMemory<char> workingDir, ReadOnlyMemory<char>? sourceRoot)
+    {
+        ReadOnlySpan<char> outputPathSpan = outputPath.Span;
+
+        // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
+#if NET
+        Uri.TryCreate(new(Path.GetDirectoryName(outputPathSpan)), UriKind.Absolute, out Uri? uri);
+#else
+        Uri.TryCreate(Path.GetDirectoryName(outputPathSpan.ToString()), UriKind.Absolute, out Uri? uri);
+#endif
+
+        // now we compute the path to show the user for this project.
+        // some options:
+        // * the raw, full output path from the MSBuild logic (OutputPath property)
+        // * the output path relative to the initial working directory, if it is under it
+        // * the output path relative to the source root, if it is under it
+
+        // full path fallback
+        var projectDisplayPathSpan = outputPathSpan;
+        var workingDirectorySpan = workingDir.Span;
+        // under working dir case
+        if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
+        {
+            if (outputPathSpan.Length > workingDirectorySpan.Length
+                && (outputPathSpan[workingDirectorySpan.Length] == Path.DirectorySeparatorChar
+                    || outputPathSpan[workingDirectorySpan.Length] == Path.AltDirectorySeparatorChar))
+            {
+                projectDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
+            }
+        }
+        // under source root case
+        else if (sourceRoot is { Span: var sourceRootSpan })
+        {
+            var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
+            if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
+            {
+                if (outputPathSpan.Length > sourceRootSpan.Length
+                    // offsets are -1 here compared to above for ***reasons***
+                    && (outputPathSpan[sourceRootSpan.Length - 1] == Path.DirectorySeparatorChar
+                        || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
+                {
+
+                    projectDisplayPathSpan = Path.Combine(relativePathFromWorkingDirToSourceRoot.ToString(), outputPathSpan.Slice(sourceRootSpan.Length).ToString()).AsSpan();
+                }
+            }
+        }
+#if NET
+        return (new(projectDisplayPathSpan), uri);
+#else
+        return (projectDisplayPathSpan.ToString(), uri);
+#endif
     }
 
     private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
@@ -850,7 +862,8 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 foreach (ITaskItem output in targetOutputs)
                 {
-                    project.OutputPath = output.ItemSpec.AsMemory();
+                    project.Outputs ??= [];
+                    project.Outputs.Add(new(output.ItemSpec.AsMemory(), ProjectOutputKind.Unknown));
                     break;
                 }
             }
@@ -912,7 +925,8 @@ public sealed partial class TerminalLogger : INodeLogger
                     message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-                    project!.OutputPath = outputPath;
+                    project!.Outputs ??= [];
+                    project.Outputs.Add(new (outputPath, ProjectOutputKind.Unknown));
                     return;
                 }
             }
