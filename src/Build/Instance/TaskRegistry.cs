@@ -1567,7 +1567,8 @@ namespace Microsoft.Build.Execution
                                         initialized = factory.Initialize(RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
-                                        if (initialized && TaskFactoryParameters != null && TaskFactoryParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out _))
+                                        // In case TaskHostFactory is explicitly requested, we will now have a parameter for that.
+                                        if (initialized && TaskFactoryParameters != null && !TaskFactoryParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out _))
                                         {
                                             targetLoggingContext.LogWarning(
                                                 null,
