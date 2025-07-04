@@ -22,6 +22,7 @@ namespace InlineCode {
         
         private string _Parameter1;
         
+        [Microsoft.Build.Framework.Required()]
         public virtual string Parameter1 {
             get {
                 return _Parameter1;
@@ -33,6 +34,7 @@ namespace InlineCode {
         
         private string _Parameter2;
         
+        [Microsoft.Build.Framework.Output()]
         public virtual string Parameter2 {
             get {
                 return _Parameter2;
@@ -44,6 +46,8 @@ namespace InlineCode {
         
         private string _Parameter3;
         
+        [Microsoft.Build.Framework.Output()]
+        [Microsoft.Build.Framework.Required()]
         public virtual string Parameter3 {
             get {
                 return _Parameter3;
