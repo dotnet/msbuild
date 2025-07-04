@@ -619,22 +619,17 @@ internal static class NativeMethods
         NotApplicable,
     }
 
-    internal enum DevDriveStatus
+    internal enum FileSystemStatus
     {
         /// <summary>
-        /// The current directory is not on a Dev Drive.
+        /// The file is on an NTFS file system.
         /// </summary>
-        NotOnDevDrive,
+        NTFS,
 
         /// <summary>
-        /// The current directory is on a Dev Drive.
+        /// The file is on a ReFS file system.
         /// </summary>
-        OnDevDrive,
-
-        /// <summary>
-        /// The current directory is on ReFS but we cannot confirm it's a Dev Drive.
-        /// </summary>
-        OnRefsNotConfirmedDevDrive,
+        ReFS,
 
         /// <summary>
         /// Not on Windows or unable to determine.
@@ -686,32 +681,31 @@ internal static class NativeMethods
         }
     }
 
-    internal static DevDriveStatus IsOnDevDrive()
+    internal static FileSystemStatus GetFileSystemStatus(string filePath)
     {
         if (!IsWindows)
         {
-            return DevDriveStatus.NotApplicable;
+            return FileSystemStatus.NotApplicable;
         }
 
         try
         {
-            return IsOnDevDriveInternal();
+            return GetFileSystemStatusInternal(filePath);
         }
         catch
         {
-            return DevDriveStatus.NotApplicable;
+            return FileSystemStatus.NotApplicable;
         }
     }
 
     [SupportedOSPlatform("windows")]
-    private static DevDriveStatus IsOnDevDriveInternal()
+    private static FileSystemStatus GetFileSystemStatusInternal(string filePath)
     {
-        string currentDirectory = Environment.CurrentDirectory;
-        string rootPath = Path.GetPathRoot(currentDirectory);
+        string rootPath = Path.GetPathRoot(filePath);
         
         if (string.IsNullOrEmpty(rootPath))
         {
-            return DevDriveStatus.NotApplicable;
+            return FileSystemStatus.NotApplicable;
         }
 
         char[] volumeNameBuffer = new char[256];
@@ -729,49 +723,21 @@ internal static class NativeMethods
 
         if (!result)
         {
-            return DevDriveStatus.NotApplicable;
+            return FileSystemStatus.NotApplicable;
         }
 
         string fileSystemName = new string(fileSystemNameBuffer).TrimEnd('\0');
         
-        // Dev Drive uses the ReFS file system, but not all ReFS volumes are Dev Drives
         if (string.Equals(fileSystemName, "ReFS", StringComparison.OrdinalIgnoreCase))
         {
-            // Additional checks to determine if this ReFS volume is specifically a Dev Drive
-            // For now, we conservatively report ReFS but not confirmed as Dev Drive
-            // until we can implement more specific Dev Drive detection
-            return IsLikelyDevDrive(fileSystemFlags) ? DevDriveStatus.OnDevDrive : DevDriveStatus.OnRefsNotConfirmedDevDrive;
+            return FileSystemStatus.ReFS;
+        }
+        else if (string.Equals(fileSystemName, "NTFS", StringComparison.OrdinalIgnoreCase))
+        {
+            return FileSystemStatus.NTFS;
         }
 
-        return DevDriveStatus.NotOnDevDrive;
-    }
-
-    /// <summary>
-    /// Attempts to determine if a ReFS volume is specifically a Dev Drive.
-    /// This is a heuristic approach as there's no direct API to distinguish Dev Drive from regular ReFS.
-    /// </summary>
-    /// <param name="fileSystemFlags">File system flags from GetVolumeInformation</param>
-    /// <returns>True if the ReFS volume appears to be a Dev Drive</returns>
-    [SupportedOSPlatform("windows")]
-    private static bool IsLikelyDevDrive(uint fileSystemFlags)
-    {
-        // Dev Drive volumes typically have specific characteristics:
-        // - They are optimized for developer scenarios
-        // - They may have specific flag combinations
-        
-        // For now, we implement a conservative approach
-        // This could be enhanced with more specific detection logic
-        // such as checking for specific registry entries or volume properties
-        
-        // As a conservative measure, we only return true if we have strong indicators
-        // For the initial implementation, we'll be conservative and require additional
-        // confirmation beyond just being ReFS
-        
-        // TODO: Implement more specific Dev Drive detection logic
-        // This might involve checking registry entries, specific volume flags,
-        // or other Dev Drive-specific indicators
-        
-        return false; // Conservative approach until we have better detection
+        return FileSystemStatus.NotApplicable;
     }
 
     private static SAC_State? s_sacState;

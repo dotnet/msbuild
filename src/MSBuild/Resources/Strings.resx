@@ -1672,21 +1672,15 @@
   <data name="LongPaths_Missing" xml:space="preserve">
     <value>not set</value>
   </data>
-  <data name="DevDrive" xml:space="preserve">
-    <value>Based on the current directory file system, Dev Drive is {0}.</value>
-    <comment>Dev Drive is a Windows feature, {0} will be "detected"/"not detected"/"not applicable"</comment>
+  <data name="FileSystem" xml:space="preserve">
+    <value>Based on the project file system, file system is {0}.</value>
+    <comment>File system detection for Windows, {0} will be "NTFS"/"ReFS"</comment>
   </data>
-  <data name="DevDrive_OnDevDrive" xml:space="preserve">
-    <value>detected</value>
+  <data name="FileSystem_NTFS" xml:space="preserve">
+    <value>NTFS</value>
   </data>
-  <data name="DevDrive_NotOnDevDrive" xml:space="preserve">
-    <value>not detected</value>
-  </data>
-  <data name="DevDrive_OnRefsNotConfirmedDevDrive" xml:space="preserve">
-    <value>on ReFS but not confirmed as Dev Drive</value>
-  </data>
-  <data name="DevDrive_NotApplicable" xml:space="preserve">
-    <value>not applicable</value>
+  <data name="FileSystem_ReFS" xml:space="preserve">
+    <value>ReFS</value>
   </data>
   <data name="SAC" xml:space="preserve">
     <value>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</value>

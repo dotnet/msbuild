@@ -33,24 +33,19 @@
         <target state="translated">MSBUILD : error MSB1027: przełącznika -noAutoResponse nie można określić w pliku autoodpowiedzi MSBuild.rsp ani w żadnym pliku odpowiedzi, do którego odwołuje się plik autoodpowiedzi.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="DevDrive">
-        <source>Based on the current directory file system, Dev Drive is {0}.</source>
-        <target state="new">Based on the current directory file system, Dev Drive is {0}.</target>
-        <note>Dev Drive is a Windows feature, {0} will be "detected"/"not detected"/"not applicable"</note>
+      <trans-unit id="FileSystem">
+        <source>Based on the project file system, file system is {0}.</source>
+        <target state="new">Based on the project file system, file system is {0}.</target>
+        <note>File system detection for Windows, {0} will be "NTFS"/"ReFS"</note>
       </trans-unit>
-      <trans-unit id="DevDrive_NotApplicable">
-        <source>not applicable</source>
-        <target state="new">not applicable</target>
+      <trans-unit id="FileSystem_NTFS">
+        <source>NTFS</source>
+        <target state="new">NTFS</target>
         <note />
       </trans-unit>
-      <trans-unit id="DevDrive_NotOnDevDrive">
-        <source>not detected</source>
-        <target state="new">not detected</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="DevDrive_OnDevDrive">
-        <source>detected</source>
-        <target state="new">detected</target>
+      <trans-unit id="FileSystem_ReFS">
+        <source>ReFS</source>
+        <target state="new">ReFS</target>
         <note />
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">

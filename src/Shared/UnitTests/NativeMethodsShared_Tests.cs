@@ -153,25 +153,25 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that NativeMethodsShared.IsOnDevDrive() returns a valid DevDriveStatus
+        /// Verifies that NativeMethodsShared.GetFileSystemStatus() returns a valid FileSystemStatus
         /// </summary>
         [Fact]
-        public void IsOnDevDriveReturnsValidStatus()
+        public void GetFileSystemStatusReturnsValidStatus()
         {
-            NativeMethodsShared.DevDriveStatus status = NativeMethodsShared.IsOnDevDrive();
+            string testPath = Directory.GetCurrentDirectory();
+            NativeMethodsShared.FileSystemStatus status = NativeMethodsShared.GetFileSystemStatus(testPath);
             
             // The result should be one of the defined enum values
             Assert.True(
-                status == NativeMethodsShared.DevDriveStatus.NotOnDevDrive ||
-                status == NativeMethodsShared.DevDriveStatus.OnDevDrive ||
-                status == NativeMethodsShared.DevDriveStatus.OnRefsNotConfirmedDevDrive ||
-                status == NativeMethodsShared.DevDriveStatus.NotApplicable,
-                "IsOnDevDrive should return a valid DevDriveStatus");
+                status == NativeMethodsShared.FileSystemStatus.NTFS ||
+                status == NativeMethodsShared.FileSystemStatus.ReFS ||
+                status == NativeMethodsShared.FileSystemStatus.NotApplicable,
+                "GetFileSystemStatus should return a valid FileSystemStatus");
 
             // On non-Windows platforms, it should return NotApplicable
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Assert.Equal(NativeMethodsShared.DevDriveStatus.NotApplicable, status);
+                Assert.Equal(NativeMethodsShared.FileSystemStatus.NotApplicable, status);
             }
         }
 
