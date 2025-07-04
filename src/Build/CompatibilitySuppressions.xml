@@ -8,5 +8,60 @@
   <Suppression>
     <DiagnosticId>PKV006</DiagnosticId>
     <Target>net9.0</Target>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
+    <Left>lib/net9.0/Microsoft.Build.dll</Left>
+    <Right>lib/net9.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.ProjectCache.ProjectCacheDescriptor</Target>
+    <Left>ref/net9.0/Microsoft.Build.dll</Left>
+    <Right>ref/net9.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Execution.BuildParameters.get_ProjectCacheDescriptor</Target>
+    <Left>lib/net472/Microsoft.Build.dll</Left>
+    <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Execution.BuildParameters.get_ProjectCacheDescriptor</Target>
+    <Left>lib/net9.0/Microsoft.Build.dll</Left>
+    <Right>lib/net9.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Execution.BuildParameters.get_ProjectCacheDescriptor</Target>
+    <Left>ref/net472/Microsoft.Build.dll</Left>
+    <Right>ref/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Execution.BuildParameters.get_ProjectCacheDescriptor</Target>
+    <Left>ref/net9.0/Microsoft.Build.dll</Left>
+    <Right>ref/net9.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
 </Suppressions>
