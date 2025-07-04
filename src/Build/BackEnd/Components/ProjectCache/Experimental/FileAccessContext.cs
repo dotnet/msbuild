@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
+    [System.Obsolete("This struct was moved to Microsoft.Build.ProjectCache namespace")]
     public readonly struct FileAccessContext
     {
         public FileAccessContext(

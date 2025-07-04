@@ -44,9 +44,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         public override SdkResultBase IndicateSuccess(IEnumerable<string> paths,
                                                       string version,
-                                                      IDictionary<string, string> propertiesToAdd = null,
-                                                      IDictionary<string, SdkResultItem> itemsToAdd = null,
-                                                      IEnumerable<string> warnings = null)
+                                                      IDictionary<string, string> propertiesToAdd,
+                                                      IDictionary<string, SdkResultItem> itemsToAdd,
+                                                      IEnumerable<string> warnings)
         {
             return new SdkResult(_sdkReference, paths, version, propertiesToAdd, itemsToAdd, warnings);
         }
