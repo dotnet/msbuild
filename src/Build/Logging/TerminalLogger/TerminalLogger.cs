@@ -11,7 +11,6 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
-using System.Collections;
 
 #if NET
 using System.Buffers;
@@ -50,7 +49,19 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         public ProjectContext(BuildEventContext context)
             : this(context.ProjectContextId)
-        { }
+        {
+        }
+    }
+
+    /// <summary>
+    /// A wrapper over the evaluation context ID passed to us in <see cref="IEventSource"/> logger events.
+    /// </summary>
+    internal record struct EvalContext(int Id)
+    {
+        public EvalContext(BuildEventContext context)
+            : this(context.EvaluationId)
+        {
+        }
     }
 
     private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
@@ -91,6 +102,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
     /// </remarks>
     private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = new();
+
+    private readonly Dictionary<EvalContext, EvalProjectInfo> _evals = new();
 
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
@@ -552,9 +565,16 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void StatusEventRaised(object sender, BuildStatusEventArgs e)
     {
-        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
+        switch (e)
         {
-            RenderImmediateMessage(e.Message!);
+            case BuildCanceledEventArgs cancelEvent:
+                RenderImmediateMessage(cancelEvent.Message!);
+                break;
+            case ProjectEvaluationStartedEventArgs _evalStart:
+                break;
+            case ProjectEvaluationFinishedEventArgs evalFinish:
+                CaptureEvalContext(evalFinish);
+                break;
         }
     }
 
@@ -563,48 +583,33 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void ProjectStarted(object sender, ProjectStartedEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is null)
+        if (e.BuildEventContext is null)
         {
             return;
         }
 
-        ProjectContext c = new ProjectContext(buildEventContext);
+        ProjectContext c = new(e.BuildEventContext);
 
         if (_restoreContext is null)
         {
-            if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
+            EvalContext evalContext = new(e.BuildEventContext);
+            string? targetFramework = null;
+            string? runtimeIdentifier = null;
+            if (_evals.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
             {
-                if (e.Properties?.Cast<DictionaryEntry>().FirstOrDefault(p => p.Key is string key && key == "TargetFramework") is DictionaryEntry entry
-                    && entry.Value is string tfm)
-                {
-                    targetFramework = tfm;
-                }
-                else
-                {
-                    targetFramework = null;
-                }
+                targetFramework = evalInfo.TargetFramework;
+                runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            if (e.GlobalProperties?.TryGetValue("RuntimeIdentifier", out string? runtimeIdentifier) != true)
-            {
-                if (e.Properties?.Cast<DictionaryEntry>().FirstOrDefault(p => p.Key is string key && key == "RuntimeIdentifier") is DictionaryEntry entry
-                    && entry.Value is string rid)
-                {
-                    runtimeIdentifier = rid;
-                }
-                else
-                {
-                    runtimeIdentifier = null;
-                }
-            }
+            System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
 
-            _projects[c] = new(e.ProjectFile!, targetFramework, runtimeIdentifier, e.TargetNames?.Split(';'), CreateStopwatch?.Invoke());
+            TerminalProjectInfo projectInfo = new(c, evalInfo, e.TargetNames?.Split(';'), CreateStopwatch?.Invoke());
+            _projects[c] = projectInfo;
 
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
-                int nodeIndex = NodeIndexForContext(buildEventContext);
+                int nodeIndex = NodeIndexForContext(e.BuildEventContext);
                 _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
@@ -728,6 +733,42 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
+    {
+        var buildEventContext = evalFinish.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        EvalContext c = new(buildEventContext);
+
+        if (!_evals.TryGetValue(c, out EvalProjectInfo _))
+        {
+            string? tfm = null;
+            string? rid = null;
+            foreach (var property in evalFinish.EnumerateProperties())
+            {
+                if (tfm is not null && rid is not null)
+                {
+                    // We already have both properties, no need to continue.
+                    break;
+                }
+                switch (property.Name)
+                {
+                    case "TargetFramework":
+                        tfm = property.Value;
+                        break;
+                    case "RuntimeIdentifier":
+                        rid = property.Value;
+                        break;
+                }
+            }
+            var evalInfo = new EvalProjectInfo(c, evalFinish.ProjectFile!, tfm, rid);
+            _evals[c] = evalInfo;
+        }
+    }
+
     private string GetGlyphForKind(ProjectOutputKind kind) => kind switch
     {
         ProjectOutputKind.Library => "🗄️",
@@ -792,8 +833,8 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
     {
-        string projectFile = project.File is not null ?
-            Path.GetFileNameWithoutExtension(project.File) :
+        string projectFile = project.ProjectFile is not null ?
+            Path.GetFileNameWithoutExtension(project.ProjectFile) :
             string.Empty;
 
         return (project.TargetFramework, project.RuntimeIdentifier, project.IsTestProject) switch

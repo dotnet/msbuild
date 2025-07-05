@@ -64,14 +64,14 @@ internal class TerminalNodeStatus
     /// <summary>
     /// Equality is based on the project, target framework, and target, but NOT the elapsed time.
     /// </summary>
-    public override bool Equals(object? obj) =>
-        obj is TerminalNodeStatus status &&
-        Project == status.Project &&
-        TargetFramework == status.TargetFramework &&
-        RuntimeIdentifier == status.RuntimeIdentifier &&
-        Target == status.Target &&
-        TargetPrefixColor == status.TargetPrefixColor &&
-        TargetPrefix == status.TargetPrefix;
+    public virtual bool Equals(TerminalNodeStatus? other) =>
+        other is not null &&
+        Project == other.Project &&
+        TargetFramework == other.TargetFramework &&
+        RuntimeIdentifier == other.RuntimeIdentifier &&
+        Target == other.Target &&
+        TargetPrefixColor == other.TargetPrefixColor &&
+        TargetPrefix == other.TargetPrefix;
 
     public override string ToString() =>
         (TargetFramework, RuntimeIdentifier) switch

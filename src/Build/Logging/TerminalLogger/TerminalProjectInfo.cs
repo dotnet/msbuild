@@ -16,6 +16,18 @@ internal enum ProjectOutputKind
 }
 
 /// <summary>
+/// A struct containing relevant evaluation-time data that may not be knowable just from ProjectStart events.
+/// </summary>
+/// <param name="context"></param>
+/// <param name="ProjectFile"></param>
+/// <param name="TargetFramework"></param>
+/// <param name="RuntimeIdentifier"></param>
+internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier)
+{
+    public readonly int Id => context.Id;
+}
+
+/// <summary>
 /// Represents a project being built.
 /// </summary>
 internal sealed class TerminalProjectInfo
@@ -23,19 +35,17 @@ internal sealed class TerminalProjectInfo
     private List<TerminalBuildMessage>? _buildMessages;
 
     /// <summary>
-    /// Initialized a new <see cref="TerminalProjectInfo"/> with the given <paramref name="targetFramework"/>.
+    /// Initialized a new <see cref="TerminalProjectInfo"/> with the given <paramref name="evalInfo"/> .
     /// </summary>
-    /// <param name="projectFile">The full path to the project file.</param>
-    /// <param name="targetFramework">The target framework of the project or null if not multi-targeting.</param>
-    /// <param name="runtimeIdentifier">The runtime identifier of the project or null if not specified.</param>
+    /// <param name="context">The ProjectContext of this project execution.</param>
+    /// <param name="evalInfo">A subset of the interesting eval-time data for this running project</param>
     /// <param name="entryTargets">The entry targets of the project or null if not specified.</param>
     /// <param name="stopwatch">A stopwatch to time the build of the project.</param>
-    public TerminalProjectInfo(string projectFile, string? targetFramework, string? runtimeIdentifier, string[]? entryTargets, StopwatchAbstraction? stopwatch)
+    public TerminalProjectInfo(TerminalLogger.ProjectContext context, EvalProjectInfo evalInfo, string[]? entryTargets, StopwatchAbstraction? stopwatch)
     {
-        File = projectFile;
-        TargetFramework = targetFramework;
-        RuntimeIdentifier = runtimeIdentifier;
+        _evalInfo = evalInfo;
         EntryTargets = entryTargets;
+        _context = context;
 
         if (stopwatch is not null)
         {
@@ -48,7 +58,15 @@ internal sealed class TerminalProjectInfo
         }
     }
 
-    public string File { get; }
+    /// <summary>
+    /// The int value of the ProjectContext id of this project execution.
+    /// </summary>
+    public int Id => _context.Id;
+
+    /// <summary>
+    /// The full path to the project file.
+    /// </summary>
+    public string? ProjectFile => _evalInfo.ProjectFile;
 
     /// <summary>
     /// A stopwatch to time the build of the project.
@@ -68,13 +86,20 @@ internal sealed class TerminalProjectInfo
     /// <summary>
     /// The target framework of the project or null if not multi-targeting.
     /// </summary>
-    public string? TargetFramework { get; }
-    public string? RuntimeIdentifier { get; }
+    public string? TargetFramework => _evalInfo.TargetFramework;
+
+    /// <summary>
+    /// The runtime identifier of the project or null if platform-agnostic.
+    /// </summary>
+    public string? RuntimeIdentifier => _evalInfo.RuntimeIdentifier;
 
     /// <summary>
     /// If null, default targets are being built
     /// </summary>
     public string[]? EntryTargets { get; }
+
+    private readonly TerminalLogger.ProjectContext _context;
+    private readonly EvalProjectInfo _evalInfo;
 
     /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
