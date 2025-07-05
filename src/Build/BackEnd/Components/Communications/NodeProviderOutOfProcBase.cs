@@ -173,7 +173,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (lowPriorityConnection != null)
                     {
-                        ShutdownNode(terminateNode, factory, nodeProcess, nodeStream);
+                        ShutdownNode(terminateNode, factory, nodeProcess, lowPriorityConnection);
                     }
                 }
             }
