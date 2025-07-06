@@ -183,7 +183,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Name of target that identifies a project that has tests, and that they just started.
     /// </summary>
-    private static string _testStartTarget = "_TestRunStart";
+    private const string _testStartTarget = "_TestRunStart";
 
     /// <summary>
     /// Time of the oldest observed test target start.
@@ -727,14 +727,14 @@ public sealed partial class TerminalLogger : INodeLogger
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
                     // and it is hard to see if project finished, or did not run at all.
-                    else if (project.Outputs is not null || project.BuildMessages is not null || project.IsTestProject)
+                    else if (project.Outputs is { Count: > 0 } || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
                         string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
                         Terminal.Write(projectFinishedHeader);
 
                         // Print the output path as a link if we have it.
-                        if (project.Outputs is not null)
+                        if (project.Outputs is { Count: > 0 })
                         {
                             var workingDirMemory = _initialWorkingDirectory.AsMemory();
                             if (project.Outputs.Count == 1)
@@ -999,6 +999,11 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
+    /// some targets have tasks/items/properties that we need to get the details of, so we track that here so we're not flooding the central node with events.
+    /// </summary>
+    private readonly Dictionary<int, string> _targetIdsToTrackTasksOf = new();
+
+    /// <summary>
     /// The <see cref="IEventSource.TargetStarted"/> callback.
     /// </summary>
     private void TargetStarted(object sender, TargetStartedEventArgs e)
@@ -1012,17 +1017,23 @@ public sealed partial class TerminalLogger : INodeLogger
 
             string targetName = e.TargetName;
 
-            if (targetName == _testStartTarget)
+            switch (targetName)
             {
-                targetName = "Testing";
+                case _testStartTarget:
+                    targetName = "Testing";
 
-                // Use the minimal start time, so if we run tests in parallel, we can calculate duration
-                // as this start time, minus time when tests finished.
-                _testStartTime = _testStartTime == null
-                    ? e.Timestamp
-                    : e.Timestamp < _testStartTime
-                        ? e.Timestamp : _testStartTime;
-                project.IsTestProject = true;
+                    // Use the minimal start time, so if we run tests in parallel, we can calculate duration
+                    // as this start time, minus time when tests finished.
+                    _testStartTime = _testStartTime == null
+                        ? e.Timestamp
+                        : e.Timestamp < _testStartTime
+                            ? e.Timestamp : _testStartTime;
+                    project.IsTestProject = true;
+                    break;
+                case "CopyFilesToOutputDirectory":
+                    // The Copy task in this target is used to copy the main assembly to the output directory.
+                    _targetIdsToTrackTasksOf[e.BuildEventContext!.TargetId] = "MainAssembly";
+                    break;
             }
 
             TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, targetName, project.Stopwatch);
@@ -1062,7 +1073,6 @@ public sealed partial class TerminalLogger : INodeLogger
 
         var detectedOutputs =
             e.TargetName switch {
-                "CopyFilesToOutputDirectory" => TryDetectOutputPath(e.TargetOutputs, project),
                 "GenerateNuspec" => TryDetectPackages(e.TargetOutputs, project),
                 "PublishItemsOutputGroup" => TryDetectPublishOutputs(e.TargetOutputs, project),
                 _ => null
@@ -1224,39 +1234,66 @@ public sealed partial class TerminalLogger : INodeLogger
         if (e is TargetSkippedEventArgs skipArgs && skipArgs.BuildEventContext is not null && skipArgs.BuildEventContext is not { TargetId: -1 } )
         {
             // this was forwarded by the child node, so it must be a target we need to track for skipped-output purposes
-            _trackedTargetIds.Add(skipArgs.BuildEventContext!.TargetId, skipArgs.TargetName);
+            _trackedTargetIds[skipArgs.BuildEventContext!.TargetId] = skipArgs.TargetName;
             return;
         }
 
-        if (e is TaskParameterEventArgs taskParameterEventArgs
-            && _trackedTargetIds.TryGetValue(taskParameterEventArgs.BuildEventContext!.TargetId, out var targetName))
+        if (e is TaskParameterEventArgs taskParameterEventArgs)
         {
-            _trackedTargetIds.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
-            // based on the target name, we can determine which outputs to patch up
-            if (taskParameterEventArgs.Items is null)
+            if (taskParameterEventArgs.Kind == TaskParameterMessageKind.SkippedTargetOutputs &&
+                _trackedTargetIds.TryGetValue(taskParameterEventArgs.BuildEventContext!.TargetId, out var targetName))
             {
-                // we only care about Targets that finish here for output-detection purposes, so we can exit if there are no outputs.
-                return;
-            }
-            if (!_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
-            {
-                // we need a project to associate the outputs with, so exit if we don't have one.
-                return;
-            }
+                _trackedTargetIds.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
+                // based on the target name, we can determine which outputs to patch up
+                if (taskParameterEventArgs.Items is null)
+                {
+                    // we only care about Targets that finish here for output-detection purposes, so we can exit if there are no outputs.
+                    return;
+                }
+                if (!_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+                {
+                    // we need a project to associate the outputs with, so exit if we don't have one.
+                    return;
+                }
 
-            var detectedOutputs =
-                targetName switch {
-                    "CopyFilesToOutputDirectory" => TryDetectOutputPath(taskParameterEventArgs.Items, project),
-                    "GenerateNuspec" => TryDetectPackages(taskParameterEventArgs.Items, project),
-                    "PublishItemsOutputGroup" => TryDetectPublishOutputs(taskParameterEventArgs.Items, project),
-                    _ => null
-                };
-            if (detectedOutputs is not null)
-            {
-                project.Outputs ??= [];
-                project.Outputs.AddRange(detectedOutputs);
+                var detectedOutputs =
+                    targetName switch
+                    {
+                        "CopyFilesToOutputDirectory" => TryDetectOutputPath(taskParameterEventArgs.Items, project),
+                        "GenerateNuspec" => TryDetectPackages(taskParameterEventArgs.Items, project),
+                        "PublishItemsOutputGroup" => TryDetectPublishOutputs(taskParameterEventArgs.Items, project),
+                        _ => null
+                    };
+                if (detectedOutputs is not null)
+                {
+                    project.Outputs ??= [];
+                    project.Outputs.AddRange(detectedOutputs);
+                }
+                return;
             }
-            return;
+            else if (taskParameterEventArgs.Kind == TaskParameterMessageKind.TaskOutput
+                && _targetIdsToTrackTasksOf.TryGetValue(taskParameterEventArgs.BuildEventContext!.TargetId, out string? taskName)
+                && taskParameterEventArgs.ItemType == taskName)
+            {
+                // Based on what the output was, figure out what to do with it
+                _targetIdsToTrackTasksOf.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
+                switch (taskParameterEventArgs.ItemType)
+                {
+                    case "MainAssembly":
+                        // This is the main assembly, so we can set the output path to the project.
+                        if (_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext), out TerminalProjectInfo? project))
+                        {
+                            var results = TryDetectOutputPath(taskParameterEventArgs.Items, project);
+                            if (results is not null)
+                            {
+                                project.Outputs ??= [];
+                                project.Outputs.AddRange(results);
+                            }
+                        }
+                        break;
+                }
+                return;
+            }
         }
 
         string? message = e.Message;
