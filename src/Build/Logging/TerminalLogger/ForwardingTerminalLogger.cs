@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
@@ -65,10 +66,13 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         }
     }
 
-    private static HashSet<string> _targetsWeCareAbout = [
-        "GetTargetPath",
-        "InitializeSourceRootMappedPaths"
-    ];
+    private static readonly HashSet<string> _targetsWeCareAbout = new([
+        "GetTargetPath", // used for the 
+        "InitializeSourceRootMappedPaths",
+        "CopyFilesToOutputDirectory", // used for build output detection
+        "GenerateNuspec", // used for nuget package output detection
+        "PublishItemsOutputGroup" // used for publish output detection
+    ], StringComparer.OrdinalIgnoreCase);
 
     private void ScrubOutputsFromIrrelevantTargets(object sender, TargetFinishedEventArgs e)
     {
@@ -99,10 +103,33 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         }
     }
 
+    private HashSet<int> _targetIdsToTrackForOutputs = new();
+
     public void MessageRaised(object sender, BuildMessageEventArgs e)
     {
         if (e.BuildEventContext is null)
         {
+            return;
+        }
+
+        if (e is TargetSkippedEventArgs targetSkippedEventArgs && _targetsWeCareAbout.Contains(targetSkippedEventArgs.TargetName))
+        {
+            // If the target is one we care about, forward the skipped event
+            // so that the terminal logger can display it.
+            _targetIdsToTrackForOutputs.Add(targetSkippedEventArgs.BuildEventContext!.TargetId);
+            BuildEventRedirector?.ForwardEvent(targetSkippedEventArgs);
+            return;
+        }
+
+        if (e is TaskParameterEventArgs taskParameterEventArgs
+            && taskParameterEventArgs.Kind == TaskParameterMessageKind.SkippedTargetOutputs
+            && _targetIdsToTrackForOutputs.Contains(taskParameterEventArgs.BuildEventContext!.TargetId))
+        {
+            _targetIdsToTrackForOutputs.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
+
+            // forward skipped outputs to the central node so we can try to reconstruct some stuff.
+            // we need to try to fake outputs from non-skipped Targets, so we need to look at target context ids?
+            BuildEventRedirector?.ForwardEvent(taskParameterEventArgs);
             return;
         }
 
