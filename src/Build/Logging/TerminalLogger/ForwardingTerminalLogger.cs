@@ -36,7 +36,7 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         eventSource.BuildFinished += ForwardEventUnconditionally;
         eventSource.ProjectStarted += ForwardEventUnconditionally;
         eventSource.ProjectFinished += ForwardEventUnconditionally;
-        eventSource.TargetStarted += ForwardEventUnconditionally;
+        eventSource.TargetStarted += TrackRelevantTargets;;
         eventSource.TargetFinished += ScrubOutputsFromIrrelevantTargets;
         eventSource.TaskStarted += TaskStarted;
 
@@ -66,26 +66,52 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         }
     }
 
+
+    /// <summary>
+    /// some targets have tasks/items/properties that we need to get the details of, so we track that here so we're not flooding the central node with events.
+    /// </summary>
+    private readonly Dictionary<int, string> _targetIdsToTrackTasksOf = new();
+
+    /// <summary>
+    /// sets up some bookkeeping for per-target tracking on the nodes to help filter input to the central node
+    /// </summary>
+    /// <param name="sender"></param>
+    /// <param name="e"></param>
+    private void TrackRelevantTargets(object sender, TargetStartedEventArgs e)
+    {
+        switch (e.TargetName)
+        {
+            case "CopyFilesToOutputDirectory":
+                // The Copy task in this target is used to copy the main assembly to the output directory.
+                _targetIdsToTrackTasksOf[e.BuildEventContext!.TargetId] = "MainAssembly";
+                break;
+        }
+        BuildEventRedirector?.ForwardEvent(e);
+    }
+
     private static readonly HashSet<string> _targetsWeCareAbout = new([
-        "GetTargetPath", // used for the 
-        "InitializeSourceRootMappedPaths",
-        "CopyFilesToOutputDirectory", // used for build output detection
+        "InitializeSourceRootMappedPaths", // sourceroots from this set up relative path computation for outputs
         "GenerateNuspec", // used for nuget package output detection
         "PublishItemsOutputGroup" // used for publish output detection
     ], StringComparer.OrdinalIgnoreCase);
 
     private void ScrubOutputsFromIrrelevantTargets(object sender, TargetFinishedEventArgs e)
     {
-        // If the target is not relevant to the terminal logger, scrub the outputs
         if (_targetsWeCareAbout.Contains(e.TargetName))
         {
             BuildEventRedirector?.ForwardEvent(e);
+            return;
         }
-        else
+
+        if (_targetIdsToTrackTasksOf.TryGetValue(e.BuildEventContext!.TargetId, out string? _))
         {
-            e.TargetOutputs = null;
-            BuildEventRedirector?.ForwardEvent(e);
+            // If the target is relevant because it has a task we care about, then the target finishing
+            // means that we can clear that tracking
+            _targetIdsToTrackTasksOf.Remove(e.BuildEventContext.TargetId);
         }
+
+        e.TargetOutputs = null;
+        BuildEventRedirector?.ForwardEvent(e);
     }
 
     public void ForwardEventUnconditionally(object sender, BuildEventArgs e)
@@ -121,16 +147,30 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
             return;
         }
 
-        if (e is TaskParameterEventArgs taskParameterEventArgs
-            && taskParameterEventArgs.Kind == TaskParameterMessageKind.SkippedTargetOutputs
-            && _targetIdsToTrackForOutputs.Contains(taskParameterEventArgs.BuildEventContext!.TargetId))
+        if (e is TaskParameterEventArgs taskParameterEventArgs)
         {
-            _targetIdsToTrackForOutputs.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
+            // skipped target outputs
+            if (taskParameterEventArgs.Kind == TaskParameterMessageKind.SkippedTargetOutputs
+                && _targetIdsToTrackForOutputs.Contains(taskParameterEventArgs.BuildEventContext!.TargetId))
+            {
+                _targetIdsToTrackForOutputs.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
 
-            // forward skipped outputs to the central node so we can try to reconstruct some stuff.
-            // we need to try to fake outputs from non-skipped Targets, so we need to look at target context ids?
-            BuildEventRedirector?.ForwardEvent(taskParameterEventArgs);
-            return;
+                // forward skipped outputs to the central node so we can try to reconstruct some stuff.
+                // we need to try to fake outputs from non-skipped Targets, so we need to look at target context ids?
+                BuildEventRedirector?.ForwardEvent(taskParameterEventArgs);
+                return;
+            }
+            // tracked Task outputs
+            else if (taskParameterEventArgs.Kind == TaskParameterMessageKind.TaskOutput
+                     && _targetIdsToTrackTasksOf.TryGetValue(taskParameterEventArgs.BuildEventContext!.TargetId, out string? outputNameToTrack)
+                     && taskParameterEventArgs.ItemType == outputNameToTrack)
+            {
+                _targetIdsToTrackTasksOf.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
+                // If the task outputs are from a target we care about, forward them
+                // so that the terminal logger can display them.
+                BuildEventRedirector?.ForwardEvent(taskParameterEventArgs);
+                return;
+            }
         }
 
         if (e.Message is not null &&
