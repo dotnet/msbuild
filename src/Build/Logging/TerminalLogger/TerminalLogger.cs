@@ -1071,6 +1071,8 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
+        // TODO: we should probably have something more like a target-name-based switch here too - 
+        //       the sourceroots being at the end here feels awkward.
         var detectedOutputs =
             e.TargetName switch {
                 "GenerateNuspec" => TryDetectPackages(e.TargetOutputs, project),
@@ -1106,13 +1108,24 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         if (project.EntryTargets?.Contains("Publish") == true)
         {
-            List<(ReadOnlyMemory<char>, ProjectOutputKind)> detectedOutputs = new();
-            // If this is a publish project, we want to capture the output path.
-            foreach (var output in TransformGenericEnumerable(outputs))
+            var mappedOutputs = TransformGenericEnumerable(outputs);
+            if (mappedOutputs is null || !mappedOutputs.Any())
             {
-                detectedOutputs.Add(new(output.AsMemory(), ProjectOutputKind.Executable));
+                // If there are no outputs, we don't have anything to set.
+                return null;
             }
-            return detectedOutputs;
+            List<(ReadOnlyMemory<char>, ProjectOutputKind)> computedOutputs = new();
+            ProjectOutputKind kind = project.OutputType switch
+            {
+                SdkOutputType.Library => ProjectOutputKind.Library,
+                SdkOutputType.Exe => ProjectOutputKind.Executable,
+                _ => ProjectOutputKind.Unknown
+            };
+            foreach (var output in mappedOutputs.Where(OutputIsOfType(kind)))
+            {
+                computedOutputs.Add((output.AsMemory(), kind));
+            }
+            return computedOutputs;
         }
         return null;
     }
@@ -1195,6 +1208,9 @@ public sealed partial class TerminalLogger : INodeLogger
         var binarySuffix = kind switch
         {
             ProjectOutputKind.Library => ".dll",
+            // TODO: these checks are wrong - they should be based on the target runtime, not the host
+            // In addition, there's probably an eval property we should be looking for here to get the right
+            // name directly instead of computing it.
             ProjectOutputKind.Executable when RuntimeInformation.IsOSPlatform(OSPlatform.Windows) => ".exe",
             ProjectOutputKind.Executable when !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) => "",
             _ => null
