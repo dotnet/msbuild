@@ -281,6 +281,15 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1069: Multi-threaded value is not valid. {0}.</source>
+        <target state="new">MSBUILD : error MSB1069: Multi-threaded value is not valid. {0}.</target>
+        <note>{StrBegin="MSBUILD : error MSB1069: "}
+     UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+     This error is shown when a user specifies a node reuse value that is not equivilant to Boolean.TrueString or Boolean.FalseString.
+     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+  </note>
+      </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
         <target state="translated">MSBUILD : error MSB1065: 터미널 로거 값이 잘못되었습니다. 'auto', 'true' 또는 'false' 중 하나여야 합니다. {0}</target>
