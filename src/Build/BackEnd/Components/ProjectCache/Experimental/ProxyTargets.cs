@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.ProjectCache
+namespace Microsoft.Build.Experimental.ProjectCache
 {
     /// <summary>
     ///     A cache hit can use this to instruct MSBuild to build the cheaper version of the targets that the plugin avoided
@@ -18,6 +18,7 @@ namespace Microsoft.Build.ProjectCache
     ///     The proxy targets are left in the build result (i.e., both GetTargetPath and Build will appear in the build result).
     ///     Real targets can be committed in which case msbuild only keeps the proxy target in the build result.
     /// </summary>
+    [Obsolete("This class was moved to Microsoft.Build.ProjectCache namespace")]
     public class ProxyTargets : ITranslatable
     {
         private Dictionary<string, string> _proxyTargetToRealTargetMap = null!;
@@ -49,12 +50,6 @@ namespace Microsoft.Build.ProjectCache
             ((ITranslatable)instance).Translate(translator);
 
             return instance;
-        }
-#pragma warning disable CS0618 // Type or member is obsolete
-
-        internal static ProxyTargets FromExperimental(Experimental.ProjectCache.ProxyTargets? experimentalProxyTargets)
-        {
-            return experimentalProxyTargets == null ? new ProxyTargets() : new ProxyTargets(experimentalProxyTargets.ProxyTargetToRealTargetMap);
         }
     }
 }
