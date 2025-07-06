@@ -15,6 +15,13 @@ internal enum ProjectOutputKind
     Package
 }
 
+internal enum SdkOutputType
+{
+    Unknown,
+    Library,
+    Exe // includes WinExe
+}
+
 /// <summary>
 /// A struct containing relevant evaluation-time data that may not be knowable just from ProjectStart events.
 /// </summary>
@@ -22,7 +29,8 @@ internal enum ProjectOutputKind
 /// <param name="ProjectFile"></param>
 /// <param name="TargetFramework"></param>
 /// <param name="RuntimeIdentifier"></param>
-internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier)
+/// <param name="OutputType"></param>
+internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier, SdkOutputType OutputType)
 {
     public readonly int Id => context.Id;
 }
@@ -99,6 +107,12 @@ internal sealed class TerminalProjectInfo
     /// The list of targets being built for this project instance. If null, the default targets are being built.
     /// </summary>
     public string[]? EntryTargets { get; }
+
+    /// <summary>
+    /// The primary output type of the project, which may be unknown.
+    /// </summary>
+    public SdkOutputType OutputType => _evalInfo.OutputType;
+
 
     /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
