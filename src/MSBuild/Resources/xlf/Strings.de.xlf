@@ -286,7 +286,7 @@
         <target state="new">MSBUILD : error MSB1069: Multi-threaded value is not valid. {0}.</target>
         <note>{StrBegin="MSBUILD : error MSB1069: "}
      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-     This error is shown when a user specifies a node reuse value that is not equivilant to Boolean.TrueString or Boolean.FalseString.
+     This error is shown when a user specifies a multi-threaded value that is not equivilent to Boolean.TrueString or Boolean.FalseString.
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
       </trans-unit>
