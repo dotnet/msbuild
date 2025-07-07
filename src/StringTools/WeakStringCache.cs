@@ -16,6 +16,8 @@ namespace Microsoft.NET.StringTools
     /// </summary>
     internal sealed partial class WeakStringCache : IDisposable
     {
+        private const int WeakHandleMinimumLength = 500;
+
         /// <summary>
         /// Debug stats returned by GetDebugInfo().
         /// </summary>
@@ -36,9 +38,14 @@ namespace Microsoft.NET.StringTools
             public GCHandle WeakHandle;
 
             /// <summary>
+            /// Reference used for smaller strings retained by the cache.
+            /// </summary>
+            private string? referencedString;
+
+            /// <summary>
             /// Returns true if the string referenced by the handle is still alive.
             /// </summary>
-            public bool IsUsed => WeakHandle.Target != null;
+            public bool IsUsed => referencedString is not null || WeakHandle.Target != null;
 
             /// <summary>
             /// Returns the string referenced by this handle if it is equal to the given internable.
@@ -47,13 +54,27 @@ namespace Microsoft.NET.StringTools
             /// <returns>The string matching the internable or null if the handle is referencing a collected string or the string is different.</returns>
             public string? GetString(ref InternableString internable)
             {
-                if (WeakHandle.IsAllocated && WeakHandle.Target is string str)
+                string? localReferenceString = referencedString;
+                if (localReferenceString is not null && internable.Equals(localReferenceString))
                 {
-                    if (internable.Equals(str))
-                    {
-                        return str;
-                    }
+                    return localReferenceString;
                 }
+
+                if (!WeakHandle.IsAllocated)
+                {
+                    return null;
+                }
+
+                if (WeakHandle.Target is not string str)
+                {
+                    return null;
+                }
+
+                if (internable.Equals(str))
+                {
+                    return str;
+                }
+
                 return null;
             }
 
@@ -63,14 +84,27 @@ namespace Microsoft.NET.StringTools
             /// <param name="str">The string to set.</param>
             public void SetString(string str)
             {
-                if (!WeakHandle.IsAllocated)
+                if (str.Length > WeakHandleMinimumLength)
                 {
-                    // The handle is not allocated - allocate it.
-                    WeakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
+                    if (WeakHandle.IsAllocated)
+                    {
+                        WeakHandle.Target = str;
+                    }
+                    else
+                    {
+                        WeakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
+                    }
+
+                    referencedString = null;
                 }
                 else
                 {
-                    WeakHandle.Target = str;
+                    if (WeakHandle.IsAllocated)
+                    {
+                        WeakHandle.Target = null;
+                    }
+
+                    referencedString = str;
                 }
             }
 
@@ -79,7 +113,10 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             public void Free()
             {
-                WeakHandle.Free();
+                if (WeakHandle.IsAllocated)
+                {
+                    WeakHandle.Free();
+                }
             }
         }
 
@@ -98,20 +135,16 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private void DisposeImpl()
         {
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 entry.Value.Free();
             }
+
             _stringsByHashCode.Clear();
+            _weakHandlesByHashCode.Clear();
         }
 
         public void Dispose()
-        {
-            DisposeImpl();
-            GC.SuppressFinalize(this);
-        }
-
-        ~WeakStringCache()
         {
             DisposeImpl();
         }
@@ -121,9 +154,9 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private DebugInfo GetDebugInfoImpl()
         {
-            DebugInfo debugInfo = new DebugInfo();
+            DebugInfo debugInfo = new() { LiveStringCount = _stringsByHashCode.Count };
 
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 if (entry.Value.IsUsed)
                 {

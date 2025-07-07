@@ -9,11 +9,13 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.FileAccesses;
+#endif
 
 #nullable disable
 
@@ -264,6 +266,7 @@ namespace Microsoft.Build.BackEnd
 
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
+                        runtime,
                         _buildComponentHost.BuildParameters.NodeId,
                         NativeMethodsShared.GetCurrentDirectory(),
                         CommunicationsUtilities.GetEnvironmentVariables(),
@@ -370,6 +373,16 @@ namespace Microsoft.Build.BackEnd
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+        }
+
+        /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>
@@ -569,10 +582,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
         {
-            string msbuildLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(requiredContext) ??
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
+#if NETFRAMEWORK
+            if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
+            {
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext).MSBuildAssemblyPath;
+            }
+#endif
+            string msbuildLocation = taskHostLocation ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a
                 // 32-bit machine.  At least give them the exe name to look for, though ...
-                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2 ? "MSBuildTaskHost.exe" : "MSBuild.exe");
+                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2 
+                ? "MSBuildTaskHost.exe" 
+                : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredContext));
 
             if (e == null)
             {

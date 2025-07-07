@@ -9,16 +9,19 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0103](#bc0103---used-environment-variable) | Suggestion | Project | 9.0.100 | Used environment variable. |
 | [BC0104](#bc0104---projectreference-is-preferred-to-reference) | Warning | N/A | 9.0.200 | ProjectReference is preferred to Reference. |
 | [BC0105](#bc0105---embeddedresource-should-specify-culture-metadata) | Warning | N/A | 9.0.200 | Culture specific EmbeddedResource should specify Culture metadata. |
+| [BC0106](#bc0106---copytooutputdirectoryalways-should-be-avoided) | Warning | N/A | 9.0.200 | CopyToOutputDirectory='Always' should be avoided. |
 | [BC0107](#bc0107---targetframework-and-targetframeworks-specified-together) | Warning | N/A | 9.0.200 | TargetFramework and TargetFrameworks specified together. |
+| [BC0108](#bc0108---targetframework-or-targetframeworks-specified-in-non-sdk-style-project) | Warning | N/A | 9.0.300 | TargetFramework or TargetFrameworks specified in non-SDK style project. |
 | [BC0201](#bc0201---usage-of-undefined-property) | Warning | Project | 9.0.100 | Usage of undefined property. |
 | [BC0202](#bc0202---property-first-declared-after-it-was-used) | Warning | Project | 9.0.100 | Property first declared after it was used. |
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
-
+| [BC0301](#bc0301---building-from-downloads-folder) | None | Project | 9.0.300 | Building from Downloads folder. |
+| [BC0302](#bc0302---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
 
 Notes: 
  * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
  * How can you alter the default configuration? [Please check the Configuration section of the BuildCheck documentation](./BuildCheck.md#sample-configuration)
- * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview
+ * To enable verbose logging in order to troubleshoot issue(s), enable [binary logging](https://github.com/dotnet/msbuild/blob/main/documentation/wiki/Binary-Log.md#msbuild-binary-log-overview)
    _Cmd:_
    ```cmd
    dotnet build -bl -check
@@ -78,6 +81,36 @@ Examples:
 <a name="RespectAlreadyAssignedItemCulture"></a>
 **Note:** In Full Framework version of MSBuild (msbuild.exe, Visual Studio) and in .NET SDK prior 9.0 a global or project specific property `RespectAlreadyAssignedItemCulture` needs to be set to `'true'` in order for the explicit `Culture` metadata to be respected. Otherwise the explicit culture will be overwritten by MSBuild engine and if different from the extension - a `MSB3002` warning is emitted (`"MSB3002: Explicitly set culture "{0}" for item "{1}" was overwritten with inferred culture "{2}", because 'RespectAlreadyAssignedItemCulture' property was not set."`)
 
+<a name="BC0106"></a>
+## BC0106 - CopyToOutputDirectory='Always' should be avoided.
+
+"Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying."
+
+[`CopyToOutputDirectory` metadata](https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-items) can take the values:
+ * `Never`
+ * `Always`
+ * `PreserveNewest`
+ * `IfDifferent`
+
+`Always` is not recommended, as it causes the files to be copied in every build, even when the destination file content is identical to the source.
+
+Before the introduction of `IfDifferent`, `Always` was needed to work around cases where the destination file could have changed between builds (e.g. an asset that can be changed during test run, but needs to be reset by the build). `IfDifferent` preserves this behavior without unnecessary copying.
+
+In order to avoid the need to change copy metadata for a large number of items, it's now possible to specify the `SkipUnchangedFilesOnCopyAlways` property in order to flip all copy behavior of `CopyToOutputDirectory=Always` to behave identically to `CopyToOutputDirectory=IfDifferent`:
+
+```xml
+<PropertyGroup>
+    <SkipUnchangedFilesOnCopyAlways>True</SkipUnchangedFilesOnCopyAlways>
+</PropertyGroup>
+
+<ItemGroup>
+    <None Include="File1.txt" CopyToOutputDirectory="Always" />
+    <None Include="File2.txt" CopyToOutputDirectory="IfDifferent" />
+</ItemGroup>
+```
+
+Both items in above example are treated same and no BC0106 diagnostic is issued.
+
 <a name="BC0107"></a>
 ## BC0107 - TargetFramework and TargetFrameworks specified together.
 
@@ -92,8 +125,17 @@ If you specify `TargetFramework` you are instructing the build to produce a sing
 `BC0107` doesn't apply if you explicitly choose to build a single target of multitargeted build:
 
 ```
-dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
+dotnet build my-multi-target.csproj /p:TargetFramework=net10.0
 ```
+
+<a name="BC0108"></a>
+## BC0108 - TargetFramework or TargetFrameworks specified in SDK-less project.
+
+"'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects not using .NET SDK."
+
+'TargetFramework' or 'TargetFrameworks' control the project output targets in modern .NET SDK projects. The older SDK-less projects interprets different properties for similar mechanism (like 'TargetFrameworkVersion') and the 'TargetFramework' or 'TargetFrameworks' are silently ignored.
+
+Make sure the Target Framework is specified appropriately for your project.
 
 <a name="BC0201"></a>
 ## BC0201 - Usage of undefined property.
@@ -144,6 +186,22 @@ Common cases of false positives:
  * Property not used in a particular build might be needed in a build with different conditions or a build of a different target (e.g. `dotnet pack /check` or `dotnet build /t:pack /check` accesses some additional properties as compared to ordinary `dotnet build /check`).
  * Property accessing is tracked for each project build request. There might be multiple distinct build requests for a project in a single build. Specific case of this is a call to the [MSBuild task](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) or [CallTarget task](https://learn.microsoft.com/en-us/visualstudio/msbuild/calltarget-task) that can request a result from a project build, while passing additional or different global properties and/or calling specific target. This happens often as part of common targets - e.g. for [multi-targeted project build parallelization](../../High-level-overview.md#parallelism)
  * Incremental build might skip execution of some targets, that might have been accessing properties of interest.
+
+<a name="BC0301"></a>
+## BC0301 - Building from Downloads folder.
+
+"Downloads folder is untrusted for projects building."
+
+Placing project files into Downloads folder (or any other folder that cannot be fully trusted including all parent folders up to a root drive) is not recomended, as unintended injection of unrelated MSBuild logic can occur.
+
+Place your projects into trusted locations - including cases when you intend to only open the project in IDE.
+
+<a name="BC0302"></a>
+## BC0302 - Building using the Exec task.
+
+"The 'Exec' task should not be used to build projects."
+
+Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
 
 <BR/>
 <BR/>

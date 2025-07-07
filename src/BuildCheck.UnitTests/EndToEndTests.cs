@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -21,6 +21,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class EndToEndTests : IDisposable
 {
     private const string EditorConfigFileName = ".editorconfig";
+    private const string LatestDotNetCoreForMSBuild = "net10.0";
 
     private readonly TestEnvironment _env;
 
@@ -147,14 +148,6 @@ public class EndToEndTests : IDisposable
                     $"Unexpected resource for culture {culture} was found in deps.json:{Environment.NewLine}{output.DepsJsonResources.ToString()}");
             }
         }
-
-        int GetWarningsCount(string output)
-        {
-            Regex regex = new Regex(@"(\d+) Warning\(s\)");
-            Match match = regex.Match(output);
-            match.Success.ShouldBeTrue("Expected Warnings section not found in the build output.");
-            return int.Parse(match.Groups[1].Value);
-        }
     }
 
     private readonly record struct EmbedResourceTestOutput(String LogOutput, JsonObject DepsJsonResources);
@@ -176,7 +169,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -216,6 +209,111 @@ public class EndToEndTests : IDisposable
         {
             File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
         }
+    }
+
+    private static int GetWarningsCount(string output)
+    {
+        Regex regex = new Regex(@"(\d+) Warning\(s\)");
+        Match match = regex.Match(output);
+        match.Success.ShouldBeTrue("Expected Warnings section not found in the build output.");
+        return int.Parse(match.Groups[1].Value);
+    }
+
+    private readonly record struct CopyTestOutput(
+        String LogOutput,
+        string File1Path,
+        string File2Path,
+        DateTime File1WriteUtc,
+        DateTime File2WriteUtc,
+        DateTime File1AccessUtc,
+        DateTime File2AccessUtc);
+
+    private CopyTestOutput RunCopyToOutputTest(bool restore, bool skipUnchangedDuringCopy)
+    {
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")}", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        // We should get warning only if we didn't opted-into the new behavior
+        if (!skipUnchangedDuringCopy)
+        {
+            string expectedDiagnostic = "warning BC0106: .* that has 'CopyToOutputDirectory' set as 'Always'";
+            Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(2);
+        }
+
+        GetWarningsCount(output).ShouldBe(skipUnchangedDuringCopy ? 0 : 1);
+
+        string[] outFile1 = Directory.GetFiles(".", "File1.txt", SearchOption.AllDirectories);
+        outFile1.Length.ShouldBe(1);
+
+        string[] outFile2 = Directory.GetFiles(".", "File2.txt", SearchOption.AllDirectories);
+        outFile2.Length.ShouldBe(1);
+
+        // File.Copy does reuse LastWriteTime of source file
+        return new(
+            output,
+            outFile1[0],
+            outFile2[0],
+            File.GetLastWriteTimeUtc(outFile1[0]),
+            File.GetLastWriteTimeUtc(outFile2[0]),
+            File.GetLastAccessTimeUtc(outFile1[0]),
+            File.GetLastAccessTimeUtc(outFile2[0]));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void CopyToOutputTest(bool skipUnchangedDuringCopy)
+    {
+        string testAssetsFolderName = "CopyAlwaysTest";
+        const string entryProjectName = "EntryProject";
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+
+        _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
+
+        var output1 = RunCopyToOutputTest(true, skipUnchangedDuringCopy);
+
+        // Run again - just Always should be copied
+        // Careful - unix based OS might not update access time on writes. 
+
+        var output2 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
+
+        // CopyToOutputDirectory="Always"
+        if (skipUnchangedDuringCopy)
+        {
+            output2.File1AccessUtc.ShouldBeEquivalentTo(output1.File1AccessUtc);
+            output2.File1WriteUtc.ShouldBeEquivalentTo(output1.File1WriteUtc);
+        }
+        else
+        {
+            output2.File1WriteUtc.ShouldBeEquivalentTo(output1.File1WriteUtc);
+        }
+        // CopyToOutputDirectory="IfDifferent"
+        output2.File2AccessUtc.ShouldBeEquivalentTo(output1.File2AccessUtc);
+        output2.File2WriteUtc.ShouldBeEquivalentTo(output1.File2WriteUtc);
+
+        // Change both in output
+
+        File.WriteAllLines(output2.File1Path, ["foo"]);
+        File.WriteAllLines(output2.File2Path, ["foo"]);
+
+        DateTime file1WriteUtc = File.GetLastWriteTimeUtc(output2.File1Path);
+        DateTime file2WriteUtc = File.GetLastWriteTimeUtc(output2.File2Path);
+
+        file1WriteUtc.ShouldBeGreaterThan(output2.File1WriteUtc);
+        file2WriteUtc.ShouldBeGreaterThan(output2.File2WriteUtc);
+
+        // Run again - both should be copied
+
+        var output3 = RunCopyToOutputTest(false, skipUnchangedDuringCopy);
+
+        // We are now overwriting the newer file in output with the older file from sources.
+        // Which is wanted - as we want to copy on any difference.
+        output3.File1WriteUtc.ShouldBeLessThan(file1WriteUtc);
+        output3.File2WriteUtc.ShouldBeLessThan(file2WriteUtc);
     }
 
 
@@ -262,10 +360,14 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework>""", "", false)]
-    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", " /p:TargetFramework=net9.0", false)]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", true)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>""", "", false)]
+    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", $" /p:TargetFramework={LatestDotNetCoreForMSBuild}", false)]
+    [InlineData($"""<TargetFramework></TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework /><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks />""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", true)]
     public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
     {
         const string testAssetsFolderName = "TFMConfusionCheck";
@@ -303,12 +405,73 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    private static int GetWarningsCount(string output)
+    // Windows only - due to targeting NetFx
+    [WindowsOnlyTheory]
+    [InlineData(
+        """
+        <Project ToolsVersion="msbuilddefaulttoolsversion">
+            <PropertyGroup>
+              <TargetFramework>net48</TargetFramework>
+            </PropertyGroup>
+            <Target Name="Build">
+                <Message Text="Build done"/>
+            </Target>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        $"""
+        <Project Sdk="Microsoft.NET.Sdk">
+          <PropertyGroup>
+            <TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>
+          </PropertyGroup>
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        false)]
+    [InlineData(
+        """
+        <Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+          <PropertyGroup>
+            <OutputType>Library</OutputType>
+            <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+            <TargetFramework>v4.8</TargetFramework>
+            <OutputPath>bin\Debug\</OutputPath>
+        	<NoWarn>CS2008</NoWarn>
+          </PropertyGroup>
+          <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+        </Project>
+        """,
+        true)]
+    public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
     {
-        Regex regex = new Regex(@"(\d+) Warning\(s\)");
-        Match match = regex.Match(output);
-        match.Success.ShouldBeTrue("Expected Warnings section not found in the build output.");
-        return int.Parse(match.Groups[1].Value);
+        TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+
+        workFolder.CreateFile("testproj.csproj", projectContent);
+
+        _env.SetCurrentDirectory(workFolder.Path);
+
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore", out bool success);
+        _env.Output.WriteLine(output);
+        _env.Output.WriteLine("=========================");
+        success.ShouldBeTrue();
+
+        string expectedDiagnostic = "warning BC0108: .* specifies 'TargetFramework\\(s\\)' property";
+        Regex.Matches(output, expectedDiagnostic).Count.ShouldBe(expectCheckTrigger ? 2 : 0);
+
+        GetWarningsCount(output).ShouldBe(expectCheckTrigger ? 1 : 0);
     }
 
 
@@ -817,9 +980,36 @@ public class EndToEndTests : IDisposable
 
             // The test packages are generated during the test project build and saved in CustomChecks folder.
             string checksPackagesPath = Path.Combine(Directory.GetParent(AssemblyLocation)?.Parent?.FullName ?? string.Empty, "CustomChecks");
-            AddPackageSource(doc, packageSourcesNode, "Key", checksPackagesPath);
+            AddPackageSource(doc, packageSourcesNode, "CustomCheckSource", checksPackagesPath);
+
+            // MSBuild packages are placed in a separate folder, so we need to add it as a package source.
+            AddPackageSource(doc, packageSourcesNode, "MSBuildTestPackagesSource", RunnerUtilities.ArtifactsLocationAttribute.ArtifactsLocation);
+
+            // PackageSourceMapping is enabled at the repository level. For the test packages we need to add the PackageSourceMapping as well.
+            XmlNode? packageSourceMapping = doc.CreateElement("packageSourceMapping");
+            string[] packagePatterns = new string[] { "*" };
+            AddPackageSourceMapping(doc, packageSourceMapping, "CustomCheckSource", packagePatterns);
+            AddPackageSourceMapping(doc, packageSourceMapping, "MSBuildTestPackagesSource", packagePatterns);
+            doc.DocumentElement.AppendChild(packageSourceMapping);
 
             doc.Save(Path.Combine(checkCandidatePath, "nuget.config"));
+        }
+    }
+
+    private void AddPackageSourceMapping(XmlDocument doc, XmlNode? packageSourceMapping, string key, string[] packagePatterns)
+    {
+        if (packageSourceMapping != null)
+        {
+            XmlElement packageSourceNode = doc.CreateElement("packageSource");
+            PopulateXmlAttribute(doc, packageSourceNode, "key", key);
+            foreach (var pattern in packagePatterns)
+            {
+                XmlElement packageNode = doc.CreateElement("package");
+                PopulateXmlAttribute(doc, packageNode, "pattern", pattern);
+                packageSourceNode.AppendChild(packageNode);
+            }
+
+            packageSourceMapping.AppendChild(packageSourceNode);
         }
     }
 

@@ -56,6 +56,7 @@ namespace Microsoft.Build.UnitTests
             // Clear these two environment variables first in case pre-setting affects the test.
             env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
             env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
+            env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
             return env;
         }
@@ -676,19 +677,16 @@ namespace Microsoft.Build.UnitTests
 
     public class TransientTestFile : TransientTestState
     {
-        private readonly bool _createFile;
         private readonly bool _expectedAsOutput;
 
         public TransientTestFile(string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(null, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(rootPath, null, extension, createFile);
         }

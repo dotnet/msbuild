@@ -24,9 +24,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="System.Collections.Immutable" />
+
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>

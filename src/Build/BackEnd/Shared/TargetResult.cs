@@ -102,7 +102,15 @@ namespace Microsoft.Build.Execution
             {
                 lock (_result)
                 {
-                    RetrieveItemsFromCache();
+                    if (_items == null)
+                    {
+                        string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
+                        using Stream stream = File.OpenRead(cacheFile);
+                        using ITranslator resultCacheTranslator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream);
+
+                        TranslateItems(resultCacheTranslator);
+                        _cacheInfo = new CacheInfo();
+                    }
 
                     return _items;
                 }
@@ -133,6 +141,22 @@ namespace Microsoft.Build.Execution
                     default:
                         return TargetResultCode.Skipped;
                 }
+            }
+        }
+
+        public string TargetResultCodeToString()
+        {
+            switch (ResultCode)
+            {
+                case TargetResultCode.Failure:
+                    return nameof(TargetResultCode.Failure);
+                case TargetResultCode.Skipped:
+                    return nameof(TargetResultCode.Skipped);
+                case TargetResultCode.Success:
+                    return nameof(TargetResultCode.Success);
+                default:
+                    Debug.Fail($"Unknown enum value: {ResultCode}");
+                    return ResultCode.ToString();
             }
         }
 
@@ -174,6 +198,13 @@ namespace Microsoft.Build.Execution
             set => _afterTargetsHaveFailed = value;
         }
 
+        /// <summary>
+        /// The defining location of the target for which this is a result.
+        /// This is not intended to be remoted via node-2-node remoting - it's intended only for in-node telemetry.
+        /// Warning!: This data is not guaranteed to be populated when Telemetry is not being collected (e.g. this is "sampled out")
+        /// </summary>
+        internal IElementLocation TargetLocation { get; set; }
+
         #region INodePacketTranslatable Members
 
         /// <summary>
@@ -187,7 +218,16 @@ namespace Microsoft.Build.Execution
                 {
                     // Should we have cached these items but now want to send them to another node, we need to
                     // ensure they are loaded before doing so.
-                    RetrieveItemsFromCache();
+                    if (_items == null)
+                    {
+                        string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
+                        using Stream stream = File.OpenRead(cacheFile);
+                        using ITranslator resultCacheTranslator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream);
+
+                        TranslateItems(resultCacheTranslator);
+                        _cacheInfo = new CacheInfo();
+                    }
+
                     InternalTranslate(translator);
                 }
             }
@@ -276,25 +316,6 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _afterTargetsHaveFailed);
             translator.TranslateOptionalBuildEventContext(ref _originalBuildEventContext);
             TranslateItems(translator);
-        }
-
-        /// <summary>
-        /// Retrieve the items from the cache.
-        /// </summary>
-        private void RetrieveItemsFromCache()
-        {
-            lock (_result)
-            {
-                if (_items == null)
-                {
-                    string cacheFile = GetCacheFile(_cacheInfo.ConfigId, _cacheInfo.TargetName);
-                    using Stream stream = File.OpenRead(cacheFile);
-                    using ITranslator translator = GetResultsCacheTranslator(TranslationDirection.ReadFromStream, stream);
-
-                    TranslateItems(translator);
-                    _cacheInfo = new CacheInfo();
-                }
-            }
         }
 
         private void TranslateItems(ITranslator translator)

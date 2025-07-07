@@ -15,58 +15,6 @@
         <target state="translated">建置失敗。無法取得屬性、項目及目標結果。請參閱上述 stderr 中的詳細資料。</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">在 {1} 秒內建置 {0}</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">失敗</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">失敗，有 {0} 個錯誤</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">失敗，有 {0} 個錯誤和 {1} 個警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">失敗，有 {0} 個警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">成功</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">成功但有 {0} 個警告</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">命令列引數 = "{0}"</target>
@@ -84,14 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse 參數不能在 MSBuild.rsp 自動回應檔中指定，也不能在自動回應檔所參考的任何回應檔中指定。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1} 秒)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-        's' should reflect the localized abbreviation for seconds
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -1729,39 +1669,6 @@
         <target state="translated">流程 = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3} 秒)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4} 秒)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: 專案檔不存在。</target>
@@ -1807,24 +1714,6 @@
         <target state="translated">'{0}' 來自 '{1}'</target>
         <note>
       These are response file switches with the location of the response file on disk.
-    </note>
-      </trans-unit>
-      <trans-unit id="RestoreComplete">
-        <source>Restore complete ({0}s)</source>
-        <target state="translated">還原完成 ({0} 秒)</target>
-        <note>
-      {0}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="RestoreCompleteWithMessage">
-        <source>Restore {0} in {1}s</source>
-        <target state="translated">在 {1} 秒內還原 {0}</target>
-        <note>
-      Restore summary when finished with warning or error
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
       <trans-unit id="SAC">
@@ -1896,6 +1785,11 @@
         <target state="translated">MSBUILD : error MSB1059: 無法列印目標。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">檢測到此組建正在自動化環境中執行，因此未使用終端機記錄器。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">因為組建是在要求直接存取 stdout 資料流的處理常式 (例如 'dotnet test') 內容中執行，所以未使用終端記錄器。</target>
@@ -1910,59 +1804,6 @@
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
         <target state="translated">因為輸出正重新導向至檔案，所以未使用終端記錄器。</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_NoTF">
-        <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} 測試 {2} ({3} 秒)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_WithTF">
-        <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} 測試 {2} {3} ({4} 秒)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_BannerAndTotal">
-        <source>Test summary: total: {0}</source>
-        <target state="translated">測試摘要: 總計: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Duration">
-        <source>duration: {0}s</source>
-        <target state="translated">持續時間: {0} 秒</target>
-        <note>
-      {0} whole number
-      's' should reflect the localized abbreviation for seconds
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Failed">
-        <source>failed: {0}</source>
-        <target state="translated">失敗: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Skipped">
-        <source>skipped: {0}</source>
-        <target state="translated">已跳過: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Succeeded">
-        <source>succeeded: {0}</source>
-        <target state="translated">成功: {0}</target>
-        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
@@ -2045,29 +1886,6 @@
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: 要前置處理的目地檔案無效。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
-      </trans-unit>
-      <trans-unit id="LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: 無法建立記錄器的執行個體。{0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1021: "}
-      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
-      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
-      </trans-unit>
-      <trans-unit id="LoggerNotFoundError">
-        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD : error MSB1020: 找不到記錄器。請檢查下列事項: 1.) 指定的記錄器名稱與記錄器類別的名稱相同。2.) 記錄器類別為 "public" 且實作 Microsoft.Build.Framework.ILogger 介面。3.) 記錄器組件的路徑為正確，或記錄器只能使用所提供的組件名稱載入。</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
-      logger class must exist in the given assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectUpgradeNeededToVcxProj">
-        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD : error MSB4192: 專案檔 "{0}" 的檔案格式為 ".vcproj" 或 ".dsp"，MSBuild 無法直接加以建置。請在 Visual Studio IDE 中開啟此專案或執行轉換工具加以轉換，若是 ".vcproj"，則改為使用 MSBuild 建置包含專案的方案檔。</target>
-        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
@@ -2180,6 +1998,14 @@
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2214,38 +2040,46 @@
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                    將所有建置事件序列化成壓縮的二進位檔案。
-                     根據預設，此檔案存放在目前的目錄下，並會命名為
-                     「msbuild.binlog」。此二進位記錄檔是
-                     建置程序的詳細描述，之後可用於重建文字記錄，
-                     以及供其他分析工具使用。二進位記錄檔
-                     的大小通常會比大部分的詳細文字
-                     診斷層級記錄小 10-20 倍，但包含了更多資訊。
+                     將所有組建活動序列化為壓縮的二進位檔案。
+                     根據預設，檔案位於目前的目錄中，且名為
+                     "msbuild.binlog"。二進位記錄檔是詳細描述
+                     說明建組程序，這稍後可用來重新建構
+                     文字記錄檔，並用於其他分析工具。二進位記錄檔
+                     通常比最詳細文字診斷層級記錄檔小 10-20x
+                     ，但它包含更多資訊。
                      (簡短形式: -bl)
 
-                     根據預設，二進位記錄器會收集專案檔的
-                     原始程式文字，包括在建置期間遇到的
-                     所有匯入專案及目標檔案。選擇性的 ProjectImports 參數
-                     會控制此行為:
+                     選擇性的 LogFile 會指定儲存
+                     二進位記錄檔位置的路徑。若要針對每個組建，產生不同的記錄檔
+                     ，可以將權杖 "{}" 新增至
+                     路徑，例如: LogFile=output-{}-log.binlog。記錄檔路徑中的
+                     每個 "{}" 會使用時間戳記，取代為唯一字串
+                     執行程序識別碼和隨機
+                     字串戳記。
 
-                      ProjectImports=None     - 不收集專案
+                     二進位記錄程式預設會收集專案檔案的來源文字
+                     ，包括組建期間所發生的所有匯入的專案和目標
+                     檔案。選擇性
+                     ProjectImports 切換可控制此行為:
+
+                      ProjectImports=None     - 不要收集專案
                                                 匯入。
-                      ProjectImports=Embed    - 在記錄檔中內嵌
-                                                專案匯入。
-                      ProjectImports=ZipFile  - 將專案檔儲存到
-                                                output.projectimports.zip，
-                                                其中輸出的名稱與
-                                                二進位記錄檔名稱相同。
+                      ProjectImports=Embed    - 記錄檔中的
+                                                內嵌專案匯入。
+                      ProjectImports=ZipFile  - 將專案檔案儲存至
+                                                output.projectimports.zip
+                                                其中輸出與二進位檔案名稱具有
+                                                相同的名稱。
 
-                     ProjectImports 的預設設定為 Embed。
-                     注意: 記錄器不會收集非 MSBuild 的來源檔案，
+                     ProjectImports 的預設設定為 [內嵌]。
+                     注意: 記錄程式不會收集非 MSBuild 來源檔案
                      例如 .cs、.cpp 等。
 
-                     將 .binlog 檔案傳遞到 msbuild.exe 作為引數而非
-                     專案/解決方案，即可加以「播放」。
-                     其他記錄器會收到記錄檔中包含的資訊，
-                     就如同原始組建發生時的情況。
-                     若要深入閱讀二進位記錄檔及其使用方式，請前往:
+                     .binlog 檔案可以藉由將其傳遞至
+                     msbuild.exe 作為引數 (而不是專案/解決方案) 來 "回放"。
+                     其他記錄程式將會收到記錄檔中包含的資訊，
+                     就像發生原始組建那樣。
+                     您可以在以下位置閱讀更多關於二進位記錄及其使用方式:
                      https://aka.ms/msbuild/binlog
 
                      範例:
@@ -2362,6 +2196,29 @@
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD :錯誤 MSB1054: 必須指定檔案名稱才能產生分析工具結果。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XMake.LoggerCreationError">
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: 無法建立記錄器 {0} 的執行個體。{1}</target>
+        <note>{StrBegin="MSBUILD : error MSB1021: "}
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
+      </trans-unit>
+      <trans-unit id="XMake.LoggerNotFoundError">
+        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
+        <target state="translated">MSBUILD : error MSB1020: 找不到記錄器。請檢查下列事項: 1.) 指定的記錄器名稱與記錄器類別的名稱相同。2.) 記錄器類別為 "public" 且實作 Microsoft.Build.Framework.ILogger 介面。3.) 記錄器組件的路徑為正確，或記錄器只能使用所提供的組件名稱載入。</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
+      logger class must exist in the given assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
+        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
+        <target state="translated">MSBUILD : error MSB4192: 專案檔 "{0}" 的檔案格式為 ".vcproj" 或 ".dsp"，MSBuild 無法直接加以建置。請在 Visual Studio IDE 中開啟此專案或執行轉換工具加以轉換，若是 ".vcproj"，則改為使用 MSBuild 建置包含專案的方案檔。</target>
+        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
   </file>

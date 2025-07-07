@@ -193,13 +193,43 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_MessageFmt">
         <source>Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</source>
-        <target state="new">Project {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}' at the same time. This will lead to 'TargetFrameworks' being ignored and build will behave as single-targeted.</target>
+        <target state="translated">Project {0} specifica la proprietà 'TargetFrameworks' '{1}' e la proprietà 'TargetFramework' '{2}' contemporaneamente. In questo modo 'TargetFrameworks' verrà ignorato e la compilazione funzionerà come destinazione singola.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0107_Title">
         <source>'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</source>
-        <target state="new">'TargetFramework' (singular) and 'TargetFrameworks' (plural) properties should not be specified in the scripts at the same time.</target>
+        <target state="translated">Le proprietà 'TargetFramework' (singolare) e 'TargetFrameworks' (plural) non devono essere specificate contemporaneamente negli script.</target>
         <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_MessageFmt">
+        <source>Project {0} specifies '{1}' item '{2}', that has 'CopyToOutputDirectory' set as 'Always'. Change the metadata or use 'CopyToOutputDirectory' property.</source>
+        <target state="translated">Project {0} specifica '{1}' elemento '{2}' per cui 'CopyToOutputDirectory' è impostato su 'Always'. Modificare i metadati o usare la proprietà 'CopyToOutputDirectory'.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0106_Title">
+        <source>Avoid specifying 'Always' for 'CopyToOutputDirectory' as this can lead to unnecessary copy operations during build. Use 'PreserveNewest' or 'IfDifferent' metadata value, or set the 'SkipUnchangedFilesOnCopyAlways' property to true to employ more effective copying.</source>
+        <target state="translated">Evitare di specificare 'Always' per 'CopyToOutputDirectory' perché ciò può causare operazioni di copia non necessarie durante la compilazione. Usare il valore dei metadati 'PreserveNewest' o 'IfDifferent' oppure impostare la proprietà 'SkipUnchangedFilesOnCopyAlways' su true per utilizzare una copia più efficace.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_MessageFmt">
+        <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
+        <target state="translated">Project {0} specifica la proprietà 'TargetFramework(s)' '{1}', che non usa .NET SDK. Queste proprietà non sono comprese dai progetti che importano direttamente destinazioni C#.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0108_Title">
+        <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
+        <target state="translated">Le proprietà 'TargetFramework' e 'TargetFrameworks' non vengono rispettate e non devono essere specificate nei progetti che non usano .NET SDK.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
+        <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
+        <target state="translated">L'attività {0} del progetto{1} compila un progetto utilizzando la CLI {2}. È necessario utilizzare invece l'attività MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0302_Title">
+        <source>The 'Exec' task should not be used to build a project.</source>
+        <target state="translated">L'attività 'Esecuzione' non deve essere utilizzata per compilare un progetto.</target>
+        <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
@@ -231,6 +261,26 @@
         <target state="translated">Una proprietà non utilizzata non deve essere dichiarata.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_MessageFmt">
+        <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
+        <target state="translated">Percorso: '{0}' non può essere considerato completamente attendibile. Inserire i progetti all'esterno di tale cartella (Progetto: {1}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0301_Title">
+        <source>Downloads folder is untrusted for projects building.</source>
+        <target state="translated">La cartella Dei download non è attendibile per la compilazione di progetti.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="BuildFinished">
+        <source>Build {0} in {1}s</source>
+        <target state="translated">Compilazione {0} in {1}s</target>
+        <note>
+      Overall build summary
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="BuildFinishedQuestionFailure">
         <source>Question build FAILED. The build exited early as it encountered a target or task that was not up-to-date.</source>
         <target state="translated">Compilazione della domanda NON RIUSCITA. La compilazione è terminata in anticipo perché è stata rilevata una destinazione o un'attività non aggiornata.</target>
@@ -245,6 +295,55 @@
         <source>The operation cannot be completed because a build is already in progress.</source>
         <target state="translated">Non è possibile completare l'operazione perché è già in corso una compilazione.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildResult_Failed">
+        <source>failed</source>
+        <target state="translated">non riuscito</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrors">
+        <source>failed with {0} error(s)</source>
+        <target state="translated">non riuscito con {0} errori</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
+        <source>failed with {0} error(s) and {1} warning(s)</source>
+        <target state="translated">non riuscito con {0} errori e {1} avvisi</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_FailedWithWarnings">
+        <source>failed with {0} warning(s)</source>
+        <target state="translated">non riuscito con {0} avvisi</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_Succeeded">
+        <source>succeeded</source>
+        <target state="translated">operazione riuscita</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildResult_SucceededWithWarnings">
+        <source>succeeded with {0} warning(s)</source>
+        <target state="translated">completato con {0} avvisi</target>
+        <note>
+      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
+    </note>
+      </trans-unit>
+      <trans-unit id="BuildSummary">
+        <source>Build summary:</source>
+        <target state="translated">Riepilogo build:</target>
+        <note>
+      A header used by Terminal Logger to introduce the build summary.
+    </note>
       </trans-unit>
       <trans-unit id="CacheMissesNotAllowedInIsolatedGraphBuilds">
         <source>MSB4252: Project "{0}" with global properties
@@ -357,6 +456,14 @@
         <target state="translated">MSB4275: tentativo di creare più sostituzioni della stessa attività: {0}</target>
         <note>{StrBegin="MSB4275: "}</note>
       </trans-unit>
+      <trans-unit id="DurationDisplay">
+        <source>({0:F1}s)</source>
+        <target state="translated">({0:F1}s)</target>
+        <note>
+        {0}: duration in seconds with 1 decimal point
+        's' should reflect the localized abbreviation for seconds
+      </note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: il file della cache dei risultati di output specificato è vuoto.</target>
@@ -402,6 +509,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" fa riferimento a {0} elemento/i, mentre "{3}" fa riferimento a {1} elemento/i. Devono avere lo stesso numero di elementi.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Si è verificata un'eccezione durante l'espansione di un fileSpec con GLOBS: fileSpec: "{0}", presupponendo che si tratti di un nome di file. Eccezione: {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -518,6 +630,11 @@
         <target state="translated">Non è possibile chiamare il metodo {0} con una raccolta contenente nomi di destinazione Null o vuoti.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Caricamento delle librerie di telemetria non riuscito con eccezione: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Proprietà di output: </target>
@@ -621,6 +738,39 @@
         <target state="translated">MSB4268: non è stato possibile arrestare correttamente la cache del progetto.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectFinished_NoTF">
+        <source>{0}{1} {2} ({3}s)</source>
+        <target state="translated">{0}{1} {2} ({3}s)</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_OutputPath">
+        <source> → {0}</source>
+        <target state="translated"> → {0}</target>
+        <note>
+      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
+      {0}: VT100 coded hyperlink to project output directory
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectFinished_WithTF">
+        <source>{0}{1} {2} {3} ({4}s)</source>
+        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph non supporta elementi ProjectReference con metadati ToolsVersion impostati. L'elemento ProjectReference "{0}" con ToolsVersion è stato trovato nel file "{1}"</target>
@@ -659,6 +809,24 @@
         <target state="translated">Gli accessi ai file di report sono attualmente supportati solo con la versione x64 di MSBuild.</target>
         <note />
       </trans-unit>
+      <trans-unit id="RestoreComplete">
+        <source>Restore complete ({0}s)</source>
+        <target state="translated">Ripristino completato ({0})</target>
+        <note>
+      {0}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="RestoreCompleteWithMessage">
+        <source>Restore {0} in {1}s</source>
+        <target state="translated">Ripristinare {0} in {1}s</target>
+        <note>
+      Restore summary when finished with warning or error
+      {0}: BuildResult_X (below)
+      {1}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
@@ -692,6 +860,26 @@ Errori: {3}</target>
         <target state="translated">Il resolver SDK "{0}" ha restituito null.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata come variabile di ambiente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata da un altro SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">Il resolver SDK '{0}' non è riuscito a risolvere l'SDK '{1}'. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: il progetto "{0}" ha ignorato i vincoli di isolamento del grafico nel progetto di riferimento "{1}"</target>
@@ -714,6 +902,11 @@ Errori: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Il grafo statico è stato caricato in {0} secondi: {1} nodi, {2} vertici</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">Costruzione del grafo statico avviata.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -778,6 +971,59 @@ Errori: {3}</target>
         <target state="translated">MSB4181: l'attività "{0}" ha restituito false, ma non è stato registrato alcun errore.</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
+      <trans-unit id="TestProjectFinished_NoTF">
+        <source>{0}{1} test {2} ({3}s)</source>
+        <target state="translated">{0}{1} test {2} {3}</target>
+        <note>
+      Project finished summary.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: BuildResult_{X}
+      {3}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTF">
+        <source>{0}{1} test {2} {3} ({4}s)</source>
+        <target state="translated">{0}{1} test {2} {3} {4}</target>
+        <note>
+      Project finished summary including target framework information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: BuildResult_{X}
+      {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="translated">Riepilogo test: totale: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="translated">durata: {0}s</target>
+        <note>
+      {0} whole number
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="translated">non riuscito: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="translated">ignorato: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="translated">riuscito: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
       <trans-unit id="UndeclaredMSBuildTasksNotAllowedInIsolatedGraphBuilds">
         <source>MSB4254: The MSBuild task is building project(s) "{0}" which are not specified in the ProjectReference item. In isolated builds this probably means that the references are not explicitly specified as a ProjectReference item in "{1}"</source>
         <target state="translated">MSB4254: l'attività MSBuild compila progetti "{0}" che non sono specificati nell'elemento ProjectReference. Nelle compilazioni isolate questa condizione indica probabilmente che i riferimenti non sono specificati in modo esplicito come elemento ProjectReference in "{1}"</target>
@@ -796,6 +1042,11 @@ Errori: {3}</target>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
         <target state="translated">Legge la proprietà non inizializzata "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnknownLoggingType">
+        <source>Logging type {0} is not understood by {1}.</source>
+        <target state="translated">Il tipo di registrazione {0} non è riconosciuto da {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -131,7 +132,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        private Dictionary<string, string> _savedEnvironmentVariables;
+        private FrozenDictionary<string, string> _savedEnvironmentVariables;
 
         /// <summary>
         /// Holds a snapshot of the current working directory at the time we blocked.
@@ -299,7 +300,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!_isTraversalProject.HasValue)
                 {
-                    if (String.Equals(Path.GetFileName(ProjectFullPath), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#if NET471_OR_GREATER
+                    if (MemoryExtensions.Equals(Microsoft.IO.Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj".AsSpan(), StringComparison.OrdinalIgnoreCase))
+#else
+                    if (MemoryExtensions.Equals(Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#endif
                     {
                         // dirs.proj are assumed to be traversals
                         _isTraversalProject = true;
@@ -324,6 +329,11 @@ namespace Microsoft.Build.BackEnd
                 return _isTraversalProject.Value;
             }
         }
+
+        /// <summary>
+        /// Flag indicating whether SDK-resolved environment variables have been set for this configuration.
+        /// </summary>
+        internal bool SdkResolvedEnvironmentVariablesSet { get; set; }
 
         /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.
@@ -607,7 +617,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        public Dictionary<string, string> SavedEnvironmentVariables
+        public FrozenDictionary<string, string> SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 
@@ -865,7 +875,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>String representation of the object</returns>
         public override string ToString()
         {
-            return String.Format(CultureInfo.CurrentCulture, "{0} {1} {2} {3}", _configId, _projectFullPath, _toolsVersion, _globalProperties);
+            return $"{_configId} {_projectFullPath} {_toolsVersion} {_globalProperties}";
         }
 
         /// <summary>

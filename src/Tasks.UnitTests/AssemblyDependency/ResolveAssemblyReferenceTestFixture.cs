@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
@@ -2507,6 +2506,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
         }
 
+#if FEATURE_WIN32_REGISTRY
         /// <summary>
         /// Registry access delegate. Given a hive and a view, return the registry base key.
         /// </summary>
@@ -2911,6 +2911,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Fail($"New GetRegistrySubKeyDefaultValue parameters encountered, need to add unittesting support for subKey={subKey}");
             return null;
         }
+#endif
 
         /// <summary>
         /// Delegate for System.IO.File.GetLastWriteTime

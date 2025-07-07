@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -213,6 +211,16 @@ namespace Microsoft.Build.Experimental
         }
 
         /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes a packet to the appropriate handler.
         /// </summary>
         /// <param name="nodeId">The node id from which the packet was received.</param>
@@ -381,7 +389,7 @@ namespace Microsoft.Build.Experimental
                 BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
 
                 buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
-                buildTelemetry.InitialServerState = command.PartialBuildTelemetry.InitialServerState;
+                buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
                 buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
             }
 

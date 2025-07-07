@@ -23,7 +23,7 @@
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
-    <PackageReference Include="System.Collections.Immutable" />
+    <PackageReference Include="System.Collections.Immutable" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
 
@@ -47,9 +47,6 @@
     </Compile>
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>Shared\EnvironmentUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>Shared\BuildEnvironmentHelper.cs</Link>

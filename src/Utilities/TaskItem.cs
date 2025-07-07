@@ -64,7 +64,7 @@ namespace Microsoft.Build.Utilities
         /// Default constructor -- do not use.
         /// </summary>
         /// <remarks>
-        /// This constructor exists only so that the type is COM-creatable. Prefer <see cref="TaskItem(string)"/>.
+        /// This constructor exists only so that the type is COM-creatable. Prefer <see cref="TaskItem(string, bool)"/>.
         /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         public TaskItem()
@@ -75,14 +75,31 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// This constructor creates a new task item, given the item spec.
         /// </summary>
-        /// <comments>Assumes the itemspec passed in is escaped.</comments>
+        /// <comments>Assumes the itemspec passed in is escaped and represents a file path. </comments>
         /// <param name="itemSpec">The item-spec string.</param>
+        public TaskItem(string itemSpec)
+            : this(itemSpec, treatAsFilePath: true) { }
+
+        /// <summary>
+        /// This constructor creates a new task item, given the item spec.
+        /// </summary>
+        /// <comments>
+        /// Assumes the itemspec passed in is escaped.
+        /// If <see name="treatAsFilePath" /> is set to <see langword="true" />, the value in <see name="itemSpec" />
+        /// will be fixed up as a path by having any backslashes replaced with slashes.
+        /// </comments>
+        /// <param name="itemSpec">The item-spec string.</param>
+        /// <param name="treatAsFilePath">
+        /// Specifies whether or not to treat the value in <see name="itemSpec" />
+        /// as a file path and attempt to normalize it.
+        /// </param>
         public TaskItem(
-            string itemSpec)
+            string itemSpec,
+            bool treatAsFilePath)
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
 
-            _itemSpec = FileUtilities.FixFilePath(itemSpec);
+            _itemSpec = treatAsFilePath ? FileUtilities.FixFilePath(itemSpec) : itemSpec;
         }
 
         /// <summary>
@@ -491,6 +508,7 @@ namespace Microsoft.Build.Utilities
             _metadata.SetItems(metadata.Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value ?? string.Empty)));
         }
 
+#if FEATURE_APPDOMAIN
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
         {
             if (_metadata == null)
@@ -509,6 +527,7 @@ namespace Microsoft.Build.Utilities
 
             return result;
         }
+#endif
 
         private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
         {

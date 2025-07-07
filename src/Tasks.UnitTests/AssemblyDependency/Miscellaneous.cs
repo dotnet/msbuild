@@ -18,7 +18,6 @@ using Microsoft.Win32;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
@@ -3267,41 +3266,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Single(parentReferenceFolders);
             Assert.Equal(reference2.ResolvedSearchPath, parentReferenceFolders[0].Directory);
-        }
-
-        /// <summary>
-        /// Generate a fake reference which has been resolved from the gac. We will use it to verify the creation of the exclusion list.
-        /// </summary>
-        /// <returns></returns>
-        private ReferenceTable GenerateTableWithAssemblyFromTheGlobalLocation(string location)
-        {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
-#if FEATURE_WIN32_REGISTRY
-                null, null, null,
-#endif
-                null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
-
-            AssemblyNameExtension assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
-            TaskItem taskItem = new TaskItem("Microsoft.VisualStudio.Interopt, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-
-            Reference reference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
-            reference.MakePrimaryAssemblyReference(taskItem, false, ".dll");
-            // "Resolve the assembly from the gac"
-            reference.FullPath = "c:\\Microsoft.VisualStudio.Interopt.dll";
-            reference.ResolvedSearchPath = location;
-            referenceTable.AddReference(assemblyNameExtension, reference);
-
-            assemblyNameExtension = new AssemblyNameExtension(new AssemblyName("Team.System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"));
-            taskItem = new TaskItem("Team, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
-
-            reference = new Reference(isWinMDFile, fileExists, getRuntimeVersion);
-            reference.MakePrimaryAssemblyReference(taskItem, false, ".dll");
-
-            // "Resolve the assembly from the gac"
-            reference.FullPath = "c:\\Team.System.dll";
-            reference.ResolvedSearchPath = location;
-            referenceTable.AddReference(assemblyNameExtension, reference);
-            return referenceTable;
         }
 
         /// <summary>
@@ -6735,11 +6699,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableDependentItemsInDenyList4()
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
             Dictionary<string, string> denyList;
@@ -6913,11 +6877,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
         private static ReferenceTable MakeEmptyReferenceTable(TaskLoggingHelper log)
         {
-            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
+            ReferenceTable referenceTable = new ReferenceTable(null, false, false, false, false, false, Array.Empty<string>(), null, null, null, null, null, null, SystemProcessorArchitecture.None, fileExists, null, null, null, null,
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null);
+                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
             return referenceTable;
         }
 
@@ -7435,77 +7399,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
-        /// <summary>
-        /// Verify the correct references are still in the references table and that references which are in the deny list are not in the references table
-        /// Also verify any expected warning messages are seen in the log.
-        /// </summary>
-        private static void VerifyReferenceTable(ReferenceTable referenceTable, MockEngine mockEngine, AssemblyNameExtension engineAssemblyName, AssemblyNameExtension dataAssemblyName, AssemblyNameExtension sqlclientAssemblyName, AssemblyNameExtension xmlAssemblyName, string warningMessage, string warningMessage2)
-        {
-            IDictionary<AssemblyNameExtension, Reference> table = referenceTable.References;
-            Assert.Equal(3, table.Count); // "Expected there to be three elements in the dictionary"
-            Assert.False(table.ContainsKey(sqlclientAssemblyName)); // "Expected to not find the sqlclientAssemblyName in the referenceList"
-            Assert.True(table.ContainsKey(xmlAssemblyName)); // "Expected to find the xmlssemblyName in the referenceList"
-            Assert.True(table.ContainsKey(dataAssemblyName)); // "Expected to find the dataAssemblyName in the referenceList"
-            Assert.True(table.ContainsKey(engineAssemblyName)); // "Expected to find the engineAssemblyName in the referenceList"
-            if (warningMessage != null)
-            {
-                mockEngine.AssertLogContains(warningMessage);
-            }
-            if (warningMessage2 != null)
-            {
-                mockEngine.AssertLogContains(warningMessage2);
-            }
-            table.Clear();
-        }
-
-        /// <summary>
-        /// Generate helper delegates for returning the file existence and the assembly name.
-        /// Also run the rest and return the result.
-        /// </summary>
-        private bool GenerateHelperDelegatesAndExecuteTask(ResolveAssemblyReference t)
-        {
-            FileExists cachedFileExists = fileExists;
-            GetAssemblyName cachedGetAssemblyName = getAssemblyName;
-            string microsoftBuildEnginePath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\Microsoft.Build.Engine.dll");
-            string systemXmlPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\System.Xml.dll");
-            fileExists = new FileExists(delegate (string path)
-{
-    if (String.Equals(path, microsoftBuildEnginePath, StringComparison.OrdinalIgnoreCase) ||
-                    String.Equals(path, systemXmlPath, StringComparison.OrdinalIgnoreCase) ||
-                    path.EndsWith("RarCache", StringComparison.OrdinalIgnoreCase))
-    {
-        return true;
-    }
-    return false;
-});
-
-            getAssemblyName = new GetAssemblyName(delegate (string path)
-            {
-                if (String.Equals(path, microsoftBuildEnginePath, StringComparison.OrdinalIgnoreCase))
-                {
-                    return new AssemblyNameExtension("Microsoft.Build.Engine, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-                }
-                else if (String.Equals(path, systemXmlPath, StringComparison.OrdinalIgnoreCase))
-                {
-                    return new AssemblyNameExtension("System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
-                }
-
-                return null;
-            });
-
-            bool success;
-            try
-            {
-                success = Execute(t);
-            }
-            finally
-            {
-                fileExists = cachedFileExists;
-                getAssemblyName = cachedGetAssemblyName;
-            }
-            return success;
-        }
-
         [Fact]
         public void DoNotAssumeFilesDescribedByRedistListExistOnDisk()
         {
@@ -7996,8 +7889,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
+                List<AssemblyEntry> entryArray = [.. redist.FindAssemblyNameFromSimpleName("System")];
 
-                List<AssemblyEntry> entryArray = redist.FindAssemblyNameFromSimpleName("System").ToList();
                 Assert.Equal(6, entryArray.Count);
                 AssemblyNameExtension a1 = new AssemblyNameExtension(entryArray[0].FullName);
                 AssemblyNameExtension a2 = new AssemblyNameExtension(entryArray[1].FullName);

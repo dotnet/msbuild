@@ -3,9 +3,9 @@
 
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Collections;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 
@@ -76,7 +76,7 @@ internal sealed class SharedOutputPathCheck : Check
         {
             context.ReportResult(BuildCheckResult.CreateBuiltIn(
                 SupportedRule,
-                // Populating precise location tracked via https://github.com/orgs/dotnet/projects/373/views/1?pane=issue&itemId=58661732
+                // Populating precise location tracked via https://github.com/dotnet/msbuild/issues/10383
                 ElementLocation.EmptyLocation,
                 Path.GetFileName(projectPath),
                 Path.GetFileName(conflictingProject),

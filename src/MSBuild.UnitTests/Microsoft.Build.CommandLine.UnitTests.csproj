@@ -7,8 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
     <PackageReference Include="Verify.Xunit" />
   </ItemGroup>
 
@@ -65,6 +66,11 @@
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="TestAssets\**" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Remove="TestAssets\TargetInvocationException\LoggerProject\FaultyLogger.cs" />
   </ItemGroup>
 
 </Project>

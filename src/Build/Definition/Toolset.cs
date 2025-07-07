@@ -13,14 +13,15 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+#if NET
 using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
 #endif
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
@@ -363,6 +364,15 @@ namespace Microsoft.Build.Evaluation
         private Toolset(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
+        }
+
+        /// <summary>
+        /// Helper for inspecting internal task registries that might or might not be initialized at this point.
+        /// </summary>
+        internal void InspectInternalTaskRegistry(Action<TaskRegistry> visitor)
+        {
+            visitor(_defaultTaskRegistry);
+            visitor(_overrideTaskRegistry);
         }
 
         /// <summary>

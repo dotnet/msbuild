@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -22,6 +22,7 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <ApplyNgenOptimization Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">full</ApplyNgenOptimization>
     <EnablePackageValidation>true</EnablePackageValidation>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 
     <!-- Do not generate a warning that our 'stable' package should not have a prerelease dependency. -->
     <NoWarn>$(NoWarn);NU5104</NoWarn>
@@ -30,7 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
-    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all"/>
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
@@ -38,8 +39,11 @@
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
+    <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
+         or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
+    <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
@@ -58,9 +62,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\EnvironmentUtilities.cs">
-      <Link>SharedUtilities\EnvironmentUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -149,6 +150,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
+    <Compile Include="BackEnd\Components\ProjectCache\Experimental\*.cs" />
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
     <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\SerializationContractInitializer.cs" />
@@ -175,6 +177,11 @@
     <Compile Include="FileAccess\RequestedAccess.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
+    <Compile Include="Logging\TerminalLogger\**\*.cs" />
+    <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
+    <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
+    <Compile Include="TelemetryInfra\TelemetryDataUtils.cs" />
+    <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -355,6 +362,7 @@
     <Compile Include="BackEnd\Components\Communications\NodeInfo.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderInProc.cs" />
+    <Compile Include="BackEnd\Components\Communications\RarNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\IBuildComponent.cs" />
     <Compile Include="BackEnd\Components\IBuildComponentHost.cs" />
     <Compile Include="BackEnd\Components\Scheduler\IScheduler.cs" />
@@ -498,6 +506,8 @@
     <Compile Include="Evaluation\Evaluator.cs" />
     <Compile Include="Evaluation\Expander.cs" />
     <Compile Include="Evaluation\ToolsetProvider.cs" />
+    <Compile Include="Evaluation\Expander\ArgumentParser.cs" />
+    <Compile Include="Evaluation\Expander\WellKnownFunctions.cs" />
     <Compile Include="Globbing\CompositeGlob.cs" />
     <Compile Include="Globbing\Extensions\MSBuildGlobExtensions.cs" />
     <Compile Include="Globbing\Visitor\GlobVisitor.cs" />
