@@ -502,19 +502,23 @@ namespace Microsoft.Build.Evaluation
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
             architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
 
-            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            parameters.Add(XMakeAttributes.runtime, runtime);
-            parameters.Add(XMakeAttributes.architecture, architecture);
+            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { XMakeAttributes.runtime, runtime },
+                { XMakeAttributes.architecture, architecture }
+            };
 
             HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(desiredContext);
 
-            if (taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation))
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredContext);
+#if NETFRAMEWORK
+            if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
             {
-                return true;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext).MSBuildAssemblyPath;
             }
+#endif
 
-            return false;
+            return taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation);
         }
 
         /// <summary>
@@ -537,6 +541,26 @@ namespace Microsoft.Build.Evaluation
         internal static string NormalizeDirectory(params string[] path)
         {
             return EnsureTrailingSlash(NormalizePath(path));
+        }
+
+        /// <summary>
+        /// Returns if the file exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool FileExists(string path)
+        {
+            return FileUtilities.FileExistsNoThrow(path);
+        }
+
+        /// <summary>
+        /// Returns if the directory exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool DirectoryExists(string path)
+        {
+            return FileUtilities.DirectoryExistsNoThrow(path);
         }
 
         /// <summary>

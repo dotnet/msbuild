@@ -1,16 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The original process environment.
         /// </summary>
-        private Dictionary<string, string> _buildProcessEnvironment;
+        private FrozenDictionary<string, string> _buildProcessEnvironment;
 
         /// <summary>
         /// The environment properties for the build.
@@ -282,9 +282,7 @@ namespace Microsoft.Build.Execution
             _enableRarNode = other._enableRarNode;
             _buildProcessEnvironment = resetEnvironment
                 ? CommunicationsUtilities.GetEnvironmentVariables()
-                : other._buildProcessEnvironment != null
-                    ? new Dictionary<string, string>(other._buildProcessEnvironment)
-                    : null;
+                : other._buildProcessEnvironment;
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
             _globalProperties = other._globalProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._globalProperties) : null;
@@ -356,8 +354,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the environment variables which were set when this build was created.
         /// </summary>
-        public IDictionary<string, string> BuildProcessEnvironment => new ReadOnlyDictionary<string, string>(
-            _buildProcessEnvironment ?? new Dictionary<string, string>(0));
+        public IDictionary<string, string> BuildProcessEnvironment => BuildProcessEnvironmentInternal;
 
         /// <summary>
         /// The name of the culture to use during the build.
@@ -720,6 +717,8 @@ namespace Microsoft.Build.Execution
             set => _buildId = value;
         }
 
+        internal FrozenDictionary<string, string> BuildProcessEnvironmentInternal => _buildProcessEnvironment ?? FrozenDictionary<string, string>.Empty;
+
         /// <summary>
         /// Gets or sets the environment properties.
         /// </summary>
@@ -887,6 +886,9 @@ namespace Microsoft.Build.Execution
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
         /// in addition to any potential project caches described in each project.
         /// </summary>
+        /// <remarks>
+        /// This property had the type "Experimental.ProjectCache.ProjectCacheDescriptor" until 17.14 (inclusive).
+        /// </remarks>
         public ProjectCacheDescriptor ProjectCacheDescriptor { get; set; }
 
         /// <summary>

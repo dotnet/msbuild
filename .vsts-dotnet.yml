@@ -16,11 +16,17 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
+- name: requireDefaultChannelsEnabled
+  displayName: Require Default Channels
+  type: boolean
+  default: true
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
+  - name: requireDefaultChannels
+    value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
@@ -33,10 +39,17 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
+  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
+    - name: requireDefaultChannels
+      value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
+  # ensures we don't build and push experimental versions to official feeds as release versions
+  - name: IsExperimental
+    value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
+  - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
     value: warn
@@ -44,7 +57,6 @@ variables:
     value: none
   - name: NugetSecurityAnalysisWarningLevel
     value: none
-
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -179,6 +191,7 @@ extends:
                     /p:DotNetPublishUsingPipelines=true
                     /p:VisualStudioIbcDrop=$(OptProfDrop)
                     /p:GenerateSbom=true
+                    /p:SuppressFinalPackageVersion=$(IsExperimental)
           displayName: Build
           condition: succeeded()
 
@@ -328,3 +341,4 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
+        requireDefaultChannels: ${{ variables.requireDefaultChannels }}

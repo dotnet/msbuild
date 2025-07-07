@@ -287,25 +287,11 @@ namespace Microsoft.Build.Evaluation
 
                 if (itemsAndMetadataFound.Metadata?.Values.Count > 0)
                 {
-                    // If there is bare metadata of any kind, and the Include involved an item list, we should
-                    // run items individually, as even non-built-in metadata might differ between items
-
-                    if (_referencedItemLists.Count >= 0)
-                    {
-                        needToExpandMetadataForEachItem = true;
-                    }
-                    else
-                    {
-                        // If there is bare built-in metadata, we must always run items individually, as that almost
-                        // always differs between items.
-
-                        // UNDONE: When batching is implemented for real, we need to make sure that
-                        // item definition metadata is included in all metadata operations during evaluation
-                        if (itemsAndMetadataFound.Metadata.Values.Count > 0)
-                        {
-                            needToExpandMetadataForEachItem = true;
-                        }
-                    }
+                    // If there is any metadata present, we need to expand items individually.
+                    // This ensures correct results for:
+                    // - Built-in metadata expressions (like %(FileName)) which vary between items
+                    // - Custom metadata when item list references are involved
+                    needToExpandMetadataForEachItem = true;
                 }
 
                 return needToExpandMetadataForEachItem;

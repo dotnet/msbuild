@@ -7,9 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-#if NETFRAMEWORK
 using System.Runtime.InteropServices;
-#endif
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
 using System.Security.Principal;
 #endif
@@ -23,6 +21,9 @@ using System.Text;
 
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Debugging;
+using System.Collections;
+using System.Collections.Frozen;
+using Microsoft.NET.StringTools;
 #endif
 #if !FEATURE_APM
 using System.Threading.Tasks;
@@ -41,110 +42,137 @@ namespace Microsoft.Build.Internal
         None = 0,
 
         /// <summary>
-        /// Process is a TaskHost
+        /// Process is a TaskHost.
         /// </summary>
         TaskHost = 1,
 
         /// <summary>
-        /// Using the 2.0 CLR
+        /// Using the 2.0 CLR.
         /// </summary>
         CLR2 = 2,
 
         /// <summary>
-        /// 64-bit Intel process
+        /// 64-bit Intel process.
         /// </summary>
         X64 = 4,
 
         /// <summary>
-        /// Node reuse enabled
+        /// Node reuse enabled.
         /// </summary>
         NodeReuse = 8,
 
         /// <summary>
-        /// Building with BelowNormal priority
+        /// Building with BelowNormal priority.
         /// </summary>
         LowPriority = 16,
 
         /// <summary>
-        /// Building with administrator privileges
+        /// Building with administrator privileges.
         /// </summary>
         Administrator = 32,
 
         /// <summary>
-        /// Using the .NET Core/.NET 5.0+ runtime
+        /// Using the .NET Core/.NET 5.0+ runtime.
         /// </summary>
         NET = 64,
 
         /// <summary>
-        /// ARM64 process
+        /// ARM64 process.
         /// </summary>
         Arm64 = 128,
     }
 
     internal class Handshake
     {
-        protected readonly int options;
-        protected readonly int salt;
-        protected readonly int fileVersionMajor;
-        protected readonly int fileVersionMinor;
-        protected readonly int fileVersionBuild;
-        protected readonly int fileVersionPrivate;
-        private readonly int sessionId;
+        // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
+        public const int NetTaskHostHandshakeVersion = 99;
+
+        public const HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
+
+        protected readonly HandshakeComponents _handshakeComponents;
 
         internal Handshake(HandshakeOptions nodeType)
             : this(nodeType, includeSessionId: true)
         {
         }
 
+        // Helper method to validate handshake option presense.
+        internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
+
         protected Handshake(HandshakeOptions nodeType, bool includeSessionId)
         {
+            // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
-
-            // We currently use 7 bits of this 32-bit integer. Very old builds will instantly reject any handshake that does not start with F5 or 06; slightly old builds always lead with 00.
-            // This indicates in the first byte that we are a modern build.
-            options = (int)nodeType | (handshakeVersion << 24);
+            var options = (int)nodeType | (handshakeVersion << 24);
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
-            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
-            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
-            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-            CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
-            salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
-            Version fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-            fileVersionMajor = fileVersion.Major;
-            fileVersionMinor = fileVersion.Minor;
-            fileVersionBuild = fileVersion.Build;
-            fileVersionPrivate = fileVersion.Revision;
+            // Calculate salt from environment and tools directory
+            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
+            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
+            string toolsDirectory = GetToolsDirectory(isNetTaskHost);
+            int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
-            // This reaches out to NtQuerySystemInformation. Due to latency, allow skipping for derived handshake if unused.
+            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
+            CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
+
+            // Get session ID if needed (expensive call)
+            int sessionId = 0;
             if (includeSessionId)
             {
-                using Process currentProcess = Process.GetCurrentProcess();
+                using var currentProcess = Process.GetCurrentProcess();
                 sessionId = currentProcess.SessionId;
             }
+
+            _handshakeComponents = isNetTaskHost
+                ? CreateNetTaskHostComponents(options, salt, sessionId)
+                : CreateStandardComponents(options, salt, sessionId);
         }
 
-        // This is used as a key, so it does not need to be human readable.
-        public override string ToString()
+        private static string GetToolsDirectory(bool isNetTaskHost) =>
+#if NETFRAMEWORK
+            isNetTaskHost
+
+                // For .NET TaskHost assembly directory sets the expectation for the child dotnet process to connect to.
+                // It's possible that MSBuild will attempt to connect to an incompatible version of MSBuild.
+                ? BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory
+                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+#else
+            BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+#endif
+
+        private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
+            options,
+            salt,
+            NetTaskHostHandshakeVersion,
+            NetTaskHostHandshakeVersion,
+            NetTaskHostHandshakeVersion,
+            NetTaskHostHandshakeVersion,
+            sessionId);
+
+        private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
         {
-            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
+            var fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+
+            return new(
+                options,
+                salt,
+                fileVersion.Major,
+                fileVersion.Minor,
+                fileVersion.Build,
+                fileVersion.Revision,
+                sessionId);
         }
 
-        public virtual int[] RetrieveHandshakeComponents()
-        {
-            return
-            [
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
-            ];
-        }
+        public virtual HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.SessionId));
 
-        public virtual string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
+        public virtual string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate} {_handshakeComponents.SessionId}".ToString(CultureInfo.InvariantCulture);
 
         public virtual byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
     }
@@ -163,24 +191,16 @@ namespace Microsoft.Build.Internal
         {
         }
 
-        public override int[] RetrieveHandshakeComponents()
-        {
-            return
-            [
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
-                CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
-            ];
-        }
+        public override HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate));
 
-        public override string GetKey()
-        {
-            return $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate}"
-                .ToString(CultureInfo.InvariantCulture);
-        }
+        public override string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate}"
+            .ToString(CultureInfo.InvariantCulture);
 
         /// <summary>
         /// Computes Handshake stable hash string representing whole state of handshake.
@@ -246,6 +266,14 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private static long s_lastLoggedTicks = DateTime.UtcNow.Ticks;
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// A set of environment variables cached from the last time we called GetEnvironmentVariables.
+        /// Used to avoid allocations if the environment has not changed.
+        /// </summary>
+        private static EnvironmentState s_environmentState;
+#endif
+
         /// <summary>
         /// Delegate to debug the communication utilities.
         /// </summary>
@@ -259,19 +287,21 @@ namespace Microsoft.Build.Internal
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
         }
 
-#if NETFRAMEWORK
         /// <summary>
         /// Get environment block.
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         internal static extern unsafe char* GetEnvironmentStrings();
 
         /// <summary>
         /// Free environment block.
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
+#if NETFRAMEWORK
         /// <summary>
         /// Set environment variable P/Invoke.
         /// </summary>
@@ -293,6 +323,16 @@ namespace Microsoft.Build.Internal
                 throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
             }
         }
+#endif
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// A container to atomically swap a cached set of environment variables and the block string used to create it.
+        /// The environment block property will only be set on Windows, since on Unix we need to directly call
+        /// Environment.GetEnvironmentVariables().
+        /// </summary>
+        private sealed record class EnvironmentState(FrozenDictionary<string, string> EnvironmentVariables, ReadOnlyMemory<char> EnvironmentBlock = default);
+#endif
 
         /// <summary>
         /// Returns key value pairs of environment variables in a new dictionary
@@ -301,16 +341,18 @@ namespace Microsoft.Build.Internal
         /// <remarks>
         /// Copied from the BCL implementation to eliminate some expensive security asserts on .NET Framework.
         /// </remarks>
+#if CLR2COMPATIBILITY
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
-#if !CLR2COMPATIBILITY
+#else
+        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+        private static FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
+        {
             // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
             // Need to ensure that constructor is called before this method returns in order to capture its env var write.
             // Otherwise the env var is not captured and thus gets deleted when RequiestBuilder resets the environment based on the cached results of this method.
             ErrorUtilities.VerifyThrowInternalNull(DebugUtils.ProcessInfoString, nameof(DebugUtils.DebugPath));
 #endif
-
-            Dictionary<string, string> table = new Dictionary<string, string>(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
             unsafe
             {
@@ -331,6 +373,19 @@ namespace Microsoft.Build.Internal
                         pEnvironmentBlockEnd++;
                     }
                     long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
+
+#if !CLR2COMPATIBILITY
+                    // Avoid allocating any objects if the environment still matches the last state.
+                    // We speed this up by comparing the full block instead of individual key-value pairs.
+                    ReadOnlySpan<char> stringBlock = new(pEnvironmentBlock, (int)stringBlockLength);
+                    EnvironmentState lastState = s_environmentState;
+                    if (lastState?.EnvironmentBlock.Span.SequenceEqual(stringBlock) == true)
+                    {
+                        return lastState.EnvironmentVariables;
+                    }
+#endif
+
+                    Dictionary<string, string> table = new(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
                     // Copy strings out, parsing into pairs and inserting into the table.
                     // The first few environment variable entries start with an '='!
@@ -373,7 +428,12 @@ namespace Microsoft.Build.Internal
                             continue;
                         }
 
+#if !CLR2COMPATIBILITY
+                        string key = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startKey, i - startKey));
+#else
                         string key = new string(pEnvironmentBlock, startKey, i - startKey);
+#endif
+
                         i++;
 
                         // skip over '='
@@ -385,11 +445,25 @@ namespace Microsoft.Build.Internal
                             i++;
                         }
 
+#if !CLR2COMPATIBILITY
+                        string value = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startValue, i - startValue));
+#else
                         string value = new string(pEnvironmentBlock, startValue, i - startValue);
+#endif
 
                         // skip over 0 handled by for loop's i++
                         table[key] = value;
                     }
+
+#if !CLR2COMPATIBILITY
+                    // Update with the current state.
+                    EnvironmentState currentState =
+                        new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToArray());
+                    s_environmentState = currentState;
+                    return currentState.EnvironmentVariables;
+#else
+                    return table;
+#endif
                 }
                 finally
                 {
@@ -399,34 +473,78 @@ namespace Microsoft.Build.Internal
                     }
                 }
             }
-
-            return table;
         }
 
-#else // NETFRAMEWORK
-
+#if NET
         /// <summary>
         /// Sets an environment variable using <see cref="Environment.SetEnvironmentVariable(string,string)" />.
         /// </summary>
         internal static void SetEnvironmentVariable(string name, string value)
             => Environment.SetEnvironmentVariable(name, value);
+#endif
 
+#if !CLR2COMPATIBILITY
         /// <summary>
-        /// Returns key value pairs of environment variables in a new dictionary
+        /// Returns key value pairs of environment variables in a read-only dictionary
         /// with a case-insensitive key comparer.
+        ///
+        /// If the environment variables have not changed since the last time
+        /// this method was called, the same dictionary instance will be returned.
         /// </summary>
-        internal static Dictionary<string, string> GetEnvironmentVariables()
+        internal static FrozenDictionary<string, string> GetEnvironmentVariables()
         {
-            var vars = Environment.GetEnvironmentVariables();
-
-            Dictionary<string, string> table = new Dictionary<string, string>(vars.Count, StringComparer.OrdinalIgnoreCase);
-            foreach (var key in vars.Keys)
+            // Always call the native method on Windows, as we'll be able to avoid the internal
+            // string and Hashtable allocations caused by Environment.GetEnvironmentVariables().
+            if (NativeMethodsShared.IsWindows)
             {
-                table[(string)key] = (string)vars[key];
+                return GetEnvironmentVariablesWindows();
             }
-            return table;
+
+            IDictionary vars = Environment.GetEnvironmentVariables();
+
+            // Directly use the enumerator since Current will box DictionaryEntry.
+            IDictionaryEnumerator enumerator = vars.GetEnumerator();
+
+            // If every key-value pair matches the last state, return a cached dictionary.
+            FrozenDictionary<string, string> lastEnvironmentVariables = s_environmentState?.EnvironmentVariables;
+            if (vars.Count == lastEnvironmentVariables?.Count)
+            {
+                bool sameState = true;
+
+                while (enumerator.MoveNext() && sameState)
+                {
+                    DictionaryEntry entry = enumerator.Entry;
+                    if (!lastEnvironmentVariables.TryGetValue((string)entry.Key, out string value)
+                        || !string.Equals((string)entry.Value, value, StringComparison.Ordinal))
+                    {
+                        sameState = false;
+                    }
+                }
+
+                if (sameState)
+                {
+                    return lastEnvironmentVariables;
+                }
+            }
+
+            // Otherwise, allocate and update with the current state.
+            Dictionary<string, string> table = new(vars.Count, StringComparer.OrdinalIgnoreCase);
+
+            enumerator.Reset();
+            while (enumerator.MoveNext())
+            {
+                DictionaryEntry entry = enumerator.Entry;
+                string key = Strings.WeakIntern((string)entry.Key);
+                string value = Strings.WeakIntern((string)entry.Value);
+                table[key] = value;
+            }
+
+            EnvironmentState newState = new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase));
+            s_environmentState = newState;
+
+            return newState.EnvironmentVariables;
         }
-#endif // NETFRAMEWORK
+#endif
 
         /// <summary>
         /// Updates the environment to match the provided dictionary.
@@ -436,7 +554,7 @@ namespace Microsoft.Build.Internal
             if (newEnvironment != null)
             {
                 // First, delete all no longer set variables
-                Dictionary<string, string> currentEnvironment = GetEnvironmentVariables();
+                IDictionary<string, string> currentEnvironment = GetEnvironmentVariables();
                 foreach (KeyValuePair<string, string> entry in currentEnvironment)
                 {
                     if (!newEnvironment.ContainsKey(entry.Key))
@@ -514,6 +632,7 @@ namespace Microsoft.Build.Internal
                 {
                     CommunicationsUtilities.Trace("Expected end of handshake signal but received {0}. Probably the host is a different MSBuild build.", valueRead);
                 }
+
                 throw new InvalidOperationException();
             }
         }
@@ -618,7 +737,12 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(bool taskHost, string architectureFlagToSet = null, bool nodeReuse = false, bool lowPriority = false, IDictionary<string, string> taskHostParameters = null)
+        internal static HandshakeOptions GetHandshakeOptions(
+            bool taskHost,
+            string architectureFlagToSet = null,
+            bool nodeReuse = false,
+            bool lowPriority = false,
+            IDictionary<string, string> taskHostParameters = null)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
@@ -870,7 +994,7 @@ namespace Microsoft.Build.Internal
         /// they will return the same hash code.
         /// This is as implemented in CLR String.GetHashCode() [ndp\clr\src\BCL\system\String.cs]
         /// but stripped out architecture specific defines
-        /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking
+        /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking.
         /// </summary>
         internal static int GetHashCode(string fileVersion)
         {
@@ -901,9 +1025,63 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        internal static int AvoidEndOfHandshakeSignal(int x)
+        internal static int AvoidEndOfHandshakeSignal(int x) => x == EndOfHandshakeSignal ? ~x : x;
+    }
+
+    /// <summary>
+    /// Represents the components of a handshake in a structured format with named fields.
+    /// </summary>
+    internal readonly struct HandshakeComponents
+    {
+        private readonly int options;
+        private readonly int salt;
+        private readonly int fileVersionMajor;
+        private readonly int fileVersionMinor;
+        private readonly int fileVersionBuild;
+        private readonly int fileVersionPrivate;
+        private readonly int sessionId;
+
+        public HandshakeComponents(int options, int salt, int fileVersionMajor, int fileVersionMinor, int fileVersionBuild, int fileVersionPrivate, int sessionId)
         {
-            return x == EndOfHandshakeSignal ? ~x : x;
+            this.options = options;
+            this.salt = salt;
+            this.fileVersionMajor = fileVersionMajor;
+            this.fileVersionMinor = fileVersionMinor;
+            this.fileVersionBuild = fileVersionBuild;
+            this.fileVersionPrivate = fileVersionPrivate;
+            this.sessionId = sessionId;
         }
+
+        public HandshakeComponents(int options, int salt, int fileVersionMajor, int fileVersionMinor, int fileVersionBuild, int fileVersionPrivate)
+            : this(options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, 0)
+        {
+        }
+
+        public int Options => options;
+
+        public int Salt => salt;
+
+        public int FileVersionMajor => fileVersionMajor;
+
+        public int FileVersionMinor => fileVersionMinor;
+
+        public int FileVersionBuild => fileVersionBuild;
+
+        public int FileVersionPrivate => fileVersionPrivate;
+
+        public int SessionId => sessionId;
+
+        public IEnumerable<KeyValuePair<string, int>> EnumerateComponents()
+        {
+            yield return new KeyValuePair<string, int>(nameof(Options), Options);
+            yield return new KeyValuePair<string, int>(nameof(Salt), Salt);
+            yield return new KeyValuePair<string, int>(nameof(FileVersionMajor), FileVersionMajor);
+            yield return new KeyValuePair<string, int>(nameof(FileVersionMinor), FileVersionMinor);
+            yield return new KeyValuePair<string, int>(nameof(FileVersionBuild), FileVersionBuild);
+            yield return new KeyValuePair<string, int>(nameof(FileVersionPrivate), FileVersionPrivate);
+            yield return new KeyValuePair<string, int>(nameof(SessionId), SessionId);
+        }
+
+        public override string ToString() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
     }
 }
