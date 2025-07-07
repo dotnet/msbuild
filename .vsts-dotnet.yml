@@ -92,6 +92,10 @@ extends:
       displayName: Build
 
       jobs:
+      - template: /eng/common/templates-official/job/job.yml@self
+        parameters:
+          enableMicrobuild: true
+
       # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
       # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
       # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
@@ -158,12 +162,6 @@ extends:
             restoreSolution: 'eng\common\internal\Tools.csproj'
             nugetConfigPath: 'eng\common\internal\NuGet.config'
             restoreDirectory: '$(Build.SourcesDirectory)\.packages'
-
-        - task: ms-vseng.MicroBuildTasks.30666190-6959-11e5-9f96-f56098202fef.MicroBuildSigningPlugin@1
-          inputs:
-            signType: $(SignType)
-            zipSources: false
-          condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
 
         - task: MicroBuildOptProfPlugin@6
           inputs:
@@ -302,10 +300,6 @@ extends:
           inputs:
             tags: 'ready-for-training'
           condition: succeeded()
-
-        - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
-          displayName: Execute cleanup tasks
-          condition: succeededOrFailed()
 
         - template: /eng/common/templates-official/steps/component-governance.yml@self
           parameters:
