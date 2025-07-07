@@ -38,7 +38,7 @@ namespace Microsoft.NET.StringTools
             /// <summary>
             /// Returns true if the string referenced by the handle is still alive.
             /// </summary>
-            public bool IsUsed => weakHandle.Target != null;
+            public bool IsUsed => weakHandle.IsAllocated && weakHandle.Target != null;
 
             /// <summary>
             /// Returns the string referenced by this handle if it is equal to the given internable.
