@@ -1568,7 +1568,10 @@ namespace Microsoft.Build.Execution
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
                                         // In case TaskHostFactory is explicitly requested, we will now have a parameter for that.
-                                        if (initialized && TaskFactoryParameters != null && !TaskFactoryParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out _))
+                                        bool containsArchOrRuntimeParam = TaskFactoryParameters?.TryGetValue(XMakeAttributes.runtime, out _) == true
+                                                                          || TaskFactoryParameters?.TryGetValue(XMakeAttributes.architecture, out _) == true;
+
+                                        if (initialized && containsArchOrRuntimeParam)
                                         {
                                             targetLoggingContext.LogWarning(
                                                 null,

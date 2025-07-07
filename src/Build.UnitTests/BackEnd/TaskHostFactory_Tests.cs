@@ -132,9 +132,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
                     e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
                 }
-
-
-
                 // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
                 Process taskHostNode2 = Process.GetProcessById(pidSidecar);
                 taskHostNode2.WaitForExit(3000).ShouldBeFalse($"The node should be alife since it is the sidecar node.");

@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Abstract out the creation of the new AssemblyTaskFactory with default task, and
         /// with some basic validation.
         /// </summary>
-        private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost, bool isTaskHostFactory)
+        private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost = false, bool isTaskHostFactory = false)
         {
             _taskFactory = new AssemblyTaskFactory();
 #if FEATURE_ASSEMBLY_LOCATION
