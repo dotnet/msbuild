@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             factoryIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.currentRuntime);
             factoryIdentityParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
-            SetupTaskFactory(factoryIdentityParameters, false /* don't want task host */, false);
+            SetupTaskFactory(factoryIdentityParameters, false /* don't want task host */);
 
             IDictionary<string, string> taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             taskIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.GetCurrentMSBuildRuntime());
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             factoryIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
             factoryIdentityParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
-            SetupTaskFactory(factoryIdentityParameters, false /* don't want task host */, false);
+            SetupTaskFactory(factoryIdentityParameters, false /* don't want task host */);
 
             IDictionary<string, string> taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             taskIdentityParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr4);

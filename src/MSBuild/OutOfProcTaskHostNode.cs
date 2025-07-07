@@ -163,7 +163,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// setting this to true means we're runnign a long-lived sidecar node.
         /// </summary>
-        private bool _reuseNode;
+        private bool _nodeReuse;
 
 #if !CLR2COMPATIBILITY
         /// <summary>
@@ -655,7 +655,7 @@ namespace Microsoft.Build.CommandLine
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
-            _reuseNode = nodeReuse;
+            _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse);
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
@@ -814,7 +814,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
             // Sidecar TaskHost will persist after the build is done.
-            if (_reuseNode)
+            if (_nodeReuse)
             {
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
             }
