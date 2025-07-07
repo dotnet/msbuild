@@ -13,6 +13,7 @@ namespace Microsoft.NET.StringTools
     /// </summary>
     internal sealed partial class WeakStringCache : IDisposable
     {
+        private const int WeakHandleMinimumLength = 500;
         private readonly ConcurrentDictionary<int, string> _stringsByHashCode;
         private readonly ConcurrentDictionary<int, StringWeakHandle> _weakHandlesByHashCode;
         private int _count;
