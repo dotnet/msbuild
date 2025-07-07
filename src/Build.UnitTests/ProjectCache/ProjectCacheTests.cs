@@ -45,22 +45,37 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         private const string AssemblyMockCache = nameof(AssemblyMockCache);
 
-        private static readonly Lazy<string> SamplePluginAssemblyPath =
+        private const string Configuration =
+#if DEBUG
+            "Debug";
+#else
+            "Release";
+#endif
+
+        private static readonly string s_currentFramework = GetCurrentFramework();
+
+        private static string GetCurrentFramework() =>
+#if RUNTIME_TYPE_NETCORE
+            $"net{RunnerUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
+#else
+            "net472";
+#endif
+
+        private static readonly string s_samplePluginPath = Path.Combine(
+            BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
+            "..",
+            "..",
+            "..",
+            "Samples",
+            "ProjectCachePlugin");
+
+        private static readonly Lazy<string> s_samplePluginAssemblyPath =
             new Lazy<string>(
-                () =>
-                {
-                    return Directory.EnumerateFiles(
-                        Path.GetFullPath(
-                            Path.Combine(
-                                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
-                                "..",
-                                "..",
-                                "..",
-                                "Samples",
-                                "ProjectCachePlugin")),
-                        "ProjectCachePlugin.dll",
-                        SearchOption.AllDirectories).First();
-                });
+                () => Path.Combine(
+                        Path.GetFullPath(s_samplePluginPath),
+                        Configuration,
+                        s_currentFramework,
+                        "ProjectCachePlugin.dll"));
 
         public class GraphCacheResponse
         {
@@ -72,7 +87,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 @$"
                     <ItemGroup>
                         <ProjectReferenceTargets Include=`Build` Targets=`Build` />
-                        <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
+                        <{ItemTypeNames.ProjectCachePlugin} Include=`{s_samplePluginAssemblyPath.Value}` />
                     </ItemGroup>
 
                     <Target Name=`Build` Returns=`@(ReturnValue)`>
@@ -917,7 +932,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var buildParameters = new BuildParameters
             {
-                ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(SamplePluginAssemblyPath.Value)
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(s_samplePluginAssemblyPath.Value)
             };
 
             MockLogger logger;
@@ -1027,7 +1042,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 },
                 extraContentForAllNodes: @$"
 <ItemGroup>
-   <{ItemTypeNames.ProjectCachePlugin} Include='{SamplePluginAssemblyPath.Value}' />
+   <{ItemTypeNames.ProjectCachePlugin} Include='{s_samplePluginAssemblyPath.Value}' />
 </ItemGroup>
 ");
             var mockCache = new InstanceMockCache();
@@ -1063,7 +1078,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         2,
                         @$"
 <ItemGroup>
-   <{ItemTypeNames.ProjectCachePlugin} Include='{SamplePluginAssemblyPath.Value}' />
+   <{ItemTypeNames.ProjectCachePlugin} Include='{s_samplePluginAssemblyPath.Value}' />
 </ItemGroup>
 "
                     }
@@ -1125,7 +1140,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     new BuildParameters
                     {
                         UseSynchronousLogging = true,
-                        ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(SamplePluginAssemblyPath.Value)
+                        ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(s_samplePluginAssemblyPath.Value)
                     });
 
                 logger = buildSession.Logger;
@@ -1235,7 +1250,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 },
                 extraContentForAllNodes: @$"
 <ItemGroup>
-    <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
+    <{ItemTypeNames.ProjectCachePlugin} Include=`{s_samplePluginAssemblyPath.Value}` />
     <{ItemTypeNames.ProjectReferenceTargets} Include=`Build` Targets=`Build` />
 </ItemGroup>
 <Target Name=`Build`>
@@ -1330,7 +1345,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 @$"
                     <Project>
                         <ItemGroup>
-                            <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
+                            <{ItemTypeNames.ProjectCachePlugin} Include=`{s_samplePluginAssemblyPath.Value}` />
                         </ItemGroup>
                         <Target Name=`Build`>
                             <Message Text=`Hello EngineShouldHandleExceptionsFromCachePlugin` Importance=`High` />
