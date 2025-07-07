@@ -1582,7 +1582,7 @@ namespace Microsoft.Build.BackEnd
                 if (inProcNodesToCreate > 0)
                 {
                     TraceScheduler("Requesting creation of new node satisfying affinity {0}", NodeAffinity.InProc);
-                    responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, 1));
+                    responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, inProcNodesToCreate));
 
                     // We only want to submit one node creation request at a time -- as part of node creation we recursively re-request the scheduler
                     // to do more scheduling, so the other request will be dealt with soon enough.
