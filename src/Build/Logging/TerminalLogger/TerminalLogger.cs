@@ -988,17 +988,22 @@ public sealed partial class TerminalLogger : INodeLogger
         if (buildEventContext is not null
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
+            // auth provider messages are 'global' in nature and should be a) immediate reported, and b) not re-reported in the summary.
             if (IsAuthProviderMessage(e.Message))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
                 return;
             }
-            else if (IsImmediateWarning(e.Code))
+
+            // If the warning is not a 'global' auth provider message, but is immediate, we render it immediately
+            // but we don't early return so that the project also tracks it.
+            if (IsImmediateWarning(e.Code))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
-                return;
             }
 
+            // This is the general case - _most_ warnings are not immediate, so we add them to the project summary
+            // and display them in the per-project and final summary.
             if (Verbosity >= LoggerVerbosity.Quiet)
             {
                 project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
