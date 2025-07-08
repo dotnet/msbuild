@@ -51,7 +51,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 {
                     env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
                 }
-                Traits.UpdateFromEnvironment();
                 ProjectInstance projectInstance = new(project.Path);
 
                 projectInstance.Build().ShouldBeTrue();
@@ -107,7 +106,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
 
                 env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
-                Traits.UpdateFromEnvironment();
                 ProjectInstance projectInstance = new(project.Path);
 
                 projectInstance.Build().ShouldBeTrue();

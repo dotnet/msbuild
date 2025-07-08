@@ -37,6 +37,7 @@ namespace Microsoft.Build.Framework
 
         internal readonly string? MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
+        // This will affect all tasks except for MSBuild and CallTarget. Those two have to run in-proc, as they depend on IBuildEngine callbacks.
         public readonly bool ForceAllTasksOutOfProcToTaskHost = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
 
         /// <summary>

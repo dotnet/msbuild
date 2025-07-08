@@ -159,7 +159,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _updateEnvironmentAndLog;
 
-
         /// <summary>
         /// setting this to true means we're runnign a long-lived sidecar node.
         /// </summary>
