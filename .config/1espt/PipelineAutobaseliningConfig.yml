@@ -14,6 +14,8 @@ pipelines:
           lastModifiedDate: 2024-03-14
         policheck:
           lastModifiedDate: 2024-10-09
+        accessibilityinsights:
+          lastModifiedDate: 2025-06-02
       binary:
         credscan:
           lastModifiedDate: 2024-03-14
@@ -32,6 +34,8 @@ pipelines:
           lastModifiedDate: 2024-11-06
         armory:
           lastModifiedDate: 2024-11-06
+        accessibilityinsights:
+          lastModifiedDate: 2025-06-04
       binary:
         credscan:
           lastModifiedDate: 2024-11-06
@@ -39,3 +43,21 @@ pipelines:
           lastModifiedDate: 2024-11-21
         spotbugs:
           lastModifiedDate: 2024-11-06
+  24263:
+    retail:
+      source:
+        credscan:
+          lastModifiedDate: 2024-12-19
+        eslint:
+          lastModifiedDate: 2024-12-19
+        psscriptanalyzer:
+          lastModifiedDate: 2024-12-19
+        armory:
+          lastModifiedDate: 2024-12-19
+      binary:
+        credscan:
+          lastModifiedDate: 2024-12-19
+        binskim:
+          lastModifiedDate: 2024-12-19
+        spotbugs:
+          lastModifiedDate: 2024-12-19

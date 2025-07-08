@@ -5,16 +5,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
@@ -26,7 +29,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    internal static class Utilities
+    internal static partial class Utilities
     {
         /// <summary>
         /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current
@@ -81,7 +84,7 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrow(s != null, "Need value to set.");
 
-            if (s.IndexOf('<') != -1)
+            if (s.Contains('<'))
             {
                 // If the value looks like it probably contains XML markup ...
                 try
@@ -223,7 +226,7 @@ namespace Microsoft.Build.Internal
             }
 
             // ...or it looks like the whole thing is a big CDATA tag ...
-            bool startsWithCData = (innerXml.IndexOf("<![CDATA[", StringComparison.Ordinal) == 0);
+            bool startsWithCData = innerXml.AsSpan().TrimStart().StartsWith("<![CDATA[".AsSpan(), StringComparison.Ordinal);
 
             if (startsWithCData)
             {
@@ -295,7 +298,12 @@ namespace Microsoft.Build.Internal
         }
 
         // used to find the xmlns attribute
-        private static readonly Regex s_xmlnsPattern = new Regex("xmlns=\"[^\"]*\"\\s*");
+#if NET
+        [GeneratedRegex("xmlns=\"[^\"]*\"\\s*")]
+        private static partial Regex XmlnsPattern { get; }
+#else
+        private static Regex XmlnsPattern { get; } = new Regex("xmlns=\"[^\"]*\"\\s*");
+#endif
 
         /// <summary>
         /// Removes the xmlns attribute from an XML string.
@@ -304,7 +312,7 @@ namespace Microsoft.Build.Internal
         /// <returns>The modified XML string.</returns>
         internal static string RemoveXmlNamespace(string xml)
         {
-            return s_xmlnsPattern.Replace(xml, String.Empty);
+            return XmlnsPattern.Replace(xml, String.Empty);
         }
 
         /// <summary>
@@ -312,19 +320,19 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static string CreateToolsVersionListString(IEnumerable<Toolset> toolsets)
         {
-            string toolsVersionList = String.Empty;
+            StringBuilder sb = StringBuilderCache.Acquire();
+
             foreach (Toolset toolset in toolsets)
             {
-                toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
+                if (sb.Length != 0)
+                {
+                    sb.Append(", ");
+                }
+
+                sb.Append('"').Append(toolset.ToolsVersion).Append('"');
             }
 
-            // Remove trailing comma and space
-            if (toolsVersionList.Length > 0)
-            {
-                toolsVersionList = toolsVersionList.Substring(0, toolsVersionList.Length - 2);
-            }
-
-            return toolsVersionList;
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         /// <summary>
@@ -613,19 +621,6 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
-        {
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
-            }
-        }
-
-        public static T[] ToArray<T>(this IEnumerator<T> enumerator)
-        {
-            return enumerator.ToEnumerable().ToArray();
-        }
-
         /// <summary>
         /// Iterates through the nongeneric enumeration and provides generic strong-typed enumeration of properties.
         /// </summary>
@@ -758,7 +753,38 @@ namespace Microsoft.Build.Internal
             }
             else
             {
-                return CastItemsOneByOne(items, typeName);
+                return CastItemsOneByOne(items, [typeName]);
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfTypes(IEnumerable items, string[] typeNames)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                return typeNames.Select(typeName =>
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                        .SelectMany(j => j);
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return typeNames.Select(typeName =>
+                        projectItemDictionary[typeName]
+                            .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                    .SelectMany(j => j);
+            }
+            else
+            {
+                return CastItemsOneByOne(items, typeNames);
             }
         }
 
@@ -777,9 +803,9 @@ namespace Microsoft.Build.Internal
         /// Enumerates the nongeneric items and attempts to cast them.
         /// </summary>
         /// <param name="items">Nongeneric list of items.</param>
-        /// <param name="itemTypeNameToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
+        /// <param name="itemTypeNamesToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
         /// <returns></returns>
-        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string itemTypeNameToFetch)
+        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string[] itemTypeNamesToFetch)
         {
             foreach (var item in items)
             {
@@ -809,7 +835,7 @@ namespace Microsoft.Build.Internal
                 }
 
                 // if itemTypeNameToFetch was not set - then return all items
-                if (itemValue != null && (itemTypeNameToFetch == null || MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, itemTypeNameToFetch)))
+                if (itemValue != null && (itemTypeNamesToFetch == null || itemTypeNamesToFetch.Any(tp => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))))
                 {
                     // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
                     //  where the only types that can be assigned are ProjectItem or ProjectItemInstance

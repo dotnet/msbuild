@@ -28,8 +28,8 @@
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
-        <source>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">カスタム イベントの種類 '{0}' のシリアル化中のセキュリティで保護されていない BinaryFormatter の使用。これは間もなく非推奨になります。代わりに Extended*EventArgs を使用してください。詳細情報: https://aka.ms/msbuild/eventargs</target>
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">カスタム イベントの種類 '{0}' は、すべてのカスタム イベントの種類が非推奨になったため、サポートされていません。代わりに Extended*EventArgs を使用してください。詳細情報: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
@@ -126,8 +126,8 @@
         <note>{StrBegin="MSB5003: "}</note>
       </trans-unit>
       <trans-unit id="Shared.FailedDeletingTempFile">
-        <source>MSB5018: Failed to delete the temporary file "{0}". {1}</source>
-        <target state="translated">MSB5018: 一時ファイル "{0}" を削除できませんでした。{1}</target>
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: 一時ファイル "{0}" を削除できませんでした。{1} {2}</target>
         <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
       <trans-unit id="Shared.InvalidFilespecForTransform">

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="File1.txt" CopyToOutputDirectory="Always" />
+    <None Include="File2.txt" CopyToOutputDirectory="IfDifferent" />
+  </ItemGroup>
+
+</Project>

@@ -6,6 +6,10 @@ on:
     paths:
       - 'eng/Versions.props'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   Sync-version:
     runs-on: ubuntu-latest
@@ -138,14 +142,19 @@ jobs:
             const { data: pullRequests } = await github.rest.pulls.list({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: newBranch,
+              head: `${context.repo.owner}:${newBranch}`,
               base: baseBranch,
               state: 'open',
             });
 
             if (pullRequests.length === 0) {
+               console.log(`No open pull requests found for branch ${newBranch} against ${baseBranch}.`);
               return true;
             } else {
+              // Log pull request details
+              pullRequests.forEach(pr => {
+                console.log(`Pull request #${pr.number}: ${pr.title} (created by ${pr.user.login})`);
+              });
               return false;
             }
           }

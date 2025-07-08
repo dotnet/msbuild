@@ -70,6 +70,7 @@
       <Link>CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Framework\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
@@ -219,6 +220,10 @@
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
+
+    <Compile Include="..\Framework\InterningReadTranslator.cs" />
+    <Compile Include="..\Framework\InterningWriteTranslator.cs" />
+    <Compile Include="..\Framework\InternPathIds.cs" />
 
     <Compile Include="..\Shared\FileSystem\IFileSystem.cs" />
     <Compile Include="..\Shared\FileSystem\FileSystems.cs" />

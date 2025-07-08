@@ -145,7 +145,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESGEN
         // Our calculation is not quite correct. Using a number substantially less than 32768 in order to
         // be sure we don't exceed it.
-        private static int s_maximumCommandLength = 28000;
+        private const int s_maximumCommandLength = 28000;
 #endif // FEATURE_RESGEN
 
         // Contains the list of paths from which inputs will not be taken into account during up-to-date check.
@@ -1705,7 +1705,7 @@ namespace Microsoft.Build.Tasks
 
             // Check the timestamp of each of the passed-in references to find the newest;
             // and then the additional inputs
-            ITaskItem[] inputs = this.References ?? [.. (this.AdditionalInputs ?? [])];
+            var inputs = (this.References ?? []).Concat(this.AdditionalInputs ?? []);
 
             foreach (ITaskItem input in inputs)
             {
@@ -1793,7 +1793,7 @@ namespace Microsoft.Build.Tasks
                                             string resolvedTypeName = typeName;
 
                                             // This type name might be an alias, so first resolve that if any.
-                                            int indexOfSeperator = typeName.IndexOf(",", StringComparison.Ordinal);
+                                            int indexOfSeperator = typeName.IndexOf(',');
 
                                             if (indexOfSeperator != -1)
                                             {
@@ -2015,12 +2015,6 @@ namespace Microsoft.Build.Tasks
                 return result != null;
             }
         }
-#endif
-
-        /// <summary>
-        /// Chars that should be ignored in the nicely justified block of base64
-        /// </summary>
-        private static readonly char[] s_specialChars = [' ', '\r', '\n'];
 
         /// <summary>
         /// Turns the nicely justified block of base64 found in a resx into a byte array.
@@ -2028,7 +2022,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static byte[] ByteArrayFromBase64WrappedString(string text)
         {
-            if (text.IndexOfAny(s_specialChars) != -1)
+            if (text.AsSpan().IndexOfAny(' ', '\r', '\n') != -1) // Chars that should be ignored in the nicely justified block of base64
             {
                 StringBuilder sb = new StringBuilder(text.Length);
                 for (int i = 0; i < text.Length; i++)
@@ -2051,6 +2045,7 @@ namespace Microsoft.Build.Tasks
                 return Convert.FromBase64String(text);
             }
         }
+#endif
 
         /// <summary>
         /// Make sure that OutputResources has 1 file name for each name in Sources.
@@ -2300,10 +2295,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<ITaskItem> _inFiles;
 
+#if !FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// List of satellite input files to process.
         /// </summary>
         private List<ITaskItem> _satelliteInFiles;
+#endif
 
         /// <summary>
         /// List of output files to process.
@@ -2314,11 +2311,6 @@ namespace Microsoft.Build.Tasks
         /// Whether we are extracting ResW files from an assembly, instead of creating .resources files.
         /// </summary>
         private bool _extractResWFiles;
-
-        /// <summary>
-        /// Where to write extracted ResW files.
-        /// </summary>
-        private string _resWOutputDirectory;
 
         private bool _usePreserializedResources;
 
@@ -2407,7 +2399,9 @@ namespace Microsoft.Build.Tasks
             _logger = log;
             _assemblyFiles = assemblyFilesList;
             _inFiles = inputs;
+#if !FEATURE_ASSEMBLYLOADCONTEXT
             _satelliteInFiles = satelliteInputs;
+#endif
             _outFiles = outputs;
             _useSourcePath = sourcePath;
             _stronglyTypedLanguage = language;
@@ -2418,7 +2412,6 @@ namespace Microsoft.Build.Tasks
             _stronglyTypedClassIsPublic = publicClass;
             _readers = new List<ReaderInfo>();
             _extractResWFiles = extractingResWFiles;
-            _resWOutputDirectory = resWOutputDirectory;
             _portableLibraryCacheInfo = new List<ResGenDependencies.PortableLibraryFile>();
             _usePreserializedResources = usePreserializedResources;
             _logWarningForBinaryFormatter = logWarningForBinaryFormatter;
@@ -3044,7 +3037,7 @@ namespace Microsoft.Build.Tasks
 
                     default:
                         // We should never get here, we've already checked the format
-                        Debug.Fail("Unknown format " + format.ToString());
+                        Debug.Fail($"Unknown format {format}");
                         return;
                 }
                 _logger.LogMessageFromResources(MessageImportance.Low, "GenerateResource.ReadResourceMessage", reader.resources.Count, filename);
@@ -3325,7 +3318,7 @@ namespace Microsoft.Build.Tasks
 #if FEATURE_RESXREADER_LIVEDESERIALIZATION
                     WriteResources(reader, new ResXResourceWriter(filename)); // closes writer for us
 #else
-                    _logger.LogError(format.ToString() + " not supported on .NET Core MSBuild");
+                    _logger.LogError($"{format} not supported on .NET Core MSBuild");
 #endif
                     break;
 
@@ -3339,7 +3332,7 @@ namespace Microsoft.Build.Tasks
 
                 default:
                     // We should never get here, we've already checked the format
-                    Debug.Fail("Unknown format " + format.ToString());
+                    Debug.Fail($"Unknown format {format}");
                     break;
             }
         }
@@ -3695,7 +3688,13 @@ namespace Microsoft.Build.Tasks
                                     }
                                     try
                                     {
-                                        ch = (char)UInt16.Parse(new String(hex), NumberStyles.HexNumber, CultureInfo.CurrentCulture);
+                                        ch = (char)UInt16.Parse(
+#if NET
+                                            hex,
+#else
+                                            new String(hex),
+#endif
+                                            NumberStyles.HexNumber, CultureInfo.CurrentCulture);
                                     }
                                     catch (FormatException)
                                     {
@@ -4150,7 +4149,7 @@ namespace Microsoft.Build.Tasks
                             result = a.GetType(name, false, ignoreCase);
                             if (result == null)
                             {
-                                int indexOfComma = name.IndexOf(",", StringComparison.Ordinal);
+                                int indexOfComma = name.IndexOf(',');
                                 if (indexOfComma != -1)
                                 {
                                     string shortName = name.Substring(0, indexOfComma);

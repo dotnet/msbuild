@@ -1,15 +1,20 @@
 {
   "sdk": {
-    "allowPrerelease": true
+    "allowPrerelease": true,
+    "paths": [
+      ".dotnet",
+      "$host$"
+    ],
+    "errorMessage": "The .NET SDK could not be found, please run a command-line build with ./build.cmd."
   },
   "tools": {
-    "dotnet": "9.0.100",
+    "dotnet": "10.0.100-preview.6.25315.102",
     "vs": {
-      "version": "17.10.0"
+      "version": "17.13.0"
     },
-    "xcopy-msbuild": "17.10.0-pre.4.0"
+    "xcopy-msbuild": "17.13.0"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "9.0.0-beta.24572.2"
+    "Microsoft.DotNet.Arcade.Sdk": "10.0.0-beta.25353.1"
   }
 }

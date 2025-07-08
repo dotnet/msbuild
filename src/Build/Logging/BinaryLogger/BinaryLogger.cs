@@ -4,10 +4,10 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -80,6 +80,8 @@ namespace Microsoft.Build.Logging
         //    BuildCheckTracingEvent, BuildCheckAcquisitionEvent, BuildSubmissionStartedEvent
         // version 24:
         //    - new record kind: BuildCanceledEventArgs
+        // version 25:
+        //    - add extra information to PropertyInitialValueSetEventArgs and PropertyReassignmentEventArgs and change message formatting logic.
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -90,7 +92,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 24;
+        internal const int FileFormatVersion = 25;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
@@ -320,6 +322,12 @@ namespace Microsoft.Build.Logging
 
             if (projectImportsCollector != null)
             {
+                // Write the build check editorconfig file paths to the log
+                foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
+                {
+                    projectImportsCollector.AddFile(filePath);
+                }
+                EditorConfigParser.ClearEditorConfigFilePaths();
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
@@ -334,6 +342,7 @@ namespace Microsoft.Build.Logging
                 projectImportsCollector.FileIOExceptionEvent -= EventSource_AnyEventRaised;
                 projectImportsCollector = null;
             }
+
 
             if (stream != null)
             {
@@ -502,13 +511,6 @@ namespace Microsoft.Build.Logging
             => (PathParameterExpander ?? ExpandPathParameter)(string.Empty);
 
         private static string ExpandPathParameter(string parameters)
-            => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{ProcessId}--{StringUtils.GenerateRandomString(6)}";
-
-        private static int ProcessId
-#if NET
-            => Environment.ProcessId;
-#else
-            => System.Diagnostics.Process.GetCurrentProcess().Id;
-#endif
+            => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{EnvironmentUtilities.CurrentProcessId}--{StringUtils.GenerateRandomString(6)}";
     }
 }

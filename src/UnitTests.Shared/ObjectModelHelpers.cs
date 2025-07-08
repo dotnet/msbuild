@@ -23,11 +23,9 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -1394,7 +1392,7 @@ namespace Microsoft.Build.UnitTests
             return logger;
         }
 
-        public static BuildResult BuildProjectContentUsingBuildManager([StringSyntax(StringSyntaxAttribute.Xml)] string content, MockLogger logger, BuildParameters parameters = null)
+        public static BuildResult BuildProjectContentUsingBuildManager([StringSyntax(StringSyntaxAttribute.Xml)] string content, ILogger logger, BuildParameters parameters = null)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
@@ -1409,7 +1407,7 @@ namespace Microsoft.Build.UnitTests
 
         public static BuildResult BuildProjectFileUsingBuildManager(
             string projectFile,
-            MockLogger logger = null,
+            ILogger logger = null,
             BuildParameters parameters = null,
             IList<string> targetsToBuild = null)
         {
