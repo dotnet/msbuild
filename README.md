@@ -1,5 +1,8 @@
 # Microsoft.Build (MSBuild)
 
+[![Build Status](https://dev.azure.com/dnceng-public/public/_apis/build/status/75?branchName=main&label=Public)](https://dev.azure.com/dnceng-public/public/_build?definitionId=75) [![Build Status](https://devdiv.visualstudio.com/DevDiv/_apis/build/status/9434?label=Internal&branchName=main)](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434)
+
+
 The Microsoft Build Engine is a platform for building applications. This engine, also known as MSBuild, provides an XML schema for a project file that controls how the build platform processes and builds software. Visual Studio uses MSBuild, but MSBuild can run without Visual Studio. By invoking msbuild.exe on your project or solution file, you can orchestrate and build products in environments where Visual Studio isn't installed.
 
 For more information on MSBuild, see the [MSBuild documentation](https://learn.microsoft.com/visualstudio/msbuild/msbuild) on learn.microsoft.com.

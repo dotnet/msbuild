@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 else
                 {
-                    Assert.True(false);
+                    Assert.Fail();
                 }
 
                 // Make sure the pointer passed back for the method is not null
