@@ -83,7 +83,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
-        public void TransiendAndSidecarNodeCanCoexist()
+        public void TransientAndSidecarNodeCanCoexist()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
