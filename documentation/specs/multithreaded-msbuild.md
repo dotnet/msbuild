@@ -8,9 +8,10 @@ Currently, MSBuild supports parallel builds (a critical feature for a build syst
 
 There are several components of MSBuild that are relevant to parallel builds. In the following sections we'll describe how they interact in the current implementation, and how we will change them to support multithreading.
 
-* The **scheduler** decides what projects to build (and where, if there are options).
-* **Projects** maintain mutable state, especially Properties and Items.
+* The **scheduler** decides what projects to build (and where, if there are options). It deduplicates requests for the same project, ensuring that
+* **Projects** maintain mutable state, especially Properties and Items. Distinct projects can be built concurrently, and the scheduler ensures that requests for the same project are deduplicated, so that only one instance of a project is built.
 * Projects are assigned to **nodes** (worker processes) that execute the build. Once a project is assigned to a node, it is not moved to another node.
+* **Targets** are the unit of execution within a project. A target is an ordered list of tasks. Within a project, targets run sequentially, but different targets in different projects can run concurrently.
 * **Tasks** are executed in targets in projects.
 
 ### Single-proc builds
@@ -175,6 +176,7 @@ deactivate Thread1_Project1
 ```
 
 Within a thread node, we can track the state of the projects assigned to the node. Since projects are independent from each other that should generally already be thread-safe.
+
 This leaves us with tasks. Tasks will need to be modified to support multithreading (see [Thread-safe tasks](#thread-safe-tasks)), but we need a way to maintain compatibility with existing tasks that do not implement the new interface, so they can still run in a process they "own" while allowing new tasks to take advantage of multithreading.
 
 For most tasks, an engine-level decision to push the tasks to a TaskHost process will maintain compatibility: the process will only run one task at a time, so the task will still "own" the process. When a task is pushed out of process this way, we will need to be careful to capture and preserve any global-process-state mutations that the task makes, so that they can be communicated back to the main MSBuild process and available to subsequent tasks in the same project.
@@ -215,9 +217,9 @@ With a sidecar TaskHost per node, tasks will get the same constraints and freedo
 
 ## Thread-safe tasks
 
-To mark that a task is multithreaded-MSBuild-aware, we will introduce a new interface that tasks can implement. We will provide an object with information about the task invocation, including the current environment and working directory, so that tasks can access the same information they would have in a single-threaded or out-of-process execution.
+To mark that a task is multithreaded-MSBuild-aware, we will introduce a new interface that tasks can implement. We will provide a new `TaskExecutionContext` object with information about the task invocation, including the current environment and working directory, so that tasks can access the same information they would have in a single-threaded or out-of-process execution.
 
-To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the object provided by the engine.
+To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the object provided by the engine (such as `context.GetEnvironmentVariable`).
 
 ## Tasks transition
 
