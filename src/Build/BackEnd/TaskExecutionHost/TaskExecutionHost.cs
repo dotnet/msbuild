@@ -1739,7 +1739,8 @@ namespace Microsoft.Build.BackEnd
                 _taskLoggingContext,
                 _buildComponentHost,
                 taskHostParameters,
-                taskLoadedType
+                taskLoadedType,
+                false
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup
 #endif
