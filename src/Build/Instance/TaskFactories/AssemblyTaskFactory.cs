@@ -15,6 +15,7 @@ using System.IO;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -67,6 +68,8 @@ namespace Microsoft.Build.BackEnd
         /// TaskLoader will be able to call back with errors.
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
+
+        private bool _isTaskHostFactory;
 
         #endregion
 
@@ -252,7 +255,7 @@ namespace Microsoft.Build.BackEnd
                 IDictionary<string, TaskPropertyInfo> taskParameters,
                 string taskElementContents,
                 IDictionary<string, string> taskFactoryIdentityParameters,
-                bool taskHostFactoryExplicitlyRequested,
+                bool taskHostExplicitlyRequested,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
                 string taskProjectFile)
@@ -265,7 +268,11 @@ namespace Microsoft.Build.BackEnd
                 _factoryIdentityParameters = new Dictionary<string, string>(taskFactoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
             }
 
-            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
+            _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
+
+            _isTaskHostFactory = (taskFactoryIdentityParameters != null
+                 && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
+                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase));
 
             try
             {
@@ -364,7 +371,8 @@ namespace Microsoft.Build.BackEnd
                     taskLoggingContext,
                     buildComponentHost,
                     mergedParameters,
-                    _loadedType
+                    _loadedType,
+                    _isTaskHostFactory
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif

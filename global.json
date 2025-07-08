@@ -8,13 +8,13 @@
     "errorMessage": "The .NET SDK could not be found, please run a command-line build with ./build.cmd."
   },
   "tools": {
-    "dotnet": "9.0.301",
+    "dotnet": "10.0.100-preview.6.25315.102",
     "vs": {
-      "version": "17.12.0"
+      "version": "17.13.0"
     },
-    "xcopy-msbuild": "17.12.0"
+    "xcopy-msbuild": "17.13.0"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "9.0.0-beta.25325.4"
+    "Microsoft.DotNet.Arcade.Sdk": "10.0.0-beta.25353.1"
   }
 }
