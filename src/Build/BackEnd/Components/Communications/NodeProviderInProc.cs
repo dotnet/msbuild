@@ -130,8 +130,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            _componentHost = null;
-            _nodeContexts = null;
         }
 
         #endregion
@@ -305,6 +303,8 @@ namespace Microsoft.Build.BackEnd
             // will report that the in-proc node is still in use when it has actually shut down.
             if (packet.Type == NodePacketType.NodeShutdown)
             {
+                _nodeContexts.TryRemove(nodeId, out _);
+
                 // Release the operating environment semaphore if we were holding it.
                 if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&
                     (InProcNodeOwningOperatingEnvironment != null))
@@ -312,11 +312,6 @@ namespace Microsoft.Build.BackEnd
                     InProcNodeOwningOperatingEnvironment.Release();
                     InProcNodeOwningOperatingEnvironment.Dispose();
                     InProcNodeOwningOperatingEnvironment = null;
-                }
-
-                if (!_componentHost.BuildParameters.EnableNodeReuse)
-                {
-                    _nodeContexts.TryRemove(nodeId, out _);
                 }
             }
 
