@@ -1785,6 +1785,11 @@ arquivo de resposta.
         <target state="translated">MSBUILD : error MSB1059: não foi possível imprimir destinos. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">O Agente de Terminal não foi usado porque foi detectado que a compilação está em execução em um ambiente automatizado.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">O Agente de Terminal não foi usado porque a compilação é executada no contexto de um processo (por exemplo, 'dotnet test') que solicita acesso direto ao fluxo stdout.</target>
@@ -1993,6 +1998,14 @@ arquivo de resposta.
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2036,16 +2049,24 @@ arquivo de resposta.
                      de diagnóstico do texto mais detalhado, mas contém mais informações.
                      (Forma abreviada: -bl)
 
+                     O LogFile opcional especifica o caminho em que o
+                     log binário é salvo. Para gerar um arquivo de log distinto
+                     para cada compilação, o token "{}" pode ser adicionado ao
+                     caminho, por exemplo: LogFile=output-{}-log.binlog. Cada 
+                     "{}" no caminho de log é substituído por uma cadeia de caracteres exclusiva
+                     usando o carimbo de data/hora, executando a ID do processo e aleatoriamente
+                     o aplicar selo de cadeia de caracteres.
+
                      O agente binário, por padrão, coleta o texto fonte dos
                      arquivos de projeto, incluindo todos os projetos importados e arquivos
                      de destino encontrados durante a compilação. A opção
-                     ProjectImports opcional controla este comportamento:
+                     ProjectImports controla este comportamento:
 
-                      ProjectImports=None     - Não coletar as importações
+                      ProjectImports=None     – Não coletar as importações
                                                 do projeto.
-                      ProjectImports=Embed    - Inserir as importações do projeto no
+                      ProjectImports=Embed    – Inserir as importações do projeto no
                                                 arquivo de log.
-                      ProjectImports=ZipFile  - Salvar os arquivos de projeto em
+                      ProjectImports=ZipFile  – Salvar os arquivos de projeto em
                                                 output.projectimports.zip
                                                 em que a saída tem o mesmo nome que o
                                                 nome do arquivo de log binário.
@@ -2177,8 +2198,8 @@ arquivo de resposta.
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Não é possível criar instância do agente de log. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: Não é possível criar uma instância do agente {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

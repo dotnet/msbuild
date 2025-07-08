@@ -1797,6 +1797,11 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <target state="translated">MSBUILD : error MSB1059: Cíle se nepovedlo vypsat. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Terminálový protokolovací nástroj nebyl použit, protože bylo zjištěno, že sestavení běží v automatizovaném prostředí.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Terminálový protokolovač se nepoužil, protože sestavení se spouští v kontextu procesu (např. dotnet test), který požaduje přímý přístup k datovému proudu stdout.</target>
@@ -2005,6 +2010,14 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2040,37 +2053,45 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializuje všechny události sestavení do komprimovaného binárního souboru.
-                     Tento soubor se standardně nachází v aktuálním adresáři a má název msbuild.binlog.
-                     Binární protokol je podrobný popis procesu sestavení, který se
-                     dá později použít k rekonstrukci textových protokolů
-                     a který můžou používat jiné nástroje pro analýzu.
-                     Binární protokol má obvykle 10–20krát menší velikost než
-                     nejpodrobnější textový protokol na úrovni diagnostiky, ale obsahuje více informací.
+                     Ve výchozím nastavení se soubor nachází v aktuálním adresáři a má název
+                     "msbuild.binlog". Binární protokol je podrobný popis
+                     procesu sestavení, který se dá později použít k rekonstrukci
+                     textových protokolů a který využívají jiné analytické nástroje. Binární protokol
+                     je obvykle 10–20krát menší než nejpodrobnější textový
+                     protokol na úrovni diagnostiky, ale obsahuje více informací.
                      (Krátký tvar: -bl)
 
-                     Binární protokolovací nástroj standardně shromažďuje
-                     zdrojový text projektových souborů včetně všech
-                     importovaných projektů a cílových souborů zjištěných
-                     při sestavování. Toto chování řídí volitelný parametr ProjectImports:
+                     Nepovinný soubor logFile určuje cestu, kde
+                     je binární protokol uložený. Pro generování samostatného souboru protokolu
+                     pro každé sestavení se dá token {} přidat do
+                     cesty, například: LogFile=output-{}-log.binlog. Každý 
+                     {} v cestě k protokolu se nahradí jedinečným řetězcem
+                     pomocí časového razítka, ID spuštěného procesu a náhodného
+                     razítka řetězce.
 
-                     ProjectImports=None     - Neshromažďovat importované
-                                                 projekty.
-                      ProjectImports=Embed    - Vložit importované projekty
-                     do souboru protokolu.
-                      ProjectImports=ZipFile  - Uložit projektové soubory
-                                                do output.projectimports.zip,
-                                                kde output je stejný název
-                                                jako název souboru binárního protokolu.
+                     Binární protokolovací nástroj ve výchozím nastavení shromažďuje zdrojový text
+                     souborů projektu, včetně všech importovaných projektů a cílových
+                     souborů, ke kterým došlo během sestavení. Nepovinný
+                     přepínač ProjectImports řídí toto chování:
+
+                      ProjectImports=None     – Neshromažďovat importy projektu
+                                                .
+                      ProjectImports=Embed    – Vložit importy projektu do
+                                                souboru protokolu.
+                      ProjectImports=ZipFile  – Uložit soubory projektu do
+                                                output.projectimports.zip
+                                                kde výstup má stejný název
+                                                jako je název binárního souboru protokolu.
 
                      Výchozí nastavení pro ProjectImports je Embed.
-                     Poznámka: Protokolovací nástroj neshromažďuje zdrojové
-                     soubory nepatřící pod MSBuild, jako .cs, .cpp atd.
+                     Poznámka: protokolovací nástroj neshromažďuje zdrojové soubory, které nepocházejí z nástroje MSBuild,
+                     jako například .cs, .cpp atd.
 
-                     Soubor .binlog se dá znovu přehrát“ tak, že se předá
-                     souboru msbuild.exe jako argument místo projektu/řešení.
-                     Jiné protokolovací nástroje obdrží informace obsažené
-                     v souboru protokolu, jako by šlo o původní sestavení.
-                     Více o binárním protokolu a jeho použití si můžete přečíst na stránce:
+                     Soubor .binlog se dá přehrát předáním do
+                     msbuild.exe jako argument místo projektu nebo řešení.
+                     Ostatní protokolovací nástroje obdrží informaci obsaženou
+                     v souboru protokolu, jako by se provádělo původní sestavení.
+                     Další informace o binárním protokolu a jeho použití najdete tady:
                      https://aka.ms/msbuild/binlog
 
                      Příklady:
@@ -2189,8 +2210,8 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Nelze vytvořit instanci protokolovacího nástroje. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: Nelze vytvořit instanci protokolovacího nástroje {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

@@ -223,12 +223,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <target state="translated">Zadanie {0} z projektu {1} tworzy projekt przy użyciu interfejsu wiersza polecenia {2}. Zamiast tego należy użyć zadania MSBuild.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <target state="translated">Zadanie „Exec” nie powinno być używane do kompilowania projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -630,6 +630,11 @@
         <target state="translated">Metody {0} nie można wywołać przy użyciu kolekcji zawierającej nazwy docelowe o wartości null lub puste.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Ładowanie bibliotek telemetrii nie powiodło się. Wyjątek: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Właściwość danych wyjściowych: </target>
@@ -855,6 +860,26 @@ Błędy: {3}</target>
         <target state="translated">Narzędzie Resolver zestawu SDK „{0}” zwróciło wartość null.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">Zestaw SDK próbował ustawić zmienną środowiskową „{0}” na „{1}”, ale została już ustawiona jako zmienna środowiskowa.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">Zestaw SDK próbował ustawić zmienną środowiskową „{0}” na „{1}”, ale została już ustawiona przez inny zestaw SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">Zestaw SDK próbował ustawić zmienną środowiskową „{0}” na „{1}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">Nie można rozpoznać zestawu SDK „{0}” przez program rozpoznawania nazw zestawu SDK „{1}”. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: W przypadku projektu „{0}” pominięto ograniczenia izolacji grafu dla przywoływanego projektu „{1}”</target>
@@ -877,6 +902,11 @@ Błędy: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Wykres statyczny załadowany w {0} s, węzły: {1}, krawędzie: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">Rozpoczęto konstruowanie grafu statycznego.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

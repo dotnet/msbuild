@@ -1788,6 +1788,11 @@
         <target state="translated">MSBUILD : error MSB1059: Hedefler yazdırılamadı. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Terminal Günlükçüsü, derlemenin otomatik bir ortamda çalıştığı tespit edildiğinden kullanılmadı.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Derleme StdOut akışına doğrudan erişim isteyen bir işlem (ör. 'dotnet test') bağlamında çalıştığı için Terminal Günlükçüsü kullanılmadı.</target>
@@ -1996,6 +2001,14 @@
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2034,28 +2047,36 @@
                      Varsayılan olarak, dosya geçerli dizinde bulunur ve "msbuild.binlog"
                      olarak adlandırılır. Daha sonra metin günlüklerini yeniden
                      yapılandırmak için kullanılabilen ve diğer analiz araçları tarafından
-                     kullanılan ikili günlüğü, derleme işleminin ayrıntılı bir açıklamasıdır.
-                     İkili günlüğü genellikle, en ayrıntılı metin tanılama düzeyi günlüklerden
+                     kullanılan ikili günlüğü, derleme işleminin ayrıntılı bir açıklamasıdır. İkili günlüğü genellikle, en ayrıntılı metin tanılama düzeyi günlüklerden
                      10-20 kat küçüktür ancak daha fazla bilgi içerir.
                      (Kısa biçim: -bl)
+                     
 
-                     İkili günlükçü varsayılan olarak, derleme sırasında karşılaşılan
-                     tüm içeri aktarılmış projeler ve hedef dosyalar dahil olmak üzere
-                     proje dosyalarının kaynak dosyalarını toplar. İsteğe bağlı
+                     İsteğe bağlı LogFile ikili günlüğün kaydedileceği yolu
+                     belirtir. Ayrı bir günlük dosyası oluşturmak için
+                     her derleme için "{}" belirteci
+                     yola eklenebilir, örneğin: LogFile=output-{}-log.binlog. Günlük 
+                     yolundaki her “{}” zaman damgası, çalışan işlem kimliği ve rastgele
+                     dize damgası kullanılarak benzersiz bir dize ile
+                     değiştirilir.
+
+                     İkili günlükçü varsayılan olarak, içe aktarılan
+                     tüm projeler ve derleme sırasında karşılaşılan hedef
+                     dosyalar da dahil olmak üzere proje dosyalarının kaynak metnini toplar. İsteğe bağlı
                      ProjectImports anahtarı bu davranışı denetler:
 
                       ProjectImports=None     - Proje içeri aktarmalarını
                                                 toplama.
-                      ProjectImports=Embed    - Proje içeri aktarmalarını günlük dosyasına
-                                                ekler.
+                      ProjectImports=Embed    - Proje içeri aktarmalarını
+                                                günlük dosyasına ekle.
                       ProjectImports=ZipFile  - Proje dosyalarını
-                                                çıkış.projectimports.zip
-                                                dosyasına kaydeder (burada çıkış, ikili
-                                                günlük dosyası adıyla aynı ada sahiptir).
+                                                output.projectimports.zip dosyasına
+                                                çıkış, ikili günlük dosyası adıyla
+                                                aynı ada sahiptir kaydet.
 
-                     ProjectImports için varsayılan ayar Embed’dir.
-                     Not: Günlükçü .cs, .cpp vb. MSBuild olmayan kaynak
-                     dosyaları toplamaz.
+                     ProjectImports varsayılan ayarı Ekle’dir.
+                     Not: Günlükçü .cs, .cpp vb. gibi MSBuild olmayan kaynak dosyalarını
+                     toplamaz.
 
                      Bir .binlog dosyası msbuild.exe’ye bir proje/çözüm
                      yerine bağımsız değişken olarak geçirilerek “yeniden oynatılabilir”.
@@ -2180,8 +2201,8 @@
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Günlük oluşturucunun bir örneği oluşturulamıyor. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: {0} günlük oluşturucusunun bir örneği oluşturulamıyor. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

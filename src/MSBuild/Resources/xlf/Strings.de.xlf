@@ -1785,6 +1785,11 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <target state="translated">MSBUILD : error MSB1059: Ziele konnten nicht ausgegeben werden. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da erkannt wurde, dass der Build in einer automatisierten Umgebung ausgeführt wird.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da der Build im Kontext eines Prozesses (z. B. "dotnet test") ausgeführt wird, der direkten Zugriff auf den stdout-Stream anfordert.</target>
@@ -1993,6 +1998,14 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2036,9 +2049,17 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                      binäre Protokolle, letztere enthalten jedoch mehr Informationen.
                      (Kurzform: -bl)
 
+                     Die optionale LogFile gibt den Pfad an, in dem das
+                     Binärprotokoll gespeichert wird. Um eine eigene Protokolldatei
+                     für jeden Build zu generieren, kann das Token "{}" zum
+                     Pfad hinzugefügt werden, z. B.: LogFile=output-{}-log.binlog. Jedes 
+                     "{}" im Protokollpfad wird durch eine eindeutige Zeichenfolge ersetzt,
+                     indem Zeitstempel, ID des ausgeführten Prozesses und ein zufälliger
+                     Zeichenfolgenstempel verwendet werden.
+
                      Die binäre Protokollierung erfasst standardmäßig den Quelltext von
-                     Projektdateien, einschließlich aller beim Buildvorgang aufgetretenen importierten
-                     Projekte und Zieldateien. Der optionale Schalter
+                     Projektdateien, einschließlich aller beim Buildvorgang aufgetretenen
+                     importierten Projekte und Zieldateien. Der optionale Schalter
                      ProjectImports steuert dieses Verhalten:
 
                       ProjectImports=None:      – Projektimporte nicht
@@ -2177,8 +2198,8 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Eine Instanz der Protokollierung kann nicht erzeugt werden. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: Eine Instanz der Protokollierung {0} kann nicht erstellt werden. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

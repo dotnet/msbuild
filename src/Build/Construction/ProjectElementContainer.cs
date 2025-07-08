@@ -521,8 +521,17 @@ namespace Microsoft.Build.Construction
 
                 if (TrySearchLeftSiblings(child.PreviousSibling, SiblingIsExplicitElement, out ProjectElement referenceSibling))
                 {
-                    // Add after previous sibling
-                    XmlElement.InsertAfter(child.XmlElement, referenceSibling.XmlElement);
+                    XmlNode insertAfter = referenceSibling.XmlElement;
+                    XmlNode next = insertAfter.NextSibling;
+                    while (next != null &&
+                    (next.NodeType == XmlNodeType.Comment||
+                    (next.NodeType == XmlNodeType.Whitespace && !next.Value.Contains("\n") && !next.Value.Contains("\r"))))
+                    {
+                        // If the next node is a comment or whitespace that does not contain newlines, then insert after it
+                        insertAfter = next;
+                        next = insertAfter.NextSibling;
+                    }
+                    XmlElement.InsertAfter(child.XmlElement, insertAfter);
                     if (XmlDocument.PreserveWhitespace)
                     {
                         // Try to match the surrounding formatting by checking the whitespace that precedes the node we inserted
@@ -530,7 +539,7 @@ namespace Microsoft.Build.Construction
                         if (referenceSibling.XmlElement.PreviousSibling?.NodeType == XmlNodeType.Whitespace)
                         {
                             var newWhitespaceNode = XmlDocument.CreateWhitespace(referenceSibling.XmlElement.PreviousSibling.Value);
-                            XmlElement.InsertAfter(newWhitespaceNode, referenceSibling.XmlElement);
+                            XmlElement.InsertAfter(newWhitespaceNode, insertAfter);
                         }
                     }
                 }
@@ -858,7 +867,9 @@ namespace Microsoft.Build.Construction
                 return false;
             }
 
-            public IEnumerator<T> GetEnumerator() => new Enumerator(_initial, _forwards);
+            public Enumerator GetEnumerator() => new Enumerator(_initial, _forwards);
+
+            IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
 
             IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
@@ -948,12 +959,17 @@ namespace Microsoft.Build.Construction
             /// <summary>
             /// Get enumerator
             /// </summary>
-            public readonly IEnumerator<ProjectElement> GetEnumerator() => _enumerator;
+            public readonly Enumerator GetEnumerator() => _enumerator;
 
             /// <summary>
             /// Get non generic enumerator
             /// </summary>
             IEnumerator IEnumerable.GetEnumerator() => _enumerator;
+
+            /// <summary>
+            /// Get enumerator
+            /// </summary>
+            IEnumerator<ProjectElement> IEnumerable<ProjectElement>.GetEnumerator() => _enumerator;
 
             /// <summary>
             /// Enumerator over a series of sibling ProjectElement objects

@@ -223,12 +223,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <target state="translated">{1} projesindeki {0} görevi {2} CLI kullanılan bir proje oluşturur. Bunun yerine MSBuild görevi kullanılmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <target state="translated">'Exec' görevi, bir projeyi oluşturmak için kullanılmamalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -630,6 +630,11 @@
         <target state="translated">{0} metosu null veya boş hedef adları içeren bir koleksiyonla çağrılamaz.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Telemetri kitaplıklarının yüklenmesi şu hayatla başarısız oldu: {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Çıkış Özelliği: </target>
@@ -855,6 +860,26 @@ Hatalar: {3}</target>
         <target state="translated">SDK çözümleyici "{0}" null döndürdü.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten bir ortam değişkeni olarak ayarlanmıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten başka bir SDK tarafından ayarlanmıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">Bir SDK, "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">SDK '{0}', SDK çözümleyici '{1}' tarafından çözümlenemedi. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: "{0}" projesi, başvurulan "{1}" projesindeki graf yalıtımı kısıtlamalarını atladı</target>
@@ -877,6 +902,11 @@ Hatalar: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Statik graf {0} saniye içinde yüklendi: {1} düğüm, {2} uç</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">Statik grafik oluşturma işlemi başlatıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

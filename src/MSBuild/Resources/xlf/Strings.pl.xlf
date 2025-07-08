@@ -1795,6 +1795,11 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
         <target state="translated">MSBUILD : error MSB1059: Nie można wydrukować elementów docelowych. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Rejestrator terminali nie został użyty, ponieważ wykryto, że kompilacja jest uruchomiona w zautomatyzowanym środowisku.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Rejestrator terminali nie został użyty, ponieważ kompilacja jest uruchamiana w kontekście procesu (np. „dotnet test”), który żąda bezpośredniego dostępu do strumienia StdOut.</target>
@@ -2003,6 +2008,14 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2041,10 +2054,18 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      Domyślnie plik znajduje się w bieżącym katalogu i ma nazwę
                      „msbuild.binlog”. Dziennik binarny to szczegółowy opis procesu
                      kompilacji, którego można później użyć do odtworzenia
-dzienników                     tekstowych i wykorzystać w innych narzędziach do analizy. Dziennik binarny
+                     dzienników tekstowych i wykorzystać w innych narzędziach do analizy. Dziennik binarny
                      jest zwykle 10–20 razy mniejszy od najbardziej szczegółowych
                      tekstowych dzienników na poziomie diagnostycznym, ale zawiera więcej informacji.
                      (Krótka forma: -bl)
+
+                     Opcjonalny LogFile określa ścieżkę, w której
+                     zapisany jest dziennik binarny. Aby wygenerować osobny plik dziennika
+                     dla każdej kompilacji, można dodać token „{}” do
+                     ścieżki, na przykład: LogFile=output-{}-log.binlog. Każdy 
+                     „{}” w ścieżce dziennika zostanie zastąpiony unikalnym ciągiem
+                     utworzonym na podstawie znacznika czasu, identyfikatora procesu i losowego
+                     ciągu znaków.
 
                      Rejestrator binarny domyślnie zbiera tekst źródłowy
                      plików projektu, w tym wszystkie zaimportowane projekty i pliki
@@ -2187,8 +2208,8 @@ dzienników                     tekstowych i wykorzystać w innych narzędziach 
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: nie można utworzyć wystąpienia rejestratora. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: nie można utworzyć wystąpienia rejestratora {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

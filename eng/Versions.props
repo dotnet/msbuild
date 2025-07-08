@@ -3,7 +3,7 @@
 <Project>
   <PropertyGroup>
     <VersionPrefix>17.15.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.14.0-preview-25161-14</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <!--
@@ -20,7 +20,6 @@
   <PropertyGroup>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
-    <UsingToolMicrosoftNetCompilers>true</UsingToolMicrosoftNetCompilers>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
@@ -86,12 +85,12 @@
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25204.5</MicrosoftDotNetXUnitExtensionsVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25202.5</MicrosoftNetCompilersToolsetVersion>
-    <NuGetBuildTasksVersion>6.14.0-preview.1.102</NuGetBuildTasksVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>10.0.0-beta.25353.1</MicrosoftDotNetXUnitExtensionsVersion>
+    <NuGetBuildTasksVersion>6.15.0-preview.1.86</NuGetBuildTasksVersion>
+    <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25353.13</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <BootstrapSdkVersion>9.0.200-preview.0.24603.3</BootstrapSdkVersion>
+  <PropertyGroup>
+    <BootstrapSdkVersion>10.0.100-preview.6.25315.102</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

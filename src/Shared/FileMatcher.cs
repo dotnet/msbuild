@@ -6,7 +6,11 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !NETFRAMEWORK
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -34,6 +38,7 @@ namespace Microsoft.Build.Shared
         private static readonly char[] s_wildcardCharacters = { '*', '?' };
         private static readonly char[] s_wildcardAndSemicolonCharacters = { '*', '?', ';' };
 
+
 #if NET
         private static readonly SearchValues<string> s_propertyAndItemReferences = SearchValues.Create(["$(", "@("], StringComparison.Ordinal);
 #else
@@ -46,6 +51,7 @@ namespace Microsoft.Build.Shared
         // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
         private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>>(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase));
         private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
+        private static readonly Lazy<ConcurrentDictionary<string, (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new(() =>new(StringComparer.Ordinal));
 
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
         private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
@@ -161,7 +167,7 @@ namespace Microsoft.Build.Shared
         /// <returns>An enumerable of filesystem entries.</returns>
         internal delegate IReadOnlyList<string> GetFileSystemEntries(FileSystemEntity entityType, string path, string pattern, string projectDirectory, bool stripProjectDirectory);
 
-        internal static void ClearFileEnumerationsCache()
+        internal static void ClearCaches()
         {
             if (s_cachedGlobExpansions.IsValueCreated)
             {
@@ -171,6 +177,10 @@ namespace Microsoft.Build.Shared
             if (s_cachedGlobExpansionsLock.IsValueCreated)
             {
                 s_cachedGlobExpansionsLock.Value.Clear();
+            }
+            if (s_regexCache.IsValueCreated)
+            {
+                s_regexCache.Value.Clear();
             }
         }
 
@@ -1482,7 +1492,7 @@ namespace Microsoft.Build.Shared
         /// <param name="regexFileMatch">Receives the regular expression.</param>
         /// <param name="needsRecursion">Receives the flag that is true if recursion is required.</param>
         /// <param name="isLegalFileSpec">Receives the flag that is true if the filespec is legal.</param>
-        internal void GetFileSpecInfoWithRegexObject(
+        internal void GetFileSpecInfoWithRegexObjectCore(
             string filespec,
             out Regex regexFileMatch,
             out bool needsRecursion,
@@ -1501,6 +1511,23 @@ namespace Microsoft.Build.Shared
             {
                 regexFileMatch = null;
             }
+        }
+
+        // PERF: Cache the Regex generation to avoid repeated allocations.
+        internal void GetFileSpecInfoWithRegexObject(
+           string filespec,
+           out Regex regexFileMatch,
+           out bool needsRecursion,
+           out bool isLegalFileSpec)
+        {
+            var result = s_regexCache.Value.GetOrAdd(filespec, spec =>
+            {
+                GetFileSpecInfoWithRegexObjectCore(spec, out var regex, out var needsRec, out var isLegal);
+                return (regex, needsRec, isLegal);
+            });
+            regexFileMatch = result.regex;
+            needsRecursion = result.needsRecursion;
+            isLegalFileSpec = result.isLegalFileSpec;
         }
 
         internal delegate (string fixedDirectoryPart, string recursiveDirectoryPart, string fileNamePart) FixupParts(
@@ -2633,13 +2660,13 @@ namespace Microsoft.Build.Shared
 
             // Ensure that the prefix match wasn't to a distinct directory, so that
             // x\y\prefix doesn't falsely match x\y\prefixmatch.
-            if (directorySeparatorCharacters.Contains(possibleParent[possibleParent.Length - 1]))
+            if (Array.IndexOf(directorySeparatorCharacters, possibleParent[possibleParent.Length - 1]) >= 0)
             {
                 return true;
             }
             else
             {
-                return directorySeparatorCharacters.Contains(possibleChild[possibleParent.Length]);
+                return Array.IndexOf(directorySeparatorCharacters, possibleChild[possibleParent.Length]) >= 0;
             }
         }
 

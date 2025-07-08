@@ -1785,6 +1785,11 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">MSBUILD : error MSB1059: les cibles n'ont pas pu être imprimées. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">L'enregistreur de terminal n'a pas été utilisé, car il a été détecté que la build s'exécute dans un environnement automatisé.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">L’enregistreur d’événements de terminal n’a pas été utilisé, car la build est exécutée dans le contexte d’un processus (par exemple, 'dotnet test') qui demande un accès direct au flux stdout.</target>
@@ -1994,6 +1999,14 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2028,65 +2041,56 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Sérialise tous les événements de build dans un fichier binaire compressé.
-                     Par défaut, le fichier se trouve dans le répertoire actif et se nomme
+                     Sérialise tous les événements de génération dans un fichier binaire compressé.
+                     Par défaut, le fichier se trouve dans le répertoire actuel et son nom est 
                      "msbuild.binlog". Le journal binaire est une description détaillée
-                     du processus de génération, qui peut servir plus tard à reconstruire
-                     les journaux texte et être utilisé par d'autres outils d'analyse. Un journal binaire
-                     est généralement
-10 à 20
-fois plus petit que le journal
-                     de diagnostic de type texte le plus détaillé, mais il contient plus d'informations.
-                     (Forme abrégée
-: -bl)
+                     du processus de génération que vous pouvez utiliser plus tard pour reconstruire
+                     des journaux texte et être utilisé par d’autres outils d’analyse. Un journal binaire
+                     est généralement 10 à 20 fois plus petit que le journal au niveau du diagnostic
+                     du texte le plus détaillé, mais il contient d’autres informations.
+                     (Forme abrégée : -bl)
 
+                     Le LogFile facultatif spécifie le chemin d’accès où le
+                     journal binaire est enregistré. Pour générer un fichier journal distinct
+                     pour chaque génération, vous pouvez ajouter le jeton « {} » dans le
+                     chemin d’accès, par exemple : LogFile=output-{}-log.binlog. Chaque 
+                     « {} » dans le chemin d’accès du journal est remplacé par une chaîne unique
+                     en utilisant un timestamp, ce qui exécute l’ID de processus et une
+                     empreinte de chaîne aléatoire.
 
-                     Le journaliseur binaire par défaut collecte le texte source
+                     L’enregistreur binaire collecte par défaut le texte source des
+                     fichiers de projet, notamment tous les projets importés et les
+                     fichiers cibles rencontrés pendant la génération. Le commutateur
+                     ProjectImports facultatif contrôle ce comportement :
 
-                     des fichiers projet, notamment tous les projets importés et les
-
-                     fichiers cibles rencontrés pendant la build. Le commutateur
-
-                     ProjectImports facultatif contrôle ce comportement
-:
-
-                      ProjectImports=None     - Ne collecte pas les importations
-                                                du projet.
-                      ProjectImports=Embed    - Incorpore les importations du projet dans
-                                                le fichier journal.
-                      ProjectImports=ZipFile  - Enregistre les fichiers projet dans
+                      ProjectImports=None     – Ne collectez pas les
+                                                importations du projet.
+                      ProjectImports=Embed    – Importations du projet incorporées dans le
+                                                fichier journal.
+                      ProjectImports=ZipFile  – Enregistrez les fichiers du projet dans
                                                 output.projectimports.zip
-                                                où la sortie porte le même nom que
-                                                le fichier journal binaire.
+                                                où la sortie est le même nom
+                                                que le nom du fichier journal binaire.
 
-                     Le paramètre par défaut de ProjectImports est Embed.
-                     Remarque
-: Le journaliseur ne collecte pas les
+                     Le paramètre par défaut pour ProjectImports est Incorporé.
+                     Remarque : l’enregistreur ne collecte pas les fichiers sources non-MSBuild
+                     tels que .cs, .cpp etc.
 
-                     fichiers sources non MSBuild tels que .cs, .cpp etc.
+                     Vous pouvez « lire » un fichier .binlog en le passant à
+                     msbuild.exe en tant qu’argument au lieu d’une solution/d’un projet.
+                     D’autres enregistreurs reçoivent les informations contenues
+                     dans le fichier journal comme si la génération d’origine se produisait.
+                     Vous pouvez lire plus d’informations sur le journal binaire et ses utilisations sur :
+                     https://aka.ms/msbuild/binlog
 
-
-                     Vous pouvez "lire" un fichier .binlog en le passant à
-
-                     msbuild.exe en tant qu'argument plutôt qu'en tant que projet/solution.
-
-                     D'autres enregistreurs d'événements reçoivent les informations
-
-                     contenues dans le fichier journal comme si la build d'origine était en cours de création.
-
-                     Pour plus d'informations sur le journal binaire et ses usages, consultez
-:
-                    https://aka.ms/msbuild/binlog
-
-                     Exemples
-:
-
+                     Exemples :
                        -bl
-
                        -bl:output.binlog
-
                        -bl:output.binlog;ProjectImports=None
-                       -bl:output.binlog;ProjectImports=ZipFile                       -bl:..\..\custom.binlog                       -binaryLogger    </target>
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
+    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"
@@ -2195,8 +2199,8 @@ fois plus petit que le journal
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Impossible de créer une instance du journal. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: Impossible de créer une instance du journal {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

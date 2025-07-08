@@ -1783,6 +1783,11 @@
         <target state="translated">MSBUILD : error MSB1059: не удалось вывести целевые объекты. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Средство ведения журнала терминалов не использовалось, так как было обнаружено, что сборка выполняется в автоматизированной среде.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Средство ведения журнала терминалов не используется, так как сборка выполняется в контексте процесса (например, "dotnet test"), который запрашивает прямой доступ к потоку stdout.</target>
@@ -1993,6 +1998,14 @@
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2031,10 +2044,18 @@
                      По умолчанию файл находится в текущем каталоге и называется
                      "msbuild.binlog". Двоичный журнал включает подробное описание
                      процесса сборки, которое затем можно использовать для воссоздания
-                     текстовых журналов. Он также может использоваться другими средствами анализа. Двоичный журнал
+                     текстовых журналов и может использоваться другими средствами анализа. Двоичный журнал
                      обычно в 10–20 раз меньше самого подробного текстового
                      журнала уровня диагностики, но содержит больше информации.
                      (Краткая форма: -bl)
+
+                     Необязательный параметр LogFile указывает путь, по которому
+                     сохраняется двоичный журнал. Чтобы создать отдельный файл журнала
+                     для каждой сборки, можно добавить токен "{}" в
+                     путь, например: LogFile=output-{}-log.binlog. Каждый 
+                     символ "{}" в пути журнала заменяется уникальной строкой,
+                     использующей временную метку, идентификатор запущенного процесса и случайную
+                     метку строки.
 
                      Средство ведения двоичного журнала по умолчанию собирает исходный текст
                      файлов проекта, включая все импортированные проекты и целевые
@@ -2051,7 +2072,7 @@
                                                 что и у двоичного файла журнала.
 
                      Значение по умолчанию для ProjectImports — Embed.
-                     Примечание. Средство ведения журнала не собирает исходные файлы, не от MSBuild,
+                     Примечание: средство ведения журнала не собирает исходные файлы, не от MSBuild,
                      например с расширениями CS, CPP и др.
 
                      BINLOG-файл можно "воспроизвести", передав его в
@@ -2177,8 +2198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: не удается создать экземпляр журнала. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: не удается создать экземпляр регистратора {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

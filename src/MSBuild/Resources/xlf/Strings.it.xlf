@@ -1796,6 +1796,11 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">MSBUILD : error MSB1059: non è stato possibile stampare le destinazioni. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Il logger del terminale non è stato utilizzato perché è stato rilevato che la compilazione è in esecuzione in un ambiente automatizzato.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Il logger di terminale non è stato usato perché la compilazione viene eseguita nel contesto di un processo (ad esempio 'dotnet test') che richiede l'accesso diretto al flusso stdout.</target>
@@ -2006,6 +2011,14 @@ Nota: livello di dettaglio dei logger di file
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2047,7 +2060,16 @@ Nota: livello di dettaglio dei logger di file
                      seguito per ricostruire i log di testo e viene usato da altri strumenti di analisi. Un log binario è in genere
                      10-20 volte più piccolo del più dettagliato log di testo
                      di livello diagnostico, ma contiene maggiori informazioni.
-                     (Froma breve: -bl)
+                     (Forma breve: -bl)
+
+                     Il LogFile facoltativo specifica il percorso in cui il
+                     il log binario viene salvato. Per generare un file di log distinto
+                     per ogni compilazione, il token "{}" può essere aggiunto al
+                     percorso, ad esempio: LogFile=output-{}-log.binlog. Ogni 
+                     "{}" nel percorso del log viene sostituito con una stringa univoca
+                     usando il timestamp, l'ID del processo in esecuzione e
+timbro
+                     stringa casuale.
 
                      Per impostazione predefinita, il logger binario raccoglie il testo di origine di
                      file di progetto, inclusi tutti i
@@ -2060,8 +2082,8 @@ Nota: livello di dettaglio dei logger di file
                                                 file di log.
                       ProjectImports=ZipFile  - I file del progetto vengono salvati in
                                                 output.projectimports.zip
-                                                dove output corrisponde allo
-                                                as stesso nome del file di log binario.
+                                                dove output corrisponde allo stesso
+                                                nome del file di log binario.
 
                      L'impostazione predefinita di ProjectImports è Embed.
                      Nota: il logger non raccoglie i file di origine non-MSBuild,
@@ -2193,8 +2215,8 @@ Esegue la profilatura della valutazione di MSBuild e scrive
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: non è possibile creare un'istanza del logger. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: non è possibile creare un'istanza del logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

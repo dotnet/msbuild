@@ -1785,6 +1785,11 @@
         <target state="translated">MSBUILD : error MSB1059: ターゲットを出力できませんでした。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">ビルドが自動化された環境で実行されていることが検出されたため、ターミナル ロガーは使用されませんでした。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">ビルドは stdout ストリームへの直接アクセスを要求するプロセス (例: 'dotnet test') のコンテキストで実行されるため、ターミナル ロガーは使用されませんでした。</target>
@@ -1993,6 +1998,14 @@
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2028,38 +2041,46 @@
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      すべてのビルド イベントを圧縮バイナリ ファイルにシリアル化します。
-                     既定では、このファイルは "msbuild.binlog" という名前で
-                     現在のディレクトリに置かれます。バイナリ ログはビルド プロセスの
-                     詳細な説明であり、後でテキスト ログを再構築するために使用でき、
-                     他の分析ツールでも使用できます。バイナリ ログは通常、
-                     ほとんどの詳細なテキスト診断レベル ログと比べて 10 分の 1 から
-                     20 分の 1 の大きさですが、より多くの情報を含んでいます。
+                     既定では、ファイルは現在のディレクトリにあり、
+                     "msbuild.binlog" という名前が付けられます。バイナリ ログはビルド プロセスの詳細な説明であり、
+                     後でテキスト ログを再構築したり、他の分析ツールで使用
+                     したりするために使用できます。バイナリ ログは通常、
+                     最も詳細なテキスト診断レベルのログの 10 - 20 分の 1 の
+                     大きさですが、より多くの情報が含まれています。
                      (短い形式: -bl)
 
-                     既定では、バイナリ ロガーはプロジェクト ファイルのソース テキストを
-                     収集します。それには、ビルド中に検出された、すべてのインポート済み
-                     プロジェクトとターゲット ファイルが含まれます。オプションの
-                     ProjectImports スイッチは次のように動作を制御します。
+                     省略可能な LogFile は、バイナリ ログが保存される
+                     パスを指定します。ビルドごとに個別のログ ファイルを
+                     生成するには、パスにトークン "{}" を追加します 
+                     (例: LogFile=output-{}-log.binlog)。ログ パス内の
+                     各 "{}" は、タイムスタンプ、実行中のプロセス ID、
+                     ランダム文字列スタンプを使用して一意の文字列に
+                     置き換えられます。
 
-                      ProjectImports=None     - プロジェクト インポートを収集しません。
+                     バイナリ ロガーでは、既定でプロジェクト ファイルのソース 
+                     テキストが収集されます。これには、ビルド中に読み込まれた
+                     すべてのインポート プロジェクトやターゲット ファイルが含まれます。省略可能な
+                     ProjectImports スイッチはこの動作を制御します:
 
-                      ProjectImports=Embed    - プロジェクト インポートをログ ファイルに
-                                                組み込みます。
-                      ProjectImports=ZipFile  - プロジェクト ファイルを
-                                                output.projectimports.zip に保存します。
-                                                ここで、output はバイナリ ログ
-                                                ファイル名と同じ名前です。
+                      ProjectImports=None     - プロジェクトのインポートを
+                                                収集しません。
+                      ProjectImports=Embed    - プロジェクトのインポートを
+                                                ログ ファイルに埋め込みます。
+                      ProjectImports=ZipFile - プロジェクト ファイルを 
+                                                output.projectimports.zip に保存します
+                                                ここで、output はバイナリ ログ ファイル名と
+                                                同じ名前です。
 
                      ProjectImports の既定の設定は Embed です。
-                     メモ: ロガーは、MSBuild 以外のソース ファイルを収集しません
-                     (.cs、.cpp など)。
+                     メモ: このロガーは、.cs、.cpp などの MSBuild 以外のソース 
+                     ファイルを収集しません。
 
-                     プロジェクト/ソリューションの代わりに、引数として .binlog ファイルを
-                     msbuild.exe に渡すと、そのファイルを "再生" することができます。
-                     他のロガーは、オリジナルのビルドが行われたときのように、
-                     ログ ファイルに含まれる情報を受け取ることができます。
-                     バイナリ ログとその使用法の詳細については、以下をお読みください。
-                     https://aka.ms/msbuild/binlog
+                     .binlog ファイルを "再生" するには、プロジェクト/
+                     ソリューションの代わりに引数として msbuild.exe に渡します。
+                     他のロガーは、元のビルドが実行されているかのように、
+                     ログ ファイルに含まれる情報を受け取ります。
+                     バイナリ ログとその使用方法の詳細については、
+                     https://aka.ms/msbuild/binlog を参照してください
 
                      例:
                        -bl
@@ -2177,8 +2198,8 @@
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Logger のインスタンスを作成できません。{0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: Logger {0} のインスタンスを作成できません。{1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

@@ -15,6 +15,7 @@ variables:
 
 jobs:
 - job: CheckVersionBumpOnReleaseBranches
+  condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
   displayName: "Check Version Bump On Release Branches"
   steps:
   - powershell: |
@@ -110,11 +111,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -214,7 +219,7 @@ jobs:
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2022preview.amd64.open
+      demands: ImageOverride -equals windows.vs2022preview.scout.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
@@ -308,11 +313,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -375,11 +384,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:

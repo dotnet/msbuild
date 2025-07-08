@@ -252,17 +252,17 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Add parameters on any output tags
-            foreach (ProjectTaskInstanceChild taskOutputSpecification in _taskNode.Outputs)
+            // Perf: Moved to indexed based for loop to avoid boxing of the enumerator for IList.
+            for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
-                ProjectTaskOutputItemInstance outputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
-                if (outputItemInstance != null)
+                ProjectTaskInstanceChild taskOutputSpecification = _taskNode.Outputs[i];
+                if (taskOutputSpecification is ProjectTaskOutputItemInstance outputItemInstance)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                ProjectTaskOutputPropertyInstance outputPropertyInstance = taskOutputSpecification as ProjectTaskOutputPropertyInstance;
-                if (outputPropertyInstance != null)
+                if (taskOutputSpecification is ProjectTaskOutputPropertyInstance outputPropertyInstance)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
@@ -428,8 +428,10 @@ namespace Microsoft.Build.BackEnd
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                        // Can be condition with _componentHost.BuildParameters.IsTelemetryEnabled) - but it's a cheap call
-                        taskFactoryWrapper?.Statistics?.ExecutionStarted();
+                        if (_componentHost.BuildParameters.IsTelemetryEnabled)
+                        {
+                            taskFactoryWrapper?.Statistics?.ExecutionStarted();
+                        }
 
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
@@ -479,7 +481,10 @@ namespace Microsoft.Build.BackEnd
 
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
-                            taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                            if (_componentHost.BuildParameters.IsTelemetryEnabled)
+                            {
+                                taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                            }
 
                             if (taskResult.ResultCode == WorkUnitResultCode.Failed && _continueOnError == ContinueOnError.WarnAndContinue)
                             {

@@ -223,12 +223,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <target state="translated">프로젝트 {1}의 작업 {0}(은)는 {2} CLI를 사용하여 프로젝트를 빌드합니다. 대신 MSBuild 작업을 사용해야 합니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <target state="translated">'Exec' 작업은 프로젝트를 빌드하는 데 사용하면 안 됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -630,6 +630,11 @@
         <target state="translated">null 또는 빈 대상 이름을 포함하는 컬렉션을 사용하여 {0} 메서드를 호출할 수 없습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">예외 {0}(으)로 인해 원격 분석 라이브러리를 로드하지 못했습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">출력 속성: </target>
@@ -855,6 +860,26 @@ Errors: {3}</source>
         <target state="translated">SDK 확인자 "{0}"이(가) null을 반환했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 환경 변수로 설정되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 다른 SDK에 의해 설정되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">SDK 확인자 '{1}'에서 SDK '{0}'을(를) 확인할 수 없습니다. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: 프로젝트 "{0}"에서 참조된 프로젝트 "{1}"의 그래프 격리 제약 조건을 건너뛰었습니다.</target>
@@ -877,6 +902,11 @@ Errors: {3}</source>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">정적 그래프가 {0}초 안에 로드됨: {1}개 노드, {2}개 에지</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">정적 그래프 생성이 시작되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

@@ -201,6 +201,16 @@ namespace Microsoft.Build.BackEnd
         ProcessReport,
 
         /// <summary>
+        /// A request contains the inputs to the RAR task.
+        /// </summary>
+        RarNodeExecuteRequest,
+
+        /// <summary>
+        /// A request contains the outputs and log events of a completed RAR task.
+        /// </summary>
+        RarNodeExecuteResponse,
+
+        /// <summary>
         /// Command in form of MSBuild command line for server node - MSBuild Server.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
