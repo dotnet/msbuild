@@ -19,6 +19,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+      <AdditionalFiles Include="BannedSymbols.txt" />
+      <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
@@ -135,6 +140,23 @@
     <Compile Include="..\Shared\ToolsetElement.cs">
       <Link>Shared\ToolsetElement.cs</Link>
     </Compile>
+  </ItemGroup>
+
+  <!--include thread-safe task analyzer to the package-->
+  <ItemGroup>
+    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+  
+  <!-- Include analyzer in the package -->
+  <ItemGroup>
+    <None Include="..\..\artifacts\bin\ThreadSafeTaskAnalyzer\$(Configuration)\netstandard2.0\Microsoft.Build.Utilities.ThreadSafeTaskAnalyzer.dll" 
+          Pack="true" 
+          PackagePath="analyzers/dotnet/cs" 
+          Visible="false" />
+    <None Include="..\ThreadSafeTaskAnalyzer\IThreadSafeTask_BannedApis.txt" 
+          Pack="true" 
+          PackagePath="analyzers/dotnet/cs" 
+          Visible="false" />
   </ItemGroup>
 
   <ItemGroup>

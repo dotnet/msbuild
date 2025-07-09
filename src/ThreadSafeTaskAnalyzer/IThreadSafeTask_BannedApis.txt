@@ -1,0 +1,74 @@
+// Thread-Safe Tasks: Banned APIs Configuration
+// This file contains APIs that should not be used in thread-safe tasks due to threading concerns
+// Format: DocumentationCommentId;Optional message
+
+// System.IO.Path Class - Uses current working directory
+M:System.IO.Path.GetFullPath(System.String);Uses current working directory - use MSBuild API instead
+
+// System.IO.File Class - All methods use current working directory
+T:System.IO.File;Uses current working directory - use MSBuild API instead
+
+// System.IO.Directory Class - All methods use current working directory  
+T:System.IO.Directory;Uses current working directory - use MSBuild API instead
+
+// System.Environment Class - Modifies process-level state
+P:System.Environment.CurrentDirectory;Accesses process-level state - use MSBuild API instead
+M:System.Environment.Exit(System.Int32);Terminates entire process - return false from task or throw exception
+M:System.Environment.FailFast(System.String);Terminates entire process - return false from task or throw exception
+M:System.Environment.FailFast(System.String,System.Exception);Terminates entire process - return false from task or throw exception
+M:System.Environment.FailFast(System.String,System.Exception,System.String);Terminates entire process - return false from task or throw exception
+M:System.Environment.SetEnvironmentVariable(System.String,System.String);Modifies process-level state - use MSBuild API instead
+M:System.Environment.SetEnvironmentVariable(System.String,System.String,System.EnvironmentVariableTarget);Modifies process-level state - use MSBuild API instead
+
+// System.IO.FileInfo Class - Constructor and methods using relative paths
+M:System.IO.FileInfo.#ctor(System.String);Uses current working directory - use absolute paths
+M:System.IO.FileInfo.CopyTo(System.String);Destination path relative to current directory - use absolute paths
+M:System.IO.FileInfo.CopyTo(System.String,System.Boolean);Destination path relative to current directory - use absolute paths
+M:System.IO.FileInfo.MoveTo(System.String);Destination path relative to current directory - use absolute paths
+M:System.IO.FileInfo.Replace(System.String,System.String);Paths relative to current directory - use absolute paths
+M:System.IO.FileInfo.Replace(System.String,System.String,System.Boolean);Paths relative to current directory - use absolute paths
+
+// System.IO.DirectoryInfo Class
+M:System.IO.DirectoryInfo.#ctor(System.String);Uses current working directory - use absolute paths
+M:System.IO.DirectoryInfo.MoveTo(System.String);Destination path relative to current directory - use absolute paths
+
+// System.IO.FileStream Class - Constructors using relative paths
+M:System.IO.FileStream.#ctor(System.String,System.IO.FileMode);Uses current working directory - use absolute paths
+M:System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.IO.FileAccess);Uses current working directory - use absolute paths
+M:System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare);Uses current working directory - use absolute paths
+M:System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,System.Int32);Uses current working directory - use absolute paths
+M:System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,System.Int32,System.Boolean);Uses current working directory - use absolute paths
+M:System.IO.FileStream.#ctor(System.String,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,System.Int32,System.IO.FileOptions);Uses current working directory - use absolute paths
+
+// System.IO.StreamReader Class - Constructors using relative paths
+M:System.IO.StreamReader.#ctor(System.String);Uses current working directory - use absolute paths
+M:System.IO.StreamReader.#ctor(System.String,System.Boolean);Uses current working directory - use absolute paths
+M:System.IO.StreamReader.#ctor(System.String,System.Text.Encoding);Uses current working directory - use absolute paths
+M:System.IO.StreamReader.#ctor(System.String,System.Text.Encoding,System.Boolean);Uses current working directory - use absolute paths
+M:System.IO.StreamReader.#ctor(System.String,System.Text.Encoding,System.Boolean,System.Int32);Uses current working directory - use absolute paths
+
+// System.Diagnostics.Process Class - Process termination and inheritance
+M:System.Diagnostics.Process.Kill;Terminates entire process
+M:System.Diagnostics.Process.Kill(System.Boolean);Terminates entire process
+M:System.Diagnostics.Process.Start(System.String);Inherits environment and working directory - configure explicitly
+M:System.Diagnostics.Process.Start(System.String,System.String);Inherits environment and working directory - configure explicitly
+
+// System.Threading.ThreadPool Class - Modifies process-wide settings
+M:System.Threading.ThreadPool.SetMinThreads(System.Int32,System.Int32);Modifies process-wide settings
+M:System.Threading.ThreadPool.SetMaxThreads(System.Int32,System.Int32);Modifies process-wide settings
+
+// System.Globalization.CultureInfo Class - Culture modification
+P:System.Globalization.CultureInfo.CurrentCulture;Modifies process-wide culture - modify thread culture instead
+P:System.Globalization.CultureInfo.CurrentUICulture;Modifies process-wide culture - modify thread culture instead
+P:System.Globalization.CultureInfo.DefaultThreadCurrentCulture;Affects new threads - modify thread culture instead
+P:System.Globalization.CultureInfo.DefaultThreadCurrentUICulture;Affects new threads - modify thread culture instead
+
+// Assembly Loading - May cause version conflicts
+M:System.Reflection.Assembly.LoadFrom(System.String);May cause version conflicts - be aware, use absolute paths
+M:System.Reflection.Assembly.LoadFile(System.String);May cause version conflicts - be aware of potential conflicts
+M:System.Reflection.Assembly.Load(System.String);May cause version conflicts - be aware of potential conflicts
+M:System.Reflection.Assembly.Load(System.Byte[]);May cause version conflicts - be aware of potential conflicts
+M:System.Reflection.Assembly.Load(System.Byte[],System.Byte[]);May cause version conflicts - be aware of potential conflicts
+M:System.Reflection.Assembly.LoadWithPartialName(System.String);May cause version conflicts - be aware of potential conflicts
+M:System.Activator.CreateInstanceFrom(System.String,System.String);May cause version conflicts - be aware of potential conflicts
+M:System.Activator.CreateInstance(System.String,System.String);May cause version conflicts - be aware of potential conflicts
