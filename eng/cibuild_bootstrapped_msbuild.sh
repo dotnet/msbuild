@@ -64,7 +64,7 @@ then
 
   _InitializeBuildTool="${bootstrapRoot}/core/dotnet"
   _InitializeBuildToolCommand="${bootstrapRoot}/core/sdk/${sdk_version}/MSBuild.dll"
-  _InitializeBuildToolFramework="net9.0"
+  _InitializeBuildToolFramework="net10.0"
 else
   echo "Unsupported hostType ($host_type)"
   exit 1

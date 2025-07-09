@@ -862,17 +862,17 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
+        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí {0} na {1}, která ale již byla nastavena jako proměnná prostředí.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
+        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí {0} na {1}, která ale už byla nastavena jinou sadou SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
+        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí {0} na {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -906,7 +906,7 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionStarted">
         <source>Static graph construction started.</source>
-        <target state="new">Static graph construction started.</target>
+        <target state="translated">Byla zahájena konstrukce statického grafu.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

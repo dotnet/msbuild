@@ -10,7 +10,7 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
@@ -886,6 +886,9 @@ namespace Microsoft.Build.Execution
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
         /// in addition to any potential project caches described in each project.
         /// </summary>
+        /// <remarks>
+        /// This property had the type "Experimental.ProjectCache.ProjectCacheDescriptor" until 17.14 (inclusive).
+        /// </remarks>
         public ProjectCacheDescriptor ProjectCacheDescriptor { get; set; }
 
         /// <summary>

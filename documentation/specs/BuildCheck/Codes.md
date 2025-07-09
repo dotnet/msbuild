@@ -125,7 +125,7 @@ If you specify `TargetFramework` you are instructing the build to produce a sing
 `BC0107` doesn't apply if you explicitly choose to build a single target of multitargeted build:
 
 ```
-dotnet build my-multi-target.csproj /p:TargetFramework=net9.0
+dotnet build my-multi-target.csproj /p:TargetFramework=net10.0
 ```
 
 <a name="BC0108"></a>

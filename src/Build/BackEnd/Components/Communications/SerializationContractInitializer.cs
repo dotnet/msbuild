@@ -4,7 +4,6 @@
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Internal;
@@ -30,7 +29,11 @@ namespace Microsoft.Build.BackEnd
                 new(typeof(InternalLoggerException), (msg, inner) => new InternalLoggerException(msg, inner)),
                 new(typeof(InvalidProjectFileException), (msg, inner) => new InvalidProjectFileException(msg, inner)),
                 new(typeof(InvalidToolsetDefinitionException), (msg, inner) => new InvalidToolsetDefinitionException(msg, inner)),
-                new(typeof(ProjectCacheException), (msg, inner) => new ProjectCacheException(msg, inner)),
+                new(typeof(ProjectCache.ProjectCacheException), (msg, inner) => new ProjectCache.ProjectCacheException(msg, inner)),
+#pragma warning disable CS0618 // Type or member is obsolete
+                // convert Exception type from Experimental namespace to the current namespace
+                new(typeof(Experimental.ProjectCache.ProjectCacheException), (msg, inner) => new ProjectCache.ProjectCacheException(msg, inner)),
+#pragma warning restore CS0618 // Type or member is obsolete
                 new(typeof(InternalErrorException), InternalErrorException.CreateFromRemote),
                 new(typeof(LoggerException), (msg, inner) => new LoggerException(msg, inner)),
                 new(typeof(NodeFailedToLaunchException), (msg, inner) => new NodeFailedToLaunchException(msg, inner)),

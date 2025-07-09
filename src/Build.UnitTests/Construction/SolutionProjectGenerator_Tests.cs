@@ -1588,10 +1588,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)));
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase));
 
                 ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)).First().Value;
                 ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)).First().Value;
@@ -2433,26 +2433,26 @@ EndGlobal
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
 
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase)));
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase)));
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
 
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
 
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase)));
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
         
-                Assert.Single(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase)));
+                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase));
             }
         }
 
