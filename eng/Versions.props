@@ -82,7 +82,7 @@
     <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>10.0.0-beta.25353.1</MicrosoftDotNetXUnitExtensionsVersion>
     <NuGetBuildTasksVersion>6.15.0-preview.1.86</NuGetBuildTasksVersion>
-    <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25353.13</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25358.1</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
   <PropertyGroup>
     <BootstrapSdkVersion>10.0.100-preview.6.25315.102</BootstrapSdkVersion>
