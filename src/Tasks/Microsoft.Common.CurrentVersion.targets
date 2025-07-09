@@ -3465,7 +3465,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         StronglyTypedNamespace="%(EmbeddedResource.StronglyTypedNamespace)"
         StronglyTypedManifestPrefix="%(EmbeddedResource.StronglyTypedManifestPrefix)"
         PublicClass="%(EmbeddedResource.PublicClass)"
-        OutputResources="@(EmbeddedResource->'%(OutputResource)')"
+        OutputResources="@(EmbeddedResource->'$(IntermediateOutputPath)%(ManifestResourceName).resources')"
         Condition="'%(EmbeddedResource.Type)' == 'Resx' and '%(EmbeddedResource.GenerateResource)' != 'false' and '$(GenerateResourceMSBuildRuntime)' != 'CLR2'"
         SdkToolsPath="$(ResgenToolPath)"
         ExecuteAsTool="$(ResGenExecuteAsTool)"
