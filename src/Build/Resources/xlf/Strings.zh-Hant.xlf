@@ -862,17 +862,17 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
+        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"，但該變數已設定為環境變數。</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
+        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"，但該變數已由另一個 SDK 設定。</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
+        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -906,7 +906,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionStarted">
         <source>Static graph construction started.</source>
-        <target state="new">Static graph construction started.</target>
+        <target state="translated">靜態圖表建構已開始。</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

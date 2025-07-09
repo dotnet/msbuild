@@ -258,6 +258,7 @@ namespace Microsoft.Build.Tasks
 #else
                     using (Stream destination = File.Open(destinationPath.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
 #endif
+#pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
                     using (Stream stream = zipArchiveEntry.Open())
                     {
                         stream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
@@ -265,6 +266,7 @@ namespace Microsoft.Build.Tasks
                             .GetAwaiter()
                             .GetResult();
                     }
+#pragma warning restore CA2025
 
                     destinationPath.LastWriteTimeUtc = zipArchiveEntry.LastWriteTime.UtcDateTime;
                 }
