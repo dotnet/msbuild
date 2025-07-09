@@ -3488,10 +3488,8 @@ namespace Microsoft.Build.CommandLine
                     // TaskHost nodes don't need to worry about node reuse or low priority. Node reuse is always off, and TaskHosts
                     // receive a connection immediately after being launched and shut down as soon as their work is over, so
                     // whatever our priority is is correct.
-                    // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                    shutdownReason = node.Run(out nodeException, nodeReuse);
+                    shutdownReason = node.Run(out nodeException);
                 }
                 else if (nodeModeNumber == 3)
                 {
