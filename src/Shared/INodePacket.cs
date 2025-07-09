@@ -3,6 +3,8 @@
 
 #nullable disable
 
+using System.IO;
+
 namespace Microsoft.Build.BackEnd
 {
     #region Enums
@@ -200,6 +202,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         ProcessReport,
 
+        // Server command packets with hardcoded values that don't have the 6th bit set.
+        // It is reserved for ExtendedHeaderFlag (0x40 = 0100 0000).
+        // Do not set it for any other packet types to avoid conflicts.
+        #region ServerNode enums 
+
         /// <summary>
         /// A request contains the inputs to the RAR task.
         /// </summary>
@@ -212,27 +219,29 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Command in form of MSBuild command line for server node - MSBuild Server.
-        /// Keep this enum value constant intact as this is part of contract with dotnet CLI
+        /// Keep this enum value constant intact as this is part of contract with dotnet CLI.
         /// </summary>
-        ServerNodeBuildCommand = 0xF0,
+        ServerNodeBuildCommand = 0x90, // Binary: 10010000
 
         /// <summary>
         /// Response from server node command
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        ServerNodeBuildResult = 0xF1,
+        ServerNodeBuildResult = 0x91, // Binary: 10010001
 
         /// <summary>
         /// Info about server console activity.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        ServerNodeConsoleWrite = 0xF2,
+        ServerNodeConsoleWrite = 0x92, // Binary: 10010010
 
         /// <summary>
         /// Command to cancel ongoing build.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
-        ServerNodeBuildCancel = 0xF3,
+        ServerNodeBuildCancel = 0x93, // Binary: 10010011
+
+        #endregion
     }
     #endregion
 
@@ -250,6 +259,43 @@ namespace Microsoft.Build.BackEnd
         {
             get;
         }
+
         #endregion
+    }
+
+    internal static class PacketTypeExtensions
+    {
+        public const byte PacketVersion = 1;
+
+        private const byte ExtendedHeaderFlag = 0x40; // Bit 6 indicates extended header with version
+
+        /// <summary>
+        /// Determines if a packet has an extended header by checking if the extended header flag is set.
+        /// are never interpreted as having extended headers, even if they happen to have the flag bit set.
+        /// </summary>
+        /// <param name="rawType">The raw packet type byte.</param>
+        /// <returns>True if the packet has an extended header, false otherwise</returns>
+        public static bool HasExtendedHeader(byte rawType) => (rawType & ExtendedHeaderFlag) != 0;
+
+        // Get base type, stripping the extended header flag
+        public static NodePacketType GetNodePacketType(byte rawType) => (NodePacketType)(rawType & ~ExtendedHeaderFlag);
+
+        // Create a type with extended header flag
+        public static byte CreateExtendedHeaderType(NodePacketType type) => (byte)((byte)type | ExtendedHeaderFlag);
+
+        // Read extended header (returns version)
+        public static byte ReadVersion(Stream stream)
+        {
+            int value = stream.ReadByte();
+            if (value == -1)
+            {
+                throw new EndOfStreamException("Unexpected end of stream while reading version");
+            }
+
+            return (byte)value;
+        }
+
+        // Write extended header with version
+        public static void WriteVersion(Stream stream, byte version) => stream.WriteByte(version);
     }
 }

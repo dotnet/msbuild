@@ -9,6 +9,10 @@
     <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ExampleNetTask\ExampleTask.csproj" />
+  </ItemGroup>
+
   <UsingTask
 	    TaskName="ExampleTask"
       AssemblyFile="$(ExampleTaskPath)"

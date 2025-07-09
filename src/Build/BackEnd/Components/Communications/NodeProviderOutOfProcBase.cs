@@ -787,13 +787,19 @@ namespace Microsoft.Build.BackEnd
                         // clear the buffer but keep the underlying capacity to avoid reallocations
                         writeStream.SetLength(0);
 
+                        NodePacketType packetType = packet.Type;
+
                         try
                         {
-                            writeStream.WriteByte((byte)packet.Type);
+                            // Write packet type with extended header.
+                            byte rawPackageType = PacketTypeExtensions.CreateExtendedHeaderType(packetType);
+                            writeStream.WriteByte(rawPackageType);
 
                             // Pad for the packet length
                             WriteInt32(writeStream, 0);
-                            packet.Translate(writeTranslator);
+
+                            // Write extended header with version
+                            PacketTypeExtensions.WriteVersion(writeStream, PacketTypeExtensions.PacketVersion);
 
                             int writeStreamLength = (int)writeStream.Position;
 

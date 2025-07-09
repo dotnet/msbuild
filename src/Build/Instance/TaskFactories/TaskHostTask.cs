@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of parameters used to decide which host to launch.
         /// </summary>
-        private IDictionary<string, string> _taskHostParameters;
+        private Dictionary<string, string> _taskHostParameters;
 
         /// <summary>
         /// The type of the task that we are wrapping.
@@ -140,7 +140,7 @@ namespace Microsoft.Build.BackEnd
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
-            IDictionary<string, string> taskHostParameters,
+            Dictionary<string, string> taskHostParameters,
             LoadedType taskType,
             bool taskHostFactoryExplicitlyRequested
 #if FEATURE_APPDOMAIN
@@ -596,7 +596,7 @@ namespace Microsoft.Build.BackEnd
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters).MSBuildAssemblyPath;
             }
 #endif
             string msbuildLocation = taskHostLocation ??

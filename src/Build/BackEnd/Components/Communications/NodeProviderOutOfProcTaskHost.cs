@@ -43,11 +43,6 @@ namespace Microsoft.Build.BackEnd
         private static string s_baseTaskHostPathArm64;
 
         /// <summary>
-        /// Store the NET path for MSBuildTaskHost so that we don't have to keep recalculating it.
-        /// </summary>
-        private static string s_baseTaskHostPathNet;
-
-        /// <summary>
         /// Store the path for the 32-bit MSBuildTaskHost so that we don't have to keep re-calculating it.
         /// </summary>
         private static string s_pathToX32Clr2;
@@ -474,18 +469,44 @@ namespace Microsoft.Build.BackEnd
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
         /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext)
+        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, Dictionary<string, string> taskHostParameters)
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            s_baseTaskHostPathNet ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryNET;
-
+            string runtimeHostPath = null;
             string msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, Constants.MSBuildAssemblyName);
-            string runtimeHostPath = Path.Combine(s_baseTaskHostPathNet, Constants.DotnetProcessName);
+
+            _ = taskHostParameters.TryGetValue(Constants.DotnetHostPath, out runtimeHostPath);
+
+            if (string.IsNullOrEmpty(msbuildAssemblyPath) && taskHostParameters.TryGetValue(Constants.MSBuildAssemblyPath, out string resolvedAssemblyPath))
+            {
+                ValidateNetHostSdkVersion(resolvedAssemblyPath);
+                msbuildAssemblyPath = Path.Combine(resolvedAssemblyPath, Constants.MSBuildAssemblyName);
+            }
 
             // Current process is .NET Framework, but handshake requests .NET
             // Launch dotnet host and path to MSBuild.dll
             return (runtimeHostPath, msbuildAssemblyPath);
+
+            static void ValidateNetHostSdkVersion(string path)
+            {
+                const int minimumSdkVersion = 10;
+                const string errorMessage = $"Net TaskHost is only supported in SDK version 10 or later.";
+
+                if (string.IsNullOrEmpty(path))
+                {
+                    ErrorUtilities.ThrowInternalError("SDK path cannot be null or empty.");
+                    return;
+                }
+
+                string lastDirectoryName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
+
+                if (int.TryParse(lastDirectoryName.Substring(0, lastDirectoryName.IndexOf('.')), out int majorVersion)
+                    && ((majorVersion < minimumSdkVersion) || lastDirectoryName.Contains("preview")))
+                {
+                    ErrorUtilities.ThrowInternalError($"SDK version {majorVersion} is below the minimum required version. {errorMessage}");
+                }
+            }
         }
 
         private static string GetOrInitializeX64Clr2Path(string toolName)
@@ -521,12 +542,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Make sure a node in the requested context exists.
         /// </summary>
-        internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
+        internal bool AcquireAndSetUpHost(
+            HandshakeOptions hostContext,
+            INodePacketFactory factory,
+            INodePacketHandler handler,
+            TaskHostConfiguration configuration,
+            Dictionary<string, string> taskHostParameters)
         {
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(hostContext))
             {
-                nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
+                nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration, taskHostParameters);
             }
             else
             {
@@ -562,7 +588,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates a new MSBuild or MSBuildTaskHost process acting as a child node.
         /// </summary>
-        internal bool CreateNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
+        internal bool CreateNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, Dictionary<string, string> taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
@@ -584,7 +610,7 @@ namespace Microsoft.Build.BackEnd
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
             {
-                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext);
+                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext, taskHostParameters);
 
                 CommunicationsUtilities.Trace("For a host context of {0}, spawning dotnet.exe from {1}.", hostContext.ToString(), msbuildAssemblyPath);
 
