@@ -9,7 +9,7 @@ Currently, MSBuild supports parallel builds (a critical feature for a build syst
 There are several components of MSBuild that are relevant to parallel builds. In the following sections we'll describe how they interact in the current implementation, and how we will change them to support multithreading.
 
 * The **scheduler** decides what projects to build (and where, if there are options). It deduplicates requests for the same project, ensuring that
-* **Projects** maintain mutable state, especially Properties and Items. Distinct projects can be built concurrently, and the scheduler ensures that requests for the same project are deduplicated, so that only one instance of a project is built.
+* **Projects** maintain mutable state, especially Properties and Items. Distinct projects can be built concurrently, and the scheduler ensures that requests for the same project are deduplicated, so that only one instance of a project is built. In MSBuild terminology, and the rest of this document, a Project is the combination of the project file contents + a particular bundle of global properties - this means that the same 'physical' Project may actually be part of many different Projects from the perspective of the scheduler.
 * Projects are assigned to **nodes** (worker processes) that execute the build. Once a project is assigned to a node, it is not moved to another node.
 * **Targets** are the unit of execution within a project. A target is an ordered list of tasks. Within a project, targets run sequentially, but different targets in different projects can run concurrently.
 * **Tasks** are executed in targets in projects.
