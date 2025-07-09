@@ -608,6 +608,7 @@ namespace Microsoft.Build.BackEnd
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
+            ITranslator writeTranslator = null;
 #if NET451_OR_GREATER
             Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
@@ -728,7 +729,7 @@ namespace Microsoft.Build.BackEnd
                                 var packetStream = _packetStream;
                                 packetStream.SetLength(0);
 
-                                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
+                                writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
 
                                 packetStream.WriteByte((byte)packet.Type);
 
