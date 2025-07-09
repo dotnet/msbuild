@@ -27,7 +27,7 @@ Instead of the problematic APIs listed below, thread-safe tasks should:
 1. **Use `ITaskExecutionContext`** for all file system operations, environment variable changes, and working directory changes.
 1. **Always use absolute paths** when still using some standard .NET file system APIs.
 1. **Explicitly configure external processes** with working directory and environment variables.
-1. **Never Modify Process Culture**: Avoid setting `CultureInfo.CurrentCulture` or `CultureInfo.CurrentUICulture`.
+1. **Never modify process culture**: Avoid modifying culture defaults.
 ### Additional Considerations
 
 ## Detailed API Reference
@@ -40,7 +40,7 @@ The following tables list specific .NET APIs and their threading safety classifi
 |-----|-------|--------------|-------|
 | `Path.GetFullPath(string path)` | ERROR | Uses current working directory | Use MSBuild API |
 
-**TODO** Check other methods and exclude for them any indirect dependency on working directory.
+**TODO**: Check other methods and exclude any indirect dependency on working directory.
 
 ### System.IO.File Class
 
@@ -62,7 +62,7 @@ The following tables list specific .NET APIs and their threading safety classifi
 | `Environment.CurrentDirectory` (getter, setter) | ERROR | Accesses process-level state | Use MSBuild API |
 | `Environment.Exit(int exitCode)` | ERROR | Terminates entire process | Return false from task or throw exception |
 | `Environment.FailFast` all overloads | ERROR | Terminates entire process | Return false from task or throw exception |
-| All ohter methods | ERROR | Modifies process-level state | Use MSBuild API |
+| All other methods | ERROR | Modifies process-level state | Use MSBuild API |
 
 ### System.IO.FileInfo Class
 
@@ -96,7 +96,7 @@ The following tables list specific .NET APIs and their threading safety classifi
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-|  All properties setters | ERROR | Modifies process-level state | Aviod |
+| All properties setters | ERROR | Modifies process-level state | Avoid |
 | `Process.GetCurrentProcess().Kill()` | ERROR | Terminates entire process |  |
 | `Process.GetCurrentProcess().Kill(bool entireProcessTree)` | ERROR | Terminates entire process |  |
 | `Process.Start(string fileName)` | ERROR | Inherits process state | Inherits environment and working directory |
@@ -114,8 +114,6 @@ The following tables list specific .NET APIs and their threading safety classifi
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| `CultureInfo.CurrentCulture` (setter) | ERROR | Modifies process-wide culture | Modify the thread culture instead |
-| `CultureInfo.CurrentUICulture` (setter) | ERROR | Modifies process-wide culture | Modify the thread culture instead |
 | `CultureInfo.DefaultThreadCurrentCulture` (setter) | ERROR | Affects new threads | Modify the thread culture instead |
 | `CultureInfo.DefaultThreadCurrentUICulture` (setter) | ERROR | Affects new threads | Modify the thread culture instead |
 
@@ -149,4 +147,4 @@ Tasks that load assemblies dynamically in the task host may cause version confli
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| `[DllImport]` attribute | WARNING | Not covered by analysers | Review for thread safety, use absolute paths |
+| `[DllImport]` attribute | WARNING | Not covered by analyzers | Review for thread safety, use absolute paths |
