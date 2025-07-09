@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks
         private readonly Dictionary<string, AssemblyNameExtension> _externallyResolvedImmutableFiles = new Dictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
-        private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
+        private IEnumerable<DependentAssembly> _remappedAssemblies = [];
 
         /// <summary>If true, then search for dependencies.</summary>
         private readonly bool _findDependencies;
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Tasks
         private readonly bool _doNotCopyLocalIfInGac;
 
         /// <summary>
-        ///  Shoould the framework attribute version mismatch be ignored.
+        ///  Should the framework attribute version mismatch be ignored.
         /// </summary>
         private readonly bool _ignoreFrameworkAttributeVersionMismatch;
 
@@ -145,7 +145,17 @@ namespace Microsoft.Build.Tasks
         private readonly GetAssemblyPathInGac _getAssemblyPathInGac;
 
         /// <summary>
-        /// Should a warning or error be emitted on architecture mismatch
+        /// Contains the list of directories that should NOT be considered as custom culture directories.
+        /// </summary>
+        private readonly string[] _nonCultureResourceDirectories = [];
+
+        /// <summary>
+        /// Is true, custom culture processing is enabled.
+        /// </summary>
+        private readonly bool _enableCustomCulture = false;
+
+        /// <summary>
+        /// Should a warning or error be emitted on architecture mismatch.
         /// </summary>
         private readonly WarnOrErrorOnTargetArchitectureMismatchBehavior _warnOrErrorOnTargetArchitectureMismatch = WarnOrErrorOnTargetArchitectureMismatchBehavior.Warning;
 
@@ -174,6 +184,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="findSatellites">If true, then search for satellite files.</param>
         /// <param name="findSerializationAssemblies">If true, then search for serialization assembly files.</param>
         /// <param name="findRelatedFiles">If true, then search for related files.</param>
+        /// <param name="enableCustomCulture">If true, custom culture processing is enabled.</param>
         /// <param name="searchPaths">Paths to search for dependent assemblies on.</param>
         /// <param name="relatedFileExtensions"></param>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
@@ -206,6 +217,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+        /// <param name="nonCultureResourceDirectories"></param>
 #else
         /// <summary>
         /// Construct.
@@ -215,13 +227,14 @@ namespace Microsoft.Build.Tasks
         /// <param name="findSatellites">If true, then search for satellite files.</param>
         /// <param name="findSerializationAssemblies">If true, then search for serialization assembly files.</param>
         /// <param name="findRelatedFiles">If true, then search for related files.</param>
+        /// <param name="enableCustomCulture">If true, custom culture processing is enabled.</param>
         /// <param name="searchPaths">Paths to search for dependent assemblies on.</param>
         /// <param name="relatedFileExtensions"></param>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
         /// <param name="resolvedSDKItems">Resolved sdk items</param>
         /// <param name="frameworkPaths">Path to the FX.</param>
         /// <param name="installedAssemblies">Installed assembly XML tables.</param>
-        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targetted.</param>
+        /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targeted.</param>
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
         /// <param name="directoryExists">Delegate used for files.</param>
         /// <param name="getDirectories">Delegate used for getting directories.</param>
@@ -234,7 +247,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="targetedRuntimeVersion">Version of the runtime to target.</param>
         /// <param name="projectTargetFramework">Version of the framework targeted by the project.</param>
         /// <param name="targetFrameworkMoniker">Target framework moniker we are targeting.</param>
-        /// <param name="log">Logging helper to allow the logging of meessages from the Reference Table.</param>
+        /// <param name="log">Logging helper to allow the logging of messages from the Reference Table.</param>
         /// <param name="latestTargetFrameworkDirectories"></param>
         /// <param name="copyLocalDependenciesWhenParentReferenceInGac"></param>
         /// <param name="doNotCopyLocalIfInGac"></param>
@@ -244,6 +257,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader"></param>
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
+        /// <param name="nonCultureResourceDirectories"></param>
 #endif
         internal ReferenceTable(
             IBuildEngine buildEngine,
@@ -251,6 +265,7 @@ namespace Microsoft.Build.Tasks
             bool findSatellites,
             bool findSerializationAssemblies,
             bool findRelatedFiles,
+            bool enableCustomCulture,
             string[] searchPaths,
             string[] allowedAssemblyExtensions,
             string[] relatedFileExtensions,
@@ -284,7 +299,8 @@ namespace Microsoft.Build.Tasks
             WarnOrErrorOnTargetArchitectureMismatchBehavior warnOrErrorOnTargetArchitectureMismatch,
             bool ignoreFrameworkAttributeVersionMismatch,
             bool unresolveFrameworkAssembliesFromHigherFrameworks,
-            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache)
+            ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
+            string[] nonCultureResourceDirectories)
         {
             _log = log;
             _findDependencies = findDependencies;
@@ -317,6 +333,8 @@ namespace Microsoft.Build.Tasks
             _warnOrErrorOnTargetArchitectureMismatch = warnOrErrorOnTargetArchitectureMismatch;
             _ignoreFrameworkAttributeVersionMismatch = ignoreFrameworkAttributeVersionMismatch;
             _assemblyMetadataCache = assemblyMetadataCache;
+            _nonCultureResourceDirectories = nonCultureResourceDirectories;
+            _enableCustomCulture = enableCustomCulture;
 
             // Set condition for when to check assembly version against the target framework version
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -817,7 +835,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
             position += component.Length + 1;
-            int nextDelimiter = fusionName.IndexOfAny(new[] { ',', ' ' }, position);
+            int nextDelimiter = fusionName.IndexOfAny([',', ' '], position);
             if (nextDelimiter == -1)
             {
                 value = fusionName.Substring(position);
@@ -971,7 +989,9 @@ namespace Microsoft.Build.Tasks
                     // Is there a candidate satellite in that folder?
                     string cultureName = Path.GetFileName(subDirectory);
 
-                    if (CultureInfoCache.IsValidCultureString(cultureName))
+                    // Custom or unknown cultures can be met only if the feature is enabled and the directory was not added to the exclusion list.
+                    if ((_enableCustomCulture && !_nonCultureResourceDirectories.Contains(cultureName))
+                        || CultureInfoCache.IsValidCultureString(cultureName))
                     {
                         string satelliteAssembly = Path.Combine(subDirectory, satelliteFilename);
                         if (_fileExists(satelliteAssembly))
@@ -1240,7 +1260,7 @@ namespace Microsoft.Build.Tasks
             if (!parentReferencesAdded.Contains(parentReferenceFolder) && !parentReferenceResolvedFromGAC && !parentReferenceResolvedFromAssemblyFolders)
             {
                 parentReferencesAdded.Add(parentReferenceFolder);
-                parentReferenceFolders.Add(new (Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
+                parentReferenceFolders.Add(new(Directory: parentReferenceFolder, ParentAssembly: parentReference.FullPath));
             }
         }
 
@@ -1290,7 +1310,7 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add(new Resolver[] { new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion) });
+                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion)]);
             }
             else
             {
@@ -2541,8 +2561,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private bool CompareAssembliesIgnoringVersion(AssemblyName a, AssemblyName b)
         {
-            ErrorUtilities.VerifyThrowInternalNull(a, nameof(a));
-            ErrorUtilities.VerifyThrowInternalNull(b, nameof(b));
+            ErrorUtilities.VerifyThrowInternalNull(a);
+            ErrorUtilities.VerifyThrowInternalNull(b);
 
             if (a == b)
             {

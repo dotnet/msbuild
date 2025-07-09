@@ -110,7 +110,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public virtual SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
-                        // If we are running in .NET core, we ask the built-in default resolver first.
+            // If we are running in .NET core, we ask the built-in default resolver first.
             // - It is a perf optimization (no need to discover and load any of the plug-in assemblies to resolve an "in-box" Sdk).
             // - It brings `dotnet build` to parity with `MSBuild.exe` functionally, as the Framework build of Microsoft.DotNet.MSBuildSdkResolver
             //   contains the same logic and it is the first resolver in priority order.
@@ -350,7 +350,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 SetResolverState(submissionId, sdkResolver, context.State);
 
-                result ??= (SdkResult)resultFactory.IndicateFailure(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", sdkResolver.Name) }, Array.Empty<string>());
+                result ??= (SdkResult)resultFactory.IndicateFailure([ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", sdkResolver.Name)], []);
 
                 if (result.Success)
                 {
@@ -381,8 +381,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 results.Add(result);
             }
 
-            warnings = results.SelectMany(r => r.Warnings ?? Array.Empty<string>());
-            errors = results.SelectMany(r => r.Errors ?? Array.Empty<string>());
+            warnings = results.SelectMany(r => r.Warnings ?? []);
+            errors = results.SelectMany(r => r.Errors ?? []);
 
             sdkResult = new SdkResult(sdk, null, null);
             return false;

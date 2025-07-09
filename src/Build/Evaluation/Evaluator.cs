@@ -12,7 +12,6 @@ using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -159,6 +158,11 @@ namespace Microsoft.Build.Evaluation
         private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        private readonly ICollection<string> _propertiesFromCommandLine;
+
+        /// <summary>
         /// The cache to consult for any imports that need loading.
         /// </summary>
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
@@ -201,6 +205,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            ICollection<string> propertiesFromCommandLine,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
             IDirectoryCacheFactory directoryCacheFactory,
@@ -213,11 +218,11 @@ namespace Microsoft.Build.Evaluation
             ILoggingService loggingService,
             BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data, nameof(data));
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
-            ErrorUtilities.VerifyThrowInternalNull(evaluationContext, nameof(evaluationContext));
-            ErrorUtilities.VerifyThrowInternalNull(loggingService, nameof(loggingService));
-            ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
+            ErrorUtilities.VerifyThrowInternalNull(data);
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
+            ErrorUtilities.VerifyThrowInternalNull(evaluationContext);
+            ErrorUtilities.VerifyThrowInternalNull(loggingService);
+            ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
 
             _evaluationLoggingContext = new EvaluationLoggingContext(
                 loggingService,
@@ -253,6 +258,7 @@ namespace Microsoft.Build.Evaluation
             _loadSettings = loadSettings;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
+            _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
             _itemFactory = itemFactory;
             _projectRootElementCache = projectRootElementCache;
             _sdkResolverService = sdkResolverService;
@@ -301,6 +307,7 @@ namespace Microsoft.Build.Evaluation
             ProjectLoadSettings loadSettings,
             int maxNodeCount,
             PropertyDictionary<ProjectPropertyInstance> environmentProperties,
+            ICollection<string> propertiesFromCommandLine,
             ILoggingService loggingService,
             IItemFactory<I, I> itemFactory,
             IToolsetProvider toolsetProvider,
@@ -321,6 +328,7 @@ namespace Microsoft.Build.Evaluation
                 loadSettings,
                 maxNodeCount,
                 environmentProperties,
+                propertiesFromCommandLine,
                 itemFactory,
                 toolsetProvider,
                 directoryCacheFactory,
@@ -362,7 +370,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped, nameof(unevaluatedIncludeEscaped));
+            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped);
 
             List<I> items = new List<I>();
             itemFactory.ItemElement = itemElement;
@@ -1240,7 +1248,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Put all the global properties into our property bag
+        /// Put all the global properties into our property bag.
         /// </summary>
         private int AddGlobalProperties()
         {
@@ -1251,7 +1259,13 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
-                _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
+                _ = _data.SetProperty(
+                    globalProperty.Name,
+                    ((IProperty)globalProperty).EvaluatedValueEscaped,
+                    isGlobalProperty: true /* it is a global property, but it comes from command line and is tracked separately */,
+                    mayBeReserved: false /* may NOT be a reserved name */,
+                    loggingContext: _evaluationLoggingContext,
+                    isCommandLineProperty: _propertiesFromCommandLine.Contains(globalProperty.Name) /* IS coming from command line argument */);
             }
 
             return _data.GlobalPropertiesDictionary.Count;
@@ -1912,12 +1926,17 @@ namespace Microsoft.Build.Evaluation
             propertiesAndItemsHash = hash.ToHashCode();
 #endif
 
-            // Generate a unique filename for the generated project for each unique set of properties and items.
-            string projectPath = _projectRootElement.FullPath + ".SdkResolver." + propertiesAndItemsHash + ".proj";
+            // Generate a unique filename for the generated project for each unique set of properties and items that ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            // _projectRootElement.FullPath can be null. This can be in the case when Project is created from XmlReader. For that case we generate filename like "{Guid}.SdkResolver.{propertiesAndItemsHash}.proj in the current directory.
+            // Otherwise the project is in the same directory as _projectRootElement and has a name of the same project and ends like ".SdkResolver.{propertiesAndItemsHash}.proj".
+            string projectNameEnding = $".SdkResolver.{propertiesAndItemsHash}.proj";
+            string projectPath = _projectRootElement.FullPath != null ?
+             _projectRootElement.FullPath + projectNameEnding :
+             FileUtilities.NormalizePath(Guid.NewGuid() + projectNameEnding);
 
             ProjectRootElement InnerCreate(string _, ProjectRootElementCacheBase __)
             {
-                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectRootElement project = ProjectRootElement.CreateEphemeral(_projectRootElementCache);
                 project.FullPath = projectPath;
 
                 if (sdkResult.PropertiesToAdd?.Any() == true)
@@ -2239,7 +2258,7 @@ namespace Microsoft.Build.Evaluation
                             VerifyVSDistributionPath(importElement.Project, importLocationInProject);
 
                             ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectNotFound",
-                                                                      importFileUnescaped, importExpressionEscaped);
+                                                                      importFileUnescaped, unescapedExpression, importExpressionEscaped);
                         }
                         else
                         {

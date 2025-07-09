@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
@@ -40,9 +41,11 @@ public class ItemsHolder(IEnumerable<ProjectItemElement> items, IEnumerable<Proj
 }
 
 /// <summary>
-/// BuildCheck OM data representing the evaluated items of a project.
+/// BuildCheck OM data representing the evaluated items of a project - but only those defined within the project!.
+/// No explicit nor implicit imports are regarded. If you are looking the get all evaluated items - use <see cref="EvaluatedItemsCheckData"/>
 /// </summary>
-public class ParsedItemsCheckData : CheckData
+[Obsolete("Use EvaluatedItemsData for access to evaluated items.", false)]
+public sealed class ParsedItemsCheckData : CheckData
 {
     internal ParsedItemsCheckData(
         string projectFilePath,
@@ -51,6 +54,36 @@ public class ParsedItemsCheckData : CheckData
         base(projectFilePath, projectConfigurationId) => ItemsHolder = itemsHolder;
 
     public ItemsHolder ItemsHolder { get; }
+}
+
+/// <summary>
+/// BuildCheck OM data representing the evaluated items of a project.
+/// </summary>
+public sealed class EvaluatedItemsCheckData : CheckData
+{
+    internal EvaluatedItemsCheckData(
+        ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
+        : base(evaluationFinishedEventArgs.ProjectFile!, evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId)
+    {
+        _evaluationFinishedEventArgs = evaluationFinishedEventArgs;
+    }
+
+    private readonly ProjectEvaluationFinishedEventArgs _evaluationFinishedEventArgs;
+
+    /// <summary>
+    /// Lazy enumerates evaluated items for a current project.
+    /// </summary>
+    public IEnumerable<ItemData> EvaluatedItems => _evaluationFinishedEventArgs.EnumerateItems();
+
+    /// <summary>
+    /// Lazy enumerates evaluated items for a current project. Only items with matching type will be returned (case-insensitive, MSBuild valid names only).
+    /// </summary>
+    public IEnumerable<ItemData> EnumerateItemsOfType(string typeName) => _evaluationFinishedEventArgs.EnumerateItemsOfType(typeName);
+
+    /// <summary>
+    /// Lazy enumerates evaluated items for a current project. Only items with matching type will be returned (case-insensitive, MSBuild valid names only, matching any type from the given list).
+    /// </summary>
+    public IEnumerable<ItemData> EnumerateItemsOfTypes(string[] typeNames) => _evaluationFinishedEventArgs.EnumerateItemsOfTypes(typeNames);
 }
 
 /// <summary>

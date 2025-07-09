@@ -35,7 +35,7 @@ namespace Microsoft.Build.Execution
         protected internal BuildSubmissionBase(BuildManager buildManager, int submissionId, TRequestData requestData)
             : base(buildManager, submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(requestData, nameof(requestData));
+            ErrorUtilities.VerifyThrowArgumentNull(requestData);
             BuildRequestData = requestData;
         }
 
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CompleteResults(TResultData result)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowArgumentNull(result);
             CheckResultValidForCompletion(result);
 
             BuildResult ??= result;
@@ -187,7 +187,7 @@ namespace Microsoft.Build.Execution
             ExecuteAsync(null, null, _legacyThreadingSemantics);
             if (_legacyThreadingSemantics)
             {
-                RequestBuilder.WaitWithBuilderThreadStart(new[] { WaitHandle }, false, legacyThreadingData, SubmissionId);
+                RequestBuilder.WaitWithBuilderThreadStart([WaitHandle], false, legacyThreadingData, SubmissionId);
             }
             else
             {

@@ -293,7 +293,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if successful</returns>
         private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(lookup, nameof(lookup));
+            ErrorUtilities.VerifyThrowArgumentNull(lookup);
 
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             TaskHost taskHost = null;
@@ -428,6 +428,9 @@ namespace Microsoft.Build.BackEnd
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
+                        // Can be condition with _componentHost.BuildParameters.IsTelemetryEnabled) - but it's a cheap call
+                        taskFactoryWrapper?.Statistics?.ExecutionStarted();
+
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
                         try
@@ -476,6 +479,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
+                            taskFactoryWrapper?.Statistics?.ExecutionStopped();
 
                             if (taskResult.ResultCode == WorkUnitResultCode.Failed && _continueOnError == ContinueOnError.WarnAndContinue)
                             {

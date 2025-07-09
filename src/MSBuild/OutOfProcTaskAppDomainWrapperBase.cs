@@ -125,7 +125,7 @@ namespace Microsoft.Build.CommandLine
                                 TaskCompleteType.CrashedDuringInitialization,
                                 exceptionToReturn,
                                 "TaskInstantiationFailureError",
-                                new string[] { taskName, taskLocation, String.Empty });
+                                [taskName, taskLocation, String.Empty]);
             }
 
             OutOfProcTaskHostTaskResult taskResult;
@@ -142,7 +142,7 @@ namespace Microsoft.Build.CommandLine
                                                     TaskCompleteType.CrashedDuringInitialization,
                                                     null,
                                                     "TaskInstantiationFailureNotSupported",
-                                                    new string[] { taskName, taskLocation, typeof(RunInSTAAttribute).FullName });
+                                                    [taskName, taskLocation, typeof(RunInSTAAttribute).FullName]);
 #endif
             }
             else
@@ -318,7 +318,7 @@ namespace Microsoft.Build.CommandLine
                     TaskCompleteType.CrashedDuringInitialization,
                     exceptionToReturn,
                     "TaskInstantiationFailureError",
-                    new string[] { taskName, taskLocation, String.Empty });
+                    [taskName, taskLocation, String.Empty]);
             }
 
             foreach (KeyValuePair<string, TaskParameter> param in taskParams)
@@ -335,7 +335,7 @@ namespace Microsoft.Build.CommandLine
                                 // If it's a TargetInvocationException, we only care about the contents of the inner exception, so save that instead.
                                 e is TargetInvocationException ? e.InnerException : e,
                                 "InvalidTaskAttributeError",
-                                new string[] { param.Key, param.Value.ToString(), taskName });
+                                [param.Key, param.Value.ToString(), taskName]);
                 }
             }
 

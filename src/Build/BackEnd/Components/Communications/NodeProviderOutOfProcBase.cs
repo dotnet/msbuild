@@ -10,6 +10,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 #if FEATURE_PIPE_SECURITY
 using System.Security.Principal;
@@ -17,8 +18,6 @@ using System.Security.Principal;
 
 #if FEATURE_APM
 using Microsoft.Build.Eventing;
-#else
-using System.Threading;
 #endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -56,6 +55,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
 
+#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+        private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
+#endif
         /// <summary>
         /// The build component host.
         /// </summary>
@@ -95,7 +97,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
             context.SendData(packet);
         }
 
@@ -152,7 +154,7 @@ namespace Microsoft.Build.BackEnd
             string msbuildtaskhostExeName = NodeProviderOutOfProcTaskHost.TaskHostNameForClr2TaskHost;
 
             // Search for all instances of msbuildtaskhost process and add them to the process list
-            nodeProcesses.AddRange(new List<Process>(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName))));
+            nodeProcesses.AddRange(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName)));
 
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
@@ -237,11 +239,12 @@ namespace Microsoft.Build.BackEnd
 #endif
             ConcurrentQueue<NodeContext> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();
+            int currentProcessId = EnvironmentUtilities.CurrentProcessId;
             Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, (nodeId) =>
             {
                 try
                 {
-                    if (!TryReuseAnyFromPossibleRunningNodes(nodeId) && !StartNewNode(nodeId))
+                    if (!TryReuseAnyFromPossibleRunningNodes(currentProcessId, nodeId) && !StartNewNode(nodeId))
                     {
                         // We were unable to reuse or launch a node.
                         CommunicationsUtilities.Trace("FAILED TO CONNECT TO A CHILD NODE");
@@ -260,12 +263,12 @@ namespace Microsoft.Build.BackEnd
 
             return nodeContexts.ToList();
 
-            bool TryReuseAnyFromPossibleRunningNodes(int nodeId)
+            bool TryReuseAnyFromPossibleRunningNodes(int currentProcessId, int nodeId)
             {
                 while (possibleRunningNodes != null && possibleRunningNodes.TryDequeue(out var nodeToReuse))
                 {
                     CommunicationsUtilities.Trace("Trying to connect to existing process {2} with id {1} to establish node {0}...", nodeId, nodeToReuse.Id, nodeToReuse.ProcessName);
-                    if (nodeToReuse.Id == Process.GetCurrentProcess().Id)
+                    if (nodeToReuse.Id == currentProcessId)
                     {
                         continue;
                     }
@@ -421,7 +424,7 @@ namespace Microsoft.Build.BackEnd
         //  on non-Windows operating systems
         private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+            SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
 #if FEATURE_PIPE_SECURITY
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
 #else
@@ -576,7 +579,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// A queue used for enqueuing packets to write to the stream asynchronously.
             /// </summary>
-            private BlockingCollection<INodePacket> _packetWriteQueue = new BlockingCollection<INodePacket>();
+            private ConcurrentQueue<INodePacket> _packetWriteQueue = new ConcurrentQueue<INodePacket>();
 
             /// <summary>
             /// A task representing the last packet write, so we can chain packet writes one after another.
@@ -711,7 +714,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _exitPacketState = ExitPacketState.ExitPacketQueued;
                 }
-                _packetWriteQueue.Add(packet);
+                _packetWriteQueue.Enqueue(packet);
                 DrainPacketQueue();
             }
 
@@ -733,64 +736,62 @@ namespace Microsoft.Build.BackEnd
                 {
                     // average latency between the moment this runs and when the delegate starts
                     // running is about 100-200 microseconds (unless there's thread pool saturation)
-                    _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(_ =>
+                    _packetWriteDrainTask = _packetWriteDrainTask.ContinueWith(
+                        SendDataCoreAsync,
+                        this,
+                        TaskScheduler.Default).Unwrap();
+
+                    static async Task SendDataCoreAsync(Task _, object state)
                     {
-                        while (_packetWriteQueue.TryTake(out var packet))
+                        NodeContext context = (NodeContext)state;
+                        while (context._packetWriteQueue.TryDequeue(out var packet))
                         {
-                            SendDataCore(packet);
+                            MemoryStream writeStream = context._writeBufferMemoryStream;
+
+                            // clear the buffer but keep the underlying capacity to avoid reallocations
+                            writeStream.SetLength(0);
+
+                            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
+                            try
+                            {
+                                writeStream.WriteByte((byte)packet.Type);
+
+                                // Pad for the packet length
+                                WriteInt32(writeStream, 0);
+                                packet.Translate(writeTranslator);
+
+                                int writeStreamLength = (int)writeStream.Position;
+
+                                // Now plug in the real packet length
+                                writeStream.Position = 1;
+                                WriteInt32(writeStream, writeStreamLength - 5);
+
+                                byte[] writeStreamBuffer = writeStream.GetBuffer();
+
+                                for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
+                                {
+                                    int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                                    await context._serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite, CancellationToken.None);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+                                }
+
+                                if (IsExitPacket(packet))
+                                {
+                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                }
+                            }
+                            catch (IOException e)
+                            {
+                                // Do nothing here because any exception will be caught by the async read handler
+                                CommunicationsUtilities.Trace(context._nodeId, "EXCEPTION in SendData: {0}", e);
+                            }
+                            catch (ObjectDisposedException) // This happens if a child dies unexpectedly
+                            {
+                                // Do nothing here because any exception will be caught by the async read handler
+                            }
                         }
-                    }, TaskScheduler.Default);
-                }
-            }
-
-            /// <summary>
-            /// Actually writes and sends the packet. This can't be called in parallel
-            /// because it reuses the _writeBufferMemoryStream, and this is why we use
-            /// the _packetWriteDrainTask to serially chain invocations one after another.
-            /// </summary>
-            /// <param name="packet">The packet to send.</param>
-            private void SendDataCore(INodePacket packet)
-            {
-                MemoryStream writeStream = _writeBufferMemoryStream;
-
-                // clear the buffer but keep the underlying capacity to avoid reallocations
-                writeStream.SetLength(0);
-
-                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(writeStream);
-                try
-                {
-                    writeStream.WriteByte((byte)packet.Type);
-
-                    // Pad for the packet length
-                    WriteInt32(writeStream, 0);
-                    packet.Translate(writeTranslator);
-
-                    int writeStreamLength = (int)writeStream.Position;
-
-                    // Now plug in the real packet length
-                    writeStream.Position = 1;
-                    WriteInt32(writeStream, writeStreamLength - 5);
-
-                    byte[] writeStreamBuffer = writeStream.GetBuffer();
-
-                    for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
-                    {
-                        int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
-                        _serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                     }
-                    if (IsExitPacket(packet))
-                    {
-                        _exitPacketState = ExitPacketState.ExitPacketSent;
-                    }
-                }
-                catch (IOException e)
-                {
-                    // Do nothing here because any exception will be caught by the async read handler
-                    CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in SendData: {0}", e);
-                }
-                catch (ObjectDisposedException) // This happens if a child dies unexpectedly
-                {
-                    // Do nothing here because any exception will be caught by the async read handler
                 }
             }
 
@@ -802,7 +803,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Avoid having a BinaryWriter just to write a 4-byte int
             /// </summary>
-            private void WriteInt32(MemoryStream stream, int value)
+            private static void WriteInt32(MemoryStream stream, int value)
             {
                 stream.WriteByte((byte)value);
                 stream.WriteByte((byte)(value >> 8));

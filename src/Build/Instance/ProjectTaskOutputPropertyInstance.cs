@@ -59,9 +59,9 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalLength(propertyName, nameof(propertyName));
             ErrorUtilities.VerifyThrowInternalLength(taskParameter, nameof(taskParameter));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
-            ErrorUtilities.VerifyThrowInternalNull(propertyNameLocation, nameof(propertyNameLocation));
-            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation, nameof(taskParameterLocation));
+            ErrorUtilities.VerifyThrowInternalNull(location);
+            ErrorUtilities.VerifyThrowInternalNull(propertyNameLocation);
+            ErrorUtilities.VerifyThrowInternalNull(taskParameterLocation);
 
             _propertyName = propertyName;
             _taskParameter = taskParameter;

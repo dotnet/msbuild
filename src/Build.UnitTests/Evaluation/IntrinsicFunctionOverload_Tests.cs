@@ -50,7 +50,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
                         </PropertyGroup>
                     </Project>";
 
-            string expected = ((long.MaxValue +1D) + 1).ToString();
+            string expected = ((long.MaxValue + 1D) + 1).ToString();
 
             using TestEnvironment env = TestEnvironment.Create();
 

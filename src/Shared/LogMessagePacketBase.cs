@@ -244,6 +244,16 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="BuildSubmissionStartedEventArgs"/>.
         /// </summary>
         BuildSubmissionStartedEvent = 40,
+
+        /// <summary>
+        /// Event is <see cref="BuildCanceledEventArgs"/>
+        /// </summary>
+        BuildCanceledEvent = 41,
+
+        /// <summary>
+        /// Event is <see cref="WorkerNodeTelemetryEventArgs"/>
+        /// </summary>
+        WorkerNodeTelemetryEvent = 42,
     }
     #endregion
 
@@ -269,23 +279,6 @@ namespace Microsoft.Build.Shared
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
         private static Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
-
-        /// <summary>
-        /// Dictionary of assemblies we've added to the resolver.
-        /// </summary>
-        private static HashSet<string> s_customEventsLoaded = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-#if FEATURE_APPDOMAIN
-        /// <summary>
-        /// The resolver used to load custom event types.
-        /// </summary>
-        private static TaskEngineAssemblyResolver s_resolver;
-#endif
-
-        /// <summary>
-        /// The object used to synchronize access to shared data.
-        /// </summary>
-        private static object s_lockObject = new Object();
 
         /// <summary>
         /// Delegate for translating targetfinished events.
@@ -416,25 +409,25 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void WriteToStream(ITranslator translator)
         {
-            if (_eventType != LoggingEventType.CustomEvent)
+            ErrorUtilities.VerifyThrow(_eventType != LoggingEventType.CustomEvent, "_eventType should not be a custom event");
+
+            MethodInfo methodInfo = null;
+            lock (s_writeMethodCache)
             {
-                MethodInfo methodInfo = null;
-                lock (s_writeMethodCache)
+                if (!s_writeMethodCache.TryGetValue(_eventType, out methodInfo))
                 {
-                    if (!s_writeMethodCache.TryGetValue(_eventType, out methodInfo))
-                    {
-                        Type eventDerivedType = _buildEvent.GetType();
-                        methodInfo = eventDerivedType.GetMethod("WriteToStream", BindingFlags.NonPublic | BindingFlags.Instance);
-                        s_writeMethodCache.Add(_eventType, methodInfo);
-                    }
+                    Type eventDerivedType = _buildEvent.GetType();
+                    methodInfo = eventDerivedType.GetMethod("WriteToStream", BindingFlags.NonPublic | BindingFlags.Instance);
+                    s_writeMethodCache.Add(_eventType, methodInfo);
                 }
+            }
 
-                int packetVersion = s_defaultPacketVersion;
+            int packetVersion = s_defaultPacketVersion;
 
-                // Make sure the other side knows what sort of serialization is coming
-                translator.Translate(ref packetVersion);
+            // Make sure the other side knows what sort of serialization is coming
+            translator.Translate(ref packetVersion);
 
-                bool eventCanSerializeItself = methodInfo != null;
+            bool eventCanSerializeItself = methodInfo != null;
 
 #if !TASKHOST && !MSBUILDENTRYPOINTEXE
                 if (_buildEvent is ProjectEvaluationStartedEventArgs
@@ -447,34 +440,22 @@ namespace Microsoft.Build.Shared
                 }
 #endif
 
-                translator.Translate(ref eventCanSerializeItself);
+            translator.Translate(ref eventCanSerializeItself);
 
-                if (eventCanSerializeItself)
-                {
-                    // 3.5 or later -- we have custom serialization methods, so let's use them.
-                    ArgsWriterDelegate writerMethod = (ArgsWriterDelegate)CreateDelegateRobust(typeof(ArgsWriterDelegate), _buildEvent, methodInfo);
-                    writerMethod(translator.Writer);
+            if (eventCanSerializeItself)
+            {
+                // 3.5 or later -- we have custom serialization methods, so let's use them.
+                ArgsWriterDelegate writerMethod = (ArgsWriterDelegate)CreateDelegateRobust(typeof(ArgsWriterDelegate), _buildEvent, methodInfo);
+                writerMethod(translator.Writer);
 
-                    if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
-                    {
-                        _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
-                    }
-                }
-                else
+                if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
                 {
-                    WriteEventToStream(_buildEvent, _eventType, translator);
+                    _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
                 }
             }
             else
             {
-#if FEATURE_ASSEMBLY_LOCATION
-                string assemblyLocation = _buildEvent.GetType().GetTypeInfo().Assembly.Location;
-                translator.Translate(ref assemblyLocation);
-#else
-                string assemblyName = _buildEvent.GetType().GetTypeInfo().Assembly.FullName;
-                translator.Translate(ref assemblyName);
-#endif
-                translator.TranslateDotNet(ref _buildEvent);
+                WriteEventToStream(_buildEvent, _eventType, translator);
             }
         }
 
@@ -483,88 +464,43 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void ReadFromStream(ITranslator translator)
         {
-            if (LoggingEventType.CustomEvent != _eventType)
+            ErrorUtilities.VerifyThrow(_eventType != LoggingEventType.CustomEvent, "_eventType should not be a custom event");
+
+            _buildEvent = GetBuildEventArgFromId();
+
+            // The other side is telling us whether the event knows how to log itself, or whether we're going to have
+            // to do it manually
+            int packetVersion = s_defaultPacketVersion;
+            translator.Translate(ref packetVersion);
+
+            bool eventCanSerializeItself = true;
+            translator.Translate(ref eventCanSerializeItself);
+
+            if (eventCanSerializeItself)
             {
-                _buildEvent = GetBuildEventArgFromId();
-
-                // The other side is telling us whether the event knows how to log itself, or whether we're going to have
-                // to do it manually
-                int packetVersion = s_defaultPacketVersion;
-                translator.Translate(ref packetVersion);
-
-                bool eventCanSerializeItself = true;
-                translator.Translate(ref eventCanSerializeItself);
-
-                if (eventCanSerializeItself)
+                MethodInfo methodInfo = null;
+                lock (s_readMethodCache)
                 {
-                    MethodInfo methodInfo = null;
-                    lock (s_readMethodCache)
+                    if (!s_readMethodCache.TryGetValue(_eventType, out methodInfo))
                     {
-                        if (!s_readMethodCache.TryGetValue(_eventType, out methodInfo))
-                        {
-                            Type eventDerivedType = _buildEvent.GetType();
-                            methodInfo = eventDerivedType.GetMethod("CreateFromStream", BindingFlags.NonPublic | BindingFlags.Instance);
-                            s_readMethodCache.Add(_eventType, methodInfo);
-                        }
-                    }
-
-                    ArgsReaderDelegate readerMethod = (ArgsReaderDelegate)CreateDelegateRobust(typeof(ArgsReaderDelegate), _buildEvent, methodInfo);
-
-                    readerMethod(translator.Reader, packetVersion);
-                    if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
-                    {
-                        _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
+                        Type eventDerivedType = _buildEvent.GetType();
+                        methodInfo = eventDerivedType.GetMethod("CreateFromStream", BindingFlags.NonPublic | BindingFlags.Instance);
+                        s_readMethodCache.Add(_eventType, methodInfo);
                     }
                 }
-                else
+
+                ArgsReaderDelegate readerMethod = (ArgsReaderDelegate)CreateDelegateRobust(typeof(ArgsReaderDelegate), _buildEvent, methodInfo);
+
+                readerMethod(translator.Reader, packetVersion);
+                if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
                 {
-                    _buildEvent = ReadEventFromStream(_eventType, translator);
-                    ErrorUtilities.VerifyThrow(_buildEvent is not null, "Not Supported LoggingEventType {0}", _eventType.ToString());
+                    _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
                 }
             }
             else
             {
-                string fileLocation = null;
-                translator.Translate(ref fileLocation);
-
-                bool resolveAssembly = false;
-                lock (s_lockObject)
-                {
-                    if (!s_customEventsLoaded.Contains(fileLocation))
-                    {
-                        resolveAssembly = true;
-                    }
-
-                    // If we are to resolve the assembly add it to the list of assemblies resolved
-                    if (resolveAssembly)
-                    {
-                        s_customEventsLoaded.Add(fileLocation);
-                    }
-                }
-
-#if FEATURE_APPDOMAIN
-                if (resolveAssembly)
-                {
-                    s_resolver = new TaskEngineAssemblyResolver();
-                    s_resolver.InstallHandler();
-                    s_resolver.Initialize(fileLocation);
-                }
-#endif
-
-                try
-                {
-                    translator.TranslateDotNet(ref _buildEvent);
-                }
-                finally
-                {
-#if FEATURE_APPDOMAIN
-                    if (resolveAssembly)
-                    {
-                        s_resolver.RemoveHandler();
-                        s_resolver = null;
-                    }
-#endif
-                }
+                _buildEvent = ReadEventFromStream(_eventType, translator);
+                ErrorUtilities.VerifyThrow(_buildEvent is not null, "Not Supported LoggingEventType {0}", _eventType.ToString());
             }
 
             _eventType = GetLoggingEventId(_buildEvent);
@@ -656,6 +592,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
                 LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
+                LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
+                LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
 #endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -798,6 +736,14 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(BuildSubmissionStartedEventArgs))
             {
                 return LoggingEventType.BuildSubmissionStartedEvent;
+            }
+            else if (eventType == typeof(BuildCanceledEventArgs))
+            {
+                return LoggingEventType.BuildCanceledEvent;
+            }
+            else if (eventType == typeof(WorkerNodeTelemetryEventArgs))
+            {
+                return LoggingEventType.WorkerNodeTelemetryEvent;
             }
 #endif
             else if (eventType == typeof(TargetStartedEventArgs))
@@ -1414,7 +1360,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Enumerable.Empty<DictionaryEntry>();
+                return (DictionaryEntry[])[];
             }
 
             var list = new ArrayList(count);
@@ -1436,7 +1382,7 @@ namespace Microsoft.Build.Shared
             int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
             if (count == 0)
             {
-                return Enumerable.Empty<DictionaryEntry>();
+                return (DictionaryEntry[])[];
             }
 
             var list = new ArrayList(count);

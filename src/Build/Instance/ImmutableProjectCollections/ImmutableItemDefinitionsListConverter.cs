@@ -25,7 +25,7 @@ namespace Microsoft.Build.Instance
             TCached? itemTypeDefinition,
             Func<TCached, T> getInstance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(getInstance, nameof(getInstance));
+            ErrorUtilities.VerifyThrowArgumentNull(getInstance);
 
             _itemList = itemList;
             _itemTypeDefinition = itemTypeDefinition;
