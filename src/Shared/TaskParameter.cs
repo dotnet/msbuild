@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.Build.Collections;
 
 #if FEATURE_APPDOMAIN
+using System.Runtime.Remoting;
 using System.Security;
 #endif
 using Microsoft.Build.Framework;
@@ -753,7 +754,7 @@ namespace Microsoft.Build.BackEnd
                         .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
 
 #if FEATURE_APPDOMAIN
-                    if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
+                    if (RemotingServices.IsTransparentProxy(destinationItem))
                     {
                         // Linq is not serializable so materialize the collection before making the call.
                         metadataToImport = metadataToImport.ToList();
