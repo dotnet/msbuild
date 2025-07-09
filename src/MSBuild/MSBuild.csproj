@@ -76,9 +76,6 @@
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
-      <Link>IConstrainedEqualityComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
       <Link>RegisteredTaskObjectCacheBase.cs</Link>
@@ -91,7 +88,6 @@
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\IKeyed.cs" />
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
