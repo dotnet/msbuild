@@ -19,7 +19,6 @@ using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     using System.Linq;
-    using System.Reflection;
     using FluentAssertions;
     using Microsoft.Build.Unittest;
 
