@@ -185,6 +185,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _noLoggingCompletedSubmissionDetails;
 
+        private static bool _isFirstWrite = true;
+
 #pragma warning restore IDE0052 // Remove unread private members
 #pragma warning restore CS0414 // The field is assigned but its value is never used
 
@@ -2626,21 +2628,27 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-                        string logFilePath = string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId);
-                        bool isFirstWrite = !File.Exists(logFilePath);
+
+                        bool shouldWriteHeader = _isFirstWrite;
+                        if (shouldWriteHeader)
+                        {
+                            shouldWriteHeader = !File.Exists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
+                            _isFirstWrite = false;
+                        }
                         using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
-                        file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
-                        file.WriteLine("------------------------------------------------");
 
-                        
-                        if (isFirstWrite)
+                        if (shouldWriteHeader)
                         {
                             file.WriteLine("SchedulerState Log Symbols:");
                             file.WriteLine("! - Blocked request: A build request waiting for dependencies or resources.");
                             file.WriteLine("> - Executing request: A build request currently being processed by a node.");
                             file.WriteLine("------------------------------------------------");
+                            file.WriteLine();
                         }
+
+                        file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
+                        file.WriteLine("------------------------------------------------");
 
                         foreach (int nodeId in _availableNodes.Keys)
                         {

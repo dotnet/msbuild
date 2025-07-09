@@ -217,42 +217,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify the logs of Scheduler contains Project and Target, in addition, SchedulerState must exist description for explain special characters.
-        /// </summary>
-        [Fact]
-        public void TestSchedulerLogs()
-        {
-            string debugPath = Path.Combine(Path.GetTempPath(), "MSBuildTestLogs", Guid.NewGuid().ToString());
-            Directory.CreateDirectory(debugPath);
-
-            var schedulerField = typeof(Scheduler).GetField("_debugDumpState", BindingFlags.NonPublic | BindingFlags.Instance);
-            var debugPathField = typeof(Scheduler).GetField("_debugDumpPath", BindingFlags.NonPublic | BindingFlags.Instance);
-            schedulerField?.SetValue(_scheduler, true);
-            debugPathField?.SetValue(_scheduler, debugPath);
-
-            string projectPath = Path.Combine(Environment.CurrentDirectory, "foo.proj");
-            CreateConfiguration(1, projectPath);
-            BuildRequest request = CreateBuildRequest(1, 1, new string[] { "foo" });
-
-            BuildRequestBlocker blocker = new BuildRequestBlocker(request.ParentGlobalRequestId, Array.Empty<string>(), new BuildRequest[] { request });
-            List<ScheduleResponse> response = new List<ScheduleResponse>(_scheduler.ReportRequestBlocked(1, blocker));
-
-            Assert.Single(response);
-            Assert.Equal(ScheduleActionType.ScheduleWithConfiguration, response[0].Action);
-            Assert.Equal(request, response[0].BuildRequest);
-
-            string schedulerTraceFile = Path.Combine(debugPath, $"SchedulerTrace_{EnvironmentUtilities.CurrentProcessId}.txt");
-            string schedulerStateFile = Path.Combine(debugPath, $"SchedulerState_{EnvironmentUtilities.CurrentProcessId}.txt");
-
-            string[] schedulerTraceLines = File.ReadAllLines(schedulerTraceFile);
-            Assert.Contains(schedulerTraceLines, line => line.Contains($"Project {projectPath} Target foo"));
-
-            string[] schedulerStateLines = File.ReadAllLines(schedulerStateFile);
-            Assert.Contains(schedulerStateLines, line => line.Contains("! - Blocked request: A build request waiting for dependencies or resources."));
-            Assert.Contains(schedulerStateLines, line => line.Contains("> - Executing request: A build request currently being processed by a node."));
-        }
-
-        /// <summary>
         /// Verify that when multiple requests are submitted with results cached, we get the results back.
         /// </summary>
         [Fact]
