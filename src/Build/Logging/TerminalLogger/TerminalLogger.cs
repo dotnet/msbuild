@@ -985,16 +985,17 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
-        if (buildEventContext is not null
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        // auth provider messages are 'global' in nature and should be a) immediate reported, and b) not re-reported in the summary.
+        if (IsAuthProviderMessage(e.Message))
         {
-            // auth provider messages are 'global' in nature and should be a) immediate reported, and b) not re-reported in the summary.
-            if (IsAuthProviderMessage(e.Message))
-            {
-                RenderImmediateMessage(FormatWarningMessage(e, Indentation));
-                return;
-            }
+            RenderImmediateMessage(FormatWarningMessage(e, Indentation));
+            return;
+        }
 
+        if (buildEventContext is not null
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
+            && Verbosity > LoggerVerbosity.Quiet)
+        {
             // If the warning is not a 'global' auth provider message, but is immediate, we render it immediately
             // but we don't early return so that the project also tracks it.
             if (IsImmediateWarning(e.Code))
@@ -1004,14 +1005,15 @@ public sealed partial class TerminalLogger : INodeLogger
 
             // This is the general case - _most_ warnings are not immediate, so we add them to the project summary
             // and display them in the per-project and final summary.
-            if (Verbosity >= LoggerVerbosity.Quiet)
-            {
-                project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
-            }
+            project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
-            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
+            // It is necessary to display warning messages reported by MSBuild, 
+            // even if it's not tracked in _projects collection or the verbosity is Quiet.
+            // The idea here (similar to the implementation in ErrorRaised) is that
+            // even in Quiet scenarios we need to show warnings/errors, even if not in
+            // full project-tree view
             RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             _buildWarningsCount++;
         }
