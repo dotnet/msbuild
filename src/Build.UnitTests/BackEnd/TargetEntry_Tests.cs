@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -628,13 +629,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests that we get the target outputs correctly.
         /// </summary>
         [Theory]
-        [InlineData(false, false)]
-        [InlineData(false, true)]
-        [InlineData(true, false)]
-        [InlineData(true, true)]
-        public void TestTargetOutputsOnFinishedEvent(bool returnsEnabledForThisProject, bool allowTargetOutputsLogging)
+        [InlineData(false, false, false)]
+        [InlineData(false, true, false)]
+        [InlineData(true, false, false)]
+        [InlineData(true, true, false)]
+        [InlineData(false, false, true)]
+        [InlineData(false, true, true)]
+        [InlineData(true, false, true)]
+        [InlineData(true, true, true)]
+        public void TestTargetOutputsOnFinishedEvent(bool returnsEnabledForThisProject, bool allowTargetOutputsLogging, bool useEnvVar)
         {
-
+            string oldEnvVar = null;
             string content = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
@@ -651,61 +656,80 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <Target Name=`c` Outputs=`%(SomeItem2.Filename)`/>
 </Project>
         ";
-
-            MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content, enableTargetOutputLogging: allowTargetOutputsLogging);
-
-            Assert.Equal(3, log.TargetFinishedEvents.Count);
-
-            TargetFinishedEventArgs targeta = log.TargetFinishedEvents[2];
-            TargetFinishedEventArgs targetb = log.TargetFinishedEvents[0];
-            TargetFinishedEventArgs targetc = log.TargetFinishedEvents[1];
-
-            Assert.NotNull(targeta);
-            Assert.NotNull(targetb);
-            Assert.NotNull(targetc);
-
-            Assert.Equal("a", targeta.TargetName);
-            Assert.Equal("b", targetb.TargetName);
-            Assert.Equal("c", targetc.TargetName);
-
-            IEnumerable targetOutputsA = targeta.TargetOutputs;
-            IEnumerable targetOutputsB = targetb.TargetOutputs;
-            IEnumerable targetOutputsC = targetc.TargetOutputs;
-
-            Assert.Null(targetOutputsA);
-            if (!allowTargetOutputsLogging)
+            MockLogger log;
+            if (useEnvVar)
             {
-                Assert.Null(targetOutputsB);
-                Assert.Null(targetOutputsC);
+                oldEnvVar = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
+                Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", allowTargetOutputsLogging.ToString());
             }
-            else
+            try
             {
+                log = Helpers.BuildProjectWithNewOMExpectSuccess(
+                    content,
+                    // if we're enabling logging via the env var, then we don't enable it via the verbosity knob
+                    enableTargetOutputLogging: allowTargetOutputsLogging && !useEnvVar);
 
-                if (returnsEnabledForThisProject)
+                Assert.Equal(3, log.TargetFinishedEvents.Count);
+
+                TargetFinishedEventArgs targeta = log.TargetFinishedEvents[2];
+                TargetFinishedEventArgs targetb = log.TargetFinishedEvents[0];
+                TargetFinishedEventArgs targetc = log.TargetFinishedEvents[1];
+
+                Assert.NotNull(targeta);
+                Assert.NotNull(targetb);
+                Assert.NotNull(targetc);
+
+                Assert.Equal("a", targeta.TargetName);
+                Assert.Equal("b", targetb.TargetName);
+                Assert.Equal("c", targetc.TargetName);
+
+                IEnumerable targetOutputsA = targeta.TargetOutputs;
+                IEnumerable targetOutputsB = targetb.TargetOutputs;
+                IEnumerable targetOutputsC = targetc.TargetOutputs;
+
+                Assert.Null(targetOutputsA);
+                if (!allowTargetOutputsLogging)
                 {
-                    // b should have stuff, c should not have stuff, because only B has Returns
-                    Assert.NotNull(targetOutputsB);
-                    List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
-                    Assert.Single(outputListB);
-                    Assert.Equal("item1", outputListB[0].ItemSpec);
-
+                    Assert.Null(targetOutputsB);
                     Assert.Null(targetOutputsC);
                 }
                 else
                 {
-                    // b and c should have stuff because everything has Outputs
-                    Assert.NotNull(targetOutputsB);
-                    Assert.NotNull(targetOutputsC);
 
-                    List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
-                    Assert.Single(outputListB);
-                    Assert.Equal("item1", outputListB[0].ItemSpec);
+                    if (returnsEnabledForThisProject)
+                    {
+                        // b should have stuff, c should not have stuff, because only B has Returns
+                        Assert.NotNull(targetOutputsB);
+                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem>];
+                        Assert.Single(outputListB);
+                        Assert.Equal("item1", outputListB[0].ItemSpec);
 
-                    List<ITaskItem> outputListC = [.. targetOutputsC as IEnumerable<ITaskItem> ];
-                    Assert.Single(outputListC);
-                    Assert.Equal("item2", outputListC[0].ItemSpec);
+                        Assert.Null(targetOutputsC);
+                    }
+                    else
+                    {
+                        // b and c should have stuff because everything has Outputs
+                        Assert.NotNull(targetOutputsB);
+                        Assert.NotNull(targetOutputsC);
+
+                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem>];
+                        Assert.Single(outputListB);
+                        Assert.Equal("item1", outputListB[0].ItemSpec);
+
+                        List<ITaskItem> outputListC = [.. targetOutputsC as IEnumerable<ITaskItem>];
+                        Assert.Single(outputListC);
+                        Assert.Equal("item2", outputListC[0].ItemSpec);
+                    }
                 }
             }
+            finally
+            {
+                if (useEnvVar)
+                {
+                    Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", oldEnvVar);
+                }
+            }
+            
         }
 
         /// <summary>
