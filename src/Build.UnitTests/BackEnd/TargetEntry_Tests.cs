@@ -637,18 +637,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string content = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
-<ItemGroup>
-<SomeItem1 Include=`item1.cs`/>
-<SomeItem2 Include=`item2.cs`/>
-</ItemGroup>
-<Target Name=`a`>
-<CallTarget Targets=`b;c`>
-    <Output TaskParameter=`TargetOutputs` PropertyName=`foo`/>
-</CallTarget>
-<Message Text=`[$(foo)]`/>
-</Target>
-<Target Name=`b` " + (returnsEnabledForThisProject ? "Returns" : "Outputs") + @"=`%(SomeItem1.Filename)`/>
-<Target Name=`c` Outputs=`%(SomeItem2.Filename)`/>
+    <ItemGroup>
+        <SomeItem1 Include=`item1.cs`/>
+        <SomeItem2 Include=`item2.cs`/>
+    </ItemGroup>
+    <Target Name=`a`>
+        <CallTarget Targets=`b;c`>
+            <Output TaskParameter=`TargetOutputs` PropertyName=`foo`/>
+        </CallTarget>
+        <Message Text=`[$(foo)]`/>
+    </Target>
+    <Target Name=`b` " + (returnsEnabledForThisProject ? "Returns" : "Outputs") + @"=`%(SomeItem1.Filename)`/>
+    <Target Name=`c` Outputs=`%(SomeItem2.Filename)`/>
 </Project>
         ";
 
