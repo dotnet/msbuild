@@ -10,6 +10,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
+#pragma warning disable RS1012 // Start action has no registered actions
+#pragma warning disable RS2008 // Start action has no registered actions
 namespace Microsoft.Build.Utilities.Analyzer
 {
     /// <summary>
@@ -94,7 +96,7 @@ namespace Microsoft.Build.Utilities.Analyzer
                     var declarationId = parts[0].Trim();
                     var message = parts.Length > 1 ? parts[1].Trim() : "";
                     var symbols = GetSymbolsFromDeclarationId(compilation, declarationId);
-                    
+
                     if (symbols.Any())
                     {
                         result[declarationId] = new BanFileEntry(declarationId, message, symbols);
@@ -133,7 +135,7 @@ namespace Microsoft.Build.Utilities.Analyzer
 
             // Analyze the operation
             context.CancellationToken.ThrowIfCancellationRequested();
-            
+
             switch (context.Operation)
             {
                 case IInvocationOperation invocation:
@@ -200,7 +202,7 @@ namespace Microsoft.Build.Utilities.Analyzer
                         syntaxNode.GetLocation(),
                         symbol.ToDisplayString(SymbolDisplayFormat),
                         string.IsNullOrWhiteSpace(entry.Message) ? "" : ": " + entry.Message);
-                    
+
                     reportDiagnostic(diagnostic);
                     return;
                 }
@@ -229,7 +231,7 @@ namespace Microsoft.Build.Utilities.Analyzer
                         syntaxNode.GetLocation(),
                         type.ToDisplayString(SymbolDisplayFormat),
                         string.IsNullOrWhiteSpace(entry.Message) ? "" : ": " + entry.Message);
-                    
+
                     reportDiagnostic(diagnostic);
                     return;
                 }

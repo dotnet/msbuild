@@ -18,10 +18,6 @@
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
-  <ItemGroup>
-      <AdditionalFiles Include="BannedSymbols.txt" />
-      <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers"/>
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -145,6 +141,8 @@
   <!--include thread-safe task analyzer to the package-->
   <ItemGroup>
     <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" PrivateAssets="all" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- Also add as direct analyzer for projects that reference Utilities -->
+    <Analyzer Include="..\..\artifacts\bin\ThreadSafeTaskAnalyzer\$(Configuration)\netstandard2.0\Microsoft.Build.Utilities.ThreadSafeTaskAnalyzer.dll" />
   </ItemGroup>
   
   <!-- Include analyzer in the package -->
@@ -156,6 +154,15 @@
     <None Include="..\ThreadSafeTaskAnalyzer\IThreadSafeTask_BannedApis.txt" 
           Pack="true" 
           PackagePath="analyzers/dotnet/cs" 
+          Visible="false" />
+    <!-- Include MSBuild integration files for automatic configuration -->
+    <None Include="build\Microsoft.Build.Utilities.Core.props" 
+          Pack="true" 
+          PackagePath="buildTransitive" 
+          Visible="false" />
+    <None Include="build\Microsoft.Build.Utilities.Core.targets" 
+          Pack="true"
+          PackagePath="buildTransitive" 
           Visible="false" />
   </ItemGroup>
 
