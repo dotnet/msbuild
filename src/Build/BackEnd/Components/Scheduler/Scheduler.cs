@@ -1493,13 +1493,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool CreateNewNodeIfPossible(List<ScheduleResponse> responses, IEnumerable<SchedulableRequest> requests)
         {
-            bool multiThreadedInProcEnabled = _componentHost.BuildParameters.MultiThreaded && !_componentHost.BuildParameters.DisableInProcNode;
-
             // We allow up to MaxNodeCount in-proc nodes when running multi-threaded.
-            int maxInProcNodeCount = multiThreadedInProcEnabled ? _componentHost.BuildParameters.MaxNodeCount : 1;
+            // TODO: Take VS scenarios into account _componentHost.BuildParameters.DisableInProcNode 
+            int maxInProcNodeCount = _componentHost.BuildParameters.MultiThreaded ? _componentHost.BuildParameters.MaxNodeCount : 1;
             int availableNodesWithInProcAffinity = maxInProcNodeCount - _currentInProcNodeCount;
 
-            int availableNodesWithOutOfProcAffinity = multiThreadedInProcEnabled ? 0 : _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;
+            int availableNodesWithOutOfProcAffinity = _componentHost.BuildParameters.MultiThreaded ? 0 : _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;
 
             int requestsWithOutOfProcAffinity = 0;
             int requestsWithAnyAffinityOnInProcNodes = 0;
