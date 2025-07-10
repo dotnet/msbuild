@@ -1496,7 +1496,7 @@ namespace Microsoft.Build.BackEnd
             bool multiThreadedInProcEnabled = _componentHost.BuildParameters.MultiThreaded && !_componentHost.BuildParameters.DisableInProcNode;
 
             // We allow up to MaxNodeCount in-proc nodes when running multi-threaded.
-            int maxInProcNodeCount = multiThreadedInProcEnabled ?_componentHost.BuildParameters.MaxNodeCount : 1;
+            int maxInProcNodeCount = multiThreadedInProcEnabled ? _componentHost.BuildParameters.MaxNodeCount : 1;
             int availableNodesWithInProcAffinity = maxInProcNodeCount - _currentInProcNodeCount;
 
             int availableNodesWithOutOfProcAffinity = multiThreadedInProcEnabled ? 0 : _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;

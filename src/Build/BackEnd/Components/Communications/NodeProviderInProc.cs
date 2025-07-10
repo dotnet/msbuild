@@ -145,10 +145,11 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(packet);
 
-            if (_nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext))
-            {
-                nodeContext._inProcNodeEndpoint.SendData(packet);
-            }
+            bool nodeExists = _nodeContexts.TryGetValue(nodeId, out NodeContext nodeContext);
+
+            ErrorUtilities.VerifyThrow(nodeExists, $"InProc node {nodeId} does not exist.");
+
+            nodeContext._inProcNodeEndpoint.SendData(packet);
         }
 
         /// <summary>
@@ -346,7 +347,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool InstantiateNode(int nodeId, INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeId), "In Proc node already instantiated.");
+            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeId), $"In Proc node {nodeId} already instantiated.");
 
             NodeEndpointInProc.EndpointPair endpoints = NodeEndpointInProc.CreateInProcEndpoints(NodeEndpointInProc.EndpointMode.Synchronous, _componentHost, nodeId);
 

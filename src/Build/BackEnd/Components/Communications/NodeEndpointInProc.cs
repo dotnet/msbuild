@@ -104,7 +104,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="commMode">The communications mode for this endpoint.</param>
         /// <param name="host">The component host.</param>
-        /// <param name="nodeId">The ID of the node this endpoint represents.</param>
+        /// <param name="nodeId">The ID of the node this endpoint manages.</param>
         private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host, int nodeId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host);
@@ -243,7 +243,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="mode">The communications mode for the endpoints.</param>
         /// <param name="host">The component host.</param>
-        /// <param name="nodeId"></param>
+        /// <param name="nodeId">The ID of the node corresponding to the pair endpoints.</param>
         /// <returns>A matched pair of endpoints.</returns>
         internal static EndpointPair CreateInProcEndpoints(EndpointMode mode, IBuildComponentHost host, int nodeId)
         {
