@@ -122,6 +122,12 @@ namespace Microsoft.Build.Framework
         public readonly int DictionaryBasedItemRemoveThreshold = ParseIntFromEnvironmentVariableOrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
 
         /// <summary>
+        /// Launches a persistent RAR process.
+        /// </summary>
+        /// TODO: Replace with command line flag when feature is completed. The environment variable is intented to avoid exposing the flag early.
+        public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
+
+        /// <summary>
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
@@ -142,6 +148,7 @@ namespace Microsoft.Build.Framework
         public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
         public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
         public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
+        public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
 
         // for VS17.14
         public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
@@ -163,9 +170,15 @@ namespace Microsoft.Build.Framework
                 : defaultValue;
         }
 
+        /// <summary>
+        /// Parse a double from an environment variable with invariant culture.
+        /// </summary>
         private static double? ParseDoubleFromEnvironmentVariable(string environmentVariable)
         {
-            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable), out double result)
+            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable),
+                                  NumberStyles.Float,
+                                  CultureInfo.InvariantCulture,
+                                  out double result)
                 ? result
                 : null;
         }

@@ -7,7 +7,6 @@ using System.Configuration;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 using Xunit;
 using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
 

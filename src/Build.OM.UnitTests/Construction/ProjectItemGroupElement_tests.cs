@@ -1,10 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
-using System.Xml;
-
+using System.Linq;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Xunit;
 
 #nullable disable
@@ -104,6 +103,114 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             Assert.Equal("c", itemGroup.Label);
             Assert.True(project.HasUnsavedChanges);
+        }
+
+        [Theory]
+        [InlineData("""
+            <Project>
+                <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" /><!-- some comment -->
+                </ItemGroup>
+            </Project>
+            """,
+            """
+            <Project>
+                <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" /><!-- some comment -->
+                    <PackageReference Include="Inserted" Version="1.5.0" />
+                </ItemGroup>
+            </Project>
+            """,
+            true)] // use trailing single comment scenario
+        [InlineData("""
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" /><!--
+                    This is a multi-line
+                    comment across lines
+                    -->
+              </ItemGroup>
+            </Project>
+            """,
+            """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" /><!--
+                    This is a multi-line
+                    comment across lines
+                    -->
+                <PackageReference Include="Inserted" Version="1.5.0" />
+              </ItemGroup>
+            </Project>
+            """,// use multi-line trailing comment scenario
+            true)]
+        [InlineData("""
+            <Project>
+               <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" />
+                    <!--
+                    This is a multi-line
+                    comment before the next item
+                    -->
+                    <PackageReference Include="B" Version="2.0.0" />
+                </ItemGroup>
+            </Project>
+            """,
+            """
+            <Project>
+               <ItemGroup>
+                    <PackageReference Include="A" Version="1.0.0" />
+                    <PackageReference Include="Inserted" Version="1.5.0" />
+                    <!--
+                    This is a multi-line
+                    comment before the next item
+                    -->
+                    <PackageReference Include="B" Version="2.0.0" />
+                </ItemGroup>
+            </Project>
+            """,
+            false)] // use multi-line comment scenario
+        [InlineData(
+            """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
+                <!-- comment before B -->
+                <PackageReference Include="B" Version="2.0.0" />
+              </ItemGroup>
+            </Project>
+            """,
+            """
+            <Project>
+              <ItemGroup>
+                <PackageReference Include="A" Version="1.0.0" />    <!-- comment A -->
+                <PackageReference Include="Inserted" Version="1.5.0" />
+                <!-- comment before B -->
+                <PackageReference Include="B" Version="2.0.0" />
+              </ItemGroup>
+            </Project>
+            """,
+            false)] // use comment before next item scenario
+        public void AddItem_PreservesComments(string content, string expectedContent, bool trailingComment)
+        {
+            using ProjectRootElementFromString projectRootElementFromString = new(content, ProjectCollection.GlobalProjectCollection, true);
+            ProjectRootElement project = projectRootElementFromString.Project;
+            ProjectItemGroupElement group = project.ItemGroups.First();
+            if (trailingComment)
+            {
+
+                group.AddItem("PackageReference", "Inserted").AddMetadata("Version", "1.5.0", expressAsAttribute: true);
+            }
+            else
+            {
+                // Insert a new item between the two existing items
+                var items = group.Items.ToList();
+                var newItem = project.CreateItemElement("PackageReference");
+                newItem.Include = "Inserted";
+                group.InsertAfterChild(newItem, items[0]);
+                newItem.AddMetadata("Version", "1.5.0", true);
+            }
+            Helpers.VerifyAssertLineByLine(expectedContent, project.RawXml);
         }
     }
 }

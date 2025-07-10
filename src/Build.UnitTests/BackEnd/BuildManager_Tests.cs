@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -1137,9 +1136,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EndWithoutBegin()
         {
             Assert.Throws<InvalidOperationException>(() =>
-                {
-                    _buildManager.EndBuild();
-                });
+            {
+                _buildManager.EndBuild();
+            });
         }
 
         [Fact]
@@ -4368,6 +4367,7 @@ $@"<Project InitialTargets=`Sleep`>
             logger.TargetStartedEvents.ShouldBeEmpty();
             logger.BuildStartedEvents.ShouldHaveSingleItem();
             logger.BuildFinishedEvents.ShouldHaveSingleItem();
+            logger.FullLog.ShouldContain("Static graph construction started.");
             logger.FullLog.ShouldContain("Static graph loaded in");
             logger.FullLog.ShouldContain("3 nodes, 2 edges");
         }

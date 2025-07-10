@@ -111,11 +111,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -215,7 +219,7 @@ jobs:
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2022preview.amd64.open
+      demands: ImageOverride -equals windows.vs2022preview.scout.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
@@ -277,23 +281,6 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
 
-# Unavailable in dnceng-public as of 9/1/2022; should be restored soon.
-# - job: RichCodeNavIndex
-#   displayName: "Windows Code Indexing"
-#   pool:
-#     vmImage: 'windows-2022'
-#   steps:
-#   - task: BatchScript@1
-#     displayName: build.cmd
-#     inputs:
-#       filename: 'build.cmd'
-#   - task: RichCodeNavIndexer@0
-#     displayName: RichCodeNav Upload
-#     inputs:
-#       languages: 'csharp'
-#     continueOnError: true
-#     condition: succeeded()
-
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   dependsOn: IfOnlyDocumentionChanged
@@ -312,7 +299,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
-    env: 
+    env:
         MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -326,11 +313,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -379,7 +370,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
-    env: 
+    env:
         MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -393,11 +384,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:

@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -511,12 +511,13 @@ namespace Microsoft.Build.BackEnd
                     ErrorUtilities.VerifyThrow(addToIssueList, "Requests with unresolved configurations should always be added to the issue list.");
                     _unresolvedConfigurations ??= new Dictionary<int, List<BuildRequest>>();
 
-                    if (!_unresolvedConfigurations.ContainsKey(newRequest.ConfigurationId))
+                    if (!_unresolvedConfigurations.TryGetValue(newRequest.ConfigurationId, out List<BuildRequest> value))
                     {
-                        _unresolvedConfigurations.Add(newRequest.ConfigurationId, new List<BuildRequest>());
+                        value = new List<BuildRequest>();
+                        _unresolvedConfigurations.Add(newRequest.ConfigurationId, value);
                     }
 
-                    _unresolvedConfigurations[newRequest.ConfigurationId].Add(newRequest);
+                    value.Add(newRequest);
                 }
 
                 if (addToIssueList)

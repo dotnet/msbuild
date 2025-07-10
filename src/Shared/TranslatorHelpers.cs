@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if !TASKHOST
+using System.Collections.Frozen;
+#endif
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
@@ -89,6 +92,68 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref dictionary, comparer, AdaptFactory(valueFactory));
         }
 
+        public static void InternDictionary(
+            this ITranslator translator,
+            ref Dictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            IDictionary<string, string> localDict = dictionary;
+            translator.TranslateDictionary(
+                ref localDict,
+                (ITranslator translator, ref string key) => translator.Intern(ref key),
+                (ITranslator translator, ref string val) => translator.Intern(ref val),
+                capacity => new Dictionary<string, string>(capacity, comparer));
+            dictionary = (Dictionary<string, string>)localDict;
+        }
+
+        public static void InternDictionary<T>(
+            this ITranslator translator,
+            ref Dictionary<string, T> dictionary,
+            IEqualityComparer<string> stringComparer,
+            NodePacketValueFactory<T> valueFactory)
+            where T : ITranslatable
+        {
+            IDictionary<string, T> localDict = dictionary;
+            translator.TranslateDictionary(
+                ref localDict,
+                (ITranslator translator, ref string key) => translator.Intern(ref key),
+                AdaptFactory(valueFactory),
+                capacity => new Dictionary<string, T>(capacity, stringComparer));
+            dictionary = (Dictionary<string, T>)localDict;
+        }
+
+        public static void InternPathDictionary(
+            this ITranslator translator,
+            ref Dictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            IDictionary<string, string> localDict = dictionary;
+
+            // For now, assume only the value contains path-like strings (e.g. TaskItem metadata).
+            translator.TranslateDictionary(
+                ref localDict,
+                (ITranslator translator, ref string key) => translator.Intern(ref key),
+                (ITranslator translator, ref string val) => translator.InternPath(ref val),
+                capacity => new Dictionary<string, string>(capacity, comparer));
+            dictionary = (Dictionary<string, string>)localDict;
+        }
+
+        public static void InternPathDictionary<T>(
+            this ITranslator translator,
+            ref Dictionary<string, T> dictionary,
+            IEqualityComparer<string> stringComparer,
+            NodePacketValueFactory<T> valueFactory)
+            where T : ITranslatable
+        {
+            IDictionary<string, T> localDict = dictionary;
+            translator.TranslateDictionary(
+                ref localDict,
+                (ITranslator translator, ref string key) => translator.InternPath(ref key),
+                AdaptFactory(valueFactory),
+                capacity => new Dictionary<string, T>(capacity, stringComparer));
+            dictionary = (Dictionary<string, T>)localDict;
+        }
+
         public static void TranslateDictionary<D, T>(
             this ITranslator translator,
             ref D dictionary,
@@ -109,6 +174,22 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), collectionCreator);
         }
+
+#if !TASKHOST
+        public static void TranslateDictionary(
+            this ITranslator translator,
+            ref FrozenDictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            IDictionary<string, string> localDict = dictionary;
+            translator.TranslateDictionary(ref localDict, capacity => new Dictionary<string, string>(capacity, comparer));
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                dictionary = localDict?.ToFrozenDictionary(comparer);
+            }
+        }
+#endif
 
         public static void TranslateHashSet<T>(
             this ITranslator translator,

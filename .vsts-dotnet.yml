@@ -20,11 +20,17 @@ parameters:
   displayName: Enable OptProf data collection for this build
   type: boolean
   default: true
+- name: requireDefaultChannelsEnabled
+  displayName: Require Default Channels
+  type: boolean
+  default: true
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
+  - name: requireDefaultChannels
+    value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # If we're not on a vs* branch, use main as our optprof collection branch
@@ -41,6 +47,9 @@ variables:
   - ${{ if eq(parameters.EnableOptProf, false) }}:
     - name: SkipApplyOptimizationData
       value: true
+  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
+    - name: requireDefaultChannels
+      value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
@@ -56,7 +65,6 @@ variables:
     value: none
   - name: NugetSecurityAnalysisWarningLevel
     value: none
-
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -129,9 +137,9 @@ extends:
         - name: TeamName
           value: MSBuild
         - name: VisualStudio.MajorVersion
-          value: 17
+          value: 18
         - name: VisualStudio.ChannelName
-          value: 'int.d17.14' # MSBuild's vs17.14 branch corresponds to this VS channel
+          value: 'int.main'
         - name: VisualStudio.DropName
           value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -342,3 +350,4 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
+        requireDefaultChannels: ${{ variables.requireDefaultChannels }}
