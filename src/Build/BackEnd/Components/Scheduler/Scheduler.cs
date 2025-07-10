@@ -1529,7 +1529,7 @@ namespace Microsoft.Build.BackEnd
                         // If we've previously seen "Any"-affinitized requests, now that there are some
                         // genuine inproc requests, they get to play with the inproc node first, so
                         // push the "Any" requests to the out-of-proc nodes.
-                        if (requestsWithAnyAffinityOnInProcNodes > 0)
+                        if (requestsWithAnyAffinityOnInProcNodes > 0 && !_componentHost.BuildParameters.MultiThreaded)
                         {
                             requestsWithAnyAffinityOnInProcNodes--;
                             outOfProcNodesToCreate++;
