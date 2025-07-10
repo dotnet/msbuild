@@ -628,6 +628,18 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </comment>
   </data>
+  <data name="HelpMessage_49_MultiThreadedSwitch" xml:space="preserve">
+    <value>  -multithreaded:&lt;parameters&gt;
+                     Enables or Disables Multi-threaded feature in MSBuild.
+                     The parameters are:
+                     True --Multiple threads will be used to build (maximum amount is equal to maxCpuCount)
+                     False--MSBuild uses the traditional parallel build
+                            behavior based on multiple processes (default)
+                     (Short form: -mt)
+                     Example:
+                       -mt:true
+    </value>
+  </data>
   <data name="HelpMessage_24_NodeReuse" xml:space="preserve">
     <value>  -nodeReuse:&lt;parameters&gt;
                      Enables or Disables the reuse of MSBuild nodes.

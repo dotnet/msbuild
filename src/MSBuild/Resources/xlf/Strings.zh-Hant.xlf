@@ -235,6 +235,29 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded:&lt;parameters&gt;
+                     Enables or Disables Multi-threaded feature in MSBuild.
+                     The parameters are:
+                     True --Multiple threads will be used to build (maximum amount is equal to maxCpuCount)
+                     False--MSBuild uses the traditional parallel build
+                            behavior based on multiple processes (default)
+                     (Short form: -mt)
+                     Example:
+                       -mt:true
+    </source>
+        <target state="new">  -multithreaded:&lt;parameters&gt;
+                     Enables or Disables Multi-threaded feature in MSBuild.
+                     The parameters are:
+                     True --Multiple threads will be used to build (maximum amount is equal to maxCpuCount)
+                     False--MSBuild uses the traditional parallel build
+                            behavior based on multiple processes (default)
+                     (Short form: -mt)
+                     Example:
+                       -mt:true
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
