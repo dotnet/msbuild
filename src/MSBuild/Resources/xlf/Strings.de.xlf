@@ -61,12 +61,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -117,7 +116,7 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     Schreiben Sie den Ausgabewert eines oder mehrerer Ziele aus und
+                     Schreiben Sie den Ausgabewert eines oder mehrerer Ziele aus, und
                      die angegebenen Ziele werden ausgeführt.
     </target>
         <note>
@@ -145,15 +144,15 @@
                      Überprüft die Verfügbarkeit von Features. Das Ergebnis ist eine der
                      Zeichenfolgen "Undefined", "Available", "NotAvailable" und
                      "Preview".
-                     –Undefinied: Die Verfügbarkeit des Features ist nicht definiert
+                     – Undefinied: Die Verfügbarkeit des Features ist nicht definiert
                      (der Featurename ist für den Prüfer der Featureverfügbarkeit
                      unbekannt)
-                     -NotAvailable: Das Feature ist nicht verfügbar (im Gegensatz zu
+                     – NotAvailable: Das Feature ist nicht verfügbar (im Gegensatz zu
                      "Undefined", wo der Featurename für den Prüfer der Featureverfügbarkeit
                      bekannt ist und er weiß, dass das Feature von der
                      aktuellen MSBuild-Engine nicht unterstützt wird)
-                     -Available: Das Feature ist verfügbar
-                     -Preview: Das Feature befindet sich in der Vorschau (nicht stabil)
+                     – Available: Das Feature ist verfügbar
+                     – Preview: Das Feature befindet sich in der Vorschau (nicht stabil)
                      (Kurzform: -fa)
     </target>
         <note>
@@ -175,15 +174,15 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                     Aktiviert oder deaktiviert die Terminalprotokollierung. Terminal-Logger
+                     Aktiviert oder deaktiviert die Terminalprotokollierung. Terminalprotokollierung
                      bietet verbesserte Buildausgabe auf der Konsole in Echtzeit,
                      logisch nach Projekt organisiert und entwickelt, um
                      verwertbare Informationen hervorzuheben. Geben Sie "auto" an (oder verwenden Sie die Option
-                     ohne Argumente), um den Terminal-Logger nur zu verwenden, wenn die
-                     Standardausgabe nicht umgeleitet wird. Analysieren Sie die Ausgabe nicht
+                     ohne Argumente), um die Terminalprotokollierung nur zu verwenden, wenn die
+                     Standardausgabe nicht umgeleitet wird. Analysieren Sie die Ausgabe nicht,
                      oder vertrauen Sie darauf, dass sie in zukünftigen
                      Versionen unverändert bleibt. Diese Option ist in MSBuild 17.8 und
-                     später verfügbar.
+                     höher verfügbar.
                      (Kurzform: -tl)
     </target>
         <note>
@@ -212,19 +211,19 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parameter für Terminal-Logger. (Kurzform: -tlp)
+                     Parameter für die Terminalprotokollierung. (Kurzform: -tlp)
                      Die verfügbaren Parameter.
-                        default: Gibt das Standardverhalten des Terminal-
-                        Loggers an. Erfordert einen der folgenden Werte:
+                        default: Gibt das Standardverhalten der
+                        Terminalprotokollierung an. Erfordert einen der folgenden Werte:
                            – "on", "true" erzwingt die Verwendung von TerminalLogger, auch
-                            wenn er deaktiviert werden sollte.
+                            bei einer Deaktivierung.
                            – "off", "true" erzwingt die Nichtverwendung von TerminalLogger, auch
-                            wenn er aktiviert werden sollte.
+                            bei einer Aktivierung.
                            – "auto" aktiviert TerminalLogger, wenn das Terminal
                             dies unterstützt, und die Sitzung nicht umgeleitet wurde
                             stdout/stderr
-                        verbosity: Überschreiben Sie die Einstellung "-verbosity" für diesen
-                        Logger
+                        verbosity: Überschreiben Sie die Einstellung "-verbosity" für diese
+                        Protokollierung
                         showCommandLine: TaskCommandLineEvent-Meldungen anzeigen
 
                       Beispiel: 
@@ -263,7 +262,7 @@
 	</source>
         <target state="translated">  -check
                      Aktiviert BuildChecks während des Builds.
-                     BuildCheck ermöglicht die Regelauswertung, um Eigenschaften 
+                     BuildCheck ermöglicht die Regelauswertung, um Eigenschaften
                      des Builds sicherzustellen. Weitere Infos: aka.ms/buildcheck
 	</target>
         <note>
@@ -741,11 +740,11 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
         <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -1023,11 +1022,11 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -1723,12 +1722,12 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
         <source>1: in enforcement</source>
-        <target state="translated">1: bei der Erzwingung</target>
+        <target state="translated">1: bei der Durchsetzung</target>
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2: in Auswertung. Es wird empfohlen, Smart App Control in der Entwicklungsumgebung zu deaktivieren, da andernfalls die Leistung beeinträchtigt werden könnte.</target>
+        <target state="translated">2: in Auswertung. Es wird empfohlen, Smart App Control in der Entwicklungsumgebung zu deaktivieren, da andernfalls die Leistung beeinträchtigt werden könnte</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
@@ -1787,7 +1786,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="translated">Die Terminalprotokollierung wurde nicht verwendet, da erkannt wurde, dass der Build in einer automatisierten Umgebung ausgeführt wird.</target>
+        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
@@ -2039,50 +2038,50 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serialisiert alle Buildereignisse in eine komprimierte Binärdatei.
-                     Standardmäßig befindet sich die Datei im aktuellen Verzeichnis und hat den Namen
-                     „msbuild.binlog“. Das binäre Protokoll ist eine detaillierte Beschreibung
-                     des Buildprozesses, der später zum Rekonstruieren von
-                     Textprotokollen dient und der von anderen Analysetools verwendet wird. Detaillierte
-                     Textprotokolle auf Diagnoseebene sind in der Regel 10–20-mal so groß wie
-                     binäre Protokolle, letztere enthalten jedoch mehr Informationen.
-                     (Kurzform: -bl)
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     Die optionale LogFile gibt den Pfad an, in dem das
-                     Binärprotokoll gespeichert wird. Um eine eigene Protokolldatei
-                     für jeden Build zu generieren, kann das Token "{}" zum
-                     Pfad hinzugefügt werden, z. B.: LogFile=output-{}-log.binlog. Jedes 
-                     "{}" im Protokollpfad wird durch eine eindeutige Zeichenfolge ersetzt,
-                     indem Zeitstempel, ID des ausgeführten Prozesses und ein zufälliger
-                     Zeichenfolgenstempel verwendet werden.
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
 
-                     Die binäre Protokollierung erfasst standardmäßig den Quelltext von
-                     Projektdateien, einschließlich aller beim Buildvorgang aufgetretenen
-                     importierten Projekte und Zieldateien. Der optionale Schalter
-                     ProjectImports steuert dieses Verhalten:
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                      ProjectImports=None:      – Projektimporte nicht
-                                                erfassen
-                      ProjectImports=Embed:     – Projektimporte in die
-                                                Protokolldatei einbetten
-                      ProjectImports=ZipFile:   – Projektdateien in
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
                                                 output.projectimports.zip
-                                                speichern, wobei „output“ dem Namen
-                                                der binären Protokolldatei entspricht.
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     Die Standardeinstellung für „ProjectImports“ ist „Embed“.
-                     Hinweis: Die Protokollierung erfasst nur MSBuild-Quelldateien.
-                     Andere Dateien wie etwa CS, CPP usw. werden nicht erfasst.
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
 
-                     Eine BINLOG-Datei kann „wiedergegeben“ werden, indem sie an
-                     „msbuild.exe“ als Argument und nicht als Projekt/Lösung übergeben wird.
-                     Andere Protokollierungen erhalten die Informationen, die
-                     wie beim ursprünglichen Buildvorgang in der Protokolldatei enthalten sind.
-                     Weitere Informationen zu binären Protokollen und ihrer Verwendung erhalten Sie unter:
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     Beispiele:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
@@ -2199,7 +2198,7 @@ Dieses Protokollierungsformat ist standardmäßig aktiviert.
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="translated">MSBUILD : error MSB1021: Eine Instanz der Protokollierung {0} kann nicht erstellt werden. {1}</target>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

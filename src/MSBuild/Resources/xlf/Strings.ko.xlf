@@ -81,7 +81,7 @@
     </source>
         <target state="translated">  -getProperty:propertyName,...
                      빌드를 실행하지 않고 평가 후
-                     지정된 속성 중 하나 이상의 값을 작성하거나,
+                     하나 이상의 지정된 속성 값을 작성하거나,
                      -targets 옵션 또는 -getTargetResult 옵션을 사용하는 경우
                      빌드 후 값을 작성합니다.
     </target>
@@ -100,8 +100,8 @@
     </source>
         <target state="translated">  -getItem:itemName,...
                      빌드를 실행하지 않고 평가 후
-                     지정된 항목 중 하나 이상의 값 및
-                     연결된 해당 메타데이터를 작성하거나,
+                     하나 이상의 지정된 항목 및
+                     관련 메타데이터의 값을 작성하거나
                      -targets 옵션 또는 -getTargetResult 옵션을 사용하는 경우
                      빌드 후 값을 작성합니다.
     </target>
@@ -116,7 +116,7 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     대상 하나 이상의 출력 값을 작성하면
+                     하나 이상의 대상의 출력 값을 작성하면
                      지정된 대상이 실행됩니다.
     </target>
         <note>
@@ -144,11 +144,11 @@
                      기능 가용성을 확인합니다. 결과는
                      문자열 "Undefined", "Available", "NotAvailable" 및
                      "Preview" 중 하나입니다.
-                     - 정의되지 않음 - 기능의 가용성이 정의되지 않았습니다
+                     - Undefined - 기능의 가용성이 정의되지 않았습니다
                      (기능 가용성 검사기에서 기능 이름을 인식할 수
                      없음).
                      - NotAvailable - 기능을 사용할 수 없습니다(
-                     정의되지 않음과는 달리, 기능 가용성 검사가에서 기능 이름을
+                     Undefined와 달리, 기능 가용성 검사가에서 기능 이름을
                      인식할 수 있으며 기능이 현재 MSBuild 엔진에서 지원되지
                      않는 것으로 인식하고 있음).
                      - Available - 기능을 사용할 수 있습니다.
@@ -174,14 +174,14 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                     터미널 로거를 사용하거나 사용하지 않도록 설정합니다. 터미널 로거
-                     는 콘솔에서 향상된 빌드 출력을 실시간으로 제공합니다.
-                     이러한 출력은 프로젝트별로 논리적으로 구성되고 실행 가능한 정보를
-                     강조 표시하도록 설계되어 있습니다. 자동을 지정(또는 인수 없이 옵션
-                     사용)하여 터미널 로거를 사용합니다. 단, 이 경우
-                     표준 출력이 리디렉션되지 않아야 합니다. 출력을 구문 분석하지 않습니다.
-                     그렇지 않을 경우 이후 버전에서 변경되지 않은 상태로
-                     유지됩니다. 이 옵션은 MSBuild 17.8 이상 버전에서
+                     터미널 로거를 사용하거나 사용하지 않도록 설정합니다. 터미널 로거는
+                     콘솔에서 향상된 빌드 출력을 실시간으로 제공하고
+                     프로젝트별로 논리적으로 구성되며 실행 가능한 정보를
+                     강조 표시하도록 설계되어 있습니다. 표준 출력이 리디렉션되지 않는
+                     경우에만 터미널 로거를 사용하려면 auto를 지정하거나
+                     인수 없이 옵션을 사용합니다. 출력을 구문 분석하지 않으면
+                     향후 버전에서도 변경되지 않은 상태로 유지될 것이라고
+                     기대하지 마세요. 이 옵션은 MSBuild 17.8 이상 버전에서
                      제공됩니다.
                      (약식: -tl)
     </target>
@@ -213,21 +213,20 @@
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
                      터미널 로거에 대한 매개 변수입니다. (약식: -tlp)
                      사용 가능한 매개 변수입니다.
-                        default--터미널의 기본 동작을 지정합니다.
-                        로거입니다. 다음 값 중 하나가 필요합니다.
-                           - 'on', 'true'는 terminalLogger를 사용하도록 강제하며,
-                            이는 사용하지 않도록 설정된 경우에도 마찬가지입니다.
-                           - 'off', 'false'는 terminalLogger를 사용하지 않도록 강제하며,
-                            이는 사용하도록 설정된 경우에도 마찬가지입니다.
-                           - 'auto'는 터미널이
-                            지원하고 세션이 리디렉션되지 않을 때 TerminalLogger를 사용하도록 설정합니다.
+                        default--터미널 로거의 기본 동작을
+                        지정합니다. 다음 값 중 하나가 필요합니다.
+                           - 'on', 'true'는 비활성화된 경우에도 terminalLogger를
+                            사용하도록 강제합니다.
+                           - 'off', 'false'는 활성화된 경우에도 terminalLogger를
+                            사용하지 않도록 강제합니다.
+                           - 'auto'는 터미널이 지원하고 세션이
+                            리디렉션되지 않을 때 TerminalLogger를 활성화합니다.
                             stdout/stderr
-                        verbosity--이
-로거에 대한 -verbosity 설정을
+                        verbosity--이 로거에 대한 -verbosity 설정을
                         재정의합니다.
                         showCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
 
-                      예:
+                      예: 
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -246,7 +245,7 @@
         <target state="translated">  -getResultOutputFile:file
                      get*에서 파일로 출력을 리디렉션합니다.
 
-                     예:
+                     예: 
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      그러면 속성 Bar의 값이 Biz.txt에 기록됩니다.
     </target>
@@ -264,7 +263,7 @@
         <target state="translated">  -check
                      빌드하는 동안 BuildChecks를 사용하도록 설정합니다.
                      BuildCheck는 속성을 확실히 하기 위해 규칙 평가를 사용 설정합니다
-                     빌드의 자세한 내용은 aka.ms/buildcheck를 참조하세요.
+                     확인할 수 있습니다. 자세한 내용은 aka.ms/buildcheck를 참조하세요.
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -741,11 +740,11 @@
         <target state="translated">  -logger:&lt;로거&gt;   이 로거를 사용하여 MSBuild의 이벤트를 기록합니다. 여러
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                      &lt;로거 매개 변수&gt;는 선택 사항이고 입력한 대로 정확히
                      로거에 전달됩니다. (약식: -l)
@@ -1023,11 +1022,11 @@
                      로거를 지정하려면 각 로거를 개별적으로 지정합니다.
                      (약식 -dl)
                      &lt;로거&gt; 구문은 다음과 같습니다.
-                       [&lt;클래스&gt;,]&lt;어셈블리&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
+                       [&lt;클래스&gt;,]&lt;assembly&gt;[,&lt;옵션&gt;][;&lt;매개 변수&gt;]
                      &lt;로거 클래스&gt; 구문은 다음과 같습니다.
                        [&lt;부분 또는 전체 네임스페이스&gt;.]&lt;로거 클래스 이름&gt;
                      &lt;로거 어셈블리&gt; 구문은 다음과 같습니다.
-                       {&lt;어셈블리 이름&gt;[,&lt;strong name&gt;] | &lt;어셈블리 파일&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      로거 옵션은 MSBuild가 로거를 만드는 방법을 지정합니다.
                       &lt;로거 매개 변수&gt;는 선택 사항이고
                      입력한 대로 정확히 로거에 전달됩니다. (약식: -l)
@@ -1787,7 +1786,7 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="translated">자동화된 환경에서 빌드가 실행 중임을 감지하여 터미널 로거를 사용하지 않았습니다.</target>
+        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
@@ -2039,50 +2038,50 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     모든 빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
-                     기본적으로 파일은 현재 디렉터리에 있으며 이름은
-                     "msbuild.binlog"입니다. 이진 로그는 나중에 텍스트 로그를 재구성하는 데
-                     사용할 수 있고 다른 분석 도구에서 사용할 수 있는 빌드 프로세스의
-                     자세한 설명입니다. 이진 로그는
-                     일반적으로 가장 자세한 텍스트 진단 수준 로그보다 10~20배
-                     작지만 더 많은 정보를 담고 있습니다.
-                     (약식: -bl)
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     선택적 LogFile은 이진 로그가 저장되는
-                     경로를 지정합니다. 각 빌드에 고유한 로그 파일을 생성하려면
-                     토큰 "{}"를 경로에 추가할 수 있습니다.
-                     예: LogFile=output-{}-log.binlog. 로그 경로의 
-                     각 "{}"는 타임스탬프, 실행 프로세스 ID 및 임이의 문자열
-                     스탬프를 사용하여 고유한 문자열로
-                     대체됩니다.
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
 
-                     기본적으로 이진 로거는 빌드하는 동안 발견된
-                     가져온 모든 프로젝트 및 대상 파일을 포함한 프로젝트 파일의
-                     원본 텍스트를 수집합니다. 선택적
-                     ProjectImports 스위치는 다음 동작을 제어합니다.
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                      ProjectImports=None     - 프로젝트 가져오기를 수집하지
-                                                마세요.
-                      ProjectImports=Embed    - 로그 파일에 프로젝트 가져오기를
-                                                포함합니다.
-                      ProjectImports=ZipFile - 프로젝트 파일을
-                                                output.projectimports.zip에
-                                                저장하며 여기서 출력은 이진 로그 파일 이름과
-                                                같은 이름입니다.
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
+                                                output.projectimports.zip
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     ProjectImports의 기본 설정은 Embed입니다.
-                     참고: 로거는 MSBuild가 아닌 소스 파일을 수집하지 않습니다.
-                     예: .cs, .cpp 등
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
 
-                     .binlog 파일은 프로젝트/솔루션 대신 인수로
-                     msbuild.exe에 전달하여 “재생”될 수 있습니다.
-                     다른 로거는 원래 빌드가 발생하는 것처럼 로그 파일에
-                     포함된 정보를 받습니다.
-                     이진 로그 및 해당 사용에 대한 자세한 내용은 다음에서 확인할 수 있습니다.
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     예:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
@@ -2199,7 +2198,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="translated">MSBUILD : error MSB1021: 로거 {0}의 인스턴스를 만들 수 없습니다. {1}</target>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
