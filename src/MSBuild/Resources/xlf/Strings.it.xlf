@@ -62,10 +62,10 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi file configurato
+                     Fa in modo che MSBuild segnali gli accessi ai file a qualsiasi
                      plug-in della cache del progetto.
 
-Questo flag è sperimentale e potrebbe non funzionare come previsto.
+                     Questo flag è sperimentale e potrebbe non funzionare come previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -80,10 +80,10 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                     Scrivere il valore di una o più proprietà specificate
-                     dopo la valutazione, senza eseguire la compilazione o se
-                     si usa sia l'opzione -targets che l’opzione -getTargetResult
-                     scrivere i valori dopo la compilazione.
+                     Scrive il valore di una o più proprietà specificate
+                     dopo la valutazione, senza eseguire la compilazione oppure, se
+                     usa l'opzione -targets o l’opzione -getTargetResult
+                     scrive i valori dopo la compilazione.
     </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
@@ -99,10 +99,10 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                     Scrivere il valore di uno o più elementi specificati e
+                     Scrive il valore di uno o più elementi specificati e
                      i metadati associati dopo la valutazione senza
-                     eseguire la compilazione o in caso si usi l’opzione -targets
-                     oppure l'opzione -getTargetResult, scrivere
+                     eseguire la compilazione oppure, se si usa l’opzione -targets
+                     o l'opzione -getTargetResult, scrive
                      i valori dopo la compilazione.
     </target>
         <note>
@@ -116,7 +116,7 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     Scrivere il valore di output di una o più destinazioni
+                     Scrive il valore di output di una o più destinazioni
                      per eseguire le destinazioni specificate.
     </target>
         <note>
@@ -141,19 +141,18 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                     Verificare la disponibilità delle funzionalità. Il risultato è uno delle
-                     stringhe "Non definito", "Disponibile", "Non disponibile" e
-                     "Anteprima".
-                     - Non definito: la disponibilità della funzionalità non è definita
-                     (Il nome della funzionalità non è noto al controllo
+                     Verifica la disponibilità delle funzionalità. Il risultato è una delle
+                     stringhe "Undefined", "Available", "NotAvailable" e
+                     "Preview".
+                     - Undefined: la disponibilità della funzionalità non è definita
+                     (il nome della funzionalità non è noto al controllo
                      della disponibilità delle funzionalità)
-                     - Non disponibile: la funzionalità non è disponibile (a differenza di
-                     Non definito, dove il nome della funzionalità è noto al controllo della disponibilità della funzionalità
-,
-                     che sa che la funzionalità non è
+                     - NotAvailable: la funzionalità non è disponibile (a differenza di
+                     Undefined, il nome della funzionalità è noto al controllo
+                     della disponibilità della funzionalità, che sa che la funzionalità non è
                      supportata dal motore MSBuild corrente)
-                     - Disponibile: la funzionalità è disponibile
-                     - Anteprima : la funzionalità è in anteprima (non stabile)
+                     - Available: la funzionalità è disponibile
+                     - Preview : la funzionalità è in anteprima (non stabile)
                      (Forma breve: -fa)
     </target>
         <note>
@@ -174,17 +173,17 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      later.
                      (Short form: -tl)
     </source>
-        <target state="translated">  -terminalLogger[:automatico, attivato, disattivato]
-                     Abilitare o disabilitare il logger del terminale. Logger del terminale
-                     fornisce output di compilazione avanzati in tempo reale sulla console,
-                     organizzato in maniera logica in base al progetto e progettato per evidenziare
-                     dati analitici interattivi. Specificare automatico (o usare l'opzione
-                     senza argomenti) per usare il logger del terminale solo se l’
-                     output standard non viene reindirizzato. Non analizzare l'output
-                     oppure affidarsi al fatto che non verrà modificato nelle future
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                     Abilita o disabilita il logger del terminale. Il logger del terminale
+                     fornisce output di compilazione avanzato nella console in tempo reale,
+                     con dati organizzati in maniera logica in base al progetto ed evidenziando
+                     le informazioni che richiedono intervento. Specificare auto (o usare l'opzione
+                     senza argomenti) per usare il logger del terminale solo se
+                     l'output standard non viene reindirizzato. Non eseguire il parsing dell'output
+                     oppure fare affidamento sul fatto che rimarrà invariato nelle future
                      versioni. Questa opzione è disponibile in MSBuild 17.8 e
                      versioni successive.
-                     Forma breve: -tl)
+                     (Forma breve: -tl)
     </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
@@ -212,18 +211,18 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parametri per il logger del terminale. Forma breve: -tlp)
+                     Parametri per il logger del terminale. (Forma breve: -tlp)
                      Parametri disponibili.
-                        impostazione predefinita- Specifica il comportamento predefinito del terminale
+                        default- Specifica il comportamento predefinito del terminale
                         logger. Richiede uno dei valori seguenti:
-                           - 'attivato', 'vero' forza l'uso di TerminalLogger anche
+                           - 'on', 'true' impone l'uso di TerminalLogger anche
                             se venisse disabilitato.
-                           - 'disattivato', 'falso' forza l'uso di TerminalLogger anche
+                           - 'off', 'false' impone l'uso di TerminalLogger anche
                             se venisse abilitato.
-                           - 'automatico' abilita TerminalLogger quando il terminale
+                           - 'auto' abilita TerminalLogger quando il terminale
                             lo supporta e la sessione non ha reindirizzato il livello di dettaglio
                             stdout/stderr
-                        -- Eseguire l'override dell'impostazione del livello di dettaglio per questo
+                        verbosity--Ignora l'impostazione -verbosity per questo
                         logger
                         showCommandLine--Mostra i messaggi TaskCommandLineEvent
 
@@ -244,11 +243,11 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                     Reindirizza l'output da get* in un file.
+                     Reindirizza l'output di get* in un file.
 
                      Esempio:
-                     -getProperty:barra -getResultOutputFile:Biz.txt
-                     Il valore della barra delle proprietà viene scritto in Biz.txt.
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     Il valore della proprietà Bar viene scritto in Biz.txt.
     </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
@@ -751,8 +750,8 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;assembly logger&gt; è la seguente:
-                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
+                     La sintassi di &lt;logger assembly&gt; è la seguente:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l.
@@ -1033,8 +1032,8 @@ Nota: livello di dettaglio dei logger di file
                        [&lt;classe&gt;,]&lt;assembly&gt;[,&lt;opzioni&gt;][;&lt;parametri&gt;]
                      La sintassi di &lt;classe logger&gt; è la seguente:
                        [&lt;spazio dei nomi parziale o completo&gt;.]&lt;nome classe logger&gt;
-                     La sintassi di &lt;assembly logger&gt; è la seguente:
-                       {&lt;nome assembly&gt;[,&lt;strong name&gt;] | &lt;file di assembly&gt;}
+                     La sintassi di &lt;logger assembly&gt; è la seguente:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Le opzioni di logger consentono di specificare in che modo MSBuild crea il logger.
                      I &lt;parametri logger&gt; sono facoltativi e vengono passati al
                      logger così come vengono digitati. Forma breve: -l
@@ -1153,9 +1152,8 @@ Nota: livello di dettaglio dei logger di file
                      è la directory corrente. Per impostazione predefinita, ai
                      file viene assegnato il nome "MSBuild&lt;idnodo&gt;.log". Il
                      percorso dei file e altri parametri di fileLogger possono
-                     essere specificati aggiungendo l'opzione
+                     essere specificati aggiungendo l'opzione "-fileLoggerParameters".
 
-                     "-fileLoggerParameters".
                      Se il nome di un file di log viene impostato con l'opzione
                      fileLoggerParameters, il logger distribuito userà il nome
                      file come modello e aggiungerà l'ID del nodo per creare un
@@ -1502,7 +1500,7 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: È necessario fornire un nome funzionalità per l’opzione featureAvailability.</target>
+        <target state="translated">MSBUILD : error MSB1067: È necessario fornire un nome di funzionalità per l’opzione featureAvailability.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
       following the switch, as in "msbuild.exe -featureAvailability:blah".
@@ -1798,7 +1796,7 @@ Nota: livello di dettaglio dei logger di file
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="translated">Il logger del terminale non è stato utilizzato perché è stato rilevato che la compilazione è in esecuzione in un ambiente automatizzato.</target>
+        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
@@ -2052,51 +2050,50 @@ Nota: livello di dettaglio dei logger di file
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializza tutti gli eventi di compilazione in un file binario compresso.
-                     Per impostazione predefinita, il file csi trova nella directory corrente e si chiama
-                     "msbuild.binlog". Il log binario è una descrizione
-                     dettagliata del processo di compilazione utilizzabile in
-                     seguito per ricostruire i log di testo e viene usato da altri strumenti di analisi. Un log binario è in genere
-                     10-20 volte più piccolo del più dettagliato log di testo
-                     di livello diagnostico, ma contiene maggiori informazioni.
-                     (Forma breve: -bl)
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     Il LogFile facoltativo specifica il percorso in cui il
-                     il log binario viene salvato. Per generare un file di log distinto
-                     per ogni compilazione, il token "{}" può essere aggiunto al
-                     percorso, ad esempio: LogFile=output-{}-log.binlog. Ogni 
-                     "{}" nel percorso del log viene sostituito con una stringa univoca
-                     usando il timestamp, l'ID del processo in esecuzione e
-timbro
-                     stringa casuale.
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
 
-                     Per impostazione predefinita, il logger binario raccoglie il testo di origine di
-                     file di progetto, inclusi tutti i
-                     progetti importati e i file di destinazione rilevati durante la compilazione. L'opzione facoltativa
-                     ProjectImports controlla questo comportamento:
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                      ProjectImports=None     - Non viene eseguita la raccolta
-                                                delle importazioni del progetto.
-                      ProjectImports=Embed    - Le importazioni del progetto vengono incorporate nel
-                                                file di log.
-                      ProjectImports=ZipFile  - I file del progetto vengono salvati in
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
                                                 output.projectimports.zip
-                                                dove output corrisponde allo stesso
-                                                nome del file di log binario.
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     L'impostazione predefinita di ProjectImports è Embed.
-                     Nota: il logger non raccoglie i file di origine non-MSBuild,
-                     ad esempio quelli con estensione .cs, .cpp e così via.
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
 
-                     È possibile riprodurre un file con estensione binlog
-                     passandolo a msbuild.exe come argomento invece di un progetto o di una soluzione.
-                     Altri logger riceveranno le
-                     informazioni contenute nel file di log come se fosse in corso la compilazione originale.
-                     Per maggiori informazioni sul file di log e su come usarlo, vedere:
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     Esempi:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
@@ -2188,16 +2185,15 @@ Esegue la profilatura della valutazione di MSBuild e scrive
                        -restoreProperty:IsRestore=true;MyProperty=value
     </source>
         <target state="translated">  -restoreProperty:&lt;n&gt;=&lt;v&gt;
-                      Imposta queste proprietà a livello di progetto o ne esegue
-                      l'override solo durante il ripristino e non usa le
-                      proprietà specificate con l'argomento -property.
-                      &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
-                      valore della proprietà. Usare il punto e virgola o la
-                      virgola per delimitare più proprietà o specificare ogni
-                      proprietà separatamente.
-                      Forma breve: -rp.
-                      Esempio:
-                        -restoreProperty:IsRestore=true;MyProperty=value
+                     Imposta queste proprietà a livello di progetto o ne esegue
+                     l'override solo durante il ripristino e non usa le
+                     proprietà specificate con l'argomento -property.
+                     &lt;v&gt; rappresenta il nome della proprietà e &lt;v&gt; il
+                     valore della proprietà. Usare il punto e virgola o la
+                     virgola per delimitare più proprietà o specificare ogni proprietà separatamente.
+                     (Forma breve: -rp)
+                     Esempio:
+                       -restoreProperty:IsRestore=true;MyProperty=value
     </target>
         <note>
       LOCALIZATION: "-restoreProperty" and "-rp" should not be localized.
@@ -2216,7 +2212,7 @@ Esegue la profilatura della valutazione di MSBuild e scrive
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="translated">MSBUILD : error MSB1021: non è possibile creare un'istanza del logger {0}. {1}</target>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
