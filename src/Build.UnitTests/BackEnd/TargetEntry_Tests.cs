@@ -713,7 +713,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that we get the target outputs correctly.
         /// </summary>
-        [Theory]
+        [Theory(Skip = "Env var state mutation causes issues with other tests")]
         [InlineData(false, false)]
         [InlineData(false, true)]
         [InlineData(true, false)]

@@ -91,6 +91,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Only log target outputs if we are going to log a target finished event and the environment variable is set and the target outputs are not null
             if (!LoggingService.OnlyLogCriticalEvents
+                // we check the logging service and the Trait here because a trait can opt non-required loggers
+                // into the behavior, but the loggers that opt into it _must_ override.
                 && (LoggingService.EnableTargetOutputLogging || Traits.Instance.EnableTargetOutputLogging)
                 && targetOutputs != null)
             {
