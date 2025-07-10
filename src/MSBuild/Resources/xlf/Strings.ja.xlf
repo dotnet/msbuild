@@ -239,7 +239,7 @@
         <source>  -multithreaded:&lt;parameters&gt;
                      Enables or Disables Multi-threaded feature in MSBuild.
                      The parameters are:
-                     True --Multiple threads will be used to build (maximum amount is equal to maxCpuCount)
+                     True --Multiple threads will be used to build (maximum is maxCpuCount)
                      False--MSBuild uses the traditional parallel build
                             behavior based on multiple processes (default)
                      (Short form: -mt)
@@ -249,7 +249,7 @@
         <target state="new">  -multithreaded:&lt;parameters&gt;
                      Enables or Disables Multi-threaded feature in MSBuild.
                      The parameters are:
-                     True --Multiple threads will be used to build (maximum amount is equal to maxCpuCount)
+                     True --Multiple threads will be used to build (maximum is maxCpuCount)
                      False--MSBuild uses the traditional parallel build
                             behavior based on multiple processes (default)
                      (Short form: -mt)
