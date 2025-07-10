@@ -619,6 +619,24 @@ internal static class NativeMethods
         NotApplicable,
     }
 
+    internal enum FileSystemStatus
+    {
+        /// <summary>
+        /// The file is on an NTFS file system.
+        /// </summary>
+        NTFS,
+
+        /// <summary>
+        /// The file is on a ReFS file system.
+        /// </summary>
+        ReFS,
+
+        /// <summary>
+        /// Not on Windows or unable to determine.
+        /// </summary>
+        NotApplicable,
+    }
+
     internal static LongPathsStatus IsLongPathsEnabled()
     {
         if (!IsWindows)
@@ -661,6 +679,65 @@ internal static class NativeMethods
                 return LongPathsStatus.Disabled;
             }
         }
+    }
+
+    internal static FileSystemStatus GetFileSystemStatus(string filePath)
+    {
+        if (!IsWindows)
+        {
+            return FileSystemStatus.NotApplicable;
+        }
+
+        try
+        {
+            return GetFileSystemStatusInternal(filePath);
+        }
+        catch
+        {
+            return FileSystemStatus.NotApplicable;
+        }
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static FileSystemStatus GetFileSystemStatusInternal(string filePath)
+    {
+        string rootPath = Path.GetPathRoot(filePath);
+        
+        if (string.IsNullOrEmpty(rootPath))
+        {
+            return FileSystemStatus.NotApplicable;
+        }
+
+        char[] volumeNameBuffer = new char[256];
+        char[] fileSystemNameBuffer = new char[256];
+        
+        bool result = GetVolumeInformation(
+            rootPath,
+            volumeNameBuffer,
+            volumeNameBuffer.Length,
+            out uint volumeSerialNumber,
+            out uint maximumComponentLength,
+            out uint fileSystemFlags,
+            fileSystemNameBuffer,
+            fileSystemNameBuffer.Length);
+
+        if (!result)
+        {
+            return FileSystemStatus.NotApplicable;
+        }
+
+        string fileSystemName = new string(fileSystemNameBuffer).TrimEnd('\0');
+        
+        if (string.Equals(fileSystemName, "ReFS", StringComparison.OrdinalIgnoreCase))
+        {
+            return FileSystemStatus.ReFS;
+        }
+        else if (string.Equals(fileSystemName, "NTFS", StringComparison.OrdinalIgnoreCase))
+        {
+            return FileSystemStatus.NTFS;
+        }
+
+        return FileSystemStatus.NotApplicable;
     }
 
     private static SAC_State? s_sacState;
@@ -1689,6 +1766,19 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
     [SupportedOSPlatform("windows")]
     internal static extern IntPtr LoadLibrary(string fileName);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    [SupportedOSPlatform("windows")]
+    internal static extern bool GetVolumeInformation(
+        string rootPathName,
+        char[] volumeNameBuffer,
+        int volumeNameSize,
+        out uint volumeSerialNumber,
+        out uint maximumComponentLength,
+        out uint fileSystemFlags,
+        char[] fileSystemNameBuffer,
+        int nFileSystemNameSize);
 
     /// <summary>
     /// Gets the fully qualified filename of the currently executing .exe.

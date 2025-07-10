@@ -1672,6 +1672,16 @@
   <data name="LongPaths_Missing" xml:space="preserve">
     <value>not set</value>
   </data>
+  <data name="FileSystem" xml:space="preserve">
+    <value>Based on the project file system, file system is {0}.</value>
+    <comment>File system detection for Windows, {0} will be "NTFS"/"ReFS"</comment>
+  </data>
+  <data name="FileSystem_NTFS" xml:space="preserve">
+    <value>NTFS</value>
+  </data>
+  <data name="FileSystem_ReFS" xml:space="preserve">
+    <value>ReFS</value>
+  </data>
   <data name="SAC" xml:space="preserve">
     <value>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</value>
     <comment>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</comment>
