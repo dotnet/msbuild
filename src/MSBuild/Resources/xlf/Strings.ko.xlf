@@ -1787,7 +1787,7 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
+        <target state="translated">자동화된 환경에서 빌드가 실행 중임을 감지하여 터미널 로거를 사용하지 않았습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
