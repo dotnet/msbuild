@@ -294,13 +294,21 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public string? Parameters { get; set; } = null;
 
+    private bool _initialized = false;
+
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)
     {
+        if (_initialized)
+        {
+            // This is a no-op, but we need to ensure that the logger is initialized only once.
+            return;
+        }
         // When MSBUILDNOINPROCNODE enabled, NodeId's reported by build start with 2. We need to reserve an extra spot for this case.
         _nodes = new TerminalNodeStatus[nodeCount + 1];
 
         Initialize(eventSource);
+        _initialized = true;
     }
 
     /// <inheritdoc/>
@@ -308,18 +316,18 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         ParseParameters();
 
-        eventSource.BuildStarted += BuildStarted;
-        eventSource.BuildFinished += BuildFinished;
-        eventSource.ProjectStarted += ProjectStarted;
-        eventSource.ProjectFinished += ProjectFinished;
-        eventSource.TargetStarted += TargetStarted;
-        eventSource.TargetFinished += TargetFinished;
-        eventSource.TaskStarted += TaskStarted;
-        eventSource.StatusEventRaised += StatusEventRaised;
+        eventSource.HandleBuildStarted(BuildStarted);
+        eventSource.HandleBuildFinished(BuildFinished);
+        eventSource.HandleProjectStarted(ProjectStarted);
+        eventSource.HandleProjectFinished(ProjectFinished);
+        eventSource.HandleTargetStarted(TargetStarted);
+        eventSource.HandleTargetFinished(TargetFinished);
+        eventSource.HandleTaskStarted(TaskStarted);
+        eventSource.HandleStatusEventRaised(StatusEventRaised);
 
-        eventSource.MessageRaised += MessageRaised;
-        eventSource.WarningRaised += WarningRaised;
-        eventSource.ErrorRaised += ErrorRaised;
+        eventSource.HandleMessageRaised(MessageRaised);
+        eventSource.HandleWarningRaised(WarningRaised);
+        eventSource.HandleErrorRaised(ErrorRaised);
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -401,16 +409,33 @@ public sealed partial class TerminalLogger : INodeLogger
         return true;
     }
 
+    private bool _shutdown = false;
 
     /// <inheritdoc/>
     public void Shutdown()
     {
+        if (_shutdown)
+        {
+            // Already shut down.
+            return;
+        }
         NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
         _cts.Cancel();
         _refresher?.Join();
         Terminal.Dispose();
         _cts.Dispose();
+        _shutdown = true;
+    }
+
+    public MessageImportance GetMinimumMessageImportance()
+    {
+        if (Verbosity == LoggerVerbosity.Quiet)
+        {
+            // If the verbosity is quiet, we don't want to log anything.
+            return MessageImportance.High - 1;
+        }
+        return MessageImportance.High;
     }
 
     #endregion
@@ -1050,7 +1075,9 @@ public sealed partial class TerminalLogger : INodeLogger
         else
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(FormatErrorMessage(e, Indentation));
+            // For nicer formatting, any messages from the engine we strip the file portion from.
+            var hasMSBuildPlaceholderLocation = e.File.Equals("MSBUILD", StringComparison.Ordinal);
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: !hasMSBuildPlaceholderLocation));
             _buildErrorsCount++;
         }
     }
@@ -1223,24 +1250,25 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent);
     }
 
-    private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true)
     {
         return FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
                 code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
-                file: HighlightFileName(e.File),
+                file: requireFileAndLinePortion ? HighlightFileName(e.File) : null,
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent);
+                indent,
+                requireFileAndLinePortion: requireFileAndLinePortion);
     }
 
     private string FormatEventMessage(
             string category,
-            string subcategory,
+            string? subcategory,
             string? message,
             string code,
             string? file,
@@ -1248,44 +1276,54 @@ public sealed partial class TerminalLogger : INodeLogger
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            string indent)
+            string indent,
+            bool requireFileAndLinePortion = true,
+            bool prependIndentation = false)
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
 
-        if (string.IsNullOrEmpty(file))
+        if (prependIndentation)
         {
-            builder.Append("MSBUILD : ");    // Should not be localized.
+            builder.Append(indent);
         }
-        else
-        {
-            builder.Append(file);
 
-            if (lineNumber == 0)
+        if (requireFileAndLinePortion)
+        {
+            if (string.IsNullOrEmpty(file))
             {
-                builder.Append(" : ");
+                builder.Append("MSBUILD : ");  // Should not be localized.
             }
             else
             {
-                if (columnNumber == 0)
+                builder.Append(file);
+
+                if (lineNumber == 0)
                 {
-                    builder.Append(endLineNumber == 0 ?
-                        $"({lineNumber}): " :
-                        $"({lineNumber}-{endLineNumber}): ");
+                    builder.Append(" : ");
                 }
                 else
                 {
-                    if (endLineNumber == 0)
+                    if (columnNumber == 0)
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        builder.Append(endLineNumber == 0 ?
+                            $"({lineNumber}): " :
+                            $"({lineNumber}-{endLineNumber}): ");
                     }
                     else
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber}-{endLineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        if (endLineNumber == 0)
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        }
+                        else
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber}-{endLineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        }
                     }
                 }
             }
