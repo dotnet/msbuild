@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Get rid of all of the metadata.
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: true);
-            ICollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
@@ -477,7 +477,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Add m3 metadata
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("m3", "m3");
-            ICollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
@@ -537,7 +537,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Get rid of all of the metadata, then add m3
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: true);
             newMetadata.Add("m3", "m3");
-            ICollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
@@ -608,7 +608,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Get rid of all of the metadata, then add m3
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: true);
             newMetadata.Add("m3", "m3");
-            ICollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
@@ -675,7 +675,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Test keeping only specified metadata
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: true);
             newMetadata["m1"] = Lookup.MetadataModification.CreateFromNoChange();
-            ICollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
@@ -729,7 +729,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Test keeping only specified metadata
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: true);
-            ICollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group = lookup.GetItems(item1.ItemType);
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             group = lookup.GetItems("i1");
@@ -777,8 +777,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Change the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("m", "m2");
-            ICollection<ProjectItemInstance> group = new List<ProjectItemInstance>();
-            group.Add(item1);
+            IReadOnlyCollection<ProjectItemInstance> group = new List<ProjectItemInstance> { item1 };
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             // Now it has m=m2
@@ -832,8 +831,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("m", "m2");
             newMetadata.Add("n", "n2");
-            ICollection<ProjectItemInstance> group = new List<ProjectItemInstance>();
-            group.Add(item1);
+            IReadOnlyCollection<ProjectItemInstance> group = new List<ProjectItemInstance> { item1 };
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             lookup.EnterScope("x");
@@ -872,8 +870,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("m", "m2");
-            ICollection<ProjectItemInstance> group = new List<ProjectItemInstance>();
-            group.Add(item1);
+            IReadOnlyCollection<ProjectItemInstance> group = new List<ProjectItemInstance> { item1 };
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             // Make an unrelated modification to the item
@@ -907,7 +904,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
             // It's still m=m1, n=n1, o=o1
-            ICollection<ProjectItemInstance> group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> group = lookup.GetItems("i1");
             Assert.Single(group);
             Assert.Equal("m1", group.First().GetMetadataValue("m"));
             Assert.Equal("n1", group.First().GetMetadataValue("n"));
@@ -917,12 +914,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("m", "m2");
             newMetadata.Add("n", "n2");
-            group = new List<ProjectItemInstance>();
-            group.Add(item1);
+            group = new List<ProjectItemInstance> { item1 };
             lookup.ModifyItems("i1", group, newMetadata);
 
             // It's now m=m2, n=n2, o=o1
-            ICollection<ProjectItemInstance> foundGroup = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> foundGroup = lookup.GetItems("i1");
             Assert.Single(foundGroup);
             Assert.Equal("m2", foundGroup.First().GetMetadataValue("m"));
             Assert.Equal("n2", foundGroup.First().GetMetadataValue("n"));
@@ -978,8 +974,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Change the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("m", "m2");
-            ICollection<ProjectItemInstance> group = new List<ProjectItemInstance>();
-            group.Add(item1);
+            IReadOnlyCollection<ProjectItemInstance> group = new List<ProjectItemInstance> { item1 };
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             // Now it has m=m2
@@ -1035,24 +1030,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Make a modification to the item to be m=m2
             Lookup.MetadataModifications newMetadata = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata.Add("m", "m2");
-            ICollection<ProjectItemInstance> group = new List<ProjectItemInstance>();
-            group.Add(item1);
+            IReadOnlyCollection<ProjectItemInstance> group = new List<ProjectItemInstance> { item1 };
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
-            ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
             Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
             // Modify to m=m3
             Lookup.MetadataModifications newMetadata2 = new Lookup.MetadataModifications(keepOnlySpecified: false);
             newMetadata2.Add("m", "m3");
-            ICollection<ProjectItemInstance> group3 = new List<ProjectItemInstance>();
-            group3.Add(item1b);
+            IReadOnlyCollection<ProjectItemInstance> group3 = new List<ProjectItemInstance> { item1b };
             lookup.ModifyItems(item1b.ItemType, group3, newMetadata2);
 
             // Modifications are visible
-            ICollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
             Assert.Single(group4);
             Assert.Equal("m3", group4.First().GetMetadataValue("m"));
 
@@ -1060,7 +1053,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             // Still visible
-            ICollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
             Assert.Single(group5);
             Assert.Equal("m3", group5.First().GetMetadataValue("m"));
         }
@@ -1091,7 +1084,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
-            ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
             Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
@@ -1103,7 +1096,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1b.ItemType, group3, newMetadata2);
 
             // Modifications are visible
-            ICollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group4 = lookup.GetItems(item1b.ItemType);
             Assert.Single(group4);
             Assert.Equal("m3", group4.First().GetMetadataValue("m"));
 
@@ -1111,7 +1104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             enteredScope.LeaveScope();
 
             // Still visible
-            ICollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group5 = lookup.GetItems(item1b.ItemType);
             Assert.Single(group5);
             Assert.Equal("m3", group5.First().GetMetadataValue("m"));
 
@@ -1144,7 +1137,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
-            ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
             Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
@@ -1152,7 +1145,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.RemoveItem(item1b);
 
             // There's now no items at all
-            ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
             Assert.Empty(group3);
         }
 
@@ -1181,7 +1174,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.ModifyItems(item1.ItemType, group, newMetadata);
 
             // Get the item (under the covers, it cloned it in order to apply the modification)
-            ICollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group2 = lookup.GetItems(item1.ItemType);
             Assert.Single(group2);
             ProjectItemInstance item1b = group2.First();
 
@@ -1189,7 +1182,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.RemoveItem(item1b);
 
             // There's now no items at all
-            ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
+            IReadOnlyCollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
             Assert.Empty(group3);
 
             // Leave scope
