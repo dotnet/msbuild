@@ -843,6 +843,47 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _mockRequestCallback.LastWaitForCores.ShouldBeFalse();
         }
 
+        /// <summary>
+        /// Verify that if a task calls Yield() but not Reacquire(), the TaskHost will
+        /// automatically reacquire when MarkAsInactive() is called to prevent hanging.
+        /// </summary>
+        [Fact]
+        public void AutoReacquireOnMarkAsInactiveAfterYield()
+        {
+            // Call Yield() without Reacquire() to simulate the bug scenario
+            _taskHost.Yield();
+
+            // Verify yield was called
+            _mockRequestCallback.YieldCalled.ShouldBeTrue();
+
+            // Call MarkAsInactive() which should automatically reacquire
+            _taskHost.MarkAsInactive();
+
+            // Verify that reacquire was called automatically
+            _mockRequestCallback.ReacquireCalled.ShouldBeTrue();
+        }
+
+        /// <summary>
+        /// Verify that normal Yield/Reacquire behavior still works after the auto-reacquire fix.
+        /// </summary>
+        [Fact]
+        public void NormalYieldReacquireStillWorks()
+        {
+            // Normal flow: Yield then Reacquire
+            _taskHost.Yield();
+            _mockRequestCallback.YieldCalled.ShouldBeTrue();
+
+            _taskHost.Reacquire();
+            _mockRequestCallback.ReacquireCalled.ShouldBeTrue();
+
+            // Reset counters
+            _mockRequestCallback.ResetCounts();
+
+            // MarkAsInactive should NOT call reacquire again since it was already called
+            _taskHost.MarkAsInactive();
+            _mockRequestCallback.ReacquireCalled.ShouldBeFalse();
+        }
+
         #region Helper Classes
 
         /// <summary>
@@ -1368,6 +1409,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
             public int LastCoresToRelease { get; private set; }
 
             /// <summary>
+            /// Whether the Yield method was called.
+            /// </summary>
+            public bool YieldCalled { get; private set; }
+
+            /// <summary>
+            /// Whether the Reacquire method was called.
+            /// </summary>
+            public bool ReacquireCalled { get; private set; }
+
+            /// <summary>
+            /// Reset the call tracking counters.
+            /// </summary>
+            public void ResetCounts()
+            {
+                YieldCalled = false;
+                ReacquireCalled = false;
+            }
+
+            /// <summary>
             /// Constructor which takes an array of build results to return from the BuildProjects method when it is called.
             /// </summary>
             internal MockIRequestBuilderCallback(BuildResult[] buildResultsToReturn)
@@ -1422,6 +1482,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public void Yield()
             {
+                YieldCalled = true;
             }
 
             /// <summary>
@@ -1429,6 +1490,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// </summary>
             public void Reacquire()
             {
+                ReacquireCalled = true;
             }
 
             /// <summary>
