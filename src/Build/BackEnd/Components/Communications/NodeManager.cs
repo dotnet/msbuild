@@ -338,7 +338,6 @@ namespace Microsoft.Build.BackEnd
                 fromNodeId = Interlocked.Add(ref _nextNodeId, numberOfNodesToCreate) - numberOfNodesToCreate;
             }
 
-
             // Create the node and add it to our mapping.
             IList<NodeInfo> nodes = nodeProvider.CreateNodes(fromNodeId, this, AcquiredNodeConfigurationFactory, numberOfNodesToCreate);
 
