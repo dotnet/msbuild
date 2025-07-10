@@ -629,16 +629,14 @@
     </comment>
   </data>
   <data name="HelpMessage_49_MultiThreadedSwitch" xml:space="preserve">
-    <value>  -multithreaded:&lt;parameters&gt;
-                     Enables or Disables Multi-threaded feature in MSBuild.
-                     The parameters are:
-                     True --Multiple threads will be used to build 
-                            (maximum is maxCpuCount)
-                     False--MSBuild uses the traditional parallel build
-                            behavior based on multiple processes (default)
+    <value>  -multithreaded
+                     Enables multi-threaded mode in MSBuilds.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
                      (Short form: -mt)
-                     Example:
-                       -mt:true
     </value>
   </data>
   <data name="HelpMessage_24_NodeReuse" xml:space="preserve">
@@ -1100,14 +1098,6 @@
       This error is shown when a user specifies an invalid CPU value. For example, -m:foo instead of -m:2.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
-  </data>
-  <data name="InvalidMultiThreadedValue" xml:space="preserve">
-    <value>MSBUILD : error MSB1069: Multi-threaded value is not valid. {0}.</value>
-    <comment>{StrBegin="MSBUILD : error MSB1069: "}
-     UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-     This error is shown when a user specifies a multi-threaded value that is not equivilent to Boolean.TrueString or Boolean.FalseString.
-     LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-  </comment>
   </data>
   <data name="InvalidMaxCPUCountValueOutsideRange" xml:space="preserve">
     <value>MSBUILD : error MSB1032: Maximum CPU count is not valid. Value must be an integer greater than zero and no more than 1024.</value>

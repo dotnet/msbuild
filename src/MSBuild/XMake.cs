@@ -2726,7 +2726,7 @@ namespace Microsoft.Build.CommandLine
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
                     // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
-                    multiThreaded = ProcessMultiThreadedSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded]);
+                    multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
                     // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
@@ -2833,6 +2833,11 @@ namespace Microsoft.Build.CommandLine
             // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
             bool isBuildCheckEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Check);
             return isBuildCheckEnabled;
+        }
+
+        private static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
@@ -3576,35 +3581,6 @@ namespace Microsoft.Build.CommandLine
             }
 
             return cpuCount;
-        }
-
-        /// <summary>
-        /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
-        /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
-        /// will determine the node reuse setting for that case.
-        /// </summary>
-        internal static bool ProcessMultiThreadedSwitch(string[] parameters)
-        {
-            bool enableMultiThreading = false;
-
-            if (parameters.Length > 0)
-            {
-                try
-                {
-                    // There does not seem to be a localizable function for this
-                    enableMultiThreading = bool.Parse(parameters[parameters.Length - 1]);
-                }
-                catch (FormatException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidMultiThreadedValue", parameters[parameters.Length - 1], ex.Message);
-                }
-                catch (ArgumentNullException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidMultiThreadedValue", parameters[parameters.Length - 1], ex.Message);
-                }
-            }
-
-            return enableMultiThreading;
         }
 
         /// <summary>
