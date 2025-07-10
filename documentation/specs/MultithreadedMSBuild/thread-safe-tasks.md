@@ -1,268 +1,172 @@
-# Thread Safe Tasks
+# Thread-Safe Tasks
 
 ## Overview
 
-MSBuild's current execution model assumes that tasks have exclusive control over the entire process during execution. This allows tasks to freely modify global process state such as environment variables, the current working directory, and other process-level resources. This design works well for MSBuild's approach of executing builds in separate processes for parallelization.
+MSBuild's current execution model assumes that tasks have exclusive control over the entire process during execution. This allows tasks to freely modify global process state such as environment variables, the current working directory, and other process-level resources. This design works well for MSBuild's approach of executing builds in separate processes for parallelization. With the introduction of multithreaded execution within a single MSBuild process, multiple tasks can now run concurrently. This requires a new task design to ensure thread safety when multiple tasks access shared process state simultaneously.
 
-With the introduction of multithreaded execution within a single MSBuild process, multiple tasks can now run concurrently. This requires a new task design to prevent race conditions and ensure thread safety when multiple tasks access shared process state simultaneously.
+To enable this multithreaded execution model, we introduce the `IThreadSafeTask` interface that tasks can implement to declare their thread-safety capabilities. Tasks implementing this interface must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Reference](thread-safe-tasks-api-reference.md) for detailed guidelines. At the same time, the `IThreadSafeTask` interface provides access to the `ExecutionContext` property that allows safe access to global process state. For example, task authors should use `ExecutionContext.GetAbsolutePath(relativePath)` instead of the standard `Path.GetFullPath(relativePath)` to ensure correct path resolution.
 
-To enable this multithreaded execution model, we introduce the `IThreadSafeTask` interface that tasks can implement to declare their thread-safety capabilities. Tasks implementing this interface must avoid using APIs that modify or depend on global process state, as such usage could cause conflicts when multiple tasks execute concurrently, see [Thread-Safe Tasks API Reference](thread-safe-tasks-api-reference.md).
-
-Task authors should use the `ExecutionContext` property provided by the `IThreadSafeTask` interface to access thread-safe APIs for operations that would otherwise use global process state. For example, use `ExecutionContext.Path.GetFullPath(relativePath)` instead of the standard `Path.GetFullPath(relativePath)`.
-
-## Option 1: Structured Interfaces
+## Design
 
 ```csharp
-public interface IThreadSafeTask<TExecutionContext> : ITask
-    where TExecutionContext : ITaskExecutionContext
+public interface IThreadSafeTask : ITask
 {
-    TExecutionContext ExecutionContext { get; set; }
+    ITaskExecutionContext ExecutionContext { get; set; }
 }
 ```
 
-The `ITaskExecutionContext` provides tasks with access to what was in multi-process mode the global process state, such as environment variables and working directory:
+**Note:** Consider backporting the `IThreadSafeTask` interface to the 17.14 branch to allow a graceful fail when tasks attempt to use it.
+
+The execution context provides essential methods for thread-safe task execution, replacing direct access to global process state:
+
 ```csharp
 public interface ITaskExecutionContext
-{    
-    string CurrentDirectory { get; set; }
-
-    IEnvironment Environment { get; }
-
-    IPath Path { get; }
-
-    IFile File { get; }
-
-    IDirectory Directory { get; }
-}
-```
-
-The `IEnvironment` provides thread-safe access to environment variables:
-```csharp
-public interface IEnvironment
 {
+    AbsolutePath CurrentDirectory { get; set; }
+
+    AbsolutePath GetAbsolutePath(string path);
+    
     string? GetEnvironmentVariable(string name);
-    
-    Dictionary<string, string?> GetEnvironmentVariables();
-    
+    IReadOnlyDictionary<string, string> GetEnvironmentVariables();
     void SetEnvironmentVariable(string name, string? value);
+    
+    Process StartProcess(ProcessStartInfo startInfo);
+    Process StartProcess(string fileName);
+    Process StartProcess(string fileName, string arguments);
 }
 ```
 
-Thread-safe alternative to `System.IO.Path` class:
-```csharp
-public interface IPath
-{
-    string GetFullPath(string path);
-    ... // Complete list of methods can be find below
-}
-```
-
-Thread-safe alternative to `System.IO.File` class:
+To help task authors avoid thread-safety issues related to path handling, we introduce `AbsolutePath` and `RelativePath` classes that are implicitly convertible to string. 
 
 ```csharp
-public interface IFile
+public class AbsolutePath
 {
-    bool Exists(string path);
-    string ReadAllText(string path);
-    ... // Complete list of methods can be find below
+    public string Path { get; }
+    
+    // Will be banned for use in tasks by analyzers
+    public AbsolutePath(string path) { }
+    
+    public AbsolutePath(string path, AbsolutePath basePath) { }
+    
+    public static implicit operator string(AbsolutePath path) { }
+}
+
+public class RelativePath
+{
+    public string Path { get; }
+    
+    public RelativePath(string path) { }
+    
+    public AbsolutePath ToAbsolute(AbsolutePath? basePath = null) { }
+    
+    public static implicit operator string(RelativePath path) { }
 }
 ```
 
-Thread-safe alternative to `System.IO.Directory` class:
+**Note:** Usage of `AbsolutePath` and `RelativePath` may need adjustment if similar concepts are implemented in the standard .NET API in the future.
 
-```csharp
-public interface IDirectory
-{
-    bool Exists(string path);
-    DirectoryInfo CreateDirectory(string path);
-    ... // Complete list of methods can be find below
-}
-```
+**TODO:** Consider having conversions for `ITaskItem`.
 
-### Interface Versioning Pattern
+### Interface Evolution Strategy
 
-To handle future updates to interfaces without breaking existing implementations, we wil use a versioning pattern. 
+To handle future updates without breaking existing implementations, we will create versioned interfaces:
 
-```csharp
-public interface IFile2 : IFile
-{
-    string ReadAllText(string path, Encoding encoding)
-    ... // Other new methods added in version 2
-}
-```
-
-Unfortunatelly, `ITaskExecutionContext` will need a version update as well.
 ```csharp
 public interface ITaskExecutionContext2 : ITaskExecutionContext
 {
-    new IPath2 Path { get; }
+    // New methods for version 2
 }
 ```
 
-### Usage Examples
+#### Alternative: Abstract Classes
 
-```csharp
-// Tasks should use minimum `ITaskExecutionContext` version that provides the needed functionality
-public class MyTask : IThreadSafeTask<ITaskExecutionContext>
-{
-    public ITaskExecutionContext ExecutionContext { get; set; }
-    
-    public bool Execute()
-    {
-        var text = ExecutionContext.File.ReadAllText("file.txt");
-        return true;
-    }
-}
-
-// Tasks that need newer functionality
-public class AdvancedTask : IThreadSafeTask<ITaskExecutionContext2>
-{
-    public ITaskExecutionContext2 ExecutionContext { get; set; }
-    
-    public bool Execute()
-    {
-        var text = ExecutionContext.File.ReadAllText("file.txt", Encoding.UTF8);
-        return true;
-    }
-}
-```
-**Note** During the loading of the task assembly, we can check whether the needed version of the `ITaskExecutionContext` is present and gracefully fail if not.
-
-**Note** Consider backporting this check to 17.14 branch as well.
-
-## Option 2: Abstract Classes
-
-This approach uses abstract classes instead of interfaces.
+Alternatively, we can use abstract classes:
 
 ```csharp
 public interface IThreadSafeTask : ITask
 {
     TaskExecutionContext ExecutionContext { get; set; }
 }
-```
 
-### TaskExecutionContext Abstract Class
-
-The `TaskExecutionContext` provides tasks with access to what was in multi-process mode the global process state, such as environment variables and working directory:
-
-```csharp
 public abstract class TaskExecutionContext
-{
-    public virtual string CurrentDirectory { get; set; }
-    public virtual TaskEnvironment Environment { get; }
-    public virtual TaskPath Path { get; }
-    public virtual TaskFile File { get; }
-    public virtual TaskDirectory Directory { get; }
+{ 
+    // Same methods as the interface, with default implementations
 }
 ```
 
-The `TaskEnvironment` provides thread-safe access to environment variables:
-```csharp
-public abstract class TaskEnvironment
-{
-    public virtual string? GetEnvironmentVariable(string name) => throw new NotImplementedException();
-    public virtual Dictionary<string, string?> GetEnvironmentVariables() => throw new NotImplementedException();
-    public virtual void SetEnvironmentVariable(string name, string? value) => throw new NotImplementedException();
-}
+**Note:** 
+- Default implementations allow backward compatibility for customers who extend the class.
+- However, version compatibility checking is not possible with this design.
+
+## Authoring Thread-Safe Tasks
+
+### Supporting Running 'classic' MSBuild Tasks in Thread Node
+
+Task authors implementing `IThreadSafeTask` need to:
+
+- Update package dependencies to support thread-safe APIs
+- Create and maintain both thread-safe and legacy versions if support for older MSBuild versions is necessary
+- Implement logic to choose appropriate task implementations based on MSBuild capabilities
+
+These requirements effectively cut off support for a long tail of MSBuild and IDE versions, creating a barrier to adoption.
+
+To allow easier adoption, MSBuild will enable the thread worker node to either recognize and wrap legacy tasks in thread-based semantics or run the 'classic' tasks themselves. This will allow task authors who are confident their tasks don't perform stateful actions to participate in multithreaded builds without sacrificing legacy support or needing to support multiple versions.
+
+Legacy tasks can run in multithreaded builds if they:
+- Do not change environment variables or current working directory
+- Do not depend on relative path resolution from current working directory
+- Do not use static fields or other shared state unsafely
+- Do not rely on specific environment variable values being set
+
+Task authors and users who would like to utilize this capability will need to add the `ThreadSafe` attribute to the task declaration:
+```xml
+  <UsingTask TaskName="MyTask" AssemblyFile="MyTask.dll" ThreadSafe="true" Condition="'$(MSBuildSupportsThreadSafeTasks)' != 'true'" />
 ```
 
-Thread-safe alternative to `System.IO.Path` class. 
-```csharp
-public abstract class TaskPath
-{
-    public virtual string GetFullPath(string path) => throw new NotImplementedException();
-    ... // Complete list of methods can be find below
-}
-```
+**Note** We will need to service supported branches so that older versions of MSBuild ignore the `ThreadSafe` attribute and do not throw the `MSB4066` error. For MSBuild versions that would not be serviced, task authors will need to conditionally import the file with task declarations based on the running MSBuild version.
 
-**Note** the default implementations allow backwords compatibility for the customers' that implement the class. 
+**Note** Alternatively, we can introduce new types of assembly factories (`AssemblyThreadCompatibleTaskFactory` and others) to avoid the error. The task declarations still need to be conditional, but this would spare us the need to service older versions. 
 
-Thread-safe alternative to `System.IO.File` class:
-```csharp
-public abstract class TaskFile
-{    
-    public virtual bool Exists(string path) => throw new NotImplementedException();
-    public virtual string ReadAllText(string path) => throw new NotImplementedException();
-    ... // Complete list of methods can be find below
-}
-```
+This support would be enabled by default for the first release of Multithreaded MSBuild, but the goal should be to deprecate it. We will disable the compatibility bridge by default eventually. We will use build-level telemetry to track 'classic' MSBuild tasks running in multithreaded mode to monitor `IThreadSafeTask` adoption trends.
 
-Thread-safe alternative to `System.IO.Directory` class:
-```csharp
-public abstract class TaskDirectory
-{
-    public virtual bool Exists(string path) => throw new NotImplementedException();
-    public virtual DirectoryInfo CreateDirectory(string path) => throw new NotImplementedException();
-    ... // Complete list of methods can be find below
-}
-```
-
-### Versioning Pattern
-
-With abstract classes, there is no need to create a new type to add methods.
-
-```csharp
-public abstract class TaskFile
-{
-    public virtual bool Exists(string path) => throw new NotImplementedException();
-    public virtual string ReadAllText(string path) => throw new NotImplementedException();
-    
-    // Method added to the class:
-    public virtual string ReadAllText(string path, Encoding encoding) => throw new NotImplementedException();
-    ... // Other methods can be added here
-}
-```
-
-### Usage Examples
-
+## Examples
+Basic `IThreadSafeTask` Example:
 ```csharp
 public class MyTask : IThreadSafeTask
 {
-    public TaskExecutionContext ExecutionContext { get; set; }
-    
     public bool Execute()
     {
-        var text = ExecutionContext.File.ReadAllText("file.txt");
-        return true;
-    }
-}
-
-// Tasks that need newer functionality
-public class AdvancedTask : IThreadSafeTask
-{
-    public TaskExecutionContext ExecutionContext { get; set; }
-    
-    public bool Execute()
-    {
-        var text = ExecutionContext.File.ReadAllText("file.txt", Encoding.UTF8);
+        // Use APIs provided by ExecutionContext
+        string envVar = ExecutionContext.GetEnvironmentVariable("EnvVar");
+       
+        // Convert string properties to strongly-typed paths and use them in standard File/Directory APIs
+        AbsolutePath path = ExecutionContext.GetAbsolutePath("SomePath");
+        string content = File.ReadAllText(path);
+        
         return true;
     }
 }
 ```
 
-**Question**: How can we check the version compatibility and gracefully fail if the required version is not available? It is not possible in the current design.
+Conditional Task Declaration Example:
+```xml
+<Project>
+  <PropertyGroup>
+    <MSBuildSupportsThreadSafeTasks Condition="'$(MSBuildVersion)' >= '17.15'">true</MSBuildSupportsThreadSafeTasks>
+  </PropertyGroup>
 
-## Methods Reference
+  <UsingTask 
+    TaskName="MyTask" 
+    AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/ThreadSafe/MyTask.dll" 
+    Condition="'$(MSBuildSupportsThreadSafeTasks)' == 'true'" />
+    
+  <UsingTask 
+    TaskName="MyTask" 
+    AssemblyFile="$(MSBuildThisFileDirectory)../lib/netstandard2.0/Legacy/MyTask.dll" 
+    Condition="'$(MSBuildSupportsThreadSafeTasks)' != 'true'" />
+</Project>
+```
 
-### Path Methods
+## Implementation Notes
 
-- `bool Exists(string path)`
-- `string GetFullPath(string path)`
-
-### File Methods
-
-**TODO** Make a list
-
-**Question** In net core and net framework (and in different versions) there is different set of the functions. Which exactly should we take?
-
-**Idea** We can use info from apisof.net to identify the most used API and we can drop not much used.
-
-### Directory Methods
-
-**TODO** Make a list
-
-## Notes
-
-**Note**: Our implementations should be thread-safe so that task authors can create multi-threaded tasks, and the class should be safe to use.
-
-**Question**: We want to prevent customers from setting or modifying the ExecutionContext, what is the good way of doing that?
+**Thread Safety:** All implementations should be thread-safe to enable task authors to create multi-threaded tasks, ensuring all classes are safe for concurrent use.

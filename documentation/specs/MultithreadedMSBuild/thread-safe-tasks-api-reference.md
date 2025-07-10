@@ -46,13 +46,13 @@ The following tables list specific .NET APIs and their threading safety classifi
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| All methods | ERROR | Uses current working directory | Use MSBuild API |
+| All methods | ERROR | Uses current working directory | Use absolute paths |
 
 ### System.IO.Directory Class
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| All methods | ERROR | Uses current working directory | Use MSBuild API |
+| All methods | ERROR | Uses current working directory | Use absolute paths |
 
 ### System.Environment Class
 
@@ -97,18 +97,18 @@ The following tables list specific .NET APIs and their threading safety classifi
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
 | All properties setters | ERROR | Modifies process-level state | Avoid |
-| `Process.GetCurrentProcess().Kill()` | ERROR | Terminates entire process |  |
-| `Process.GetCurrentProcess().Kill(bool entireProcessTree)` | ERROR | Terminates entire process |  |
-| `Process.Start(string fileName)` | ERROR | Inherits process state | Inherits environment and working directory |
-| `Process.Start(string fileName, string arguments)` | ERROR | Inherits process state | Inherits environment and working directory |
-| `Process.Start(ProcessStartInfo startInfo)` | WARNING | May inherit process state |  |
+| `Process.GetCurrentProcess().Kill()` | ERROR | Terminates entire process | Avoid |
+| `Process.GetCurrentProcess().Kill(bool entireProcessTree)` | ERROR | Terminates entire process | Avoid |
+| `Process.Start(string fileName)` | ERROR | Inherits process state | Use MSBuild API |
+| `Process.Start(string fileName, string arguments)` | ERROR | Inherits process state | Use MSBuild API |
+| `Process.Start(ProcessStartInfo startInfo)` | WARNING | May inherit process state | Use MSBuild API |
 
 ### System.Threading.ThreadPool Class
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| `ThreadPool.SetMinThreads(int workerThreads, int completionPortThreads)` | ERROR | Modifies process-wide settings |  |
-| `ThreadPool.SetMaxThreads(int workerThreads, int completionPortThreads)` | ERROR | Modifies process-wide settings |  |
+| `ThreadPool.SetMinThreads(int workerThreads, int completionPortThreads)` | ERROR | Modifies process-wide settings | Avoid |
+| `ThreadPool.SetMaxThreads(int workerThreads, int completionPortThreads)` | ERROR | Modifies process-wide settings | Avoid |
 
 ### System.Globalization.CultureInfo Class
 
