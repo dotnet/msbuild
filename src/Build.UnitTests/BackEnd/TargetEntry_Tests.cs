@@ -700,7 +700,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     {
                         // b should have stuff, c should not have stuff, because only B has Returns
                         Assert.NotNull(targetOutputsB);
-                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem>];
+                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
                         Assert.Single(outputListB);
                         Assert.Equal("item1", outputListB[0].ItemSpec);
 
@@ -712,11 +712,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         Assert.NotNull(targetOutputsB);
                         Assert.NotNull(targetOutputsC);
 
-                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem>];
+                        List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
                         Assert.Single(outputListB);
                         Assert.Equal("item1", outputListB[0].ItemSpec);
 
-                        List<ITaskItem> outputListC = [.. targetOutputsC as IEnumerable<ITaskItem>];
+                        List<ITaskItem> outputListC = [.. targetOutputsC as IEnumerable<ITaskItem> ];
                         Assert.Single(outputListC);
                         Assert.Equal("item2", outputListC[0].ItemSpec);
                     }
@@ -729,7 +729,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", oldEnvVar);
                 }
             }
-            
         }
 
         /// <summary>
