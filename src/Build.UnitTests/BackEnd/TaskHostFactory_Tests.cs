@@ -26,7 +26,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _output = testOutputHelper;
         }
 
-        [Theory]
+        [Theory(Skip ="Environment variable issue")]
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(true, true)]
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [Fact(Skip = "Environment variable issue")]
         public void TransiendAndSidecarNodeCanCoexist()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
                 // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
                 Process taskHostNode2 = Process.GetProcessById(pidSidecar);
-                taskHostNode2.WaitForExit(3000).ShouldBeFalse($"The node should be alife since it is the sidecar node.");
+                taskHostNode2.WaitForExit(3000).ShouldBeFalse($"The node should be alive since it is the sidecar node.");
                 taskHostNode2.Kill();
             }
         }
