@@ -2839,7 +2839,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
         <source>Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</source>
-        <target state="new">Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</target>
+        <target state="translated">Nie można wywnioskować typu parametru „{0}”, ponieważ typ atrybutu „{1}” jest nieznany. Wartość będzie traktowana jako ciąg.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">

@@ -11,7 +11,11 @@ namespace Microsoft.Build.Collections
     ///     Defines methods to support the comparison of objects for
     ///     equality over constrained inputs.
     /// </summary>
+#if TASKHOST
+    internal interface IConstrainedEqualityComparer<T> : IEqualityComparer<T>
+#else
     internal interface IConstrainedEqualityComparer<in T> : IEqualityComparer<T>
+#endif
     {
         /// <summary>
         /// Determines whether the specified objects are equal, factoring in the specified bounds when comparing <paramref name="y"/>.
