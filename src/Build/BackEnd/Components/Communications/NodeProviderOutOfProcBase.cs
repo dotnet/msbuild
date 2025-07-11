@@ -474,8 +474,22 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
-                return nodeStream;
+                var result = TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
+                if (result.IsSuccess)
+                {
+                    return nodeStream;
+                }
+                else
+                {
+                    // Can be:
+                    // UnauthorizedAccessException -- Couldn't connect, might not be a node.
+                    // IOException -- Couldn't connect, already in use.
+                    // TimeoutException -- Couldn't connect, might not be a node.
+                    // InvalidOperationException – Couldn’t connect, probably a different build
+                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}.", pipeName);
+                    nodeStream?.Dispose();
+                    return null;
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
