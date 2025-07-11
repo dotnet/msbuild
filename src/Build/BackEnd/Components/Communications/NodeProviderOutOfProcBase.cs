@@ -474,7 +474,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
+                TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
                 return nodeStream;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -499,7 +499,7 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
         /// </remarks>
-        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
+        internal static HandshakeResult TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
         {
             nodeStream.Connect(timeout);
 
@@ -528,13 +528,21 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
+            if (
 #if NETCOREAPP2_1_OR_GREATER
-            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
+            nodeStream.TryReadEndOfHandshakeSignal(true, timeout).IsSuccess)
 #else
-            nodeStream.ReadEndOfHandshakeSignal(true);
+            nodeStream.TryReadEndOfHandshakeSignal(true).IsSuccess)
 #endif
-            // We got a connection.
-            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+            {
+                // We got a connection.
+                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                return HandshakeResult.Success(0);
+            }
+            else
+            {
+                return HandshakeResult.Failure(HandshakeStatus.Failure, null);
+            }
         }
 
         /// <summary>
