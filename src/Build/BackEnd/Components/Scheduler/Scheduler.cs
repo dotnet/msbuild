@@ -185,7 +185,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _noLoggingCompletedSubmissionDetails;
 
-        private static bool _isFirstWrite = true;
+        /// <summary>
+        /// Static variable to track whether this is the first write to the debug dump file.
+        /// If true, indicates that a header should be written to the file.
+        /// After the first write, this is set to false to prevent writing the header in subsequent writes.
+        /// </summary>
+        private static bool _debugDumpIsFirstWrite = true;
 
 #pragma warning restore IDE0052 // Remove unread private members
 #pragma warning restore CS0414 // The field is assigned but its value is never used
@@ -1708,7 +1713,6 @@ namespace Microsoft.Build.BackEnd
             Stack<BuildRequest> requestsToAdd = new Stack<BuildRequest>(blocker.BuildRequests.Length);
             foreach (BuildRequest request in blocker.BuildRequests)
             {
-                TraceScheduler("Project {0} Target {1}", _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets));
                 // Assign a global request id to this request.
                 if (request.GlobalRequestId == BuildRequest.InvalidGlobalRequestId)
                 {
@@ -1716,7 +1720,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int nodeForResults = (parentRequest == null) ? InvalidNodeId : parentRequest.AssignedNode;
-                TraceScheduler("Received request {0} (node request {1}) with parent {2} from node {3}", request.GlobalRequestId, request.NodeRequestId, request.ParentGlobalRequestId, nodeForResults);
+                TraceScheduler("Received request {0} (node request {1} Project {2} Target {3}) with parent {4} from node {5}", request.GlobalRequestId, request.NodeRequestId, _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets), request.ParentGlobalRequestId, nodeForResults);
 
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
@@ -2629,11 +2633,11 @@ namespace Microsoft.Build.BackEnd
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                        bool shouldWriteHeader = _isFirstWrite;
+                        bool shouldWriteHeader = _debugDumpIsFirstWrite;
                         if (shouldWriteHeader)
                         {
                             shouldWriteHeader = !File.Exists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
-                            _isFirstWrite = false;
+                            _debugDumpIsFirstWrite = false;
                         }
                         using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
