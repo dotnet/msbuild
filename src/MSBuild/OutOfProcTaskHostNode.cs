@@ -159,6 +159,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _updateEnvironmentAndLog;
 
+        /// <summary>
+        /// setting this to true means we're runnign a long-lived sidecar node.
+        /// </summary>
+        private bool _nodeReuse;
+
 #if !CLR2COMPATIBILITY
         /// <summary>
         /// The task object cache.
@@ -639,7 +644,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
-        public NodeEngineShutdownReason Run(out Exception shutdownException)
+        public NodeEngineShutdownReason Run(out Exception shutdownException, bool nodeReuse = false)
         {
 #if !CLR2COMPATIBILITY
             _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
@@ -649,7 +654,8 @@ namespace Microsoft.Build.CommandLine
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
-            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost();
+            _nodeReuse = nodeReuse;
+            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse);
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
@@ -806,8 +812,16 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
-            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
-            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            // Sidecar TaskHost will persist after the build is done.
+            if (_nodeReuse)
+            {
+                _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+            }
+            else 
+            {
+                // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
+                _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            }
             _shutdownEvent.Set();
         }
 
