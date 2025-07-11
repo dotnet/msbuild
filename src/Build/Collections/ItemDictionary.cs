@@ -84,6 +84,17 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public int Count => _nodes.Count;
 
+        public int ItemTypesCount
+        {
+            get
+            {
+                lock (_itemLists)
+                {
+                    return _itemLists.Count;
+                }
+            }
+        }
+
         /// <summary>
         /// Get the item types that have at least one item in this collection
         /// </summary>

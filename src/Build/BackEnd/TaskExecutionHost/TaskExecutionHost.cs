@@ -1384,6 +1384,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Only count non-null elements. We sometimes have a single-element array where the element is null
                     bool hasElements = false;
+                    _batchBucket.Lookup.InitializeCapacity(outputs.Length);
 
                     foreach (ITaskItem output in outputs)
                     {
@@ -1537,6 +1538,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (outputTargetIsItem)
                 {
+                    _batchBucket.Lookup.InitializeCapacity(outputs.Length);
+
                     // to store the outputs as items, use the string representations of the outputs as item-specs
                     foreach (string output in outputs)
                     {
