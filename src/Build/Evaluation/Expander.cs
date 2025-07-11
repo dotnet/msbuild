@@ -774,8 +774,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Add the argument in the StringBuilder to the arguments list, handling nulls
-        /// appropriately.
+        /// Extract the argument from the StringBuilder, handling nulls appropriately.
         /// </summary>
         private static string ExtractArgument(SpanBasedStringBuilder argumentBuilder)
         {
