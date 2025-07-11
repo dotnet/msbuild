@@ -679,6 +679,19 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(93);
         }
+
+        [Event(94, Keywords = Keywords.All)]
+        public void NodeShutdownFailure(string additionalInformation)
+        {
+            WriteEvent(94, additionalInformation);
+        }
+
+        [Event(95, Keywords = Keywords.All)]
+        public void NodeShutdownSuccess(string additionalInformation)
+        {
+            WriteEvent(95, additionalInformation);
+        }
+
         #endregion
     }
 }

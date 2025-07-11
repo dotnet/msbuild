@@ -266,6 +266,11 @@ namespace Microsoft.Build.Execution
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
+        /// <summary>
+        /// The debugging property to get more insights into the build process.
+        /// </summary>
+        private bool _nodesShutDownSuccessfully;
+
 #if DEBUG
         /// <summary>
         /// <code>true</code> to wait for a debugger to be attached, otherwise <code>false</code>.
@@ -1017,7 +1022,17 @@ namespace Microsoft.Build.Execution
 
                 _noActiveSubmissionsEvent!.WaitOne();
                 ShutdownConnectedNodes(false /* normal termination */);
-                _noNodesActiveEvent!.WaitOne();
+
+                // Add a timeout to avoid hanging indefinitely
+                _nodesShutDownSuccessfully = _noNodesActiveEvent!.WaitOne(TimeSpan.FromSeconds(5));
+
+                if (!_nodesShutDownSuccessfully)
+                {
+                    foreach (int nodeId in _activeNodes)
+                    {
+                        MSBuildEventSource.Log.NodeShutdownFailure($"Node {nodeId} failed to send shutdown packet within timeout period.");
+                    }
+                }
 
                 // Wait for all of the actions in the work queue to drain.
                 // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
@@ -2548,6 +2563,8 @@ namespace Microsoft.Build.Execution
             _executionCancellationTokenSource?.Cancel();
             ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), "Unexpected shutdown from node {0} which shouldn't exist.", node);
             _activeNodes.Remove(node);
+
+            MSBuildEventSource.Log.NodeShutdownSuccess($"Node {node} removed from active nodes, {_activeNodes.Count} nodes remaining.");
 
             if (shutdownPacket.Reason != NodeShutdownReason.Requested)
             {
