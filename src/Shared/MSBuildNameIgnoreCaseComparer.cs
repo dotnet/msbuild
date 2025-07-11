@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -22,7 +22,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// The processor architecture on which we are running, but default it will be x86
         /// </summary>
-        private static readonly NativeMethods.ProcessorArchitectures s_runningProcessorArchitecture = NativeMethods.ProcessorArchitecture;
+        private static readonly NativeMethodsShared.ProcessorArchitectures s_runningProcessorArchitecture = NativeMethodsShared.ProcessorArchitecture;
 
         /// <summary>
         /// The default immutable comparer instance.
@@ -46,12 +46,12 @@ namespace Microsoft.Build.Collections
         {
             if (lengthToCompare < 0)
             {
-                EscapeHatches.ThrowInternalError("Invalid lengthToCompare '{0}' {1} {2}", constrainedString, start, lengthToCompare);
+                ErrorUtilities.ThrowInternalError("Invalid lengthToCompare '{0}' {1} {2}", constrainedString, start, lengthToCompare);
             }
 
             if (start < 0 || start > (constrainedString?.Length ?? 0) - lengthToCompare)
             {
-                EscapeHatches.ThrowInternalError("Invalid start '{0}' {1} {2}", constrainedString, start, lengthToCompare);
+                ErrorUtilities.ThrowInternalError("Invalid start '{0}' {1} {2}", constrainedString, start, lengthToCompare);
             }
 
             if (ReferenceEquals(compareToString, constrainedString))
@@ -72,8 +72,8 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            if ((s_runningProcessorArchitecture != NativeMethods.ProcessorArchitectures.IA64)
-                && (s_runningProcessorArchitecture != NativeMethods.ProcessorArchitectures.ARM))
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.IA64)
+                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.ARM))
             {
                 // The use of unsafe here is quite a bit faster than the regular
                 // mechanism in the BCL. This is because we can make assumptions
@@ -120,8 +120,8 @@ namespace Microsoft.Build.Collections
                 return 0; // per BCL convention
             }
 
-            if ((s_runningProcessorArchitecture != NativeMethods.ProcessorArchitectures.IA64)
-                && (s_runningProcessorArchitecture != NativeMethods.ProcessorArchitectures.ARM))
+            if ((s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.IA64)
+                && (s_runningProcessorArchitecture != NativeMethodsShared.ProcessorArchitectures.ARM))
             {
                 unsafe
                 {
