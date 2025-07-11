@@ -20,19 +20,19 @@ namespace Microsoft.Build.Shared
         public static readonly char[] ConfigPlatformSeparator = { '|' };
 
         // This field stores pre-cached project elements for project guids for quicker access by project guid
-        private readonly Dictionary<string, XmlElement> _cachedProjectElements = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, XmlElement> _cachedProjectElements;
 
         // This field stores pre-cached project elements for project guids for quicker access by project absolute path
-        private readonly Dictionary<string, XmlElement> _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, XmlElement> _cachedProjectElementsByAbsolutePath;
 
         // This field stores the project absolute path for quicker access by project guid
-        private readonly Dictionary<string, string> _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _cachedProjectAbsolutePathsByGuid;
 
         // This field stores the project guid for quicker access by project absolute path
-        private readonly Dictionary<string, string> _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, string> _cachedProjectGuidsByAbsolutePath;
 
         // This field stores the list of dependency project guids by depending project guid
-        private readonly Dictionary<string, List<string>> _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, List<string>> _cachedDependencyProjectGuidsByDependingProjectGuid;
 
         public SolutionConfiguration(string xmlString)
         {
@@ -47,6 +47,14 @@ namespace Microsoft.Build.Shared
             XmlNodeList? projectConfigurationElements = GetProjectConfigurations(xmlString);
             if (projectConfigurationElements != null)
             {
+                int projectConfigurationCount = projectConfigurationElements.Count;
+
+                _cachedProjectElements = new Dictionary<string, XmlElement>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+                _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+                _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+                _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+                _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+
                 foreach (XmlElement xmlElement in projectConfigurationElements)
                 {
                     string projectGuid = xmlElement.GetAttribute(ProjectAttribute);
@@ -101,6 +109,14 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
+            else
+            {
+                _cachedProjectElements = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
+                _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
+                _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+    }
         }
 
         public static SolutionConfiguration Empty { get; } = new SolutionConfiguration(string.Empty);
