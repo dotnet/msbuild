@@ -94,7 +94,7 @@ internal sealed class Terminal : ITerminal
     {
         if (_isBuffering)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("terminal beginupdate exception");
         }
         _isBuffering = true;
     }
@@ -104,7 +104,7 @@ internal sealed class Terminal : ITerminal
     {
         if (!_isBuffering)
         {
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("terminal endupdate exception");
         }
         _isBuffering = false;
 

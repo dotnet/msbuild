@@ -63,7 +63,7 @@ namespace Microsoft.Build
         {
             if (input == null)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("interning binary reader");
             }
 
             _buffer = buffer;

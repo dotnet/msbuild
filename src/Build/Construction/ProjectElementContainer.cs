@@ -905,7 +905,7 @@ namespace Microsoft.Build.Construction
                             return _current;
                         }
 
-                        throw new InvalidOperationException();
+                        throw new InvalidOperationException("element container exception");
                     }
                 }
 
@@ -1017,7 +1017,7 @@ namespace Microsoft.Build.Construction
                             return Current;
                         }
 
-                        throw new InvalidOperationException();
+                        throw new InvalidOperationException("elementcontainer current exception");
                     }
                 }
 

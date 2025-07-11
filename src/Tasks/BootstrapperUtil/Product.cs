@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         public Product()
         {
             Debug.Fail("Products are not to be created in this fashion.  Please use IBootstrapperBuilder.Products instead.");
-            throw new InvalidOperationException();
+            throw new InvalidOperationException("product exception");
         }
 
         internal Product(XmlNode node, string code, ProductValidationResults validationResults, string copyAll)

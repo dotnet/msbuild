@@ -596,7 +596,7 @@ namespace Microsoft.Build.Collections
         {
             if (key != item.Key)
             {
-                throw new InvalidOperationException();
+                throw new InvalidOperationException("Hashset exception 1");
             }
 
             AddEvenIfPresent(item);
@@ -971,7 +971,7 @@ namespace Microsoft.Build.Collections
             {
                 if (_version != _set._version)
                 {
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("hashset moveset exception");
                 }
 
                 while (_index < _set._lastIndex)
@@ -1003,7 +1003,7 @@ namespace Microsoft.Build.Collections
                 {
                     if (_index == 0 || _index == _set._lastIndex + 1)
                     {
-                        throw new InvalidOperationException();
+                        throw new InvalidOperationException("hashset current exception");
                     }
                     return Current;
                 }
@@ -1013,7 +1013,7 @@ namespace Microsoft.Build.Collections
             {
                 if (_version != _set._version)
                 {
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("hashset reset exception");
                 }
 
                 _index = 0;

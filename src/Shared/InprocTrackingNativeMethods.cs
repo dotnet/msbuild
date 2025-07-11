@@ -220,7 +220,7 @@ namespace Microsoft.Build.Shared
                     Marshal.ThrowExceptionForHR(hresult, new IntPtr(-1));
 
                     // If Marshal.ThrowExceptionForHR did not throw, we still need to make sure to throw:
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("inproc tracking native");
                 }
 
                 s_fileTrackerDllHandle = handle;
