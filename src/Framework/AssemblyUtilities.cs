@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -24,36 +24,10 @@ namespace Microsoft.Build.Shared
         private static bool s_initialized;
 
         // Cached method info
-        private static PropertyInfo s_assemblylocationProperty;
         private static MethodInfo s_cultureInfoGetCultureMethod;
 
         private static Lazy<CultureInfo[]> s_validCultures = new Lazy<CultureInfo[]>(() => GetValidCultures(), true);
 #endif
-
-#if !CLR2COMPATIBILITY
-        private static Lazy<Assembly> s_entryAssembly = new Lazy<Assembly>(() => GetEntryAssembly());
-        public static Assembly EntryAssembly => s_entryAssembly.Value;
-#else
-        public static Assembly EntryAssembly = GetEntryAssembly();
-#endif
-
-        public static string GetAssemblyLocation(Assembly assembly)
-        {
-#if FEATURE_ASSEMBLY_LOCATION
-            return assembly.Location;
-#else
-            // Assembly.Location is only available in .netstandard1.5, but MSBuild needs to target 1.3.
-            // use reflection to access the property
-            Initialize();
-
-            if (s_assemblylocationProperty == null)
-            {
-                throw new NotSupportedException("Type Assembly does not have the Location property");
-            }
-
-            return (string)s_assemblylocationProperty.GetValue(assembly);
-#endif
-        }
 
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
@@ -132,11 +106,6 @@ namespace Microsoft.Build.Shared
             s_initialized = true;
         }
 #endif // !FEATURE_CULTUREINFO_GETCULTURES
-
-        private static Assembly GetEntryAssembly()
-        {
-            return System.Reflection.Assembly.GetEntryAssembly();
-        }
 
 #if !FEATURE_CULTUREINFO_GETCULTURES
         private static CultureInfo[] GetValidCultures()

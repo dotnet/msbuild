@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.Assembly),
+                        _taskType.Type.Assembly.Location,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
@@ -497,7 +497,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     exceptionMessageArgs = [_taskType.Type.Name,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.Assembly),
+                        _taskType.Type.Assembly.Location,
                         string.Empty];
                 }
 

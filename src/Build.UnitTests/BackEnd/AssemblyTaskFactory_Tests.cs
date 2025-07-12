@@ -683,11 +683,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost)
         {
             _taskFactory = new AssemblyTaskFactory();
-#if FEATURE_ASSEMBLY_LOCATION
-            _loadInfo = AssemblyLoadInfo.Create(null, Assembly.GetAssembly(typeof(TaskToTestFactories)).Location);
-#else
-            _loadInfo = AssemblyLoadInfo.Create(typeof(TaskToTestFactories).Assembly.FullName, null);
-#endif
+            _loadInfo = AssemblyLoadInfo.Create(null, typeof(TaskToTestFactories).Assembly.Location);
             _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
         }
