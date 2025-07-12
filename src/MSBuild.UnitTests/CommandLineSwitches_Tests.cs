@@ -474,7 +474,6 @@ namespace Microsoft.Build.UnitTests
             unquoteParameters.ShouldBeTrue();
         }
 
-#if FEATURE_XML_SCHEMA_VALIDATION
         [Theory]
         [InlineData("validate")]
         [InlineData("VALIDATE")]
@@ -498,7 +497,6 @@ namespace Microsoft.Build.UnitTests
             missingParametersErrorMessage.ShouldBeNull();
             unquoteParameters.ShouldBeTrue();
         }
-#endif
 
         [Theory]
         [InlineData("preprocess")]
@@ -1185,10 +1183,8 @@ namespace Microsoft.Build.UnitTests
                                         Array.Empty<ILogger>(),
                                         LoggerVerbosity.Normal,
                                         Array.Empty<DistributedLoggerRecord>(),
-#if FEATURE_XML_SCHEMA_VALIDATION
                                         false,
                                         null,
-#endif
                                         1,
                                         false,
                                         true,

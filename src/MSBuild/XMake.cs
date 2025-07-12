@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -651,10 +651,8 @@ namespace Microsoft.Build.CommandLine
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
                 LoggerVerbosity originalVerbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
-#if FEATURE_XML_SCHEMA_VALIDATION
                 bool needToValidateProject = false;
                 string schemaFile = null;
-#endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
 #if FEATURE_NODE_REUSE
@@ -698,10 +696,8 @@ namespace Microsoft.Build.CommandLine
                                             ref verbosity,
                                             ref originalVerbosity,
                                             ref distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
                                             ref needToValidateProject,
                                             ref schemaFile,
-#endif
                                             ref cpuCount,
                                             ref multiThreaded,
                                             ref enableNodeReuse,
@@ -818,35 +814,34 @@ namespace Microsoft.Build.CommandLine
                                 loggers,
                                 verbosity,
                                 distributedLoggerRecords.ToArray(),
-#if FEATURE_XML_SCHEMA_VALIDATION
-                                needToValidateProject, schemaFile,
-#endif
-                                    cpuCount,
-                                    multiThreaded,
-                                    enableNodeReuse,
-                                    preprocessWriter,
-                                    targetsWriter,
-                                    detailedSummary,
-                                    warningsAsErrors,
-                                    warningsNotAsErrors,
-                                    warningsAsMessages,
-                                    enableRestore,
-                                    profilerLogger,
-                                    enableProfiler,
-                                    interactive,
-                                    isolateProjects,
-                                    graphBuildOptions,
-                                    lowPriority,
-                                    question,
-                                    isBuildCheckEnabled,
-                                    inputResultsCaches,
-                                    outputResultsCache,
-                                    saveProjectResult: outputPropertiesItemsOrTargetResults,
-                                    ref result,
+                                needToValidateProject,
+                                schemaFile,
+                                cpuCount,
+                                multiThreaded,
+                                enableNodeReuse,
+                                preprocessWriter,
+                                targetsWriter,
+                                detailedSummary,
+                                warningsAsErrors,
+                                warningsNotAsErrors,
+                                warningsAsMessages,
+                                enableRestore,
+                                profilerLogger,
+                                enableProfiler,
+                                interactive,
+                                isolateProjects,
+                                graphBuildOptions,
+                                lowPriority,
+                                question,
+                                isBuildCheckEnabled,
+                                inputResultsCaches,
+                                outputResultsCache,
+                                saveProjectResult: outputPropertiesItemsOrTargetResults,
+                                ref result,
 #if FEATURE_REPORTFILEACCESSES
-                                    reportFileAccesses,
+                                reportFileAccesses,
 #endif
-                                    commandLine))
+                                commandLine))
                         {
                             exitType = ExitType.BuildError;
                         }
@@ -1223,10 +1218,8 @@ namespace Microsoft.Build.CommandLine
             ILogger[] loggers,
             LoggerVerbosity verbosity,
             DistributedLoggerRecord[] distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
             bool needToValidateProject,
             string schemaFile,
-#endif
             int cpuCount,
             bool multiThreaded,
             bool enableNodeReuse,
@@ -1356,7 +1349,6 @@ namespace Microsoft.Build.CommandLine
 
                 bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
 
-#if FEATURE_XML_SCHEMA_VALIDATION
                 // If the user has requested that the schema be validated, do that here.
                 if (needToValidateProject && !isSolution)
                 {
@@ -1374,7 +1366,6 @@ namespace Microsoft.Build.CommandLine
                     // we can safely assume that the project successfully validated.
                     projectCollection.UnloadProject(project);
                 }
-#endif
 
                 if (isPreprocess)
                 {
@@ -2418,10 +2409,8 @@ namespace Microsoft.Build.CommandLine
             ref LoggerVerbosity verbosity,
             ref LoggerVerbosity originalVerbosity,
             ref List<DistributedLoggerRecord> distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
             ref bool needToValidateProject,
             ref string schemaFile,
-#endif
             ref int cpuCount,
             ref bool multiThreaded,
             ref bool enableNodeReuse,
@@ -2558,10 +2547,8 @@ namespace Microsoft.Build.CommandLine
                                                            ref verbosity,
                                                            ref originalVerbosity,
                                                            ref distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
                                                            ref needToValidateProject,
                                                            ref schemaFile,
-#endif
                                                            ref cpuCount,
                                                            ref multiThreaded,
                                                            ref enableNodeReuse,
@@ -2707,11 +2694,9 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
                     }
 
-#if FEATURE_XML_SCHEMA_VALIDATION
                     // figure out if the project needs to be validated against a schema
                     needToValidateProject = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Validate);
                     schemaFile = ProcessValidateSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Validate]);
-#endif
                     invokeBuild = true;
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors) &&
@@ -4516,7 +4501,6 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-#if FEATURE_XML_SCHEMA_VALIDATION
         /// <summary>
         /// Figures out if the project needs to be validated against a schema.
         /// </summary>
@@ -4537,7 +4521,6 @@ namespace Microsoft.Build.CommandLine
 
             return schemaFile;
         }
-#endif
 
         /// <summary>
         /// Given an invalid ToolsVersion string and the collection of valid toolsets,
