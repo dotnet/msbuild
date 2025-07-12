@@ -223,7 +223,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-#if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
         /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the
         /// partial name matching still work.
@@ -322,15 +321,14 @@ namespace Microsoft.Build.UnitTests
         {
             return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("ILogger") != null);
+                type.GetInterface("ILogger") != null;
         }
 
         private static bool IsForwardingLoggerClass(Type type, object unused)
         {
             return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("IForwardingLogger") != null);
+                type.GetInterface("IForwardingLogger") != null;
         }
-#endif
     }
 }

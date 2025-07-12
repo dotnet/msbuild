@@ -884,7 +884,7 @@ internal static class NativeMethods
         {
             if (s_frameworkCurrentPath == null)
             {
-                var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).Assembly);
+                var baseTypeLocation = typeof(string).Assembly.Location;
 
                 s_frameworkCurrentPath =
                     Path.GetDirectoryName(baseTypeLocation)
