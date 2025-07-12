@@ -12,7 +12,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -3010,7 +3009,7 @@ namespace Microsoft.Build.Execution
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(BuildCheckForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
@@ -3030,7 +3029,7 @@ namespace Microsoft.Build.Execution
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(InternalTelemetryForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
@@ -3081,7 +3080,7 @@ namespace Microsoft.Build.Execution
             static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord>? forwarders)
             {
                 Type configurableLoggerType = typeof(ConfigurableForwardingLogger);
-                string engineAssemblyName = configurableLoggerType.GetTypeInfo().Assembly.GetName().FullName;
+                string engineAssemblyName = configurableLoggerType.Assembly.GetName().FullName;
                 string configurableLoggerName = configurableLoggerType.FullName!;
 
                 if (forwarders == null)
