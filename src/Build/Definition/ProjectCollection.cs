@@ -484,7 +484,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (s_assemblyDisplayVersion == null)
                 {
-                    var fullInformationalVersion = typeof(Constants).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+                    var fullInformationalVersion = typeof(Constants).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
                     // use a truncated version with only 9 digits of SHA
                     var plusIndex = fullInformationalVersion.IndexOf('+');

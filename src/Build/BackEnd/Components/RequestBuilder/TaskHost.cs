@@ -10,7 +10,6 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Lifetime;
 #endif
 using System.Diagnostics;
-using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.Collections;
@@ -1119,7 +1118,7 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable SYSLIB0050
             // Types which are not serializable and are not IExtendedBuildEventArgs as
             // those always implement custom serialization by WriteToStream and CreateFromStream.
-            if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+            if (!e.GetType().IsSerializable && e is not IExtendedBuildEventArgs)
 #pragma warning restore SYSLIB0050
             {
                 _taskLoggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);

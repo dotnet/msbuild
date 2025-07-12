@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -884,7 +884,7 @@ internal static class NativeMethods
         {
             if (s_frameworkCurrentPath == null)
             {
-                var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).GetTypeInfo().Assembly);
+                var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).Assembly);
 
                 s_frameworkCurrentPath =
                     Path.GetDirectoryName(baseTypeLocation)

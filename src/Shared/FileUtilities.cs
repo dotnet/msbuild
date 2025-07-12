@@ -16,7 +16,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -765,7 +764,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get the currently executing assembly path
         /// </summary>
-        internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
+        internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).Assembly));
 
         /// <summary>
         /// Determines the full path for the given file-spec.

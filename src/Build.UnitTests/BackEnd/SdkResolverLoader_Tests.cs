@@ -126,7 +126,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
-                LoadResolverAssemblyFunc = (resolverPath) => typeof(SdkResolverLoader_Tests).GetTypeInfo().Assembly,
+                LoadResolverAssemblyFunc = (resolverPath) => typeof(SdkResolverLoader_Tests).Assembly,
                 FindPotentialSdkResolversFunc = (rootFolder, loc) => new List<string>
                 {
                     "myresolver.dll"
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
             {
-                LoadResolverAssemblyFunc = (resolverPath) => typeof(SdkResolverLoader_Tests).GetTypeInfo().Assembly,
+                LoadResolverAssemblyFunc = (resolverPath) => typeof(SdkResolverLoader_Tests).Assembly,
                 FindPotentialSdkResolversFunc = (rootFolder, loc) => new List<string>
                 {
                     "myresolver.dll"

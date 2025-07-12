@@ -904,7 +904,7 @@ namespace Microsoft.Build.BackEnd
                             throw new InvalidProjectFileException(ipex.Message, ipex);
                         }
                     }
-                    else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
+                    else if (type == typeof(Exception) || type.IsSubclassOf(typeof(Exception)))
                     {
                         // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
                         // a debugger attached to break on 2nd chance exceptions.

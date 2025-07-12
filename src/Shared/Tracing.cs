@@ -7,7 +7,6 @@ using System.Diagnostics;
 #if DEBUG
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Reflection;
 #endif
 
 #nullable disable
@@ -68,7 +67,7 @@ namespace Microsoft.Build.Internal
                 s_interval = TimeSpan.FromSeconds(1);
             }
 
-            s_currentAssemblyName = typeof(Tracing).GetTypeInfo().Assembly.GetName().Name;
+            s_currentAssemblyName = typeof(Tracing).Assembly.GetName().Name;
 
             // Trace.WriteLine(new string('/', 100));
             // Trace.WriteLine("interval: " + interval.Seconds);
