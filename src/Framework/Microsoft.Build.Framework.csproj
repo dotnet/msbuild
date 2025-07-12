@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -29,8 +29,9 @@
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" PrivateAssets="all" />
   </ItemGroup>
 
-  <!-- Framework and standard don't have DiagnosticSource. -->
+  <!-- Framework and standard don't have these. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
