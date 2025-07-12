@@ -72,9 +72,7 @@ namespace Microsoft.Build.CommandLine
             Logger,
             DistributedLogger,
             Verbosity,
-#if FEATURE_XML_SCHEMA_VALIDATION
             Validate,
-#endif
             ConsoleLoggerParameters,
             NodeMode,
             MaxCPUCount,
@@ -247,9 +245,7 @@ namespace Microsoft.Build.CommandLine
             new ParameterizedSwitchInfo(  ["logger", "l"],                      ParameterizedSwitch.Logger,                     null,                           false,          "MissingLoggerError",                  false,  false,   "HelpMessage_11_LoggerSwitch"),
             new ParameterizedSwitchInfo(  ["distributedlogger", "dl"],          ParameterizedSwitch.DistributedLogger,          null,                           false,          "MissingLoggerError",                  false,  false,   "HelpMessage_18_DistributedLoggerSwitch"),
             new ParameterizedSwitchInfo(  ["verbosity", "v"],                   ParameterizedSwitch.Verbosity,                  null,                           false,          "MissingVerbosityError",               true,   false,   "HelpMessage_12_VerbositySwitch"),
-#if FEATURE_XML_SCHEMA_VALIDATION
             new ParameterizedSwitchInfo(  ["validate", "val"],                  ParameterizedSwitch.Validate,                   null,                           false,          null,                                  true,   false,   "HelpMessage_15_ValidateSwitch"),
-#endif
             new ParameterizedSwitchInfo(  ["consoleloggerparameters", "clp"],   ParameterizedSwitch.ConsoleLoggerParameters,    null,                           false,          "MissingConsoleLoggerParameterError",  true,   false,   "HelpMessage_13_ConsoleLoggerParametersSwitch"),
             new ParameterizedSwitchInfo(  ["nodemode", "nmode"],                ParameterizedSwitch.NodeMode,                   null,                           false,          null,                                  false,  false,   null),
             new ParameterizedSwitchInfo(  ["maxcpucount", "m"],                 ParameterizedSwitch.MaxCPUCount,                null,                           false,          "MissingMaxCPUCountError",             true,   false,   "HelpMessage_17_MaximumCPUSwitch"),
