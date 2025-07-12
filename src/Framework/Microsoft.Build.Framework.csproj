@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -39,6 +39,9 @@
   <ItemGroup>
     <Compile Include="..\Shared\Constants.cs">
       <Link>Shared\Constants.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\IsExternalInit.cs">
+      <Link>Shared\IsExternalInit.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BinaryReaderExtensions.cs">
       <Link>Shared\BinaryReaderExtensions.cs</Link>
