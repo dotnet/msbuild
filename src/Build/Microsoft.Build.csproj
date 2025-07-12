@@ -123,10 +123,6 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <!-- Polyfill included by Microsoft.CodeAnalysis.Contracts. -->
-    <!--<Compile Include="..\Shared\IsExternalInit.cs">
-      <Link>BuildCheck\Utilities\IsExternalInit.cs</Link>
-    </Compile>-->
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
