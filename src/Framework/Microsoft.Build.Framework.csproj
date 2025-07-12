@@ -14,6 +14,10 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- Promote CompilerServices.Unsafe from the old version we get from System.Memory on net472. -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
@@ -39,9 +43,6 @@
   <ItemGroup>
     <Compile Include="..\Shared\Constants.cs">
       <Link>Shared\Constants.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IsExternalInit.cs">
-      <Link>Shared\IsExternalInit.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BinaryReaderExtensions.cs">
       <Link>Shared\BinaryReaderExtensions.cs</Link>
