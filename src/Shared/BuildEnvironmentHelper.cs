@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
@@ -426,14 +427,14 @@ namespace Microsoft.Build.Shared
         private static string GetProcessFromRunningProcess()
         {
 #if RUNTIME_TYPE_NETCORE
-            // The EntryAssembly property can return null when a managed assembly has been loaded from
+            // Assembly.GetEntryAssembly() can return null when a managed assembly has been loaded from
             // an unmanaged application (for example, using custom CLR hosting).
-            if (AssemblyUtilities.EntryAssembly == null)
+            if (Assembly.GetEntryAssembly() is not { } entryAsm)
             {
                 return EnvironmentUtilities.ProcessPath;
             }
 
-            return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
+            return entryAsm.Location;
 #else
 
             return EnvironmentUtilities.ProcessPath;

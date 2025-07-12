@@ -764,7 +764,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get the currently executing assembly path
         /// </summary>
-        internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).Assembly));
+        internal static string ExecutingAssemblyPath => Path.GetFullPath(typeof(FileUtilities).Assembly.Location);
 
         /// <summary>
         /// Determines the full path for the given file-spec.
