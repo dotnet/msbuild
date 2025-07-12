@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
@@ -339,7 +338,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         loggingContext.LogComment(MessageImportance.Low, "SDKResolverNullMessage", sdkResolver.Name, sdk.ToString());
                     }
                 }
-                catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
+                catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
                     // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
                     // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather

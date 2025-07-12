@@ -55,16 +55,6 @@ namespace Microsoft.Build.Shared
 #endif
         }
 
-#if CLR2COMPATIBILITY
-        /// <summary>
-        /// Shim for the lack of <see cref="System.Reflection.IntrospectionExtensions.GetTypeInfo"/> in .NET 3.5.
-        /// </summary>
-        public static Type GetTypeInfo(this Type t)
-        {
-            return t;
-        }
-#endif
-
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
 #if CLR2COMPATIBILITY

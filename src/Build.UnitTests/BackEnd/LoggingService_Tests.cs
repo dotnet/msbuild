@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
                 LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 #endif
                 _initializedService.RegisterDistributedLogger(null, description);
             });
@@ -351,8 +351,8 @@ namespace Microsoft.Build.UnitTests.Logging
             LoggerDescription configurableDescription = CreateLoggerDescription(configurableClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
             LoggerDescription distributedDescription = CreateLoggerDescription(distributedClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-            LoggerDescription configurableDescription = CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-            LoggerDescription distributedDescription = CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+            LoggerDescription configurableDescription = CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).Assembly.FullName, true);
+            LoggerDescription distributedDescription = CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).Assembly.FullName, true);
 #endif
 
             DistributedFileLogger fileLogger = new DistributedFileLogger();
@@ -388,8 +388,8 @@ namespace Microsoft.Build.UnitTests.Logging
             LoggerDescription configurableDescriptionA = CreateLoggerDescription(configurableClassNameA, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
             LoggerDescription configurableDescriptionB = CreateLoggerDescription(configurableClassNameB, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-            LoggerDescription configurableDescriptionA = CreateLoggerDescription(configurableClassNameA, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-            LoggerDescription configurableDescriptionB = CreateLoggerDescription(configurableClassNameB, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+            LoggerDescription configurableDescriptionA = CreateLoggerDescription(configurableClassNameA, typeof(ProjectCollection).Assembly.FullName, true);
+            LoggerDescription configurableDescriptionB = CreateLoggerDescription(configurableClassNameB, typeof(ProjectCollection).Assembly.FullName, true);
 #endif
 
             RegularILogger regularILoggerA = new RegularILogger();
@@ -433,7 +433,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
             LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 #endif
 
             RegularILogger regularILogger = new RegularILogger();
@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
             LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 #endif
 
             RegularILogger regularILogger = new RegularILogger();
@@ -526,7 +526,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
                 LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 #endif
                 _initializedService.ShutdownComponent();
                 List<LoggerDescription> tempList = new List<LoggerDescription>();
@@ -549,8 +549,8 @@ namespace Microsoft.Build.UnitTests.Logging
             loggerDescriptions.Add(CreateLoggerDescription(configurableClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true));
             loggerDescriptions.Add(CreateLoggerDescription(distributedClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true));
 #else
-            loggerDescriptions.Add(CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true));
-            loggerDescriptions.Add(CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true));
+            loggerDescriptions.Add(CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).Assembly.FullName, true));
+            loggerDescriptions.Add(CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).Assembly.FullName, true));
 #endif
 
             // Register some descriptions with a sink
@@ -611,7 +611,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
             LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
 #else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 #endif
 
             RegularILogger regularILogger = new RegularILogger();
@@ -1108,7 +1108,7 @@ namespace Microsoft.Build.UnitTests.Logging
 #if FEATURE_ASSEMBLY_LOCATION
                 Assembly thisAssembly = Assembly.GetAssembly(typeof(LoggingService_Tests));
 #else
-                Assembly thisAssembly = typeof(LoggingService_Tests).GetTypeInfo().Assembly;
+                Assembly thisAssembly = typeof(LoggingService_Tests).Assembly;
 #endif
                 string loggerAssemblyName = thisAssembly.FullName;
                 LoggerDescription centralLoggerDescrption = CreateLoggerDescription(className, loggerAssemblyName, true);
