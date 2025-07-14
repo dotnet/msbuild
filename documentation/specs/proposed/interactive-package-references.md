@@ -142,7 +142,7 @@ We can take inspiration from VS debugger decompilation features:
  * Option B: Attempt to run build (`dotnet build`) on `.sln` in repo root or `src` folder, or fallback to discovery of most common build scripts in repo root (`build.<extension>` for few most common script types based on current OS). Prototyping task: https://github.com/dotnet/msbuild/issues/8512
  * Option C: Sources crawling and finding project by name/assembly name; build; compare results.
  * Option D: Working backwards from the nuget (finding pack script or msbuild properties indicating nuget creation ...); build; compare results
- * Option E: Seting up convention for explicit description of build prerequisites and package build. Inspiration for this can be `.proj` files describing external dependencies build recipe in dotnet source build ([sample build descriptions](https://github.com/dotnet/source-build-externals/tree/main/repos)) or [`git dependencies`](https://fsprojects.github.io/Paket/git-dependencies.html) project for Paket
+ * Option E: Seting up convention for explicit description of build prerequisites and package build. Inspiration for this can be `.proj` files describing external dependencies build recipe in dotnet source build ([sample build descriptions](https://github.com/dotnet/source-build-reference-packages/tree/main/src/externalPackages)) or [`git dependencies`](https://fsprojects.github.io/Paket/git-dependencies.html) project for Paket
 
 
 **Gotchas:**

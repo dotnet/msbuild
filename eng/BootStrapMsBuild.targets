@@ -251,6 +251,18 @@
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
           DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!-- global.json in the repo root defines path to .dotnet folder with the highest priority. It ruins the core bootstrap configuration.
+         To workaround it, here we copy the root global.json to bootstrap folder and remove a problematic part from it. -->
+    <Copy SourceFiles="$(RepoRoot)\global.json" DestinationFiles="$(InstallDir)\global.json" />
+    <PropertyGroup>
+        <GlobalJsonContent>$([System.IO.File]::ReadAllText('$(InstallDir)\global.json'))</GlobalJsonContent>
+        <ModifiedContent>$([System.Text.RegularExpressions.Regex]::Replace($(GlobalJsonContent), ',?\s*"paths":\s*\[[^\]]*\]', ''))</ModifiedContent>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(InstallDir)\global.json"
+                      Lines="$(ModifiedContent)"
+                      Overwrite="true" />
+
   </Target>
 
 </Project>

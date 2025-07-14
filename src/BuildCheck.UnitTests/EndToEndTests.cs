@@ -21,6 +21,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class EndToEndTests : IDisposable
 {
     private const string EditorConfigFileName = ".editorconfig";
+    private const string LatestDotNetCoreForMSBuild = "net10.0";
 
     private readonly TestEnvironment _env;
 
@@ -359,14 +360,14 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework>""", "", false)]
-    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", " /p:TargetFramework=net9.0", false)]
-    [InlineData("""<TargetFramework></TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFramework /><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks />""", "", false)]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", true)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>""", "", false)]
+    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", $" /p:TargetFramework={LatestDotNetCoreForMSBuild}", false)]
+    [InlineData($"""<TargetFramework></TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework /><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks />""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", true)]
     public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
     {
         const string testAssetsFolderName = "TFMConfusionCheck";
@@ -419,10 +420,10 @@ public class EndToEndTests : IDisposable
         """,
         false)]
     [InlineData(
-        """
+        $"""
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
-            <TargetFramework>net9.0</TargetFramework>
+            <TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>
           </PropertyGroup>
         </Project>
         """,
