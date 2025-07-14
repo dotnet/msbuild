@@ -883,14 +883,6 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (Verbosity > LoggerVerbosity.Quiet)
             {
-
-                // Show immediate messages to the user.
-                if (IsImmediateMessage(message))
-                {
-                    RenderImmediateMessage(message);
-                    return;
-                }
-                
                 if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
                 {
                     // ensure we only log the preview message once for the entire build.
