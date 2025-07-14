@@ -4265,6 +4265,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal MultiDictionary<string, ProjectItem> ItemsByEvaluatedIncludeCache { get; private set; }
 
+
+            public PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary { get; private set; }
+
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
@@ -4285,6 +4288,7 @@ namespace Microsoft.Build.Evaluation
                 AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 AllEvaluatedItems = new List<ProjectItem>();
                 EvaluatedItemElements = new List<ProjectItemElement>();
+                SdkResolvedEnvironmentVariablePropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>();
                 EvaluationId = BuildEventContext.InvalidEvaluationId;
 
                 _globalPropertiesToTreatAsLocal?.Clear();
@@ -4439,6 +4443,28 @@ namespace Microsoft.Build.Evaluation
             {
                 ItemDefinitions.TryGetValue(itemType, out ProjectItemDefinition itemDefinition);
                 return itemDefinition;
+            }
+
+            /// <summary>
+            /// Add an environment variable (and property) based on the result of an SDK resolver.
+            /// </summary>
+            /// <param name="name">Environment variable name.</param>
+            /// <param name="value">Environment variable value.</param>
+            public void AddSdkResolvedEnvironmentVariable(string name, string value)
+            {
+                // If the property has already been set as an environment variable or by another SDK, we do not overwrite it.
+                if (EnvironmentVariablePropertiesDictionary?.Contains(name) == true
+                    || SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
+                {
+                    return;
+                }
+
+                ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
+
+                SdkResolvedEnvironmentVariablePropertiesDictionary ??= new();
+                SdkResolvedEnvironmentVariablePropertiesDictionary.Set(property);
+
+                SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: null);
             }
 
             /// <summary>

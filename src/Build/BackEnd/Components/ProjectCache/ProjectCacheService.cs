@@ -26,7 +26,8 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+#pragma warning disable CS0618 // Type or member is obsolete, this class is adapting to both Experimental and new plugin APIs
+namespace Microsoft.Build.ProjectCache
 {
     internal record CacheRequest(BuildSubmission Submission, BuildRequestConfiguration Configuration);
 
@@ -57,7 +58,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         private record struct ProjectCachePlugin(
             string Name,
-            ProjectCachePluginBase? Instance,
+            IProjectCachePluginBase? PluginInstance,
 #if FEATURE_REPORTFILEACCESSES
             FileAccessManager.HandlerRegistration? HandlerRegistration,
 #endif
@@ -205,7 +206,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 buildEventContext,
                 buildEventFileInfo);
 
-            ProjectCachePluginBase pluginInstance;
+            var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
+                _loggingService,
+                buildEventContext,
+                buildEventFileInfo);
+
+            IProjectCachePluginBase? pluginInstance = null;
             string pluginTypeName;
 
             if (projectCacheDescriptor.PluginInstance != null)
@@ -226,13 +232,13 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     Type pluginType = GetTypeFromAssemblyPath(pluginAssemblyPath);
                     pluginTypeName = pluginType.Name;
 
-                    pluginInstance = GetPluginInstanceFromType(pluginType);
+                    pluginInstance = CreatePluginInstanceFromType(pluginType);
                 }
                 catch (Exception e)
                 {
                     return new ProjectCachePlugin(
                         pluginTypeName,
-                        Instance: null,
+                        PluginInstance: null,
 #if FEATURE_REPORTFILEACCESSES
                         HandlerRegistration: null,
 #endif
@@ -256,17 +262,36 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             try
             {
-                await pluginInstance.BeginBuildAsync(
-                    new CacheContext(
-                        projectCacheDescriptor.PluginSettings,
-                        DefaultMSBuildFileSystem.Instance,
-                        requestedTargetsList,
-                        projectGraph,
-                        graphEntryPoints),
-                    pluginLogger,
-                    cancellationToken);
+                // Handle current plugin type
+                if (pluginInstance is ProjectCachePluginBase currentPlugin)
+                {
+                    await currentPlugin.BeginBuildAsync(
+                        new CacheContext(
+                            projectCacheDescriptor.PluginSettings,
+                            DefaultMSBuildFileSystem.Instance,
+                            requestedTargetsList,
+                            projectGraph,
+                            graphEntryPoints),
+                        pluginLogger,
+                        cancellationToken);
+                }
+                // Handle experimental plugin type
+#pragma warning disable CS0618 // Type or member is obsolete
+                else if (pluginInstance is Experimental.ProjectCache.ProjectCachePluginBase experimentalPlugin)
+                {
+                    await experimentalPlugin.BeginBuildAsync(
+                        new Experimental.ProjectCache.CacheContext(
+                            projectCacheDescriptor.PluginSettings,
+                            DefaultMSBuildFileSystem.Instance,
+                            requestedTargetsList,
+                            projectGraph,
+                            graphEntryPoints),
+                        experimentalPluginLogger,
+                        cancellationToken);
+                }
+#pragma warning restore CS0618 // Type or member is obsolete
 
-                if (pluginLogger.HasLoggedErrors)
+                if (pluginLogger.HasLoggedErrors || experimentalPluginLogger.HasLoggedErrors)
                 {
                     ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheInitializationFailed");
                 }
@@ -275,39 +300,66 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 FileAccessManager.HandlerRegistration? handlerRegistration = null;
                 if (_componentHost.BuildParameters.ReportFileAccesses)
                 {
-                    handlerRegistration = _fileAccessManager.RegisterHandlers(
-                        (buildRequest, fileAccessData) =>
-                        {
-                            // TODO: Filter out projects which do not configure this plugin
-                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                            pluginInstance.HandleFileAccess(fileAccessContext, fileAccessData);
-                        },
-                        (buildRequest, processData) =>
-                        {
-                            // TODO: Filter out projects which do not configure this plugin
-                            FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
-                            pluginInstance.HandleProcess(fileAccessContext, processData);
-                        });
+                    if (pluginInstance is ProjectCachePluginBase currentPluginForFileAccess)
+                    {
+                        handlerRegistration = _fileAccessManager.RegisterHandlers(
+                            (buildRequest, fileAccessData) =>
+                            {
+                                // TODO: Filter out projects which do not configure this plugin
+                                FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                                currentPluginForFileAccess.HandleFileAccess(fileAccessContext, fileAccessData);
+                            },
+                            (buildRequest, processData) =>
+                            {
+                                // TODO: Filter out projects which do not configure this plugin
+                                FileAccessContext fileAccessContext = GetFileAccessContext(buildRequest);
+                                currentPluginForFileAccess.HandleProcess(fileAccessContext, processData);
+                            });
+                    }
+#pragma warning disable CS0618 // Type or member is obsolete
+                    else if (pluginInstance is Experimental.ProjectCache.ProjectCachePluginBase experimentalPluginForFileAccess)
+                    {
+                        handlerRegistration = _fileAccessManager.RegisterHandlers(
+                            (buildRequest, fileAccessData) =>
+                            {
+                                Experimental.ProjectCache.FileAccessContext fileAccessContext = GetExperimentalFileAccessContext(buildRequest);
+                                experimentalPluginForFileAccess.HandleFileAccess(fileAccessContext, fileAccessData);
+                            },
+                            (buildRequest, processData) =>
+                            {
+                                Experimental.ProjectCache.FileAccessContext fileAccessContext = GetExperimentalFileAccessContext(buildRequest);
+                                experimentalPluginForFileAccess.HandleProcess(fileAccessContext, processData);
+                            });
+                    }
+#pragma warning restore CS0618 // Type or member is obsolete
                 }
 #endif
 
+#if FEATURE_REPORTFILEACCESSES
                 return new ProjectCachePlugin(
                     pluginTypeName,
                     pluginInstance,
-#if FEATURE_REPORTFILEACCESSES
-                    handlerRegistration,
+                    handlerRegistration);
+#else
+                return new ProjectCachePlugin(
+                    pluginTypeName,
+                    pluginInstance);
 #endif
-                    InitializationException: null);
             }
             catch (Exception e)
             {
+#if FEATURE_REPORTFILEACCESSES
                 return new ProjectCachePlugin(
                     pluginTypeName,
-                    Instance: null,
-#if FEATURE_REPORTFILEACCESSES
+                    PluginInstance: null,
                     HandlerRegistration: null,
-#endif
                     ExceptionDispatchInfo.Capture(e));
+#else
+                return new ProjectCachePlugin(
+                    pluginTypeName,
+                    PluginInstance: null,
+                    ExceptionDispatchInfo.Capture(e));
+#endif
             }
             finally
             {
@@ -321,6 +373,15 @@ namespace Microsoft.Build.Experimental.ProjectCache
             IReadOnlyDictionary<string, string> globalProperties = GetGlobalProperties(configuration);
             return new FileAccessContext(configuration.ProjectFullPath, globalProperties, buildRequest.Targets);
         }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        private Experimental.ProjectCache.FileAccessContext GetExperimentalFileAccessContext(BuildRequest buildRequest)
+        {
+            BuildRequestConfiguration configuration = _configCache[buildRequest.ConfigurationId];
+            IReadOnlyDictionary<string, string> globalProperties = GetGlobalProperties(configuration);
+            return new Experimental.ProjectCache.FileAccessContext(configuration.ProjectFullPath, globalProperties, buildRequest.Targets);
+        }
+#pragma warning restore CS0618 // Type or member is obsolete
 
         private IReadOnlyDictionary<string, string> GetGlobalProperties(BuildRequestConfiguration configuration)
             => _globalPropertiesPerConfiguration.GetOrAdd(
@@ -336,25 +397,41 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         return globalProperties;
                     });
 
-        private static ProjectCachePluginBase GetPluginInstanceFromType(Type pluginType)
+        private static IProjectCachePluginBase CreatePluginInstanceFromType(Type pluginType)
         {
             try
             {
-                return (ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
+                if (typeof(ProjectCachePluginBase).IsAssignableFrom(pluginType))
+                {
+                    return (ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
+                }
+#pragma warning disable CS0618 // Type or member is obsolete
+                else if (typeof(Experimental.ProjectCache.ProjectCachePluginBase).IsAssignableFrom(pluginType))
+                {
+                    return (Experimental.ProjectCache.ProjectCachePluginBase)Activator.CreateInstance(pluginType)!;
+                }
+#pragma warning restore CS0618 // Type or member is obsolete
+                else
+                {
+                    throw new InvalidOperationException($"Plugin type '{pluginType}' does not derive from a supported plugin base class.");
+                }
             }
             catch (TargetInvocationException e) when (e.InnerException != null)
             {
                 HandlePluginException(e.InnerException, "Constructor");
-                return null!; // Unreachable
+                // This will never be reached due to the exception, but satisfies the compiler
+                throw;
             }
         }
 
         private static Type GetTypeFromAssemblyPath(string pluginAssemblyPath)
         {
-            var assembly = LoadAssembly(pluginAssemblyPath);
+            Assembly assembly = LoadAssembly(pluginAssemblyPath);
 
-            var type = GetTypes<ProjectCachePluginBase>(assembly).FirstOrDefault();
-
+            Type? type = GetTypes<ProjectCachePluginBase>(assembly).FirstOrDefault();
+#pragma warning disable CS0618 // Type or member is obsolete
+            type ??= GetTypes<Experimental.ProjectCache.ProjectCachePluginBase>(assembly).FirstOrDefault();
+#pragma warning restore CS0618 // Type or member is obsolete
             if (type == null)
             {
                 ProjectCacheException.ThrowForMSBuildIssueWithTheProjectCache("NoProjectCachePluginFoundInAssembly", pluginAssemblyPath);
@@ -508,6 +585,10 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 _loggingService,
                 buildEventContext,
                 buildEventFileInfo);
+            var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
+                _loggingService,
+                buildEventContext,
+                buildEventFileInfo);
 
             string? targetNames = buildRequest.TargetNames != null && buildRequest.TargetNames.Count > 0
                 ? string.Join(", ", buildRequest.TargetNames)
@@ -538,12 +619,27 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     // Rethrow any initialization exception.
                     plugin.InitializationException?.Throw();
 
-                    ErrorUtilities.VerifyThrow(plugin.Instance != null, "Plugin '{0}' instance is null", plugin.Name);
+
+                    ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, "Plugin '{0}' instance is null", plugin.Name);
 
                     MSBuildEventSource.Log.ProjectCacheGetCacheResultStart(plugin.Name, buildRequest.ProjectFullPath, targetNames ?? MSBuildConstants.DefaultTargetsMarker);
-                    cacheResult = await plugin.Instance!.GetCacheResultAsync(buildRequest, pluginLogger, cancellationToken);
+                    if (plugin.PluginInstance is ProjectCachePluginBase currentPlugin)
+                    {
+                        cacheResult = await currentPlugin.GetCacheResultAsync(buildRequest, pluginLogger, cancellationToken);
+                    }
+#pragma warning disable CS0618 // Type or member is obsolete
+                    else if (plugin.PluginInstance is Experimental.ProjectCache.ProjectCachePluginBase experimentalPlugin)
+                    {
+                        Experimental.ProjectCache.CacheResult cacheResultExp = await experimentalPlugin.GetCacheResultAsync(buildRequest, experimentalPluginLogger, cancellationToken);
+                        cacheResult = CacheResult.FromExperimental(cacheResultExp);
+                    }
+#pragma warning restore CS0618 // Type or member is obsolete
+                    else
+                    {
+                        ErrorUtilities.ThrowInternalError("Unknown plugin type", plugin.Name);
+                    }
 
-                    if (pluginLogger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
+                    if (pluginLogger.HasLoggedErrors || experimentalPluginLogger.HasLoggedErrors || cacheResult.ResultType == CacheResultType.None)
                     {
                         ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheQueryFailed", buildRequest.ProjectFullPath);
                     }
@@ -742,9 +838,17 @@ namespace Microsoft.Build.Experimental.ProjectCache
             string? targetNames = string.Join(", ", targets);
 
             FileAccessContext fileAccessContext = new(requestConfiguration.ProjectFullPath, globalProperties, targets);
+#pragma warning disable CS0618 // Type or member is obsolete
+            Experimental.ProjectCache.FileAccessContext experimentalFileAccessContext = new(requestConfiguration.ProjectFullPath, globalProperties, targets);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             var buildEventFileInfo = new BuildEventFileInfo(requestConfiguration.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
+                _loggingService,
+                buildEventContext,
+                buildEventFileInfo);
+
+            var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
                 _loggingService,
                 buildEventContext,
                 buildEventFileInfo);
@@ -768,12 +872,21 @@ namespace Microsoft.Build.Experimental.ProjectCache
                         // Rethrow any initialization exception.
                         plugin.InitializationException?.Throw();
 
-                        ErrorUtilities.VerifyThrow(plugin.Instance != null, "Plugin '{0}' instance is null", plugin.Name);
+                        ErrorUtilities.VerifyThrow(plugin.PluginInstance != null, "Plugin '{0}' instance is null", plugin.Name);
 
                         MSBuildEventSource.Log.ProjectCacheHandleBuildResultStart(plugin.Name, fileAccessContext.ProjectFullPath, targetNames);
                         try
                         {
-                            await plugin.Instance!.HandleProjectFinishedAsync(fileAccessContext, buildResult, pluginLogger, cancellationToken);
+#pragma warning disable CS0618 // Type or member is obsolete
+                            if (plugin.PluginInstance is Experimental.ProjectCache.ProjectCachePluginBase experimentalPlugin)
+                            {
+                                await experimentalPlugin.HandleProjectFinishedAsync(experimentalFileAccessContext, buildResult, experimentalPluginLogger, cancellationToken);
+                            }
+                            else if (plugin.PluginInstance is ProjectCachePluginBase currentPlugin)
+                            {
+                                await currentPlugin.HandleProjectFinishedAsync(fileAccessContext, buildResult, pluginLogger, cancellationToken);
+                            }
+#pragma warning restore CS0618 // Type or member is obsolete
                         }
                         catch (Exception e) when (e is not ProjectCacheException)
                         {
@@ -816,6 +929,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
                 buildEventContext,
                 buildEventFileInfo);
 
+            var experimentalPluginLogger = new LoggingServiceToExperimentalPluginLoggerAdapter(
+                _loggingService,
+                buildEventContext,
+                buildEventFileInfo);
+
             _loggingService.LogComment(buildEventContext, MessageImportance.Low, "ProjectCacheEndBuild");
 
             Task[] cleanupTasks = new Task[_projectCachePlugins.Count];
@@ -827,7 +945,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     ProjectCachePlugin plugin = await kvp.Value.Value;
 
                     // If there is no instance, the exceptions would have bubbled up already, so skip cleanup for this one.
-                    if (plugin.Instance == null)
+                    if (plugin.PluginInstance == null)
                     {
                         return;
                     }
@@ -842,9 +960,20 @@ namespace Microsoft.Build.Experimental.ProjectCache
                     MSBuildEventSource.Log.ProjectCacheEndBuildStart(plugin.Name);
                     try
                     {
-                        await plugin.Instance.EndBuildAsync(pluginLogger, CancellationToken.None);
+#pragma warning disable CS0618 // Type or member is obsolete
+                        if (plugin.PluginInstance is Experimental.ProjectCache.ProjectCachePluginBase experimentalPlugin)
+                        {
+                            await experimentalPlugin.EndBuildAsync(experimentalPluginLogger, CancellationToken.None);
+                        }
+                        else if (plugin.PluginInstance is ProjectCachePluginBase currentPlugin)
+                        {
+                            await currentPlugin.EndBuildAsync(pluginLogger, CancellationToken.None);
+                        }
+#pragma warning restore CS0618 // Type or member is obsolete
                     }
-                    catch (Exception e) when (e is not ProjectCacheException)
+#pragma warning disable CS0618 // Type or member is obsolete
+                    catch (Exception e) when (e is not ProjectCacheException && e is not Experimental.ProjectCache.ProjectCacheException)
+#pragma warning restore CS0618 // Type or member is obsolete
                     {
                         HandlePluginException(e, nameof(ProjectCachePluginBase.EndBuildAsync));
                     }
@@ -857,7 +986,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
             await Task.WhenAll(cleanupTasks).ConfigureAwait(false);
 
-            if (pluginLogger.HasLoggedErrors)
+            if (pluginLogger.HasLoggedErrors || experimentalPluginLogger.HasLoggedErrors)
             {
                 ProjectCacheException.ThrowForErrorLoggedInsideTheProjectCache("ProjectCacheShutdownFailed");
             }
@@ -895,6 +1024,61 @@ namespace Microsoft.Build.Experimental.ProjectCache
             public override bool HasLoggedErrors { get; protected set; }
 
             public LoggingServiceToPluginLoggerAdapter(
+                ILoggingService loggingService,
+                BuildEventContext buildEventContext,
+                BuildEventFileInfo buildEventFileInfo)
+            {
+                _loggingService = loggingService;
+                _buildEventContext = buildEventContext;
+                _buildEventFileInfo = buildEventFileInfo;
+            }
+
+            public override void LogMessage(string message, MessageImportance? messageImportance = null)
+            {
+                _loggingService.LogCommentFromText(
+                    _buildEventContext,
+                    messageImportance ?? MessageImportance.Normal,
+                    message);
+            }
+
+            public override void LogWarning(string warning)
+            {
+                _loggingService.LogWarningFromText(
+                    _buildEventContext,
+                    subcategoryResourceName: null,
+                    warningCode: null,
+                    helpKeyword: null,
+                    _buildEventFileInfo,
+                    warning);
+            }
+
+            public override void LogError(string error)
+            {
+                HasLoggedErrors = true;
+
+                _loggingService.LogErrorFromText(
+                    _buildEventContext,
+                    subcategoryResourceName: null,
+                    errorCode: null,
+                    helpKeyword: null,
+                    _buildEventFileInfo,
+                    error);
+            }
+        }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        private class LoggingServiceToExperimentalPluginLoggerAdapter : Experimental.ProjectCache.PluginLoggerBase
+#pragma warning restore CS0618 // Type or member is obsolete
+        {
+            private readonly ILoggingService _loggingService;
+
+            private readonly BuildEventContext _buildEventContext;
+
+            private readonly BuildEventFileInfo _buildEventFileInfo;
+
+            public override bool HasLoggedErrors { get; protected set; }
+
+            public LoggingServiceToExperimentalPluginLoggerAdapter(
                 ILoggingService loggingService,
                 BuildEventContext buildEventContext,
                 BuildEventFileInfo buildEventFileInfo)

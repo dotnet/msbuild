@@ -1383,6 +1383,15 @@ Errors: {3}</value>
     <value>MSB4238: The name "{0}" is not a valid SDK name.</value>
     <comment>{StrBegin="MSB4238: "}</comment>
   </data>
+  <data name="SdkEnvironmentVariableAlreadySet" xml:space="preserve">
+    <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</value>
+  </data>
+  <data name="SdkEnvironmentVariableAlreadySetBySdk" xml:space="preserve">
+    <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</value>
+  </data>
+  <data name="SdkEnvironmentVariableSet" xml:space="preserve">
+    <value>An SDK attempted set the environment variable "{0}" to "{1}".</value>
+  </data>
   <data name="UnrecognizedParentElement" xml:space="preserve">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -1924,6 +1933,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="NuGetAssemblyNotFound" xml:space="preserve">
     <value>A required NuGet assembly '{0}' could not be loaded.</value>
+  </data>
+  <data name="StaticGraphConstructionStarted" xml:space="preserve">
+    <value>Static graph construction started.</value>
   </data>
   <data name="StaticGraphConstructionMetrics" xml:space="preserve">
     <value>Static graph loaded in {0} seconds: {1} nodes, {2} edges</value>

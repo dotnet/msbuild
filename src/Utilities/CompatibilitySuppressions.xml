@@ -2,6 +2,48 @@
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.DotNetFrameworkArchitecture</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.HostObjectInitializationStatus</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.MultipleVersionSupport</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.SDKType</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.TargetDotNetFrameworkVersion</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Utilities.VisualStudioVersion</Target>
+    <Left>ref/net9.0/Microsoft.Build.Utilities.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Utilities.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>.NETCoreApp,Version=v2.0</Target>
   </Suppression>
@@ -48,5 +90,9 @@
   <Suppression>
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>Xamarin.XboxOne,Version=v0.0</Target>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net9.0</Target>
   </Suppression>
 </Suppressions>
