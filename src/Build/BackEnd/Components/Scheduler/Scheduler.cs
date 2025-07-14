@@ -1580,7 +1580,11 @@ namespace Microsoft.Build.BackEnd
                 // If we still want to create one, go ahead
                 if (inProcNodesToCreate > 0)
                 {
-                    ErrorUtilities.VerifyThrow(!_componentHost.BuildParameters.MultiThreaded && inProcNodesToCreate == 1, "We should not be trying to create more than one inproc node");
+                    if (!_componentHost.BuildParameters.MultiThreaded)
+                    {
+                        ErrorUtilities.VerifyThrow(inProcNodesToCreate == 1, "We should not be trying to create more than one inproc node");
+                    }
+
                     TraceScheduler("Requesting creation of new node satisfying affinity {0}", NodeAffinity.InProc);
                     responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, inProcNodesToCreate));
 
