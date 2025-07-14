@@ -483,20 +483,60 @@ namespace Microsoft.Build.Tasks
         /// Find every assembly full name that matches the given simple name.
         /// </summary>
         /// <returns>The list of assembly names.</returns>
-        internal IEnumerable<AssemblyEntry> FindAssemblyNameFromSimpleName(string simpleName)
+        internal AssemblyNameFromSimpleNameEnumerator FindAssemblyNameFromSimpleName(string simpleName)
         {
-            if (_simpleNameMap.TryGetValue(simpleName, out int index))
+            return new AssemblyNameFromSimpleNameEnumerator(_assemblyList, _simpleNameMap, simpleName);
+        }
+
+        internal struct AssemblyNameFromSimpleNameEnumerator
+        {
+            private readonly string _simpleName;
+            private int _index;
+            private readonly ReadOnlyCollection<AssemblyEntry> _assemblyList;
+
+            public AssemblyNameFromSimpleNameEnumerator(ReadOnlyCollection<AssemblyEntry> assemblyList, ReadOnlyDictionary<string, int> simpleNameMap, string simpleName)
             {
-                for (int i = index; i < _assemblyList.Count; ++i)
+                _assemblyList = assemblyList ?? throw new ArgumentNullException(nameof(assemblyList));
+                _simpleName = simpleName;
+                _index = simpleNameMap.TryGetValue(simpleName, out int index) ? index : int.MaxValue;
+            }
+
+            public AssemblyNameFromSimpleNameEnumerator()
+            {
+                _assemblyList = null;
+                _simpleName = null;
+                _index = int.MaxValue;
+            }
+
+            public bool MoveNext()
+            {
+                if (_assemblyList is not null && _index < _assemblyList.Count)
                 {
-                    AssemblyEntry entry = _assemblyList[i];
-                    if (!String.Equals(simpleName, entry.SimpleName, StringComparison.OrdinalIgnoreCase))
+                    AssemblyEntry entry = _assemblyList[_index];
+                    if (!String.Equals(_simpleName, entry.SimpleName, StringComparison.OrdinalIgnoreCase))
                     {
-                        break;
+                        // Because _assemblyList is sorted by SimpleName then version,
+                        // once we find a SimpleName that doesn't match we can stop iterating.
+                        _index = int.MaxValue;
+                        return false;
                     }
-                    yield return entry;
+
+                    Current = entry;
+                    _index += 1;
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
+
+            public AssemblyNameFromSimpleNameEnumerator GetEnumerator()
+            {
+                return this;
+            }
+
+            public AssemblyEntry Current { get; private set; }
         }
 
         /// <summary>

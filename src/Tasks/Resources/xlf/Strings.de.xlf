@@ -2838,8 +2838,8 @@
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
-        <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="translated">Der Typ des Parameters "{0}" konnte nicht rückgeschlossen werden, da der Attributtyp unbekannt ist. Der Wert wird als Zeichenfolge behandelt.</target>
+        <source>Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</source>
+        <target state="translated">Der Typ des Parameters „{0}“ konnte nicht abgeleitet werden, da der Attributtyp „{1}“ unbekannt ist. Der Wert wird als Zeichenfolge behandelt.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
@@ -3581,6 +3581,16 @@
         <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
         <target state="translated">MSB3942: Fehler beim Erstellen der ZIP-Datei "{0}", weil sie bereits vorhanden ist. Löschen Sie die Datei, oder benennen Sie sie um, und versuchen Sie es dann noch mal.</target>
         <note>{StrBegin="MSB3942: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
+        <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
+        <target state="translated">MSB3944: Nicht unterstützter Komprimierungsgrad „{0}“. Stattdessen wird der Standardkomprimierungsgrad verwendet.</target>
+        <note>{StrBegin="MSB3944: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
+        <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
+        <target state="translated">MSB3945: Der Komprimierungsgrad „{0}“ wird von der .NET Framework-Version von MSBuild nicht unterstützt. Stattdessen wird der Standardkomprimierungsgrad verwendet.</target>
+        <note>{StrBegin="MSB3945: "}</note>
       </trans-unit>
     </body>
   </file>

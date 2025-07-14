@@ -35,9 +35,9 @@ public sealed partial class TerminalLogger : INodeLogger
     private const string FilePathPattern = " -> ";
 
 #if NET
-    private static readonly SearchValues<string> _immediateMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
+    private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
 #else
-    private static readonly string[] _immediateMessageKeywords = ["[CredentialProvider]", "--interactive"];
+    private static readonly string[] _authProviderMessageKeywords = ["[CredentialProvider]", "--interactive"];
 #endif
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
@@ -874,22 +874,26 @@ public sealed partial class TerminalLogger : INodeLogger
                 }
             }
 
+            // auth provider messages should always be shown to the user.
+            if (IsAuthProviderMessage(message))
+            {
+                RenderImmediateMessage(message);
+                return;
+            }
+
             if (Verbosity > LoggerVerbosity.Quiet)
             {
-                // Show immediate messages to the user.
-                if (IsImmediateMessage(message))
-                {
-                    RenderImmediateMessage(message);
-                    return;
-                }
                 if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
                 {
-                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                    // when it's a preview version up to MaxCPUCount times, but that's
-                    // an implementation detail--the user cares about at most one.
-
-                    RenderImmediateMessage(message);
-                    _loggedPreviewMessage = true;
+                    // ensure we only log the preview message once for the entire build.
+                    if (!_loggedPreviewMessage)
+                    {
+                        // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                        // when it's a preview version up to MaxCPUCount times, but that's
+                        // an implementation detail--the user cares about at most one.
+                        RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, DoubleIndentation));
+                        _loggedPreviewMessage = true;
+                    }
                     return;
                 }
             }
@@ -984,21 +988,35 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
+        // auth provider messages are 'global' in nature and should be a) immediate reported, and b) not re-reported in the summary.
+        if (IsAuthProviderMessage(e.Message))
+        {
+            RenderImmediateMessage(FormatWarningMessage(e, Indentation));
+            return;
+        }
+
         if (buildEventContext is not null
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
-                IsImmediateWarning(e.Code))
+            // If the warning is not a 'global' auth provider message, but is immediate, we render it immediately
+            // but we don't early return so that the project also tracks it.
+            if (IsImmediateWarning(e.Code))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
 
+            // This is the general case - _most_ warnings are not immediate, so we add them to the project summary
+            // and display them in the per-project and final summary.
             project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
-            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
+            // It is necessary to display warning messages reported by MSBuild, 
+            // even if it's not tracked in _projects collection or the verbosity is Quiet.
+            // The idea here (similar to the implementation in ErrorRaised) is that
+            // even in Quiet scenarios we need to show warnings/errors, even if not in
+            // full project-tree view
             RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             _buildWarningsCount++;
         }
@@ -1009,11 +1027,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool IsImmediateMessage(string message) =>
+    private bool IsAuthProviderMessage(string? message) =>
 #if NET
-        message.AsSpan().ContainsAny(_immediateMessageKeywords);
+        message is not null && message.AsSpan().ContainsAny(_authProviderMessageKeywords);
 #else
-        _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
+        message is not null && _authProviderMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
 
 
@@ -1208,6 +1226,29 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent);
     }
 
+    /// <summary>
+    /// Renders message with just code/category/message data.
+    /// No file data is included. This can be used for immediate/one-time
+    /// messages that lack a specific project context, such as the .NET
+    /// SDK's 'preview version' message, while not removing the code.
+    /// </summary>
+    private string FormatSimpleMessageWithoutFileData(BuildMessageEventArgs e, string indent)
+    {
+        return FormatEventMessage(
+                category: AnsiCodes.Colorize("info", TerminalColor.Default),
+                subcategory: null,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Default),
+                file: null,
+                lineNumber: 0,
+                endLineNumber: 0,
+                columnNumber: 0,
+                endColumnNumber: 0,
+                indent,
+                requireFileAndLinePortion: false,
+                prependIndentation: true);
+    }
+
     private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
     {
         return FormatEventMessage(
@@ -1225,7 +1266,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private string FormatEventMessage(
             string category,
-            string subcategory,
+            string? subcategory,
             string? message,
             string code,
             string? file,
@@ -1233,44 +1274,53 @@ public sealed partial class TerminalLogger : INodeLogger
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            string indent)
+            string indent,
+            bool requireFileAndLinePortion = true,
+            bool prependIndentation = false)
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
-
-        if (string.IsNullOrEmpty(file))
+        if (prependIndentation)
         {
-            builder.Append("MSBUILD : ");    // Should not be localized.
+            builder.Append(indent);
         }
-        else
-        {
-            builder.Append(file);
 
-            if (lineNumber == 0)
+        if (requireFileAndLinePortion)
+        {
+            if (string.IsNullOrEmpty(file))
             {
-                builder.Append(" : ");
+                builder.Append("MSBUILD : ");    // Should not be localized.
             }
             else
             {
-                if (columnNumber == 0)
+                builder.Append(file);
+
+                if (lineNumber == 0)
                 {
-                    builder.Append(endLineNumber == 0 ?
-                        $"({lineNumber}): " :
-                        $"({lineNumber}-{endLineNumber}): ");
+                    builder.Append(" : ");
                 }
                 else
                 {
-                    if (endLineNumber == 0)
+                    if (columnNumber == 0)
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        builder.Append(endLineNumber == 0 ?
+                            $"({lineNumber}): " :
+                            $"({lineNumber}-{endLineNumber}): ");
                     }
                     else
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber}-{endLineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        if (endLineNumber == 0)
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        }
+                        else
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber}-{endLineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        }
                     }
                 }
             }

@@ -207,25 +207,26 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                 IAsyncResult result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #else
-                Task<int> readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+                Task<int> readTask = localStream.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #endif
+
+                // Ordering of the wait handles is important. The first signalled wait handle in the array
+                // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
+                // terminate event triggered so that we cannot get into a situation where packets are being
+                // spammed to the client and it never gets an opportunity to shutdown.
+                WaitHandle[] handles =
+                [
+                    localPacketPumpShutdownEvent,
+#if FEATURE_APM
+                    result.AsyncWaitHandle
+#else
+                    ((IAsyncResult)readTask).AsyncWaitHandle
+#endif
+                ];
 
                 bool continueReading = true;
                 do
                 {
-                    // Ordering of the wait handles is important. The first signalled wait handle in the array
-                    // will be returned by WaitAny if multiple wait handles are signalled. We prefer to have the
-                    // terminate event triggered so that we cannot get into a situation where packets are being
-                    // spammed to the client and it never gets an opportunity to shutdown.
-                    WaitHandle[] handles =
-                    [
-                        localPacketPumpShutdownEvent,
-#if FEATURE_APM
-                        result.AsyncWaitHandle
-#else
-                        ((IAsyncResult)readTask).AsyncWaitHandle
-#endif
-                    ];
                     int waitId = WaitHandle.WaitAny(handles);
                     switch (waitId)
                     {
@@ -242,7 +243,7 @@ namespace Microsoft.Build.BackEnd.Client
 #if FEATURE_APM
                                 headerBytesRead = localStream.EndRead(result);
 #else
-                                headerBytesRead = readTask.Result;
+                                headerBytesRead = readTask.ConfigureAwait(false).GetAwaiter().GetResult();
 #endif
 
                                 if ((headerBytesRead != headerByte.Length) && !localPacketPumpShutdownEvent.WaitOne(0))
@@ -275,7 +276,12 @@ namespace Microsoft.Build.BackEnd.Client
 
                                 while (packetBytesRead < packetLength)
                                 {
+#if FEATURE_APM
                                     int bytesRead = localStream.Read(packetData, packetBytesRead, packetLength - packetBytesRead);
+#else
+                                    ValueTask<int> bytesReadTask = localStream.ReadAsync(packetData.AsMemory(packetBytesRead, packetLength - packetBytesRead));
+                                    int bytesRead = bytesReadTask.IsCompleted ? bytesReadTask.Result : bytesReadTask.AsTask().ConfigureAwait(false).GetAwaiter().GetResult();
+#endif
                                     if (bytesRead == 0)
                                     {
                                         // Incomplete read.  Abort.
@@ -305,8 +311,10 @@ namespace Microsoft.Build.BackEnd.Client
                                     // Start reading the next package header.
 #if FEATURE_APM
                                     result = localStream.BeginRead(headerByte, 0, headerByte.Length, null, null);
+                                    handles[1] = result.AsyncWaitHandle;
 #else
-                                    readTask = CommunicationsUtilities.ReadAsync(localStream, headerByte, headerByte.Length).AsTask();
+                                    readTask = localStream.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
+                                    handles[1] = ((IAsyncResult)readTask).AsyncWaitHandle;
 #endif
                                 }
                             }
