@@ -10,6 +10,9 @@
   <ItemGroup>
     <PackageVersion Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Collections" Version="$(MicrosoftCodeAnalysisCollectionsVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="$(MicrosoftCodeAnalysisVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="$(MicrosoftCodeAnalysisVersion)" />
     <PackageVersion Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageVersion Include="Microsoft.IO.Redist" Version="$(MicrosoftIORedistVersion)" />
     <PackageVersion Include="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" Condition="'$(UsingToolMicrosoftNetCompilers)' != 'true'" />

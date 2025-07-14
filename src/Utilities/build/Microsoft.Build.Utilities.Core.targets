@@ -1,0 +1,11 @@
+<Project>
+  <!-- 
+    This targets file automatically includes the banned APIs configuration file 
+    for the ThreadSafeTask analyzer when the Microsoft.Build.Utilities.Core package is referenced.
+  -->
+  
+  <ItemGroup Condition="'$(EnableThreadSafeTaskAnalyzer)' != 'false'">
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)..\analyzers\dotnet\cs\IThreadSafeTask_BannedApis.txt" />
+  </ItemGroup>
+  
+</Project>
