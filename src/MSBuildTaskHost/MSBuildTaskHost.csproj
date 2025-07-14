@@ -70,6 +70,7 @@
       <Link>CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\Shared\IsExternalInit.cs" />
     <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Framework\ErrorUtilities.cs">
@@ -202,6 +203,7 @@
     <Compile Include="Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
     <Compile Include="Immutable\ImmutableDictionary.cs" />
+    <Compile Include="NullableAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
     <Compile Include="..\MSBuild\LogMessagePacket.cs">
@@ -220,8 +222,6 @@
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
-    <Compile Include="..\Framework\IConstrainedEqualityComparer.cs" />
-    <Compile Include="..\Framework\MSBuildNameIgnoreCaseComparer.cs" />
 
     <Compile Include="..\Framework\InterningReadTranslator.cs" />
     <Compile Include="..\Framework\InterningWriteTranslator.cs" />

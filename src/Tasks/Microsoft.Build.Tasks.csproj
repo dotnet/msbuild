@@ -87,6 +87,7 @@
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>FileDelegates.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs" />
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
     </Compile>
@@ -131,6 +132,7 @@
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Modifiers.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
