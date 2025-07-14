@@ -2789,7 +2789,9 @@ namespace Microsoft.Build.CommandLine
                         verbosity = LoggerVerbosity.Diagnostic;
                     }
 
-                    if (originalVerbosity == LoggerVerbosity.Diagnostic)
+                    // we don't want to write the MSBuild command line to the display because TL by intent is a
+                    // highly-controlled visual experience and we don't want to clutter it with the command line switches.
+                    if (originalVerbosity == LoggerVerbosity.Diagnostic && !useTerminalLogger)
                     {
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
                         Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
