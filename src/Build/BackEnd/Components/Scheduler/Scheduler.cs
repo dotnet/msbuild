@@ -1720,7 +1720,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int nodeForResults = (parentRequest == null) ? InvalidNodeId : parentRequest.AssignedNode;
-                TraceScheduler("Received request {0} (node request {1} Project {2} Target {3}) with parent {4} from node {5}", request.GlobalRequestId, request.NodeRequestId, _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets), request.ParentGlobalRequestId, nodeForResults);
+                TraceScheduler("Received request {0} (node request {1}) with parent {2} from node {3} for project {4} with targets {5}", request.GlobalRequestId, request.NodeRequestId, request.ParentGlobalRequestId, nodeForResults, _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets));
 
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
