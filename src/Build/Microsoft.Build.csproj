@@ -38,6 +38,8 @@
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
+    <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PooledObjects" PrivateAssets="all" />
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
@@ -123,9 +125,6 @@
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IsExternalInit.cs">
-      <Link>BuildCheck\Utilities\IsExternalInit.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
