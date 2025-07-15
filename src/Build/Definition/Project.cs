@@ -2624,14 +2624,28 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ItemSpecFragment[] includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment && f.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0).ToArray();
-                if (includeGlobFragments.Length == 0)
+                List<ItemSpecFragment> includeGobFragmentsList = null;
+                foreach (ItemSpecFragment fragment in includeItemspec.Fragments)
+                {
+                    if (fragment is GlobFragment && fragment.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0)
+                    {
+                        includeGobFragmentsList ??= new List<ItemSpecFragment>(includeItemspec.Fragments.Count);
+                        includeGobFragmentsList.Add(fragment);
+                    }
+                }
+
+                if (includeGobFragmentsList == null || includeGobFragmentsList.Count == 0)
                 {
                     return null;
                 }
 
-                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
-                var includeGlob = CompositeGlob.Create(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
+                string[] includeGlobStrings = new string[includeGobFragmentsList.Count];
+                for (int i = 0; i < includeGlobStrings.Length; ++i)
+                {
+                    includeGlobStrings[i] = includeGobFragmentsList[i].TextFragment;
+                }
+
+                var includeGlob = CompositeGlob.Create(includeGobFragmentsList.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = [];
                 IMSBuildGlob excludeGlob = null;
