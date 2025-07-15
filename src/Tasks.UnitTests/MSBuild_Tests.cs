@@ -1586,7 +1586,7 @@ namespace Microsoft.Build.UnitTests
                 </Project>
                 """);
 
-            project.SetGlobalProperty("BuildNonexistentProjectsByDefault", bool.TrueString);
+            project.SetGlobalProperty(PropertyNames.BuildNonexistentProjectsByDefault, bool.TrueString);
 
             var logger = new MockLogger();
             bool result = project.Build(logger);

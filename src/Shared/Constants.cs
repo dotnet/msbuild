@@ -154,6 +154,8 @@ namespace Microsoft.Build.Shared
         internal const string TargetFrameworks = nameof(TargetFrameworks);
         internal const string TargetFramework = nameof(TargetFramework);
         internal const string UsingMicrosoftNETSdk = nameof(UsingMicrosoftNETSdk);
+
+        internal const string BuildNonexistentProjectsByDefault = nameof(BuildNonexistentProjectsByDefault);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.

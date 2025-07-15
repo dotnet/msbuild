@@ -297,7 +297,7 @@ namespace Microsoft.Build.Tasks
                         skipNonExistProjects = behavior;
                     }
                     else if (BuildEngine is IBuildEngine6 buildEngine6 && buildEngine6.GetGlobalProperties()
-                        .TryGetValue("BuildNonexistentProjectsByDefault", out var buildNonexistentProjectsByDefault) &&
+                        .TryGetValue(PropertyNames.BuildNonexistentProjectsByDefault, out var buildNonexistentProjectsByDefault) &&
                         ConversionUtilities.ConvertStringToBool(buildNonexistentProjectsByDefault))
                     {
                         skipNonExistProjects = SkipNonExistentProjectsBehavior.Build;
