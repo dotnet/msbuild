@@ -142,7 +142,7 @@
     </source>
         <target state="translated">  -featureAvailability:featureName,...
                      Проверьте доступность функции. Результатом является одна из 
-                     строк "Неопределено", "Доступно", "Недоступно" и 
+                     строк "Не определено", "Доступно", "Недоступно" и 
                      "Предварительный просмотр". 
                      - Не определено — доступность функции не определена 
                      (имя функции неизвестно средству проверки доступности 
@@ -215,18 +215,18 @@
                      Доступные параметры. 
                         по умолчанию — определяет поведение логгера 
                         терминала. Требуется одно из следующих значений: 
-                           - `on`, `true` заставляет использовать TerminalLogger даже 
+                           - "on", "true" заставляет использовать TerminalLogger даже 
                             когда он будет отключен. 
-                           - `off`, `false` запрещает использование TerminalLogger 
+                           - "off", "false" запрещает использование TerminalLogger 
                             даже если бы он был включен. 
-                           - `auto` включает TerminalLogger, когда терминал 
+                           - "auto" включает TerminalLogger, когда терминал 
                             поддерживает это, и в сеансе нет перенаправления
                             stdout/stderr
                         verbosity – Переопределить параметр -verbosity для этого 
                         терминала 
                         showCommandLine — Показать сообщения TaskCommandLineEvent 
 
-                      Пример: 
+                      Пример:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -282,7 +282,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: недопустимое значение регистратора терминала. Это должно быть одно из значений: "auto", "true" или "false". {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: Недопустимое значение средства ведения журнала терминала. Это должно быть одно из следующих значений: "auto", "ИСТИНА" или "ЛОЖЬ". {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1516,7 +1516,7 @@
       </trans-unit>
       <trans-unit id="MissingGetResultFileError">
         <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
-        <target state="translated">MSBUILD : error MSB1068: необходимо указать файл для параметра getResultOutputFile.</target>
+        <target state="translated">MSBUILD : error MSB1068: необходимо предоставить файл для переключателя getResultOutputFile.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
       following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
@@ -1785,7 +1785,7 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="translated">Средство ведения журнала терминалов не использовалось, так как было обнаружено, что сборка выполняется в автоматизированной среде.</target>
+        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
@@ -2039,50 +2039,50 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Сериализует все события сборки в сжатый двоичный файл.
-                     По умолчанию файл находится в текущем каталоге и называется
-                     "msbuild.binlog". Двоичный журнал включает подробное описание
-                     процесса сборки, которое затем можно использовать для воссоздания
-                     текстовых журналов и может использоваться другими средствами анализа. Двоичный журнал
-                     обычно в 10–20 раз меньше самого подробного текстового
-                     журнала уровня диагностики, но содержит больше информации.
-                     (Краткая форма: -bl)
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     Необязательный параметр LogFile указывает путь, по которому
-                     сохраняется двоичный журнал. Чтобы создать отдельный файл журнала
-                     для каждой сборки, можно добавить токен "{}" в
-                     путь, например: LogFile=output-{}-log.binlog. Каждый 
-                     символ "{}" в пути журнала заменяется уникальной строкой,
-                     использующей временную метку, идентификатор запущенного процесса и случайную
-                     метку строки.
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
 
-                     Средство ведения двоичного журнала по умолчанию собирает исходный текст
-                     файлов проекта, включая все импортированные проекты и целевые
-                     файлы, найденные во время сборки. Дополнительный
-                     параметр ProjectImports управляет этим поведением:
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                      ProjectImports=None     — не собирать импортированные файлы
-                                                проекта.
-                      ProjectImports=Embed    — внедрять импортированные файлы проекта в
-                                                файл журнала.
-                      ProjectImports=ZipFile  — сохранять файлы проекта в
-                                                вывод.projectimports.zip,
-                                                где вывод — это то же имя,
-                                                что и у двоичного файла журнала.
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
+                                                output.projectimports.zip
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     Значение по умолчанию для ProjectImports — Embed.
-                     Примечание: средство ведения журнала не собирает исходные файлы, не от MSBuild,
-                     например с расширениями CS, CPP и др.
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
 
-                     BINLOG-файл можно "воспроизвести", передав его в
-                     msbuild.exe в качестве аргумента вместо проекта или решения.
-                     Другие средства ведения журнала получат содержащиеся
-                     в файле журнала сведения, как если бы происходила собственно сборка.
-                     Дополнительные сведения о двоичных журналах и их использовании:
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     Примеры:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
@@ -2199,7 +2199,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="translated">MSBUILD : error MSB1021: не удается создать экземпляр регистратора {0}. {1}</target>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
