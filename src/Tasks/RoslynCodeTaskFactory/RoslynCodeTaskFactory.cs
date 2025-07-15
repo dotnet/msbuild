@@ -156,7 +156,7 @@ namespace Microsoft.Build.Tasks
             _parameters = parameterGroup.Values.ToArray();
 
             // Attempt to parse and extract everything from the <UsingTask />
-            if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo))
+            if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, taskFactoryLoggingHost, out RoslynCodeTaskFactoryTaskInfo taskInfo))
             {
                 return false;
             }
@@ -223,6 +223,13 @@ namespace Microsoft.Build.Tasks
                 CreateProperty(codeTypeDeclaration, propertyInfo.Name, propertyInfo.PropertyType);
             }
 
+            // Create the #line directive to map generated code back to original source
+            string lineDirective = "";
+            if (!string.IsNullOrEmpty(taskInfo.SourceFilePath))
+            {
+                lineDirective = $"#line {taskInfo.SourceLineNumber} \"{taskInfo.SourceFilePath.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"\n";
+            }
+
             if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Fragment)
             {
                 CodeMemberProperty successProperty = CreateProperty(codeTypeDeclaration, "Success", typeof(bool), true);
@@ -234,13 +241,20 @@ namespace Microsoft.Build.Tasks
                     Attributes = MemberAttributes.Override | MemberAttributes.Public,
                     ReturnType = new CodeTypeReference(typeof(Boolean))
                 };
-                executeMethod.Statements.Add(new CodeSnippetStatement(taskInfo.SourceCode));
+                
+                // Add the #line directive before the user code
+                string userCodeWithLineDirective = lineDirective + taskInfo.SourceCode;
+                
+                executeMethod.Statements.Add(new CodeSnippetStatement(userCodeWithLineDirective));
                 executeMethod.Statements.Add(new CodeMethodReturnStatement(new CodePropertyReferenceExpression(null, successProperty.Name)));
                 codeTypeDeclaration.Members.Add(executeMethod);
             }
             else
             {
-                codeTypeDeclaration.Members.Add(new CodeSnippetTypeMember(taskInfo.SourceCode));
+                // Add the #line directive before the user code
+                string userCodeWithLineDirective = lineDirective + taskInfo.SourceCode;
+                
+                codeTypeDeclaration.Members.Add(new CodeSnippetTypeMember(userCodeWithLineDirective));
             }
 
             CodeNamespace codeNamespace = new CodeNamespace("InlineCode");
@@ -275,6 +289,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
         /// <param name="parameters">An <see cref="ICollection{TaskPropertyInfo}"/> containing parameters for the task.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object that receives the details of the parsed task.</param>
+        /// <param name="buildEngine">The build engine to get project file information from.</param>
         /// <returns><c>true</c> if the task body was successfully parsed, otherwise <c>false</c>.</returns>
         /// <remarks>
         /// The <paramref name="taskBody"/> will look like this:
@@ -290,7 +305,7 @@ namespace Microsoft.Build.Tasks
         /// ]]>
         /// </code>
         /// </remarks>
-        internal static bool TryLoadTaskBody(TaskLoggingHelper log, string taskName, string taskBody, ICollection<TaskPropertyInfo> parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo)
+        internal static bool TryLoadTaskBody(TaskLoggingHelper log, string taskName, string taskBody, ICollection<TaskPropertyInfo> parameters, IBuildEngine buildEngine, out RoslynCodeTaskFactoryTaskInfo taskInfo)
         {
             taskInfo = new RoslynCodeTaskFactoryTaskInfo
             {
@@ -305,7 +320,7 @@ namespace Microsoft.Build.Tasks
             {
                 // For legacy reasons, the inner XML of the <UsingTask /> has no document element.  So we have to add a top-level
                 // element around it so it can be parsed.
-                document = XDocument.Parse($"<Task>{taskBody}</Task>");
+                document = XDocument.Parse($"<Task>{taskBody}</Task>", LoadOptions.SetLineInfo);
             }
             catch (Exception e)
             {
@@ -399,6 +414,20 @@ namespace Microsoft.Build.Tasks
             // Copies the source code from the inner text of the <Code /> element.  This might be override later if the user specified
             // a file instead.
             taskInfo.SourceCode = codeElement.Value;
+
+            // Store the source file path and line number for #line directives
+            taskInfo.SourceFilePath = buildEngine.ProjectFileOfTaskNode;
+            if (codeElement is IXmlLineInfo lineInfo && lineInfo.HasLineInfo())
+            {
+                // The line info is for the <Code> element, but we want the line where the actual code starts
+                // For now, we'll use the Code element line + 1 as an approximation
+                taskInfo.SourceLineNumber = lineInfo.LineNumber + 1;
+            }
+            else
+            {
+                // Default to line 1 if we can't get line info
+                taskInfo.SourceLineNumber = 1;
+            }
 
             // Parse the attributes of the <Code /> element
             XAttribute languageAttribute = null;
