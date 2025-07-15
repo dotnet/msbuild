@@ -122,7 +122,9 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             _componentHost = host;
-            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<int, NodeContext>(
+                concurrencyLevel: Environment.ProcessorCount,
+                capacity: host.BuildParameters.MaxNodeCount);
         }
 
         /// <summary>
