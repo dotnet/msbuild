@@ -162,7 +162,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Attempt to compile an assembly (or get one from the cache)
-            if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
+            if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, _parameters, out Assembly assembly))
             {
                 return false;
             }
@@ -536,7 +536,8 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            taskInfo.SourceCode = GetSourceCode(taskInfo, parameters);
+            // Don't modify taskInfo.SourceCode here to preserve the original source code for caching
+            // The GetSourceCode method will be called during compilation to generate the final code with line directives
 
             return true;
         }
@@ -688,9 +689,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="buildEngine">An <see cref="IBuildEngine"/> to use give to the compiler task so that messages can be logged.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object containing details about the task.</param>
+        /// <param name="parameters">The parameters for the task.</param>
         /// <param name="assembly">The <see cref="Assembly"/> if the source code be compiled and loaded, otherwise <code>null</code>.</param>
         /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>null</code>.</returns>
-        private bool TryCompileInMemoryAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
+        private bool TryCompileInMemoryAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, ICollection<TaskPropertyInfo> parameters, out Assembly assembly)
         {
             // First attempt to get a compiled assembly from the cache
             if (CompiledAssemblyCache.TryGetValue(taskInfo, out assembly))
@@ -714,12 +716,15 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // Generate the final source code with line directives
+                string finalSourceCode = GetSourceCode(taskInfo, parameters);
+                
                 // Embed generated file in the binlog
                 string fileNameInBinlog = $"{Guid.NewGuid()}-{_taskName}-compilation-file.tmp";
-                _log.LogIncludeGeneratedFile(fileNameInBinlog, taskInfo.SourceCode);
+                _log.LogIncludeGeneratedFile(fileNameInBinlog, finalSourceCode);
 
                 // Create the code
-                File.WriteAllText(sourceCodePath, taskInfo.SourceCode);
+                File.WriteAllText(sourceCodePath, finalSourceCode);
 
                 // Execute the compiler.  We re-use the existing build task by hosting it and giving it our IBuildEngine instance for logging
                 RoslynCodeTaskFactoryCompilerBase managedCompiler = null;

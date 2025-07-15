@@ -845,7 +845,9 @@ namespace InlineTask
 
             if (verifySource)
             {
-                Verify(taskInfo.SourceCode, _verifySettings).GetAwaiter().GetResult();
+                // Verify the generated source code with line directives
+                string generatedSourceCode = RoslynCodeTaskFactory.GetSourceCode(taskInfo, parameters ?? new List<TaskPropertyInfo>());
+                Verify(generatedSourceCode, _verifySettings).GetAwaiter().GetResult();
             }
         }
     }
