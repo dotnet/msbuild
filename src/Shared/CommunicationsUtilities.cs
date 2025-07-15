@@ -80,6 +80,8 @@ namespace Microsoft.Build.Internal
         /// ARM64 process.
         /// </summary>
         Arm64 = 128,
+
+        SomeNewOption = 256,
     }
 
     internal class Handshake
