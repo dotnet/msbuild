@@ -353,7 +353,7 @@ namespace Microsoft.Build.BackEnd
                         config.RetrieveFromCache();
                         ((IBuildResults)resultToReport).SavedCurrentDirectory = config.SavedCurrentDirectory;
                         ((IBuildResults)resultToReport).SavedEnvironmentVariables = config.SavedEnvironmentVariables;
-                        if (!request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreExistingProjectState))
+                        if ((request.BuildRequestDataFlags & BuildRequestDataFlags.IgnoreExistingProjectState) != BuildRequestDataFlags.IgnoreExistingProjectState)
                         {
                             resultToReport.ProjectStateAfterBuild = config.Project;
                         }
@@ -456,7 +456,11 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            TraceEngine("Request {0}({1}) (nr {2}) is no longer waiting on nr {3} (UBR).  Results are {4}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, result.NodeRequestId, result.OverallResult);
+                            // PERF: Explicitly check the debug flag here so that we don't pay the cost for getting OverallResult
+                            if (_debugDumpState)
+                            {
+                                TraceEngine("Request {0}({1}) (nr {2}) is no longer waiting on nr {3} (UBR).  Results are {4}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, result.NodeRequestId, result.OverallResult);
+                            }
 
                             // Update the configuration with targets information, if we received any and didn't already have it.
                             if (result.DefaultTargets != null)
@@ -1436,7 +1440,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method used for debugging purposes.
         /// </summary>
-        private void TraceEngine(string format, object arg)
+        private void TraceEngine(string format, ulong arg)
         {
             if (_debugDumpState)
             {
@@ -1447,7 +1451,29 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method used for debugging purposes.
         /// </summary>
-        private void TraceEngine(string format, object arg1, object arg2)
+        private void TraceEngine(string format, int arg)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, int arg1, BuildRequestEngineStatus arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2.Box()]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, int arg1, int arg2)
         {
             if (_debugDumpState)
             {
@@ -1458,7 +1484,18 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method used for debugging purposes.
         /// </summary>
-        private void TraceEngine(string format, object arg1, object arg2, object arg3)
+        private void TraceEngine(string format, ulong arg1, ulong arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, int arg1, int arg2, int arg3)
         {
             if (_debugDumpState)
             {
@@ -1469,7 +1506,18 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method used for debugging purposes.
         /// </summary>
-        private void TraceEngine(string format, object arg1, object arg2, object arg3, object arg4)
+        private void TraceEngine(string format, int arg1, int arg2, string arg3)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, string arg4)
         {
             if (_debugDumpState)
             {
@@ -1480,7 +1528,29 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method used for debugging purposes.
         /// </summary>
-        private void TraceEngine(string format, object arg1, object arg2, object arg3, object arg4, object arg5)
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, BuildRequestEntryState arg4)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, int arg5)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, BuildResultCode arg5)
         {
             if (_debugDumpState)
             {
