@@ -11,7 +11,7 @@
     <Usage Id="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
     <Usage Id="Microsoft.Build.Framework" Version="14.3.0" IsDirectDependency="true" />
     <Usage Id="Microsoft.Build.Framework" Version="15.5.180" IsDirectDependency="true" />
-    <Usage Id="Microsoft.Build.NuGetSdkResolver" Version="5.11.1-rc.5" IsDirectDependency="true" />
+    <Usage Id="Microsoft.Build.NuGetSdkResolver" Version="5.11.2-rc.2" IsDirectDependency="true" />
     <Usage Id="Microsoft.Build.Tasks.Git" Version="1.1.0-beta-21480-02" />
     <Usage Id="Microsoft.Build.Utilities.Core" Version="14.3.0" IsDirectDependency="true" />
     <Usage Id="Microsoft.Build.Utilities.Core" Version="15.5.180" IsDirectDependency="true" />
@@ -57,18 +57,29 @@
     <Usage Id="NETStandard.Library" Version="1.6.1" IsDirectDependency="true" IsAutoReferenced="true" />
     <Usage Id="NETStandard.Library" Version="2.0.3" IsDirectDependency="true" IsAutoReferenced="true" />
     <Usage Id="Newtonsoft.Json" Version="9.0.1" />
-    <Usage Id="NuGet.Build.Tasks" Version="5.11.1-rc.5" IsDirectDependency="true" />
-    <Usage Id="NuGet.Commands" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.Common" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.Configuration" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.Credentials" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.DependencyResolver.Core" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.Frameworks" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.LibraryModel" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.Packaging" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.ProjectModel" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.Protocol" Version="5.11.1-rc.5" />
-    <Usage Id="NuGet.Versioning" Version="5.11.1-rc.5" />
+    <Usage Id="NuGet.Build.Tasks" Version="5.11.6" IsDirectDependency="true" />
+    <Usage Id="NuGet.Commands" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Commands" Version="5.11.6" />
+    <Usage Id="NuGet.Common" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Common" Version="5.11.6" />
+    <Usage Id="NuGet.Configuration" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Configuration" Version="5.11.6" />
+    <Usage Id="NuGet.Credentials" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Credentials" Version="5.11.6" />
+    <Usage Id="NuGet.DependencyResolver.Core" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.DependencyResolver.Core" Version="5.11.6" />
+    <Usage Id="NuGet.Frameworks" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Frameworks" Version="5.11.6" />
+    <Usage Id="NuGet.LibraryModel" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.LibraryModel" Version="5.11.6" />
+    <Usage Id="NuGet.Packaging" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Packaging" Version="5.11.6" />
+    <Usage Id="NuGet.ProjectModel" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.ProjectModel" Version="5.11.6" />
+    <Usage Id="NuGet.Protocol" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Protocol" Version="5.11.6" />
+    <Usage Id="NuGet.Versioning" Version="5.11.2-rc.2" />
+    <Usage Id="NuGet.Versioning" Version="5.11.6" />
     <Usage Id="Perfolizer" Version="0.2.1" />
     <Usage Id="runtime.any.System.Collections" Version="4.3.0" />
     <Usage Id="runtime.any.System.Globalization" Version="4.3.0" />
