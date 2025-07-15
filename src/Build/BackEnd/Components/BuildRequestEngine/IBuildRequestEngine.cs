@@ -86,6 +86,25 @@ namespace Microsoft.Build.BackEnd
         Shutdown
     }
 
+    internal static class BuildRequestEngineStatusBoxes
+    {
+        public static readonly object UninitializedBox = BuildRequestEngineStatus.Uninitialized;
+        public static readonly object IdleBox = BuildRequestEngineStatus.Idle;
+        public static readonly object ActiveBox = BuildRequestEngineStatus.Active;
+        public static readonly object WaitingBox = BuildRequestEngineStatus.Waiting;
+        public static readonly object ShutdownBox = BuildRequestEngineStatus.Shutdown;
+
+        public static object Box(this BuildRequestEngineStatus status) => status switch
+        {
+            BuildRequestEngineStatus.Uninitialized => UninitializedBox,
+            BuildRequestEngineStatus.Idle => IdleBox,
+            BuildRequestEngineStatus.Active => ActiveBox,
+            BuildRequestEngineStatus.Waiting => WaitingBox,
+            BuildRequestEngineStatus.Shutdown => ShutdownBox,
+            _ => throw new ArgumentOutOfRangeException(nameof(status)),
+        };
+    }
+
     /// <summary>
     /// Objects implementing this interface may be used by a Node to process build requests
     /// and generate build results.

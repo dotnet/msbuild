@@ -333,7 +333,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
                     TraceEngine("Request {0}({1}) (nr {2}) received and activated.", request.GlobalRequestId, request.ConfigurationId, request.NodeRequestId);
 
                     ErrorUtilities.VerifyThrow(!_requestsByGlobalRequestId.ContainsKey(request.GlobalRequestId), "Request {0} is already known to the engine.", request.GlobalRequestId);
@@ -403,7 +403,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
                     ErrorUtilities.VerifyThrow(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), "Request {0} is not known to the engine.", unblocker.BlockedRequestId);
                     BuildRequestEntry entry = _requestsByGlobalRequestId[unblocker.BlockedRequestId];
 
@@ -504,7 +504,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
 
                     TraceEngine("Received configuration response for node config {0}, now global config {1}.", response.NodeConfigurationId, response.GlobalConfigurationId);
                     ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
@@ -1430,6 +1430,61 @@ namespace Microsoft.Build.BackEnd
                         queue.Complete();
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, object arg)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, object arg1, object arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, object arg1, object arg2, object arg3)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, object arg1, object arg2, object arg3, object arg4)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4]);
+            }
+        }
+
+        /// <summary>
+        /// Method used for debugging purposes.
+        /// </summary>
+        private void TraceEngine(string format, object arg1, object arg2, object arg3, object arg4, object arg5)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
             }
         }
 
