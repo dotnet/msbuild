@@ -630,10 +630,11 @@
   </data>
   <data name="HelpMessage_49_MultiThreadedSwitch" xml:space="preserve">
     <value>  -multithreaded
-                     Enables multi-threaded mode in MSBuilds.
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
+                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
                      (Short form: -mt)

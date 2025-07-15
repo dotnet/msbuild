@@ -237,19 +237,21 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
         <source>  -multithreaded
-                     Enables multi-threaded mode in MSBuilds.
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
+                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
         <target state="new">  -multithreaded
-                     Enables multi-threaded mode in MSBuilds.
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
                      instead of multiple processes.
+                     This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
                      (Short form: -mt)
