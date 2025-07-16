@@ -14,6 +14,10 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
+- name: EnableOptProf
+  displayName: Enable OptProf data collection for this build
+  type: boolean
+  default: true
 - name: requireDefaultChannelsEnabled
   displayName: Require Default Channels
   type: boolean
@@ -37,8 +41,13 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  - name: requireDefaultChannels
-    value: ${{ parameters.requireDefaultChannelsEnabled }}
+  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
+  - ${{ if eq(parameters.EnableOptProf, false) }}:
+    - name: SkipApplyOptimizationData
+      value: true
+  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
+    - name: requireDefaultChannels
+      value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
