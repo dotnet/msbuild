@@ -1966,8 +1966,11 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("test message from other");
         }
 
-        [Fact]
-        public void NonExistentProject()
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void NonExistentProject(bool? buildNonexistentProjectsByDefault)
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject("""
                 <Project>
@@ -1980,12 +1983,19 @@ namespace Microsoft.Build.UnitTests
                 </Project>
                 """);
 
+            if (buildNonexistentProjectsByDefault is { } b)
+            {
+                project.SetGlobalProperty(PropertyNames.BuildNonexistentProjectsByDefault, b.ToString());
+            }
+
             var logger = new MockLogger();
             bool result = project.Build(logger);
             _testOutput.WriteLine(logger.FullLog);
             Assert.False(result);
             logger.AssertLogDoesntContain("test message from other");
-            logger.AssertLogContains("MSB3202"); // error MSB3202: The project file was not found.
+            logger.AssertLogContains(buildNonexistentProjectsByDefault == true
+                ? "MSB4025" // error MSB4025: The project file could not be loaded.
+                : "MSB3202"); // error MSB3202: The project file was not found.
         }
     }
 }
