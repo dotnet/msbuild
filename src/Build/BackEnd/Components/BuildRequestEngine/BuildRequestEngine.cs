@@ -1437,9 +1437,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, ulong arg)
         {
             if (_debugDumpState)
@@ -1448,9 +1445,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg)
         {
             if (_debugDumpState)
@@ -1459,9 +1453,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, BuildRequestEngineStatus arg2)
         {
             if (_debugDumpState)
@@ -1470,9 +1461,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, int arg2)
         {
             if (_debugDumpState)
@@ -1481,9 +1469,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, ulong arg1, ulong arg2)
         {
             if (_debugDumpState)
@@ -1492,9 +1477,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, int arg2, int arg3)
         {
             if (_debugDumpState)
@@ -1503,9 +1485,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, int arg2, string arg3)
         {
             if (_debugDumpState)
@@ -1514,9 +1493,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, int arg2, int arg3, string arg4)
         {
             if (_debugDumpState)
@@ -1525,9 +1501,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, int arg2, int arg3, BuildRequestEntryState arg4)
         {
             if (_debugDumpState)
@@ -1536,9 +1509,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, int arg5)
         {
             if (_debugDumpState)
@@ -1547,9 +1517,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, BuildResultCode arg5)
         {
             if (_debugDumpState)
@@ -1558,9 +1525,6 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
         private void TraceEngine(string format, params object[] stuff)
         {
             if (_debugDumpState)

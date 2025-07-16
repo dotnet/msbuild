@@ -86,6 +86,12 @@ namespace Microsoft.Build.BackEnd
         Shutdown
     }
 
+    /// <summary>
+    /// Provides boxed representations of the <see cref="BuildRequestEngineStatus"/> enumeration values.
+    /// </summary>
+    /// <remarks>This class offers pre-boxed objects for each status value to avoid repeated allocations due to boxing
+    /// when frequently accessing these status values. It also includes an extension method to retrieve the
+    /// boxed object corresponding to a given <see cref="BuildRequestEngineStatus"/>.</remarks>
     internal static class BuildRequestEngineStatusBoxes
     {
         public static readonly object UninitializedBox = BuildRequestEngineStatus.Uninitialized;
@@ -94,6 +100,13 @@ namespace Microsoft.Build.BackEnd
         public static readonly object WaitingBox = BuildRequestEngineStatus.Waiting;
         public static readonly object ShutdownBox = BuildRequestEngineStatus.Shutdown;
 
+        /// <summary>
+        /// Gets the canonical boxed object for the specified <see cref="BuildRequestEngineStatus"/>.
+        /// </summary>
+        /// <param name="status">The desired <see cref="BuildRequestEngineStatus"/>.</param>
+        /// <returns>The boxed <see cref="BuildRequestEngineStatus"/>.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="status"/> is outside the range of
+        /// defined <see cref="BuildRequestEngineStatus"/> values.</exception>
         public static object Box(this BuildRequestEngineStatus status) => status switch
         {
             BuildRequestEngineStatus.Uninitialized => UninitializedBox,
