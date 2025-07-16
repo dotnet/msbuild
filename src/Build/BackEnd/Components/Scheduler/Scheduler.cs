@@ -185,6 +185,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _noLoggingCompletedSubmissionDetails;
 
+        /// <summary>
+        /// Static variable to track whether this is the first write to the debug dump file.
+        /// If true, indicates that a header should be written to the file.
+        /// After the first write, this is set to false to prevent writing the header in subsequent writes.
+        /// </summary>
+        private static bool _debugDumpIsFirstWrite = true;
+
 #pragma warning restore IDE0052 // Remove unread private members
 #pragma warning restore CS0414 // The field is assigned but its value is never used
 
@@ -1713,7 +1720,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int nodeForResults = (parentRequest == null) ? InvalidNodeId : parentRequest.AssignedNode;
-                TraceScheduler("Received request {0} (node request {1}) with parent {2} from node {3}", request.GlobalRequestId, request.NodeRequestId, request.ParentGlobalRequestId, nodeForResults);
+                TraceScheduler("Received request {0} (node request {1}) with parent {2} from node {3} for project {4} with targets {5}", request.GlobalRequestId, request.NodeRequestId, request.ParentGlobalRequestId, nodeForResults, _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets));
 
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
@@ -2625,7 +2632,24 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
+                        bool shouldWriteHeader = _debugDumpIsFirstWrite;
+                        if (shouldWriteHeader)
+                        {
+                            shouldWriteHeader = !File.Exists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
+                            _debugDumpIsFirstWrite = false;
+                        }
                         using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+
+
+                        if (shouldWriteHeader)
+                        {
+                            file.WriteLine("SchedulerState Log Symbols:");
+                            file.WriteLine("! - Blocked request: A build request waiting for dependencies or resources.");
+                            file.WriteLine("> - Executing request: A build request currently being processed by a node.");
+                            file.WriteLine("------------------------------------------------");
+                            file.WriteLine();
+                        }
 
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------");
