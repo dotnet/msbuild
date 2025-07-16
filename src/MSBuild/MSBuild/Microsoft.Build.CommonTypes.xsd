@@ -1436,11 +1436,6 @@ elementFormDefault="qualified">
         </xs:annotation>
     </xs:element>
     <xs:element name="BaseAddress" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="BuildNonexistentProjectsByDefault" type="msb:boolean" substitutionGroup="msb:Property">
-        <xs:annotation>
-            <xs:documentation><!-- _locID_text="BuildNonexistentProjectsByDefault" _locComment="" -->Indicates whether `SkipNonexistentProjects=Build` should be the default setting of MSBuild tasks.</xs:documentation>
-        </xs:annotation>
-    </xs:element>
     <xs:element name="BootstrapperComponentsLocation" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="BootstrapperComponentsLocation" _locComment="" -->HomeSite, Relative, or Absolute</xs:documentation>
