@@ -231,5 +231,43 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
         }
+
+        [Fact]
+        public void Wave18_0IsIncludedInAllWaves()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                ChangeWaves.AllWaves.ShouldContain(ChangeWaves.Wave18_0);
+                ChangeWaves.Wave18_0.ShouldBe(new Version(18, 0));
+            }
+        }
+
+        [Fact]
+        public void Wave18_0FeaturesAreEnabledByDefault()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                SetChangeWave(string.Empty, env);
+                
+                buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                        versionToCheckAgainstCurrentChangeWave: ChangeWaves.Wave18_0,
+                                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.EnableAllFeatures,
+                                                        warningCodesLogShouldContain: null);
+            }
+        }
+
+        [Fact]
+        public void Wave18_0FeaturesCanBeDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                SetChangeWave(ChangeWaves.Wave18_0.ToString(), env);
+                
+                buildSimpleProjectAndValidateChangeWave(testEnvironment: env,
+                                                        versionToCheckAgainstCurrentChangeWave: ChangeWaves.Wave18_0,
+                                                        currentChangeWaveShouldUltimatelyResolveTo: ChangeWaves.Wave18_0,
+                                                        warningCodesLogShouldContain: null);
+            }
+        }
     }
 }

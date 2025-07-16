@@ -1881,9 +1881,12 @@ namespace Microsoft.Build.Evaluation
 
                 if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
                 {
-                    foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                     {
-                        _data.AddSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                        foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                        {
+                            _data.AddSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                        }
                     }
                 }
 
@@ -1898,8 +1901,10 @@ namespace Microsoft.Build.Evaluation
                         "dotnet.exe");
                     if (File.Exists(dotnetExe))
                     {
-
-                        _data.AddSdkResolvedEnvironmentVariable("DOTNET_HOST_PATH", dotnetExe);
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                        {
+                            _data.AddSdkResolvedEnvironmentVariable("DOTNET_HOST_PATH", dotnetExe);
+                        }
                     }
                 }
 
