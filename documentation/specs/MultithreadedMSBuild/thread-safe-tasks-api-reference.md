@@ -99,9 +99,13 @@ The following tables list specific .NET APIs and their threading safety classifi
 | All properties setters | ERROR | Modifies process-level state | Avoid |
 | `Process.GetCurrentProcess().Kill()` | ERROR | Terminates entire process | Avoid |
 | `Process.GetCurrentProcess().Kill(bool entireProcessTree)` | ERROR | Terminates entire process | Avoid |
-| `Process.Start(string fileName)` | ERROR | Inherits process state | Use MSBuild API |
-| `Process.Start(string fileName, string arguments)` | ERROR | Inherits process state | Use MSBuild API |
-| `Process.Start(ProcessStartInfo startInfo)` | WARNING | May inherit process state | Use MSBuild API |
+| `Process.Start` all overloads | ERROR | May inherit process state | Use MSBuild API |
+
+### System.Diagnostics.ProcessStartInfo Class
+
+| API | Level | Short Reason | Recommendation |
+|-----|-------|--------------|-------|
+| Constructor `ProcessStartInfo()` all overloads | ERROR | May inherit process state | Use MSBuild API |
 
 ### System.Threading.ThreadPool Class
 

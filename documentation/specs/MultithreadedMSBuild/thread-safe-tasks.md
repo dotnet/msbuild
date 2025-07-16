@@ -29,12 +29,15 @@ public interface ITaskExecutionContext
     string? GetEnvironmentVariable(string name);
     IReadOnlyDictionary<string, string> GetEnvironmentVariables();
     void SetEnvironmentVariable(string name, string? value);
-    
+
+    ProcessStartInfo GetProcessStartInfo();
     Process StartProcess(ProcessStartInfo startInfo);
     Process StartProcess(string fileName);
-    Process StartProcess(string fileName, string arguments);
+    Process StartProcess(string fileName, IEnumerable<string> arguments);
 }
 ```
+
+**Note:** The `ITaskExecutionContext` will not be thread-safe for performance reasons. Task authors who spawn multiple threads within their task implementation must provide their own synchronization when accessing the execution context from multiple threads. However, each thread node has its own isolated context object provided to the tasks, so task authors do not need to worry about synchronization with other tasks running concurrently in different thread nodes.
 
 To help task authors avoid thread-safety issues related to path handling, we introduce `AbsolutePath` and `RelativePath` classes that are implicitly convertible to string. 
 
@@ -166,7 +169,3 @@ Conditional Task Declaration Example:
     Condition="'$(MSBuildSupportsThreadSafeTasks)' != 'true'" />
 </Project>
 ```
-
-## Implementation Notes
-
-**Thread Safety:** All implementations should be thread-safe to enable task authors to create multi-threaded tasks, ensuring all classes are safe for concurrent use.
