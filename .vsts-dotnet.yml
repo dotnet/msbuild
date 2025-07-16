@@ -60,6 +60,7 @@ variables:
     value: none
   - name: NugetSecurityAnalysisWarningLevel
     value: none
+
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -94,7 +95,7 @@ extends:
     - stage: build
       displayName: Build
       jobs:
-      - template: eng\.vsts-dotnet-build-jobs.yml
+      - template: eng/.vsts-dotnet-build-jobs.yml@self
         parameters:
           enableMicrobuild: true
           isExperimental: false

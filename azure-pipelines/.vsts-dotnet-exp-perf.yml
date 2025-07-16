@@ -28,8 +28,9 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # Use main as our optprof collection branch by default.
-  - name: SourceBranch
-    value: main
+  - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
+    - name: SourceBranch
+      value: main
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
@@ -80,7 +81,7 @@ extends:
     - stage: build
       displayName: Build
       jobs:
-      - template: ..\eng\.vsts-dotnet-build-jobs.yml
+      - template: eng/.vsts-dotnet-build-jobs.yml@self
         parameters:
           enableMicrobuild: false
           isExperimental: true
@@ -89,7 +90,7 @@ extends:
           codeSignValidationEnabled: false
           codeSignValidationBreak: false
 
-    - template: ..\eng\common\templates-official\post-build\post-build.yml@self
+    - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
         publishingInfraVersion: 3
         enableSymbolValidation: true

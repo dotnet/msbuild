@@ -20,7 +20,7 @@ parameters:
   default: false
 
 jobs:
-- template: common/templates-official/job/job.yml@self
+- template: /eng/common/templates-official/job/job.yml@self
   parameters:
     enableMicrobuild: ${{ parameters.enableMicrobuild }}
 
@@ -29,7 +29,7 @@ jobs:
 # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
 #  set 'EnableReleaseOneLocBuild' to true.
 - ${{ if and(parameters.enableLocalization, startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
-  - template: common/templates-official/job/onelocbuild.yml@self
+  - template: /eng/common/templates-official/job/onelocbuild.yml@self
     parameters:
       MirrorRepo: 'msbuild'
       LclSource: lclFilesfromPackage
@@ -39,7 +39,7 @@ jobs:
       condition: ${{ variables.EnableReleaseOneLocBuild }}
 # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
 - ${{ if and(parameters.enableLocalization, eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
-  - template: common/templates-official/job/onelocbuild.yml@self
+  - template: /eng/common/templates-official/job/onelocbuild.yml@self
     parameters:
       MirrorRepo: 'msbuild'
       LclSource: lclFilesfromPackage
@@ -87,8 +87,8 @@ jobs:
     inputs:
       command: restore
       feedsToUse: config
-      restoreSolution: 'common\internal\Tools.csproj'
-      nugetConfigPath: 'common\internal\NuGet.config'
+      restoreSolution: 'eng\common\internal\Tools.csproj'
+      nugetConfigPath: 'eng\common\internal\NuGet.config'
       restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
   - task: MicroBuildOptProfPlugin@6
@@ -122,7 +122,7 @@ jobs:
     condition: succeeded()
 
   # Required by Microsoft policy
-  - template: common\templates-official\steps\generate-sbom.yml@self
+  - template: /eng/common/templates-official/steps/generate-sbom.yml@self
 
   # Publish OptProf configuration files
   - task: 1ES.PublishArtifactsDrop@1
@@ -149,7 +149,7 @@ jobs:
   # Publish run settings
   - task: PowerShell@2
     inputs:
-      filePath: common\sdk-task.ps1
+      filePath: eng\common\sdk-task.ps1
       arguments: -configuration $(BuildConfiguration)
                 -task VisualStudio.BuildIbcTrainingSettings
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
@@ -231,11 +231,11 @@ jobs:
 
   # Conditional component governance
   - ${{ if parameters.enableComponentGovernance }}:
-    - template: common/templates-official/steps/component-governance.yml@self
+    - template: /eng/common/templates-official/steps/component-governance.yml@self
       parameters:
         disableComponentGovernance: false
 
-- template: common/templates-official/jobs/source-build.yml@self
+- template: /eng/common/templates-official/jobs/source-build.yml@self
   parameters:
     platforms:
       - name: Managed
@@ -244,7 +244,7 @@ jobs:
           image: 1ESPT-Ubuntu22.04
           os: linux
 
-- template: common/templates-official/job/publish-build-assets.yml@self
+- template: /eng/common/templates-official/job/publish-build-assets.yml@self
   parameters:
     enablePublishBuildArtifacts: true
     publishUsingPipelines: true
