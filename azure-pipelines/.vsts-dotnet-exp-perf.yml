@@ -28,9 +28,8 @@ variables:
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # Use main as our optprof collection branch by default.
-  - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
-    - name: SourceBranch
-      value: main
+  - name: SourceBranch
+    value: main
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
@@ -38,7 +37,7 @@ variables:
     - name: SourceBranch
       value: ''
   - name: Codeql.Enabled
-    value: true
+    value: false
   - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel

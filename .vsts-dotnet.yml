@@ -37,16 +37,12 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
-    - name: requireDefaultChannels
-      value: ${{ parameters.requireDefaultChannelsEnabled }}
+  - name: requireDefaultChannels
+    value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
-  # ensures we don't build and push experimental versions to official feeds as release versions
-  - name: IsExperimental
-    value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
   - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
@@ -89,10 +85,10 @@ extends:
     - stage: build
       displayName: Build
       jobs:
-      - template: eng/.vsts-dotnet-build-jobs.yml
+      - template: eng\.vsts-dotnet-build-jobs.yml
         parameters:
           enableMicrobuild: true
-          isExperimental: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
+          isExperimental: false
           enableLocalization: true
           enableComponentGovernance: ${{ or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}
           codeSignValidationEnabled: true
