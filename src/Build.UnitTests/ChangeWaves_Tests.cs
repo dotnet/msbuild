@@ -269,5 +269,41 @@ namespace Microsoft.Build.Engine.UnitTests
                                                         warningCodesLogShouldContain: null);
             }
         }
+
+        [Fact]
+        public void AddSdkResolvedEnvironmentVariable_EnabledWhenWave18_0IsEnabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                SetChangeWave(string.Empty, env); // Enable all features
+
+                // When Wave18_0 is enabled, AreFeaturesEnabled should return true
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0).ShouldBe(true);
+            }
+        }
+
+        [Fact]
+        public void AddSdkResolvedEnvironmentVariable_DisabledWhenWave18_0IsDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                SetChangeWave(ChangeWaves.Wave18_0.ToString(), env); // Disable Wave18_0 and higher
+
+                // When Wave18_0 is disabled, AreFeaturesEnabled should return false
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0).ShouldBe(false);
+            }
+        }
+
+        [Fact]
+        public void AddSdkResolvedEnvironmentVariable_EnabledWhenWaveIsHigher()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                SetChangeWave(ChangeWaves.Wave17_10.ToString(), env); // Disable Wave17_10 and higher, Wave18_0 should be disabled
+
+                // When Wave17_10 is disabled, Wave18_0 should also be disabled since 18.0 > 17.10
+                ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0).ShouldBe(false);
+            }
+        }
     }
 }
