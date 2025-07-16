@@ -1,14 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
 using System;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 
-#if FEATURE_ASSEMBLYLOADCONTEXT
-using System.Runtime.Loader;
-#endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -19,10 +17,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// This is a helper class to install an AssemblyResolver event handler in whatever AppDomain this class is created in.
     /// </summary>
-    internal class TaskEngineAssemblyResolver
-#if FEATURE_APPDOMAIN
-        : MarshalByRefObject
-#endif
+    internal class TaskEngineAssemblyResolver : MarshalByRefObject
     {
         /// <summary>
         /// This public default constructor is needed so that instances of this class can be created by NDP.
@@ -50,17 +45,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void InstallHandler()
         {
-#if FEATURE_APPDOMAIN
             Debug.Assert(_eventHandler == null, "The TaskEngineAssemblyResolver.InstallHandler method should only be called once!");
 
             _eventHandler = new ResolveEventHandler(ResolveAssembly);
 
             AppDomain.CurrentDomain.AssemblyResolve += _eventHandler;
-#else
-            _eventHandler = new Func<AssemblyLoadContext, AssemblyName, Assembly>(ResolveAssembly);
-
-            AssemblyLoadContext.GetLoadContext(typeof(TaskEngineAssemblyResolver).Assembly).Resolving += _eventHandler;
-#endif
         }
 
 
@@ -72,11 +61,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (_eventHandler != null)
             {
-#if FEATURE_APPDOMAIN
                 AppDomain.CurrentDomain.AssemblyResolve -= _eventHandler;
-#else
-                AssemblyLoadContext.GetLoadContext(typeof(TaskEngineAssemblyResolver).Assembly).Resolving -= _eventHandler;
-#endif
                 _eventHandler = null;
             }
             else
@@ -86,7 +71,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// This is an assembly resolution handler necessary for fixing up types instantiated in different
         /// AppDomains and loaded with a Assembly.LoadFrom equivalent call. See comments in TaskEngine.ExecuteTask
@@ -96,9 +80,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="args"></param>
         /// <returns></returns>
         internal Assembly ResolveAssembly(object sender, ResolveEventArgs args)
-#else
-        private Assembly ResolveAssembly(AssemblyLoadContext assemblyLoadContext, AssemblyName assemblyName)
-#endif
         {
             // Is this our task assembly?
             if (_taskAssemblyFile != null)
@@ -107,7 +88,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     try
                     {
-#if FEATURE_APPDOMAIN
                         AssemblyNameExtension taskAssemblyName = new AssemblyNameExtension(AssemblyName.GetAssemblyName(_taskAssemblyFile));
                         AssemblyNameExtension argAssemblyName = new AssemblyNameExtension(args.Name);
 
@@ -120,14 +100,6 @@ namespace Microsoft.Build.BackEnd.Logging
 #endif
 
                         }
-#else // !FEATURE_APPDOMAIN
-                        AssemblyNameExtension taskAssemblyName = new AssemblyNameExtension(AssemblyLoadContext.GetAssemblyName(_taskAssemblyFile));
-                        AssemblyNameExtension argAssemblyName = new AssemblyNameExtension(assemblyName);
-                        if (taskAssemblyName.Equals(argAssemblyName))
-                        {
-                            return assemblyLoadContext.LoadFromAssemblyPath(_taskAssemblyFile);
-                        }
-#endif
                     }
                     // any problems with the task assembly? return null.
                     catch (FileNotFoundException)
@@ -145,7 +117,6 @@ namespace Microsoft.Build.BackEnd.Logging
             return null;
         }
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// Overridden to give this class infinite lease time. Otherwise we end up with a limited
         /// lease (5 minutes I think) and instances can expire if they take long time processing.
@@ -160,10 +131,8 @@ namespace Microsoft.Build.BackEnd.Logging
 
         // we have to store the event handler instance in case we have to remove it
         private ResolveEventHandler _eventHandler = null;
-#else
-        private Func<AssemblyLoadContext, AssemblyName, Assembly> _eventHandler = null;
-#endif
         // path to the task assembly, but only if it's loaded using LoadFrom. If it's loaded with Load, this is null.
         private string _taskAssemblyFile = null;
     }
 }
+#endif
