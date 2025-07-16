@@ -100,7 +100,7 @@ extends:
           enableMicrobuild: true
           isExperimental: false
           enableLocalization: true
-          enableComponentGovernance: ${{ or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}
+          enableComponentGovernance: true
           codeSignValidationEnabled: true
           codeSignValidationBreak: true
 
