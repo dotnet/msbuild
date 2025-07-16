@@ -80,6 +80,11 @@ namespace Microsoft.Build.Internal
         /// ARM64 process.
         /// </summary>
         Arm64 = 128,
+
+        /// <summary>
+        /// Using a long-running sidecar TaskHost process to reduce startup overhead and reuse in-memory caches.
+        /// </summary>
+        SidecarTaskHost = 256,
     }
 
     internal class Handshake
