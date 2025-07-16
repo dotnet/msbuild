@@ -1,12 +1,12 @@
 trigger:
-- main
-- vs*
+- exp/*
+- perf/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
-#   SignType: real
+#   SignType: test
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -27,7 +27,7 @@ variables:
     value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  # If we're not on a vs* branch, use main as our optprof collection branch
+  # Use main as our optprof collection branch by default.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
@@ -37,16 +37,8 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
-    - name: requireDefaultChannels
-      value: ${{ parameters.requireDefaultChannelsEnabled }}
-  - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
     value: true
-  # ensures we don't build and push experimental versions to official feeds as release versions
-  - name: IsExperimental
-    value: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
   - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
@@ -55,6 +47,7 @@ variables:
     value: none
   - name: NugetSecurityAnalysisWarningLevel
     value: none
+
 resources:
   repositories:
   - repository: 1ESPipelineTemplates
@@ -79,8 +72,7 @@ extends:
       sbom:
         enabled: false
       codeSignValidation:
-        enabled: true
-        break: true
+        enabled: false
         additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
       credscan:
         suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
@@ -89,16 +81,16 @@ extends:
     - stage: build
       displayName: Build
       jobs:
-      - template: eng/.vsts-dotnet-build-jobs.yml
+      - template: ..\eng\.vsts-dotnet-build-jobs.yml
         parameters:
-          enableMicrobuild: true
-          isExperimental: ${{ startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/') }}
-          enableLocalization: true
-          enableComponentGovernance: ${{ or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}
-          codeSignValidationEnabled: true
-          codeSignValidationBreak: true
+          enableMicrobuild: false
+          isExperimental: true
+          enableLocalization: false
+          enableComponentGovernance: false
+          codeSignValidationEnabled: false
+          codeSignValidationBreak: false
 
-    - template: eng\common\templates-official\post-build\post-build.yml@self
+    - template: ..\eng\common\templates-official\post-build\post-build.yml@self
       parameters:
         publishingInfraVersion: 3
         enableSymbolValidation: true
