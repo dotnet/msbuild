@@ -885,12 +885,15 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
                 {
-                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                    // when it's a preview version up to MaxCPUCount times, but that's
-                    // an implementation detail--the user cares about at most one.
-
-                    RenderImmediateMessage(message);
-                    _loggedPreviewMessage = true;
+                    // ensure we only log the preview message once for the entire build.
+                    if (!_loggedPreviewMessage)
+                    {
+                        // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                        // when it's a preview version up to MaxCPUCount times, but that's
+                        // an implementation detail--the user cares about at most one.
+                        RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, DoubleIndentation));
+                        _loggedPreviewMessage = true;
+                    }
                     return;
                 }
             }
@@ -1223,6 +1226,29 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent);
     }
 
+    /// <summary>
+    /// Renders message with just code/category/message data.
+    /// No file data is included. This can be used for immediate/one-time
+    /// messages that lack a specific project context, such as the .NET
+    /// SDK's 'preview version' message, while not removing the code.
+    /// </summary>
+    private string FormatSimpleMessageWithoutFileData(BuildMessageEventArgs e, string indent)
+    {
+        return FormatEventMessage(
+                category: AnsiCodes.Colorize("info", TerminalColor.Default),
+                subcategory: null,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Default),
+                file: null,
+                lineNumber: 0,
+                endLineNumber: 0,
+                columnNumber: 0,
+                endColumnNumber: 0,
+                indent,
+                requireFileAndLinePortion: false,
+                prependIndentation: true);
+    }
+
     private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
     {
         return FormatEventMessage(
@@ -1240,7 +1266,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private string FormatEventMessage(
             string category,
-            string subcategory,
+            string? subcategory,
             string? message,
             string code,
             string? file,
@@ -1248,44 +1274,53 @@ public sealed partial class TerminalLogger : INodeLogger
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            string indent)
+            string indent,
+            bool requireFileAndLinePortion = true,
+            bool prependIndentation = false)
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
-
-        if (string.IsNullOrEmpty(file))
+        if (prependIndentation)
         {
-            builder.Append("MSBUILD : ");    // Should not be localized.
+            builder.Append(indent);
         }
-        else
-        {
-            builder.Append(file);
 
-            if (lineNumber == 0)
+        if (requireFileAndLinePortion)
+        {
+            if (string.IsNullOrEmpty(file))
             {
-                builder.Append(" : ");
+                builder.Append("MSBUILD : ");    // Should not be localized.
             }
             else
             {
-                if (columnNumber == 0)
+                builder.Append(file);
+
+                if (lineNumber == 0)
                 {
-                    builder.Append(endLineNumber == 0 ?
-                        $"({lineNumber}): " :
-                        $"({lineNumber}-{endLineNumber}): ");
+                    builder.Append(" : ");
                 }
                 else
                 {
-                    if (endLineNumber == 0)
+                    if (columnNumber == 0)
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        builder.Append(endLineNumber == 0 ?
+                            $"({lineNumber}): " :
+                            $"({lineNumber}-{endLineNumber}): ");
                     }
                     else
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber}-{endLineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        if (endLineNumber == 0)
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        }
+                        else
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber}-{endLineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        }
                     }
                 }
             }
