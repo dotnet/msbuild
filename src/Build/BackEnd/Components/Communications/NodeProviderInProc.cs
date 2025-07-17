@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Collections.Concurrent;
 
 #if FEATURE_THREAD_CULTURE
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
@@ -61,7 +60,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private ConcurrentDictionary<int, NodeContext> _nodeContexts;
+        private Dictionary<int, NodeContext> _nodeContexts;
 
         /// <summary>
         /// Flag indicating we have disposed.
@@ -122,7 +121,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             _componentHost = host;
-            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+            _nodeContexts = new Dictionary<int, NodeContext>();
         }
 
         /// <summary>
@@ -304,7 +303,7 @@ namespace Microsoft.Build.BackEnd
             // will report that the in-proc node is still in use when it has actually shut down.
             if (packet.Type == NodePacketType.NodeShutdown)
             {
-                _nodeContexts.TryRemove(nodeId, out _);
+                _nodeContexts.Remove(nodeId);
 
                 // Release the operating environment semaphore if we were holding it.
                 if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&
