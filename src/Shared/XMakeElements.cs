@@ -3,7 +3,8 @@
 #if NET
 using System.Buffers;
 #endif
-using System.Collections.Generic;
+using System.Collections.Frozen;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -45,7 +46,7 @@ namespace Microsoft.Build.Shared
             ['$', '@', '(', ')', '%', '*', '?', '.']);
 
         // Names that cannot be used as property or item names because they are reserved
-        internal static readonly HashSet<string> ReservedItemNames =
+        internal static readonly FrozenSet<string> ReservedItemNames = FrozenSet.Create(MSBuildNameIgnoreCaseComparer.Default,
         [
             // project, "Project" is not reserved, because unfortunately ProjectReference items already use it as metadata name.
             visualStudioProject,
@@ -61,6 +62,6 @@ namespace Microsoft.Build.Shared
             choose,
             when,
             otherwise,
-        ];
+        ]);
     }
 }
