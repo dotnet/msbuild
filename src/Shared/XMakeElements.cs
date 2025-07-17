@@ -1,10 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 #if NET
 using System.Buffers;
 #endif
+using System;
 using System.Collections.Frozen;
-using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Shared
             ['$', '@', '(', ')', '%', '*', '?', '.']);
 
         // Names that cannot be used as property or item names because they are reserved
-        internal static readonly FrozenSet<string> ReservedItemNames = FrozenSet.Create(MSBuildNameIgnoreCaseComparer.Default,
+        internal static readonly FrozenSet<string> ReservedItemNames = FrozenSet.Create(StringComparer.Ordinal,
         [
             // project, "Project" is not reserved, because unfortunately ProjectReference items already use it as metadata name.
             visualStudioProject,

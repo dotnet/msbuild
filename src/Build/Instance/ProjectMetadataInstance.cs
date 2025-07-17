@@ -242,7 +242,7 @@ namespace Microsoft.Build.Execution
             VerifyThrowReservedNameAllowItemSpecModifiers(name);
             foreach (string itemSpecModifier in FileUtilities.ItemSpecModifiers.All)
             {
-                if (itemSpecModifier.Length == name.Length && itemSpecModifier[0] == name[0])
+                if (itemSpecModifier.Length == name.Length && itemSpecModifier[0] == char.ToUpperInvariant(name[0]))
                 {
                     ErrorUtilities.VerifyThrowArgument(!MSBuildNameIgnoreCaseComparer.Default.Equals(itemSpecModifier, name), "OM_ReservedName", name);
                 }
@@ -262,7 +262,7 @@ namespace Microsoft.Build.Execution
             {
                 if (reservedName.Length == name.Length && reservedName[0] == name[0])
                 {
-                    ErrorUtilities.VerifyThrowArgument(!MSBuildNameIgnoreCaseComparer.Default.Equals(reservedName, name), "OM_ReservedName", name);
+                    ErrorUtilities.VerifyThrowArgument(!StringComparer.Ordinal.Equals(reservedName, name), "OM_ReservedName", name);
                 }
             }
         }
