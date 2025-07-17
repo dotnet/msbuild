@@ -37,7 +37,7 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="System.Collections.Immutable" PrivateAssets="all" />
+    <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Diagnostics.DiagnosticSource" PrivateAssets="all" />
   </ItemGroup>
 
