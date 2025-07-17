@@ -759,6 +759,9 @@ namespace Microsoft.Build.BackEnd
                     _exitPacketState = ExitPacketState.ExitPacketQueued;
                 }
 
+                // These calls to Thread.MemoryBarrier() prevent instruction reordering that was
+                // causing an inssue on ARM64. We want to guarantee that the packet is enqueued
+                // before we check the semaphore and potentially signal it.
                 Thread.MemoryBarrier();
 
                 _packetWriteQueue.Enqueue(packet);
