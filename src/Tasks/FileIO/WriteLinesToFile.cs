@@ -32,6 +32,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] Lines { get; set; }
 
+        // Maximum number of retries for transactional write
+        private const int MaxRetries = 5;
+
+        // Delay between retries in milliseconds
+        private const int RetryDelayMs = 100;
+
         /// <summary>
         /// If true, overwrite any existing file contents.
         /// </summary>
@@ -48,6 +54,12 @@ namespace Microsoft.Build.Tasks
         /// timestamp will be preserved.
         /// </summary>
         public bool WriteOnlyWhenDifferent { get; set; }
+
+        /// <summary>
+        /// If true, use transactional write mode: write to a temp file, rename existing file, rename temp file to target, and delete old file.
+        /// Retries renaming if the file is locked.
+        /// </summary>
+        public bool Transactional { get; set; }
 
         /// <summary>
         /// Question whether this task is incremental.
@@ -97,10 +109,11 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
+                    Directory.CreateDirectory(directoryPath);
+                    string contentsAsString = buffer.ToString();
+                    string targetFile = File.ItemSpec;
                     if (Overwrite)
                     {
-                        Directory.CreateDirectory(directoryPath);
-                        string contentsAsString = buffer.ToString();
 
                         // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
                         if (WriteOnlyWhenDifferent)
@@ -132,6 +145,56 @@ namespace Microsoft.Build.Tasks
                                 Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
                             }
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
+                        }
+
+                        if (Transactional)
+                        {
+                            string tempFile = Path.Combine(directoryPath, $"temp_{Guid.NewGuid().ToString()}");
+                            string backupFile = targetFile + ".bak";
+
+                            // Write to temp file
+                            System.IO.File.WriteAllText(tempFile, contentsAsString, encoding);
+
+                            bool renameSucceeded = false;
+
+                            for (int attempt = 0; attempt <= MaxRetries; attempt++)
+                            {
+                                try
+                                {
+                                    // If target file exists, rename it to backup
+                                    if (FileUtilities.FileExistsNoThrow(targetFile))
+                                    {
+                                        System.IO.File.Move(targetFile, backupFile);
+                                    }
+
+                                    // Rename temp file to target
+                                    System.IO.File.Move(tempFile, targetFile);
+                                    renameSucceeded = true;
+
+                                    // Delete backup file if it exists
+                                    if (FileUtilities.FileExistsNoThrow(backupFile))
+                                    {
+                                        System.IO.File.Delete(backupFile);
+                                    }
+                                    break;
+                                }
+                                catch (IOException) when (attempt < MaxRetries)
+                                {
+                                    // Wait before retrying
+                                    System.Threading.Thread.Sleep(RetryDelayMs);
+                                }
+                            }
+                            if (!renameSucceeded)
+                            {
+                                // Clean up temp file on failure
+                                if (FileUtilities.FileExistsNoThrow(tempFile))
+                                {
+                                    System.IO.File.Delete(tempFile);
+                                }
+                                string lockedFileMessage = LockCheck.GetLockedFileMessage(targetFile);
+                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, "Failed to rename temporary file after retries.", lockedFileMessage);
+                                return false;
+                            }
                         }
 
                         System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
