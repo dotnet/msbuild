@@ -4,6 +4,7 @@
 using System;
 #if !TASKHOST
 using System.Collections.Frozen;
+using System.Collections.Immutable;
 #endif
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
@@ -187,6 +188,55 @@ namespace Microsoft.Build.BackEnd
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 dictionary = localDict?.ToFrozenDictionary(comparer);
+            }
+        }
+
+        public static void TranslateDictionary(
+            this ITranslator translator,
+            ref ImmutableDictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            // Defensive copy since immutable dictionaries are expected to be overwritten.
+            ImmutableDictionary<string, string> localDict = dictionary;
+
+            if (!translator.TranslateNullable(localDict))
+            {
+                return;
+            }
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                int count = localDict.Count;
+                translator.Translate(ref count);
+
+                foreach (KeyValuePair<string, string> kvp in localDict)
+                {
+                    string key = kvp.Key;
+                    string value = kvp.Value;
+
+                    translator.Translate(ref key);
+                    translator.Translate(ref value);
+                }
+            }
+            else
+            {
+                int count = default;
+                translator.Translate(ref count);
+
+                ImmutableDictionary<string, string>.Builder builder = ImmutableDictionary.Create<string, string>(comparer).ToBuilder();
+
+                for (int i = 0; i < count; i++)
+                {
+                    string key = null;
+                    string value = null;
+
+                    translator.Translate(ref key);
+                    translator.Translate(ref value);
+
+                    builder[key] = value;
+                }
+
+                dictionary = builder.ToImmutable();
             }
         }
 #endif
