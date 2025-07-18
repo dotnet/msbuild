@@ -848,6 +848,11 @@ Errors: {3}</source>
         <target state="translated">Сбой сопоставителя SDK "{0}" при попытке сопоставить пакет SDK "{1}". Исключение: "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverFailedDueToNodeShutDown">
+        <source>SDK could not be resolved by the SDK resolver because the worker node was shut down.</source>
+        <target state="new">SDK could not be resolved by the SDK resolver because the worker node was shut down.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverNullMessage">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
         <target state="translated">Сопоставитель "{0}" попытался разрешить пакет SDK "{1}" и вернул значение NULL в виде строки в списке предупреждений или ошибок.</target>

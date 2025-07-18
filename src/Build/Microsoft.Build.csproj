@@ -159,6 +159,7 @@
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverServiceException.cs" />
     <Compile Include="BackEnd\Shared\EventsCreatorHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
