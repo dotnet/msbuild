@@ -246,15 +246,15 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="new">  -multithreaded
-                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
-                     This means that MSBuild will use multiple threads
-                     to build projects in parallel,
-                     instead of multiple processes.
-                     This option is not supported.
-                     The maximum number of threads used is determined by the
-                     -maxCpuCount switch.
-                     (Short form: -mt)
+        <target state="translated">  -vícevláknový
+                     Povolí experimentální vícevláknový režim v nástroji MSBuild.
+                     To znamená, že nástroj MSBuild bude používat více vláken
+                     k paralelnímu sestavování projektů,
+                     místo více procesů.
+                     Tato možnost není podporována.
+                     Maximální počet použitých vláken je určen
+                     přepínačem -maxCpuCount.
+                     (Krátký tvar: -mt)
     </target>
         <note />
       </trans-unit>
