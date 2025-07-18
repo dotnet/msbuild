@@ -731,6 +731,35 @@ namespace Microsoft.Build.Shared
             return directory;
         }
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Deletes all subdirectories within the specified directory without throwing exceptions.
+        /// This method enumerates all subdirectories in the given directory and attempts to delete
+        /// each one recursively. If any IO-related exceptions occur during enumeration or deletion,
+        /// they are silently ignored.
+        /// </summary>
+        /// <param name="directory">The directory whose subdirectories should be deleted.</param>
+        /// <remarks>
+        /// This method is useful for cleanup operations where partial failure is acceptable.
+        /// It will not delete the root directory itself, only its subdirectories.
+        /// IO exceptions during directory enumeration or deletion are caught and ignored.
+        /// </remarks>
+        internal static void DeleteSubdirectoriesNoThrow(string directory)
+        {
+            try
+            {
+                foreach (string dir in Directory.EnumerateDirectories(directory))
+                {
+                    DeleteDirectoryNoThrow(dir, recursive: true, retryCount: 1);
+                }
+            }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+            {
+                // If we can't enumerate the directories, ignore. Other cases should be handled by DeleteDirectoryNoThrow.
+            }
+        }
+#endif
+
         /// <summary>
         /// Determines whether the given assembly file name has one of the listed extensions.
         /// </summary>

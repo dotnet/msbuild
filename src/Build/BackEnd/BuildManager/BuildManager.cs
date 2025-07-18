@@ -1147,6 +1147,11 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        TaskFactoryUtilities.CleanInlineTaskCaches();
+                    }
+
                     MSBuildEventSource.Log.BuildStop();
 
                     _threadException?.Throw();
