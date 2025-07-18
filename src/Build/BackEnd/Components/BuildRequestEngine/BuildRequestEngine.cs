@@ -343,7 +343,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
                     TraceEngine("Request {0}({1}) (nr {2}) received and activated.", request.GlobalRequestId, request.ConfigurationId, request.NodeRequestId);
 
                     ErrorUtilities.VerifyThrow(!_requestsByGlobalRequestId.ContainsKey(request.GlobalRequestId), "Request {0} is already known to the engine.", request.GlobalRequestId);
@@ -363,7 +363,7 @@ namespace Microsoft.Build.BackEnd
                         config.RetrieveFromCache();
                         ((IBuildResults)resultToReport).SavedCurrentDirectory = config.SavedCurrentDirectory;
                         ((IBuildResults)resultToReport).SavedEnvironmentVariables = config.SavedEnvironmentVariables;
-                        if (!request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreExistingProjectState))
+                        if ((request.BuildRequestDataFlags & BuildRequestDataFlags.IgnoreExistingProjectState) != BuildRequestDataFlags.IgnoreExistingProjectState)
                         {
                             resultToReport.ProjectStateAfterBuild = config.Project;
                         }
@@ -414,7 +414,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
                     ErrorUtilities.VerifyThrow(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), "Request {0} is not known to the engine.", unblocker.BlockedRequestId);
                     BuildRequestEntry entry = _requestsByGlobalRequestId[unblocker.BlockedRequestId];
 
@@ -467,7 +467,11 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            TraceEngine("Request {0}({1}) (nr {2}) is no longer waiting on nr {3} (UBR).  Results are {4}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, result.NodeRequestId, result.OverallResult);
+                            // PERF: Explicitly check the debug flag here so that we don't pay the cost for getting OverallResult
+                            if (_debugDumpState)
+                            {
+                                TraceEngine("Request {0}({1}) (nr {2}) is no longer waiting on nr {3} (UBR).  Results are {4}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, result.NodeRequestId, result.OverallResult);
+                            }
 
                             // Update the configuration with targets information, if we received any and didn't already have it.
                             if (result.DefaultTargets != null)
@@ -515,7 +519,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
 
                     TraceEngine("Received configuration response for node config {0}, now global config {1}.", response.NodeConfigurationId, response.GlobalConfigurationId);
                     ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
@@ -1449,9 +1453,94 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
+        private void TraceEngine(string format, ulong arg)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, BuildRequestEngineStatus arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2.Box()]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2]);
+            }
+        }
+
+        private void TraceEngine(string format, ulong arg1, ulong arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, string arg3)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, string arg4)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, BuildRequestEntryState arg4)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, int arg5)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, BuildResultCode arg5)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
+            }
+        }
+
         private void TraceEngine(string format, params object[] stuff)
         {
             if (_debugDumpState)
