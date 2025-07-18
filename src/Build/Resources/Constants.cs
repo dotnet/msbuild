@@ -172,6 +172,8 @@ namespace Microsoft.Build.Internal
         internal const string programFilesx86 = "ProgramFiles(x86)";
 
         internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
+
+        internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
     }
 
     /// <summary>
