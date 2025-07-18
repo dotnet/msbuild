@@ -270,18 +270,18 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            private static IEnumerable<string> GetMetadataValuesAndConditions(ImmutableArray<ProjectMetadataElement> metadata)
-            {
-                foreach (var metadataElement in metadata)
-                {
-                    yield return metadataElement.Value;
-                    yield return metadataElement.Condition;
-                }
-            }
-
             protected bool NeedToExpandMetadataForEachItem(ImmutableArray<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
             {
-                itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetMetadataValuesAndConditions(metadata));
+                itemsAndMetadataFound = new ItemsAndMetadataPair(null, null);
+
+                foreach (var metadataElement in metadata)
+                {
+                    string expression = metadataElement.Value;
+                    ExpressionShredder.GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref itemsAndMetadataFound, ShredderOptions.All);
+
+                    expression = metadataElement.Condition;
+                    ExpressionShredder.GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref itemsAndMetadataFound, ShredderOptions.All);
+                }
 
                 bool needToExpandMetadataForEachItem = false;
 
