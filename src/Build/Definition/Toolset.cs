@@ -202,10 +202,11 @@ namespace Microsoft.Build.Evaluation
         private Dictionary<string, SubToolset> _subToolsets;
 
         /// <summary>
-        /// If no sub-toolset is specified, this is the default sub-toolset version.  Null == no default
-        /// sub-toolset, just use the base toolset.
+        /// If no sub-toolset is specified, this is the default sub-toolset version. Null == no default
+        /// sub-toolset, just use the base toolset. Uses lazy initialization for thread safety as this
+        /// is accessed from TaskRegistry initialization which can occur from multiple threads.
         /// </summary>
-        private string _defaultSubToolsetVersion;
+        private readonly Lazy<string> _defaultSubToolsetVersionLazy;
 
         /// <summary>
         /// Map of project import properties to their list of fall-back search paths
@@ -287,6 +288,7 @@ namespace Microsoft.Build.Evaluation
             _environmentProperties = environmentProperties;
             _overrideTasksPath = msbuildOverrideTasksPath;
             _defaultOverrideToolsVersion = defaultOverrideToolsVersion;
+            _defaultSubToolsetVersionLazy = new Lazy<string>(ComputeDefaultSubToolsetVersion);
         }
 
         /// <summary>
@@ -369,6 +371,7 @@ namespace Microsoft.Build.Evaluation
         private Toolset(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
+            _defaultSubToolsetVersionLazy = new Lazy<string>(ComputeDefaultSubToolsetVersion);
         }
 
         /// <summary>
@@ -491,44 +494,49 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                if (_defaultSubToolsetVersion == null)
-                {
-                    // 1) Workaround for ToolsVersion 4.0 + VS 2010
-                    if (String.Equals(ToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase) && Dev10IsInstalled)
-                    {
-                        return Constants.Dev10SubToolsetValue;
-                    }
-
-                    // 2) Otherwise, just pick the highest available.
-                    SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
-                    List<string> additionalSubToolsetNames = new List<string>();
-
-                    foreach (string subToolsetName in SubToolsets.Keys)
-                    {
-                        Version subToolsetVersion = VersionUtilities.ConvertToVersion(subToolsetName);
-
-                        if (subToolsetVersion != null)
-                        {
-                            subToolsetsWithVersion.Add(subToolsetVersion, subToolsetName);
-                        }
-                        else
-                        {
-                            // if it doesn't parse to an actual version number, shrug and just add it to the end.
-                            additionalSubToolsetNames.Add(subToolsetName);
-                        }
-                    }
-
-                    List<string> orderedSubToolsetList = new List<string>(additionalSubToolsetNames);
-                    orderedSubToolsetList.AddRange(subToolsetsWithVersion.Values);
-
-                    if (orderedSubToolsetList.Count > 0)
-                    {
-                        _defaultSubToolsetVersion = orderedSubToolsetList[orderedSubToolsetList.Count - 1];
-                    }
-                }
-
-                return _defaultSubToolsetVersion;
+                return _defaultSubToolsetVersionLazy.Value;
             }
+        }
+
+        /// <summary>
+        /// Computes the default sub-toolset version for this sub-toolset.
+        /// </summary>
+        private string ComputeDefaultSubToolsetVersion()
+        {
+            // 1) Workaround for ToolsVersion 4.0 + VS 2010
+            if (String.Equals(ToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase) && Dev10IsInstalled)
+            {
+                return Constants.Dev10SubToolsetValue;
+            }
+
+            // 2) Otherwise, just pick the highest available.
+            SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
+            List<string> additionalSubToolsetNames = new List<string>();
+
+            foreach (string subToolsetName in SubToolsets.Keys)
+            {
+                Version subToolsetVersion = VersionUtilities.ConvertToVersion(subToolsetName);
+
+                if (subToolsetVersion != null)
+                {
+                    subToolsetsWithVersion.Add(subToolsetVersion, subToolsetName);
+                }
+                else
+                {
+                    // if it doesn't parse to an actual version number, shrug and just add it to the end.
+                    additionalSubToolsetNames.Add(subToolsetName);
+                }
+            }
+
+            List<string> orderedSubToolsetList = new List<string>(additionalSubToolsetNames);
+            orderedSubToolsetList.AddRange(subToolsetsWithVersion.Values);
+
+            if (orderedSubToolsetList.Count > 0)
+            {
+                return orderedSubToolsetList[orderedSubToolsetList.Count - 1];
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -883,7 +891,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         private void RegisterDefaultTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
-            // Double-checked locking pattern for thread safety
+            // Synchronization needed because TaskRegistry can be accessed from multiple threads
             if (!_defaultTasksRegistrationAttempted)
             {
                 lock (_taskRegistryLock)
@@ -996,7 +1004,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterOverrideTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
-            // Double-checked locking pattern for thread safety
+            // Synchronization needed because TaskRegistry can be accessed from multiple threads
             if (!_overrideTasksRegistrationAttempted)
             {
                 lock (_taskRegistryLock)
