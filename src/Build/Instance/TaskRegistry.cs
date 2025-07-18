@@ -16,7 +16,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
@@ -60,6 +59,14 @@ namespace Microsoft.Build.Execution
         /// The fallback task registry
         /// </summary>
         private Toolset _toolset;
+
+        /// <summary>
+        /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
+        /// a small well-known set of tasks that are known to depend on IBuildEngine
+        /// callbacks; as forcing those out of proc would be just setting them up for
+        /// known failure.
+        /// </summary>
+        private static readonly bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v4), used for shimming in loading
@@ -1464,25 +1471,19 @@ namespace Microsoft.Build.Execution
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
-                    _taskFactoryParameters ??= new();
-                    TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
-                        // If ForceAllTasksOutOfProc is true, we will force all tasks to run in the MSBuild task host
-                        // "EXCEPT a small well-known set of tasks that are known to depend on IBuildEngine callbacks
-                        // as forcing those out of proc would be just setting them up for known failure"
-
-                        bool launchTaskHost =
+                        bool explicitlyLaunchTaskHost =
                             isTaskHostFactory ||
                             (
-                                Traits.Instance.ForceAllTasksOutOfProcToTaskHost &&
+                                s_forceTaskHostLaunch &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
                     else
@@ -1567,11 +1568,7 @@ namespace Microsoft.Build.Execution
                                         initialized = factory.Initialize(RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
-                                        // In case TaskHostFactory is explicitly requested, we will now have a parameter for that.
-                                        bool containsArchOrRuntimeParam = TaskFactoryParameters?.TryGetValue(XMakeAttributes.runtime, out _) == true
-                                                                          || TaskFactoryParameters?.TryGetValue(XMakeAttributes.architecture, out _) == true;
-
-                                        if (initialized && containsArchOrRuntimeParam)
+                                        if (initialized && TaskFactoryParameters != null)
                                         {
                                             targetLoggingContext.LogWarning(
                                                 null,
