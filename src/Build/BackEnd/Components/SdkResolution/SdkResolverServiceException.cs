@@ -14,14 +14,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     public class SdkResolverServiceException : BuildExceptionBase
     {
-        public SdkResolverServiceException(string resourceName, params string[] args)
-            : base(string.Format(ResourceUtilities.GetResourceString(resourceName), args))
+        public SdkResolverServiceException(string resourceName, params string[] args) : base(string.Format(ResourceUtilities.GetResourceString(resourceName), args))
         {
         }
 
         // Do not remove - used by BuildExceptionSerializationHelper
-        internal SdkResolverServiceException(string message, Exception inner)
-            : base(message, inner)
+        internal SdkResolverServiceException(string message, Exception inner) : base(message, inner)
         { }
     }
 }
