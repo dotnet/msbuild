@@ -1340,6 +1340,9 @@
   <data name="SDKResolverFailed" xml:space="preserve">
     <value>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</value>
   </data>
+  <data name="SDKResolverFailedDueToNodeShutDown" xml:space="preserve">
+    <value>SDK could not be resolved by the SDK resolver because the worker node was shut down.</value>
+  </data>
   <data name="SingleResolverFailedToResolveSDK" xml:space="preserve">
     <value>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</value>
   </data>

@@ -66,6 +66,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
+            if (IsNodeShutDown)
+            {
+                throw new SdkResolverServiceException("SDKResolverFailedDueToNodeShutDown");
+            }
+
             bool wasResultCached = true;
 
             MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(submissionId, sdk.Name, solutionPath, projectPath);
@@ -122,6 +127,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Create the SdkResolverRequest packet to send
             INodePacket packet = SdkResolverRequest.Create(submissionId, sdk, loggingContext.BuildEventContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
+
+            if (IsNodeShutDown)
+            {
+                throw new SdkResolverServiceException("SDKResolverFailedDueToNodeShutDown");
+            }
 
             SendPacket(packet);
 

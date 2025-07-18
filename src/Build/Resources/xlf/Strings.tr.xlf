@@ -848,6 +848,11 @@ Hatalar: {3}</target>
         <target state="translated">"{0}" SDK çözümleyicisi, "{1}" SDK'sını çözümlemeye çalışırken başarısız oldu. İstisna: "{2}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="SDKResolverFailedDueToNodeShutDown">
+        <source>SDK could not be resolved by the SDK resolver because the worker node was shut down.</source>
+        <target state="new">SDK could not be resolved by the SDK resolver because the worker node was shut down.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverNullMessage">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
         <target state="translated">"{0}" çözümleyicisi "{1}" SDK'sını çözümlemeye çalıştı ve uyarılar veya hatalar listesinde bir dize olarak null döndürdü.</target>

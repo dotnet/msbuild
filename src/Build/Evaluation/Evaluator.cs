@@ -1807,7 +1807,14 @@ namespace Microsoft.Build.Evaluation
                 {
                     using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution, _sdkResolverService.GetType());
 
-                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio,
+                    sdkResult = _sdkResolverService.ResolveSdk(
+                        _submissionId,
+                        sdkReference,
+                        _evaluationLoggingContext,
+                        importElement.Location,
+                        solutionPath, projectPath,
+                        _interactive,
+                        _isRunningInVisualStudio,
                         failOnUnresolvedSdk: !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk));
                 }
                 catch (SdkResolverException e)
@@ -1815,6 +1822,10 @@ namespace Microsoft.Build.Evaluation
                     // We throw using e.Message because e.Message already contains the stack trace
                     // https://github.com/dotnet/msbuild/pull/6763
                     ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e.Message);
+                }
+                catch (SdkResolverServiceException e)
+                {
+                    ProjectErrorUtilities.ThrowInvalidProject(importElement.SdkLocation, "SDKResolverCriticalFailure", e);
                 }
 
                 if (!sdkResult.Success)

@@ -679,6 +679,12 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(93);
         }
+
+        [Event(94, Keywords = Keywords.All)]
+        public void SdkResolverServiceNodeShutDownSet()
+        {
+            WriteEvent(94);
+        }
         #endregion
     }
 }
