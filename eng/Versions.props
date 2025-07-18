@@ -84,7 +84,7 @@
     <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25361.3</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
   <PropertyGroup>
-  <!-- These are manually updated since they are text-only source packages and can't be
+    <!-- These are manually updated since they are text-only source packages and can't be
        overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
        When updating the version make sure to add the new version to source-build-reference-packages first. -->
     <MicrosoftCodeAnalysisCollectionsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisCollectionsVersion>
