@@ -79,10 +79,17 @@
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
-    <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>10.0.0-beta.25353.1</MicrosoftDotNetXUnitExtensionsVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>10.0.0-beta.25358.3</MicrosoftDotNetXUnitExtensionsVersion>
     <NuGetBuildTasksVersion>6.15.0-preview.1.86</NuGetBuildTasksVersion>
-    <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25358.1</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25361.3</MicrosoftNetCompilersToolsetVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+  <!-- These are manually updated since they are text-only source packages and can't be
+       overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
+       When updating the version make sure to add the new version to source-build-reference-packages first. -->
+    <MicrosoftCodeAnalysisCollectionsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisCollectionsVersion>
+    <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
+    <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
   </PropertyGroup>
   <PropertyGroup>
     <BootstrapSdkVersion>10.0.100-preview.6.25315.102</BootstrapSdkVersion>

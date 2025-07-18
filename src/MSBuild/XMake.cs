@@ -715,6 +715,7 @@ namespace Microsoft.Build.CommandLine
                 string schemaFile = null;
 #endif
                 int cpuCount = 1;
+                bool multiThreaded = false;
 #if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
 #else
@@ -761,6 +762,7 @@ namespace Microsoft.Build.CommandLine
                                             ref schemaFile,
 #endif
                                             ref cpuCount,
+                                            ref multiThreaded,
                                             ref enableNodeReuse,
                                             ref preprocessWriter,
                                             ref targetsWriter,
@@ -883,6 +885,7 @@ namespace Microsoft.Build.CommandLine
                                 needToValidateProject, schemaFile,
 #endif
                                     cpuCount,
+                                    multiThreaded,
                                     enableNodeReuse,
                                     preprocessWriter,
                                     targetsWriter,
@@ -1295,6 +1298,7 @@ namespace Microsoft.Build.CommandLine
             string schemaFile,
 #endif
             int cpuCount,
+            bool multiThreaded,
             bool enableNodeReuse,
             TextWriter preprocessWriter,
             TextWriter targetsWriter,
@@ -1502,6 +1506,7 @@ namespace Microsoft.Build.CommandLine
                     parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #endif
                     parameters.MaxNodeCount = cpuCount;
+                    parameters.MultiThreaded = multiThreaded;
                     parameters.Loggers = projectCollection.Loggers;
                     parameters.ForwardingLoggers = remoteLoggerRecords;
                     parameters.ToolsetDefinitionLocations = Microsoft.Build.Evaluation.ToolsetDefinitionLocations.ConfigurationFile | Microsoft.Build.Evaluation.ToolsetDefinitionLocations.Registry;
@@ -2518,6 +2523,7 @@ namespace Microsoft.Build.CommandLine
             ref string schemaFile,
 #endif
             ref int cpuCount,
+            ref bool multiThreaded,
             ref bool enableNodeReuse,
             ref TextWriter preprocessWriter,
             ref TextWriter targetsWriter,
@@ -2657,6 +2663,7 @@ namespace Microsoft.Build.CommandLine
                                                            ref schemaFile,
 #endif
                                                            ref cpuCount,
+                                                           ref multiThreaded,
                                                            ref enableNodeReuse,
                                                            ref preprocessWriter,
                                                            ref targetsWriter,
@@ -2717,6 +2724,9 @@ namespace Microsoft.Build.CommandLine
 
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
+
+                    // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
+                    multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
                     // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
@@ -2789,7 +2799,9 @@ namespace Microsoft.Build.CommandLine
                         verbosity = LoggerVerbosity.Diagnostic;
                     }
 
-                    if (originalVerbosity == LoggerVerbosity.Diagnostic)
+                    // we don't want to write the MSBuild command line to the display because TL by intent is a
+                    // highly-controlled visual experience and we don't want to clutter it with the command line switches.
+                    if (originalVerbosity == LoggerVerbosity.Diagnostic && !useTerminalLogger)
                     {
                         string equivalentCommandLine = commandLineSwitches.GetEquivalentCommandLineExceptProjectFile();
                         Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
@@ -2823,6 +2835,11 @@ namespace Microsoft.Build.CommandLine
             // Opt-in behavior to be determined by: https://github.com/dotnet/msbuild/issues/9723
             bool isBuildCheckEnabled = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Check);
             return isBuildCheckEnabled;
+        }
+
+        private static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
+        {
+            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

@@ -16,6 +16,10 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
+- name: EnableOptProf
+  displayName: Enable OptProf data collection for this build
+  type: boolean
+  default: true
 - name: requireDefaultChannelsEnabled
   displayName: Require Default Channels
   type: boolean
@@ -39,6 +43,10 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
+  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
+  - ${{ if eq(parameters.EnableOptProf, false) }}:
+    - name: SkipApplyOptimizationData
+      value: true
   - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
     - name: requireDefaultChannels
       value: ${{ parameters.requireDefaultChannelsEnabled }}
@@ -172,6 +180,7 @@ extends:
             AccessToken: '$(System.AccessToken)'
             feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
           displayName: 'Install OptProf Plugin'
+          condition: and(succeeded(), ${{ parameters.EnableOptProf }})
 
         # Required by MicroBuildBuildVSBootstrapper
         - task: MicroBuildSwixPlugin@4
@@ -207,7 +216,7 @@ extends:
             toLowerCase: false
             usePat: true
           displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-          condition: succeeded()
+          condition: and(succeeded(), ${{ parameters.EnableOptProf }})
 
         # Build VS bootstrapper
         # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
@@ -218,7 +227,7 @@ extends:
             manifests: $(VisualStudio.SetupManifestList)
             outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
           displayName: 'OptProf - Build VS bootstrapper'
-          condition: succeeded()
+          condition: and(succeeded(), ${{ parameters.EnableOptProf }})
 
         # Publish run settings
         - task: PowerShell@2
@@ -230,7 +239,7 @@ extends:
                       /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
                       /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
           displayName: 'OptProf - Build IBC training settings'
-          condition: succeeded()
+          condition: and(succeeded(), ${{ parameters.EnableOptProf }})
 
         # Publish bootstrapper info
         - task: 1ES.PublishBuildArtifacts@1
@@ -239,7 +248,7 @@ extends:
             ArtifactName: MicroBuildOutputs
             ArtifactType: Container
           displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-          condition: succeeded()
+          condition: and(succeeded(), ${{ parameters.EnableOptProf }})
 
         - task: 1ES.PublishBuildArtifacts@1
           displayName: 'Publish Artifact: logs'
@@ -301,7 +310,7 @@ extends:
           displayName: Tag build as ready for optimization training
           inputs:
             tags: 'ready-for-training'
-          condition: succeeded()
+          condition: and(succeeded(), ${{ parameters.EnableOptProf }})
 
         - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
           displayName: Execute cleanup tasks

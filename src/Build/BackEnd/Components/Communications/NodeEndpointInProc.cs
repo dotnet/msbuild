@@ -91,6 +91,11 @@ namespace Microsoft.Build.BackEnd
         /// Use a lock on the packetQueue itself.
         /// </remarks>
         private ConcurrentQueue<INodePacket> _packetQueue;
+
+        /// <summary>
+        /// The ID of the node this endpoint represents.
+        /// </summary>
+        private readonly int _nodeId;
         #endregion
 
         #region Constructors and Factories
@@ -99,13 +104,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="commMode">The communications mode for this endpoint.</param>
         /// <param name="host">The component host.</param>
-        private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host)
+        /// <param name="nodeId">The ID of the node this endpoint manages.</param>
+        private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host, int nodeId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(host);
 
             _status = LinkStatus.Inactive;
             _mode = commMode;
             _componentHost = host;
+            _nodeId = nodeId;
 
             if (commMode == EndpointMode.Asynchronous)
             {
@@ -214,7 +221,7 @@ namespace Microsoft.Build.BackEnd
 
             if (_mode == EndpointMode.Synchronous)
             {
-                _peerEndpoint._packetFactory.RoutePacket(0, packet);
+                _peerEndpoint._packetFactory.RoutePacket(_nodeId, packet);
             }
             else
             {
@@ -236,11 +243,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="mode">The communications mode for the endpoints.</param>
         /// <param name="host">The component host.</param>
+        /// <param name="nodeId">The ID of the node corresponding to the pair endpoints.</param>
         /// <returns>A matched pair of endpoints.</returns>
-        internal static EndpointPair CreateInProcEndpoints(EndpointMode mode, IBuildComponentHost host)
+        internal static EndpointPair CreateInProcEndpoints(EndpointMode mode, IBuildComponentHost host, int nodeId)
         {
-            NodeEndpointInProc node = new NodeEndpointInProc(mode, host);
-            NodeEndpointInProc manager = new NodeEndpointInProc(mode, host);
+            NodeEndpointInProc node = new NodeEndpointInProc(mode, host, nodeId);
+            NodeEndpointInProc manager = new NodeEndpointInProc(mode, host, nodeId);
 
             // NOTE: This creates a circular reference which must be explicitly broken before these
             // objects can be reclaimed by the garbage collector.
@@ -436,7 +444,7 @@ namespace Microsoft.Build.BackEnd
                                 INodePacket packet;
                                 while (_packetQueue.TryDequeue(out packet))
                                 {
-                                    _peerEndpoint._packetFactory.RoutePacket(0, packet);
+                                    _peerEndpoint._packetFactory.RoutePacket(_nodeId, packet);
                                 }
                             }
 
