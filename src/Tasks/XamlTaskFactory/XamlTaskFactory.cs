@@ -150,7 +150,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                results = codegenerator.CompileAssemblyFromDom(compilerParameters, dom);
+                results = CompileWithRetry(codegenerator, compilerParameters, dom, log, 10, 1000);
             }
 
             try
@@ -187,6 +187,25 @@ namespace Microsoft.Build.Tasks
             }
 
             return !log.HasLoggedErrors;
+        }
+
+        private CompilerResults CompileWithRetry(CodeDomProvider codeGenerator, CompilerParameters compilerParameters, CodeCompileUnit dom, TaskLoggingHelper log, int maxRetries, int delayMilliseconds)
+        {
+            int attempt = 0;
+            while (true)
+            {
+                try
+                {
+                    return codeGenerator.CompileAssemblyFromDom(compilerParameters, dom);
+                }
+                catch (FileNotFoundException) when (attempt < maxRetries - 1)
+                {
+                    log.LogWarning("Compile attempt {0} failed due to missing file. Retrying in {1} ms...", attempt + 1, delayMilliseconds);
+                    
+                    Thread.Sleep(delayMilliseconds);
+                    attempt++;
+                }
+            }
         }
 
         /// <summary>
