@@ -3850,8 +3850,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         /// <summary>
         /// Verify that when we don't specify the sub-toolset version, we get the correct sub-toolset properties
-        /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
-        /// sorted) toolset if it's not.
+        /// based on the default sub-toolset version -- highest numerically sorted sub-toolset.
         /// </summary>
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
