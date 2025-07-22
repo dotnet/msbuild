@@ -17,6 +17,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Eventing;
+
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
 #endif
@@ -261,6 +263,12 @@ namespace Microsoft.Build.Execution
                 switch (index)
                 {
                     case 0:
+                        // Signal the SDK resolver service to shutdown
+                        // It should be shut down first so all the requests for SDK resolution are discarded.
+                        // Otherwise worker node might stuck in a situation where _buildRequestEngine.CleanupForBuild() waiting for the SDK resolver service response from the main node
+                        // and it never comes since we don't listen to _packetReceivedEvent in the middle of the _shutdownEvent.
+                        ((IBuildComponent)_sdkResolverService).ShutdownComponent();
+
                         NodeEngineShutdownReason shutdownReason = HandleShutdown(out shutdownException);
                         return shutdownReason;
 
@@ -456,6 +464,8 @@ namespace Microsoft.Build.Execution
         {
             CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
+            MSBuildEventSource.Log.OutOfProcNodeShutDownStart();
+
             // Clean up the engine
             if (_buildRequestEngine != null && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
             {
@@ -466,9 +476,6 @@ namespace Microsoft.Build.Execution
                     ((IBuildComponent)_buildRequestEngine).ShutdownComponent();
                 }
             }
-
-            // Signal the SDK resolver service to shutdown
-            ((IBuildComponent)_sdkResolverService).ShutdownComponent();
 
             // Dispose of any build registered objects
             IRegisteredTaskObjectCache objectCache = (IRegisteredTaskObjectCache)(_componentFactories.GetComponent(BuildComponentType.RegisteredTaskObjectCache));
@@ -535,6 +542,8 @@ namespace Microsoft.Build.Execution
             }
 
             CommunicationsUtilities.Trace("Shut down complete.");
+
+            MSBuildEventSource.Log.OutOfProcNodeShutDownStop(_shutdownReason.ToString());
 
             return _shutdownReason;
         }

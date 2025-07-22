@@ -685,6 +685,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(94);
         }
+
+        [Event(95, Keywords = Keywords.All)]
+        public void OutOfProcNodeShutDownStart()
+        {
+            WriteEvent(95);
+        }
+
+        [Event(96, Keywords = Keywords.All)]
+        public void OutOfProcNodeShutDownStop(string shutdownReason)
+        {
+            WriteEvent(96, shutdownReason);
+        }
         #endregion
     }
 }

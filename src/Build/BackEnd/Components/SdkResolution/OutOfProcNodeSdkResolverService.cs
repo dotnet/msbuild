@@ -128,11 +128,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             // Create the SdkResolverRequest packet to send
             INodePacket packet = SdkResolverRequest.Create(submissionId, sdk, loggingContext.BuildEventContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio);
 
-            if (IsNodeShutDown)
-            {
-                throw new SdkResolverServiceException("SDKResolverFailedDueToNodeShutDown");
-            }
-
             SendPacket(packet);
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
