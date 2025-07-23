@@ -975,7 +975,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
                 if (hasProject)
                 {
-                    project!.AddBuildMessage(TerminalMessageSeverity.Message, message);
+                    project!.AddBuildMessage(TerminalMessageSeverity.Message, FormatInformationalMessage(e));
                 }
                 else
                 {
@@ -986,12 +986,12 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    private Uri? GenerateLinkForMessage(BuildMessageEventArgs e)
+    private static Uri? GenerateLinkForMessage(BuildMessageEventArgs e)
     {
         if (e.HelpKeyword is not null)
         {
             // generate a default help keyword based link? fw?...
-            return null;
+            return GenerateLinkForHelpKeyword(e.HelpKeyword);
         }
         else
         {
@@ -1040,7 +1040,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    private Uri? GenerateLinkForWarning(BuildWarningEventArgs e)
+    private static Uri? GenerateLinkForWarning(BuildWarningEventArgs e)
     {
         if (e.HelpLink is not null && Uri.TryCreate(e.HelpLink, UriKind.Absolute, out Uri? uri))
         {
@@ -1049,13 +1049,15 @@ public sealed partial class TerminalLogger : INodeLogger
         else if (e.HelpKeyword is not null)
         {
             // generate a default help keyword based link? fw?...
-            return null;
+            return GenerateLinkForHelpKeyword(e.HelpKeyword);
         }
         else
         {
             return null;
         }
     }
+
+    private static Uri GenerateLinkForHelpKeyword(string helpKeyword) => new($"https://go.microsoft.com/fwlink/?LinkId={helpKeyword}");
 
     /// <summary>
     /// Detect markers that require special attention from a customer.
@@ -1102,7 +1104,7 @@ public sealed partial class TerminalLogger : INodeLogger
         else if (e.HelpKeyword is not null)
         {
             // generate a default help keyword based link? fw?...
-            return null;
+            return GenerateLinkForHelpKeyword(e.HelpKeyword);
         }
         else
         {
@@ -1275,7 +1277,25 @@ public sealed partial class TerminalLogger : INodeLogger
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent);
+                indent,
+                terminalWidth: Terminal.Width);
+    }
+
+    private string FormatInformationalMessage(BuildMessageEventArgs e)
+    {
+        return FormatEventMessage(
+                category: null,
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: CreateLink(GenerateLinkForMessage(e), e.Code),
+                file: HighlightFileName(e.File),
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                indent: string.Empty,
+                terminalWidth: Terminal.Width,
+                requireFileAndLinePortion: false);
     }
 
     /// <summary>
@@ -1297,6 +1317,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 columnNumber: 0,
                 endColumnNumber: 0,
                 indent,
+                terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: false,
                 prependIndentation: true);
     }
@@ -1313,11 +1334,12 @@ public sealed partial class TerminalLogger : INodeLogger
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent);
+                indent,
+                terminalWidth: Terminal.Width);
     }
 
-    private string FormatEventMessage(
-            string category,
+    private static string FormatEventMessage(
+            string? category,
             string? subcategory,
             string? message,
             string code,
@@ -1327,6 +1349,7 @@ public sealed partial class TerminalLogger : INodeLogger
             int columnNumber,
             int endColumnNumber,
             string indent,
+            int terminalWidth,
             bool requireFileAndLinePortion = true,
             bool prependIndentation = false)
     {
@@ -1384,7 +1407,13 @@ public sealed partial class TerminalLogger : INodeLogger
             builder.Append(' ');
         }
 
-        builder.Append($"{category} {code}: ");
+        if (string.IsNullOrEmpty(category))
+        {
+            builder.Append(category);
+            builder.Append(' ');
+        }
+        builder.Append(code);
+        builder.Append(": ");
 
         // render multi-line message in a special way
         if (message.Contains('\n'))
@@ -1394,9 +1423,9 @@ public sealed partial class TerminalLogger : INodeLogger
 
             foreach (string line in lines)
             {
-                if (indent.Length + line.Length > Terminal.Width) // custom wrapping with indentation
+                if (indent.Length + line.Length > terminalWidth) // custom wrapping with indentation
                 {
-                    WrapText(builder, line, Terminal.Width, indent);
+                    WrapText(builder, line, terminalWidth, indent);
                 }
                 else
                 {
