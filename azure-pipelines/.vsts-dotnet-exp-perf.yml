@@ -83,12 +83,12 @@ extends:
       jobs:
       - template: eng/.vsts-dotnet-build-jobs.yml@self
         parameters:
-          enableMicrobuild: false
+          enableMicrobuild: true
           isExperimental: true
           enableLocalization: false
           enableComponentGovernance: false
-          codeSignValidationEnabled: false
-          codeSignValidationBreak: false
+          codeSignValidationEnabled: true
+          codeSignValidationBreak: true
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
