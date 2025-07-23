@@ -1412,7 +1412,7 @@ namespace Microsoft.Build.CommandLine
                 projectCollection = new ProjectCollection(
                     globalProperties,
                     loggers,
-                    null,
+                    remoteLoggerRecords,
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
