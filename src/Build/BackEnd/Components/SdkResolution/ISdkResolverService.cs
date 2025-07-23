@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         Action<INodePacket> SendPacket { get; }
 
         /// <summary>
-        /// Gets or sets if shutdown even was already triggered.
+        /// Gets or sets if shutdown event was already triggered.
         /// </summary>
         bool IsNodeShutDown { get; set; }
 
