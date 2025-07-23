@@ -218,7 +218,7 @@ namespace Microsoft.Build.BackEnd
         void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>;
 
         /// <summary>
-        /// Translates a list of T using an <see cref="ObjectTranslator{T}"/> anda collection factory
+        /// Translates a list of T using an <see cref="ObjectTranslator{T}"/> and a collection factory
         /// </summary>
         /// <param name="list">The list to be translated.</param>
         /// <param name="objectTranslator">The translator to use for the items in the list</param>
