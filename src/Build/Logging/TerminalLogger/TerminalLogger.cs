@@ -696,7 +696,7 @@ public sealed partial class TerminalLogger : INodeLogger
                             }
 
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                                CreateLink(uri, outputPathSpan.ToString())));
                         }
                         else
                         {
@@ -725,6 +725,11 @@ public sealed partial class TerminalLogger : INodeLogger
             }
         }
     }
+
+    private static string CreateLink(Uri? uri, string linkText) =>
+        uri is null
+            ? linkText
+            : $"{AnsiCodes.LinkPrefix}{uri}{AnsiCodes.LinkInfix}{linkText}{AnsiCodes.LinkSuffix}";
 
     private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
     {
@@ -981,6 +986,19 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    private Uri? GenerateLinkForMessage(BuildMessageEventArgs e)
+    {
+        if (e.HelpKeyword is not null)
+        {
+            // generate a default help keyword based link? fw?...
+            return null;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     /// The <see cref="IEventSource.WarningRaised"/> callback.
     /// </summary>
@@ -1022,6 +1040,23 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    private Uri? GenerateLinkForWarning(BuildWarningEventArgs e)
+    {
+        if (e.HelpLink is not null && Uri.TryCreate(e.HelpLink, UriKind.Absolute, out Uri? uri))
+        {
+            return uri;
+        }
+        else if (e.HelpKeyword is not null)
+        {
+            // generate a default help keyword based link? fw?...
+            return null;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     /// Detect markers that require special attention from a customer.
     /// </summary>
@@ -1055,6 +1090,23 @@ public sealed partial class TerminalLogger : INodeLogger
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
             RenderImmediateMessage(FormatErrorMessage(e, Indentation));
             _buildErrorsCount++;
+        }
+    }
+
+    private Uri? GenerateLinkForError(BuildErrorEventArgs e)
+    {
+        if (e.HelpLink is not null && Uri.TryCreate(e.HelpLink, UriKind.Absolute, out Uri? uri))
+        {
+            return uri;
+        }
+        else if (e.HelpKeyword is not null)
+        {
+            // generate a default help keyword based link? fw?...
+            return null;
+        }
+        else
+        {
+            return null;
         }
     }
 
@@ -1217,7 +1269,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
+                code: AnsiCodes.Colorize(CreateLink(GenerateLinkForWarning(e), e.Code), TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
@@ -1255,7 +1307,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
+                code: AnsiCodes.Colorize(CreateLink(GenerateLinkForError(e), e.Code), TerminalColor.Red),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
