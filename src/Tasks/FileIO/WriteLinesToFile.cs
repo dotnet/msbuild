@@ -286,7 +286,7 @@ namespace Microsoft.Build.Tasks
                     {
                         Directory.CreateDirectory(directoryPath);
 
-                        // When WriteOnlyWhenDifferent is set, read the file and if they're the same return
+                        // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
                         if (WriteOnlyWhenDifferent)
                         {
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
@@ -317,6 +317,7 @@ namespace Microsoft.Build.Tasks
                             }
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
+
                         System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                     }
                     else
