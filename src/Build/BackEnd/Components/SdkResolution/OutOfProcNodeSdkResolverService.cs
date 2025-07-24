@@ -68,7 +68,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             if (IsNodeShutDown)
             {
-                throw new SdkResolverServiceException("SDKResolverFailedDueToNodeShutDown");
+                throw new SdkResolverServiceException("SDK could not be resolved by the SDK resolver because the worker node was shut down.");
             }
 
             bool wasResultCached = true;
@@ -132,6 +132,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
             WaitHandle.WaitAny([_responseReceivedEvent, ShutdownEvent]);
+
+            if (_lastResponse == null)
+            {
+                throw new SdkResolverServiceException("SDK could not be resolved by the SDK resolver.");
+            }
 
             // Keep track of the element location of the reference
             _lastResponse.ElementLocation = sdkReferenceLocation;

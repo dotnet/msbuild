@@ -848,11 +848,6 @@ Errors: {3}</source>
         <target state="translated">尝试解析 SDK "{1}" 时，SDK 解析程序 "{0}" 失败。异常: "{2}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="SDKResolverFailedDueToNodeShutDown">
-        <source>SDK could not be resolved by the SDK resolver because the worker node was shut down.</source>
-        <target state="new">SDK could not be resolved by the SDK resolver because the worker node was shut down.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SDKResolverNullMessage">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}" and returned null as a string in the list of warnings or errors.</source>
         <target state="translated">“{0}”解析程序已尝试解析 SDK“{1}”，并在警告或错误列表中以字符串形式返回 null。</target>

@@ -263,12 +263,6 @@ namespace Microsoft.Build.Execution
                 switch (index)
                 {
                     case 0:
-                        // Signal the SDK resolver service to shutdown
-                        // It should be shut down first so all the requests for SDK resolution are discarded.
-                        // Otherwise worker node might stuck in a situation where _buildRequestEngine.CleanupForBuild() waiting for the SDK resolver service response from the main node
-                        // and it never comes since we don't listen to _packetReceivedEvent in the middle of the _shutdownEvent.
-                        ((IBuildComponent)_sdkResolverService).ShutdownComponent();
-
                         NodeEngineShutdownReason shutdownReason = HandleShutdown(out shutdownException);
                         return shutdownReason;
 
@@ -465,6 +459,12 @@ namespace Microsoft.Build.Execution
             CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
             MSBuildEventSource.Log.OutOfProcNodeShutDownStart();
+
+            // Signal the SDK resolver service to shutdown
+            // It should be shut down first so all the requests for SDK resolution are discarded.
+            // Otherwise worker node might stuck in a situation where _buildRequestEngine.CleanupForBuild() waiting for the SDK resolver service response from the main node
+            // and it never comes since we don't listen to _packetReceivedEvent in the middle of the _shutdownEvent.
+            ((IBuildComponent)_sdkResolverService).ShutdownComponent();
 
             // Clean up the engine
             if (_buildRequestEngine != null && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
