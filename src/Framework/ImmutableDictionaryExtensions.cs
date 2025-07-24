@@ -38,7 +38,7 @@ namespace Microsoft.Build.Framework
             {
                 foreach (KeyValuePair<string, string> item in items)
                 {
-                    verifyThrowKey.Invoke(item.Key);
+                    verifyThrowKey(item.Key);
 
                     // Set null as empty string to match behavior with ProjectMetadataInstance.
                     yield return item.Value == null
