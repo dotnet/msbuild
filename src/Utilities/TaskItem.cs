@@ -124,7 +124,7 @@ namespace Microsoft.Build.Utilities
 
             if (itemMetadata.Count > 0)
             {
-                _metadata = ImmutableDictionaryExtensions.EmptyMetadata;
+                ImmutableDictionary<string, string>.Builder builder = ImmutableDictionaryExtensions.EmptyMetadata.ToBuilder();
 
                 foreach (DictionaryEntry singleMetadata in itemMetadata)
                 {
@@ -132,9 +132,11 @@ namespace Microsoft.Build.Utilities
                     string key = (string)singleMetadata.Key;
                     if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(key))
                     {
-                        _metadata = _metadata.SetItem(key, (string)singleMetadata.Value ?? string.Empty);
+                        builder[key] = (string)singleMetadata.Value ?? string.Empty;
                     }
                 }
+
+                _metadata = builder.ToImmutable();
             }
         }
 
