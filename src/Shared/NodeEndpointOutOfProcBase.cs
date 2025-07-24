@@ -729,6 +729,8 @@ namespace Microsoft.Build.BackEnd
                                 var packetStream = _packetStream;
                                 packetStream.SetLength(0);
 
+                                // Re-use writeTranslator; we clear _packetStream but never replace it.
+                                // If _packetStream is ever reassigned, set writeTranslator = null first.
                                 writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
 
                                 packetStream.WriteByte((byte)packet.Type);
