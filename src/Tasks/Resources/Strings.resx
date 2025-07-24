@@ -2205,6 +2205,18 @@
   <data name="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
     <value>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</value>
   </data>
+  <data name="WriteLinesToFile.ErrorReadingFileTransactional">
+    <value>MSB3493: Could not read existing file "{0}" for appending content. Error: {1}</value>
+    <comment>{StrBegin="MSB3493: "}</comment>
+  </data>
+  <data name="WriteLinesToFile.Retry">
+    <value>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</value>
+    <comment>{0: file path, 1: current attempt, 2: max attempts, 3: error message}</comment>
+  </data>
+  <data name="WriteLinesToFile.UsingTransactionalMode">
+    <value>Using transactional mode for writing to file "{0}".</value>
+    <comment>{0: file path}</comment>
+  </data>
   <!--
         The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.
         If this bucket overflows, pls. contact 'vsppbdev'.
