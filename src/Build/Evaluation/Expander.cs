@@ -666,6 +666,27 @@ namespace Microsoft.Build.Evaluation
             return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
         }
 
+        private static string TruncateString(string metadataValue)
+        {
+#if NET
+            metadataValue = string.Concat(metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3), "...");
+#else
+            // PERF: We need the formatted, truncated string. Using something like a StringBuilder avoids
+            // needing to use an unsafe block, but this is more efficient.
+            string truncatedMetadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion);
+            unsafe
+            {
+                fixed (char* truncatedMetadataPointer = truncatedMetadataValue)
+                {
+                    Span<char> destination = new Span<char>(truncatedMetadataPointer, truncatedMetadataValue.Length);
+                    "...".AsSpan().CopyTo(destination.Slice(CharacterLimitPerExpansion - 3));
+                    metadataValue = truncatedMetadataValue;
+                }
+            }
+#endif
+            return metadataValue;
+        }
+
         /// <summary>
         /// Returns true if the supplied string contains a valid property name.
         /// </summary>
@@ -1125,12 +1146,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (IsTruncationEnabled(evaluator._options) && metadataValue.Length > CharacterLimitPerExpansion)
                     {
-                        metadataValue =
-#if NET
-                            $"{metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
-#else
-                            $"{metadataValue.Substring(0, CharacterLimitPerExpansion - 3)}...";
-#endif
+                        metadataValue = TruncateString(metadataValue);
                     }
                 }
                 else
@@ -1337,12 +1353,7 @@ namespace Microsoft.Build.Evaluation
                                 var value = propertyValue.ToString();
                                 if (value.Length > CharacterLimitPerExpansion)
                                 {
-                                    propertyValue =
-#if NET
-                                        $"{value.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
-#else
-                                        $"{value.Substring(0, CharacterLimitPerExpansion - 3)}...";
-#endif
+                                    propertyValue = TruncateString(value);
                                 }
                             }
 
