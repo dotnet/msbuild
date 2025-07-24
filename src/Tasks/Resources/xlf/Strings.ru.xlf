@@ -2883,9 +2883,9 @@
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
-        <source>MSB3493: Could not read existing file "{0}" for appending content. Error: {1}</source>
-        <target state="new">MSB3493: Could not read existing file "{0}" for appending content. Error: {1}</target>
-        <note>{StrBegin="MSB3493: "}</note>
+        <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
+        <target state="new">MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</target>
+        <note>{StrBegin="MSB3494: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.Retry">
         <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
