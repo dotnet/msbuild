@@ -1126,9 +1126,9 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                if (DirectMetadataCount == 0 && metadata.GetType() == typeof(ImmutableDictionary<string, string>))
+                if (DirectMetadataCount == 0 && metadata is ImmutableDictionary<string, string> immutableMetadata)
                 {
-                    _directMetadata = (ImmutableDictionary<string, string>)metadata;
+                    _directMetadata = immutableMetadata;
 
                     if (validateKeys)
                     {

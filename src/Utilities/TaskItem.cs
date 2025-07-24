@@ -541,9 +541,9 @@ namespace Microsoft.Build.Utilities
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
         {
-            if ((_metadata == null || _metadata.IsEmpty) && metadata.GetType() == typeof(ImmutableDictionary<string, string>))
+            if ((_metadata == null || _metadata.IsEmpty) && metadata is ImmutableDictionary<string, string> immutableMetadata)
             {
-                _metadata = (ImmutableDictionary<string, string>)metadata;
+                _metadata = immutableMetadata;
                 return;
             }
 
