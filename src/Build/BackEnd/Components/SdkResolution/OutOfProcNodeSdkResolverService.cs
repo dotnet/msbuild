@@ -66,6 +66,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.ResolveSdk"/>
         public override SdkResult ResolveSdk(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, bool failOnUnresolvedSdk)
         {
+            if (IsNodeShutDown)
+            {
+                throw new SdkResolverServiceException("SDK could not be resolved by the SDK resolver because the worker node was shut down.");
+            }
+
             bool wasResultCached = true;
 
             MSBuildEventSource.Log.OutOfProcSdkResolverServiceRequestSdkPathFromMainNodeStart(submissionId, sdk.Name, solutionPath, projectPath);
@@ -127,6 +132,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             // Wait for either the response or a shutdown event.  Either event means this thread should return
             WaitHandle.WaitAny([_responseReceivedEvent, ShutdownEvent]);
+
+            if (_lastResponse == null)
+            {
+                throw new SdkResolverServiceException("SDK could not be resolved by the SDK resolver.");
+            }
 
             // Keep track of the element location of the reference
             _lastResponse.ElementLocation = sdkReferenceLocation;
