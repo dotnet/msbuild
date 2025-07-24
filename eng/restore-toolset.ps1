@@ -10,7 +10,7 @@ function InitializeCustomSDKToolset {
 function CreateBuildEnvScripts {
   Create-Directory $ArtifactsDir
   $scriptPath = Join-Path $ArtifactsDir "msbuild-build-env.bat"
-  $dotnetPath = Join-Path $ArtifactsDir "core"
+  $dotnetPath = "$ArtifactsDir\bin\bootstrap\core"
   $scriptContents = @"
 @echo off
 title SDK Build ($RepoRoot)
@@ -37,10 +37,10 @@ DOSKEY killdotnet=taskkill /F /IM dotnet.exe /T ^& taskkill /F /IM VSTest.Consol
 # https://aka.ms/vs/unsigned-dotnet-debugger-lib
 `$env:VSDebugger_ValidateDotnetDebugLibSignatures = 0
 
-`$env:DOTNET_ROOT = Join-Path "$ArtifactsDir" "core"
-`$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = Join-Path "$ArtifactsDir" "core"
+`$env:DOTNET_ROOT = "$ArtifactsDir\bin\bootstrap\core"
+`$env:DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR = "$ArtifactsDir\bin\bootstrap\core"
 
-`$env:PATH = "`$(Join-Path '$ArtifactsDir' 'core');`$env:PATH"
+`$env:PATH = "$ArtifactsDir\bin\bootstrap\core;$env:PATH"
 `$env:DOTNET_ADD_GLOBAL_TOOLS_TO_PATH = "0"
 
 function killdotnet {

@@ -67,6 +67,7 @@ then
   _InitializeBuildToolFramework="net10.0"
 
   export DOTNET_ROOT="${bootstrapRoot}/core"
+
 else
   echo "Unsupported hostType ($host_type)"
   exit 1

@@ -15,8 +15,8 @@ function CreateBuildEnvScript {
 #!/usr/bin/env bash
 export DOTNET_MULTILEVEL_LOOKUP=0
 
-export DOTNET_ROOT=$artifacts_dir/core
-export PATH=$artifacts_dir/core:\$PATH
+export DOTNET_ROOT=$artifacts_dir/bin/bootstrap/core
+export PATH=$artifacts_dir/bin/bootstrap/core:\$PATH
 export DOTNET_ADD_GLOBAL_TOOLS_TO_PATH=0
 "
 
