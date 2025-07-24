@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="23101ed07a38169d3e59d63b9d4d33e6d1d609bb" BarId="274386" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="1c92f346e02a8363def6f7bdbcc526d3c579dd74" BarId="275898" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="Microsoft.Bcl.Cryptography" Version="9.0.0">
@@ -120,9 +120,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>eb38c4a6cccfce5ee9415da1a930fc6534194b2b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-1.25361.3">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25369.9">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>d3571ef089ef13c74ea786dce8ef615916a097cd</Sha>
+      <Sha>a8d4395106dcc0d720dd7d1a838661a0ca7cf939</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25358.3">
       <Uri>https://github.com/dotnet/arcade</Uri>

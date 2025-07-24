@@ -11,7 +11,7 @@
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
       is built crosses a UTC date boundary.
     -->
-    <DotNetUseShippingVersions Condition="'$(DotNetBuildOrchestrator)' != 'true'">true</DotNetUseShippingVersions>
+    <DotNetUseShippingVersions Condition="'$(DotNetBuildFromVMR)' != 'true'">true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
@@ -81,10 +81,10 @@
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
     <MicrosoftDotNetXUnitExtensionsVersion>10.0.0-beta.25358.3</MicrosoftDotNetXUnitExtensionsVersion>
     <NuGetBuildTasksVersion>6.15.0-preview.1.86</NuGetBuildTasksVersion>
-    <MicrosoftNetCompilersToolsetVersion>5.0.0-1.25361.3</MicrosoftNetCompilersToolsetVersion>
+    <MicrosoftNetCompilersToolsetVersion>5.0.0-2.25369.9</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
   <PropertyGroup>
-  <!-- These are manually updated since they are text-only source packages and can't be
+    <!-- These are manually updated since they are text-only source packages and can't be
        overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
        When updating the version make sure to add the new version to source-build-reference-packages first. -->
     <MicrosoftCodeAnalysisCollectionsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisCollectionsVersion>

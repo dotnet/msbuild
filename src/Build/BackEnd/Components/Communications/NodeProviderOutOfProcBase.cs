@@ -161,22 +161,29 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
-
-                if (nodeStream == null)
-                {
-                    // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
-                }
-
+                using Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
                 if (nodeStream != null)
                 {
-                    // If we're able to connect to such a process, send a packet requesting its termination
-                    CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
-                    nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
-                    nodeStream.Dispose();
+                    ShutdownNode(terminateNode, factory, nodeProcess, nodeStream);
                 }
+                else
+                {
+                    // If we couldn't connect attempt to connect to the process with the handshake including low priority.
+                    using Stream lowPriorityConnection = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
+
+                    if (lowPriorityConnection != null)
+                    {
+                        ShutdownNode(terminateNode, factory, nodeProcess, lowPriorityConnection);
+                    }
+                }
+            }
+
+            static void ShutdownNode(NodeContextTerminateDelegate terminateNode, INodePacketFactory factory, Process nodeProcess, Stream nodeStream)
+            {
+                // If we're able to connect to such a process, send a packet requesting its termination
+                CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
+                NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
+                nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
             }
         }
 
@@ -600,19 +607,14 @@ namespace Microsoft.Build.BackEnd
             private readonly NodeContextTerminateDelegate _terminateDelegate;
 
             /// <summary>
-            /// A dedicated thread to consume enqueued packets.
+            /// A task representing the work to consume enqueued packets.
             /// </summary>
-            private readonly Thread _drainPacketQueueThread;
+            private readonly Task _packetWriteDrainTask;
 
             /// <summary>
-            /// Used to signal the consuming thread that a packet has been enqueued;
+            /// Used to signal the consuming task that a packet has been enqueued.
             /// </summary>
-            private readonly AutoResetEvent _packetEnqueued;
-
-            /// <summary>
-            /// Used to signal that the exit packet has been sent and we no longer need to wait for the queue to drain.
-            /// </summary>
-            private readonly CancellationTokenSource _packetQueueDrainDelayCancellation;
+            private readonly SemaphoreSlim _packetEnqueued;
 
             /// <summary>
             /// Tracks the state of the packet sent to terminate the node.
@@ -648,13 +650,9 @@ namespace Microsoft.Build.BackEnd
 #endif
 
                 _packetWriteQueue = new ConcurrentQueue<INodePacket>();
-                _packetEnqueued = new AutoResetEvent(false);
-                _packetQueueDrainDelayCancellation = new CancellationTokenSource();
+                _packetEnqueued = new SemaphoreSlim(0, 1);
 
-                // specify the smallest stack size - 64kb
-                _drainPacketQueueThread = new Thread(DrainPacketQueue, 64 * 1024);
-                _drainPacketQueueThread.IsBackground = true;
-                _drainPacketQueueThread.Start(this);
+                _packetWriteDrainTask = DrainPacketQueue();
             }
 
             /// <summary>
@@ -760,30 +758,42 @@ namespace Microsoft.Build.BackEnd
                 {
                     _exitPacketState = ExitPacketState.ExitPacketQueued;
                 }
+
+                // These calls to Thread.MemoryBarrier() prevent instruction reordering that was
+                // causing an inssue on ARM64. We want to guarantee that the packet is enqueued
+                // before we check the semaphore and potentially signal it.
+                Thread.MemoryBarrier();
+
                 _packetWriteQueue.Enqueue(packet);
-                _packetEnqueued.Set();
+
+                Thread.MemoryBarrier();
+
+                if (_packetEnqueued.CurrentCount == 0)
+                {
+                    // If the semaphore is not already signaled, signal it to wake up the draining task.
+                    _packetEnqueued.Release();
+                }
             }
 
             /// <summary>
-            /// We use a dedicated thread to avoid blocking a threadpool thread.
+            /// Use a threadpool thread to drain the queue and be careful not to block it where possible.
             /// </summary>
             /// <remarks>Usually there'll be a single packet in the queue, but sometimes
             /// a burst of SendData comes in, with 10-20 packets scheduled.</remarks>
-            private void DrainPacketQueue(object state)
+            private async Task DrainPacketQueue()
             {
-                NodeContext context = (NodeContext)state;
-                MemoryStream writeStream = context._writeBufferMemoryStream;
-                Stream serverToClientStream = context._pipeStream;
+                MemoryStream writeStream = _writeBufferMemoryStream;
+                Stream serverToClientStream = _pipeStream;
+                ITranslator writeTranslator = _writeTranslator;
 
                 while (true)
                 {
-                    context._packetEnqueued.WaitOne();
-                    while (context._packetWriteQueue.TryDequeue(out INodePacket packet))
+                    await _packetEnqueued.WaitAsync();
+                    while (_packetWriteQueue.TryDequeue(out INodePacket packet))
                     {
                         // clear the buffer but keep the underlying capacity to avoid reallocations
                         writeStream.SetLength(0);
 
-                        ITranslator writeTranslator = context._writeTranslator;
                         try
                         {
                             writeStream.WriteByte((byte)packet.Type);
@@ -803,22 +813,29 @@ namespace Microsoft.Build.BackEnd
                             for (int i = 0; i < writeStreamLength; i += MaxPacketWriteSize)
                             {
                                 int lengthToWrite = Math.Min(writeStreamLength - i, MaxPacketWriteSize);
-
-                                serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
+#if NET
+                                await serverToClientStream.WriteAsync(writeStreamBuffer.AsMemory(i, lengthToWrite));
+#else
+                                await serverToClientStream.WriteAsync(writeStreamBuffer, i, lengthToWrite);
+#endif
                             }
 
                             if (IsExitPacket(packet))
                             {
-                                context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                context._packetQueueDrainDelayCancellation.Cancel();
+                                _exitPacketState = ExitPacketState.ExitPacketSent;
 
+                                return;
+                            }
+
+                            if (packet is NodeBuildComplete)
+                            {
                                 return;
                             }
                         }
                         catch (IOException e)
                         {
                             // Do nothing here because any exception will be caught by the async read handler
-                            CommunicationsUtilities.Trace(context._nodeId, "EXCEPTION in SendData: {0}", e);
+                            CommunicationsUtilities.Trace(_nodeId, "EXCEPTION in SendData: {0}", e);
                         }
                         catch (ObjectDisposedException) // This happens if a child dies unexpectedly
                         {
@@ -850,6 +867,7 @@ namespace Microsoft.Build.BackEnd
             private void Close()
             {
                 _pipeStream.Dispose();
+                _packetEnqueued.Dispose();
                 _terminateDelegate(_nodeId);
             }
 
@@ -863,13 +881,15 @@ namespace Microsoft.Build.BackEnd
                     // Wait up to 100ms until all remaining packets are sent.
                     // We don't need to wait long, just long enough for the Task to start running on the ThreadPool.
 #if NET
-                    await Task.Delay(100, _packetQueueDrainDelayCancellation.Token).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
+                    await _packetWriteDrainTask.WaitAsync(TimeSpan.FromMilliseconds(100)).ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
 #else
-                    await Task.WhenAny(Task.Delay(100, _packetQueueDrainDelayCancellation.Token));
+                    using (var cts = new CancellationTokenSource(100))
+                    {
+                        await Task.WhenAny(_packetWriteDrainTask, Task.Delay(100, cts.Token));
+                        cts.Cancel();
+                    }
 #endif
                 }
-
-                _packetQueueDrainDelayCancellation?.Dispose();
 
                 if (_exitPacketState == ExitPacketState.ExitPacketSent)
                 {

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -60,7 +61,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
-        private Dictionary<int, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<int, NodeContext> _nodeContexts;
 
         /// <summary>
         /// Flag indicating we have disposed.
@@ -121,7 +122,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             _componentHost = host;
-            _nodeContexts = new Dictionary<int, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
         }
 
         /// <summary>
@@ -303,7 +304,7 @@ namespace Microsoft.Build.BackEnd
             // will report that the in-proc node is still in use when it has actually shut down.
             if (packet.Type == NodePacketType.NodeShutdown)
             {
-                _nodeContexts.Remove(nodeId);
+                _nodeContexts.TryRemove(nodeId, out _);
 
                 // Release the operating environment semaphore if we were holding it.
                 if ((_componentHost.BuildParameters.SaveOperatingEnvironment) &&

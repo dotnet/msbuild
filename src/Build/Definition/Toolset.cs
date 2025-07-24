@@ -152,14 +152,19 @@ namespace Microsoft.Build.Evaluation
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
         /// <summary>
+        /// Lock for task registry initialization
+        /// </summary>
+        private readonly object _taskRegistryLock = new object();
+
+        /// <summary>
         /// indicates if the default tasks file has already been scanned
         /// </summary>
-        private bool _defaultTasksRegistrationAttempted;
+        private volatile bool _defaultTasksRegistrationAttempted;
 
         /// <summary>
         /// indicates if the override tasks file has already been scanned
         /// </summary>
-        private bool _overrideTasksRegistrationAttempted;
+        private volatile bool _overrideTasksRegistrationAttempted;
 
         /// <summary>
         /// holds all the default tasks we know about and the assemblies they exist in
@@ -174,17 +179,17 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Delegate to retrieving files.  For unit testing only.
         /// </summary>
-        private DirectoryGetFiles _getFiles;
+        private readonly DirectoryGetFiles _getFiles;
 
         /// <summary>
         /// Delegate to check to see if a directory exists
         /// </summary>
-        private DirectoryExists _directoryExists = null;
+        private readonly DirectoryExists _directoryExists;
 
         /// <summary>
         /// Delegate for loading Xml.  For unit testing only.
         /// </summary>
-        private LoadXmlFromPath _loadXmlFromPath;
+        private readonly LoadXmlFromPath _loadXmlFromPath;
 
         /// <summary>
         /// Expander to expand the properties and items in the using tasks files
@@ -197,10 +202,11 @@ namespace Microsoft.Build.Evaluation
         private Dictionary<string, SubToolset> _subToolsets;
 
         /// <summary>
-        /// If no sub-toolset is specified, this is the default sub-toolset version.  Null == no default
-        /// sub-toolset, just use the base toolset.
+        /// If no sub-toolset is specified, this is the default sub-toolset version. Null == no default
+        /// sub-toolset, just use the base toolset. Uses lazy initialization for thread safety as this
+        /// is accessed from TaskRegistry initialization which can occur from multiple threads.
         /// </summary>
-        private string _defaultSubToolsetVersion;
+        private readonly Lazy<string> _defaultSubToolsetVersionLazy;
 
         /// <summary>
         /// Map of project import properties to their list of fall-back search paths
@@ -282,6 +288,7 @@ namespace Microsoft.Build.Evaluation
             _environmentProperties = environmentProperties;
             _overrideTasksPath = msbuildOverrideTasksPath;
             _defaultOverrideToolsVersion = defaultOverrideToolsVersion;
+            _defaultSubToolsetVersionLazy = new Lazy<string>(ComputeDefaultSubToolsetVersion);
         }
 
         /// <summary>
@@ -364,6 +371,7 @@ namespace Microsoft.Build.Evaluation
         private Toolset(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
+            _defaultSubToolsetVersionLazy = new Lazy<string>(ComputeDefaultSubToolsetVersion);
         }
 
         /// <summary>
@@ -486,44 +494,49 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                if (_defaultSubToolsetVersion == null)
-                {
-                    // 1) Workaround for ToolsVersion 4.0 + VS 2010
-                    if (String.Equals(ToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase) && Dev10IsInstalled)
-                    {
-                        return Constants.Dev10SubToolsetValue;
-                    }
-
-                    // 2) Otherwise, just pick the highest available.
-                    SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
-                    List<string> additionalSubToolsetNames = new List<string>();
-
-                    foreach (string subToolsetName in SubToolsets.Keys)
-                    {
-                        Version subToolsetVersion = VersionUtilities.ConvertToVersion(subToolsetName);
-
-                        if (subToolsetVersion != null)
-                        {
-                            subToolsetsWithVersion.Add(subToolsetVersion, subToolsetName);
-                        }
-                        else
-                        {
-                            // if it doesn't parse to an actual version number, shrug and just add it to the end.
-                            additionalSubToolsetNames.Add(subToolsetName);
-                        }
-                    }
-
-                    List<string> orderedSubToolsetList = new List<string>(additionalSubToolsetNames);
-                    orderedSubToolsetList.AddRange(subToolsetsWithVersion.Values);
-
-                    if (orderedSubToolsetList.Count > 0)
-                    {
-                        _defaultSubToolsetVersion = orderedSubToolsetList[orderedSubToolsetList.Count - 1];
-                    }
-                }
-
-                return _defaultSubToolsetVersion;
+                return _defaultSubToolsetVersionLazy.Value;
             }
+        }
+
+        /// <summary>
+        /// Computes the default sub-toolset version for this sub-toolset.
+        /// </summary>
+        private string ComputeDefaultSubToolsetVersion()
+        {
+            // 1) Workaround for ToolsVersion 4.0 + VS 2010
+            if (String.Equals(ToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase) && Dev10IsInstalled)
+            {
+                return Constants.Dev10SubToolsetValue;
+            }
+
+            // 2) Otherwise, just pick the highest available.
+            SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
+            List<string> additionalSubToolsetNames = new List<string>();
+
+            foreach (string subToolsetName in SubToolsets.Keys)
+            {
+                Version subToolsetVersion = VersionUtilities.ConvertToVersion(subToolsetName);
+
+                if (subToolsetVersion != null)
+                {
+                    subToolsetsWithVersion.Add(subToolsetVersion, subToolsetName);
+                }
+                else
+                {
+                    // if it doesn't parse to an actual version number, shrug and just add it to the end.
+                    additionalSubToolsetNames.Add(subToolsetName);
+                }
+            }
+
+            List<string> orderedSubToolsetList = new List<string>(additionalSubToolsetNames);
+            orderedSubToolsetList.AddRange(subToolsetsWithVersion.Values);
+
+            if (orderedSubToolsetList.Count > 0)
+            {
+                return orderedSubToolsetList[orderedSubToolsetList.Count - 1];
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -878,20 +891,27 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         private void RegisterDefaultTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
+            // Synchronization needed because TaskRegistry can be accessed from multiple threads
             if (!_defaultTasksRegistrationAttempted)
             {
-                try
+                lock (_taskRegistryLock)
                 {
-                    _defaultTaskRegistry = new TaskRegistry(projectRootElementCache);
+                    if (!_defaultTasksRegistrationAttempted)
+                    {
+                        try
+                        {
+                            _defaultTaskRegistry = new TaskRegistry(projectRootElementCache);
 
-                    InitializeProperties(loggingContext);
+                            InitializeProperties(loggingContext);
 
-                    string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
-                    LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
-                }
-                finally
-                {
-                    _defaultTasksRegistrationAttempted = true;
+                            string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
+                            LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
+                        }
+                        finally
+                        {
+                            _defaultTasksRegistrationAttempted = true;
+                        }
+                    }
                 }
             }
         }
@@ -984,55 +1004,62 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterOverrideTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
+            // Synchronization needed because TaskRegistry can be accessed from multiple threads
             if (!_overrideTasksRegistrationAttempted)
             {
-                try
+                lock (_taskRegistryLock)
                 {
-                    _overrideTaskRegistry = new TaskRegistry(projectRootElementCache);
-                    bool overrideDirectoryExists = false;
-
-                    try
+                    if (!_overrideTasksRegistrationAttempted)
                     {
-                        // Make sure the override directory exists and is not empty before trying to find the files
-                        if (!String.IsNullOrEmpty(_overrideTasksPath))
+                        try
                         {
-                            if (Path.IsPathRooted(_overrideTasksPath))
+                            _overrideTaskRegistry = new TaskRegistry(projectRootElementCache);
+                            bool overrideDirectoryExists = false;
+
+                            try
                             {
-                                if (_directoryExists != null)
+                                // Make sure the override directory exists and is not empty before trying to find the files
+                                if (!String.IsNullOrEmpty(_overrideTasksPath))
                                 {
-                                    overrideDirectoryExists = _directoryExists(_overrideTasksPath);
-                                }
-                                else
-                                {
-                                    overrideDirectoryExists = FileSystems.Default.DirectoryExists(_overrideTasksPath);
+                                    if (Path.IsPathRooted(_overrideTasksPath))
+                                    {
+                                        if (_directoryExists != null)
+                                        {
+                                            overrideDirectoryExists = _directoryExists(_overrideTasksPath);
+                                        }
+                                        else
+                                        {
+                                            overrideDirectoryExists = FileSystems.Default.DirectoryExists(_overrideTasksPath);
+                                        }
+                                    }
+
+                                    if (!overrideDirectoryExists)
+                                    {
+                                        string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
+                                        loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                                    }
                                 }
                             }
-
-                            if (!overrideDirectoryExists)
+                            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
-                                string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
+                                string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
                                 loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
                             }
+
+                            if (overrideDirectoryExists)
+                            {
+                                InitializeProperties(loggingContext);
+                                string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
+
+                                // Load and register any override tasks
+                                LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
+                            }
+                        }
+                        finally
+                        {
+                            _overrideTasksRegistrationAttempted = true;
                         }
                     }
-                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                    {
-                        string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
-                        loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
-                    }
-
-                    if (overrideDirectoryExists)
-                    {
-                        InitializeProperties(loggingContext);
-                        string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
-
-                        // Load and register any override tasks
-                        LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
-                    }
-                }
-                finally
-                {
-                    _overrideTasksRegistrationAttempted = true;
                 }
             }
         }
