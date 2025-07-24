@@ -69,6 +69,11 @@ namespace Microsoft.Build.Execution
             CurrentCache.AddConfiguration(config);
         }
 
+        public void RemoveConfiguration(int configId)
+        {
+            CurrentCache.RemoveConfiguration(configId);
+        }
+
         public BuildRequestConfiguration GetMatchingConfiguration(BuildRequestConfiguration config)
         {
             var overrideConfig = _override.GetMatchingConfiguration(config);

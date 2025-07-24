@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -13,18 +13,22 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// Implements a build request configuration cache.
     /// </summary>
-    /// <remarks>
-    /// Any methods which performs multiple operations on the cache should:
-    /// 1. Take a local reference to the configurations container, in case another thread swaps the instance.
-    /// 2. Pair modifications with a TryX method, such that both backing dictionaries are updated in-sync. If this can't
-    /// be guaranteed, a new instance should be created to atomically swap the field.
-    /// </remarks>
     internal class ConfigCache : IConfigCache
     {
         /// <summary>
-        /// Lookup which can be used to find a configuration with the specified ID or metadata.
+        /// The configurations
         /// </summary>
-        private Configurations _configurations;
+        private IDictionary<int, BuildRequestConfiguration> _configurations;
+
+        /// <summary>
+        /// Object used for locking.
+        /// </summary>
+        private object _lockObject = new object();
+
+        /// <summary>
+        /// Lookup which can be used to find a configuration with the specified metadata.
+        /// </summary>
+        private IDictionary<ConfigurationMetadata, int> _configurationIdsByMetadata;
 
         /// <summary>
         /// The maximum cache entries allowed before a sweep can occur.
@@ -36,7 +40,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public ConfigCache()
         {
-            _configurations = new Configurations();
+            _configurations = new Dictionary<int, BuildRequestConfiguration>();
+            _configurationIdsByMetadata = new Dictionary<ConfigurationMetadata, int>();
             if (!int.TryParse(Environment.GetEnvironmentVariable("MSBUILDCONFIGCACHESWEEPTHRESHHOLD"), out _sweepThreshhold))
             {
                 _sweepThreshhold = 500;
@@ -53,7 +58,10 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return _configurations.ById[configId];
+                lock (_lockObject)
+                {
+                    return _configurations[configId];
+                }
             }
         }
 
@@ -65,23 +73,31 @@ namespace Microsoft.Build.BackEnd
         /// <param name="config">The configuration to add.</param>
         public void AddConfiguration(BuildRequestConfiguration config)
         {
-            AddConfiguration(config, _configurations);
-        }
-
-        /// <summary>
-        /// Helper to add a configuration to the cache with a consistent lookup reference.
-        /// </summary>
-        private void AddConfiguration(BuildRequestConfiguration config, Configurations configurations)
-        {
             ErrorUtilities.VerifyThrowArgumentNull(config);
             ErrorUtilities.VerifyThrow(config.ConfigurationId != 0, "Invalid configuration ID");
 
-            if (!configurations.ById.TryAdd(config.ConfigurationId, config))
+            lock (_lockObject)
             {
-                ErrorUtilities.ThrowInternalError("Configuration {0} already cached", config.ConfigurationId);
+                int configId = GetKeyForConfiguration(config);
+                ErrorUtilities.VerifyThrow(!_configurations.ContainsKey(configId), "Configuration {0} already cached", config.ConfigurationId);
+                _configurations.Add(configId, config);
+                _configurationIdsByMetadata.Add(new ConfigurationMetadata(config), configId);
             }
+        }
 
-            _ = configurations.ByMetadata[new ConfigurationMetadata(config)] = config;
+        /// <summary>
+        /// Removes the specified configuration from the cache.
+        /// </summary>
+        /// <param name="configId">The id of the configuration to remove.</param>
+        public void RemoveConfiguration(int configId)
+        {
+            lock (_lockObject)
+            {
+                BuildRequestConfiguration config = _configurations[configId];
+                _configurations.Remove(configId);
+                _configurationIdsByMetadata.Remove(new ConfigurationMetadata(config));
+                config.ClearCacheFile();
+            }
         }
 
         /// <summary>
@@ -103,12 +119,15 @@ namespace Microsoft.Build.BackEnd
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata)
         {
             ErrorUtilities.VerifyThrowArgumentNull(configMetadata);
-            if (!_configurations.ByMetadata.TryGetValue(configMetadata, out BuildRequestConfiguration config))
+            lock (_lockObject)
             {
-                return null;
-            }
+                if (!_configurationIdsByMetadata.TryGetValue(configMetadata, out int configId))
+                {
+                    return null;
+                }
 
-            return config;
+                return _configurations[configId];
+            }
         }
 
         /// <summary>
@@ -116,39 +135,40 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata, ConfigCreateCallback callback, bool loadProject)
         {
-            // Take a local reference to ensure that we are operating on the same lookup instance.
-            Configurations configurations = _configurations;
+            lock (_lockObject)
+            {
+                BuildRequestConfiguration configuration = GetMatchingConfiguration(configMetadata);
 
-            // If there is no matching configuration, let the caller create one.
-            ErrorUtilities.VerifyThrowArgumentNull(configMetadata);
-            if (!configurations.ByMetadata.TryGetValue(configMetadata, out BuildRequestConfiguration configuration))
-            {
-                configuration = callback(null, loadProject);
-                AddConfiguration(configuration, configurations);
-            }
-            else if (loadProject)
-            {
-                // We already had a configuration, load the project
-                // If it exists but it cached, retrieve it
-                if (configuration.IsCached)
+                // If there is no matching configuration, let the caller create one.
+                if (configuration == null)
                 {
-                    configuration.RetrieveFromCache();
+                    configuration = callback(null, loadProject);
+                    AddConfiguration(configuration);
+                }
+                else if (loadProject)
+                {
+                    // We already had a configuration, load the project
+                    // If it exists but it cached, retrieve it
+                    if (configuration.IsCached)
+                    {
+                        configuration.RetrieveFromCache();
+                    }
+
+                    // If it is still not loaded (because no instance was ever created here), let the caller populate the instance.
+                    if (!configuration.IsLoaded)
+                    {
+                        callback(configuration, loadProject: true);
+                    }
                 }
 
-                // If it is still not loaded (because no instance was ever created here), let the caller populate the instance.
-                if (!configuration.IsLoaded)
+                // In either case, make sure the project is loaded if it was requested.
+                if (loadProject)
                 {
-                    callback(configuration, loadProject: true);
+                    ErrorUtilities.VerifyThrow(configuration.IsLoaded, "Request to create configuration did not honor request to also load project.");
                 }
-            }
 
-            // In either case, make sure the project is loaded if it was requested.
-            if (loadProject)
-            {
-                ErrorUtilities.VerifyThrow(configuration.IsLoaded, "Request to create configuration did not honor request to also load project.");
+                return configuration;
             }
-
-            return configuration;
         }
 
         /// <summary>
@@ -158,7 +178,10 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the cache contains a configuration with this id, false otherwise.</returns>
         public bool HasConfiguration(int configId)
         {
-            return _configurations.ById.ContainsKey(configId);
+            lock (_lockObject)
+            {
+                return _configurations.ContainsKey(configId);
+            }
         }
 
         /// <summary>
@@ -166,12 +189,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ClearConfigurations()
         {
-            foreach (KeyValuePair<int, BuildRequestConfiguration> config in _configurations.ById)
+            lock (_lockObject)
             {
-                config.Value.ClearCacheFile();
-            }
+                foreach (var config in _configurations.Values)
+                {
+                    config.ClearCacheFile();
+                }
 
-            _configurations = new Configurations();
+                _configurations = new Dictionary<int, BuildRequestConfiguration>();
+                _configurationIdsByMetadata = new Dictionary<ConfigurationMetadata, int>();
+            }
         }
 
         /// <summary>
@@ -182,16 +209,11 @@ namespace Microsoft.Build.BackEnd
         /// configuration in this cache.</returns>
         public int GetSmallestConfigId()
         {
-            Configurations configurations = _configurations;
-            ErrorUtilities.VerifyThrow(!configurations.ById.IsEmpty, "No configurations exist from which to obtain the smallest configuration id.");
-
-            int smallestId = int.MaxValue;
-            foreach (KeyValuePair<int, BuildRequestConfiguration> kvp in configurations.ById)
+            lock (_lockObject)
             {
-                smallestId = Math.Min(smallestId, kvp.Key);
+                ErrorUtilities.VerifyThrow(_configurations.Count > 0, "No configurations exist from which to obtain the smallest configuration id.");
+                return _configurations.OrderBy(kvp => kvp.Key).First().Key;
             }
-
-            return smallestId;
         }
 
         /// <summary>
@@ -202,26 +224,34 @@ namespace Microsoft.Build.BackEnd
         {
             List<int> configurationIdsCleared = new List<int>();
 
-            Configurations configurationsToKeep = new();
+            Dictionary<int, BuildRequestConfiguration> configurationsToKeep = new Dictionary<int, BuildRequestConfiguration>();
+            Dictionary<ConfigurationMetadata, int> configurationIdsByMetadataToKeep = new Dictionary<ConfigurationMetadata, int>();
 
-            foreach (KeyValuePair<ConfigurationMetadata, BuildRequestConfiguration> metadata in _configurations.ByMetadata)
+            lock (_lockObject)
             {
-                BuildRequestConfiguration configuration = metadata.Value;
-                int configId = configuration.ConfigurationId;
-
-                // We do not want to retain this configuration
-                if (!configuration.ExplicitlyLoaded)
+                foreach (KeyValuePair<ConfigurationMetadata, int> metadata in _configurationIdsByMetadata)
                 {
-                    configurationIdsCleared.Add(configId);
-                    configuration.ClearCacheFile();
-                    continue;
+                    int configId = metadata.Value;
+
+                    if (_configurations.TryGetValue(configId, out BuildRequestConfiguration configuration))
+                    {
+                        // We do not want to retain this configuration
+                        if (!configuration.ExplicitlyLoaded)
+                        {
+                            configurationIdsCleared.Add(configId);
+                            configuration.ClearCacheFile();
+                            continue;
+                        }
+
+                        configurationsToKeep.Add(configId, configuration);
+                        configurationIdsByMetadataToKeep.Add(metadata.Key, metadata.Value);
+                    }
                 }
 
-                configurationsToKeep.ById[configId] = configuration;
-                configurationsToKeep.ByMetadata[metadata.Key] = configuration;
+                _configurations = configurationsToKeep;
+                _configurationIdsByMetadata = configurationIdsByMetadataToKeep;
             }
 
-            _configurations = configurationsToKeep;
             return configurationIdsCleared;
         }
 
@@ -230,7 +260,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool IsConfigCacheSizeLargerThanThreshold()
         {
-            return _configurations.ById.Count > _sweepThreshhold;
+            return _configurations.Count > _sweepThreshhold;
         }
 
         /// <summary>
@@ -241,40 +271,40 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if any configurations were cached, false otherwise.</returns>
         public bool WriteConfigurationsToDisk()
         {
-            bool cachedAtLeastOneProject = false;
-
-            // Cache 10% of configurations to release some memory
-            Configurations configurations = _configurations;
-            int count = configurations.ById.Count;
-            int remainingToRelease = count;
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLEAGGRESSIVECACHING")))
+            lock (_lockObject)
             {
-                // Cache only 10% of configurations to release some memory
-                remainingToRelease = Convert.ToInt32(Math.Max(1, Math.Floor(count * 0.1)));
-            }
+                bool cachedAtLeastOneProject = false;
 
-            foreach (KeyValuePair<int, BuildRequestConfiguration> kvp in configurations.ById)
-            {
-                BuildRequestConfiguration configuration = kvp.Value;
-                if (!configuration.IsCached)
+                // Cache 10% of configurations to release some memory
+                int remainingToRelease = _configurations.Count;
+                if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLEAGGRESSIVECACHING")))
                 {
-                    configuration.CacheIfPossible();
+                    // Cache only 10% of configurations to release some memory
+                    remainingToRelease = Convert.ToInt32(Math.Max(1, Math.Floor(_configurations.Count * 0.1)));
+                }
 
-                    if (configuration.IsCached)
+                foreach (BuildRequestConfiguration configuration in _configurations.Values)
+                {
+                    if (!configuration.IsCached)
                     {
-                        cachedAtLeastOneProject = true;
+                        configuration.CacheIfPossible();
 
-                        remainingToRelease--;
-
-                        if (remainingToRelease == 0)
+                        if (configuration.IsCached)
                         {
-                            break;
+                            cachedAtLeastOneProject = true;
+
+                            remainingToRelease--;
+
+                            if (remainingToRelease == 0)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
-            return cachedAtLeastOneProject;
+                return cachedAtLeastOneProject;
+            }
         }
 
         #endregion
@@ -286,11 +316,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IEnumerator<BuildRequestConfiguration> GetEnumerator()
         {
-            // Avoid ConcurrentDictionary.Values here, as it allocates a new snapshot array on each access.
-            foreach (KeyValuePair<int, BuildRequestConfiguration> configuration in _configurations.ById)
-            {
-                yield return configuration.Value;
-            }
+            return _configurations.Values.GetEnumerator();
         }
 
         #endregion
@@ -302,7 +328,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return _configurations.Values.GetEnumerator();
         }
 
         #endregion
@@ -323,14 +349,38 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            _configurations = new Configurations();
+            lock (_lockObject)
+            {
+                _configurations.Clear();
+            }
         }
 
         #endregion
 
         public void Translate(ITranslator translator)
         {
-            translator.Translate(ref _configurations, static _ => new Configurations(_));
+            translator.TranslateDictionary(
+                ref _configurations,
+                (ITranslator aTranslator, ref int configId) => aTranslator.Translate(ref configId),
+                (ITranslator aTranslator, ref BuildRequestConfiguration configuration) =>
+                {
+                    if (translator.Mode == TranslationDirection.WriteToStream)
+                    {
+                        configuration.TranslateForFutureUse(aTranslator);
+                    }
+                    else
+                    {
+                        configuration = new BuildRequestConfiguration();
+                        configuration.TranslateForFutureUse(aTranslator);
+                    }
+                },
+                capacity => new Dictionary<int, BuildRequestConfiguration>(capacity));
+
+            translator.TranslateDictionary(
+                ref _configurationIdsByMetadata,
+                (ITranslator aTranslator, ref ConfigurationMetadata configMetadata) => aTranslator.Translate(ref configMetadata, ConfigurationMetadata.FactoryForDeserialization),
+                (ITranslator aTranslator, ref int configId) => aTranslator.Translate(ref configId),
+                capacity => new Dictionary<ConfigurationMetadata, int>(capacity));
         }
 
         /// <summary>
@@ -343,59 +393,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// A container for thread-safe configuration lookups, such that both fields can be atomically swapped.
+        /// Override which determines the key for entry into the collection from the specified build request configuration.
         /// </summary>
-        private record class Configurations : ITranslatable
+        /// <param name="config">The build request configuration.</param>
+        /// <returns>The configuration id.</returns>
+        protected int GetKeyForConfiguration(BuildRequestConfiguration config)
         {
-            private ConcurrentDictionary<int, BuildRequestConfiguration> _byId;
-            private ConcurrentDictionary<ConfigurationMetadata, BuildRequestConfiguration> _byMetadata;
-
-            internal Configurations()
-            {
-                _byId = new ConcurrentDictionary<int, BuildRequestConfiguration>();
-                _byMetadata = new ConcurrentDictionary<ConfigurationMetadata, BuildRequestConfiguration>();
-            }
-
-            internal Configurations(ITranslator translator)
-            {
-                Translate(translator);
-            }
-
-            internal ConcurrentDictionary<int, BuildRequestConfiguration> ById => _byId;
-
-            internal ConcurrentDictionary<ConfigurationMetadata, BuildRequestConfiguration> ByMetadata => _byMetadata;
-
-            public void Translate(ITranslator translator)
-            {
-                // Only serialize one dictionary, as the other can be derived.
-                IDictionary<int, BuildRequestConfiguration> configurationsById = _byId;
-                translator.TranslateDictionary(
-                    ref configurationsById,
-                    (ITranslator aTranslator, ref int configId) => aTranslator.Translate(ref configId),
-                    (ITranslator aTranslator, ref BuildRequestConfiguration configuration) =>
-                    {
-                        if (translator.Mode == TranslationDirection.WriteToStream)
-                        {
-                            configuration.TranslateForFutureUse(aTranslator);
-                        }
-                        else
-                        {
-                            configuration = new BuildRequestConfiguration();
-                            configuration.TranslateForFutureUse(aTranslator);
-                        }
-                    },
-                    capacity => new ConcurrentDictionary<int, BuildRequestConfiguration>(Environment.ProcessorCount, capacity));
-
-                if (translator.Mode == TranslationDirection.ReadFromStream)
-                {
-                    _byId = (ConcurrentDictionary<int, BuildRequestConfiguration>)configurationsById;
-                    _byMetadata = new ConcurrentDictionary<ConfigurationMetadata, BuildRequestConfiguration>(Environment.ProcessorCount, configurationsById.Count);
-                    foreach (KeyValuePair<int, BuildRequestConfiguration> kvp in configurationsById)
-                    {
-                        _byMetadata[new ConfigurationMetadata(kvp.Value)] = kvp.Value;
-                    }
-                }
-            }
+            return config.ConfigurationId;
         }
     }
 }

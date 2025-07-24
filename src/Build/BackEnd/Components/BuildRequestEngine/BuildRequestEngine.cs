@@ -92,18 +92,9 @@ namespace Microsoft.Build.BackEnd
         private IConfigCache _configCache;
 
         /// <summary>
-        /// The list of unresolved configurations by ID.
+        /// The list of unresolved configurations
         /// </summary>
-        /// <remarks>
-        /// We intentionally don't use another IConfigCache to track unresolved configs. These are local to BuildRequestEngine,
-        /// and we are guaranteed to run in a single-threaded context due to the ActionBlock.
-        /// </remarks>
-        private Dictionary<int, BuildRequestConfiguration> _unresolvedConfigurationsById;
-
-        /// <summary>
-        /// The list of unresolved configurations by metadata.
-        /// </summary>
-        private Dictionary<ConfigurationMetadata, BuildRequestConfiguration> _unresolvedConfigurationsByMetadata;
+        private IConfigCache _unresolvedConfigurations;
 
         /// <summary>
         /// The logging context for the node
@@ -323,8 +314,7 @@ namespace Microsoft.Build.BackEnd
                 _requests.Clear();
                 _requestsByGlobalRequestId.Clear();
                 _unsubmittedRequests.Clear();
-                _unresolvedConfigurationsById.Clear();
-                _unresolvedConfigurationsByMetadata.Clear();
+                _unresolvedConfigurations.ClearConfigurations();
                 Strings.ClearCachedStrings();
 
                 ChangeStatus(BuildRequestEngineStatus.Uninitialized);
@@ -521,9 +511,8 @@ namespace Microsoft.Build.BackEnd
                     ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
 
                     // Remove the unresolved configuration entry from the unresolved cache.
-                    BuildRequestConfiguration config = _unresolvedConfigurationsById[response.NodeConfigurationId];
-                    _ = _unresolvedConfigurationsById.Remove(response.NodeConfigurationId);
-                    _ = _unresolvedConfigurationsByMetadata.Remove(new ConfigurationMetadata(config));
+                    BuildRequestConfiguration config = _unresolvedConfigurations[response.NodeConfigurationId];
+                    _unresolvedConfigurations.RemoveConfiguration(response.NodeConfigurationId);
 
                     // Add the configuration to the resolved cache unless it already exists there.  This will be
                     // the case in single-proc mode as we share the global cache with the Build Manager.
@@ -617,8 +606,9 @@ namespace Microsoft.Build.BackEnd
             // proper IDs yet.  We don't get this from the global config cache because that singleton shouldn't be polluted
             // with our temporaries.
             // NOTE: Because we don't get this from the component host, we cannot override it.
-            _unresolvedConfigurationsById = new Dictionary<int, BuildRequestConfiguration>();
-            _unresolvedConfigurationsByMetadata = new Dictionary<ConfigurationMetadata, BuildRequestConfiguration>();
+            ConfigCache unresolvedConfigCache = new ConfigCache();
+            unresolvedConfigCache.InitializeComponent(host);
+            _unresolvedConfigurations = unresolvedConfigCache;
         }
 
         /// <summary>
@@ -1165,13 +1155,12 @@ namespace Microsoft.Build.BackEnd
                     if (matchingConfig == null)
                     {
                         // No configuration locally, are we already waiting for it?
-                        ConfigurationMetadata configMetadata = new(request.Config);
-                        if (!_unresolvedConfigurationsByMetadata.TryGetValue(configMetadata, out matchingConfig))
+                        matchingConfig = _unresolvedConfigurations.GetMatchingConfiguration(request.Config);
+                        if (matchingConfig == null)
                         {
                             // Not waiting for it
                             request.Config.ConfigurationId = GetNextUnresolvedConfigurationId();
-                            _unresolvedConfigurationsById.Add(request.Config.ConfigurationId, request.Config);
-                            _unresolvedConfigurationsByMetadata.Add(configMetadata, request.Config);
+                            _unresolvedConfigurations.AddConfiguration(request.Config);
                             unresolvedConfigurationsAdded ??= new HashSet<int>();
                             unresolvedConfigurationsAdded.Add(request.Config.ConfigurationId);
                         }
@@ -1292,11 +1281,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     foreach (int unresolvedConfigurationId in unresolvedConfigurationsAdded)
                     {
-                        if (_unresolvedConfigurationsById.TryGetValue(unresolvedConfigurationId, out BuildRequestConfiguration configToRemove))
-                        {
-                            _ = _unresolvedConfigurationsById.Remove(unresolvedConfigurationId);
-                            _ = _unresolvedConfigurationsByMetadata.Remove(new ConfigurationMetadata(configToRemove));
-                        }
+                        _unresolvedConfigurations.RemoveConfiguration(unresolvedConfigurationId);
                     }
                 }
 
@@ -1332,7 +1317,7 @@ namespace Microsoft.Build.BackEnd
                         _nextUnresolvedConfigurationId = StartingUnresolvedConfigId;
                     }
                 }
-                while (_unresolvedConfigurationsById.ContainsKey(_nextUnresolvedConfigurationId));
+                while (_unresolvedConfigurations.HasConfiguration(_nextUnresolvedConfigurationId));
             }
 
             return _nextUnresolvedConfigurationId;
@@ -1365,7 +1350,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(config.WasGeneratedByNode, "InvalidConfigurationId");
             ErrorUtilities.VerifyThrowArgumentNull(config);
-            ErrorUtilities.VerifyThrow(_unresolvedConfigurationsById.ContainsKey(config.ConfigurationId), "NoUnresolvedConfiguration");
+            ErrorUtilities.VerifyThrow(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
             TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
             RaiseNewConfigurationRequest(config);
         }
