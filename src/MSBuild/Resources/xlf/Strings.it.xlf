@@ -235,6 +235,29 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -Multithreading
+                     Abilita la modalità multithread SPERIMENTALE in MSBuild.
+                     Ciò significa che MSBuild userà più thread
+                     per creare progetti in parallelo,
+                     invece di più processi.
+                     Questa opzione non è supportata.
+                     Il numero massimo di thread usati è determinato da
+                     Opzione -maxCpuCount.
+                     (Forma breve: -mt)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
@@ -1796,6 +1819,11 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">MSBUILD : error MSB1059: non è stato possibile stampare le destinazioni. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Il logger del terminale non è stato utilizzato perché è stato rilevato che la compilazione è in esecuzione in un ambiente automatizzato.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Il logger di terminale non è stato usato perché la compilazione viene eseguita nel contesto di un processo (ad esempio 'dotnet test') che richiede l'accesso diretto al flusso stdout.</target>
@@ -2211,7 +2239,7 @@ Esegue la profilatura della valutazione di MSBuild e scrive
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
+        <target state="translated">MSBUILD : error MSB1021: non è possibile creare un'istanza del logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

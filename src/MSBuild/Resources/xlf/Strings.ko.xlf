@@ -235,6 +235,30 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -multithreaded
+                     MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
+                     즉, MSBuild는 여러 스레드를 사용하여
+                     프로젝트를 병렬로 빌드합니다.
+                     여러 프로세스 대신에 말이죠.
+                     이 옵션은 지원되지 않습니다.
+                     사용되는 최대 스레드 수는 
+에 의해 결정됩니다.
+                     -maxCpuCount 스위치에 의해 결정됩니다.
+                     (약식: -mt)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
@@ -1785,6 +1809,11 @@
         <target state="translated">MSBUILD : error MSB1059: 대상을 출력할 수 없습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">자동화된 환경에서 빌드가 실행 중임을 감지하여 터미널 로거를 사용하지 않았습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">빌드가 stdout 스트림에 대한 직접 액세스를 요청하는 프로세스(예: 'dotnet test')의 컨텍스트에서 실행되기 때문에 터미널 로거는 사용되지 않았습니다.</target>
@@ -2194,7 +2223,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
+        <target state="translated">MSBUILD : error MSB1021: 로거 {0}의 인스턴스를 만들 수 없습니다. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

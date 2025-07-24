@@ -1593,6 +1593,13 @@ internal static class NativeMethods
             return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
         }
 
+        if (Console.BufferHeight == 0 || Console.BufferWidth == 0)
+        {
+            // The current console doesn't have a valid buffer size, which means it is not a real console. let's default to not using TL
+            // in those scenarios.
+            return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
+        }
+
         bool acceptAnsiColorCodes = false;
         bool outputIsScreen = false;
         uint? originalConsoleMode = null;

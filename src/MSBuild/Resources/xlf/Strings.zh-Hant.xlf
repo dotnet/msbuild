@@ -235,6 +235,29 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -multithreaded
+                     在 MSBuild 中啟用實驗性多執行緒模式。
+                     這表示 MSBuild 將使用多個執行緒
+                     來平行建置專案，
+                     而不是使用多個處理序。
+                     不支援此選項。
+                     使用的執行緒數量上限由
+                     -maxCpuCount 切換開關決定。
+                     (簡短形式: -m)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
@@ -1785,6 +1808,11 @@
         <target state="translated">MSBUILD : error MSB1059: 無法列印目標。{0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">檢測到此組建正在自動化環境中執行，因此未使用終端機記錄器。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">因為組建是在要求直接存取 stdout 資料流的處理常式 (例如 'dotnet test') 內容中執行，所以未使用終端記錄器。</target>
@@ -2194,7 +2222,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
+        <target state="translated">MSBUILD : error MSB1021: 無法建立記錄器 {0} 的執行個體。{1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
