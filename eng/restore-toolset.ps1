@@ -13,7 +13,7 @@ function CreateBuildEnvScripts {
   $dotnetPath = "$ArtifactsDir\bin\bootstrap\core"
   $scriptContents = @"
 @echo off
-title SDK Build ($RepoRoot)
+title MSBuild ($RepoRoot)
 set DOTNET_MULTILEVEL_LOOKUP=0
 REM https://aka.ms/vs/unsigned-dotnet-debugger-lib
 set VSDebugger_ValidateDotnetDebugLibSignatures=0
