@@ -6,7 +6,6 @@ parameters:
   pool: ''
     
   CeapexPat: $(dn-bot-ceapex-package-r) # PAT for the loc AzDO instance https://dev.azure.com/ceapex
-  GithubPat: $(BotAccount-dotnet-bot-repo-PAT)
 
   SourcesDirectory: $(Build.SourcesDirectory)
   CreatePr: true
@@ -33,7 +32,7 @@ jobs:
   displayName: OneLocBuild${{ parameters.JobNameSuffix }}
 
   variables:
-    - group: OneLocBuildVariables # Contains the CeapexPat and GithubPat
+    - group: OneLocBuildVariables # Contains the CeapexPat
     - name: _GenerateLocProjectArguments
       value: -SourcesDirectory ${{ parameters.SourcesDirectory }}
         -LanguageSet "${{ parameters.LanguageSet }}"
@@ -91,7 +90,6 @@ jobs:
         patVariable: ${{ parameters.CeapexPat }}
         ${{ if eq(parameters.RepoType, 'gitHub') }}:
           repoType: ${{ parameters.RepoType }}
-          gitHubPatVariable: "${{ parameters.GithubPat }}"
         ${{ if ne(parameters.MirrorRepo, '') }}:
           isMirrorRepoSelected: true
           gitHubOrganization: ${{ parameters.GitHubOrg }}
