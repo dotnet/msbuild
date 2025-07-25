@@ -886,10 +886,17 @@ namespace Microsoft.Build.BackEnd.Logging
 
         internal abstract void ResetConsoleLoggerState();
 
+        private bool _initialized = false;
+
         public virtual void Initialize(IEventSource eventSource, int nodeCount)
         {
+            if (_initialized)
+            {
+                return;
+            }
             NumberOfProcessors = nodeCount;
             Initialize(eventSource);
+            _initialized = true;
         }
 
         /// <summary>
@@ -936,19 +943,19 @@ namespace Microsoft.Build.BackEnd.Logging
             // to call its event handlers directly. The VS HostLogger does this.
             if (eventSource != null)
             {
-                eventSource.BuildStarted += BuildStartedHandler;
-                eventSource.BuildFinished += BuildFinishedHandler;
-                eventSource.ProjectStarted += ProjectStartedHandler;
-                eventSource.ProjectFinished += ProjectFinishedHandler;
-                eventSource.TargetStarted += TargetStartedHandler;
-                eventSource.TargetFinished += TargetFinishedHandler;
-                eventSource.TaskStarted += TaskStartedHandler;
-                eventSource.TaskFinished += TaskFinishedHandler;
-                eventSource.ErrorRaised += ErrorHandler;
-                eventSource.WarningRaised += WarningHandler;
-                eventSource.MessageRaised += MessageHandler;
-                eventSource.CustomEventRaised += CustomEventHandler;
-                eventSource.StatusEventRaised += StatusEventHandler;
+                eventSource.HandleBuildStarted(BuildStartedHandler);
+                eventSource.HandleBuildFinished(BuildFinishedHandler);
+                eventSource.HandleProjectStarted(ProjectStartedHandler);
+                eventSource.HandleProjectFinished(ProjectFinishedHandler);
+                eventSource.HandleTargetStarted(TargetStartedHandler);
+                eventSource.HandleTargetFinished(TargetFinishedHandler);
+                eventSource.HandleTaskStarted(TaskStartedHandler);
+                eventSource.HandleTaskFinished(TaskFinishedHandler);
+                eventSource.HandleErrorRaised(ErrorHandler);
+                eventSource.HandleWarningRaised(WarningHandler);
+                eventSource.HandleMessageRaised(MessageHandler);
+                eventSource.HandleCustomEventRaised(CustomEventHandler);
+                eventSource.HandleStatusEventRaised(StatusEventHandler);
 
                 bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
                 if (logPropertiesAndItemsAfterEvaluation && eventSource is IEventSource4 eventSource4)

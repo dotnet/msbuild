@@ -56,9 +56,14 @@ namespace Microsoft.Build.Logging
         /// <param name="eventSource">Available events.</param>
         public override void Initialize(IEventSource eventSource)
         {
+            if (_initialized)
+            {
+                return;
+            }
             ErrorUtilities.VerifyThrowArgumentNull(eventSource);
             eventSource.BuildFinished += FileLoggerBuildFinished;
             InitializeFileLogger(eventSource, 1);
+            _initialized = true;
         }
 
         private void FileLoggerBuildFinished(object sender, BuildFinishedEventArgs e)
@@ -135,7 +140,12 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public override void Initialize(IEventSource eventSource, int nodeCount)
         {
+            if (_initialized)
+            {
+                return;
+            }
             InitializeFileLogger(eventSource, nodeCount);
+            _initialized = true;
         }
 
         /// <summary>
@@ -164,7 +174,12 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public override void Shutdown()
         {
+            if (_shutdown)
+            {
+                return;
+            }
             _fileWriter?.Dispose();
+            _shutdown = true;
         }
 
         /// <summary>
@@ -269,6 +284,10 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private Encoding _encoding = new UTF8Encoding(false);
 #endif
+
+        private bool _initialized;
+        private bool _shutdown;
+
         /// <summary>
         /// File logger parameters delimiters.
         /// </summary>
