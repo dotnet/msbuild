@@ -290,6 +290,7 @@ namespace Microsoft.Build.Execution
             HostServices = other.HostServices;
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
+            MultiThreaded = other.MultiThreaded;
             _memoryUseLimit = other._memoryUseLimit;
             _nodeExeLocation = other._nodeExeLocation;
             NodeId = other.NodeId;
@@ -543,6 +544,11 @@ namespace Microsoft.Build.Execution
                 _maxNodeCount = value;
             }
         }
+
+        /// <summary>
+        /// Enables running build in multiple in-proc nodes.
+        /// </summary>
+        public bool MultiThreaded { get; set; }
 
         /// <summary>
         /// The amount of memory the build should limit itself to using, in megabytes.

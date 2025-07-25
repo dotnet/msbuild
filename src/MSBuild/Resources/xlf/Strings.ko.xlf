@@ -235,6 +235,30 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -multithreaded
+                     MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
+                     즉, MSBuild는 여러 스레드를 사용하여
+                     프로젝트를 병렬로 빌드합니다.
+                     여러 프로세스 대신에 말이죠.
+                     이 옵션은 지원되지 않습니다.
+                     사용되는 최대 스레드 수는 
+에 의해 결정됩니다.
+                     -maxCpuCount 스위치에 의해 결정됩니다.
+                     (약식: -mt)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
