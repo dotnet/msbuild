@@ -1416,7 +1416,7 @@ public sealed partial class TerminalLogger : INodeLogger
             builder.Append(' ');
         }
 
-        if(!string.IsNullOrEmpty(file))
+        if(!string.IsNullOrEmpty(code))
         {
             builder.Append(code);
             builder.Append(": ");
