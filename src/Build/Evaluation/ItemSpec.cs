@@ -493,7 +493,7 @@ namespace Microsoft.Build.Evaluation
 
         protected virtual IMSBuildGlob CreateMsBuildGlob()
         {
-            return MSBuildGlob.Parse(ProjectDirectory, EscapingUtilities.UnescapeAll(TextFragment));
+            return MSBuildGlob.CreateGlob(ProjectDirectory, EscapingUtilities.UnescapeAll(TextFragment));
         }
 
         private FileSpecMatcherTester CreateFileSpecMatcher()
