@@ -35,9 +35,10 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
+  <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <!-- Need Win32 API on .NET Standard to ping registry for some methods in ToolLocationHelper -->
-    <PackageReference Include="Microsoft.Win32.Registry" />
+    <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
+    <PackageReference Update="System.Diagnostics.DiagnosticSource" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
