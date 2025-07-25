@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -13,6 +15,52 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
+    /// <summary>
+    /// Helper class to manage a global Mutex for file access synchronization.
+    /// </summary>
+    internal class SingleGlobalInstance : IDisposable
+    {
+        public bool HasHandle = false;
+        private Mutex mutex;
+
+        public SingleGlobalInstance(string mutexName, int millisecondsTimeout = -1)
+        {
+            try
+            {
+                mutex = new Mutex(false, mutexName);
+                HasHandle = mutex.WaitOne(millisecondsTimeout);
+            }
+            catch (AbandonedMutexException)
+            {
+                HasHandle = true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error creating mutex {mutexName}: {ex.Message}");
+            }
+        }
+
+        public void Dispose()
+        {
+            if (mutex != null)
+            {
+                if (HasHandle)
+                {
+                    try
+                    {
+                        mutex.ReleaseMutex();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error releasing mutex: {ex.Message}");
+                    }
+                }
+                mutex.Dispose();
+                mutex = null;
+            }
+        }
+    }
+
     /// <summary>
     /// Appends a list of items to a file. One item per line with carriage returns in-between.
     /// </summary>
@@ -32,6 +80,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] Lines { get; set; }
 
+        public bool HasHandle = false;
+
+        // Maximum number of retries for transactional write
+        private const int MaxRetries = 5;
+
+
         /// <summary>
         /// If true, overwrite any existing file contents.
         /// </summary>
@@ -48,6 +102,12 @@ namespace Microsoft.Build.Tasks
         /// timestamp will be preserved.
         /// </summary>
         public bool WriteOnlyWhenDifferent { get; set; }
+
+        /// <summary>
+        /// If true, use transactional write mode: write to a temp file, rename existing file, rename temp file to target, and delete old file.
+        /// Retries renaming if the file is locked.
+        /// </summary>
+        public bool Transactional { get; set; }
 
         /// <summary>
         /// Question whether this task is incremental.
@@ -97,10 +157,134 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
-                    if (Overwrite)
+                    string contentsAsString = buffer.ToString();
+
+                    string targetFile = File.ItemSpec;
+
+                    if (Transactional)
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.UsingTransactionalMode", targetFile);
+
+                        string mutexName;
+                        if (string.IsNullOrEmpty(targetFile))
+                        {
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, "Target file path is null or empty.", "");
+                            return false;
+                        }
+
+                        // Create a unique mutex name based on the target file path
+                        mutexName = "WriteLinesToFile_" + targetFile.ToLowerInvariant()
+                            .Replace(@"\", "_")
+                            .Replace(":", "_")
+                            .Replace("/", "_")
+                            .Replace("?", "_")
+                            .Replace("*", "_")
+                            .Replace("<", "_")
+                            .Replace(">", "_")
+                            .Replace("|", "_");
+
+                        // Retry acquiring mutex up to 3 times with 10-second delay
+                        int mutexRetries = 3;
+                        int mutexRetryDelayMs = 10000;
+                        bool acquiredMutex = false;
+
+                        for (int i = 0; i < mutexRetries && !acquiredMutex; i++)
+                        {
+                            // Attempt to acquire mutex with a 60-second timeout
+                            using (var mutexInstance = new SingleGlobalInstance(mutexName, 10000))
+                            {
+                                if (mutexInstance.HasHandle)
+                                {
+                                    acquiredMutex = true;
+                                    // Generate unique temporary file name
+                                    string tempFile = Path.Combine(directoryPath, $"temp_{Guid.NewGuid():N}");
+                                    try
+                                    {
+                                        string existingContent = string.Empty;
+                                        if (FileUtilities.FileExistsNoThrow(targetFile))
+                                        {
+                                            try
+                                            {
+                                                existingContent = System.IO.File.ReadAllText(targetFile, encoding);
+                                            }
+                                            catch (IOException ex)
+                                            {
+                                                // Log error if reading the target file fails
+                                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFileTransactional", targetFile, ex.Message);
+                                                return false;
+                                            }
+                                        }
+
+                                        // Check if temporary file already exists (should not happen due to unique name)
+                                        if (FileUtilities.FileExistsNoThrow(tempFile))
+                                        {
+                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", tempFile, "Temporary file already exists.", "");
+                                            return false;
+                                        }
+
+                                        // Write combined content to temporary file
+                                        System.IO.File.WriteAllText(tempFile, existingContent + contentsAsString, encoding);
+
+                                        // Attempt to replace target file with temporary file
+                                        int remainingAttempts = MaxRetries;
+                                        while (remainingAttempts-- > 0)
+                                        {
+                                            try
+                                            {
+                                                System.IO.File.Replace(tempFile, targetFile, null, true);
+                                                return true;
+                                            }
+                                            catch (FileNotFoundException)
+                                            {
+                                                System.IO.File.Move(tempFile, targetFile);
+                                                return true;
+                                            }
+                                            catch (IOException ex)
+                                            {
+                                                Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.Retry", targetFile, MaxRetries - remainingAttempts, MaxRetries, ex.Message);
+                                                Thread.Sleep(5);
+                                            }
+                                        }
+
+                                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, $"Failed to replace file after {MaxRetries} attempts.", "");
+                                        return false;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        // Catch any unexpected errors during file operations
+                                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, $"Unexpected error while processing file: {ex.Message}", "");
+                                        return false;
+                                    }
+                                    finally
+                                    {
+                                        // Clean up temporary file if it exists
+                                        if (FileUtilities.FileExistsNoThrow(tempFile))
+                                        {
+                                            try
+                                            {
+                                                System.IO.File.Delete(tempFile);
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorDeletingTempFile", tempFile, ex.Message);
+                                            }
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.Retry", targetFile, i + 1, mutexRetries, "Failed to acquire mutex.");
+                                    Thread.Sleep(mutexRetryDelayMs);
+                                }
+                            }
+                        }
+
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, $"Failed to acquire mutex after {mutexRetries} attempts.", "");
+                        return false;
+                    }
+                    else if (Overwrite)
                     {
                         Directory.CreateDirectory(directoryPath);
-                        string contentsAsString = buffer.ToString();
 
                         // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
                         if (WriteOnlyWhenDifferent)
