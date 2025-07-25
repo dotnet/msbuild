@@ -22,16 +22,15 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create();
             var bootstrapCoreFolder = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
-            _ = env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", Path.Combine(RunnerUtilities.BootstrapRootPath, "core"));
-            _ = env.SetEnvironmentVariable("MSBuildAssemblyDirectory", Path.Combine(RunnerUtilities.BootstrapRootPath, "core", "sdk", RunnerUtilities.BootstrapSdkVersion));
-
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:m", out bool successTestTask);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{testProjectPath} -restore -v:n",
+                out bool successTestTask);
             successTestTask.ShouldBeTrue();
 
             testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
-            testTaskOutput.ShouldContain($"Process path: {Path.Combine(bootstrapCoreFolder, Constants.DotnetProcessName)}");
+            testTaskOutput.ShouldContain($"Process path: {Path.Combine(bootstrapCoreFolder, Constants.DotnetProcessName)}", customMessage: testTaskOutput);
         }
     }
 }
