@@ -367,7 +367,8 @@ namespace Microsoft.Build.BackEnd
                     projectLoggingContext.BuildEventContext);
                 _state = TargetEntryState.Completed;
 
-                if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                if (projectLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&
+                    !projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
                     string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _target.ConditionLocation);
