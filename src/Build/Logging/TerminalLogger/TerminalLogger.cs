@@ -726,10 +726,13 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
-    private static string CreateLink(Uri? uri, string linkText) =>
-        uri is null
-            ? linkText
-            : $"{AnsiCodes.LinkPrefix}{uri}{AnsiCodes.LinkInfix}{linkText}{AnsiCodes.LinkSuffix}";
+    private static string? CreateLink(Uri? uri, string? linkText) =>
+        (uri, linkText) switch
+        {
+            (null, _) => string.IsNullOrEmpty(linkText) ? null : linkText,
+            (_, null) => null,
+            _ => $"{AnsiCodes.LinkPrefix}{uri}{AnsiCodes.LinkInfix}{linkText}{AnsiCodes.LinkSuffix}",
+        };
 
     private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
     {
@@ -1030,7 +1033,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
         else
         {
-            // It is necessary to display warning messages reported by MSBuild, 
+            // It is necessary to display warning messages reported by MSBuild,
             // even if it's not tracked in _projects collection or the verbosity is Quiet.
             // The idea here (similar to the implementation in ErrorRaised) is that
             // even in Quiet scenarios we need to show warnings/errors, even if not in
@@ -1342,7 +1345,7 @@ public sealed partial class TerminalLogger : INodeLogger
             string? category,
             string? subcategory,
             string? message,
-            string code,
+            string? code,
             string? file,
             int lineNumber,
             int endLineNumber,
@@ -1407,13 +1410,17 @@ public sealed partial class TerminalLogger : INodeLogger
             builder.Append(' ');
         }
 
-        if (string.IsNullOrEmpty(category))
+        if (!string.IsNullOrEmpty(category))
         {
             builder.Append(category);
             builder.Append(' ');
         }
-        builder.Append(code);
-        builder.Append(": ");
+
+        if(!string.IsNullOrEmpty(file))
+        {
+            builder.Append(code);
+            builder.Append(": ");
+        }
 
         // render multi-line message in a special way
         if (message.Contains('\n'))
