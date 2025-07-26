@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
@@ -429,7 +428,7 @@ namespace Microsoft.Build.Shared
 #if RUNTIME_TYPE_NETCORE
             // Assembly.GetEntryAssembly() can return null when a managed assembly has been loaded from
             // an unmanaged application (for example, using custom CLR hosting).
-            if (Assembly.GetEntryAssembly() is not { } entryAsm)
+            if (System.Reflection.Assembly.GetEntryAssembly() is not { } entryAsm)
             {
                 return EnvironmentUtilities.ProcessPath;
             }
