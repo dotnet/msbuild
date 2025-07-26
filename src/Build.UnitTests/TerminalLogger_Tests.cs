@@ -210,14 +210,6 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private BuildWarningEventArgs MakeWarningEventArgs(string warning)
-        {
-            return new BuildWarningEventArgs("", "AA0000", "directory/file", 1, 2, 3, 4, warning, null, null)
-            {
-                BuildEventContext = MakeBuildEventContext(),
-            };
-        }
-
         private BuildWarningEventArgs MakeCopyRetryWarning(int retryCount)
         {
             return new BuildWarningEventArgs("", "MSB3026", "directory/file", 1, 2, 3, 4,
@@ -228,9 +220,9 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private BuildMessageEventArgs MakeMessageEventArgs(string message, MessageImportance importance)
+        private BuildMessageEventArgs MakeMessageEventArgs(string message, MessageImportance importance, string? code = null, string? keyword = "keyword")
         {
-            return new BuildMessageEventArgs(message, "keyword", null, importance)
+            return new BuildMessageEventArgs(message: message, helpKeyword: keyword, senderName: null, importance: importance, eventTimestamp: DateTime.UtcNow, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, code: code, subcategory: null, file: null)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
@@ -253,9 +245,17 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private BuildErrorEventArgs MakeErrorEventArgs(string error)
+        private BuildErrorEventArgs MakeErrorEventArgs(string error, string? link = null, string? keyword = null)
         {
-            return new BuildErrorEventArgs("", "AA0000", "directory/file", 1, 2, 3, 4, error, null, null)
+            return new BuildErrorEventArgs(subcategory: null, code: "AA0000", file: "directory/file", lineNumber: 1, columnNumber: 2, endLineNumber: 3, endColumnNumber: 4, message: error, helpKeyword: keyword, helpLink: link, senderName: null, eventTimestamp: DateTime.UtcNow)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+        }
+
+        private BuildWarningEventArgs MakeWarningEventArgs(string warning, string? link = null, string? keyword = null)
+        {
+            return new BuildWarningEventArgs(subcategory: null, code: "AA0000", file: "directory/file", lineNumber: 1, columnNumber: 2, endLineNumber: 3, endColumnNumber: 4, message: warning, helpKeyword: keyword, helpLink: link, senderName: null, eventTimestamp: DateTime.UtcNow)
             {
                 BuildEventContext = MakeBuildEventContext(),
             };
@@ -533,6 +533,7 @@ namespace Microsoft.Build.UnitTests
             ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
         }
 
+
         private void CallAllTypesOfTestMessages()
         {
             MessageRaised?.Invoke(_eventSender, MakeExtendedMessageEventArgs(
@@ -792,6 +793,51 @@ namespace Microsoft.Build.UnitTests
                 mockLogFromPlaybackWithoutTL.EvaluationFinishedEvents.ShouldContain(x => (x.Properties != null) && x.Properties.GetEnumerator().MoveNext());
                 mockLogFromPlaybackWithTL.EvaluationFinishedEvents.ShouldContain(x => (x.Properties != null) && x.Properties.GetEnumerator().MoveNext());
             }
+        }
+
+        [Fact]
+        public async Task PrintMessageLinks()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+            _terminallogger.ParseParameters();
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("this message has a link because it has a code and a keyword", MessageImportance.High, code: "1234", keyword: "keyword"));
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("this message has no link because it only has a code", MessageImportance.High, code: "1234", keyword: null));
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("this message has no link because it only has a keyword", MessageImportance.High, keyword: "keyword"));
+            });
+
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+
+        [Fact]
+        public async Task PrintWarningLinks()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has a link because it has an explicit link", link: "https://example.com"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has a link because it has a keyword", keyword: "keyword"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has a link to example.com because links take precedence over keywords", link: "https://example.com", keyword: "keyword"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has no link because it has no link or keyword"));
+            });
+
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+        
+        [Fact]
+        public async Task PrintErrorLinks()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has a link because it has an explicit link", link: "https://example.com"));
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has a link because it has a keyword", keyword: "keyword"));
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has a link to example.com because links take precedence over keywords", link: "https://example.com", keyword: "keyword"));
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has no link because it has no link or keyword"));
+            });
+
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
     }
 }
