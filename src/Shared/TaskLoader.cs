@@ -4,6 +4,10 @@
 using System;
 using Microsoft.Build.Framework;
 
+#if FEATURE_APPDOMAIN
+using System.Reflection;
+#endif
+
 namespace Microsoft.Build.Shared
 {
     /// <summary>

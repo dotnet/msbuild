@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-#if FEATURE_COMPILE_IN_TESTS
 using System.Reflection;
-#endif
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -24,7 +22,6 @@ using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using System.Reflection;
 #if FEATURE_COMPILE_IN_TESTS
 using Microsoft.Build.Shared;
 #endif
