@@ -1067,7 +1067,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool IsAuthProviderMessage(string? message) =>
+    private static bool IsAuthProviderMessage(string? message) =>
 #if NET
         message is not null && message.AsSpan().ContainsAny(_authProviderMessageKeywords);
 #else
@@ -1075,8 +1075,25 @@ public sealed partial class TerminalLogger : INodeLogger
 #endif
 
 
-    private bool IsImmediateWarning(string code) => code == "MSB3026";
+    private static bool IsImmediateWarning(string code) => code == "MSB3026";
 
+    private static Uri? GenerateLinkForError(BuildErrorEventArgs e)
+    {
+        if (e.HelpLink is not null && Uri.TryCreate(e.HelpLink, UriKind.Absolute, out Uri? uri))
+        {
+            return uri;
+        }
+        else if (e.HelpKeyword is not null)
+        {
+            // generate a default help keyword based link? fw?...
+            return GenerateLinkForHelpKeyword(e.HelpKeyword);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
@@ -1095,23 +1112,6 @@ public sealed partial class TerminalLogger : INodeLogger
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
             RenderImmediateMessage(FormatErrorMessage(e, Indentation));
             _buildErrorsCount++;
-        }
-    }
-
-    private Uri? GenerateLinkForError(BuildErrorEventArgs e)
-    {
-        if (e.HelpLink is not null && Uri.TryCreate(e.HelpLink, UriKind.Absolute, out Uri? uri))
-        {
-            return uri;
-        }
-        else if (e.HelpKeyword is not null)
-        {
-            // generate a default help keyword based link? fw?...
-            return GenerateLinkForHelpKeyword(e.HelpKeyword);
-        }
-        else
-        {
-            return null;
         }
     }
 
@@ -1416,7 +1416,7 @@ public sealed partial class TerminalLogger : INodeLogger
             builder.Append(' ');
         }
 
-        if(!string.IsNullOrEmpty(code))
+        if (!string.IsNullOrEmpty(code))
         {
             builder.Append(code);
             builder.Append(": ");
