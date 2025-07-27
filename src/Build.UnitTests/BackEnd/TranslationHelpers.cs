@@ -6,6 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if FEATURE_ASSEMBLYLOADCONTEXT
+using System.Runtime.Loader;
+#endif
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -146,16 +149,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 if (left.GetType() != right.GetType())
                 {
                     // Handle known type conversions during serialization
-                    if (!IsKnownMovedType(left, right))
-                    {
-                        diffReason = $"Exception types are different ({left.GetType().FullName} vs {right.GetType().FullName}).";
-                        return false;
-                    }
-                    else
+                    if (IsKnownMovedType(left, right))
                     {
                         // For known moved types, skip detailed property comparison since types are different
                         // but this is expected behavior - just return true since basic checks passed
                         return true;
+                    }
+                    else
+                    {
+                        string leftName = left.GetType().FullName;
+                        string rightName = right.GetType().FullName;
+#if FEATURE_ASSEMBLYLOADCONTEXT
+                        AssemblyLoadContext leftContext = AssemblyLoadContext.GetLoadContext(left.GetType().Assembly);
+                        AssemblyLoadContext rightContext = AssemblyLoadContext.GetLoadContext(right.GetType().Assembly);
+                        if (leftName == rightName && leftContext != rightContext)
+                        {
+                            diffReason = $"Exception types are the same ({leftName}) but loaded from different assembly load contexts ({leftContext} vs {rightContext}).";
+                        }
+                        else
+#endif
+                        {
+                            diffReason = $"Exception types are different ({leftName} vs {rightName}).";
+                        }
+
+                        return false;
                     }
                 }
 
