@@ -6,6 +6,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+#if NET
+using System.Runtime.Loader;
+#endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -283,6 +286,9 @@ namespace Microsoft.Build.UnitTests
             LoadedType loadedType = loader.Load(String.Empty, AssemblyLoadInfo.Create(null, forwardingLoggerAssemblyLocation));
             Assert.NotNull(loadedType);
             Assert.Equal(forwardingLoggerAssemblyLocation, loadedType.Assembly.AssemblyLocation);
+#if NET
+            Assert.Equal(AssemblyLoadContext.GetLoadContext(firstPublicType.Assembly), AssemblyLoadContext.GetLoadContext(loadedType.Type.Assembly));
+#endif
             Assert.Equal(firstPublicType, loadedType.Type);
 
 
