@@ -72,8 +72,20 @@ namespace Microsoft.Build.UnitTests
         [InlineData(null, true, true, "off", typeof(ConsoleLogger))]
         [InlineData(null, true, true, "false", typeof(ConsoleLogger))]
         [InlineData("--tl:off", true, true, "", typeof(ConsoleLogger))]
+        [InlineData("--tl:false", true, true, "", typeof(ConsoleLogger))]
         [InlineData(null, true, true, "", typeof(TerminalLogger))]
-        [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))]
+        [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))] // arg overrides env
+        [InlineData("-tl:true", true, true, "off", typeof(TerminalLogger))] // arg overrides env
+        [InlineData("-tl:off", true, true, "on", typeof(ConsoleLogger))] // arg overrides env (disable)
+        [InlineData("-tl:false", true, true, "true", typeof(ConsoleLogger))] // arg overrides env (disable)
+        [InlineData("-tl:on", false, false, "", typeof(TerminalLogger))] // Force when explicitly set to "on"
+        [InlineData("-tl:true", false, false, "", typeof(TerminalLogger))] // Force when explicitly set to "true"
+        [InlineData("-tl:on", true, false, "", typeof(TerminalLogger))] // Force when explicitly set to "on"
+        [InlineData("-tl:true", false, true, "", typeof(TerminalLogger))] // Force when explicitly set to "true"
+        [InlineData(null, false, false, "on", typeof(TerminalLogger))] // Force when env var set to "on"
+        [InlineData(null, false, false, "true", typeof(TerminalLogger))] // Force when env var set to "true"
+        [InlineData(null, true, false, "on", typeof(TerminalLogger))] // Force when env var set to "on"
+        [InlineData(null, false, true, "true", typeof(TerminalLogger))] // Force when env var set to "true"
         public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string? argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, Type expectedType)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();

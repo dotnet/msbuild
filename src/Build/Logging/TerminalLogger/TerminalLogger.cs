@@ -250,7 +250,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             string argsString = string.Join(" ", args);
 
-            MatchCollection tlMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off)", RegexOptions.IgnoreCase);
+            MatchCollection tlMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false)", RegexOptions.IgnoreCase);
             tlArg = tlMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value ?? string.Empty;
 
             MatchCollection verbosityMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
@@ -272,12 +272,29 @@ public sealed partial class TerminalLogger : INodeLogger
             verbosity = parsedVerbosity;
         }
 
-        bool isDisabled =
-            tlArg.Equals("on", StringComparison.InvariantCultureIgnoreCase) ? false :
-            tlArg.Equals("off", StringComparison.InvariantCultureIgnoreCase) ? true :
-            tlEnvVariable.Equals("off", StringComparison.InvariantCultureIgnoreCase) || tlEnvVariable.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase);
+        // Command line arguments take precedence over environment variables
+        bool isForced = false;
+        bool isDisabled = false;
 
-        if (isDisabled || !supportsAnsi || !outputIsScreen)
+        if (!string.IsNullOrEmpty(tlArg))
+        {
+            // Command line argument provided - it takes precedence
+            isForced = tlArg.Equals("on", StringComparison.InvariantCultureIgnoreCase) || 
+                       tlArg.Equals("true", StringComparison.InvariantCultureIgnoreCase);
+            isDisabled = tlArg.Equals("off", StringComparison.InvariantCultureIgnoreCase) || 
+                        tlArg.Equals("false", StringComparison.InvariantCultureIgnoreCase);
+        }
+        else if (!string.IsNullOrEmpty(tlEnvVariable))
+        {
+            // No command line argument, check environment variable
+            isForced = tlEnvVariable.Equals("on", StringComparison.InvariantCultureIgnoreCase) || 
+                       tlEnvVariable.Equals("true", StringComparison.InvariantCultureIgnoreCase);
+            isDisabled = tlEnvVariable.Equals("off", StringComparison.InvariantCultureIgnoreCase) || 
+                        tlEnvVariable.Equals("false", StringComparison.InvariantCultureIgnoreCase) || 
+                        tlEnvVariable.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        if (isDisabled || (!isForced && (!supportsAnsi || !outputIsScreen)))
         {
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
             return new ConsoleLogger(verbosity);
