@@ -273,34 +273,59 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         // Command line arguments take precedence over environment variables
-        bool isForced = false;
-        bool isDisabled = false;
+        string effectiveValue = !string.IsNullOrEmpty(tlArg) ? tlArg : tlEnvVariable;
 
-        if (!string.IsNullOrEmpty(tlArg))
-        {
-            // Command line argument provided - it takes precedence
-            isForced = tlArg.Equals("on", StringComparison.InvariantCultureIgnoreCase) || 
-                       tlArg.Equals("true", StringComparison.InvariantCultureIgnoreCase);
-            isDisabled = tlArg.Equals("off", StringComparison.InvariantCultureIgnoreCase) || 
-                        tlArg.Equals("false", StringComparison.InvariantCultureIgnoreCase);
-        }
-        else if (!string.IsNullOrEmpty(tlEnvVariable))
-        {
-            // No command line argument, check environment variable
-            isForced = tlEnvVariable.Equals("on", StringComparison.InvariantCultureIgnoreCase) || 
-                       tlEnvVariable.Equals("true", StringComparison.InvariantCultureIgnoreCase);
-            isDisabled = tlEnvVariable.Equals("off", StringComparison.InvariantCultureIgnoreCase) || 
-                        tlEnvVariable.Equals("false", StringComparison.InvariantCultureIgnoreCase) || 
-                        tlEnvVariable.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase);
-        }
+        bool isForced = IsTerminalLoggerEnabled(effectiveValue);
+        bool isDisabled = IsTerminalLoggerDisabled(effectiveValue);
 
-        if (isDisabled || (!isForced && (!supportsAnsi || !outputIsScreen)))
+        // if forced, always use the Terminal Logger
+        if (isForced)
+        {
+            return new TerminalLogger(verbosity, originalConsoleMode);
+        }
+        
+        // If explicitly disabled, always use console logger
+        if (isDisabled)
         {
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
             return new ConsoleLogger(verbosity);
         }
 
-        return new TerminalLogger(verbosity, originalConsoleMode);
+        // If not forced and system doesn't support terminal features, fall back to console logger
+        if (supportsAnsi && outputIsScreen)
+        {
+            return new TerminalLogger(verbosity, originalConsoleMode);
+        }
+        else
+        {
+            // otherwise the state only allows fallback to console logger
+            NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
+            return new ConsoleLogger(verbosity);
+        }
+    }
+
+    /// <summary>
+    /// Checks if the given value indicates TerminalLogger should be enabled/forced.
+    /// </summary>
+    /// <param name="value">The value to check (from command line or environment variable)</param>
+    /// <returns>True if the value indicates TerminalLogger should be enabled</returns>
+    private static bool IsTerminalLoggerEnabled(string? value)
+    {
+        return !string.IsNullOrEmpty(value) &&
+               (value.Equals("on", StringComparison.InvariantCultureIgnoreCase) ||
+                value.Equals("true", StringComparison.InvariantCultureIgnoreCase));
+    }
+
+    /// <summary>
+    /// Checks if the given value indicates TerminalLogger should be disabled.
+    /// </summary>
+    /// <param name="value">The value to check (from command line or environment variable)</param>
+    /// <returns>True if the value indicates TerminalLogger should be disabled</returns>
+    private static bool IsTerminalLoggerDisabled(string? value)
+    {
+        return !string.IsNullOrEmpty(value) &&
+               (value.Equals("off", StringComparison.InvariantCultureIgnoreCase) ||
+                value.Equals("false", StringComparison.InvariantCultureIgnoreCase));
     }
 
     #region INodeLogger implementation
