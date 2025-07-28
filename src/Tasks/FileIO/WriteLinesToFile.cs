@@ -200,30 +200,30 @@ namespace Microsoft.Build.Tasks
                                     string tempFile = Path.Combine(directoryPath, $"temp_{Guid.NewGuid():N}");
                                     try
                                     {
-                                        string existingContent = string.Empty;
+                                        // Copy existing file to temp file if it exists
                                         if (FileUtilities.FileExistsNoThrow(targetFile))
                                         {
                                             try
                                             {
-                                                existingContent = System.IO.File.ReadAllText(targetFile, encoding);
+                                                System.IO.File.Copy(targetFile, tempFile);
                                             }
                                             catch (IOException ex)
                                             {
-                                                // Log error if reading the target file fails
                                                 Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFileTransactional", targetFile, ex.Message);
                                                 return false;
                                             }
                                         }
 
-                                        // Check if temporary file already exists (should not happen due to unique name)
-                                        if (FileUtilities.FileExistsNoThrow(tempFile))
+                                        // Append new content to temp file
+                                        try
                                         {
-                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", tempFile, "Temporary file already exists.", "");
+                                            System.IO.File.AppendAllText(tempFile, contentsAsString, encoding);
+                                        }
+                                        catch (IOException ex)
+                                        {
+                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", tempFile, $"Failed to append to temporary file: {ex.Message}", "");
                                             return false;
                                         }
-
-                                        // Write combined content to temporary file
-                                        System.IO.File.WriteAllText(tempFile, existingContent + contentsAsString, encoding);
 
                                         // Attempt to replace target file with temporary file
                                         int remainingAttempts = MaxRetries;
