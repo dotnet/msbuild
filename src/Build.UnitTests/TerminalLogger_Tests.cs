@@ -86,6 +86,14 @@ namespace Microsoft.Build.UnitTests
         [InlineData(null, false, false, "true", typeof(TerminalLogger))] // Force when env var set to "true"
         [InlineData(null, true, false, "on", typeof(TerminalLogger))] // Force when env var set to "on"
         [InlineData(null, false, true, "true", typeof(TerminalLogger))] // Force when env var set to "true"
+        [InlineData("-tl:auto", false, false, "", typeof(ConsoleLogger))] // Auto respects system capabilities (no ANSI, no screen)
+        [InlineData("-tl:auto", true, false, "", typeof(ConsoleLogger))] // Auto respects system capabilities (ANSI but no screen)
+        [InlineData("-tl:auto", false, true, "", typeof(ConsoleLogger))] // Auto respects system capabilities (screen but no ANSI)
+        [InlineData("-tl:auto", true, true, "", typeof(TerminalLogger))] // Auto respects system capabilities (both ANSI and screen)
+        [InlineData("-tl:auto", true, true, "off", typeof(TerminalLogger))] // Auto ignores env var when explicitly set
+        [InlineData("-tl:auto", false, false, "on", typeof(ConsoleLogger))] // Auto ignores env var and respects system capabilities
+        [InlineData(null, false, false, "auto", typeof(ConsoleLogger))] // Auto via env var respects system capabilities
+        [InlineData(null, true, true, "auto", typeof(TerminalLogger))] // Auto via env var respects system capabilities
         public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string? argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, Type expectedType)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
