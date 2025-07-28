@@ -309,24 +309,20 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="value">The value to check (from command line or environment variable)</param>
     /// <returns>True if the value indicates TerminalLogger should be enabled</returns>
-    private static bool IsTerminalLoggerEnabled(string? value)
-    {
-        return !string.IsNullOrEmpty(value) &&
-               (value.Equals("on", StringComparison.InvariantCultureIgnoreCase) ||
-                value.Equals("true", StringComparison.InvariantCultureIgnoreCase));
-    }
+    private static bool IsTerminalLoggerEnabled(string? value) =>
+        value is { Length: > 0 } &&
+            (value.Equals("on", StringComparison.InvariantCultureIgnoreCase) ||
+             value.Equals("true", StringComparison.InvariantCultureIgnoreCase));
 
     /// <summary>
     /// Checks if the given value indicates TerminalLogger should be disabled.
     /// </summary>
     /// <param name="value">The value to check (from command line or environment variable)</param>
     /// <returns>True if the value indicates TerminalLogger should be disabled</returns>
-    private static bool IsTerminalLoggerDisabled(string? value)
-    {
-        return !string.IsNullOrEmpty(value) &&
-               (value.Equals("off", StringComparison.InvariantCultureIgnoreCase) ||
-                value.Equals("false", StringComparison.InvariantCultureIgnoreCase));
-    }
+    private static bool IsTerminalLoggerDisabled(string? value) =>
+        value is { Length: > 0 } &&
+            (value.Equals("off", StringComparison.InvariantCultureIgnoreCase) ||
+             value.Equals("false", StringComparison.InvariantCultureIgnoreCase));
 
     #region INodeLogger implementation
 
