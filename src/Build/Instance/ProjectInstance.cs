@@ -521,7 +521,7 @@ namespace Microsoft.Build.Execution
                     if (import.ImportedProject != null)
                     {
                         paths.Add(import.ImportedProject.FullPath);
-        }
+                    }
                 }
 
                 return paths;
@@ -1143,14 +1143,7 @@ namespace Microsoft.Build.Execution
                     return ReadOnlyEmptyDictionary<string, string>.Instance;
                 }
 
-                Dictionary<string, string> dictionary = new Dictionary<string, string>(_globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
-
-                foreach (ProjectPropertyInstance property in _globalProperties)
-                {
-                    dictionary[property.Name] = ((IProperty)property).EvaluatedValueEscaped;
-                }
-
-                return new ObjectModel.ReadOnlyDictionary<string, string>(dictionary);
+                return _globalProperties.ToReadOnlyDictionary();
             }
         }
 
