@@ -234,6 +234,29 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -multiproceso
+                     Habilita el modo multiproceso EXPERIMENTAL en MSBuild.
+                     Esto significa que MSBuild usará varios subprocesos
+                     para compilar proyectos en paralelo,
+                     en lugar de varios procesos.
+                     Esta opción no se admite.
+                     El número máximo de subprocesos usados viene determinado por el
+                     Modificador -maxCpuCount.
+                     (Forma corta: -mt)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
