@@ -333,6 +333,11 @@ namespace Microsoft.Build.Collections
         /// <returns>True if a property with a matching name was found. False otherwise.</returns>
         public bool TryGetPropertyUnescapedValue(string propertyName, out string unescapedValue)
         {
+            if (_properties is IRetrievableUnescapedValuedEntryHashSet unescapedProperties)
+            {
+                return unescapedProperties.TryGetUnescapedValue(propertyName, out unescapedValue);
+            }
+
             if (_properties.TryGetEscapedValue(propertyName, out string escapedValue) && escapedValue != null)
             {
                 unescapedValue = EscapingUtilities.UnescapeAll(escapedValue);

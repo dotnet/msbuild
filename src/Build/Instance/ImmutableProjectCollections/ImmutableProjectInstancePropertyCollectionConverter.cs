@@ -15,7 +15,8 @@ namespace Microsoft.Build.Instance
     /// <inheritdoc />
     internal sealed class ImmutableProjectInstancePropertyCollectionConverter :
         ImmutableElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>,
-        IRetrievableValuedEntryHashSet<ProjectPropertyInstance>
+        IRetrievableValuedEntryHashSet<ProjectPropertyInstance>,
+        IRetrievableUnescapedValuedEntryHashSet
     {
         private readonly Project _linkedProject;
 
@@ -31,18 +32,29 @@ namespace Microsoft.Build.Instance
 
         public bool TryGetEscapedValue(string key, out string escapedValue)
         {
-            string unescapedValue = _linkedProject.GetPropertyValue(key);
+            if (TryGetUnescapedValue(key, out string unescapedValue))
+            {
+                escapedValue = EscapingUtilities.Escape(unescapedValue);
+                return true;
+            }
+
+            escapedValue = null;
+            return false;
+        }
+
+        public bool TryGetUnescapedValue(string key, out string unescapedValue)
+        {
+            unescapedValue = _linkedProject.GetPropertyValue(key);
             if (string.IsNullOrEmpty(unescapedValue))
             {
                 // maintain the behavior of the original implementation
                 if (!ContainsKey(key))
                 {
-                    escapedValue = null;
+                    unescapedValue = null;
                     return false;
                 }
             }
 
-            escapedValue = EscapingUtilities.Escape(unescapedValue);
             return true;
         }
     }
