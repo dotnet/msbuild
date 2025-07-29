@@ -98,8 +98,8 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                             CommunicationsUtilities.Trace("({0}) Completed RAR request.", _endpointId);
                             break;
                         case NodePacketType.NodeShutdown:
-                            // Although the client has already disconnected, it is still necessary to Diconnect() so the
-                            // pipe can transition into PipeState.Disonnected, which is treated as an intentional pipe break.
+                            // Although the client has already disconnected, it is still necessary to Disconnect() so the
+                            // pipe can transition into PipeState.Disconnected, which is treated as an intentional pipe break.
                             // Otherwise, all future operations on the pipe will throw an exception.
                             CommunicationsUtilities.Trace("({0}) RAR client disconnected.", _endpointId);
                             _pipeServer.Disconnect();
