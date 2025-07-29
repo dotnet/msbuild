@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Only two of the items should have the 'a1' include.
             Assert.Equal(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
             // And ensure the other item got added.
-            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
+            Assert.Single(group, item => item.EvaluatedInclude == "a2");
 
             scope.LeaveScope();
 
@@ -188,7 +188,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Only two of the items should have the 'a1' include.
             Assert.Equal(2, group.Where(item => item.EvaluatedInclude == "a1").Count());
             // And ensure the other item got added.
-            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
+            Assert.Single(group, item => item.EvaluatedInclude == "a2");
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
 
             // One item will have the a2 include
-            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
+            Assert.Single(group, item => item.EvaluatedInclude == "a2");
 
             scope.LeaveScope();
 
@@ -242,7 +242,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(4, group.Where(item => item.EvaluatedInclude == "a1").Count());
 
             // One item will have the a2 include
-            Assert.Single(group.Where(item => item.EvaluatedInclude == "a2"));
+            Assert.Single(group, item => item.EvaluatedInclude == "a2");
         }
 
         [Fact]
