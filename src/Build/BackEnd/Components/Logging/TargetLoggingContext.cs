@@ -90,7 +90,9 @@ namespace Microsoft.Build.BackEnd.Logging
             TargetOutputItemsInstanceEnumeratorProxy targetOutputWrapper = null;
 
             // Only log target outputs if we are going to log a target finished event and the environment variable is set and the target outputs are not null
-            if (!LoggingService.OnlyLogCriticalEvents && LoggingService.EnableTargetOutputLogging && targetOutputs != null)
+            if (!LoggingService.OnlyLogCriticalEvents
+                && (LoggingService.EnableTargetOutputLogging || Traits.Instance.EnableTargetOutputLogging)
+                && targetOutputs != null)
             {
                 targetOutputWrapper = new TargetOutputItemsInstanceEnumeratorProxy(targetOutputs);
             }
