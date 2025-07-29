@@ -18,6 +18,9 @@ parameters:
 - name: codeSignValidationBreak
   type: boolean
   default: false
+- name: _SignType
+  type: boolean
+  value: test
 
 jobs:
 # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
