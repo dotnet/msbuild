@@ -33,6 +33,7 @@ jobs:
       MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
       JobNameSuffix: '_release'
       condition: ${{ variables.EnableReleaseOneLocBuild }}
+
 # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
 - ${{ if and(parameters.enableLocalization, eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
   - template: /eng/common/templates-official/job/onelocbuild.yml@self
@@ -44,15 +45,20 @@ jobs:
       JobNameSuffix: '_main'
       condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
 
-- job: Windows_NT
-  template: /eng/common/templates-official/job/job.yml@self
+# Fixed: Use the job template that installs MicroBuild plugins
+- template: /eng/common/templates-official/job/job.yml@self
   parameters:
     enableMicrobuild: ${{ parameters.enableMicrobuild }}
+    enablePublishBuildArtifacts: true
+    enablePublishTestResults: false
+    enablePublishBuildAssets: false
+    enableBuildRetry: true
+    jobName: Windows_NT
+    timeoutInMinutes: 180
     pool:
       name: VSEngSS-MicroBuild2022-1ES
       demands:
       - agent.os -equals Windows_NT
-    timeoutInMinutes: 180
     variables:
     - group: Publish-Build-Assets
     - name: TeamName
