@@ -1077,7 +1077,8 @@ namespace Microsoft.Build.Execution
                 out IDictionary<string, ProjectProperty> elementsDictionary,
                 out IDictionary<(string, int, int), ProjectProperty> constrainedElementsDictionary);
 
-            var hashSet = new ImmutableValuedElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(
+            var hashSet = new ImmutableProjectInstancePropertyCollectionConverter(
+                                linkedProject,
                                 elementsDictionary,
                                 constrainedElementsDictionary,
                                 ConvertCachedPropertyToInstance);
@@ -3506,7 +3507,7 @@ namespace Microsoft.Build.Execution
             {
                 if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
                 {
-                    directMetadata = new ImmutablePropertyCollectionConverter<ProjectMetadata, ProjectMetadataInstance>(metadataDict, ConvertCachedProjectMetadataToInstance);
+                    directMetadata = new ImmutableProjectMetadataCollectionConverter(item, metadataDict, ConvertCachedProjectMetadataToInstance);
                 }
                 else
                 {
