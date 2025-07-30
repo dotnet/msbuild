@@ -38,12 +38,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
                 string pidTaskProject = $@"
 <Project>
-<UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""{taskFactory}"" />
-<Target Name='AccessPID'>
-    <ProcessIdTask>
-        <Output PropertyName=""PID"" TaskParameter=""Pid"" />
-    </ProcessIdTask>
-</Target>
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""{taskFactory}"" />
+    <Target Name='AccessPID'>
+        <ProcessIdTask>
+            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
+        </ProcessIdTask>
+    </Target>
 </Project>";
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);
                     
