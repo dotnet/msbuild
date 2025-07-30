@@ -1368,7 +1368,10 @@ namespace Microsoft.Build.Execution
                     lock (_taskNamesCreatableByFactoryLock)
                     {
                         // Keep a cache of task identities which have been checked against the factory, this is useful because we ask this question everytime we get a registered task record or a taskFactory wrapper.
-                        _taskNamesCreatableByFactory ??= new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                        if (_taskNamesCreatableByFactory == null)
+                        {
+                            _taskNamesCreatableByFactory = new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                        }
                     }
                 }
 
