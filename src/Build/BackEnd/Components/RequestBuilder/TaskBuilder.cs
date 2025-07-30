@@ -618,7 +618,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
-                    if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                    if (_targetLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&
+                        !_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
                         string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
