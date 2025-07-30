@@ -8,7 +8,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Microsoft.Runtime.Hosting;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -81,7 +80,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
                 }
                 else
                 {
-                    Assert.True(false, "Key container could not be created (perhaps you are not running as admin).");
+                    Assert.Fail("Key container could not be created (perhaps you are not running as admin).");
                 }
             }
             finally

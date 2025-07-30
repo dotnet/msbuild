@@ -54,7 +54,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 byte[] buffer = new byte[2];
-                s.Read(buffer, 0, 2);
+                s.ReadExactly(buffer, 0, 2);
                 s.Position = 0;
                 var document = new XmlDocument();
                 var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 byte[] buffer = new byte[2];
-                s.Read(buffer, 0, 2);
+                s.ReadExactly(buffer, 0, 2);
                 s.Position = 0;
                 // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
                 if ((buffer[0] == 0x4D) && (buffer[1] == 0x5A))
@@ -224,8 +224,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static Manifest Deserialize(Stream s)
         {
             s.Position = 0;
-            var r = new XmlTextReader(s) { DtdProcessing = DtdProcessing.Ignore };
-
+            var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = false };
+            using XmlReader r = XmlReader.Create(s, settings);
             do
             {
                 r.Read();
@@ -238,11 +238,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var xs = new XmlSerializer(t);
 
             int t1 = Environment.TickCount;
-            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+            var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = false };
             using (XmlReader xr = XmlReader.Create(s, xrSettings))
             {
                 var m = (Manifest)xs.Deserialize(xr);
-                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestReader.Deserialize t={0}", Environment.TickCount - t1));
+                Util.WriteLog($"ManifestReader.Deserialize t={Environment.TickCount - t1}");
                 return m;
             }
         }

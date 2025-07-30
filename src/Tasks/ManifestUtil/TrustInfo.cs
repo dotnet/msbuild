@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 #if !RUNTIME_TYPE_NETCORE
@@ -500,7 +499,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // Partial trust is not supported on .NET Core.
             // Fail if loaded manifest does not specify full-trust.
             // It can happen if manifest is manually modifed.
-            if (unrestrictedAttribute == null || (false == Boolean.Parse(unrestrictedAttribute.Value)))
+            if (unrestrictedAttribute == null || (!Boolean.Parse(unrestrictedAttribute.Value)))
             {
                 throw new ArgumentException("Partial trust is not supported.");
             }
@@ -534,7 +533,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var m = new MemoryStream();
             Write(m);
             m.Position = 0;
-            var r = new StreamReader(m);
+            using var r = new StreamReader(m);
+
             return r.ReadToEnd();
         }
 
@@ -789,7 +789,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 output.Flush();
             }
             document.Save(output);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.WriteTrustInfo t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.WriteTrustInfo t={Environment.TickCount - t1}");
         }
     }
 }

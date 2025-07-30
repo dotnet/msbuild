@@ -34,12 +34,6 @@ namespace Microsoft.Build.BackEnd
         void AddConfiguration(BuildRequestConfiguration config);
 
         /// <summary>
-        /// Removes the specified configuration from the cache.
-        /// </summary>
-        /// <param name="configId">The id of the configuration to remove.</param>
-        void RemoveConfiguration(int configId);
-
-        /// <summary>
         /// Gets the cached configuration which matches the specified configuration
         /// </summary>
         /// <param name="config">The configuration to match.</param>
@@ -54,7 +48,7 @@ namespace Microsoft.Build.BackEnd
         BuildRequestConfiguration GetMatchingConfiguration(ConfigurationMetadata configMetadata);
 
         /// <summary>
-        /// Gets a matching configuration.  If no such configration exists, one is created and optionally loaded.
+        /// Gets a matching configuration. If no such configuration exists, one is created and optionally loaded.
         /// </summary>
         /// <param name="configMetadata">The configuration metadata to match.</param>
         /// <param name="callback">Callback to be invoked if the configuration does not exist.</param>

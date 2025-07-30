@@ -1,11 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
-using System.Threading;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -17,7 +13,7 @@ namespace Microsoft.Build.UnitTests
     public sealed class EncodingUtilities_Tests
     {
         /// <summary>
-        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded 
+        /// Test the CanEncode method with and without ANSI characters to determine if they can be encoded
         /// in the current system encoding.
         /// </summary>
         [WindowsOnlyFact]
@@ -47,11 +43,20 @@ namespace Microsoft.Build.UnitTests
             }
             const string DOTNET_CLI_UI_LANGUAGE = nameof(DOTNET_CLI_UI_LANGUAGE);
             using TestEnvironment testEnvironment = TestEnvironment.Create();
-            
+
             // Override the ui language by setting environment variable
             testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, inputLanguage);
 
             EncodingUtilities.GetExternalOverriddenUILanguageIfSupportableWithEncoding().ShouldBeEquivalentTo(new CultureInfo(expectedLanguage));
+        }
+
+        [WindowsOnlyFact]
+        public void BatchFileEncoding_EncodingSpecificationTrueEqualsAlways()
+        {
+            const string content = @"example";
+
+            var alwaysEncoding = EncodingUtilities.BatchFileEncoding(content, EncodingUtilities.UseUtf8Always);
+            EncodingUtilities.BatchFileEncoding(content, EncodingUtilities.UseUtf8True).ShouldBe(alwaysEncoding);
         }
     }
 }

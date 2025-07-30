@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if !CLR2COMPATIBILITY
+#if !CLR2COMPATIBILITY && FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 #endif
 using Microsoft.Build.Shared;
@@ -105,7 +105,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             IDictionary<string, string> buildProcessEnvironment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowInternalNull(result);
 
             _taskResult = result.Result;
             _taskException = result.TaskException;

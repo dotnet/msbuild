@@ -15,57 +15,6 @@
         <target state="translated">Derleme başarısız oldu. Özellikler, Öğeler ve Hedef sonuçları alınamıyor. Yukarıda stderr'de ayrıntılara bakın.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">"{1}" sn'de {0} oluşturun</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">başarısız oldu</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">{0} hata ile başarısız oldu</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">{0} hata ve {1} uyarıyla başarısız oldu</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">{0} uyarıyla başarısız oldu</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">başarılı</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">{0} uyarıyla başarılı oldu</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Komut satırı bağımsız değişkenleri = "{0}"</target>
@@ -83,13 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse anahtarı, MSBuild.rsp otomatik yanıt dosyasında ve bu dosyanın başvuruda bulunduğu herhangi bir yanıt dosyasında belirtilemez.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -130,6 +72,227 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_43_GetPropertySwitch">
+        <source>  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </source>
+        <target state="translated">  -getProperty:propertyName,...
+                     Belirtilen bir veya daha fazla özelliğin değerini
+                     değerlendirmeden sonra, derlemeyi yürütmeden yaz veya
+                     -targets ya da -getTargetResult seçeneklerinden biri
+                     kullanıldıysa, değerleri derlemeden sonra yaz.
+    </target>
+        <note>
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_44_GetItemSwitch">
+        <source>  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </source>
+        <target state="translated">  -getItem:itemName,...
+                     Belirtilen bir veya daha fazla öğenin değerini ve
+                     değerlendirmeden sonraki ilişkili meta değerini derlemeyi
+                     yürütmeden yaz veya -targets ya da -getTargetResult
+                     seçeneklerinden biri kullanıldıysa, değerleri
+                     derlemeden sonra yaz.
+    </target>
+        <note>
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
+        <source>  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </source>
+        <target state="translated">  -getTargetResult:targetName,...
+                     Bir veya daha fazla hedefin çıktı değerini yazın,
+                     belirtilen hedefler yürütülür.
+    </target>
+        <note>
+      LOCALIZATION: "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
+        <source>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </source>
+        <target state="translated">  -featureAvailability:featureName,...
+                     Özellik kullanılabilirliğini denetle. Sonuç "Undefined",
+                     "Available", "NotAvailable" ve "Preview" dizelerinden
+                     biridir.
+                     - Undefined - özelliğin kullanılabilirliği tanımlanmamış
+                     (özelliğin adı özellik kullanılabilirliği tarafından
+                     bilinmiyor)
+                     - NotAvailable - özellik kullanılamıyor (Undefined’dan
+                     farklı olarak, özellik kullanılabilirliği denetleyicisi özelliğin adını
+                     biliyor ancak özelliğin geçerli MSBuild altyapısı tarafından
+                     desteklenmediğini de biliyor)
+                     - Available - özellik kullanılabilir
+                     - Önizleme - özellik önizleme aşamasında (kararlı değil)
+                     (Kısa biçimi: -fa)
+    </target>
+        <note>
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
+        <source>  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </source>
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                     Terminal günlükçüsünü etkinleştir veya devre dışı bırak. Terminal günlükçüsü
+                     konsolda gerçek zamanlı olarak gelişmiş derleme çıktısı sağlar,
+                     projeye göre mantıksal olarak düzenler ve eyleme
+                     dönüştürülebilir bilgileri vurgular. Sadece standart çıktı yeniden yönlendirilmiyorsa
+                     terminal günlükçüsünü kullanmak için otomatik olarak ayarlayın
+                     (veya bu seçeneği bağımsız değişken olmadan kullanın). Çıktı verilerini ayrıştırmayın
+                     veya gelecek sürümlerde değişmeden kalacak şekilde
+                     kullanın. Bu seçenek MSBuild 17.8 ve sonraki sürümlerde
+                     kullanılabilir.
+                     (Kısa biçimi: -tl)
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
+        <source>  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
+
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </source>
+        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
+                     Terminal günlükçüsü için parametreler. (Kısa biçimi: -tlp)
+                     Mevcut parametreler.
+                        default--Terminalin davranışını varsayılan olarak ayarlar
+                        günlükçü. Şu değerlerden birini gerektirir: 
+                           - `on`, `true` TerminalLogger’ı devre dışı olsa bile
+                            kullanılmaya zorlar.
+                           - `on`, `true` TerminalLogger’ı etkinleştirilmiş olsa bile
+                            kullanılmamaya zorlar.
+                           - 'auto' terminal desteklediğinde ve oturumda
+                            yeniden yönlendirilmiş stdout/stderr bulunmadığında
+                            TerminalLogger’ı etkinleştirir
+                        verbosity--Bu günlükçü için -verbosity ayarını
+                        geçersiz kıl
+                        showCommandLine--TaskCommandLineEvent iletilerini göster
+
+                      Örnek:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -çok iş parçacıklı 
+                     MSBuild'de DENEME amaçlı çok iş parçacıklı modu etkinleştirir.
+                     Bu, MSBuild'in
+                     projeleri işlemek için birden çok iş parçacığı kullanacağı,
+                     birden çok işlem kullanmayacağı anlamına gelir.
+                     Bu seçenek desteklenmemektedir.
+                     Kullanılan maksimum iş parçacığı sayısı
+                     -maxCpuCount anahtarı ile belirlenir.
+                     (Kısa form: -mt)
+    </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
+        <source>  -getResultOutputFile:file
+                     Redirect output from get* into a file.
+
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </source>
+        <target state="translated">  -getResultOutputFile:file
+                     get* çıktısını bir dosyaya yeniden yönlendir.
+
+                     Örnek:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     Bu, Bar özelliğinin değerini Biz.txt dosyasına yazar.
+    </target>
+        <note>
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_52_BuildCheckSwitch">
+        <source>  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see aka.ms/buildcheck
+	</source>
+        <target state="translated">  -check
+                     Derleme sırasında BuildChecks'i sağlar.
+                     BuildCheck, özelliklerin güvenliğini sağlamak için kuralların değerlendirilmesini sağlar
+                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için bkz. aka.ms/buildcheck
+	</target>
+        <note>
+    {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
+    LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+  </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: Düşük öncelikli değer geçerli değil. {0}</target>
@@ -159,6 +322,26 @@
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LongPaths">
+        <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
+        <target state="translated">Windows kayıt defteri anahtarı LongPathsEnabled ayarına bağlı olarak LongPaths özelliği {0}.</target>
+        <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
+      </trans-unit>
+      <trans-unit id="LongPaths_Disabled">
+        <source>disabled</source>
+        <target state="translated">devre dışı</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Enabled">
+        <source>enabled</source>
+        <target state="translated">etkin</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Missing">
+        <source>not set</source>
+        <target state="translated">ayarlanmadı</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -1333,11 +1516,11 @@
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
-        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: Özellik kullanılabilirlik anahtarı için bir özellik adı belirtilmesi gerekli.</target>
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
+        <target state="translated">MSBUILD : error MSB1067: featureAvailability anahtarı için özellik adı belirtilmelidir.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1435,7 +1618,7 @@
         <target state="translated">MSBUILD : error MSB1066: -terminalLoggerParameters anahtarı kullanılıyorsa terminal günlükçüsü için bir veya birden çok parametre belirtin</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1512,37 +1695,6 @@
         <target state="translated">İşlem = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}sn)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3}({4}sn)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: Proje dosyası yok.</target>
@@ -1590,21 +1742,25 @@
       These are response file switches with the location of the response file on disk.
     </note>
       </trans-unit>
-      <trans-unit id="RestoreComplete">
-        <source>Restore complete ({0}s)</source>
-        <target state="translated">Geri yükleme tamamlandı ({0}sn)</target>
-        <note>
-      {0}: duration in seconds with 1 decimal point
-    </note>
+      <trans-unit id="SAC">
+        <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
+        <target state="translated">Windows kayıt defteri anahtarı VerifiedAndReputablePolicyState'e göre SAC durumu = {0}.</target>
+        <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
-      <trans-unit id="RestoreCompleteWithMessage">
-        <source>Restore {0} in {1}s</source>
-        <target state="translated">{1}sn içinde {0} geri yükle</target>
-        <note>
-      Restore summary when finished with warning or error
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-    </note>
+      <trans-unit id="SAC_Enforcement">
+        <source>1: in enforcement</source>
+        <target state="translated">1: zorlamada</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SAC_Evaluation">
+        <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
+        <target state="translated">2: değerlendirmede. Aksi takdirde performansın etkilenebileceği için geliştirme ortamında Akıllı Uygulama Denetimi’nin kapatılması önerilir</target>
+        <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Off">
+        <source>0: turned off</source>
+        <target state="translated">0: kapalı</target>
+        <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
@@ -1655,6 +1811,11 @@
         <target state="translated">MSBUILD : error MSB1059: Hedefler yazdırılamadı. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">Terminal Günlükçüsü, derlemenin otomatik bir ortamda çalıştığı tespit edildiğinden kullanılmadı.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">Derleme StdOut akışına doğrudan erişim isteyen bir işlem (ör. 'dotnet test') bağlamında çalıştığı için Terminal Günlükçüsü kullanılmadı.</target>
@@ -1669,54 +1830,6 @@
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
         <target state="translated">Çıkış bir dosyaya yeniden yönlendirildiği için Terminal Günlükçüsü kullanılmadı.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_NoTF">
-        <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}{1} testi {2} ({3}s)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_WithTF">
-        <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} testi {2} {3} ({4}s)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_BannerAndTotal">
-        <source>Test summary: total: {0}</source>
-        <target state="new">Test summary: total: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Duration">
-        <source>duration: {0}s</source>
-        <target state="new">duration: {0}s</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Failed">
-        <source>failed: {0}</source>
-        <target state="new">failed: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Skipped">
-        <source>skipped: {0}</source>
-        <target state="new">skipped: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Succeeded">
-        <source>succeeded: {0}</source>
-        <target state="new">succeeded: {0}</target>
-        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
@@ -1795,38 +1908,10 @@
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
       </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">Oluşturma iptal edilmeye çalışılıyor...</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: Ön işlem uygulanacak dosya geçerli değil. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
-      </trans-unit>
-      <trans-unit id="LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Günlük oluşturucunun bir örneği oluşturulamıyor. {0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1021: "}
-      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
-      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
-      </trans-unit>
-      <trans-unit id="LoggerNotFoundError">
-        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD : error MSB1020: Günlükçü bulunamadı. Aşağıdakileri denetleyin: 1.) Belirtilen günlükçü adı, günlükçü sınıfının adıyla aynıdır. 2.) Günlükçü sınıfı "geneldir" ve Microsoft.Build.Framework.ILogger arabirimini uygular. 3.) Günlükçü bütünleştirilmiş kodunun yolu doğrudur veya günlükçü yalnızca belirtilen günlükçü adı kullanılarak yüklenebilir.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
-      logger class must exist in the given assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectUpgradeNeededToVcxProj">
-        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD : error MSB4192: "{0}" proje dosyası, MSBuild’in doğrudan derleyemeyeceği ".vcproj" veya ".dsp" dosya biçiminde. Lütfen projeyi Visual Studio IDE içinde açarak veya dönüştürme aracını kullanarak dönüştürün ya da “.vcproj” için MSBuild kullanarak projeyi içeren çözüm dosyasını derleyin.</target>
-        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
@@ -1939,6 +2024,14 @@
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -1977,28 +2070,36 @@
                      Varsayılan olarak, dosya geçerli dizinde bulunur ve "msbuild.binlog"
                      olarak adlandırılır. Daha sonra metin günlüklerini yeniden
                      yapılandırmak için kullanılabilen ve diğer analiz araçları tarafından
-                     kullanılan ikili günlüğü, derleme işleminin ayrıntılı bir açıklamasıdır.
-                     İkili günlüğü genellikle, en ayrıntılı metin tanılama düzeyi günlüklerden
+                     kullanılan ikili günlüğü, derleme işleminin ayrıntılı bir açıklamasıdır. İkili günlüğü genellikle, en ayrıntılı metin tanılama düzeyi günlüklerden
                      10-20 kat küçüktür ancak daha fazla bilgi içerir.
                      (Kısa biçim: -bl)
+                     
 
-                     İkili günlükçü varsayılan olarak, derleme sırasında karşılaşılan
-                     tüm içeri aktarılmış projeler ve hedef dosyalar dahil olmak üzere
-                     proje dosyalarının kaynak dosyalarını toplar. İsteğe bağlı
+                     İsteğe bağlı LogFile ikili günlüğün kaydedileceği yolu
+                     belirtir. Ayrı bir günlük dosyası oluşturmak için
+                     her derleme için "{}" belirteci
+                     yola eklenebilir, örneğin: LogFile=output-{}-log.binlog. Günlük 
+                     yolundaki her “{}” zaman damgası, çalışan işlem kimliği ve rastgele
+                     dize damgası kullanılarak benzersiz bir dize ile
+                     değiştirilir.
+
+                     İkili günlükçü varsayılan olarak, içe aktarılan
+                     tüm projeler ve derleme sırasında karşılaşılan hedef
+                     dosyalar da dahil olmak üzere proje dosyalarının kaynak metnini toplar. İsteğe bağlı
                      ProjectImports anahtarı bu davranışı denetler:
 
                       ProjectImports=None     - Proje içeri aktarmalarını
                                                 toplama.
-                      ProjectImports=Embed    - Proje içeri aktarmalarını günlük dosyasına
-                                                ekler.
+                      ProjectImports=Embed    - Proje içeri aktarmalarını
+                                                günlük dosyasına ekle.
                       ProjectImports=ZipFile  - Proje dosyalarını
-                                                çıkış.projectimports.zip
-                                                dosyasına kaydeder (burada çıkış, ikili
-                                                günlük dosyası adıyla aynı ada sahiptir).
+                                                output.projectimports.zip dosyasına
+                                                çıkış, ikili günlük dosyası adıyla
+                                                aynı ada sahiptir kaydet.
 
-                     ProjectImports için varsayılan ayar Embed’dir.
-                     Not: Günlükçü .cs, .cpp vb. MSBuild olmayan kaynak
-                     dosyaları toplamaz.
+                     ProjectImports varsayılan ayarı Ekle’dir.
+                     Not: Günlükçü .cs, .cpp vb. gibi MSBuild olmayan kaynak dosyalarını
+                     toplamaz.
 
                      Bir .binlog dosyası msbuild.exe’ye bir proje/çözüm
                      yerine bağımsız değişken olarak geçirilerek “yeniden oynatılabilir”.
@@ -2121,6 +2222,29 @@
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD: MSB1054 hatası: Profil oluşturucu sonucunun oluşturulması için bir dosya adı belirtilmelidir.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XMake.LoggerCreationError">
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: {0} günlük oluşturucusunun bir örneği oluşturulamıyor. {1}</target>
+        <note>{StrBegin="MSBUILD : error MSB1021: "}
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
+      </trans-unit>
+      <trans-unit id="XMake.LoggerNotFoundError">
+        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
+        <target state="translated">MSBUILD : error MSB1020: Günlükçü bulunamadı. Aşağıdakileri denetleyin: 1.) Belirtilen günlükçü adı, günlükçü sınıfının adıyla aynıdır. 2.) Günlükçü sınıfı "geneldir" ve Microsoft.Build.Framework.ILogger arabirimini uygular. 3.) Günlükçü bütünleştirilmiş kodunun yolu doğrudur veya günlükçü yalnızca belirtilen günlükçü adı kullanılarak yüklenebilir.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
+      logger class must exist in the given assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
+        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
+        <target state="translated">MSBUILD : error MSB4192: "{0}" proje dosyası, MSBuild’in doğrudan derleyemeyeceği ".vcproj" veya ".dsp" dosya biçiminde. Lütfen projeyi Visual Studio IDE içinde açarak veya dönüştürme aracını kullanarak dönüştürün ya da “.vcproj” için MSBuild kullanarak projeyi içeren çözüm dosyasını derleyin.</target>
+        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
   </file>

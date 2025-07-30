@@ -10,7 +10,6 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
@@ -211,7 +210,8 @@ ObjectModelHelpers.CleanupFileContents(
   </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             MockLogger logger = new MockLogger();
             List<ILogger> loggers = new List<ILogger>() { logger };
@@ -241,7 +241,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b", item.GetMetadataValue("m"));
@@ -267,7 +268,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b.ext", item.GetMetadataValue("m"));
@@ -293,7 +295,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b.l1", item.GetMetadataValue("m"));
@@ -323,7 +326,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal("b.n1", item.GetMetadataValue("m"));
@@ -350,7 +354,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
 
@@ -379,7 +384,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal(".bar", item.GetMetadataValue("m"));
@@ -406,7 +412,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectItem item = project.GetItems("i").ElementAt(0);
             Assert.Equal(".foo", item.EvaluatedInclude);
@@ -440,7 +447,8 @@ ObjectModelHelpers.CleanupFileContents(
   </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;
 
             ProjectInstance instance = project.CreateProjectInstance();
             MockLogger l = new MockLogger();
@@ -646,7 +654,8 @@ ObjectModelHelpers.CleanupFileContents(
   </ItemDefinitionGroup>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)));  // No exception
+            using ProjectFromString projectFromString = new(content);
+            Project project = projectFromString.Project;  // No exception
         }
     }
 }

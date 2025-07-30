@@ -8,7 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -46,7 +45,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The task execution host
         /// </summary>
-        private ITaskExecutionHost _host;
+        private TaskExecutionHost _host;
 
         /// <summary>
         /// The mock logging service
@@ -1245,7 +1244,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #else
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().FullName, null);
 #endif
-            LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().Assembly, typeof(ITaskItem));
+            LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly, typeof(ITaskItem));
 
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
             taskFactory.ThrowOnExecute = throwOnExecute;
@@ -1266,7 +1265,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 CancellationToken.None);
 
             ProjectTaskInstance taskInstance = project.Targets["foo"].Tasks.First();
-            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance);
+            TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly.GetName().FullName);
 
             ItemDictionary<ProjectItemInstance> itemsByName = new ItemDictionary<ProjectItemInstance>();
 
@@ -1283,7 +1282,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             itemsByName.Add(item2);
             _twoItems = new ITaskItem[] { new TaskItem(item), new TaskItem(item2) };
 
-            _bucket = new ItemBucket(Array.Empty<string>(), new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
+            _bucket = new ItemBucket(new Dictionary<string, ICollection<ProjectItemInstance>>().Keys, new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
+            _bucket.Initialize(null);
             _host.FindTask(null);
             _host.InitializeForBatch(talc, _bucket, null);
             _parametersSetOnTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
@@ -1300,18 +1300,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Single(_bucket.Lookup.GetItems("output"));
             Assert.Equal(value, _bucket.Lookup.GetItems("output").First().EvaluatedInclude);
-        }
-
-        /// <summary>
-        /// Helper method for tests
-        /// </summary>
-        private void ValidateOutputItem(string outputName, ITaskItem value)
-        {
-            Assert.True(_host.GatherTaskOutputs(outputName, ElementLocation.Create(".", 1, 1), true, "output"));
-            Assert.True(_outputsReadFromTask.ContainsKey(outputName));
-
-            Assert.Single(_bucket.Lookup.GetItems("output"));
-            Assert.Equal(0, TaskItemComparer.Instance.Compare(value, new TaskItem(_bucket.Lookup.GetItems("output").First())));
         }
 
         /// <summary>
@@ -1559,7 +1547,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 ");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             return project.CreateProjectInstance();
         }
     }

@@ -134,7 +134,7 @@ namespace Microsoft.Build.Logging
             // So keeping that map here
             var originalLocations = new Dictionary<EvaluationLocation, EvaluationLocation>(EvaluationLocationIdAgnosticComparer.Singleton);
 
-            while (_profiledResults.Any())
+            while (!_profiledResults.IsEmpty)
             {
                 ProfilerResult profiledResult;
                 var result = _profiledResults.TryDequeue(out profiledResult);
@@ -297,19 +297,12 @@ namespace Microsoft.Build.Logging
 
                 Console.WriteLine(ResourceUtilities.GetResourceString("WritingProfilerReportDone"));
             }
-            catch (DirectoryNotFoundException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
-            }
-            catch (SecurityException ex)
+            catch (Exception ex) when (ex is
+                DirectoryNotFoundException or
+                IOException or
+                UnauthorizedAccessException or
+                SecurityException or
+                ArgumentException)
             {
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorWritingProfilerReport", ex.Message));
             }

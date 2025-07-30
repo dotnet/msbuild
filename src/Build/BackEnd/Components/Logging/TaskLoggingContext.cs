@@ -34,46 +34,51 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a task logging context from a parent target context and a task node.
         /// </summary>
-        internal TaskLoggingContext(TargetLoggingContext targetLoggingContext, string projectFullPath, ProjectTargetInstanceChild task)
-            : base(targetLoggingContext)
+        internal TaskLoggingContext(TargetLoggingContext targetLoggingContext, string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
+            : base(targetLoggingContext, CreateInitialContext(targetLoggingContext, projectFullPath, task, taskAssemblyLocation))
         {
             _targetLoggingContext = targetLoggingContext;
             _task = task;
+            _taskName = GetTaskName(task);
+            this.IsValid = true;
+        }
 
-            ProjectTaskInstance taskInstance = task as ProjectTaskInstance;
-            if (taskInstance != null)
-            {
-                _taskName = taskInstance.Name;
-            }
-            else
-            {
-                ProjectPropertyGroupTaskInstance propertyGroupInstance = task as ProjectPropertyGroupTaskInstance;
-                if (propertyGroupInstance != null)
-                {
-                    _taskName = "PropertyGroup";
-                }
-                else
-                {
-                    ProjectItemGroupTaskInstance itemGroupInstance = task as ProjectItemGroupTaskInstance;
-                    if (itemGroupInstance != null)
-                    {
-                        _taskName = "ItemGroup";
-                    }
-                    else
-                    {
-                        _taskName = "Unknown";
-                    }
-                }
-            }
-
-            this.BuildEventContext = LoggingService.LogTaskStarted2(
+        private static BuildEventContext CreateInitialContext(TargetLoggingContext targetLoggingContext,
+            string projectFullPath, ProjectTargetInstanceChild task, string taskAssemblyLocation)
+        {
+            BuildEventContext buildEventContext = targetLoggingContext.LoggingService.LogTaskStarted2(
                 targetLoggingContext.BuildEventContext,
-                _taskName,
+                GetTaskName(task),
                 projectFullPath,
                 task.Location.File,
                 task.Location.Line,
-                task.Location.Column);
-            this.IsValid = true;
+                task.Location.Column,
+                taskAssemblyLocation);
+
+            return buildEventContext;
+        }
+
+        private static string GetTaskName(ProjectTargetInstanceChild task)
+        {
+            ProjectTaskInstance taskInstance = task as ProjectTaskInstance;
+            if (taskInstance != null)
+            {
+                return taskInstance.Name;
+            }
+
+            ProjectPropertyGroupTaskInstance propertyGroupInstance = task as ProjectPropertyGroupTaskInstance;
+            if (propertyGroupInstance != null)
+            {
+                return "PropertyGroup";
+            }
+
+            ProjectItemGroupTaskInstance itemGroupInstance = task as ProjectItemGroupTaskInstance;
+            if (itemGroupInstance != null)
+            {
+                return "ItemGroup";
+            }
+
+            return "Unknown";
         }
 
         /// <summary>
@@ -142,7 +147,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="taskName">The task in which the warning occurred</param>
         internal void LogTaskWarningFromException(Exception exception, BuildEventFileInfo file, string taskName)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "must be valid");
+            CheckValidity();
             LoggingService.LogTaskWarningFromException(BuildEventContext, exception, file, taskName);
         }
 

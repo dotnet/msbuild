@@ -205,7 +205,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         {
                             try
                             {
-                                var sr = new StreamReader(fs);
+                                using var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
                                 string data = sr.ReadToEnd();
                                 if (!string.IsNullOrEmpty(data))
                                 {
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 Internet => SecurityZone.Internet,
                 _ => throw new ArgumentException(String.Empty /* no message */, nameof(targetZone)),
             };
-            var evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
+            var evidence = new Evidence([new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity(""))], null);
 
             PermissionSet sandbox = SecurityManager.GetStandardSandbox(evidence);
             string resultInString = sandbox.ToString();
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                a = Array.Empty<string>();
+                a = [];
             }
             return a;
         }
@@ -502,7 +502,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
-            SignFile(certThumbprint, timestampUrl, path, null, null);
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion: null, targetFrameworkIdentifier: null);
         }
 
         /// <summary>
@@ -518,7 +518,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string path,
                                     string targetFrameworkVersion)
         {
-            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, null);
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier: null);
         }
 
         /// <summary>
@@ -536,7 +536,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string targetFrameworkVersion,
                                     string targetFrameworkIdentifier)
         {
-            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier, false);
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier, disallowMansignTimestampFallback: false);
         }
 
         /// <summary>
@@ -610,7 +610,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SupportedOSPlatform("windows")]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
-            X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
+            using X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
             SignFile(cert, timestampUrl, path);
         }
 
@@ -637,7 +637,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             // setup resources
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-            SignFileInternal(cert, timestampUrl, path, true, resources);
+            SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources);
         }
 
         [SupportedOSPlatform("windows")]
@@ -701,12 +701,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         {
                             doc.Load(xr);
                         }
+
                         var manifest = new SignedCmiManifest2(doc, useSha256);
                         CmiManifestSigner2 signer;
                         if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
-                            signer = new CmiManifestSigner2(csp, cert, useSha256);
+#pragma warning disable CA2000 // Dispose objects before losing scope because CmiManifestSigner2 will dispose the RSACryptoServiceProvider
+                            signer = new CmiManifestSigner2(SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256), cert, useSha256);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                         }
                         else
                         {

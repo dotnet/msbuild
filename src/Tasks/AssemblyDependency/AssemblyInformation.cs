@@ -12,12 +12,9 @@ using System.Runtime.InteropServices;
 #endif
 using System.Reflection;
 using System.Runtime.Versioning;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using static Microsoft.Build.Shared.FileSystem.WindowsNative;
 #if FEATURE_ASSEMBLYLOADCONTEXT
 using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
@@ -50,7 +47,7 @@ namespace Microsoft.Build.Tasks
 #endif
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT
-        private static string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
+        private const string s_targetFrameworkAttribute = "System.Runtime.Versioning.TargetFrameworkAttribute";
 #endif
 #if !FEATURE_ASSEMBLYLOADCONTEXT
         // Borrowed from genman.
@@ -71,7 +68,7 @@ namespace Microsoft.Build.Tasks
         internal AssemblyInformation(string sourceFile)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(sourceFile, nameof(sourceFile));
+            ErrorUtilities.VerifyThrowArgumentNull(sourceFile);
             _sourceFile = sourceFile;
 
 #if !FEATURE_ASSEMBLYLOADCONTEXT

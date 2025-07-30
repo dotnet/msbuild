@@ -3,7 +3,53 @@ trigger:
 - exp/*
 - vs*
 
+variables:
+- ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+  - group: AzureDevOps-Artifact-Feeds-Pats
+- name: cfsNugetWarnLevel
+  value: warn
+- name: nugetMultiFeedWarnLevel
+  value: none
+- name: NugetSecurityAnalysisWarningLevel
+  value: none
+
 jobs:
+- job: CheckVersionBumpOnReleaseBranches
+  condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
+  displayName: "Check Version Bump On Release Branches"
+  steps:
+  - powershell: |
+      $versionsFile = "eng/Versions.props"
+      $changedFiles = git diff --name-only HEAD HEAD~1
+      $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
+      $isInitialCommit = $false
+      $isVersionBumped = $false
+      if ($changedVersionsFile -ne $null) {
+        $difference = git diff HEAD~1 $versionsFile
+        $changedContent = $difference -join "%"
+        # 'DotNetFinalVersionKind' is expected to be added only during the initial setup of the release branch
+        $initialCommitPattern = '-\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix>%.*\+\s*<VersionPrefix>\d+\.\d+\.\d+<\/VersionPrefix><DotNetFinalVersionKind>release<\/DotNetFinalVersionKind>'
+        $isInitialCommit = $changedContent -match $initialCommitPattern
+        $pattern = '-\s*<VersionPrefix>\d+\.\d+\.(?<previous>\d+)<\/VersionPrefix>.*%\+\s*<VersionPrefix>\d+\.\d+\.(?<current>\d+)<\/VersionPrefix>'
+        if (!($isInitialCommit) -and ($changedContent -match $pattern)) {
+          try {
+            $previousPatch = [Convert]::ToInt32($Matches.previous)
+            $currentPatch = [Convert]::ToInt32($Matches.current)
+            if ($currentPatch -gt $previousPatch) {
+              $isVersionBumped = $true
+            }
+          } catch {
+            Write-Host "An error occurred during conversion: $_"
+          }
+        }
+      }
+
+      if (!($isInitialCommit -or $isVersionBumped)) {
+        throw "Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
+      }
+    condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
+    displayName: "Check if patch version is bumped up"
+
 - job: IfOnlyDocumentionChanged
   displayName: "Check whether Test Results need to be executed"
   steps:
@@ -30,6 +76,14 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
@@ -57,11 +111,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -101,11 +159,21 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
+    env:
+      MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -151,11 +219,19 @@ jobs:
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2022preview.amd64.open
+      demands: ImageOverride -equals windows.vs2022preview.scout.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
@@ -205,23 +281,6 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
 
-# Unavailable in dnceng-public as of 9/1/2022; should be restored soon.
-# - job: RichCodeNavIndex
-#   displayName: "Windows Code Indexing"
-#   pool:
-#     vmImage: 'windows-2022'
-#   steps:
-#   - task: BatchScript@1
-#     displayName: build.cmd
-#     inputs:
-#       filename: 'build.cmd'
-#   - task: RichCodeNavIndexer@0
-#     displayName: RichCodeNav Upload
-#     inputs:
-#       languages: 'csharp'
-#     continueOnError: true
-#     condition: succeeded()
-
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   dependsOn: IfOnlyDocumentionChanged
@@ -230,8 +289,18 @@ jobs:
   pool:
     vmImage: 'ubuntu-latest'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
+    env:
+        MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -244,11 +313,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:
@@ -287,8 +360,18 @@ jobs:
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
+    env:
+        MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -301,11 +384,15 @@ jobs:
       mergeTestResults: true
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  - task: CmdLine@2
-    displayName: 'Set flag to publish Verify *.received.* files when test step fails'
-    condition: failed()
+  - task: PowerShell@2
     inputs:
-      script: 'echo "##vso[task.setvariable variable=publishverify]Yes"'
+      targetType: 'inline'
+      script: |
+        $files = Get-ChildItem -Path . -Recurse -Include *.received.*
+        if ($files.Count -gt 0) {
+          echo "##vso[task.setvariable variable=publishverify]Yes"
+        }
+    displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
     inputs:

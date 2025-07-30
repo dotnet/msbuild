@@ -1,9 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.Caching;
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The environment at the time the build is started.
         /// </summary>
-        private IDictionary<string, string> _savedEnvironment;
+        private FrozenDictionary<string, string> _savedEnvironment;
 
         /// <summary>
         /// The current directory at the time the build is started.
@@ -114,7 +114,9 @@ namespace Microsoft.Build.BackEnd
             _packetReceivedEvent = new AutoResetEvent(false);
             _shutdownEvent = new AutoResetEvent(false);
 
-            _buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
+            IBuildComponent buildRequestEngine = BuildRequestEngine.CreateComponent(BuildComponentType.RequestEngine);
+            buildRequestEngine.InitializeComponent(componentHost);
+            _buildRequestEngine = (IBuildRequestEngine)buildRequestEngine;
 
             _engineExceptionEventHandler = OnEngineException;
             _newConfigurationRequestEventHandler = OnNewConfigurationRequest;
@@ -137,7 +139,7 @@ namespace Microsoft.Build.BackEnd
                 _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
                 _nodeEndpoint.Listen(this);
 
-                var waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent };
+                WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
                 _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
@@ -220,6 +222,16 @@ namespace Microsoft.Build.BackEnd
         {
             // The in-proc endpoint shouldn't be serializing, just routing.
             ErrorUtilities.ThrowInternalError("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
+        }
+
+        /// <summary>
+        /// Not necessary for in-proc node - we don't serialize.
+        /// </summary>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            // The in-proc endpoint shouldn't be serializing, just routing.
+            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializePacket on the in-proc node.");
+            return null;
         }
 
         /// <summary>

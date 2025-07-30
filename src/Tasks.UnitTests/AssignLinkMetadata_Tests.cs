@@ -7,7 +7,6 @@ using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
@@ -174,7 +173,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private ITaskItem GetParentedTaskItem(string itemSpec, string linkMetadata = null)
         {
-            Project p = new Project(new ProjectCollection())
+            using var collection = new ProjectCollection();
+            Project p = new Project(collection)
             {
                 FullPath = Path.Combine(Path.GetTempPath(), "a.proj")
             };

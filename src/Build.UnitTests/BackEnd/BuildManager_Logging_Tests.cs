@@ -15,7 +15,6 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 #nullable disable
@@ -60,14 +59,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         private readonly ProjectCollection _projectCollection;
 
         private readonly TestEnvironment _env;
-        private readonly ITestOutputHelper _output;
 
         /// <summary>
         /// SetUp
         /// </summary>
         public BuildManager_Logging_Tests(ITestOutputHelper output)
         {
-            _output = output;
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
 
@@ -78,28 +75,19 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _env = TestEnvironment.Create(output);
         }
 
-        [DotNetOnlyTheory]
-        [InlineData("1", true)]
-        // [InlineData("0", true)] <-- explicitly opting out on core will lead to node crash (as documented)
-        [InlineData(null, true)]
-        public void Build_WithCustomBuildArgs_NetCore(string envVariableValue, bool isWarningExpected)
-            => TestCustomEventWarning<BuildErrorEventArgs>(envVariableValue, isWarningExpected);
+        [DotNetOnlyFact]
+        public void Build_WithCustomBuildArgs_ShouldEmitErrorOnNetCore() => Build_WithCustomBuildArgs_ShouldEmitEvent<BuildErrorEventArgs>();
 
-        [WindowsFullFrameworkOnlyTheory]
-        [InlineData("1", true)]
-        [InlineData("0", false)]
-        [InlineData(null, true)]
-        public void Build_WithCustomBuildArgs_Framework(string envVariableValue, bool isWarningExpected) =>
-            TestCustomEventWarning<BuildWarningEventArgs>(envVariableValue, isWarningExpected);
+        [WindowsFullFrameworkOnlyFact]
+        public void Build_WithCustomBuildArgs_ShouldEmitWarningOnFramework() => Build_WithCustomBuildArgs_ShouldEmitEvent<BuildWarningEventArgs>();
 
-        private void TestCustomEventWarning<T>(string envVariableValue, bool isWarningExpected) where T : LazyFormattedBuildEventArgs
+        private void Build_WithCustomBuildArgs_ShouldEmitEvent<T>() where T : LazyFormattedBuildEventArgs
         {
-            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, new[] { "main", "child1" }, string.Empty);
+            var testFiles = _env.CreateTestProjectWithFiles(string.Empty, ["main", "child1"], string.Empty);
 
             ILoggingService service = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(_logger);
 
-            _env.SetEnvironmentVariable("MSBUILDCUSTOMBUILDEVENTWARNING", envVariableValue);
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
             _buildManager.BeginBuild(BuildParameters);
@@ -118,24 +106,17 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                    mainProjectPath,
                    new Dictionary<string, string>(),
                    MSBuildConstants.CurrentToolsVersion,
-                   new[] { "MainTarget" },
+                   ["MainTarget"],
                    null);
 
                 var submission = _buildManager.PendBuildRequest(buildRequestData);
                 var result = submission.Execute();
                 var allEvents = _logger.AllBuildEvents;
 
-                if (isWarningExpected)
-                {
-                    allEvents.OfType<T>().ShouldHaveSingleItem();
-                    allEvents.First(x => x is T).Message.ShouldContain(
-                        string.Format(ResourceUtilities.GetResourceString("DeprecatedEventSerialization"),
-                        "MyCustomBuildEventArgs"));
-                }
-                else
-                {
-                    allEvents.OfType<T>().ShouldBeEmpty();
-                }
+                allEvents.OfType<T>().ShouldHaveSingleItem();
+                allEvents.First(x => x is T).Message.ShouldContain(
+                    string.Format(ResourceUtilities.GetResourceString("DeprecatedEventSerialization"),
+                    "MyCustomBuildEventArgs"));
             }
             finally
             {

@@ -940,13 +940,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         internal sealed class MockEnumerator : IEnumerable<AssemblyNameExtension>
         {
             private List<string> _assembliesToEnumerate = null;
-            private List<string>.Enumerator _enumerator;
 
             public MockEnumerator(List<string> assembliesToEnumerate)
             {
                 _assembliesToEnumerate = assembliesToEnumerate;
-
-                _enumerator = assembliesToEnumerate.GetEnumerator();
             }
 
 

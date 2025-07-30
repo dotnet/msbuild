@@ -261,10 +261,7 @@ namespace Microsoft.Build.Tasks
             if (BuildInParallel)
             {
                 skipProjects = new bool[Projects.Length];
-                for (int i = 0; i < skipProjects.Length; i++)
-                {
-                    skipProjects[i] = true;
-                }
+                skipProjects.AsSpan().Fill(true);
             }
             else
             {
@@ -298,6 +295,12 @@ namespace Microsoft.Build.Tasks
                     if (TryParseSkipNonExistentProjects(project.GetMetadata("SkipNonexistentProjects"), out SkipNonExistentProjectsBehavior behavior))
                     {
                         skipNonExistProjects = behavior;
+                    }
+                    else if (BuildEngine is IBuildEngine6 buildEngine6 && buildEngine6.GetGlobalProperties()
+                        .TryGetValue(PropertyNames.BuildNonexistentProjectsByDefault, out var buildNonexistentProjectsByDefault) &&
+                        ConversionUtilities.ConvertStringToBool(buildNonexistentProjectsByDefault))
+                    {
+                        skipNonExistProjects = SkipNonExistentProjectsBehavior.Build;
                     }
                     else
                     {
@@ -460,7 +463,7 @@ namespace Microsoft.Build.Tasks
                 // Separate target invocations for each individual target.
                 foreach (string targetName in targets)
                 {
-                    targetLists.Add(new[] { targetName });
+                    targetLists.Add([targetName]);
                 }
             }
             else

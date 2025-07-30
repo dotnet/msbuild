@@ -2,55 +2,63 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 
 /// <summary>
-/// Representation of a single report of a single finding from a BuildAnalyzer
+/// Representation of a single report of a single finding from a Check
 /// Each rule has upfront known message format - so only the concrete arguments are added
 /// Optionally a location is attached - in the near future we might need to support multiple locations
-///  (for 2 cases - a) grouped result for multiple occurrences; b) a single report for a finding resulting from combination of multiple locations)
+///  (for 2 cases - a) grouped result for multiple occurrences; b) a single report for a finding resulting from combination of multiple locations).
 /// </summary>
 public sealed class BuildCheckResult : IBuildCheckResult
 {
-    public static BuildCheckResult Create(BuildAnalyzerRule rule, ElementLocation location, params string[] messageArgs)
-    {
-        return new BuildCheckResult(rule, location, messageArgs);
-    }
+    public static BuildCheckResult Create(CheckRule rule, IMSBuildElementLocation location, params string[] messageArgs) => new BuildCheckResult(rule, location, messageArgs);
 
-    public BuildCheckResult(BuildAnalyzerRule buildAnalyzerRule, ElementLocation location, string[] messageArgs)
+    internal static BuildCheckResult CreateBuiltIn(CheckRule rule, IMSBuildElementLocation location,
+        params string[] messageArgs) => new BuildCheckResult(rule, location, messageArgs) { _isBuiltIn = true };
+
+    public BuildCheckResult(CheckRule checkConfig, IMSBuildElementLocation location, string[] messageArgs)
     {
-        BuildAnalyzerRule = buildAnalyzerRule;
+        CheckRule = checkConfig;
         Location = location;
         MessageArgs = messageArgs;
     }
 
-    internal BuildEventArgs ToEventArgs(BuildAnalyzerResultSeverity severity)
+    internal BuildEventArgs ToEventArgs(CheckResultSeverity severity)
         => severity switch
         {
-            BuildAnalyzerResultSeverity.Info => new BuildCheckResultMessage(this),
-            BuildAnalyzerResultSeverity.Warning => new BuildCheckResultWarning(this),
-            BuildAnalyzerResultSeverity.Error => new BuildCheckResultError(this),
+            CheckResultSeverity.Suggestion => new BuildCheckResultMessage(this),
+            CheckResultSeverity.Warning => new BuildCheckResultWarning(this),
+            CheckResultSeverity.Error => new BuildCheckResultError(this),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
-    public BuildAnalyzerRule BuildAnalyzerRule { get; }
+    public CheckRule CheckRule { get; }
+
+    public string Code => CheckRule.Id;
 
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).
     /// </summary>
-    public ElementLocation Location { get; }
+    public IMSBuildElementLocation Location { get; }
 
     public string LocationString => Location.LocationString;
 
     public string[] MessageArgs { get; }
-    public string MessageFormat => BuildAnalyzerRule.MessageFormat;
+
+    public string MessageFormat => CheckRule.MessageFormat;
 
     public string FormatMessage() =>
-        _message ??= $"{(Equals(Location ?? ElementLocation.EmptyLocation, ElementLocation.EmptyLocation) ? string.Empty : (Location!.LocationString + ": "))}{BuildAnalyzerRule.Id}: {string.Format(BuildAnalyzerRule.MessageFormat, MessageArgs)}";
+        _message ??= _isBuiltIn
+            // Builtin rules get unified helplink.
+            ? $"https://aka.ms/buildcheck/codes#{CheckRule.Id} - {string.Format(CheckRule.MessageFormat, MessageArgs)}"
+            // Custom rules can provide their own helplink.
+            : (!string.IsNullOrEmpty(CheckRule.HelpLinkUri) ? $"{CheckRule.HelpLinkUri} - " : null) +
+              string.Format(CheckRule.MessageFormat, MessageArgs);
 
     private string? _message;
+    private bool _isBuiltIn;
 }

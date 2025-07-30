@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Scatter files associated with this reference.
         /// </summary>
-        private string[] _scatterFiles = Array.Empty<string>();
+        private string[] _scatterFiles = [];
 
         /// <summary>
         /// Any errors that occurred while resolving or finding dependencies on this item.
@@ -258,7 +258,7 @@ namespace Microsoft.Build.Tasks
         {
             if (scatterFilesToAttach == null || scatterFilesToAttach.Length == 0)
             {
-                _scatterFiles = Array.Empty<string>();
+                _scatterFiles = [];
             }
             else
             {
@@ -500,7 +500,7 @@ namespace Microsoft.Build.Tasks
 
                     if (string.IsNullOrEmpty(_fullPath))
                     {
-                        _scatterFiles = Array.Empty<string>();
+                        _scatterFiles = [];
                         _satelliteFiles = new List<string>();
                         _serializationAssemblyFiles = new List<string>();
                         AssembliesConsideredAndRejected = new List<ResolutionSearchLocation>();
@@ -725,7 +725,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void AddPreUnificationVersion(String referencePath, Version version, UnificationReason reason)
         {
-            string key = referencePath + version.ToString() + reason.ToString();
+            string key = $"{referencePath}{version}{reason}";
 
             // Only add a reference, version, and reason once.
             UnificationVersion unificationVersion;

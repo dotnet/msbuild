@@ -16,7 +16,10 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_CODETASKFACTORY
 
     using System.CodeDom.Compiler;
+    using System.IO.Compression;
+    using Microsoft.Build.Logging;
     using Microsoft.Build.Tasks.UnitTests;
+    using Shouldly;
 
     public sealed class CodeTaskFactoryTests
     {
@@ -283,30 +286,34 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a reference is missing an include attribute is set but it is empty
         /// </summary>
-        [Fact]
-        public void EmptyReferenceInclude()
+        [Theory]
+        [InlineData("")]
+        [InlineData("Include=\"\"")]
+        [InlineData("Include=\" \"")]
+        public void EmptyReferenceInclude(string includeSetting)
         {
-            string projectFileContents = @"
+            string taskName = "CustomTaskFromCodeFactory_EmptyReferenceInclude";
+            string projectFileContents = @$"
                     <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_EmptyReferenceInclude` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                        <UsingTask TaskName=`{taskName}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
                          <ParameterGroup>
                              <Text/>
                           </ParameterGroup>
                             <Task>
-                                 <Reference/>
+                                 <Reference {includeSetting}/>
                                 <Code>
                                        Log.LogMessage(MessageImportance.High, Text);
                                 </Code>
                             </Task>
                         </UsingTask>
                         <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_EmptyReferenceInclude/>
+                            <{taskName}/>
                         </Target>
                     </Project>";
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, false);
-            string unformattedMessage = ResourceUtilities.GetResourceString("CodeTaskFactory.AttributeEmpty");
-            mockLogger.AssertLogContains(String.Format(unformattedMessage, "Include"));
+            string unformattedMessage = ResourceUtilities.GetResourceString("CodeTaskFactory.AttributeEmptyWithTaskElement");
+            mockLogger.AssertLogContains(String.Format(unformattedMessage, "Include", "Reference", taskName));
         }
 
         /// <summary>
@@ -1152,7 +1159,7 @@ namespace Microsoft.Build.UnitTests
         {
             string taskName = "HelloTask";
 
-            string sourceContent =  $$"""
+            string sourceContent = $$"""
                 namespace InlineTask
                 {
                     using Microsoft.Build.Utilities;
@@ -1195,6 +1202,79 @@ namespace Microsoft.Build.UnitTests
 
             CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
                 FactoryType.CodeTaskFactory, "HelloTask", taskXml, false);
+        }
+
+        [Fact]
+        public void ShouldEmitSingleGeneratedFileIntoBinlog()
+        {
+            using var env = TestEnvironment.Create();
+
+            // Define task XML for Import.targets
+            string taskXml = @"
+                <Project>
+                  <UsingTask
+                    TaskName=""CustomTask""
+                    TaskFactory=""CodeTaskFactory""
+                    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+                    <ParameterGroup>
+                      <InputParameter ParameterType=""System.String"" />
+                      <OutputParameter ParameterType=""System.String"" Output=""True"" />
+                    </ParameterGroup>
+                    <Task>
+                      <Using Namespace=""System"" />
+                      <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                            Console.WriteLine(this.InputParameter);
+                            this.OutputParameter = ""Hello "" + this.InputParameter;
+                        ]]>
+                      </Code>
+                    </Task>
+                  </UsingTask>
+                </Project>";
+
+            TransientTestFile importTargetsFile = env.CreateFile("Import.targets", taskXml);
+
+            // Define Another.proj content
+            string anotherContent = $@"<Project>
+                <Import Project=""{importTargetsFile.Path}"" />
+                <Target Name=""AnotherTarget"">
+                    <CustomTask InputParameter=""Foo"">
+                        <Output PropertyName=""TaskOutput"" TaskParameter=""OutputParameter"" />
+                    </CustomTask>
+                    <Message Text=""Output: $(TaskOutput)"" />
+                </Target>
+            </Project>";
+
+            TransientTestFile anotherProjFile = env.CreateFile("Another.proj", anotherContent);
+
+            // Define main.csproj content
+            string projectFileContent = $@"<Project>
+                <Import Project=""{importTargetsFile.Path}"" />
+                <Target Name=""Build"">
+                    <MSBuild Projects=""{anotherProjFile.Path}"" Targets=""AnotherTarget"" />
+                    <CustomTask InputParameter=""Bar"" />
+                </Target>
+            </Project>";
+
+            TransientTestFile binlog = env.ExpectFile(".binlog");
+
+            var binaryLogger = new BinaryLogger()
+            {
+                Parameters = $"LogFile={binlog.Path}",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.ZipFile,
+            };
+
+            Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContent, binaryLogger, out bool result, out string projectDirectory);
+
+            Assert.True(result);
+
+            string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            // check to make sure that only 1 tmp file is created
+            var tmpFiles = zipArchive.Entries.Where(zE => zE.Name.EndsWith("CustomTask-compilation-file.tmp")).ToList();
+            tmpFiles.Count.ShouldBe(1, $"Expected exactly one file ending with 'CustomTask-compilation-file.tmp' in ProjectImports.zip, but found {tmpFiles.Count}.");
         }
     }
 #else

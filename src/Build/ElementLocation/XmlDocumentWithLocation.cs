@@ -7,6 +7,7 @@ using System.Threading;
 using System.Xml;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -24,14 +25,9 @@ namespace Microsoft.Build.Construction
     internal class XmlDocumentWithLocation : XmlDocument
     {
         /// <summary>
-        /// Used to cache strings used in attribute values and comments.
-        /// </summary>
-        private static ProjectStringCache s_globalStringCache = new ProjectStringCache();
-
-        /// <summary>
         /// Used to cache tag names in loaded files.
         /// </summary>
-        private static NameTable s_nameTable = new XmlNameTableThreadSafe();
+        private static readonly NameTable s_nameTable = new XmlNameTableThreadSafe();
 
         /// <summary>
         /// Whether we can selectively load as read-only (eg just when in program files directory)
@@ -48,11 +44,6 @@ namespace Microsoft.Build.Construction
         /// Easier to intercept and store than to derive it from the XmlDocument.BaseUri property.
         /// </summary>
         private string _fullPath;
-
-        /// <summary>
-        /// Local cache of strings for attribute values and comments. Used for testing.
-        /// </summary>
-        private ProjectStringCache _stringCache;
 
         /// <summary>
         /// Whether we can expect to never save this file.
@@ -132,19 +123,6 @@ namespace Microsoft.Build.Construction
         {
             get { return _fullPath; }
             set { _fullPath = value; }
-        }
-
-        /// <summary>
-        /// Sets or gets the string cache used by this XmlDocument.
-        /// </summary>
-        /// <remarks>
-        /// When a particular instance has not been set will use the global string cache. The ability
-        /// to use a particular instance is useful for tests.
-        /// </remarks>
-        internal ProjectStringCache StringCache
-        {
-            get { return _stringCache ?? s_globalStringCache; }
-            set { _stringCache = value; }
         }
 
         /// <summary>
@@ -272,7 +250,7 @@ namespace Microsoft.Build.Construction
                 text = String.Empty;
             }
 
-            string interned = StringCache.Add(text, this);
+            string interned = Strings.WeakIntern(text);
             return base.CreateWhitespace(interned);
         }
 
@@ -288,7 +266,7 @@ namespace Microsoft.Build.Construction
                 text = String.Empty;
             }
 
-            string interned = StringCache.Add(text, this);
+            string interned = Strings.WeakIntern(text);
             return base.CreateSignificantWhitespace(interned);
         }
 
@@ -298,7 +276,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public override XmlText CreateTextNode(string text)
         {
-            string textNode = StringCache.Add(text, this);
+            string textNode = Strings.WeakIntern(text);
             return base.CreateTextNode(textNode);
         }
 
@@ -313,7 +291,7 @@ namespace Microsoft.Build.Construction
                 data = String.Empty;
             }
 
-            string interned = StringCache.Add(data, this);
+            string interned = Strings.WeakIntern(data);
             return base.CreateComment(interned);
         }
 
@@ -364,16 +342,6 @@ namespace Microsoft.Build.Construction
         internal static void ClearReadOnlyFlags_UnitTestsOnly()
         {
             s_readOnlyFlags = ReadOnlyLoadFlags.Undefined;
-        }
-
-        /// <summary>
-        /// Called when the XmlDocument is unloaded to remove this XML's
-        /// contribution to the string interning cache.
-        /// Does NOT zombie the ProjectRootElement or anything else.
-        /// </summary>
-        internal void ClearAnyCachedStrings()
-        {
-            StringCache.Clear(this);
         }
 
         /// <summary>

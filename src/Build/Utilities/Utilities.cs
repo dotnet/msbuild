@@ -5,13 +5,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
@@ -23,7 +29,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    internal static class Utilities
+    internal static partial class Utilities
     {
         /// <summary>
         /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current
@@ -78,7 +84,7 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrow(s != null, "Need value to set.");
 
-            if (s.IndexOf('<') != -1)
+            if (s.Contains('<'))
             {
                 // If the value looks like it probably contains XML markup ...
                 try
@@ -220,7 +226,7 @@ namespace Microsoft.Build.Internal
             }
 
             // ...or it looks like the whole thing is a big CDATA tag ...
-            bool startsWithCData = (innerXml.IndexOf("<![CDATA[", StringComparison.Ordinal) == 0);
+            bool startsWithCData = innerXml.AsSpan().TrimStart().StartsWith("<![CDATA[".AsSpan(), StringComparison.Ordinal);
 
             if (startsWithCData)
             {
@@ -292,7 +298,12 @@ namespace Microsoft.Build.Internal
         }
 
         // used to find the xmlns attribute
-        private static readonly Regex s_xmlnsPattern = new Regex("xmlns=\"[^\"]*\"\\s*");
+#if NET
+        [GeneratedRegex("xmlns=\"[^\"]*\"\\s*")]
+        private static partial Regex XmlnsPattern { get; }
+#else
+        private static Regex XmlnsPattern { get; } = new Regex("xmlns=\"[^\"]*\"\\s*");
+#endif
 
         /// <summary>
         /// Removes the xmlns attribute from an XML string.
@@ -301,7 +312,7 @@ namespace Microsoft.Build.Internal
         /// <returns>The modified XML string.</returns>
         internal static string RemoveXmlNamespace(string xml)
         {
-            return s_xmlnsPattern.Replace(xml, String.Empty);
+            return XmlnsPattern.Replace(xml, String.Empty);
         }
 
         /// <summary>
@@ -309,19 +320,19 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static string CreateToolsVersionListString(IEnumerable<Toolset> toolsets)
         {
-            string toolsVersionList = String.Empty;
+            StringBuilder sb = StringBuilderCache.Acquire();
+
             foreach (Toolset toolset in toolsets)
             {
-                toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
+                if (sb.Length != 0)
+                {
+                    sb.Append(", ");
+                }
+
+                sb.Append('"').Append(toolset.ToolsVersion).Append('"');
             }
 
-            // Remove trailing comma and space
-            if (toolsVersionList.Length > 0)
-            {
-                toolsVersionList = toolsVersionList.Substring(0, toolsVersionList.Length - 2);
-            }
-
-            return toolsVersionList;
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         /// <summary>
@@ -462,11 +473,11 @@ namespace Microsoft.Build.Internal
         /// Retrieves properties derived from the current
         /// environment variables.
         /// </summary>
-        internal static PropertyDictionary<ProjectPropertyInstance> GetEnvironmentProperties()
+        internal static PropertyDictionary<ProjectPropertyInstance> GetEnvironmentProperties(bool makeReadOnly)
         {
             IDictionary<string, string> environmentVariablesBag = CommunicationsUtilities.GetEnvironmentVariables();
 
-            PropertyDictionary<ProjectPropertyInstance> environmentProperties = new PropertyDictionary<ProjectPropertyInstance>(environmentVariablesBag.Count + 2);
+            var envPropertiesHashSet = new RetrievableValuedEntryHashSet<ProjectPropertyInstance>(environmentVariablesBag.Count + 2, MSBuildNameIgnoreCaseComparer.Default);
 
             // We set the MSBuildExtensionsPath variables here because we don't want to make them official
             // reserved properties; we need the ability for people to override our default in their
@@ -483,11 +494,11 @@ namespace Microsoft.Build.Internal
                                           ? Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix)
                                           : programFiles32;
 #endif
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath32, extensionsPath32, true));
 
 #if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath64 = extensionsPath;
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
 #else
             // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a
             // 64-bit machine, and is empty on a 32-bit machine.
@@ -500,7 +511,7 @@ namespace Microsoft.Build.Internal
                                                   FrameworkLocationHelper.programFiles64,
                                                   ReservedPropertyNames.extensionsPathSuffix)
                                               : FrameworkLocationHelper.programFiles64;
-                environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
+                envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
             }
 #endif
 
@@ -523,13 +534,13 @@ namespace Microsoft.Build.Internal
             }
 #endif
 
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath, extensionsPath, true));
 
             // Windows XP and Windows Server 2003 don't define LocalAppData in their environment.
             // We'll set it here if the environment doesn't have it so projects can reliably
             // depend on $(LocalAppData).
             string localAppData = String.Empty;
-            ProjectPropertyInstance localAppDataProp = environmentProperties.GetProperty(ReservedPropertyNames.localAppData);
+            ProjectPropertyInstance localAppDataProp = envPropertiesHashSet.Get(ReservedPropertyNames.localAppData);
             if (localAppDataProp != null)
             {
                 localAppData = localAppDataProp.EvaluatedValue;
@@ -551,11 +562,11 @@ namespace Microsoft.Build.Internal
             }
 
 
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.localAppData, localAppData));
 
             // Add MSBuildUserExtensionsPath at $(LocalAppData)\Microsoft\MSBuild
             string userExtensionsPath = Path.Combine(localAppData, ReservedPropertyNames.userExtensionsPathSuffix);
-            environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
+            envPropertiesHashSet.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.userExtensionsPath, userExtensionsPath));
 
             foreach (KeyValuePair<string, string> environmentVariable in environmentVariablesBag)
             {
@@ -570,7 +581,7 @@ namespace Microsoft.Build.Internal
                 {
                     ProjectPropertyInstance environmentProperty = ProjectPropertyInstance.Create(environmentVariableName, environmentVariable.Value);
 
-                    environmentProperties.Set(environmentProperty);
+                    envPropertiesHashSet.Add(environmentProperty);
                 }
                 else
                 {
@@ -579,8 +590,60 @@ namespace Microsoft.Build.Internal
                 }
             }
 
+            if (makeReadOnly)
+            {
+                envPropertiesHashSet.MakeReadOnly();
+            }
+
+            var environmentProperties = new PropertyDictionary<ProjectPropertyInstance>(envPropertiesHashSet);
             return environmentProperties;
         }
+
+#if !NET
+        /// <summary>
+        /// Ensures that the capacity of this list is at least the specified <paramref name="capacity"/>.
+        /// If the current capacity of the list is less than specified <paramref name="capacity"/>,
+        /// the capacity is increased by continuously twice current capacity until it is at least the specified <paramref name="capacity"/>.
+        /// </summary>
+        /// <typeparam name="T">The type contained in the list.</typeparam>
+        /// <param name="list">The list to adjust the capacity of.</param>
+        /// <param name="capacity">The minimum capacity to ensure.</param>
+        /// <returns>The new capacity of this list.</returns>
+        public static int EnsureCapacity<T>(this List<T> list, int capacity)
+        {
+            const int DefaultCapacity = 4;
+            const int MaxArrayLength = 0X7FFFFFC7;
+
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            }
+
+            if (capacity > list.Capacity)
+            {
+                // Implementation copied and slightly modified from List's internal implementation.
+                int newCapacity = list.Count == 0 ? DefaultCapacity : 2 * list.Capacity;
+
+                // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
+                // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
+                if ((uint)newCapacity > MaxArrayLength)
+                {
+                    newCapacity = MaxArrayLength;
+                }
+
+                // If the computed capacity is still less than specified, set to the original argument.
+                // Capacities exceeding Array.MaxLength will be surfaced as OutOfMemoryException by Array.Resize.
+                if (newCapacity < capacity)
+                {
+                    newCapacity = capacity;
+                }
+
+                list.Capacity = newCapacity;
+            }
+
+            return list.Capacity;
+        }
+#endif
 
         /// <summary>
         /// Extension to IEnumerable to get the count if it
@@ -604,55 +667,48 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
-        {
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
-            }
-        }
-
-        public static T[] ToArray<T>(this IEnumerator<T> enumerator)
-        {
-            return enumerator.ToEnumerable().ToArray();
-        }
-
-        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed enumeration of properties.
+        /// </summary>
+        public static IEnumerable<PropertyData> EnumerateProperties(IEnumerable properties)
         {
             if (properties == null)
             {
-                return;
+                return [];
             }
 
             if (properties is PropertyDictionary<ProjectPropertyInstance> propertyInstanceDictionary)
             {
-                propertyInstanceDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyInstanceDictionary.Enumerate();
             }
             else if (properties is PropertyDictionary<ProjectProperty> propertyDictionary)
             {
-                propertyDictionary.Enumerate((key, value) =>
-                {
-                    callback(arg, new KeyValuePair<string, string>(key, value));
-                });
+                return propertyDictionary.Enumerate();
             }
             else
             {
-                foreach (var item in properties)
+                return CastOneByOne(properties);
+            }
+
+            IEnumerable<PropertyData> CastOneByOne(IEnumerable props)
+            {
+                foreach (var item in props)
                 {
                     if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
                     {
-                        callback(arg, new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
+                        yield return new(property.Name, property.EvaluatedValue ?? string.Empty);
                     }
                     else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
                     {
-                        callback(arg, new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
+                        yield return new(key, dictionaryEntry.Value as string ?? string.Empty);
                     }
                     else if (item is KeyValuePair<string, string> kvp)
                     {
-                        callback(arg, kvp);
+                        yield return new(kvp.Key, kvp.Value);
+                    }
+                    else if (item is KeyValuePair<string, TimeSpan> keyTimeSpanValue)
+                    {
+                        yield return new(keyTimeSpanValue.Key, keyTimeSpanValue.Value.Ticks.ToString());
                     }
                     else
                     {
@@ -669,61 +725,169 @@ namespace Microsoft.Build.Internal
             }
         }
 
-        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        /// <summary>
+        /// Iterates through the nongeneric enumeration and provides generic strong-typed callback to handle the properties.
+        /// </summary>
+        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
         {
+            foreach (var tuple in EnumerateProperties(properties))
+            {
+                callback(arg, new KeyValuePair<string, string>(tuple.Name, tuple.Value));
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItems(IEnumerable items)
+        {
+            // The actual type of the item data can be of types:
+            //  * <see cref="ProjectItemInstance"/>
+            //  * <see cref="ProjectItem"/>
+            //  * <see cref="IItem"/>
+            //  * <see cref="ITaskItem"/>
+            //  * possibly others
+            // That's why we here wrap with ItemAccessor if needed
+
+            if (items == null)
+            {
+                return [];
+            }
+
             if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
             {
-                projectItemInstanceDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemInstanceDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
             {
-                projectItemDictionary.EnumerateItemsPerType((itemType, itemList) =>
-                {
-                    foreach (var item in itemList)
-                    {
-                        callback(new DictionaryEntry(itemType, item));
-                    }
-                });
+                return projectItemDictionary
+                    .EnumerateItemsPerType()
+                    .Select(t => t.itemValue.Select(itemValue => new ItemData(t.itemType, (IItemData)itemValue)))
+                    .SelectMany(tpl => tpl);
             }
             else
             {
-                foreach (var item in items)
-                {
-                    string itemType = default;
-                    object itemValue = null;
+                return CastItemsOneByOne(items, null);
+            }
+        }
 
-                    if (item is IItem iitem)
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfType(IEnumerable items, string typeName)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                return
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return
+                    projectItemDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i));
+            }
+            else
+            {
+                return CastItemsOneByOne(items, [typeName]);
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the given nongeneric enumeration and tries to match or wrap appropriate item types.
+        /// Only items with matching type (case insensitive, MSBuild valid names only) will be returned.
+        /// </summary>
+        public static IEnumerable<ItemData> EnumerateItemsOfTypes(IEnumerable items, string[] typeNames)
+        {
+            if (items == null)
+            {
+                return [];
+            }
+
+            if (items is ItemDictionary<ProjectItemInstance> projectItemInstanceDictionary)
+            {
+                return typeNames.Select(typeName =>
+                    projectItemInstanceDictionary[typeName]
+                        .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                        .SelectMany(j => j);
+            }
+            else if (items is ItemDictionary<ProjectItem> projectItemDictionary)
+            {
+                return typeNames.Select(typeName =>
+                        projectItemDictionary[typeName]
+                            .Select(i => new ItemData(i.ItemType, (IItemData)i)))
+                    .SelectMany(j => j);
+            }
+            else
+            {
+                return CastItemsOneByOne(items, typeNames);
+            }
+        }
+
+        /// <summary>
+        /// Iterates through the nongeneric enumeration of items and provides generic strong-typed callback to handle the items.
+        /// </summary>
+        public static void EnumerateItems(IEnumerable items, Action<DictionaryEntry> callback)
+        {
+            foreach (var tuple in EnumerateItems(items))
+            {
+                callback(new DictionaryEntry(tuple.Type, tuple.Value));
+            }
+        }
+
+        /// <summary>
+        /// Enumerates the nongeneric items and attempts to cast them.
+        /// </summary>
+        /// <param name="items">Nongeneric list of items.</param>
+        /// <param name="itemTypeNamesToFetch">If not null, only the items with matching type (case insensitive, MSBuild valid names only) will be returned.</param>
+        /// <returns></returns>
+        private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string[] itemTypeNamesToFetch)
+        {
+            foreach (var item in items)
+            {
+                string itemType = default;
+                object itemValue = null;
+
+                if (item is IItem iitem)
+                {
+                    itemType = iitem.Key;
+                    itemValue = iitem;
+                }
+                else if (item is DictionaryEntry dictionaryEntry)
+                {
+                    itemType = dictionaryEntry.Key as string;
+                    itemValue = dictionaryEntry.Value;
+                }
+                else
+                {
+                    if (item == null)
                     {
-                        itemType = iitem.Key;
-                        itemValue = iitem;
-                    }
-                    else if (item is DictionaryEntry dictionaryEntry)
-                    {
-                        itemType = dictionaryEntry.Key as string;
-                        itemValue = dictionaryEntry.Value;
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
                     }
                     else
                     {
-                        if (item == null)
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
-                        }
-                        else
-                        {
-                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
-                        }
+                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
                     }
+                }
 
-                    if (!String.IsNullOrEmpty(itemType))
-                    {
-                        callback(new DictionaryEntry(itemType, itemValue));
-                    }
+                // if itemTypeNameToFetch was not set - then return all items
+                if (itemValue != null && (itemTypeNamesToFetch == null || itemTypeNamesToFetch.Any(tp => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))))
+                {
+                    // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                    //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                    // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                    //  (see xml comments of TaskItemData for details)
+                    yield return new ItemData(itemType!, itemValue);
                 }
             }
         }

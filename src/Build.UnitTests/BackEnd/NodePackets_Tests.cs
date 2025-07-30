@@ -7,7 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -73,8 +76,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             PropertyReassignmentEventArgs propReassign = new("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal);
             ResponseFileUsedEventArgs responseFileUsed = new("path");
             UninitializedPropertyReadEventArgs uninitializedPropertyRead = new("prop", "message", "help", "sender", MessageImportance.Normal);
-            EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "help", "sender", MessageImportance.Normal);
+            EnvironmentVariableReadEventArgs environmentVariableRead = new("env", "message", "file", 0, 0);
             GeneratedFileUsedEventArgs generatedFileUsed = new GeneratedFileUsedEventArgs("path", "some content");
+            BuildSubmissionStartedEventArgs buildSubmissionStarted = new(new Dictionary<string, string> { { "Value1", "Value2" } }, ["Path1"], ["TargetName"], BuildRequestDataFlags.ReplaceExistingProjectInstance, 123);
+            BuildCheckTracingEventArgs buildCheckTracing = new();
+            BuildCanceledEventArgs buildCanceled = new("message", DateTime.UtcNow);
+            WorkerNodeTelemetryEventArgs workerNodeTelemetry = new();
 
             VerifyLoggingPacket(buildFinished, LoggingEventType.BuildFinishedEvent);
             VerifyLoggingPacket(buildStarted, LoggingEventType.BuildStartedEvent);
@@ -108,6 +115,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyLoggingPacket(uninitializedPropertyRead, LoggingEventType.UninitializedPropertyRead);
             VerifyLoggingPacket(environmentVariableRead, LoggingEventType.EnvironmentVariableReadEvent);
             VerifyLoggingPacket(generatedFileUsed, LoggingEventType.GeneratedFileUsedEvent);
+            VerifyLoggingPacket(buildSubmissionStarted, LoggingEventType.BuildSubmissionStartedEvent);
+            VerifyLoggingPacket(buildCheckTracing, LoggingEventType.BuildCheckTracingEvent);
+            VerifyLoggingPacket(buildCanceled, LoggingEventType.BuildCanceledEvent);
+            VerifyLoggingPacket(workerNodeTelemetry, LoggingEventType.WorkerNodeTelemetryEvent);
         }
 
         private static BuildEventContext CreateBuildEventContext()
@@ -251,7 +262,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     new ResponseFileUsedEventArgs("path"),
                     new UninitializedPropertyReadEventArgs("prop", "message", "help", "sender", MessageImportance.Normal),
-                    new EnvironmentVariableReadEventArgs("env", "message", "help", "sender", MessageImportance.Normal) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
+                    new EnvironmentVariableReadEventArgs("env", "message", "file", 0, 0) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
                     new PropertyReassignmentEventArgs("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal),
                     new PropertyInitialValueSetEventArgs("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal),
                     new MetaprojectGeneratedEventArgs("metaName", "path", "message"),
@@ -281,31 +292,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CreateTargetSkipped(),
                     new ExtendedBuildErrorEventArgs("extError", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedBuildWarningEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedBuildMessageEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal, DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedCustomBuildEventArgs("extCustom", "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     new ExtendedCriticalBuildMessageEventArgs("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1")
                     {
-                        ExtendedData = "{'long-json':'mostly-strings'}",
+                        ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
@@ -321,12 +332,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     LogMessagePacket deserializedPacket = tempPacket as LogMessagePacket;
 
                     packet.Should().BeEquivalentTo(deserializedPacket, options => options
-                        .RespectingRuntimeTypes());
+                        .PreferringRuntimeMemberTypes());
 
                     BuildEventArgs args = packet.NodeBuildEvent?.Value;
                     BuildEventArgs desArgs = deserializedPacket?.NodeBuildEvent?.Value;
                     desArgs.Should().BeEquivalentTo(args, options => options
-                        .RespectingRuntimeTypes()
+                        .PreferringRuntimeMemberTypes()
                         // Since we use struct DictionaryEntry of class TaskItemData, generated DictionaryEntry.Equals compare TaskItemData by references.
                         // Bellow will instruct equivalency test to not use DictionaryEntry.Equals but its public members for equivalency tests.
                         .ComparingByMembers<DictionaryEntry>()

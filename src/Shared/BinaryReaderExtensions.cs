@@ -22,9 +22,9 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static int ReadOptionalInt32(this BinaryReader reader)
+        public static int? ReadOptionalInt32(this BinaryReader reader)
         {
-            return reader.ReadByte() == 0 ? 0 : reader.ReadInt32();
+            return reader.ReadByte() == 0 ? null : reader.ReadInt32();
         }
 
 #if !TASKHOST
@@ -124,6 +124,21 @@ namespace Microsoft.Build.Shared
             {
                 data.ExtendedMetadata = null;
             }
+        }
+
+        public static Dictionary<string, TimeSpan> ReadDurationDictionary(this BinaryReader reader)
+        {
+            int count = reader.Read7BitEncodedInt();
+            var durations = new Dictionary<string, TimeSpan>(count);
+            for (int i = 0; i < count; i++)
+            {
+                string key = reader.ReadString();
+                TimeSpan value = TimeSpan.FromTicks(reader.ReadInt64());
+
+                durations.Add(key, value);
+            }
+
+            return durations;
         }
     }
 }

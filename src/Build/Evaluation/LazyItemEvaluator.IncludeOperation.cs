@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
@@ -33,11 +34,11 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
+            [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "_lazyEvaluator._evaluationProfiler has own dipose logic.")]
             protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 ImmutableArray<I>.Builder? itemsToAdd = null;
 
-                Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (_excludes != null)
                 {
@@ -48,14 +49,10 @@ namespace Microsoft.Build.Evaluation
                         var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
                         excludePatterns.AddRange(excludeSplits);
                     }
-
-                    if (excludePatterns.Count > 0)
-                    {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
-                    }
                 }
 
                 ISet<string>? excludePatternsForGlobs = null;
+                Func<string, bool>? excludeTester = excludePatterns.Count > 0 ? EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory) : null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -72,16 +69,27 @@ namespace Microsoft.Build.Evaluation
                             elementLocation: _itemElement.IncludeLocation);
 
                         itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-                        itemsToAdd.AddRange(
-                            excludeTester != null
-                                ? itemsFromExpression.Where(item => !excludeTester.Value(item.EvaluatedInclude))
-                                : itemsFromExpression);
+
+                        if (excludeTester is not null)
+                        {
+                            foreach (var item in itemsFromExpression)
+                            {
+                                if (!excludeTester(item.EvaluatedInclude))
+                                {
+                                    itemsToAdd.Add(item);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            itemsToAdd.AddRange(itemsFromExpression);
+                        }
                     }
                     else if (fragment is ValueFragment valueFragment)
                     {
                         string value = valueFragment.TextFragment;
 
-                        if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
+                        if (excludeTester is null || !excludeTester(EscapingUtilities.UnescapeAll(value)))
                         {
                             itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                             itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
@@ -107,14 +115,14 @@ namespace Microsoft.Build.Evaluation
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
                             }
 
-                            using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
+                            using (_lazyEvaluator?._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                             {
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
                                     excludePatternsForGlobs,
                                     fileMatcher: FileMatcher,
-                                    loggingMechanism: _lazyEvaluator._loggingContext,
+                                    loggingMechanism: _lazyEvaluator?._loggingContext,
                                     includeLocation: _itemElement.IncludeLocation,
                                     excludeLocation: _itemElement.ExcludeLocation);
                             }

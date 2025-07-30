@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks
             XmlReader reader = null;
             try
             {
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true};
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
                 // it's important to normalize the path as it may contain two slashes
                 // see https://github.com/dotnet/msbuild/issues/4335 for details.
@@ -34,7 +34,9 @@ namespace Microsoft.Build.Tasks
                 // Need a filestream as the XmlReader doesn't support nonstandard unicode characters in path.
                 // No need to dispose - as 'CloseInput' was passed to XmlReaderSettings
                 FileStream fs = File.OpenRead(appConfigFilePath);
+#pragma warning disable CA2000 // Dispose objects before losing scope is suppressed because the reader is disposed in the finally block
                 reader = XmlReader.Create(fs, readerSettings);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 Read(reader);
             }
             catch (XmlException e)

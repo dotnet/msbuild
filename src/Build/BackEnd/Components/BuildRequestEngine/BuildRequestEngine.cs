@@ -3,18 +3,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.TelemetryInfra;
+using Microsoft.NET.StringTools;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -91,9 +92,18 @@ namespace Microsoft.Build.BackEnd
         private IConfigCache _configCache;
 
         /// <summary>
-        /// The list of unresolved configurations
+        /// The list of unresolved configurations by ID.
         /// </summary>
-        private IConfigCache _unresolvedConfigurations;
+        /// <remarks>
+        /// We intentionally don't use another IConfigCache to track unresolved configs. These are local to BuildRequestEngine,
+        /// and we are guaranteed to run in a single-threaded context due to the ActionBlock.
+        /// </remarks>
+        private Dictionary<int, BuildRequestConfiguration> _unresolvedConfigurationsById;
+
+        /// <summary>
+        /// The list of unresolved configurations by metadata.
+        /// </summary>
+        private Dictionary<ConfigurationMetadata, BuildRequestConfiguration> _unresolvedConfigurationsByMetadata;
 
         /// <summary>
         /// The logging context for the node
@@ -283,8 +293,14 @@ namespace Microsoft.Build.BackEnd
                         throw new AggregateException(deactivateExceptions);
                     }
 
-                    var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
+                    IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
+                    var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
+                    // Flush and send the final telemetry data if they are being collected
+                    ITelemetryForwarder telemetryForwarder = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
+                    telemetryForwarder.FinalizeProcessing(_nodeLoggingContext);
+                    // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
+                    buildCheckProvider.ShutdownComponent();
                 },
                 isLastTask: true);
 
@@ -307,7 +323,10 @@ namespace Microsoft.Build.BackEnd
                 _requests.Clear();
                 _requestsByGlobalRequestId.Clear();
                 _unsubmittedRequests.Clear();
-                _unresolvedConfigurations.ClearConfigurations();
+                _unresolvedConfigurationsById.Clear();
+                _unresolvedConfigurationsByMetadata.Clear();
+                Strings.ClearCachedStrings();
+
                 ChangeStatus(BuildRequestEngineStatus.Uninitialized);
             }
         }
@@ -358,7 +377,8 @@ namespace Microsoft.Build.BackEnd
                         // On the other hand, if this is not the inproc node, we want to make sure that our copy of this configuration
                         // knows that its results are no longer on this node.  Since we don't know enough here to know where the
                         // results are going, we satisfy ourselves with marking that they are simply "not here".
-                        if (_componentHost.BuildParameters.NodeId != Scheduler.InProcNodeId)
+                        // TODO: Only checking multi-threaded might not work for VS scenarios https://github.com/dotnet/msbuild/issues/11939
+                        if (!_componentHost.BuildParameters.MultiThreaded && _componentHost.BuildParameters.NodeId != Scheduler.InProcNodeId)
                         {
                             config.ResultsNodeId = Scheduler.ResultsTransferredId;
                         }
@@ -501,8 +521,9 @@ namespace Microsoft.Build.BackEnd
                     ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
 
                     // Remove the unresolved configuration entry from the unresolved cache.
-                    BuildRequestConfiguration config = _unresolvedConfigurations[response.NodeConfigurationId];
-                    _unresolvedConfigurations.RemoveConfiguration(response.NodeConfigurationId);
+                    BuildRequestConfiguration config = _unresolvedConfigurationsById[response.NodeConfigurationId];
+                    _ = _unresolvedConfigurationsById.Remove(response.NodeConfigurationId);
+                    _ = _unresolvedConfigurationsByMetadata.Remove(new ConfigurationMetadata(config));
 
                     // Add the configuration to the resolved cache unless it already exists there.  This will be
                     // the case in single-proc mode as we share the global cache with the Build Manager.
@@ -587,7 +608,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "BuildRequestEngine already initialized!");
             _componentHost = host;
             _configCache = (IConfigCache)host.GetComponent(BuildComponentType.ConfigCache);
@@ -596,9 +617,8 @@ namespace Microsoft.Build.BackEnd
             // proper IDs yet.  We don't get this from the global config cache because that singleton shouldn't be polluted
             // with our temporaries.
             // NOTE: Because we don't get this from the component host, we cannot override it.
-            ConfigCache unresolvedConfigCache = new ConfigCache();
-            unresolvedConfigCache.InitializeComponent(host);
-            _unresolvedConfigurations = unresolvedConfigCache;
+            _unresolvedConfigurationsById = new Dictionary<int, BuildRequestConfiguration>();
+            _unresolvedConfigurationsByMetadata = new Dictionary<ConfigurationMetadata, BuildRequestConfiguration>();
         }
 
         /// <summary>
@@ -1125,8 +1145,8 @@ namespace Microsoft.Build.BackEnd
             // to the entry rather than a series of them.
             lock (issuingEntry.GlobalLock)
             {
-                var existingResultsToReport = new List<BuildResult>();
-                var unresolvedConfigurationsAdded = new HashSet<int>();
+                List<BuildResult> existingResultsToReport = null;
+                HashSet<int> unresolvedConfigurationsAdded = null;
 
                 foreach (FullyQualifiedBuildRequest request in newRequests)
                 {
@@ -1145,12 +1165,14 @@ namespace Microsoft.Build.BackEnd
                     if (matchingConfig == null)
                     {
                         // No configuration locally, are we already waiting for it?
-                        matchingConfig = _unresolvedConfigurations.GetMatchingConfiguration(request.Config);
-                        if (matchingConfig == null)
+                        ConfigurationMetadata configMetadata = new(request.Config);
+                        if (!_unresolvedConfigurationsByMetadata.TryGetValue(configMetadata, out matchingConfig))
                         {
                             // Not waiting for it
                             request.Config.ConfigurationId = GetNextUnresolvedConfigurationId();
-                            _unresolvedConfigurations.AddConfiguration(request.Config);
+                            _unresolvedConfigurationsById.Add(request.Config.ConfigurationId, request.Config);
+                            _unresolvedConfigurationsByMetadata.Add(configMetadata, request.Config);
+                            unresolvedConfigurationsAdded ??= new HashSet<int>();
                             unresolvedConfigurationsAdded.Add(request.Config.ConfigurationId);
                         }
                         else
@@ -1229,6 +1251,7 @@ namespace Microsoft.Build.BackEnd
 
                             // Can't report the result directly here, because that could cause the request to go from
                             // Waiting to Ready.
+                            existingResultsToReport ??= new List<BuildResult>();
                             existingResultsToReport.Add(response.Results);
                         }
                         else
@@ -1240,9 +1263,12 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // If we have any results we had to report, do so now.
-                foreach (BuildResult existingResult in existingResultsToReport)
+                if (existingResultsToReport is not null)
                 {
-                    issuingEntry.ReportResult(existingResult);
+                    foreach (BuildResult existingResult in existingResultsToReport)
+                    {
+                        issuingEntry.ReportResult(existingResult);
+                    }
                 }
 
                 // Issue any configuration requests we may still need.
@@ -1251,16 +1277,27 @@ namespace Microsoft.Build.BackEnd
                 {
                     foreach (BuildRequestConfiguration unresolvedConfigurationToIssue in unresolvedConfigurationsToIssue)
                     {
-                        unresolvedConfigurationsAdded.Remove(unresolvedConfigurationToIssue.ConfigurationId);
+                        if (unresolvedConfigurationsAdded is not null)
+                        {
+                            unresolvedConfigurationsAdded.Remove(unresolvedConfigurationToIssue.ConfigurationId);
+                        }
+
                         IssueConfigurationRequest(unresolvedConfigurationToIssue);
                     }
                 }
 
                 // Remove any configurations we ended up not waiting for, otherwise future requests will think we are still waiting for them
                 // and will never get submitted.
-                foreach (int unresolvedConfigurationId in unresolvedConfigurationsAdded)
+                if (unresolvedConfigurationsAdded is not null)
                 {
-                    _unresolvedConfigurations.RemoveConfiguration(unresolvedConfigurationId);
+                    foreach (int unresolvedConfigurationId in unresolvedConfigurationsAdded)
+                    {
+                        if (_unresolvedConfigurationsById.TryGetValue(unresolvedConfigurationId, out BuildRequestConfiguration configToRemove))
+                        {
+                            _ = _unresolvedConfigurationsById.Remove(unresolvedConfigurationId);
+                            _ = _unresolvedConfigurationsByMetadata.Remove(new ConfigurationMetadata(configToRemove));
+                        }
+                    }
                 }
 
                 // Finally, if we can issue build requests, do so.
@@ -1295,7 +1332,7 @@ namespace Microsoft.Build.BackEnd
                         _nextUnresolvedConfigurationId = StartingUnresolvedConfigId;
                     }
                 }
-                while (_unresolvedConfigurations.HasConfiguration(_nextUnresolvedConfigurationId));
+                while (_unresolvedConfigurationsById.ContainsKey(_nextUnresolvedConfigurationId));
             }
 
             return _nextUnresolvedConfigurationId;
@@ -1327,8 +1364,8 @@ namespace Microsoft.Build.BackEnd
         private void IssueConfigurationRequest(BuildRequestConfiguration config)
         {
             ErrorUtilities.VerifyThrow(config.WasGeneratedByNode, "InvalidConfigurationId");
-            ErrorUtilities.VerifyThrowArgumentNull(config, nameof(config));
-            ErrorUtilities.VerifyThrow(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
+            ErrorUtilities.VerifyThrowArgumentNull(config);
+            ErrorUtilities.VerifyThrow(_unresolvedConfigurationsById.ContainsKey(config.ConfigurationId), "NoUnresolvedConfiguration");
             TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
             RaiseNewConfigurationRequest(config);
         }
@@ -1339,7 +1376,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="blocker">The information about why the request is blocked.</param>
         private void IssueBuildRequest(BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
 
             if (blocker.BuildRequests == null)
             {
@@ -1423,10 +1460,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true))
+                    using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
                     {
                         string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, DateTime.UtcNow.Ticks, message);
+                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
                         file.Flush();
                     }
                 }

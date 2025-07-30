@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
                             t.XmlInputPaths = (TaskItem[])xmlValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
                             t.XslCompiledDllPath = (TaskItem)xslValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests
                         t.XmlInputPaths = (TaskItem[])xmlValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests
                         t.XslCompiledDllPath = (TaskItem)xslValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -1087,6 +1087,7 @@ namespace Microsoft.Build.UnitTests
             t.UseTrustedSettings = false;
 
             Assert.False(t.Execute()); // "Test should have failed and not allowed the use of the document() function within the xslt file"
+            engine.Log.ShouldContain("MSB3703"); // "The log should contain MSB3703 error message at XslDocumentFunctionWorks test"
 
             CleanUp(dir);
         }
@@ -1212,7 +1213,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception e)
             {
-                Assert.True(false, "Compiler didn't work" + e.ToString());
+                Assert.Fail("Compiler didn't work" + e.ToString());
             }
 
             asmBldr.Save(Path.GetFileName(outputFile), PortableExecutableKinds.ILOnly, ImageFileMachine.I386);

@@ -28,11 +28,6 @@ namespace Microsoft.Build.Evaluation
     internal abstract class ToolsetReader
     {
         /// <summary>
-        /// The global properties used to read the toolset.
-        /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
-
-        /// <summary>
         /// The environment properties used to read the toolset.
         /// </summary>
         private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
@@ -45,7 +40,6 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             _environmentProperties = environmentProperties;
-            _globalProperties = globalProperties;
         }
 
         /// <summary>
@@ -419,44 +413,14 @@ namespace Microsoft.Build.Evaluation
 
                     Toolset toolset = ReadToolset(toolsVersion, globalProperties, initialPropertiesClone, accumulateProperties);
 
-                    // Register toolset paths into list of immutable directories
-                    // example: C:\Windows\Microsoft.NET\Framework
-                    string frameworksPathPrefix32 = existingRootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath32")?.EvaluatedValue?.Trim());
-                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefix32);
-                    // example: C:\Windows\Microsoft.NET\Framework64
-                    string frameworksPathPrefix64 = existingRootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPath64")?.EvaluatedValue?.Trim());
-                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefix64);
-                    // example: C:\Windows\Microsoft.NET\FrameworkArm64
-                    string frameworksPathPrefixArm64 = existingRootOrNull(initialPropertiesClone.GetProperty("MSBuildFrameworkToolsPathArm64")?.EvaluatedValue?.Trim());
-                    FileClassifier.Shared.RegisterImmutableDirectory(frameworksPathPrefixArm64);
+                    FileClassifier.Shared.RegisterFrameworkLocations(p =>
+                        initialPropertiesClone.GetProperty(p)?.EvaluatedValue);
 
                     if (toolset != null)
                     {
                         toolsets[toolset.ToolsVersion] = toolset;
                     }
                 }
-            }
-
-            string existingRootOrNull(string path)
-            {
-                if (!string.IsNullOrEmpty(path))
-                {
-                    try
-                    {
-                        path = Directory.GetParent(FileUtilities.EnsureNoTrailingSlash(path))?.FullName;
-
-                        if (!Directory.Exists(path))
-                        {
-                            path = null;
-                        }
-                    }
-                    catch
-                    {
-                        path = null;
-                    }
-                }
-
-                return path;
             }
         }
 
@@ -716,22 +680,26 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public static MSBuildExtensionsPathReferenceKind FindIn(string expression)
         {
-            if (expression.IndexOf("$(MSBuildExtensionsPath)") >= 0)
+            const string PathBase = "$(MSBuildExtensionsPath";
+            int pos = expression.IndexOf(PathBase, StringComparison.Ordinal);
+            if (pos >= 0)
             {
-                return MSBuildExtensionsPathReferenceKind.Default;
+                ReadOnlySpan<char> remainder = expression.AsSpan(pos + PathBase.Length);
+                if (remainder.StartsWith(")".AsSpan()))
+                {
+                    return Default;
+                }
+                else if (remainder.StartsWith("32)".AsSpan()))
+                {
+                    return Path32;
+                }
+                else if (remainder.StartsWith("64)".AsSpan()))
+                {
+                    return Path64;
+                }
             }
 
-            if (expression.IndexOf("$(MSBuildExtensionsPath32)") >= 0)
-            {
-                return MSBuildExtensionsPathReferenceKind.Path32;
-            }
-
-            if (expression.IndexOf("$(MSBuildExtensionsPath64)") >= 0)
-            {
-                return MSBuildExtensionsPathReferenceKind.Path64;
-            }
-
-            return MSBuildExtensionsPathReferenceKind.None;
+            return None;
         }
     }
 }

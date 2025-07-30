@@ -51,16 +51,23 @@ InitializeDotNetCli true
 
 if [[ $build_stage1 == true ]];
 then
-	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties || exit $?
+	/bin/bash "$ScriptRoot/common/build.sh" --restore --build --ci --configuration $configuration $properties $extra_properties || exit $?
 fi
 
 bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  _InitializeBuildTool="$_InitializeDotNetCli/dotnet"
-  _InitializeBuildToolCommand="$bootstrapRoot/net8.0/MSBuild/MSBuild.dll"
-  _InitializeBuildToolFramework="net8.0"
+  script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  props_file="$script_dir/Versions.props"
+  sdk_version=$(grep -A1 "BootstrapSdkVersion" "$props_file" | grep -o ">.*<" | sed 's/[><]//g')
+
+  _InitializeBuildTool="${bootstrapRoot}/core/dotnet"
+  _InitializeBuildToolCommand="${bootstrapRoot}/core/sdk/${sdk_version}/MSBuild.dll"
+  _InitializeBuildToolFramework="net10.0"
+
+  export DOTNET_ROOT="${bootstrapRoot}/core"
+
 else
   echo "Unsupported hostType ($host_type)"
   exit 1
@@ -83,7 +90,7 @@ export DOTNET_HOST_PATH="$_InitializeDotNetCli/dotnet"
 # - Create bootstrap environment as it's required when also running tests
 if [ $onlyDocChanged = 0 ]
 then
-    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=true $properties $extra_properties
+    . "$ScriptRoot/common/build.sh" --restore --build --test --ci --nodereuse false --configuration $configuration $properties $extra_properties
 
 else
     . "$ScriptRoot/common/build.sh" --restore --build --ci --nodereuse false --configuration $configuration /p:CreateBootstrap=false $properties $extra_properties

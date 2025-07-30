@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -10,16 +11,17 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BuildCheck.Infrastructure;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.TelemetryInfra;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
@@ -195,8 +197,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="entry">The entry to build.</param>
         public void BuildRequest(NodeLoggingContext loggingContext, BuildRequestEntry entry)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(loggingContext, nameof(loggingContext));
-            ErrorUtilities.VerifyThrowArgumentNull(entry, nameof(entry));
+            ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
+            ErrorUtilities.VerifyThrowArgumentNull(entry);
             ErrorUtilities.VerifyThrow(_componentHost != null, "Host not set.");
             ErrorUtilities.VerifyThrow(_targetBuilder == null, "targetBuilder not null");
             ErrorUtilities.VerifyThrow(_nodeLoggingContext == null, "nodeLoggingContext not null");
@@ -240,7 +242,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
             ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
-            ErrorUtilities.VerifyThrow(_pendingResourceRequests.Any(), "No pending resource requests");
+            ErrorUtilities.VerifyThrow(!_pendingResourceRequests.IsEmpty, "No pending resource requests");
             VerifyEntryInActiveOrWaitingState();
 
             _pendingResourceRequests.Dequeue()(response);
@@ -331,10 +333,10 @@ namespace Microsoft.Build.BackEnd
         public async Task<BuildResult[]> BuildProjects(string[] projectFiles, PropertyDictionary<ProjectPropertyInstance>[] properties, string[] toolsVersions, string[] targets, bool waitForResults, bool skipNonexistentTargets = false)
         {
             VerifyIsNotZombie();
-            ErrorUtilities.VerifyThrowArgumentNull(projectFiles, nameof(projectFiles));
-            ErrorUtilities.VerifyThrowArgumentNull(properties, nameof(properties));
-            ErrorUtilities.VerifyThrowArgumentNull(targets, nameof(targets));
-            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions, nameof(toolsVersions));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFiles);
+            ErrorUtilities.VerifyThrowArgumentNull(properties);
+            ErrorUtilities.VerifyThrowArgumentNull(targets);
+            ErrorUtilities.VerifyThrowArgumentNull(toolsVersions);
             ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
             ErrorUtilities.VerifyThrow(projectFiles.Length == properties.Length, "Properties and project counts not the same");
             ErrorUtilities.VerifyThrow(projectFiles.Length == toolsVersions.Length, "Tools versions and project counts not the same");
@@ -401,7 +403,7 @@ namespace Microsoft.Build.BackEnd
 
             RaiseOnBlockedRequest(blockingGlobalRequestId, blockingTarget, partialBuildResult);
 
-            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+            WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
             int handle;
             if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
@@ -447,7 +449,7 @@ namespace Microsoft.Build.BackEnd
             VerifyIsNotZombie();
             RaiseOnBlockedRequest(_requestEntry.Request.GlobalRequestId, String.Empty);
 
-            WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+            WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
             int handle = WaitHandle.WaitAny(handles);
 
@@ -496,7 +498,7 @@ namespace Microsoft.Build.BackEnd
             // a queue of pending requests.
             ResourceResponse responseObject = null;
             using AutoResetEvent responseEvent = new AutoResetEvent(false);
-            _pendingResourceRequests.Enqueue((ResourceResponse response) =>
+            _pendingResourceRequests.Enqueue((response) =>
             {
                 responseObject = response;
                 responseEvent.Set();
@@ -505,7 +507,7 @@ namespace Microsoft.Build.BackEnd
             RaiseResourceRequest(ResourceRequest.CreateAcquireRequest(_requestEntry.Request.GlobalRequestId, requestedCores, waitForCores));
 
             // Wait for one of two events to be signaled: 1) The build was canceled, 2) The response to our request was received.
-            WaitHandle[] waitHandles = new WaitHandle[] { _terminateEvent, responseEvent };
+            WaitHandle[] waitHandles = [_terminateEvent, responseEvent];
             int waitResult;
 
             // Drop the lock so that the same task can call ReleaseCores from other threads to unblock itself.
@@ -549,7 +551,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="host">The component host.</param>
         public void InitializeComponent(IBuildComponentHost host)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
             ErrorUtilities.VerifyThrow(_componentHost == null, "RequestBuilder already initialized.");
             _componentHost = host;
         }
@@ -956,7 +958,7 @@ namespace Microsoft.Build.BackEnd
             BuildResult[] results;
             if (waitForResults)
             {
-                WaitHandle[] handles = new WaitHandle[] { _terminateEvent, _continueEvent };
+                WaitHandle[] handles = [_terminateEvent, _continueEvent];
 
                 int handle;
                 if (IsBuilderUsingLegacyThreadingSemantics(_componentHost, _requestEntry))
@@ -1030,22 +1032,9 @@ namespace Microsoft.Build.BackEnd
 
             // The build results will have node request IDs in the same order as the requests were issued,
             // which is in the array order above.
-            List<BuildResult> resultsList = new List<BuildResult>(results.Values);
-            resultsList.Sort(delegate (BuildResult left, BuildResult right)
-            {
-                if (left.NodeRequestId < right.NodeRequestId)
-                {
-                    return -1;
-                }
-                else if (left.NodeRequestId == right.NodeRequestId)
-                {
-                    return 0;
-                }
-
-                return 1;
-            });
-
-            return resultsList.ToArray();
+            BuildResult[] resultsArray = results.Values.ToArray();
+            Array.Sort(resultsArray, (left, right) => left.NodeRequestId.CompareTo(right.NodeRequestId));
+            return resultsArray;
         }
 
         /// <summary>
@@ -1104,26 +1093,28 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_targetBuilder != null, "Target builder is null");
 
-            // We consider this the entrypoint for the project build for purposes of BuildCheck processing 
+            // We consider this the entrypoint for the project build for purposes of BuildCheck processing
+            bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
-            var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
-            buildCheckManager.SetDataSource(BuildCheckDataSource.BuildExecution);
+            var buildCheckManager = isRestoring
+                ? null
+                : (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
+
+            buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
             // Make sure it is null before loading the configuration into the request, because if there is a problem
             // we do not wand to have an invalid projectLoggingContext floating around. Also if this is null the error will be
             // logged with the node logging context
             _projectLoggingContext = null;
 
-            MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath);
-
             try
             {
                 // Load the project
                 if (!_requestEntry.RequestConfiguration.IsLoaded)
                 {
-                    buildCheckManager.StartProjectEvaluation(
+                    buildCheckManager?.ProjectFirstEncountered(
                         BuildCheckDataSource.BuildExecution,
-                        _requestEntry.Request.ParentBuildEventContext,
+                        new CheckLoggingContext(_nodeLoggingContext.LoggingService, _requestEntry.Request.BuildEventContext),
                         _requestEntry.RequestConfiguration.ProjectFullPath);
 
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
@@ -1131,6 +1122,21 @@ namespace Microsoft.Build.BackEnd
                         RequestEntry.Request.BuildRequestDataFlags,
                         RequestEntry.Request.SubmissionId,
                         _nodeLoggingContext.BuildEventContext.NodeId);
+                }
+
+                // Set SDK-resolved environment variables if they haven't been set yet for this configuration
+                if (!_requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet &&
+                     _requestEntry.RequestConfiguration.Project is IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> project)
+                {
+                    if (project.SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
+                    {
+                        foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
+                        {
+                            Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
+                        }
+                    }
+
+                    _requestEntry.RequestConfiguration.SdkResolvedEnvironmentVariablesSet = true;
                 }
             }
             catch
@@ -1146,20 +1152,21 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager.EndProjectEvaluation(
-                    BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
+                buildCheckManager?.EndProjectEvaluation(
+                    _requestEntry.Request.BuildEventContext);
             }
 
-            _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
-            buildCheckManager.StartProjectRequest(
-                BuildCheckDataSource.BuildExecution,
-                _requestEntry.Request.ParentBuildEventContext);
 
             try
             {
-                // Now that the project has started, parse a few known properties which indicate warning codes to treat as errors or messages
-                ConfigureWarningsAsErrorsAndMessages();
+                // Determine the set of targets we need to build
+                (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
+   .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
+                }
+                HandleProjectStarted(buildCheckManager);
 
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
                 ConfigureKnownImmutableFolders();
@@ -1176,9 +1183,6 @@ namespace Microsoft.Build.BackEnd
 
                 _requestEntry.Request.BuildEventContext = _projectLoggingContext.BuildEventContext;
 
-                // Determine the set of targets we need to build
-                string[] allTargets = _requestEntry.RequestConfiguration
-                    .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
 
                 ProjectErrorUtilities.VerifyThrowInvalidProject(allTargets.Length > 0,
                     _requestEntry.RequestConfiguration.Project.ProjectFileLocation, "NoTargetSpecified");
@@ -1209,6 +1213,8 @@ namespace Microsoft.Build.BackEnd
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
 
+                UpdateStatisticsPostBuild();
+
                 result = _requestEntry.Request.ProxyTargets == null
                     ? result
                     : CopyTargetResultsFromProxyTargetsToRealTargets(result);
@@ -1223,9 +1229,9 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager.EndProjectRequest(
-                    BuildCheckDataSource.BuildExecution,
-                    _requestEntry.Request.ParentBuildEventContext);
+                buildCheckManager?.EndProjectRequest(
+                    new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
+                    _requestEntry.RequestConfiguration.ProjectFullPath);
             }
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)
@@ -1258,6 +1264,86 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        private void UpdateStatisticsPostBuild()
+        {
+            ITelemetryForwarder telemetryForwarder =
+                ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
+                .Instance;
+
+            if (!telemetryForwarder.IsTelemetryCollected)
+            {
+                return;
+            }
+
+            IResultsCache resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
+            // The TargetBuilder filters out results for targets not explicitly requested before returning the result.
+            // Hence we need to fetch the original result from the cache - to get the data for all executed targets.
+            BuildResult unfilteredResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
+
+            foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
+            {
+                bool wasExecuted =
+                    unfilteredResult.ResultsByTarget.TryGetValue(projectTargetInstance.Key, out TargetResult targetResult) &&
+                    // We need to match on location of target as well - as multiple targets with same name can be defined.
+                    // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
+                    projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
+
+                bool isFromNuget, isMetaprojTarget, isCustom;
+
+                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                {
+                    isMetaprojTarget = true;
+                    isFromNuget = false;
+                    isCustom = false;
+                }
+                else
+                {
+                    isMetaprojTarget = false;
+                    isFromNuget = FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath);
+                    isCustom = !FileClassifier.Shared.IsBuiltInLogic(projectTargetInstance.Value.FullPath) ||
+                               // add the isFromNuget to condition - to prevent double checking of nonnuget package
+                               (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
+                }
+
+                telemetryForwarder.AddTarget(
+                    projectTargetInstance.Key,
+                    // would we want to distinguish targets that were executed only during this execution - we'd need
+                    //  to remember target names from ResultsByTarget from before execution
+                    wasExecuted,
+                    isCustom,
+                    isMetaprojTarget,
+                    isFromNuget);
+            }
+
+            TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
+            CollectTasksStats(taskReg);
+
+            void CollectTasksStats(TaskRegistry taskRegistry)
+            {
+                if (taskRegistry == null)
+                {
+                    return;
+                }
+
+                foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
+                {
+                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                        registeredTaskRecord.Statistics.ExecutedTime,
+                        registeredTaskRecord.Statistics.ExecutedCount,
+                        registeredTaskRecord.Statistics.TotalMemoryConsumption,
+                        registeredTaskRecord.ComputeIfCustom(),
+                        registeredTaskRecord.IsFromNugetCache);
+
+                    registeredTaskRecord.Statistics.Reset();
+                }
+
+                taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
+            }
+        }
+
+        private static bool IsMetaprojTargetPath(string targetPath)
+            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+
         /// <summary>
         /// Saves the current operating environment.
         /// </summary>
@@ -1268,6 +1354,31 @@ namespace Microsoft.Build.BackEnd
                 _requestEntry.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
                 _requestEntry.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
             }
+        }
+
+        private void HandleProjectStarted(IBuildCheckManager buildCheckManager)
+        {
+            (ProjectStartedEventArgs args, ProjectLoggingContext ctx) = _nodeLoggingContext.CreateProjectLoggingContext(_requestEntry);
+
+            _projectLoggingContext = ctx;
+            ConfigureWarningsAsErrorsAndMessages();
+            ILoggingService loggingService = _projectLoggingContext?.LoggingService;
+            BuildEventContext projectBuildEventContext = _projectLoggingContext?.BuildEventContext;
+
+            // We can set the warning as errors and messages only after the project logging context has been created (as it creates the new ProjectContextId)
+            if (loggingService != null && projectBuildEventContext != null)
+            {
+                args.WarningsAsErrors = loggingService.GetWarningsAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                args.WarningsAsMessages = loggingService.GetWarningsAsMessages(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                args.WarningsNotAsErrors = loggingService.GetWarningsNotAsErrors(projectBuildEventContext).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            }
+
+            // We can log the event only after the warning as errors and messages have been set and added
+            loggingService?.LogProjectStarted(args);
+
+            buildCheckManager?.StartProjectRequest(
+                new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext!.BuildEventContext),
+                _requestEntry.RequestConfiguration.ProjectFullPath);
         }
 
         /// <summary>
@@ -1283,7 +1394,7 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 // Restore the original build environment variables.
-                SetEnvironmentVariableBlock(_componentHost.BuildParameters.BuildProcessEnvironment);
+                SetEnvironmentVariableBlock(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
             }
         }
 
@@ -1306,9 +1417,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Sets the environment block to the set of saved variables.
         /// </summary>
-        private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment)
+        private void SetEnvironmentVariableBlock(FrozenDictionary<string, string> savedEnvironment)
         {
-            IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            FrozenDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
             ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
             UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
         }
@@ -1316,7 +1427,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Clears from the current environment any variables which do not exist in the saved environment
         /// </summary>
-        private void ClearVariablesNotInEnvironment(IDictionary<string, string> savedEnvironment, IDictionary<string, string> currentEnvironment)
+        private void ClearVariablesNotInEnvironment(FrozenDictionary<string, string> savedEnvironment, FrozenDictionary<string, string> currentEnvironment)
         {
             foreach (KeyValuePair<string, string> entry in currentEnvironment)
             {
@@ -1330,7 +1441,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Updates the current environment with values in the saved environment which differ or are not yet set.
         /// </summary>
-        private void UpdateEnvironmentVariables(IDictionary<string, string> savedEnvironment, IDictionary<string, string> currentEnvironment)
+        private void UpdateEnvironmentVariables(FrozenDictionary<string, string> savedEnvironment, FrozenDictionary<string, string> currentEnvironment)
         {
             foreach (KeyValuePair<string, string> entry in savedEnvironment)
             {
@@ -1366,14 +1477,14 @@ namespace Microsoft.Build.BackEnd
             // Ensure everything that is required is available at this time
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
-                if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
+                if (String.Equals(project.GetEngineRequiredPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
                 {
-                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsErrors));
+                    ISet<string> warningsAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsErrors));
 
                     if (warningsAsErrors?.Count > 0)
                     {
@@ -1381,14 +1492,14 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsNotAsErrors));
 
                 if (warningsNotAsErrors?.Count > 0)
                 {
                     loggingService.AddWarningsNotAsErrors(buildEventContext, warningsNotAsErrors);
                 }
 
-                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsMessages));
+                ISet<string> warningsAsMessages = ParseWarningCodes(project.GetEngineRequiredPropertyValue(MSBuildConstants.WarningsAsMessages));
 
                 if (warningsAsMessages?.Count > 0)
                 {
@@ -1402,21 +1513,20 @@ namespace Microsoft.Build.BackEnd
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             if (project != null)
             {
-                // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
-                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
-                // example: C:\Program Files\dotnet\
-                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("NetCoreRoot")?.Trim());
+                FileClassifier.Shared.RegisterKnownImmutableLocations(project.GetPropertyValue);
             }
         }
 
-        private ISet<string> ParseWarningCodes(string warnings)
+        private static ISet<string> ParseWarningCodes(string warnings)
         {
             if (String.IsNullOrWhiteSpace(warnings))
             {
                 return null;
             }
 
-            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings), StringComparer.OrdinalIgnoreCase);
+            return new HashSet<string>(ExpressionShredder.SplitSemiColonSeparatedList(warnings)
+            .SelectMany(w => w.Split([','], StringSplitOptions.RemoveEmptyEntries))
+            .Select(w => w.Trim()), StringComparer.OrdinalIgnoreCase);
         }
 
         private sealed class DedicatedThreadsTaskScheduler : TaskScheduler

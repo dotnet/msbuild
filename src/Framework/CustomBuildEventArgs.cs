@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET
+using System.Diagnostics.CodeAnalysis;
+#endif
 
 #nullable disable
 
@@ -13,10 +16,9 @@ namespace Microsoft.Build.Framework
     /// <remarks>
     /// <format type="text/markdown"><![CDATA[
     /// ## Remarks
-    /// > [!CAUTION]
-    /// In .NET 8 and later and Visual Studio 17.8 and later, this type is deprecated; instead use <xref:Microsoft.Build.Framework.ExtendedCustomBuildEventArgs>.
-    /// For more information, [this link](https://learn.microsoft.com/dotnet/core/compatibility/sdk/8.0/custombuildeventargs).
-    /// For recommended replacement, see [this link](https://learn.microsoft.com/dotnet/core/compatibility/sdk/8.0/custombuildeventargs#recommended-action).
+    /// > [!WARNING]
+    /// > In .NET 8 and later and Visual Studio 17.8 and later, this type is deprecated; instead use [ExtendedCustomBuildEventArgs](/dotnet/api/microsoft.build.framework.extendedcustombuildeventargs).
+    /// > For more information, see [MSBuild custom derived build events deprecated](/dotnet/core/compatibility/sdk/8.0/custombuildeventargs).
     /// ]]></format>
     /// </remarks>
     [Serializable]
@@ -72,7 +74,7 @@ namespace Microsoft.Build.Framework
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">Message arguments</param>
         protected CustomBuildEventArgs(
-            string message,
+            [StringSyntax(StringSyntaxAttribute.CompositeFormat)] string message,
             string helpKeyword,
             string senderName,
             DateTime eventTimestamp,

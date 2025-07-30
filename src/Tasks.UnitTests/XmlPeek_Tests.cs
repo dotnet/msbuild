@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
@@ -48,6 +49,13 @@ namespace Microsoft.Build.UnitTests
   <variable Type='String' Name='c'></variable>
   <method AccessModifier='public static' Name='GetVal' />
 </class>
+";
+        private readonly string _xmlFileRequiresEscaping = @"
+<Root>
+  <Key>abcdefg</Key>
+  <Key>a$(d)fg</Key>
+  <Key>a$(d.f)</Key>
+</Root>
 ";
 
         [Fact]
@@ -330,6 +338,24 @@ namespace Microsoft.Build.UnitTests
             project.Build().ShouldBeFalse();
             log.AssertLogContains("MSB4044");
             log.AssertLogContains("\"Query\"");
+        }
+
+        [Fact]
+        public void PeekEscapesCorrectly()
+        {
+            MockEngine engine = new MockEngine(true);
+            string xmlInputPath;
+            Prepare(_xmlFileRequiresEscaping, out xmlInputPath);
+
+            XmlPeek p = new XmlPeek();
+            p.BuildEngine = engine;
+
+            p.XmlInputPath = new TaskItem(xmlInputPath);
+            p.Query = "//Key/text()";
+
+            Assert.True(p.Execute());
+            Assert.Equal(["abcdefg", "a$(d)fg", "a$(d.f)"], p.Result.Select(x => x.ItemSpec));
+            Assert.Equal(["abcdefg", "a%24%28d%29fg", "a%24%28d.f%29"], p.Result.Cast<TaskItem>().Select(x => x.ToString()));
         }
 
         private void Prepare(string xmlFile, out string xmlInputPath)

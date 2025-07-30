@@ -15,57 +15,6 @@
         <target state="translated">Échec de la génération. Impossible d’obtenir les propriétés, les éléments et les résultats cibles. Consultez les détails dans stderr ci-dessus.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildFinished">
-        <source>Build {0} in {1}s</source>
-        <target state="translated">Générer {0} dans {1}s</target>
-        <note>
-      Overall build summary
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Failed">
-        <source>failed</source>
-        <target state="translated">échec</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrors">
-        <source>failed with {0} error(s)</source>
-        <target state="translated">a échoué avec {0} erreur(s)</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithErrorsAndWarnings">
-        <source>failed with {0} error(s) and {1} warning(s)</source>
-        <target state="translated">a échoué avec {0} erreur(s) et {1} avertissement(s)</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_FailedWithWarnings">
-        <source>failed with {0} warning(s)</source>
-        <target state="translated">a échoué avec {0} avertissement(s)</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_Succeeded">
-        <source>succeeded</source>
-        <target state="translated">a réussi</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
-      <trans-unit id="BuildResult_SucceededWithWarnings">
-        <source>succeeded with {0} warning(s)</source>
-        <target state="translated">a réussi avec {0} avertissement(s)</target>
-        <note>
-      Part of Terminal Logger summary message: "Build {BuildResult_X} in {duration}s"
-    </note>
-      </trans-unit>
       <trans-unit id="CommandLine">
         <source>Command line arguments = "{0}"</source>
         <target state="translated">Arguments de ligne de commande = "{0}"</target>
@@ -83,13 +32,6 @@
         <source>MSBUILD : error MSB1027: The -noAutoResponse switch cannot be specified in the MSBuild.rsp auto-response file, nor in any response file that is referenced by the auto-response file.</source>
         <target state="translated">MSBUILD : error MSB1027: Impossible de spécifier le commutateur -noAutoResponse dans le fichier réponse automatique MSBuild.rsp, ni dans aucun autre fichier réponse référencé par le fichier réponse automatique.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="DurationDisplay">
-        <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
-        <note>
-        {0}: duration in seconds with 1 decimal point
-      </note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
@@ -130,6 +72,228 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_43_GetPropertySwitch">
+        <source>  -getProperty:propertyName,...
+                     Write out the value of one or more specified properties
+                     after evaluation, without executing the build, or if either
+                     the -targets option or the -getTargetResult option is
+                     used, write out the values after the build.
+    </source>
+        <target state="translated">  -getProperty:propertyName,...
+                     Notez la valeur d’une ou de plusieurs propriétés spécifiées
+                     après l’évaluation, sans exécuter la build, ou si
+                     l’option -targets ou l’option -getTargetResult est
+                     utilisé, écrivez les valeurs après la génération.
+    </target>
+        <note>
+      LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_44_GetItemSwitch">
+        <source>  -getItem:itemName,...
+                     Write out the value of one or more specified items and
+                     their associated metadata after evaluation without
+                     executing the build, or if either the -targets option
+                     or the -getTargetResult option is used, write out
+                     the values after the build.
+    </source>
+        <target state="translated">  -getItem:itemName,...
+                     Notez la valeur d’un ou de plusieurs éléments spécifiés et
+                     leurs métadonnées associées après l’évaluation sans
+                     l’exécution de la build, ou si l’option -targets
+                     ou l’option -getTargetResult est utilisée, écrivez
+                     les valeurs après la génération.
+    </target>
+        <note>
+      LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_45_GetTargetResultSwitch">
+        <source>  -getTargetResult:targetName,...
+                     Write out the output value of one or more targets and
+                     the specified targets will be executed.
+    </source>
+        <target state="translated">  -getTargetResult:targetName,...
+                     Notez la valeur de sortie d’une ou de plusieurs cibles et
+                     les cibles spécifiées seront exécutées.
+    </target>
+        <note>
+      LOCALIZATION: "-getTargetResult" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_46_FeatureAvailabilitySwitch">
+        <source>  -featureAvailability:featureName,...
+                     Check feature availability. The result is one of the
+                     strings "Undefined", "Available", "NotAvailable" and
+                     "Preview".
+                     - Undefined - the availability of the feature is undefined
+                     (the feature name is unknown to the feature availability
+                     checker)
+                     - NotAvailable - the feature is not available (unlike
+                     Undefined, the feature name is known to the feature
+                     availability checker and it knows the feature is not
+                     supported by current MSBuild engine)
+                     - Available - the feature is available
+                     - Preview - the feature is in preview (not stable)
+                     (Short form: -fa)
+    </source>
+        <target state="translated">  -featureAvailability:featureName,...
+                     Vérifiez la disponibilité des fonctionnalités. Le résultat est l’une des
+                     chaînes « Undefined », « Available », « NotAvailable » et
+                     « Aperçu ».
+                     - Non défini : la disponibilité de la fonctionnalité n’est pas définie
+                     (le nom de la fonctionnalité est inconnu de la disponibilité des fonctionnalités
+                     vérificateur)
+                     - NotAvailable : la fonctionnalité n’est pas disponible (contrairement à
+                     Non défini, le nom de la fonctionnalité est connu de la fonctionnalité
+                     et sait que la fonctionnalité n’est pas
+                     prise en charge par le moteur MSBuild actuel)
+                     - Disponible : la fonctionnalité est disponible
+                     - Préversion : la fonctionnalité est en préversion (non stable)
+                     (Forme abrégée : -fa)
+    </target>
+        <note>
+      LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_47_TerminalLoggerSwitch">
+        <source>  -terminalLogger[:auto,on,off]
+                     Enable or disable the terminal logger. Terminal logger
+                     provides enhanced build output on the console in real time,
+                     organized logically by project, and designed to highlight
+                     actionable information. Specify auto (or use the option
+                     without arguments) to use the terminal logger only if the
+                     standard output is not redirected. Don't parse the output
+                     or otherwise rely on it remaining unchanged in future
+                     versions. This option is available in MSBuild 17.8 and
+                     later.
+                     (Short form: -tl)
+    </source>
+        <target state="translated">  -terminalLogger[:auto,on,off]
+                     Activez ou désactivez l’enregistreur d’événements du terminal. Enregistreur d’événements terminal
+                     fournit une sortie de build améliorée sur la console en temps réel,
+                     organisé logiquement par projet et conçu pour mettre en évidence
+                     les informations exploitables. Spécifier automatiquement (ou utiliser l’option
+                     sans arguments) pour utiliser l’enregistreur d’événements de terminal uniquement si le
+                     la sortie standard n’est pas redirigée. N’analysez pas la sortie
+                     ou reposez-vous sur le fait qu’il reste inchangé dans les
+futures
+                     versions. Cette option est disponible dans MSBuild 17.8 et
+                     ultérieures.
+                     (Forme abrégée : -tl)
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_48_TerminalLoggerParametersSwitch">
+        <source>  -terminalLoggerParameters: &lt;parameters&gt;
+                     Parameters to terminal logger. (Short form: -tlp)
+                     The available parameters.
+                        default--Specifies the default behavior of the terminal
+                        logger. It requires one of the following values:
+                           - `on`, `true`  forces TerminalLogger to be used even
+                            when it would be disabled.
+                           - `off`, `false` forces TerminalLogger to not be used
+                            even when it would be enabled.
+                           - `auto` enables TerminalLogger when the terminal
+                            supports it and the session doesn't have redirected
+                            stdout/stderr
+                        verbosity--Override the -verbosity setting for this
+                        logger
+                        showCommandLine--Show TaskCommandLineEvent messages
+
+                      Example:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </source>
+        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
+                     Paramètres de l’enregistreur d’événements de terminal. (Forme abrégée : -tlp)
+                     Paramètres disponibles.
+                        default --Spécifie le comportement par défaut du terminal
+                        enregistreur. Elle nécessite l’une des valeurs suivantes :
+                           - 'on', 'true' force TerminalLogger à être utilisé même
+                            quand il serait désactivé.
+                           - 'off', 'false' force TerminalLogger à ne pas être utilisé
+                            même lorsqu’il serait activé.
+                           - « auto » active TerminalLogger lorsque le terminal
+                            la prend en charge et la session n’a pas redirigée
+                            stdout/stderr
+                        verbosity--Remplacer le paramètre -verbosity pour cet
+                        enregistreur
+                        showCommandLine--Afficher les messages TaskCommandLineEvent
+
+                      Exemple :
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
+        <note>
+      LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -multithread
+                     Active le mode EXPERIMENTAL multithread dans MSBuild.
+                     Cela signifie que MSBuild utilisera plusieurs threads
+                     pour construire des projets en parallèle,
+                     au lieu de plusieurs processus.
+                     Cette option n'est pas prise en charge.
+                     Le nombre maximal de threads utilisés est déterminé par le
+                     commutateur -maxCpuCount.
+                     (Forme courte : -m)
+    </target>
+        <note />
+      </trans-unit>
+      <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
+        <source>  -getResultOutputFile:file
+                     Redirect output from get* into a file.
+
+                     Example:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     This writes the value of property Bar into Biz.txt.
+    </source>
+        <target state="translated">  -getResultOutputFile:file
+                     Rediriger la sortie de get* vers un fichier.
+
+                     Exemple :
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     Cette opération écrit la valeur de la barre de propriétés dans Biz.txt.
+    </target>
+        <note>
+      LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
+      LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+    </note>
+      </trans-unit>
+      <trans-unit id="HelpMessage_52_BuildCheckSwitch">
+        <source>  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see aka.ms/buildcheck
+	</source>
+        <target state="translated">  -check
+                     Active BuildChecks pendant la construction.
+                     BuildCheck permet d'évaluer les règles pour garantir les propriétés
+                     de la build. Pour plus d'informations, consultez aka.ms/buildcheck
+	</target>
+        <note>
+    {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
+    LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
+  </note>
+      </trans-unit>
       <trans-unit id="InvalidLowPriorityValue">
         <source>MSBUILD : error MSB1064: Low priority value is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1064: la valeur basse priorité n’est pas valide. {0}</target>
@@ -159,6 +323,26 @@
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LongPaths">
+        <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
+        <target state="translated">D’après la clé de Registre Windows LongPathsEnabled, la fonctionnalité LongPaths est {0}.</target>
+        <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
+      </trans-unit>
+      <trans-unit id="LongPaths_Disabled">
+        <source>disabled</source>
+        <target state="translated">désactivé</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Enabled">
+        <source>enabled</source>
+        <target state="translated">activé</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Missing">
+        <source>not set</source>
+        <target state="translated">non défini</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
@@ -1329,11 +1513,11 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
-        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureavailability switch.</source>
-        <target state="translated">MSBUILD : error MSB1067: vous devez fournir un nom de fonctionnalité pour le commutateur featureavailability.</target>
+        <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
+        <target state="translated">MSBUILD : error MSB1067: doit fournir un nom de fonctionnalité pour le commutateur featureAvailability.</target>
         <note>
-      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureavailability". The user must pass in an actual feature name
-      following the switch, as in "msbuild.exe -featureavailability:blah".
+      {StrBegin="MSBUILD : error MSB1067: "}UE: This happens if the user does something like "msbuild.exe -featureAvailability". The user must pass in an actual feature name
+      following the switch, as in "msbuild.exe -featureAvailability:blah".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -1431,7 +1615,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">MSBUILD : error MSB1066: spécifiez un ou plusieurs paramètres pour l’enregistreur d’événements de terminal si vous utilisez le commutateur -terminalLoggerParameters</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
-      UE: This happens if the user does something like "msbuild.exe -termionalLoggerParameters:". The user must pass in one or more parameters
+      UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
       after the switch e.g. "msbuild.exe -terminalLoggerParameters:default=auto".
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
@@ -1508,37 +1692,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">Processus = "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="ProjectFinished_NoTF">
-        <source>{0}{1} {2} ({3}s)</source>
-        <target state="translated">{0}{1} {2} ({3}s)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_OutputPath">
-        <source> → {0}</source>
-        <target state="translated"> → {0}</target>
-        <note>
-      Info about project output - when known. Printed after ProjectFinished_NoTF or ProjectFinished_WithTF.
-      {0}: VT100 coded hyperlink to project output directory
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectFinished_WithTF">
-        <source>{0}{1} {2} {3} ({4}s)</source>
-        <target state="translated">{0}{1} {2} {3} ({4}s)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
       <trans-unit id="ProjectNotFoundError">
         <source>MSBUILD : error MSB1009: Project file does not exist.</source>
         <target state="translated">MSBUILD : error MSB1009: Le fichier projet n'existe pas.</target>
@@ -1586,21 +1739,25 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       These are response file switches with the location of the response file on disk.
     </note>
       </trans-unit>
-      <trans-unit id="RestoreComplete">
-        <source>Restore complete ({0}s)</source>
-        <target state="translated">Restauration terminée ({0}s)</target>
-        <note>
-      {0}: duration in seconds with 1 decimal point
-    </note>
+      <trans-unit id="SAC">
+        <source>Based on the Windows registry key VerifiedAndReputablePolicyState, SAC state = {0}.</source>
+        <target state="translated">Basé sur la clé de Registre Windows VerifiedAndReputablePolicyState, état SAC = {0}.</target>
+        <note>"Windows" is the OS, SAC is the Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
-      <trans-unit id="RestoreCompleteWithMessage">
-        <source>Restore {0} in {1}s</source>
-        <target state="translated">Restaurer {0} en {1}s</target>
-        <note>
-      Restore summary when finished with warning or error
-      {0}: BuildResult_X (below)
-      {1}: duration in seconds with 1 decimal point
-    </note>
+      <trans-unit id="SAC_Enforcement">
+        <source>1: in enforcement</source>
+        <target state="translated">1 : mise en œuvre</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SAC_Evaluation">
+        <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
+        <target state="translated">2 : en évaluation Il est recommandé de désactiver smart App Control dans l’environnement de développement, car les performances risquent d’être affectées dans le cas contraire</target>
+        <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="SAC_Off">
+        <source>0: turned off</source>
+        <target state="translated">0 : désactivé</target>
+        <note />
       </trans-unit>
       <trans-unit id="SchemaFileLocation">
         <source>Validating project using schema file "{0}".</source>
@@ -1651,6 +1808,11 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">MSBUILD : error MSB1059: les cibles n'ont pas pu être imprimées. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">L'enregistreur de terminal n'a pas été utilisé, car il a été détecté que la build s'exécute dans un environnement automatisé.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">L’enregistreur d’événements de terminal n’a pas été utilisé, car la build est exécutée dans le contexte d’un processus (par exemple, 'dotnet test') qui demande un accès direct au flux stdout.</target>
@@ -1665,54 +1827,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <source>Terminal Logger was not used because the output is being redirected to a file.</source>
         <target state="translated">L’enregistreur d’événements du terminal n’a pas été utilisé car la sortie est redirigée vers un fichier.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_NoTF">
-        <source>{0}{1} test {2} ({3}s)</source>
-        <target state="translated">{0}Test de {1} : {2} ({3} s)</target>
-        <note>
-      Project finished summary.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: BuildResult_{X}
-      {3}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="TestProjectFinished_WithTF">
-        <source>{0}{1} test {2} {3} ({4}s)</source>
-        <target state="translated">{0}Test de {1} {2} : {3} ({4} s)</target>
-        <note>
-      Project finished summary including target framework information.
-      {0}: indentation - few spaces to visually indent row
-      {1}: project name
-      {2}: target framework
-      {3}: BuildResult_{X}
-      {4}: duration in seconds with 1 decimal point
-    </note>
-      </trans-unit>
-      <trans-unit id="TestSummary_BannerAndTotal">
-        <source>Test summary: total: {0}</source>
-        <target state="new">Test summary: total: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Duration">
-        <source>duration: {0}s</source>
-        <target state="new">duration: {0}s</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Failed">
-        <source>failed: {0}</source>
-        <target state="new">failed: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Skipped">
-        <source>skipped: {0}</source>
-        <target state="new">skipped: {0}</target>
-        <note>{0} whole number</note>
-      </trans-unit>
-      <trans-unit id="TestSummary_Succeeded">
-        <source>succeeded: {0}</source>
-        <target state="new">succeeded: {0}</target>
-        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
@@ -1791,38 +1905,10 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
   </note>
       </trans-unit>
-      <trans-unit id="AbortingBuild">
-        <source>Attempting to cancel the build...</source>
-        <target state="translated">Tentative d'annulation de la génération en cours...</target>
-        <note />
-      </trans-unit>
       <trans-unit id="InvalidPreprocessPath">
         <source>MSBUILD : error MSB1047: File to preprocess to is not valid. {0}</source>
         <target state="translated">MSBUILD : error MSB1047: Le fichier à prétraiter n'est pas valide. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1047: "}</note>
-      </trans-unit>
-      <trans-unit id="LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Impossible de créer une instance du journal. {0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1021: "}
-      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
-      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
-      </trans-unit>
-      <trans-unit id="LoggerNotFoundError">
-        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
-        <target state="translated">MSBUILD : error MSB1020: Le journal est introuvable. Vérifiez les points suivants : 1.) Le nom du journal est le même que celui de la classe de journalisation. 2.) La classe de journalisation est "public" et implémente l'interface Microsoft.Build.Framework.ILogger. 3.) Le chemin de l'assembly de journalisation est correct ou le journal peut uniquement être chargé à l'aide du nom d'assembly fourni.</target>
-        <note>
-      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
-      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
-      logger class must exist in the given assembly.
-      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
-    </note>
-      </trans-unit>
-      <trans-unit id="ProjectUpgradeNeededToVcxProj">
-        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
-        <target state="translated">MSBUILD : error MSB4192: Le fichier projet "{0}" utilise le format de fichier ".vcproj" ou ".dsp", que MSBuild ne peut pas générer directement. Convertissez le projet en l'ouvrant dans l'IDE de Visual Studio ou en exécutant l'outil de conversion. Pour ".vcproj", utilisez à la place MSBuild pour générer le fichier solution contenant le projet.</target>
-        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
       <trans-unit id="NeedJustMyCode">
         <source>If MSBuild debugging does not work correctly, please verify that the "Just My Code" feature is enabled in Visual Studio, and that you have selected the managed debugger.</source>
@@ -1936,6 +2022,14 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -1970,65 +2064,56 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Sérialise tous les événements de build dans un fichier binaire compressé.
-                     Par défaut, le fichier se trouve dans le répertoire actif et se nomme
+                     Sérialise tous les événements de génération dans un fichier binaire compressé.
+                     Par défaut, le fichier se trouve dans le répertoire actuel et son nom est 
                      "msbuild.binlog". Le journal binaire est une description détaillée
-                     du processus de génération, qui peut servir plus tard à reconstruire
-                     les journaux texte et être utilisé par d'autres outils d'analyse. Un journal binaire
-                     est généralement
-10 à 20
-fois plus petit que le journal
-                     de diagnostic de type texte le plus détaillé, mais il contient plus d'informations.
-                     (Forme abrégée
-: -bl)
+                     du processus de génération que vous pouvez utiliser plus tard pour reconstruire
+                     des journaux texte et être utilisé par d’autres outils d’analyse. Un journal binaire
+                     est généralement 10 à 20 fois plus petit que le journal au niveau du diagnostic
+                     du texte le plus détaillé, mais il contient d’autres informations.
+                     (Forme abrégée : -bl)
 
+                     Le LogFile facultatif spécifie le chemin d’accès où le
+                     journal binaire est enregistré. Pour générer un fichier journal distinct
+                     pour chaque génération, vous pouvez ajouter le jeton « {} » dans le
+                     chemin d’accès, par exemple : LogFile=output-{}-log.binlog. Chaque 
+                     « {} » dans le chemin d’accès du journal est remplacé par une chaîne unique
+                     en utilisant un timestamp, ce qui exécute l’ID de processus et une
+                     empreinte de chaîne aléatoire.
 
-                     Le journaliseur binaire par défaut collecte le texte source
+                     L’enregistreur binaire collecte par défaut le texte source des
+                     fichiers de projet, notamment tous les projets importés et les
+                     fichiers cibles rencontrés pendant la génération. Le commutateur
+                     ProjectImports facultatif contrôle ce comportement :
 
-                     des fichiers projet, notamment tous les projets importés et les
-
-                     fichiers cibles rencontrés pendant la build. Le commutateur
-
-                     ProjectImports facultatif contrôle ce comportement
-:
-
-                      ProjectImports=None     - Ne collecte pas les importations
-                                                du projet.
-                      ProjectImports=Embed    - Incorpore les importations du projet dans
-                                                le fichier journal.
-                      ProjectImports=ZipFile  - Enregistre les fichiers projet dans
+                      ProjectImports=None     – Ne collectez pas les
+                                                importations du projet.
+                      ProjectImports=Embed    – Importations du projet incorporées dans le
+                                                fichier journal.
+                      ProjectImports=ZipFile  – Enregistrez les fichiers du projet dans
                                                 output.projectimports.zip
-                                                où la sortie porte le même nom que
-                                                le fichier journal binaire.
+                                                où la sortie est le même nom
+                                                que le nom du fichier journal binaire.
 
-                     Le paramètre par défaut de ProjectImports est Embed.
-                     Remarque
-: Le journaliseur ne collecte pas les
+                     Le paramètre par défaut pour ProjectImports est Incorporé.
+                     Remarque : l’enregistreur ne collecte pas les fichiers sources non-MSBuild
+                     tels que .cs, .cpp etc.
 
-                     fichiers sources non MSBuild tels que .cs, .cpp etc.
+                     Vous pouvez « lire » un fichier .binlog en le passant à
+                     msbuild.exe en tant qu’argument au lieu d’une solution/d’un projet.
+                     D’autres enregistreurs reçoivent les informations contenues
+                     dans le fichier journal comme si la génération d’origine se produisait.
+                     Vous pouvez lire plus d’informations sur le journal binaire et ses utilisations sur :
+                     https://aka.ms/msbuild/binlog
 
-
-                     Vous pouvez "lire" un fichier .binlog en le passant à
-
-                     msbuild.exe en tant qu'argument plutôt qu'en tant que projet/solution.
-
-                     D'autres enregistreurs d'événements reçoivent les informations
-
-                     contenues dans le fichier journal comme si la build d'origine était en cours de création.
-
-                     Pour plus d'informations sur le journal binaire et ses usages, consultez
-:
-                    https://aka.ms/msbuild/binlog
-
-                     Exemples
-:
-
+                     Exemples :
                        -bl
-
                        -bl:output.binlog
-
                        -bl:output.binlog;ProjectImports=None
-                       -bl:output.binlog;ProjectImports=ZipFile                       -bl:..\..\custom.binlog                       -binaryLogger    </target>
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
+    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"
@@ -2135,6 +2220,29 @@ fois plus petit que le journal
         <source>MSBUILD :error MSB1054: A filename must be specified to generate the profiler result.</source>
         <target state="translated">MSBUILD : erreur MSB1054 : Un nom de fichier doit être spécifié pour générer le résultat du profileur.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XMake.LoggerCreationError">
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: Impossible de créer une instance du journal {0}. {1}</target>
+        <note>{StrBegin="MSBUILD : error MSB1021: "}
+      UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
+      logger could not be created -- this message comes from the CLR/FX and is localized.</note>
+      </trans-unit>
+      <trans-unit id="XMake.LoggerNotFoundError">
+        <source>MSBUILD : error MSB1020: The logger was not found. Check the following: 1.) The logger name specified is the same as the name of the logger class. 2.) The logger class is "public" and implements the Microsoft.Build.Framework.ILogger interface. 3.) The path to the logger assembly is correct, or the logger can be loaded using only the assembly name provided.</source>
+        <target state="translated">MSBUILD : error MSB1020: Le journal est introuvable. Vérifiez les points suivants : 1.) Le nom du journal est le même que celui de la classe de journalisation. 2.) La classe de journalisation est "public" et implémente l'interface Microsoft.Build.Framework.ILogger. 3.) Le chemin de l'assembly de journalisation est correct ou le journal peut uniquement être chargé à l'aide du nom d'assembly fourni.</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1020: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies an logger that does not exist e.g. "msbuild -logger:FooLoggerClass,FooAssembly". The
+      logger class must exist in the given assembly.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="XMake.ProjectUpgradeNeededToVcxProj">
+        <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
+        <target state="translated">MSBUILD : error MSB4192: Le fichier projet "{0}" utilise le format de fichier ".vcproj" ou ".dsp", que MSBuild ne peut pas générer directement. Convertissez le projet en l'ouvrant dans l'IDE de Visual Studio ou en exécutant l'outil de conversion. Pour ".vcproj", utilisez à la place MSBuild pour générer le fichier solution contenant le projet.</target>
+        <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
     </body>
   </file>

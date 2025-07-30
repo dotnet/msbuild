@@ -41,14 +41,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         private readonly ConcurrentDictionary<int, ConcurrentDictionary<SdkResolver, object>> _resolverStateBySubmission = new ConcurrentDictionary<int, ConcurrentDictionary<SdkResolver, object>>();
 
         /// <summary>
-        /// Stores the list of SDK resolvers which were loaded.
-        /// </summary>
-        /// <remarks>
-        /// Need it for supporting the ChangeWave less than <see cref="ChangeWaves.Wave17_4"/>. Remove when move out Wave17_4.
-        /// </remarks>
-        private IReadOnlyList<SdkResolver> _resolversList;
-
-        /// <summary>
         /// Stores the loaded SDK resolvers, mapped to the manifest from which they came.
         /// </summary>
         private Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>> _manifestToResolvers;
@@ -56,12 +48,12 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// Stores the list of manifests of specific SDK resolvers which could be loaded.
         /// </summary>
-        private IList<SdkResolverManifest> _specificResolversManifestsRegistry;
+        protected IReadOnlyList<SdkResolverManifest> _specificResolversManifestsRegistry;
 
         /// <summary>
         /// Stores the list of manifests of general SDK resolvers which could be loaded.
         /// </summary>
-        private IList<SdkResolverManifest> _generalResolversManifestsRegistry;
+        protected IReadOnlyList<SdkResolverManifest> _generalResolversManifestsRegistry;
 
         /// <summary>
         /// Stores an <see cref="SdkResolverLoader"/> which can load registered SDK resolvers.
@@ -70,7 +62,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// Unless the 17.10 changewave is disabled, we use a singleton instance because the set of SDK resolvers
         /// is not expected to change during the lifetime of the process.
         /// </remarks>
-        private SdkResolverLoader _sdkResolverLoader = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
+        protected SdkResolverLoader _sdkResolverLoader = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
             ? CachingSdkResolverLoader.Instance
             : new SdkResolverLoader();
 
@@ -85,6 +77,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         /// <inheritdoc cref="ISdkResolverService.SendPacket"/>
         public Action<INodePacket> SendPacket { get; }
+
+        /// <inheritdoc cref="ISdkResolverService.IsNodeShutDown"/>
+        public bool IsNodeShutDown { get; set; }
 
         /// <summary>
         /// Determines if the <see cref="SdkReference"/> is the same as the specified version.  If the <paramref name="sdk"/> object has <code>null</code> for the version,
@@ -144,7 +139,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             //
             // Overall, while Sdk resolvers look like a general plug-in system, there are good reasons why some of the logic is hard-coded.
             // It's not really meant to be modified outside of very special/internal scenarios.
-#if NETCOREAPP
+#if NET
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
             {
                 if (TryResolveSdkUsingSpecifiedResolvers(
@@ -165,27 +160,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 }
             }
 #endif
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
-            {
-                return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
-            }
-            else
-            {
-                SdkResult result = ResolveSdkUsingAllResolvers(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, out IEnumerable<string> errors, out IEnumerable<string> warnings);
 
-                // Warnings are already logged on success.
-                if (!result.Success)
-                {
-                    if (failOnUnresolvedSdk)
-                    {
-                        loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
-                    }
-
-                    LogWarnings(loggingContext, sdkReferenceLocation, warnings);
-                }
-
-                return result;
-            }
+            return ResolveSdkUsingResolversWithPatternsFirst(submissionId, sdk, loggingContext, sdkReferenceLocation, solutionPath, projectPath, interactive, isRunningInVisualStudio, failOnUnresolvedSdk);
         }
 
         /// <remarks>
@@ -205,6 +181,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolverManifest> matchingResolversManifests = new();
             foreach (SdkResolverManifest manifest in _specificResolversManifestsRegistry)
             {
+                WaitIfTestRequires(); 
                 try
                 {
                     if (manifest.ResolvableSdkRegex.IsMatch(sdk.Name))
@@ -252,7 +229,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             resolvers = GetResolvers(
                 _generalResolversManifestsRegistry,
                 loggingContext,
-                sdkReferenceLocation).ToList();
+                sdkReferenceLocation);
 
             if (TryResolveSdkUsingSpecifiedResolvers(
                 resolvers,
@@ -276,7 +253,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (failOnUnresolvedSdk)
             {
-                loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                if (resolvers.Count == 1) // Check if only one resolver was used
+                {
+                    // Log the single resolver's error message directly
+                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "SingleResolverFailedToResolveSDK", sdk.Name, resolvers[0].Name, string.Join(Environment.NewLine, errors));
+                }
+                else
+                {
+                    // Log the error with the MSBuild wrapper
+                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                }
             }
 
             LogWarnings(loggingContext, sdkReferenceLocation, warnings);
@@ -285,22 +271,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(sdk, null, null);
         }
 
-        private List<SdkResolver> GetResolvers(IList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
+        private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
         {
             // Create a sorted by priority list of resolvers. Load them if needed.
             List<SdkResolver> resolvers = new List<SdkResolver>();
             foreach (var resolverManifest in resolversManifests)
             {
-                if (!_manifestToResolvers.TryGetValue(resolverManifest, out IReadOnlyList<SdkResolver> newResolvers))
+                IReadOnlyList<SdkResolver> newResolvers;
+                lock (_lockObject)
                 {
-                    lock (_lockObject)
+                    if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
                     {
-                        if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
-                        {
-                            // Loading of the needed resolvers.
-                            newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
-                            _manifestToResolvers[resolverManifest] = newResolvers;
-                        }
+                        // Loading of the needed resolvers.
+                        newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
+                        _manifestToResolvers[resolverManifest] = newResolvers;
                     }
                 }
 
@@ -309,31 +293,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             resolvers.Sort((l, r) => l.Priority.CompareTo(r.Priority));
             return resolvers;
-        }
-
-        private SdkResult ResolveSdkUsingAllResolvers(int submissionId, SdkReference sdk, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, string solutionPath, string projectPath, bool interactive, bool isRunningInVisualStudio, out IEnumerable<string> errors, out IEnumerable<string> warnings)
-        {
-            // Lazy initialize all SDK resolvers
-            if (_resolversList == null)
-            {
-                Initialize(sdkReferenceLocation);
-            }
-
-            TryResolveSdkUsingSpecifiedResolvers(
-                _resolversList,
-                submissionId,
-                sdk,
-                loggingContext,
-                sdkReferenceLocation,
-                solutionPath,
-                projectPath,
-                interactive,
-                isRunningInVisualStudio,
-                out SdkResult sdkResult,
-                out errors,
-                out warnings);
-
-            return sdkResult;
         }
 
         private bool TryResolveSdkUsingSpecifiedResolvers(
@@ -372,6 +331,13 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     MSBuildEventSource.Log.SdkResolverResolveSdkStart();
                     result = (SdkResult)sdkResolver.Resolve(sdk, context, resultFactory);
+
+                    // We have had issues, for example dotnet/msbuild/issues/9537, where the SDK resolver returned null as particular warnings or errors.
+                    // Since this can be caused by custom and 3rd party SDK resolvers, we want to log this information to help diagnose the issue.
+                    if (result?.Warnings?.Any(s => s is null) == true || result?.Errors?.Any(s => s is null) == true)
+                    {
+                        loggingContext.LogComment(MessageImportance.Low, "SDKResolverNullMessage", sdkResolver.Name, sdk.ToString());
+                    }
                 }
                 catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
@@ -394,7 +360,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 SetResolverState(submissionId, sdkResolver, context.State);
 
-                result ??= (SdkResult)resultFactory.IndicateFailure(new string[] { ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", sdkResolver.Name) }, Array.Empty<string>());
+                result ??= (SdkResult)resultFactory.IndicateFailure([ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SDKResolverReturnedNull", sdkResolver.Name)], []);
 
                 if (result.Success)
                 {
@@ -425,19 +391,25 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 results.Add(result);
             }
 
-            warnings = results.SelectMany(r => r.Warnings ?? Array.Empty<string>());
-            errors = results.SelectMany(r => r.Errors ?? Array.Empty<string>());
+            warnings = results.SelectMany(r => r.Warnings ?? []);
+            errors = results.SelectMany(r => r.Errors ?? []);
 
             sdkResult = new SdkResult(sdk, null, null);
             return false;
         }
+
+        internal virtual void WaitIfTestRequires() { }
+
+        // This is a convenience wrapper that we override for one test so that we don't introduce unnecessary #if DEBUG
+        // segments into the production code.
+        internal virtual IReadOnlyList<SdkResolverManifest> GetResolverManifests(ElementLocation location) => _sdkResolverLoader.GetResolversManifests(location);
 
         /// <summary>
         /// Used for unit tests only.  This is currently only called through reflection in Microsoft.Build.Engine.UnitTests.TransientSdkResolution.CallResetForTests
         /// </summary>
         /// <param name="resolverLoader">An <see cref="SdkResolverLoader"/> to use for loading SDK resolvers.</param>
         /// <param name="resolvers">Explicit set of SdkResolvers to use for all SDK resolution.</param>
-        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
+        internal virtual void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
         {
             if (resolverLoader != null)
             {
@@ -448,27 +420,21 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 _sdkResolverLoader = CachingSdkResolverLoader.Instance;
             }
 
-            _specificResolversManifestsRegistry = null;
-            _generalResolversManifestsRegistry = null;
+            List<SdkResolverManifest> specificResolversManifestsRegistry = null;
+            List<SdkResolverManifest> generalResolversManifestsRegistry = null;
             _manifestToResolvers = null;
-            _resolversList = null;
 
             if (resolvers != null)
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
-                {
-                    _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
-                    _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
-                    _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
+                specificResolversManifestsRegistry = new List<SdkResolverManifest>();
+                generalResolversManifestsRegistry = new List<SdkResolverManifest>();
+                _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
-                    SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: null);
-                    _generalResolversManifestsRegistry.Add(sdkResolverManifest);
-                    _manifestToResolvers[sdkResolverManifest] = resolvers;
-                }
-                else
-                {
-                    _resolversList = resolvers;
-                }
+                SdkResolverManifest sdkResolverManifest = new SdkResolverManifest(DisplayName: "TestResolversManifest", Path: null, ResolvableSdkRegex: null);
+                generalResolversManifestsRegistry.Add(sdkResolverManifest);
+                _manifestToResolvers[sdkResolverManifest] = resolvers;
+                _generalResolversManifestsRegistry = generalResolversManifestsRegistry.AsReadOnly();
+                _specificResolversManifestsRegistry = specificResolversManifestsRegistry.AsReadOnly();
             }
         }
 
@@ -481,7 +447,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             foreach (string warning in warnings)
             {
-                loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
+                // Do not fail on returned null messages
+                if (!string.IsNullOrWhiteSpace(warning))
+                {
+                    loggingContext.LogWarningFromText(null, null, null, new BuildEventFileInfo(location), warning);
+                }
             }
         }
 
@@ -506,19 +476,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return null;
         }
 
-        private void Initialize(ElementLocation location)
-        {
-            lock (_lockObject)
-            {
-                if (_resolversList != null)
-                {
-                    return;
-                }
-
-                _resolversList = _sdkResolverLoader.LoadAllResolvers(location);
-            }
-        }
-
         private void RegisterResolversManifests(ElementLocation location)
         {
             lock (_lockObject)
@@ -528,12 +485,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     return;
                 }
 
-                var allResolversManifests = _sdkResolverLoader.GetResolversManifests(location);
-
+                IReadOnlyList<SdkResolverManifest> allResolversManifests = GetResolverManifests(location);
                 _manifestToResolvers = new Dictionary<SdkResolverManifest, IReadOnlyList<SdkResolver>>();
 
                 SdkResolverManifest sdkDefaultResolversManifest = null;
-#if NETCOREAPP
+#if NET
                 if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
 #endif
                 {
@@ -546,24 +502,37 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     }
                 }
 
+                var specificResolversManifestsRegistry = new List<SdkResolverManifest>();
+                var generalResolversManifestsRegistry = new List<SdkResolverManifest>();
+
                 // Break the list of all resolvers manifests into two parts: manifests with specific and general resolvers.
-                _specificResolversManifestsRegistry = new List<SdkResolverManifest>();
-                _generalResolversManifestsRegistry = new List<SdkResolverManifest>();
+                // Since the collections are meant to be immutable, we have to only ever assign them when they're complete.
+                // Otherwise race can happen, see https://github.com/dotnet/msbuild/issues/7927
                 foreach (SdkResolverManifest manifest in allResolversManifests)
                 {
+                    WaitIfTestRequires();
+
                     if (manifest.ResolvableSdkRegex == null)
                     {
-                        _generalResolversManifestsRegistry.Add(manifest);
+                        generalResolversManifestsRegistry.Add(manifest);
                     }
                     else
                     {
-                        _specificResolversManifestsRegistry.Add(manifest);
+                        specificResolversManifestsRegistry.Add(manifest);
                     }
                 }
                 if (sdkDefaultResolversManifest != null)
                 {
-                    _generalResolversManifestsRegistry.Add(sdkDefaultResolversManifest);
+                    generalResolversManifestsRegistry.Add(sdkDefaultResolversManifest);
                 }
+
+                // Until this is set(and this is under lock), the ResolveSdkUsingResolversWithPatternsFirst will always
+                // enter if branch leaving to this section.
+                // Then it will wait at the lock and return after we release it since the collections we have filled them before releasing the lock.
+                // The collections are never modified after this point.
+                // So I've made them ReadOnly
+                _specificResolversManifestsRegistry = specificResolversManifestsRegistry.AsReadOnly();
+                _generalResolversManifestsRegistry = generalResolversManifestsRegistry.AsReadOnly();
             }
         }
 
@@ -576,7 +545,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     submissionId,
                     _ => new ConcurrentDictionary<SdkResolver, object>(
                         NativeMethodsShared.GetLogicalCoreCount(),
-                        ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) ? _specificResolversManifestsRegistry.Count + _generalResolversManifestsRegistry.Count : _resolversList.Count));
+                        _specificResolversManifestsRegistry.Count + _generalResolversManifestsRegistry.Count));
 
                 resolverState.AddOrUpdate(resolver, state, (sdkResolver, obj) => state);
             }

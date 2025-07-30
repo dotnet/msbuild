@@ -327,7 +327,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             if (!evt.WaitOne(5000))
             {
-                Assert.True(false, "Did not receive " + eventName + " callback before the timeout expired.");
+                Assert.Fail("Did not receive " + eventName + " callback before the timeout expired.");
             }
         }
 
@@ -339,7 +339,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     internal sealed class TestTargetBuilder : ITargetBuilder, IBuildComponent
     {
-        private IBuildComponentHost _host;
         private IResultsCache _cache;
         private FullyQualifiedBuildRequest[] _newRequests;
         private IRequestBuilderCallback _requestBuilderCallback;
@@ -356,16 +355,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #region ITargetBuilder Members
 
-        public Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, string[] targets, Lookup baseLookup, CancellationToken cancellationToken)
+        public Task<BuildResult> BuildTargets(ProjectLoggingContext loggingContext, BuildRequestEntry entry, IRequestBuilderCallback callback, (string name, TargetBuiltReason reason)[] targets, Lookup baseLookup, CancellationToken cancellationToken)
         {
             _requestBuilderCallback = callback;
 
             if (cancellationToken.WaitHandle.WaitOne(1500))
             {
                 BuildResult result = new BuildResult(entry.Request);
-                foreach (string target in targets)
+                foreach ((string name, TargetBuiltReason reason) target in targets)
                 {
-                    result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
+                    result.AddResultsForTarget(target.name, BuildResultUtilities.GetEmptyFailingTargetResult());
                 }
                 return Task<BuildResult>.FromResult(result);
             }
@@ -388,9 +387,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 if (cancellationToken.WaitHandle.WaitOne(1500))
                 {
                     BuildResult result = new BuildResult(entry.Request);
-                    foreach (string target in targets)
+                    foreach ((string name, TargetBuiltReason reason) target in targets)
                     {
-                        result.AddResultsForTarget(target, BuildResultUtilities.GetEmptyFailingTargetResult());
+                        result.AddResultsForTarget(target.name, BuildResultUtilities.GetEmptyFailingTargetResult());
                     }
                     return Task<BuildResult>.FromResult(result);
                 }
@@ -405,13 +404,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         public void InitializeComponent(IBuildComponentHost host)
         {
-            _host = host;
             _cache = new ResultsCache();
         }
 
         public void ShutdownComponent()
         {
-            _host = null;
             _cache = null;
         }
         #endregion

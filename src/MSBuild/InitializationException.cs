@@ -22,7 +22,7 @@ namespace Microsoft.Build.CommandLine
     /// Unlike the CommandLineSwitchException, this exception is NOT thrown for syntax errors in switches.
     /// </remarks>
     [Serializable]
-    internal sealed class InitializationException : Exception
+    internal sealed class InitializationException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// This constructor initializes the exception message.
@@ -59,7 +59,7 @@ namespace Microsoft.Build.CommandLine
             StreamingContext context) :
             base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info);
 
             invalidSwitch = info.GetString("invalidSwitch");
         }
@@ -152,6 +152,28 @@ namespace Microsoft.Build.CommandLine
             {
                 // the exception message can contain a format item i.e. "{0}" to hold the given exception's message
                 errorMessage = ResourceUtilities.FormatString(errorMessage, (e == null) ? String.Empty : e.Message);
+            }
+
+            InitializationException.Throw(errorMessage, invalidSwitch);
+        }
+
+        /// <summary>
+        /// Throws the exception using the given exception context and can include the logger name.
+        /// </summary>
+        internal static void Throw(string messageResourceName, string invalidSwitch, Exception e, bool showStackTrace, params object[] formatArgs)
+        {
+            string errorMessage = AssemblyResources.GetString(messageResourceName);
+
+            ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
+
+            // the exception message can contain a format item i.e.
+            // "{0}" to hold the logger name
+            // "{1}" to hold the given exception's message
+            errorMessage = ResourceUtilities.FormatString(errorMessage, formatArgs);
+
+            if (showStackTrace && e != null)
+            {            
+                errorMessage += Environment.NewLine + e.ToString();
             }
 
             InitializationException.Throw(errorMessage, invalidSwitch);

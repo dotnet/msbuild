@@ -9,7 +9,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     /// <summary>
     /// Result types that a plugin can return for a given build request.
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public static CacheResult IndicateCacheHit(IReadOnlyCollection<PluginTargetResult> targetResults)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetResults, nameof(targetResults));
+            ErrorUtilities.VerifyThrowArgumentLength(targetResults);
 
             return new CacheResult(CacheResultType.CacheHit, ConstructBuildResult(targetResults));
         }
@@ -133,6 +133,20 @@ namespace Microsoft.Build.Experimental.ProjectCache
             var taskItem = new ProjectItemInstance.TaskItem(taskItemInterface.EvaluatedIncludeEscaped, definingFileEscaped: null);
             taskItemInterface.CopyMetadataTo(taskItem);
             return taskItem;
+        }
+
+#pragma warning disable CS0618 // Type or member is obsolete
+        internal static CacheResult FromExperimental(Experimental.ProjectCache.CacheResult experimentalResult)
+        {
+            if (experimentalResult.Exception != null)
+            {
+                return IndicateException(experimentalResult.Exception);
+            }
+
+            return new CacheResult(
+                    (CacheResultType)(int)experimentalResult.ResultType,
+                    buildResult: experimentalResult.BuildResult,
+                    proxyTargets: ProxyTargets.FromExperimental(experimentalResult.ProxyTargets));
         }
     }
 }

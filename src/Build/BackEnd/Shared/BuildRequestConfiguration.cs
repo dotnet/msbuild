@@ -1,7 +1,8 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -131,7 +132,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        private Dictionary<string, string> _savedEnvironmentVariables;
+        private FrozenDictionary<string, string> _savedEnvironmentVariables;
 
         /// <summary>
         /// Holds a snapshot of the current working directory at the time we blocked.
@@ -167,7 +168,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="defaultToolsVersion">The default ToolsVersion to use as a fallback</param>
         internal BuildRequestConfiguration(int configId, BuildRequestData data, string defaultToolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(data, nameof(data));
+            ErrorUtilities.VerifyThrowArgumentNull(data);
             ErrorUtilities.VerifyThrowInternalLength(data.ProjectFullPath, "data.ProjectFullPath");
 
             _configId = configId;
@@ -209,7 +210,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="instance">The project instance.</param>
         internal BuildRequestConfiguration(int configId, ProjectInstance instance)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(instance, nameof(instance));
+            ErrorUtilities.VerifyThrowArgumentNull(instance);
 
             _configId = configId;
             _projectFullPath = instance.FullPath;
@@ -230,7 +231,7 @@ namespace Microsoft.Build.BackEnd
         private BuildRequestConfiguration(int configId, BuildRequestConfiguration other)
         {
             ErrorUtilities.VerifyThrow(configId != InvalidConfigurationId, "Configuration ID must not be invalid when using this constructor.");
-            ErrorUtilities.VerifyThrowArgumentNull(other, nameof(other));
+            ErrorUtilities.VerifyThrowArgumentNull(other);
             ErrorUtilities.VerifyThrow(other._transferredState == null, "Unexpected transferred state still set on other configuration.");
 
             _project = other._project;
@@ -299,7 +300,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!_isTraversalProject.HasValue)
                 {
-                    if (String.Equals(Path.GetFileName(ProjectFullPath), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#if NET471_OR_GREATER
+                    if (MemoryExtensions.Equals(Microsoft.IO.Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj".AsSpan(), StringComparison.OrdinalIgnoreCase))
+#else
+                    if (MemoryExtensions.Equals(Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj", StringComparison.OrdinalIgnoreCase))
+#endif
                     {
                         // dirs.proj are assumed to be traversals
                         _isTraversalProject = true;
@@ -324,6 +329,11 @@ namespace Microsoft.Build.BackEnd
                 return _isTraversalProject.Value;
             }
         }
+
+        /// <summary>
+        /// Flag indicating whether SDK-resolved environment variables have been set for this configuration.
+        /// </summary>
+        internal bool SdkResolvedEnvironmentVariablesSet { get; set; }
 
         /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.
@@ -607,7 +617,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        public Dictionary<string, string> SavedEnvironmentVariables
+        public FrozenDictionary<string, string> SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 
@@ -699,9 +709,21 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (IsCacheable)
                     {
-                        using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream);
+                        string cacheFile = GetCacheFile();
+                        try
+                        {
+                            Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
+                            using Stream stream = File.Create(cacheFile);
+                            using ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream, stream);
 
-                        _project.Cache(translator);
+                            _project.Cache(translator);
+                        }
+                        catch (Exception e) when (e is DirectoryNotFoundException or UnauthorizedAccessException)
+                        {
+                            ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
+                            throw;
+                        }
+
                         _baseLookup = null;
 
                         IsCached = true;
@@ -727,9 +749,19 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream);
+                string cacheFile = GetCacheFile();
+                try
+                {
+                    using Stream stream = File.OpenRead(cacheFile);
+                    using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream, stream);
 
-                _project.RetrieveFromCache(translator);
+                    _project.RetrieveFromCache(translator);
+                }
+                catch (Exception e) when (e is DirectoryNotFoundException or UnauthorizedAccessException)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
+                    throw;
+                }
 
                 IsCached = false;
             }
@@ -740,7 +772,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="request">The request </param>
         /// <returns>An array of t</returns>
-        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request)
+        public List<(string name, TargetBuiltReason reason)> GetTargetsUsedToBuildRequest(BuildRequest request)
         {
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
@@ -753,13 +785,31 @@ namespace Microsoft.Build.BackEnd
                     "Targets must be same as proxy targets");
             }
 
-            List<string> initialTargets = _projectInitialTargets;
-            List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
+            bool hasInitialTargets = request.Targets.Count == 0 ? false : true;
 
-            var allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count);
+            List<(string name, TargetBuiltReason reason)> allTargets = new(
+                _projectInitialTargets.Count +
+                (hasInitialTargets ? _projectDefaultTargets.Count : request.Targets.Count));
 
-            allTargets.AddRange(initialTargets);
-            allTargets.AddRange(nonInitialTargets);
+            foreach (var target in _projectInitialTargets)
+            {
+                allTargets.Add((target, TargetBuiltReason.InitialTargets));
+            }
+
+            if (hasInitialTargets)
+            {
+                foreach (var target in request.Targets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.EntryTargets));
+                }
+            }
+            else
+            {
+                foreach (var target in _projectDefaultTargets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.DefaultTargets));
+                }
+            }
 
             return allTargets;
         }
@@ -768,7 +818,7 @@ namespace Microsoft.Build.BackEnd
 
         public bool ShouldSkipIsolationConstraintsForReference(string referenceFullPath)
         {
-            ErrorUtilities.VerifyThrowInternalNull(Project, nameof(Project));
+            ErrorUtilities.VerifyThrowInternalNull(Project);
             ErrorUtilities.VerifyThrowInternalLength(referenceFullPath, nameof(referenceFullPath));
             ErrorUtilities.VerifyThrow(Path.IsPathRooted(referenceFullPath), "Method does not treat path normalization cases");
 
@@ -825,7 +875,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>String representation of the object</returns>
         public override string ToString()
         {
-            return String.Format(CultureInfo.CurrentCulture, "{0} {1} {2} {3}", _configId, _projectFullPath, _toolsVersion, _globalProperties);
+            return $"{_configId} {_projectFullPath} {_toolsVersion} {_globalProperties}";
         }
 
         /// <summary>
@@ -940,6 +990,7 @@ namespace Microsoft.Build.BackEnd
         internal string GetCacheFile()
         {
             string filename = Path.Combine(FileUtilities.GetCacheDirectory(), String.Format(CultureInfo.InvariantCulture, "Configuration{0}.cache", _configId));
+
             return filename;
         }
 
@@ -1025,27 +1076,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private ITranslator GetConfigurationTranslator(TranslationDirection direction)
-        {
-            string cacheFile = GetCacheFile();
-            try
-            {
-                if (direction == TranslationDirection.WriteToStream)
-                {
-                    Directory.CreateDirectory(Path.GetDirectoryName(cacheFile));
-                    return BinaryTranslator.GetWriteTranslator(File.Create(cacheFile));
-                }
-                else
-                {
+        private ITranslator GetConfigurationTranslator(TranslationDirection direction, Stream stream) =>
+            direction == TranslationDirection.WriteToStream
+                    ? BinaryTranslator.GetWriteTranslator(stream)
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
-                    return BinaryTranslator.GetReadTranslator(File.OpenRead(cacheFile), InterningBinaryReader.PoolingBuffer);
-                }
-            }
-            catch (Exception e) when (e is DirectoryNotFoundException || e is UnauthorizedAccessException)
-            {
-                ErrorUtilities.ThrowInvalidOperation("CacheFileInaccessible", cacheFile, e);
-                throw;
-            }
-        }
+                    : BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
     }
 }

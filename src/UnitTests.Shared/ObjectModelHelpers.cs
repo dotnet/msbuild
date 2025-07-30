@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -22,11 +23,9 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
 
@@ -118,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             return items[0];
         }
 
-        public static void AssertItemEvaluationFromProject(string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false, bool makeExpectedIncludeAbsolute = false)
+        public static void AssertItemEvaluationFromProject([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] inputFiles, string[] expectedInclude, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false, bool makeExpectedIncludeAbsolute = false)
         {
             AssertItemEvaluationFromGenericItemEvaluator((p, c) =>
                 {
@@ -135,7 +134,7 @@ namespace Microsoft.Build.UnitTests
             normalizeSlashes);
         }
 
-        public static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<ITestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        public static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<ITestItem>> itemEvaluator, [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
             using (var env = TestEnvironment.Create())
             using (var collection = new ProjectCollection())
@@ -442,7 +441,7 @@ namespace Microsoft.Build.UnitTests
             // Log an error for any leftover items in the expectedItems collection.
             foreach (ITaskItem expectedItem in expectedItems)
             {
-                Assert.True(false, string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
+                Assert.Fail(string.Format("Item '{0}' was expected but not returned.", expectedItem.ItemSpec));
             }
 
             if (outOfOrder)
@@ -450,7 +449,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("ERROR:  Items were returned in the incorrect order...");
                 Console.WriteLine("Expected:  " + expectedItemSpecs);
                 Console.WriteLine("Actual:    " + actualItemSpecs);
-                Assert.True(false, "Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
+                Assert.Fail("Items were returned in the incorrect order.  See 'Standard Out' tab for more details.");
             }
         }
 
@@ -587,20 +586,22 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectFileContents"></param>
         /// <returns></returns>
-        public static string CleanupFileContents(string projectFileContents)
+        public static string CleanupFileContents([StringSyntax(StringSyntaxAttribute.Xml)] string projectFileContents)
         {
+            StringBuilder temp = new (projectFileContents);
+
             // Replace reverse-single-quotes with double-quotes.
-            projectFileContents = projectFileContents.Replace("`", "\"");
+            temp.Replace('`', '"');
 
             // Place the correct MSBuild namespace into the <Project> tag.
-            projectFileContents = projectFileContents.Replace("msbuildnamespace", msbuildNamespace);
-            projectFileContents = projectFileContents.Replace("msbuilddefaulttoolsversion", s_msbuildDefaultToolsVersion);
-            projectFileContents = projectFileContents.Replace("msbuildassemblyversion", s_msbuildAssemblyVersion);
+            temp.Replace("msbuildnamespace", msbuildNamespace);
+            temp.Replace("msbuilddefaulttoolsversion", s_msbuildDefaultToolsVersion);
+            temp.Replace("msbuildassemblyversion", s_msbuildAssemblyVersion);
 
-            return projectFileContents;
+            return temp.ToString();
         }
 
-        public static string Cleanup(this string aString)
+        public static string Cleanup([StringSyntax(StringSyntaxAttribute.Xml)] this string aString)
         {
             return CleanupFileContents(aString);
         }
@@ -658,14 +659,15 @@ namespace Microsoft.Build.UnitTests
             return projectFilePath;
         }
 
-        public static ProjectRootElement CreateInMemoryProjectRootElement(string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
+        public static ProjectRootElement CreateInMemoryProjectRootElement([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, ProjectCollection collection = null, bool preserveFormatting = true)
         {
             var cleanedProject = CleanupFileContents(projectContents);
-
+#pragma warning disable CA2000 // The return object depends on the created XML reader and project collection that should not be disposed in this scope.
             return ProjectRootElement.Create(
                 XmlReader.Create(new StringReader(cleanedProject)),
                 collection ?? new ProjectCollection(),
                 preserveFormatting);
+#pragma warning restore CA2000 // The return object depends on the created XML reader and project collection that should not be disposed in this scope.
         }
 
         /// <summary>
@@ -686,7 +688,9 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         public static Project CreateInMemoryProject(string xml, params ILogger[] loggers)
         {
+#pragma warning disable CA2000 // The return object depends on the project collection that should not be disposed in this scope.
             return CreateInMemoryProject(new ProjectCollection(), xml, loggers);
+#pragma warning restore CA2000 // The return object depends on the project collection that should not be disposed in this scope.
         }
 
         /// <summary>
@@ -711,7 +715,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>Returns created <see cref="Project"/>.</returns>
         public static Project CreateInMemoryProject(
             ProjectCollection projectCollection,
-            string xml,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string xml,
             string toolsVersion /* may be null */,
             params ILogger[] loggers)
         {
@@ -723,12 +727,13 @@ namespace Microsoft.Build.UnitTests
                     projectCollection.RegisterLogger(logger);
                 }
             }
-
+#pragma warning disable CA2000 // The return object depends on the created XML reader that should not be disposed in this scope.
             Project project = new Project(
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
                 globalProperties: null,
                 toolsVersion,
                 projectCollection);
+#pragma warning restore CA2000 // The return object depends on the created XML reader that should not be disposed in this scope.
 
             Guid guid = Guid.NewGuid();
             project.FullPath = Path.Combine(TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
@@ -746,7 +751,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="loggerVerbosity">The required logging verbosity.</param>
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
         public static MockLogger BuildProjectExpectSuccess(
-            string projectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
             ITestOutputHelper testOutputHelper = null,
             LoggerVerbosity loggerVerbosity = LoggerVerbosity.Normal)
         {
@@ -762,7 +767,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="projectContents">The project file content in string format.</param>
         /// <param name="loggers">The array of loggers to use.</param>
         public static void BuildProjectExpectSuccess(
-            string projectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
             params ILogger[] loggers)
         {
             using ProjectCollection collection = new();
@@ -776,7 +781,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectContents">The project file content in string format.</param>
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
-        public static MockLogger BuildProjectExpectFailure(string projectContents)
+        public static MockLogger BuildProjectExpectFailure([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents)
         {
             MockLogger logger = new MockLogger();
             BuildProjectExpectFailure(projectContents, logger);
@@ -790,7 +795,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="projectContents">The project file content in string format.</param>
         /// <param name="loggers">The array of loggers to use.</param>
         public static void BuildProjectExpectFailure(
-            string projectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
             params ILogger[] loggers)
         {
             using ProjectCollection collection = new();
@@ -806,7 +811,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="newExpectedProjectContents"></param>
         public static void CompareProjectContents(
             Project project,
-            string newExpectedProjectContents)
+            [StringSyntax(StringSyntaxAttribute.Xml)] string newExpectedProjectContents)
         {
             // Get the new XML for the project, normalizing the whitespace.
             string newActualProjectContents = project.Xml.RawXml;
@@ -894,7 +899,7 @@ namespace Microsoft.Build.UnitTests
         /// up the file contents (replacing single-back-quote with double-quote, etc.).
         /// Silently OVERWRITES existing file.
         /// </summary>
-        public static string CreateFileInTempProjectDirectory(string fileRelativePath, string fileContents, Encoding encoding = null)
+        public static string CreateFileInTempProjectDirectory(string fileRelativePath, [StringSyntax(StringSyntaxAttribute.Xml)] string fileContents, Encoding encoding = null)
         {
             Assert.False(string.IsNullOrEmpty(fileRelativePath));
             string fullFilePath = Path.Combine(TempProjectDir, fileRelativePath);
@@ -975,8 +980,9 @@ namespace Microsoft.Build.UnitTests
         public static Project LoadProjectFileInTempProjectDirectory(string projectFileRelativePath, bool touchProject)
         {
             string projectFileFullPath = Path.Combine(TempProjectDir, projectFileRelativePath);
-
+#pragma warning disable CA2000 // The return object depends on the project collection that should not be disposed in this scope.
             ProjectCollection projectCollection = new ProjectCollection();
+#pragma warning restore CA2000 // The return object depends on the project collection that should not be disposed in this scope.
 
             Project project = new Project(projectFileFullPath, null, null, projectCollection);
 
@@ -1073,7 +1079,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get items of item type "i" with using the item xml fragment passed in
         /// </summary>
-        public static IList<ProjectItem> GetItemsFromFragment(string fragment, bool allItems = false, bool ignoreCondition = false)
+        public static IList<ProjectItem> GetItemsFromFragment([StringSyntax(StringSyntaxAttribute.Xml)] string fragment, bool allItems = false, bool ignoreCondition = false)
         {
             string content = FormatProjectContentsWithItemGroupFragment(fragment);
 
@@ -1089,9 +1095,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Get the items of type "i" in the project provided
         /// </summary>
-        public static IList<ProjectItem> GetItems(string content, bool allItems = false, bool ignoreCondition = false)
+        public static IList<ProjectItem> GetItems([StringSyntax(StringSyntaxAttribute.Xml)] string content, bool allItems = false, bool ignoreCondition = false)
         {
-            var projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(CleanupFileContents(content))));
+            using ProjectRootElementFromString projectRootElementFromString = new(CleanupFileContents(content));
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
             Project project = new Project(projectXml);
             IList<ProjectItem> item = Helpers.MakeList(
                 ignoreCondition ?
@@ -1101,7 +1108,7 @@ namespace Microsoft.Build.UnitTests
             return item;
         }
 
-        public static string FormatProjectContentsWithItemGroupFragment(string fragment)
+        public static string FormatProjectContentsWithItemGroupFragment([StringSyntax(StringSyntaxAttribute.Xml)] string fragment)
         {
             return
                 $@"
@@ -1121,7 +1128,7 @@ namespace Microsoft.Build.UnitTests
     {
         public static string Format(this string s, params object[] formatItems)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(s, nameof(s));
+            ErrorUtilities.VerifyThrowArgumentNull(s);
 
             return string.Format(s, formatItems);
         }
@@ -1144,7 +1151,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.True(false, "unrecognized current platform");
+                Assert.Fail("unrecognized current platform");
             }
 
             return currentPlatformString;
@@ -1344,12 +1351,12 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Build a project in memory using the new OM
         /// </summary>
-        private static void BuildProjectWithNewOM(string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
+        private static void BuildProjectWithNewOM([StringSyntax(StringSyntaxAttribute.Xml)] string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
-
-            Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
+            using ProjectFromString projectFromString = new(content, globalProperties, toolsVersion: null);
+            Project project = projectFromString.Project;
             logger ??= new MockLogger
             {
                 AllowTaskCrashes = allowTaskCrash
@@ -1359,12 +1366,13 @@ namespace Microsoft.Build.UnitTests
             result = project.Build(loggers);
         }
 
-        public static void BuildProjectWithNewOMAndBinaryLogger(string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
+        public static void BuildProjectWithNewOMAndBinaryLogger([StringSyntax(StringSyntaxAttribute.Xml)] string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
-            Project project = new Project(XmlReader.Create(new StringReader(content)), null, toolsVersion: null);
+            using ProjectFromString projectFromString = new(content, null, toolsVersion: null);
+            Project project = projectFromString.Project;
 
             List<ILogger> loggers = new List<ILogger>() { binaryLogger };
 
@@ -1373,7 +1381,7 @@ namespace Microsoft.Build.UnitTests
             projectDirectory = project.DirectoryPath;
         }
 
-        public static MockLogger BuildProjectContentUsingBuildManagerExpectResult(string content, BuildResultCode expectedResult)
+        public static MockLogger BuildProjectContentUsingBuildManagerExpectResult([StringSyntax(StringSyntaxAttribute.Xml)] string content, BuildResultCode expectedResult)
         {
             var logger = new MockLogger();
 
@@ -1384,7 +1392,7 @@ namespace Microsoft.Build.UnitTests
             return logger;
         }
 
-        public static BuildResult BuildProjectContentUsingBuildManager(string content, MockLogger logger, BuildParameters parameters = null)
+        public static BuildResult BuildProjectContentUsingBuildManager([StringSyntax(StringSyntaxAttribute.Xml)] string content, ILogger logger, BuildParameters parameters = null)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
@@ -1399,7 +1407,7 @@ namespace Microsoft.Build.UnitTests
 
         public static BuildResult BuildProjectFileUsingBuildManager(
             string projectFile,
-            MockLogger logger = null,
+            ILogger logger = null,
             BuildParameters parameters = null,
             IList<string> targetsToBuild = null)
         {
@@ -1442,7 +1450,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that a drive enumerating wildcard warning is logged or exception is thrown.
         /// </summary>
-        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard([StringSyntax(StringSyntaxAttribute.Xml)] string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
         {
             using (var env = TestEnvironment.Create(testOutput))
             {
@@ -1550,7 +1558,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="newExpectedProjectContents"></param>
         /// <param name="newActualProjectContents"></param>
-        public static void CompareProjectXml(string newExpectedProjectContents, string newActualProjectContents)
+        public static void CompareProjectXml(
+            [StringSyntax(StringSyntaxAttribute.Xml)] string newExpectedProjectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string newActualProjectContents)
         {
             // Replace single-quotes with double-quotes, and normalize whitespace.
             newExpectedProjectContents =
@@ -1573,7 +1583,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the saved project content matches the provided content
         /// </summary>
-        public static void VerifyAssertProjectContent(string expected, Project project)
+        public static void VerifyAssertProjectContent([StringSyntax(StringSyntaxAttribute.Xml)] string expected, Project project)
         {
             VerifyAssertProjectContent(expected, project.Xml);
         }
@@ -1581,7 +1591,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the saved project content matches the provided content
         /// </summary>
-        public static void VerifyAssertProjectContent(string expected, ProjectRootElement project, bool ignoreFirstLineOfActual = true)
+        public static void VerifyAssertProjectContent([StringSyntax(StringSyntaxAttribute.Xml)] string expected, ProjectRootElement project, bool ignoreFirstLineOfActual = true)
         {
             VerifyAssertLineByLine(expected, project.RawXml, ignoreFirstLineOfActual);
         }
@@ -1598,7 +1608,7 @@ namespace Microsoft.Build.UnitTests
         /// Write the given <see cref="projectContents"/> in a new temp directory and create the given <see cref="files"/> relative to the project
         /// </summary>
         /// <returns>the path to the temp root directory that contains the project and files</returns>
-        public static string CreateProjectInTempDirectoryWithFiles(string projectContents, string[] files, out string createdProjectFile, out string[] createdFiles, string relativePathFromRootToProject = ".")
+        public static string CreateProjectInTempDirectoryWithFiles([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] files, out string createdProjectFile, out string[] createdFiles, string relativePathFromRootToProject = ".")
         {
             var root = GetTempDirectoryWithGuid();
             Directory.CreateDirectory(root);
@@ -1889,7 +1899,7 @@ namespace Microsoft.Build.UnitTests
 
             if (ex1 == null && ex2 == null)
             {
-                Assert.True(false, "Neither threw");
+                Assert.Fail("Neither threw");
             }
 
             Assert.NotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
@@ -1947,7 +1957,7 @@ namespace Microsoft.Build.UnitTests
                 string output = "\r\n#################################Expected#################################\n" + string.Join("\r\n", expectedLines);
                 output += "\r\n#################################Actual#################################\n" + string.Join("\r\n", actualLines);
 
-                Assert.True(false, output);
+                Assert.Fail(output);
             }
 
             if (actualLines.Length > expectedLines.Length)
@@ -1955,14 +1965,14 @@ namespace Microsoft.Build.UnitTests
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.True(false, "Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
+                Assert.Fail("Expected content was shorter, actual had this extra line: '" + actualLines[expectedLines.Length] + "'");
             }
             else if (actualLines.Length < expectedLines.Length)
             {
                 LogLine("\n#################################Expected#################################\n" + string.Join("\n", expectedLines));
                 LogLine("#################################Actual#################################\n" + string.Join("\n", actualLines));
 
-                Assert.True(false, "Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
+                Assert.Fail("Actual content was shorter, expected had this extra line: '" + expectedLines[actualLines.Length] + "'");
             }
         }
 
@@ -1971,7 +1981,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void ClearDirtyFlag(ProjectRootElement project)
         {
-            project.Save(new StringWriter());
+            using var sw = new StringWriter();
+            project.Save(sw);
             Assert.False(project.HasUnsavedChanges);
         }
 

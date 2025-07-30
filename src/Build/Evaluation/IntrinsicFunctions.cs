@@ -4,12 +4,17 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if NETFRAMEWORK
+using System.Linq;
+#endif
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -17,7 +22,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
-
 // Needed for DoesTaskHostExistForParameters
 using NodeProviderOutOfProcTaskHost = Microsoft.Build.BackEnd.NodeProviderOutOfProcTaskHost;
 
@@ -27,15 +31,24 @@ namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// The Intrinsic class provides static methods that can be accessed from MSBuild's
-    /// property functions using $([MSBuild]::Function(x,y))
+    /// property functions using $([MSBuild]::Function(x,y)).
     /// </summary>
-    internal static class IntrinsicFunctions
+    internal static partial class IntrinsicFunctions
     {
+        // lang=regex
+        private const string RegistrySdkSpecification = @"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$";
+
 #pragma warning disable CA1416 // Platform compatibility: we'll only use this on Windows
-        private static readonly object[] DefaultRegistryViews = new object[] { RegistryView.Default };
+        private static readonly object[] DefaultRegistryViews = [RegistryView.Default];
 #pragma warning restore CA1416
 
-        private static readonly Lazy<Regex> RegistrySdkRegex = new Lazy<Regex>(() => new Regex(@"^HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Microsoft SDKs\\Windows\\v(\d+\.\d+)$", RegexOptions.IgnoreCase));
+#if NET
+        [GeneratedRegex(RegistrySdkSpecification, RegexOptions.IgnoreCase)]
+        private static partial Regex RegistrySdkRegex { get; }
+#else
+        private static Regex s_registrySdkRegex;
+        private static Regex RegistrySdkRegex => s_registrySdkRegex ??= new Regex(RegistrySdkSpecification, RegexOptions.IgnoreCase);
+#endif
 
         private static readonly Lazy<NuGetFrameworkWrapper> NuGetFramework = new Lazy<NuGetFrameworkWrapper>(() => NuGetFrameworkWrapper.CreateInstance());
 
@@ -189,9 +202,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return null;
             }
@@ -206,9 +218,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -220,9 +231,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -243,9 +253,8 @@ namespace Microsoft.Build.Evaluation
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
-            // on non-Windows (no registry), and with a changewave (in case someone
-            // had a registry property and it breaks when it lights up).
-            if (!NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+            // on non-Windows (no registry).
+            if (!NativeMethodsShared.IsWindows)
             {
                 return defaultValue;
             }
@@ -266,8 +275,8 @@ namespace Microsoft.Build.Evaluation
             {
                 if (viewObject is string viewAsString)
                 {
-                    string typeLeafName = typeof(RegistryView).Name + ".";
-                    string typeFullName = typeof(RegistryView).FullName + ".";
+                    string typeLeafName = $"{typeof(RegistryView).Name}.";
+                    string typeFullName = $"{typeof(RegistryView).FullName}.";
 
                     // We'll allow the user to specify the leaf or full type name on the RegistryView enum
                     viewAsString = viewAsString.Replace(typeFullName, "").Replace(typeLeafName, "");
@@ -281,7 +290,7 @@ namespace Microsoft.Build.Evaluation
                         // Fake common requests to HKLM that we can resolve
 
                         // See if this asks for a specific SDK
-                        var m = RegistrySdkRegex.Value.Match(keyName);
+                        var m = RegistrySdkRegex.Match(keyName);
 
                         if (m.Success && m.Groups.Count >= 1 && valueName.Equals("InstallRoot", StringComparison.OrdinalIgnoreCase))
                         {
@@ -291,6 +300,7 @@ namespace Microsoft.Build.Evaluation
                         return string.Empty;
                     }
 
+#pragma warning disable CA2000 // Dispose objects before losing scope is false positive here.
                     using (RegistryKey key = GetBaseKeyFromKeyName(keyName, view, out string subKeyName))
                     {
                         if (key != null)
@@ -311,6 +321,7 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 }
             }
 
@@ -446,13 +457,20 @@ namespace Microsoft.Build.Evaluation
 
         private static string CalculateSha256(string toHash)
         {
-            var sha = System.Security.Cryptography.SHA256.Create();
+#if NET
+            Span<byte> hash = stackalloc byte[SHA256.HashSizeInBytes];
+            SHA256.HashData(Encoding.UTF8.GetBytes(toHash), hash);
+            return Convert.ToHexStringLower(hash);
+#else
+            using var sha = SHA256.Create();
             var hashResult = new StringBuilder();
             foreach (byte theByte in sha.ComputeHash(Encoding.UTF8.GetBytes(toHash)))
             {
                 hashResult.Append(theByte.ToString("x2"));
             }
+
             return hashResult.ToString();
+#endif
         }
 
         /// <summary>
@@ -484,19 +502,23 @@ namespace Microsoft.Build.Evaluation
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
             architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
 
-            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            parameters.Add(XMakeAttributes.runtime, runtime);
-            parameters.Add(XMakeAttributes.architecture, architecture);
+            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                { XMakeAttributes.runtime, runtime },
+                { XMakeAttributes.architecture, architecture }
+            };
 
             HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(desiredContext);
 
-            if (taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation))
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredContext);
+#if NETFRAMEWORK
+            if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
             {
-                return true;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext).MSBuildAssemblyPath;
             }
+#endif
 
-            return false;
+            return taskHostLocation != null && FileUtilities.FileExistsNoThrow(taskHostLocation);
         }
 
         /// <summary>
@@ -519,6 +541,26 @@ namespace Microsoft.Build.Evaluation
         internal static string NormalizeDirectory(params string[] path)
         {
             return EnsureTrailingSlash(NormalizePath(path));
+        }
+
+        /// <summary>
+        /// Returns if the file exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool FileExists(string path)
+        {
+            return FileUtilities.FileExistsNoThrow(path);
+        }
+
+        /// <summary>
+        /// Returns if the directory exists
+        /// </summary>
+        /// <param name="path">The path to check</param>
+        /// <returns></returns>
+        internal static bool DirectoryExists(string path)
+        {
+            return FileUtilities.DirectoryExistsNoThrow(path);
         }
 
         /// <summary>
@@ -624,6 +666,34 @@ namespace Microsoft.Build.Evaluation
             return ChangeWaves.AreFeaturesEnabled(wave);
         }
 
+        internal static string SubstringByAsciiChars(string input, int start, int length)
+        {
+            if (start > input.Length)
+            {
+                return string.Empty;
+            }
+
+            if (start + length > input.Length)
+            {
+                length = input.Length - start;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in input.AsSpan(start, length))
+            {
+                if (c >= 32 && c <= 126 && !FileUtilities.InvalidFileNameChars.Contains(c))
+                {
+                    sb.Append(c);
+                }
+                else
+                {
+                    sb.Append('_');
+                }
+            }
+
+            return sb.ToString();
+        }
+
         internal static string CheckFeatureAvailability(string featureName)
         {
             return Features.CheckFeatureAvailability(featureName).ToString();
@@ -664,9 +734,21 @@ namespace Microsoft.Build.Evaluation
             return BuildEnvironmentHelper.Instance.MSBuildExtensionsPath;
         }
 
-        public static bool IsRunningFromVisualStudio()
+        public static bool IsRunningFromVisualStudio() => BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+
+        public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
-            return BuildEnvironmentHelper.Instance.Mode == BuildEnvironmentMode.VisualStudio;
+            pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
+            if (File.Exists(pathToAssembly))
+            {
+                loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
+
+                return true;
+            }
+
+            loggingContext.LogComment(MessageImportance.Low, "CustomCheckAssemblyNotExist", pathToAssembly);
+
+            return false;
         }
 
         #region Debug only intrinsics
@@ -745,7 +827,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                subKeyName = keyName.Substring(i + 1, keyName.Length - i - 1);
+                subKeyName = keyName.Substring(i + 1);
             }
 
             return basekey;

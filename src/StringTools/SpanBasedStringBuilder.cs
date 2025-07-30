@@ -120,6 +120,33 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         public int Capacity => _spans.Capacity;
 
+        public char this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= Length)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                int adjustedIndex = index;
+                foreach (ReadOnlyMemory<char> span in _spans)
+                {
+                    if (adjustedIndex < span.Length)
+                    {
+                        return span.Span[adjustedIndex];
+                    }
+                    else
+                    {
+                        adjustedIndex -= span.Length;
+                    }
+                }
+
+                // Should never reach here if Length is correct
+                throw new IndexOutOfRangeException();
+            }
+        }
+
         /// <summary>
         /// Creates a new enumerator for enumerating characters in this string. Does not allocate.
         /// </summary>
@@ -127,6 +154,38 @@ namespace Microsoft.NET.StringTools
         public Enumerator GetEnumerator()
         {
             return new Enumerator(_spans);
+        }
+
+        public bool Equals(string other) => Equals(other.AsSpan(), StringComparison.Ordinal);
+
+        public bool Equals(string other, StringComparison comparison) => Equals(other.AsSpan(), comparison);
+
+        public bool Equals(ReadOnlySpan<char> other) => Equals(other, StringComparison.Ordinal);
+
+        public bool Equals(ReadOnlySpan<char> other, StringComparison comparison)
+        {
+            if (_spans.Count == 0 && other.IsEmpty)
+            {
+                return true;
+            }
+
+            if (_spans.Count == 0 || other.IsEmpty || Length != other.Length)
+            {
+                return false;
+            }
+
+            int otherIndex = 0;
+            foreach (ReadOnlyMemory<char> internalSpan in _spans)
+            {
+                if (!MemoryExtensions.Equals(other.Slice(otherIndex, internalSpan.Length), internalSpan.Span, comparison))
+                {
+                    return false;
+                }
+
+                otherIndex += internalSpan.Length;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -226,6 +285,28 @@ namespace Microsoft.NET.StringTools
             }
         }
 
+        public void TrimStart(char c)
+        {
+            for (int spanIdx = 0; spanIdx < _spans.Count; spanIdx++)
+            {
+                ReadOnlySpan<char> span = _spans[spanIdx].Span;
+                int i = 0;
+                while (i < span.Length && span[i] == c)
+                {
+                    i++;
+                }
+                if (i > 0)
+                {
+                    _spans[spanIdx] = _spans[spanIdx].Slice(i);
+                    Length -= i;
+                }
+                if (!_spans[spanIdx].IsEmpty)
+                {
+                    return;
+                }
+            }
+        }
+
         /// <summary>
         /// Removes trailing white-space characters from the string.
         /// </summary>
@@ -251,6 +332,28 @@ namespace Microsoft.NET.StringTools
             }
         }
 
+        public void TrimEnd(char c)
+        {
+            for (int spanIdx = _spans.Count - 1; spanIdx >= 0; spanIdx--)
+            {
+                ReadOnlySpan<char> span = _spans[spanIdx].Span;
+                int i = span.Length - 1;
+                while (i >= 0 && span[i] == c)
+                {
+                    i--;
+                }
+                if (i + 1 < span.Length)
+                {
+                    _spans[spanIdx] = _spans[spanIdx].Slice(0, i + 1);
+                    Length -= span.Length - (i + 1);
+                }
+                if (!_spans[spanIdx].IsEmpty)
+                {
+                    return;
+                }
+            }
+        }
+
         /// <summary>
         /// Removes leading and trailing white-space characters from the string.
         /// </summary>
@@ -258,6 +361,12 @@ namespace Microsoft.NET.StringTools
         {
             TrimStart();
             TrimEnd();
+        }
+
+        public void Trim(char c)
+        {
+            TrimStart(c);
+            TrimEnd(c);
         }
 
         /// <summary>

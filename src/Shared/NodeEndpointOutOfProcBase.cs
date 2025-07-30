@@ -2,23 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET
+using System.Collections.Frozen;
+#endif
+using System.Diagnostics.CodeAnalysis;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
 #else
 using System.Collections.Concurrent;
 #endif
-using System.IO;
-using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using System.IO.Pipes;
+using System.IO;
+using System.Collections.Generic;
+
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
+
 #endif
-#if !FEATURE_APM
+#if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
 #endif
 
@@ -29,6 +36,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
+    [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is expected to keep the stream open for the process lifetime")]
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
         #region Private Data
@@ -113,7 +121,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
-        #endregion
+#if NET
+        /// <summary>
+        /// The set of property names from handshake responsible for node version.
+        /// </summary>
+        private readonly FrozenSet<string> _versionHandshakeGroup = [
+            nameof(HandshakeComponents.FileVersionMajor),
+            nameof(HandshakeComponents.FileVersionMinor),
+            nameof(HandshakeComponents.FileVersionBuild),
+            nameof(HandshakeComponents.FileVersionPrivate)];
+#endif
+
+#endregion
 
         #region INodeEndpoint Events
 
@@ -257,7 +276,7 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
-        /// Returns the host handshake for this node endpoint
+        /// Returns the host handshake for this node endpoint.
         /// </summary>
         protected abstract Handshake GetHandshake();
 
@@ -391,25 +410,33 @@ namespace Microsoft.Build.BackEnd
                     Handshake handshake = GetHandshake();
                     try
                     {
-                        int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
-                        for (int i = 0; i < handshakeComponents.Length; i++)
+                        HandshakeComponents handshakeComponents = handshake.RetrieveHandshakeComponents();
+
+                        int index = 0;
+                        foreach (var component in handshakeComponents.EnumerateComponents())
                         {
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             int handshakePart = _pipeServer.ReadIntForHandshake(
-                                byteToAccept: i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
-                            if (handshakePart != handshakeComponents[i])
+                            if (!IsHandshakePartValid(component, handshakePart, index))
                             {
-                                CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, handshakeComponents[i]);
-                                _pipeServer.WriteIntForHandshake(i + 1);
+                                CommunicationsUtilities.Trace(
+                                        "Handshake failed. Received {0} from host  for {1} but expected {2}. Probably the host is a different MSBuild build.",
+                                        handshakePart,
+                                        component.Key,
+                                        component.Value);
+                                _pipeServer.WriteIntForHandshake(index + 1);
                                 gotValidConnection = false;
                                 break;
                             }
+
+                            index++;
                         }
 
                         if (gotValidConnection)
@@ -492,7 +519,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (localPipeServer.IsConnected)
                 {
-#if NETCOREAPP // OperatingSystem.IsWindows() is new in .NET 5.0
+#if NET // OperatingSystem.IsWindows() is new in .NET 5.0
                     if (OperatingSystem.IsWindows())
 #endif
                     {
@@ -508,34 +535,104 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private void RunReadLoop(Stream localReadPipe, Stream localWritePipe,
-            ConcurrentQueue<INodePacket> localPacketQueue, AutoResetEvent localPacketAvailable, AutoResetEvent localTerminatePacketPump)
+        /// <summary>
+        /// Method to verify that the handshake part received from the host matches the expected values.
+        /// </summary>
+        private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index)
         {
-            // Ordering of the wait handles is important.  The first signalled wait handle in the array
-            // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
+            if (handshakePart == component.Value)
+            {
+                return true;
+            }
+
+#if NET
+            // Check if this is a valid NET task host exception
+            bool isAllowedMismatch = false;
+
+            if (component.Key == nameof(HandshakeComponents.Options))
+            {
+                // NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
+                // 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+                isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
+            }
+            else
+            {
+                isAllowedMismatch = _versionHandshakeGroup.Contains(component.Key) && component.Value == Handshake.NetTaskHostHandshakeVersion;
+            }
+
+            if (isAllowedMismatch)
+            {
+                CommunicationsUtilities.Trace("Handshake for NET Host. Child host {0} for {1}.", handshakePart, component.Key);
+                return true;
+            }
+#endif
+            CommunicationsUtilities.Trace(
+                "Handshake failed. Received {0} from host for {1} but expected {2}. Probably the host is a different MSBuild build.",
+                handshakePart,
+                component.Key,
+                component.Value);
+
+            return false;
+        }
+
+#if NET
+        /// <summary>
+        /// NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
+        /// 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+        /// </summary>
+        private bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
+        {
+            var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
+            var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
+
+            // not X64 or Arm64 means we are running on x86
+            bool receivedIsX86 = !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
+                                 !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
+
+            bool expectedIsX64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+
+            return receivedIsX86 && expectedIsX64;
+        }
+#endif
+
+        private void RunReadLoop(
+            BufferedReadStream localReadPipe,
+            NamedPipeServerStream localWritePipe,
+            ConcurrentQueue<INodePacket> localPacketQueue,
+            AutoResetEvent localPacketAvailable,
+            AutoResetEvent localTerminatePacketPump)
+        {
+            // Ordering of the wait handles is important.  The first signaled wait handle in the array
+            // will be returned by WaitAny if multiple wait handles are signaled.  We prefer to have the
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
-#if FEATURE_APM
-            IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+            ITranslator writeTranslator = null;
+#if NET451_OR_GREATER
+            Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
+#elif NETCOREAPP
+            Task<int> readTask = localReadPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #else
-            Task<int> readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
+            IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
+
+            // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
+            // packets to be sent by other threads which are shutting down, such as the logging thread.
+            WaitHandle[] handles = new WaitHandle[]
+            {
+#if NET451_OR_GREATER || NETCOREAPP
+                ((IAsyncResult)readTask).AsyncWaitHandle,
+#else
+                result.AsyncWaitHandle,
+#endif
+                localPacketAvailable,
+                localTerminatePacketPump,
+            };
 
             bool exitLoop = false;
             do
             {
-                // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
-                // packets to be sent by other threads which are shutting down, such as the logging thread.
-                WaitHandle[] handles = new WaitHandle[] {
-#if FEATURE_APM
-                    result.AsyncWaitHandle,
-#else
-                    ((IAsyncResult)readTask).AsyncWaitHandle,
-#endif
-                    localPacketAvailable, localTerminatePacketPump };
-
                 int waitId = WaitHandle.WaitAny(handles);
                 switch (waitId)
                 {
@@ -544,10 +641,10 @@ namespace Microsoft.Build.BackEnd
                             int bytesRead = 0;
                             try
                             {
-#if FEATURE_APM
-                                bytesRead = localReadPipe.EndRead(result);
+#if NET451_OR_GREATER || NETCOREAPP
+                                bytesRead = readTask.ConfigureAwait(false).GetAwaiter().GetResult();
 #else
-                                bytesRead = readTask.Result;
+                                bytesRead = localReadPipe.EndRead(result);
 #endif
                             }
                             catch (Exception e)
@@ -588,7 +685,7 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            NodePacketType packetType = (NodePacketType)Enum.ToObject(typeof(NodePacketType), headerByte[0]);
+                            NodePacketType packetType = (NodePacketType)headerByte[0];
 
                             try
                             {
@@ -604,10 +701,18 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-#if FEATURE_APM
-                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#if NET451_OR_GREATER
+                            readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
+#elif NETCOREAPP
+                            readTask = localReadPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #else
-                            readTask = CommunicationsUtilities.ReadAsync(localReadPipe, headerByte, headerByte.Length);
+                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+#endif
+
+#if NET451_OR_GREATER || NETCOREAPP
+                            handles[0] = ((IAsyncResult)readTask).AsyncWaitHandle;
+#else
+                            handles[0] = result.AsyncWaitHandle;
 #endif
                         }
 
@@ -624,7 +729,9 @@ namespace Microsoft.Build.BackEnd
                                 var packetStream = _packetStream;
                                 packetStream.SetLength(0);
 
-                                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
+                                // Re-use writeTranslator; we clear _packetStream but never replace it.
+                                // If _packetStream is ever reassigned, set writeTranslator = null first.
+                                writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
 
                                 packetStream.WriteByte((byte)packet.Type);
 
@@ -670,8 +777,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-        #endregion
+#endregion
 
-        #endregion
+#endregion
     }
 }

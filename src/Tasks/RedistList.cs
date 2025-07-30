@@ -215,7 +215,7 @@ namespace Microsoft.Build.Tasks
         public static RedistList GetFrameworkList20()
         {
             string frameworkVersion20Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
-            string[] redistListPaths = Array.Empty<string>();
+            string[] redistListPaths = [];
             if (frameworkVersion20Path != null)
             {
                 redistListPaths = RedistList.GetRedistListPathsFromDisk(frameworkVersion20Path);
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static RedistList GetRedistListFromPath(string path)
         {
-            string[] redistListPaths = (path == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(path);
+            string[] redistListPaths = (path == null) ? [] : GetRedistListPathsFromDisk(path);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Tasks
 
             // On dogfood build machines, v3.5 is not formally installed, so this returns null.
             // We don't use redist lists in this case.
-            string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(referenceAssembliesPath);
+            string[] redistListPaths = (referenceAssembliesPath == null) ? [] : GetRedistListPathsFromDisk(referenceAssembliesPath);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths to redist lists under given framework directory.</returns>
         public static string[] GetRedistListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             lock (s_locker)
             {
@@ -317,7 +317,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentNullException(nameof(assemblyName));
             }
 
-            int i = assemblyName.IndexOf(",", StringComparison.Ordinal);
+            int i = assemblyName.IndexOf(',');
             return i > 0 ? assemblyName.Substring(0, i) : assemblyName;
         }
 
@@ -429,7 +429,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool FrameworkAssemblyEntryInRedist(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
 
             if (!_assemblyNameInRedist.TryGetValue(assemblyName, out bool isAssemblyNameInRedist))
             {
@@ -483,20 +483,60 @@ namespace Microsoft.Build.Tasks
         /// Find every assembly full name that matches the given simple name.
         /// </summary>
         /// <returns>The list of assembly names.</returns>
-        internal IEnumerable<AssemblyEntry> FindAssemblyNameFromSimpleName(string simpleName)
+        internal AssemblyNameFromSimpleNameEnumerator FindAssemblyNameFromSimpleName(string simpleName)
         {
-            if (_simpleNameMap.TryGetValue(simpleName, out int index))
+            return new AssemblyNameFromSimpleNameEnumerator(_assemblyList, _simpleNameMap, simpleName);
+        }
+
+        internal struct AssemblyNameFromSimpleNameEnumerator
+        {
+            private readonly string _simpleName;
+            private int _index;
+            private readonly ReadOnlyCollection<AssemblyEntry> _assemblyList;
+
+            public AssemblyNameFromSimpleNameEnumerator(ReadOnlyCollection<AssemblyEntry> assemblyList, ReadOnlyDictionary<string, int> simpleNameMap, string simpleName)
             {
-                for (int i = index; i < _assemblyList.Count; ++i)
+                _assemblyList = assemblyList ?? throw new ArgumentNullException(nameof(assemblyList));
+                _simpleName = simpleName;
+                _index = simpleNameMap.TryGetValue(simpleName, out int index) ? index : int.MaxValue;
+            }
+
+            public AssemblyNameFromSimpleNameEnumerator()
+            {
+                _assemblyList = null;
+                _simpleName = null;
+                _index = int.MaxValue;
+            }
+
+            public bool MoveNext()
+            {
+                if (_assemblyList is not null && _index < _assemblyList.Count)
                 {
-                    AssemblyEntry entry = _assemblyList[i];
-                    if (!String.Equals(simpleName, entry.SimpleName, StringComparison.OrdinalIgnoreCase))
+                    AssemblyEntry entry = _assemblyList[_index];
+                    if (!String.Equals(_simpleName, entry.SimpleName, StringComparison.OrdinalIgnoreCase))
                     {
-                        break;
+                        // Because _assemblyList is sorted by SimpleName then version,
+                        // once we find a SimpleName that doesn't match we can stop iterating.
+                        _index = int.MaxValue;
+                        return false;
                     }
-                    yield return entry;
+
+                    Current = entry;
+                    _index += 1;
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
+
+            public AssemblyNameFromSimpleNameEnumerator GetEnumerator()
+            {
+                return this;
+            }
+
+            public AssemblyEntry Current { get; private set; }
         }
 
         /// <summary>
@@ -794,7 +834,7 @@ namespace Microsoft.Build.Tasks
                         {
                             // When comparing the assembly entries we want to compare the FullName which is a formatted as name, version, publicKeyToken and culture and whether the entry is a redistroot flag
                             // We do not need to add the redistName and the framework directory because this will be the same for all entries in the current redist list being read.
-                            string hashIndex = String.Format(CultureInfo.InvariantCulture, "{0},{1}", newEntry.FullName, newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString());
+                            string hashIndex = $"{newEntry.FullName},{(newEntry.IsRedistRoot == null ? "null" : newEntry.IsRedistRoot.ToString())}";
 
                             assemblyEntries.TryGetValue(hashIndex, out AssemblyEntry dictionaryEntry);
                             // If the entry is not in the dictionary or the entry is in the dictionary but the new entry has the ingac flag true, make sure the dictionary contains the entry with the ingac true.
@@ -991,7 +1031,7 @@ namespace Microsoft.Build.Tasks
         /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));
+            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor);
             _subsetToSearchFor = subsetToSearchFor;
         }
 
@@ -1015,7 +1055,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths locations to subset lists under the given framework directory.</returns>
         public string[] GetSubsetListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             // Make sure we have some subset names to search for it is possible that no subsets are asked for
             // so we should return as quickly as possible in that case.
@@ -1067,7 +1107,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return Array.Empty<string>();
+            return [];
         }
         #endregion
     }

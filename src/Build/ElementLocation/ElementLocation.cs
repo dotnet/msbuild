@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Threading;
@@ -176,7 +175,7 @@ namespace Microsoft.Build.Construction
         /// In AG there are 600 locations that have a file but zero line and column.
         /// In theory yet another derived class could be made for these to save 4 bytes each.
         /// </remarks>
-        internal static ElementLocation Create(string? filePath, int line, int column)
+        public static ElementLocation Create(string? filePath, int line, int column)
         {
             // Combine line and column values with bitwise OR so we can perform various
             // checks on both values in a single comparison, reducing the amount of branching

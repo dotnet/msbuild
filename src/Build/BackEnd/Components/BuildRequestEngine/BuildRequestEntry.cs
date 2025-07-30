@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -122,8 +122,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="requestConfiguration">The build request configuration.</param>
         internal BuildRequestEntry(BuildRequest request, BuildRequestConfiguration requestConfiguration)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(request, nameof(request));
-            ErrorUtilities.VerifyThrowArgumentNull(requestConfiguration, nameof(requestConfiguration));
+            ErrorUtilities.VerifyThrowArgumentNull(request);
+            ErrorUtilities.VerifyThrowArgumentNull(requestConfiguration);
             ErrorUtilities.VerifyThrow(requestConfiguration.ConfigurationId == request.ConfigurationId, "Configuration id mismatch");
 
             GlobalLock = new Object();
@@ -303,7 +303,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+                ErrorUtilities.VerifyThrowArgumentNull(result);
                 ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Waiting || _outstandingRequests == null, "Entry must be in the Waiting state to report results, or we must have flushed our requests due to an error. Config: {0} State: {1} Requests: {2}", RequestConfiguration.ConfigurationId, State, _outstandingRequests != null);
 
                 // If the matching request is in the issue list, remove it so we don't try to ask for it to be built.
@@ -471,7 +471,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (GlobalLock)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(result, nameof(result));
+                ErrorUtilities.VerifyThrowArgumentNull(result);
                 ErrorUtilities.VerifyThrow(Result == null, "Entry already Completed.");
 
                 // If this request is determined to be a success, then all outstanding items must have been taken care of
@@ -511,12 +511,13 @@ namespace Microsoft.Build.BackEnd
                     ErrorUtilities.VerifyThrow(addToIssueList, "Requests with unresolved configurations should always be added to the issue list.");
                     _unresolvedConfigurations ??= new Dictionary<int, List<BuildRequest>>();
 
-                    if (!_unresolvedConfigurations.ContainsKey(newRequest.ConfigurationId))
+                    if (!_unresolvedConfigurations.TryGetValue(newRequest.ConfigurationId, out List<BuildRequest> value))
                     {
-                        _unresolvedConfigurations.Add(newRequest.ConfigurationId, new List<BuildRequest>());
+                        value = new List<BuildRequest>();
+                        _unresolvedConfigurations.Add(newRequest.ConfigurationId, value);
                     }
 
-                    _unresolvedConfigurations[newRequest.ConfigurationId].Add(newRequest);
+                    value.Add(newRequest);
                 }
 
                 if (addToIssueList)

@@ -29,7 +29,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// An object for the two inproc endpoints to synchronize on.
         /// </summary>
-        private static Object s_locker = new Object();
+        private static readonly Object s_locker = new Object();
 
         /// <summary>
         /// The current communication status of the node.
@@ -91,6 +91,11 @@ namespace Microsoft.Build.BackEnd
         /// Use a lock on the packetQueue itself.
         /// </remarks>
         private ConcurrentQueue<INodePacket> _packetQueue;
+
+        /// <summary>
+        /// The ID of the node this endpoint represents.
+        /// </summary>
+        private readonly int _nodeId;
         #endregion
 
         #region Constructors and Factories
@@ -99,13 +104,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="commMode">The communications mode for this endpoint.</param>
         /// <param name="host">The component host.</param>
-        private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host)
+        /// <param name="nodeId">The ID of the node this endpoint manages.</param>
+        private NodeEndpointInProc(EndpointMode commMode, IBuildComponentHost host, int nodeId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(host, nameof(host));
+            ErrorUtilities.VerifyThrowArgumentNull(host);
 
             _status = LinkStatus.Inactive;
             _mode = commMode;
             _componentHost = host;
+            _nodeId = nodeId;
 
             if (commMode == EndpointMode.Asynchronous)
             {
@@ -162,7 +169,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowInternalNull(factory);
             _packetFactory = factory;
 
             // Initialize our thread in async mode so we are ready when the Node-side endpoint "connects".
@@ -180,7 +187,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">Unused</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrowInternalNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowInternalNull(factory);
             _packetFactory = factory;
 
             // Set up asynchronous packet pump, if necessary.
@@ -214,7 +221,7 @@ namespace Microsoft.Build.BackEnd
 
             if (_mode == EndpointMode.Synchronous)
             {
-                _peerEndpoint._packetFactory.RoutePacket(0, packet);
+                _peerEndpoint._packetFactory.RoutePacket(_nodeId, packet);
             }
             else
             {
@@ -236,11 +243,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="mode">The communications mode for the endpoints.</param>
         /// <param name="host">The component host.</param>
+        /// <param name="nodeId">The ID of the node corresponding to the pair endpoints.</param>
         /// <returns>A matched pair of endpoints.</returns>
-        internal static EndpointPair CreateInProcEndpoints(EndpointMode mode, IBuildComponentHost host)
+        internal static EndpointPair CreateInProcEndpoints(EndpointMode mode, IBuildComponentHost host, int nodeId)
         {
-            NodeEndpointInProc node = new NodeEndpointInProc(mode, host);
-            NodeEndpointInProc manager = new NodeEndpointInProc(mode, host);
+            NodeEndpointInProc node = new NodeEndpointInProc(mode, host, nodeId);
+            NodeEndpointInProc manager = new NodeEndpointInProc(mode, host, nodeId);
 
             // NOTE: This creates a circular reference which must be explicitly broken before these
             // objects can be reclaimed by the garbage collector.
@@ -331,7 +339,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
             ErrorUtilities.VerifyThrow(_mode == EndpointMode.Asynchronous, "EndPoint mode is synchronous, should be asynchronous");
             ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
             ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
@@ -420,7 +428,7 @@ namespace Microsoft.Build.BackEnd
                 // will be returned by WaitAny if multiple wait handles are signalled.  We prefer to have the
                 // terminate event triggered so that we cannot get into a situation where packets are being
                 // spammed to the endpoint and it never gets an opportunity to shutdown.
-                WaitHandle[] handles = new WaitHandle[] { _terminatePacketPump, _packetAvailable };
+                WaitHandle[] handles = [_terminatePacketPump, _packetAvailable];
 
                 bool exitLoop = false;
                 do
@@ -436,7 +444,7 @@ namespace Microsoft.Build.BackEnd
                                 INodePacket packet;
                                 while (_packetQueue.TryDequeue(out packet))
                                 {
-                                    _peerEndpoint._packetFactory.RoutePacket(0, packet);
+                                    _peerEndpoint._packetFactory.RoutePacket(_nodeId, packet);
                                 }
                             }
 

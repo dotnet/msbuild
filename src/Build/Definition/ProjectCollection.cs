@@ -498,6 +498,11 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Properties passed from the command line (e.g. by using /p:).
+        /// </summary>
+        public ICollection<string> PropertiesFromCommandLine { get; set; }
+
+        /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they
         /// aren't otherwise told what tools version to use.
         /// This value is gotten from the .exe.config file, or else in the registry,
@@ -894,11 +899,26 @@ namespace Microsoft.Build.Evaluation
                 // This is only done once, when the project collection is created. Any subsequent
                 // environment changes will be ignored. Child nodes will be passed this set
                 // of properties in their build parameters.
+                return new PropertyDictionary<ProjectPropertyInstance>(SharedReadOnlyEnvironmentProperties);
+            }
+        }
+
+        /// <summary>
+        /// Returns a shared immutable property dictionary containing the properties representing the environment.
+        /// </summary>
+        internal PropertyDictionary<ProjectPropertyInstance> SharedReadOnlyEnvironmentProperties
+        {
+            get
+            {
+                // Retrieves the environment properties.
+                // This is only done once, when the project collection is created. Any subsequent
+                // environment changes will be ignored. Child nodes will be passed this set
+                // of properties in their build parameters.
                 using (_locker.EnterDisposableReadLock())
                 {
                     if (_environmentProperties != null)
                     {
-                        return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
+                        return _environmentProperties;
                     }
                 }
 
@@ -906,9 +926,9 @@ namespace Microsoft.Build.Evaluation
                 {
                     if (_environmentProperties == null)
                     {
-                        _environmentProperties = Utilities.GetEnvironmentProperties();
+                        _environmentProperties = Utilities.GetEnvironmentProperties(makeReadOnly: true);
                     }
-                    return new PropertyDictionary<ProjectPropertyInstance>(_environmentProperties);
+                    return _environmentProperties;
                 }
             }
         }
@@ -995,7 +1015,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void AddToolset(Toolset toolset)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(toolset, nameof(toolset));
+            ErrorUtilities.VerifyThrowArgumentNull(toolset);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets[toolset.ToolsVersion] = toolset;
@@ -1011,7 +1031,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public bool RemoveToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
 
             bool changed;
             using (_locker.EnterDisposableWriteLock())
@@ -1055,7 +1075,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public Toolset GetToolset(string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion, nameof(toolsVersion));
+            ErrorUtilities.VerifyThrowArgumentLength(toolsVersion);
             using (_locker.EnterDisposableWriteLock())
             {
                 _toolsets.TryGetValue(toolsVersion, out var toolset);
@@ -1142,7 +1162,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>A loaded project.</returns>
         public Project LoadProject(string fileName, IDictionary<string, string> globalProperties, string toolsVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(fileName, nameof(fileName));
+            ErrorUtilities.VerifyThrowArgumentLength(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
             using (_locker.EnterDisposableWriteLock())
@@ -1348,18 +1368,6 @@ namespace Microsoft.Build.Evaluation
                 // free memory. These may be the last references to the ProjectRootElements
                 // in the cache, so the cache shouldn't hold strong references to them of its own.
                 ProjectRootElementCache.DiscardStrongReferences();
-
-                // Aggressively release any strings from all the contributing documents.
-                // It's fine if we cache less (by now we likely did a lot of loading and got the benefits)
-                // If we don't do this, we could be releasing the last reference to a
-                // ProjectRootElement, causing it to fall out of the weak cache leaving its strings and XML
-                // behind in the string cache.
-                project.Xml.XmlDocument.ClearAnyCachedStrings();
-
-                foreach (var import in project.Imports)
-                {
-                    import.ImportedProject.XmlDocument.ClearAnyCachedStrings();
-                }
             }
         }
 
@@ -1376,7 +1384,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         public void UnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return;
@@ -1390,7 +1398,6 @@ namespace Microsoft.Build.Evaluation
                     ErrorUtilities.ThrowInvalidOperation("OM_ProjectXmlCannotBeUnloadedDueToLoadedProjects", projectRootElement.FullPath, conflictingProject.FullPath);
                 }
 
-                projectRootElement.XmlDocument.ClearAnyCachedStrings();
                 ProjectRootElementCache.DiscardAnyWeakReference(projectRootElement);
             }
         }
@@ -1527,7 +1534,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElement">The project XML root element to unload.</param>
         public bool TryUnloadProject(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
             if (projectRootElement.Link != null)
             {
                 return false;
@@ -1541,7 +1548,6 @@ namespace Microsoft.Build.Evaluation
                 if (conflictingProject == null)
                 {
                     ProjectRootElementCache.DiscardAnyWeakReference(projectRootElement);
-                    projectRootElement.XmlDocument.ClearAnyCachedStrings();
                     return true;
                 }
 
@@ -1667,7 +1673,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterLoggerInternal(ILogger logger)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(logger, nameof(logger));
+            ErrorUtilities.VerifyThrowArgumentNull(logger);
             Debug.Assert(_locker.IsWriteLockHeld);
             _loggingService.RegisterLogger(new ReusableLogger(logger));
         }
@@ -1941,7 +1947,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public ReusableLogger(ILogger originalLogger)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(originalLogger, nameof(originalLogger));
+                ErrorUtilities.VerifyThrowArgumentNull(originalLogger);
                 _originalLogger = originalLogger;
             }
 
@@ -1971,6 +1977,11 @@ namespace Microsoft.Build.Evaluation
             /// The BuildFinished logging event
             /// </summary>
             public event BuildFinishedEventHandler BuildFinished;
+
+            /// <summary>
+            /// The BuildCanceled logging event
+            /// </summary>
+            public event BuildCanceledEventHandler BuildCanceled;
 
             /// <summary>
             /// The ProjectStarted logging event
@@ -2390,6 +2401,14 @@ namespace Microsoft.Build.Evaluation
             private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
             {
                 BuildFinished?.Invoke(sender, e);
+            }
+
+            /// <summary>
+            /// Handler for BuildCanceled events.
+            /// </summary>
+            private void BuildCanceledHandler(object sender, BuildCanceledEventArgs e)
+            {
+                BuildCanceled?.Invoke(sender, e);
             }
 
             /// <summary>

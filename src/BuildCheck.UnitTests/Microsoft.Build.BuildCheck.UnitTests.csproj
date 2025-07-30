@@ -11,14 +11,26 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
+    <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
+  
+  <ItemGroup Label="TestAssests">
+    <ProjectReference Include=".\TestAssets\CustomCheck\CustomCheck.csproj" />
+    <ProjectReference Include=".\TestAssets\CustomCheck2\CustomCheck2.csproj" />
+    <ProjectReference Include=".\TestAssets\InvalidCustomCheck\InvalidCustomCheck.csproj" />
+    <ProjectReference Include=".\TestAssets\ErrorCustomCheck\ErrorCustomCheck.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="System.Collections.Immutable" />
+
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,5 +45,36 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="TestAssets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\IsExternalInit.cs" />
+  </ItemGroup>
+
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)BuildCheckUnitTestsConstants.cs">
+    <PropertyGroup>
+      <GeneratedText>
+        <![CDATA[
+namespace Microsoft.Build.BuildCheck.UnitTests
+{
+    internal sealed class BuildCheckUnitTestsConstants
+    {
+        public const string MicrosoftBuildPackageVersion = @"$(Version)"%3B
+        public const string RepoRoot = @"$(RepoRoot)"%3B
+    }
+}
+      ]]>
+      </GeneratedText>
+      <GeneratedFilePath>$(IntermediateOutputPath)BuildCheckUnitTestsConstants.cs</GeneratedFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+  </Target>
+
 </Project>

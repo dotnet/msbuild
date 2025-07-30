@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -13,7 +12,6 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -634,7 +632,7 @@ namespace Microsoft.Build.UnitTests.GetSDKReferenceFiles_Tests
             // References from the two builds should not overlap, otherwise the cache files are being misused
             foreach (var ref2 in references2)
             {
-                Assert.Empty(references1.Where(i => i.ItemSpec.Equals(ref2.ItemSpec, StringComparison.InvariantCultureIgnoreCase)));
+                Assert.DoesNotContain(references1, i => i.ItemSpec.Equals(ref2.ItemSpec, StringComparison.InvariantCultureIgnoreCase));
             }
 
             Thread.Sleep(100);

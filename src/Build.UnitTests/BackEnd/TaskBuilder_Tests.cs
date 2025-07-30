@@ -7,7 +7,6 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
@@ -33,26 +32,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class TaskBuilder_Tests : ITargetBuilderCallback
     {
-        /// <summary>
-        /// The mock component host and logger
-        /// </summary>
-        private MockHost _host;
-
         private readonly ITestOutputHelper _testOutput;
-
-        /// <summary>
-        /// The temporary project we use to run the test
-        /// </summary>
-        private ProjectInstance _testProject;
 
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
         public TaskBuilder_Tests(ITestOutputHelper output)
         {
-            _host = new MockHost();
             _testOutput = output;
-            _testProject = CreateTestProject();
         }
 
         /*********************************************************************************
@@ -76,7 +63,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -128,7 +116,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -153,7 +142,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Project>";
 
                 MockLogger logger = new MockLogger(_testOutput);
-                ManualResetEvent waitCommandExecuted = new ManualResetEvent(false);
+                using ManualResetEvent waitCommandExecuted = new ManualResetEvent(false);
                 string unescapedSleepCommand = sleepCommand.Replace("&quot;", "\"").Replace("&gt;", ">");
                 logger.AdditionalHandlers.Add((sender, args) =>
                 {
@@ -163,10 +152,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     }
                 });
 
-                var project = new Project(XmlReader.Create(new StringReader(contents)), null, MSBuildConstants.CurrentToolsVersion, collection)
-                {
-                    FullPath = env.CreateFile().Path
-                };
+                using ProjectFromString projectFromString = new(contents, null, MSBuildConstants.CurrentToolsVersion, collection);
+                Project project = projectFromString.Project;
+                project.FullPath = env.CreateFile().Path;
 
                 var _parameters = new BuildParameters
                 {
@@ -234,7 +222,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       </Target>
                       </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build("t", loggers);
@@ -286,7 +275,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target>
                     </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+                using ProjectFromString projectFromString = new(projectFileContents);
+                Project project = projectFromString.Project;
                 List<ILogger> loggers = new List<ILogger>();
                 loggers.Add(logger);
                 project.Build("t2", loggers);
@@ -356,7 +346,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     </Target>
                 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             project.Build(loggers);
@@ -405,7 +396,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             MockLogger logger = new MockLogger();
             loggers.Add(logger);
@@ -442,7 +434,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             project.Build("t", new[] { logger }).ShouldBeTrue();
 
             // Assuming the current directory of the test .dll has at least one subfolder
@@ -469,7 +462,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -492,7 +486,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -522,7 +517,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -552,7 +548,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 </Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
             List<ILogger> loggers = new List<ILogger>();
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
@@ -1084,11 +1081,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 	</Target>
 </Project>");
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
 
             return project;
         }
-#endif
 
         /// <summary>
         /// Helper to create the STA test task.
@@ -1162,79 +1159,7 @@ namespace ClassLibrary2
 }";
             return CustomTaskHelper.GetAssemblyForTask(taskContents);
         }
-
-        /// <summary>
-        /// Creates a test project.
-        /// </summary>
-        /// <returns>The project.</returns>
-        private ProjectInstance CreateTestProject()
-        {
-            string projectFileContents = ObjectModelHelpers.CleanupFileContents(@"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-
-                    <ItemGroup>
-                        <Compile Include='b.cs' />
-                        <Compile Include='c.cs' />
-                    </ItemGroup>
-
-                    <ItemGroup>
-                        <Reference Include='System' />
-                    </ItemGroup>
-
-                    <Target Name='Empty' />
-
-                    <Target Name='Skip' Inputs='testProject.proj' Outputs='testProject.proj' />
-
-                    <Target Name='Error' >
-                        <ErrorTask1 ContinueOnError='True'/>
-                        <ErrorTask2 ContinueOnError='False'/>
-                        <ErrorTask3 />
-                        <OnError ExecuteTargets='Foo'/>
-                        <OnError ExecuteTargets='Bar'/>
-                    </Target>
-
-                    <Target Name='Foo' Inputs='foo.cpp' Outputs='foo.o'>
-                        <FooTask1/>
-                    </Target>
-
-                    <Target Name='Bar'>
-                        <BarTask1/>
-                    </Target>
-
-                    <Target Name='Baz' DependsOnTargets='Bar'>
-                        <BazTask1/>
-                        <BazTask2/>
-                    </Target>
-
-                    <Target Name='Baz2' DependsOnTargets='Bar;Foo'>
-                        <Baz2Task1/>
-                        <Baz2Task2/>
-                        <Baz2Task3/>
-                    </Target>
-
-                    <Target Name='DepSkip' DependsOnTargets='Skip'>
-                        <DepSkipTask1/>
-                        <DepSkipTask2/>
-                        <DepSkipTask3/>
-                    </Target>
-
-                    <Target Name='DepError' DependsOnTargets='Foo;Skip;Error'>
-                        <DepSkipTask1/>
-                        <DepSkipTask2/>
-                        <DepSkipTask3/>
-                    </Target>
-
-                </Project>
-                ");
-
-            IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testfile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
-            Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
-            config.Project = project.CreateProjectInstance();
-            cache.AddConfiguration(config);
-
-            return config.Project;
-        }
+#endif
 
         /// <summary>
         /// The mock component host object.
@@ -1372,32 +1297,14 @@ namespace ClassLibrary2
                 };
             }
 
+            public TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+                => (TComponent)GetComponent(type);
+
             /// <summary>
             /// Register a component factory.
             /// </summary>
             public void RegisterFactory(BuildComponentType type, BuildComponentFactoryDelegate factory)
             {
-            }
-
-            #endregion
-
-            #region IBuildComponent Members
-
-            /// <summary>
-            /// Sets the component host
-            /// </summary>
-            /// <param name="host">The component host</param>
-            public void InitializeComponent(IBuildComponentHost host)
-            {
-                throw new NotImplementedException();
-            }
-
-            /// <summary>
-            /// Shuts down the component
-            /// </summary>
-            public void ShutdownComponent()
-            {
-                throw new NotImplementedException();
             }
 
             #endregion

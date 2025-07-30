@@ -136,7 +136,7 @@
     <value>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</value>
   </data>
   <data name="DeprecatedEventSerialization" xml:space="preserve">
-    <value>Usage of unsecure BinaryFormatter during serialization of custom event type '{0}'. This will be deprecated soon. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
+    <value>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
   </data>
   <data name="FileLocation" xml:space="preserve">
     <value>{0} ({1},{2})</value>
@@ -188,7 +188,7 @@
     <comment>{StrBegin="MSB5003: "}</comment>
   </data>
   <data name="Shared.FailedDeletingTempFile" xml:space="preserve">
-    <value>MSB5018: Failed to delete the temporary file "{0}". {1}</value>
+    <value>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</value>
     <comment>{StrBegin="MSB5018: "}</comment>
   </data>
   <data name="Shared.InvalidFilespecForTransform" xml:space="preserve">

@@ -1,4 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <UseProductOutputPath>true</UseProductOutputPath>
     <CopyNuGetImplementations>false</CopyNuGetImplementations>
@@ -7,12 +8,20 @@
     <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
-    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
-  </ItemGroup>
-  <ItemGroup>
+    <PackageReference Include="Microsoft.Build" Version="16.11.0" PrivateAssets="all" />
     <PackageReference Include="Shouldly" Version="4.2.1" />
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+
+    <!-- Bump versions of transitive dependencies to vulnerable packages,
+         but don't reference them so the plugin doesn't carry higher references
+         than its targeted MSBuild. NOT NECESSARY for public plugins; use higher MSBuild. -->
+    <PackageReference Include="System.Drawing.Common" Version="4.7.2" ExcludeAssets="all" />
   </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="System.Text.Encodings.Web" Version="4.7.2" ExcludeAssets="all" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
 </Project>

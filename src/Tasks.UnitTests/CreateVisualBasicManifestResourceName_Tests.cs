@@ -424,7 +424,7 @@ End Namespace
 ");
             }
 
-            Assert.True(false, String.Format("Encountered a new path {0}, needs unittesting support", path));
+            Assert.Fail(String.Format("Encountered a new path {0}, needs unittesting support", path));
             return null;
         }
 
@@ -664,22 +664,6 @@ End Namespace
                     log: null);
 
             Assert.Equal(@"RootNamespace.MyResource.resources", result);
-        }
-
-        private void AssertSimpleCase(string code, string expected)
-        {
-            string result =
-            CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
-                    fileName: "MyForm.resx",
-                    linkFileName: null,    // Link file name
-                    prependCultureAsDirectory: true,
-                    rootNamespace: "RootNamespace",    // Root namespace
-                    dependentUponFileName: "MyForm.vb",
-                    culture: null,
-                    binaryStream: StreamHelpers.StringToStream(code),
-                    log: null);
-
-            Assert.Equal(expected, result);
         }
     }
 }

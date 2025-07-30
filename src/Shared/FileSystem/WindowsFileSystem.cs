@@ -55,12 +55,22 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool DirectoryExists(string path)
         {
+            if (!string.IsNullOrEmpty(path) && FileUtilities.IsPathTooLong(path))
+            {
+                // If the path is too long, we can't check if it exists on windows
+                string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
+                throw new PathTooLongException(message);
+            }
             return NativeMethodsShared.DirectoryExistsWindows(path);
         }
 
         public override bool FileExists(string path)
         {
-            return NativeMethodsShared.FileExistsWindows(path);
+#if NETFRAMEWORK
+            return Microsoft.IO.File.Exists(path);
+#else
+            return File.Exists(path);
+#endif
         }
 
         public override bool FileOrDirectoryExists(string path)

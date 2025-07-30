@@ -146,6 +146,7 @@ namespace Microsoft.Build.Tasks
         private async Task DownloadAsync(Uri uri, CancellationToken cancellationToken)
         {
             // The main reason to use HttpClient vs WebClient is because we can pass a message handler for unit tests to mock
+#pragma warning disable CA2000 // Dispose objects before losing scope because HttpClientHandler is disposed by HTTPClient.Dispose()
             using (var client = new HttpClient(HttpMessageHandler ?? new HttpClientHandler(), disposeHandler: true) { Timeout = TimeSpan.FromMilliseconds(Timeout) })
             {
                 // Only get the response without downloading the file so we can determine if the file is already up-to-date
@@ -155,7 +156,7 @@ namespace Microsoft.Build.Tasks
                     {
                         response.EnsureSuccessStatusCode();
                     }
-#if NET6_0_OR_GREATER
+#if NET
                     catch (HttpRequestException)
                     {
                         throw;
@@ -168,7 +169,7 @@ namespace Microsoft.Build.Tasks
 #endif
                     }
 
-                    if (!TryGetFileName(response, out string filename))
+                    if (!TryGetFileName(uri, out string filename))
                     {
                         Log.LogErrorWithCodeFromResources("DownloadFile.ErrorUnknownFileName", SourceUrl, nameof(DestinationFileName));
                         return;
@@ -202,7 +203,7 @@ namespace Microsoft.Build.Tasks
                             Log.LogMessageFromResources(MessageImportance.High, "DownloadFile.Downloading", SourceUrl, destinationFile.FullName, response.Content.Headers.ContentLength);
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                             using (Stream responseStream = await response.Content.ReadAsStreamAsync(
-#if NET6_0_OR_GREATER
+#if NET
                             cancellationToken
 #endif
                             ).ConfigureAwait(false))
@@ -226,6 +227,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+#pragma warning restore CA2000 // Dispose objects before losing scope
         }
 
         /// <summary>
@@ -258,7 +260,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-#if NET6_0_OR_GREATER
+#if NET
                 // net5.0 included StatusCode in the HttpRequestException.
                 switch (httpRequestException.StatusCode)
                 {
@@ -306,28 +308,27 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Attempts to get the file name to use when downloading the file.
         /// </summary>
-        /// <param name="response">The <see cref="HttpResponseMessage"/> with information about the response.</param>
+        /// <param name="requestUri">The uri we sent request to.</param>
         /// <param name="filename">Receives the name of the file.</param>
         /// <returns><code>true</code> if a file name could be determined, otherwise <code>false</code>.</returns>
-        private bool TryGetFileName(HttpResponseMessage response, out string filename)
+        private bool TryGetFileName(Uri requestUri, out string filename)
         {
-            if (response == null)
+            if (requestUri == null)
             {
-                throw new ArgumentNullException(nameof(response));
+                throw new ArgumentNullException(nameof(requestUri));
             }
 
             // Not all URIs contain a file name so users will have to specify one
             // Example: http://www.download.com/file/1/
 
-            filename = !String.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
+            filename = !string.IsNullOrWhiteSpace(DestinationFileName?.ItemSpec)
                 ? DestinationFileName.ItemSpec // Get the file name from what the user specified
-                : response.Content?.Headers?.ContentDisposition?.FileName // Attempt to get the file name from the content-disposition header value
-                  ?? Path.GetFileName(response.RequestMessage.RequestUri.LocalPath); // Otherwise attempt to get a file name from the URI
+                : Path.GetFileName(requestUri.LocalPath); // Otherwise attempt to get a file name from the URI
 
-            return !String.IsNullOrWhiteSpace(filename);
+            return !string.IsNullOrWhiteSpace(filename);
         }
 
-#if !NET6_0_OR_GREATER
+#if !NET
         /// <summary>
         /// Represents a wrapper around the <see cref="HttpRequestException"/> that also contains the <see cref="HttpStatusCode"/>.
         /// DEPRECATED as of net5.0, which included the StatusCode in the HttpRequestException class.

@@ -56,6 +56,7 @@ namespace Microsoft.Build.UnitTests
             // Clear these two environment variables first in case pre-setting affects the test.
             env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
             env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
+            env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
             return env;
         }
@@ -99,7 +100,7 @@ namespace Microsoft.Build.UnitTests
                     item.AssertInvariant(Output);
                 }
 
-                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
                 ChangeWaves.ResetStateForTests();
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
@@ -315,7 +316,7 @@ namespace Microsoft.Build.UnitTests
         /// Will not work for out of proc nodes since the output writer does not reach into those
         public TransientPrintLineDebugger CreatePrintLineDebuggerWithTestOutputHelper()
         {
-            ErrorUtilities.VerifyThrowInternalNull(Output, nameof(Output));
+            ErrorUtilities.VerifyThrowInternalNull(Output);
             return WithTransientTestState(new TransientPrintLineDebugger(this, OutPutHelperWriter(Output)));
 
             CommonWriterType OutPutHelperWriter(ITestOutputHelper output)
@@ -442,6 +443,11 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var key in subset.Keys)
                 {
+                    if (key is "_MSBUILDTLENABLED")
+                    {
+                        continue;
+                    }
+
                     // workaround for https://github.com/dotnet/msbuild/pull/3866
                     // if the initial environment had empty keys, then MSBuild will accidentally remove them via Environment.SetEnvironmentVariable
                     if (operation != "removed" || !string.IsNullOrEmpty((string)subset[key]))
@@ -671,19 +677,16 @@ namespace Microsoft.Build.UnitTests
 
     public class TransientTestFile : TransientTestState
     {
-        private readonly bool _createFile;
         private readonly bool _expectedAsOutput;
 
         public TransientTestFile(string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(null, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(rootPath, null, extension, createFile);
         }

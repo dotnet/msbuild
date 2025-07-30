@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
@@ -50,7 +49,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     new List<SdkResolver> { new DefaultSdkResolver() }
                     : new List<SdkResolver>();
             try
-            {   
+            {
                 var potentialResolvers = FindPotentialSdkResolvers(
                     Path.Combine(BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32, "SdkResolvers"), location);
 
@@ -119,22 +118,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 var assembly = Path.Combine(subfolder.FullName, $"{subfolder.Name}.dll");
                 bool assemblyAdded = false;
 
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
-                {
-                    // Prefer manifest over the assembly. Try to read the xml first, and if not found then look for an assembly.
-                    assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
-                    if (!assemblyAdded)
-                    {
-                        assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
-                    }
-                }
-                else
+                // Prefer manifest over the assembly. Try to read the xml first, and if not found then look for an assembly.
+                assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
+                if (!assemblyAdded)
                 {
                     assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
-                    if (!assemblyAdded)
-                    {
-                        assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
-                    }
                 }
 
                 if (!assemblyAdded)
@@ -243,6 +231,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         protected virtual Assembly LoadResolverAssembly(string resolverPath)
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
+            {
+                string resolverFileName = Path.GetFileNameWithoutExtension(resolverPath);
+                if (resolverFileName.Equals("Microsoft.DotNet.MSBuildSdkResolver", StringComparison.OrdinalIgnoreCase))
+                {
+                    // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
+                    // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
+                    AssemblyName assemblyName = new AssemblyName(resolverFileName)
+                    {
+                        CodeBase = resolverPath,
+                    };
+                    return Assembly.Load(assemblyName);
+                }
+            }
             return Assembly.LoadFrom(resolverPath);
 #else
             return s_loader.LoadFromPath(resolverPath);

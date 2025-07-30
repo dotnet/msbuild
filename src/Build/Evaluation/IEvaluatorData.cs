@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -210,9 +211,21 @@ namespace Microsoft.Build.Evaluation
         PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary { get; }
 
         /// <summary>
+        /// A dictionary of all discovered environment variables during Sdk Resolutions that occurred during evaluation.
+        /// </summary>
+        PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary { get; }
+
+        /// <summary>
+        /// Add an environment variable (and property) based on the result of an SDK resolver.
+        /// </summary>
+        /// <param name="name">Environment variable name.</param>
+        /// <param name="value">Environment variable value.</param>
+        void AddSdkResolvedEnvironmentVariable(string name, string value);
+
+        /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
-        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext);
+        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext);
 
         /// <summary>
         /// Indicates to the data block that evaluation has completed,
@@ -267,12 +280,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null);
+        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, BackEnd.Logging.LoggingContext loggingContext, bool isEnvironmentVariable = false, bool isCommandLineProperty = false);
 
         /// <summary>
         /// Sets a property which comes from the Xml.
         /// </summary>
-        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped);
+        P SetProperty(ProjectPropertyElement propertyElement, string evaluatedValueEscaped, BackEnd.Logging.LoggingContext loggingContext);
 
         /// <summary>
         /// Retrieves an existing target, if any.

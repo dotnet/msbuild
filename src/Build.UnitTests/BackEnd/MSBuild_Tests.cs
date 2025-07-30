@@ -37,15 +37,12 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
             try
             {
                 Directory.SetCurrentDirectory(Path.GetTempPath());
-
-                string tempPath = Path.GetTempPath();
 
                 string tempProject = ObjectModelHelpers.CreateTempFileOnDisk(@"
                 <Project DefaultTargets=`TargetA; TargetB; TargetC` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -68,16 +65,16 @@ namespace Microsoft.Build.UnitTests
                     projectFile1 += "..\\";
                 }
 
-                int rootLength = Path.GetPathRoot(tempPath).Length;
-                string tempPathNoRoot = tempPath.Substring(rootLength);
+                int rootLength = Path.GetPathRoot(tempProject).Length;
+                string tempPathNoRoot = tempProject.Substring(rootLength);
 
-                projectFile1 += Path.Combine(tempPathNoRoot, fileName);
+                projectFile1 += tempPathNoRoot;
 
                 string parentProjectContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <Target Name=`Build`>
-                        <MSBuild Projects=`" + projectFile1 + @"` />
+                        <MSBuild Projects=`" + projectFile1 + @"`/>
                     </Target>
                 </Project>";
                 try
@@ -1463,7 +1460,7 @@ namespace Microsoft.Build.UnitTests
                         </Project>";
 
                     MockLogger logger = new MockLogger();
-                    ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
+                    using ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
                     Project p = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger);
                     bool success = p.Build();
                     switch (i)
@@ -1558,7 +1555,7 @@ namespace Microsoft.Build.UnitTests
                 </Project>";
 
                 MockLogger logger = new MockLogger();
-                ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
+                using ProjectCollection pc = new ProjectCollection(null, new List<ILogger> { logger }, null, ToolsetDefinitionLocations.Default, 2, false);
                 Project p = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger);
                 bool success = p.Build();
 
@@ -1897,6 +1894,108 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(projectFile1);
                 File.Delete(projectFile2);
             }
+        }
+
+        [Fact]
+        public void InMemoryProject_Build()
+        {
+            Project project = ObjectModelHelpers.CreateInMemoryProject("""
+                <Project>
+                    <Target Name="Build">
+                        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Other" SkipNonexistentProjects="Build" />
+                    </Target>
+                    <Target Name="Other">
+                        <Message Text="test message from other" />
+                    </Target>
+                </Project>
+                """);
+
+            var logger = new MockLogger();
+            bool result = project.Build(logger);
+            _testOutput.WriteLine(logger.FullLog);
+            Assert.True(result);
+            logger.AssertLogContains("test message from other");
+        }
+
+        [Fact]
+        public void InMemoryProject_Error()
+        {
+            Project project = ObjectModelHelpers.CreateInMemoryProject("""
+                <Project>
+                    <Target Name="Build">
+                        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Other" SkipNonexistentProjects="False" />
+                    </Target>
+                    <Target Name="Other">
+                        <Message Text="test message from other" />
+                    </Target>
+                </Project>
+                """);
+
+            var logger = new MockLogger();
+            bool result = project.Build(logger);
+            _testOutput.WriteLine(logger.FullLog);
+            Assert.False(result);
+            logger.AssertLogDoesntContain("test message from other");
+            logger.AssertLogContains("MSB3202"); // error MSB3202: The project file was not found.
+        }
+
+        /// <summary>
+        /// This is used by file-based apps (<c>dotnet run file.cs</c>) which use in-memory projects
+        /// and want to support existing targets which often invoke the <c>MSBuild</c> task on the current project.
+        /// </summary>
+        [Fact]
+        public void InMemoryProject_BuildByDefault()
+        {
+            Project project = ObjectModelHelpers.CreateInMemoryProject("""
+                <Project>
+                    <Target Name="Build">
+                        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="Other" />
+                    </Target>
+                    <Target Name="Other">
+                        <Message Text="test message from other" />
+                    </Target>
+                </Project>
+                """);
+
+            project.SetGlobalProperty(PropertyNames.BuildNonexistentProjectsByDefault, bool.TrueString);
+
+            var logger = new MockLogger();
+            bool result = project.Build(logger);
+            _testOutput.WriteLine(logger.FullLog);
+            Assert.True(result);
+            logger.AssertLogContains("test message from other");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void NonExistentProject(bool? buildNonexistentProjectsByDefault)
+        {
+            Project project = ObjectModelHelpers.CreateInMemoryProject("""
+                <Project>
+                    <Target Name="Build">
+                        <MSBuild Projects="non-existent-project.csproj" Targets="Other" />
+                    </Target>
+                    <Target Name="Other">
+                        <Message Text="test message from other" />
+                    </Target>
+                </Project>
+                """);
+
+            if (buildNonexistentProjectsByDefault is { } b)
+            {
+                project.SetGlobalProperty(PropertyNames.BuildNonexistentProjectsByDefault, b.ToString());
+            }
+
+            var logger = new MockLogger();
+            bool result = project.Build(logger);
+            _testOutput.WriteLine(logger.FullLog);
+            Assert.False(result);
+            logger.AssertLogDoesntContain("test message from other");
+            logger.AssertLogContains(buildNonexistentProjectsByDefault == true
+                ? "MSB4025" // error MSB4025: The project file could not be loaded.
+                : "MSB3202"); // error MSB3202: The project file was not found.
         }
     }
 }

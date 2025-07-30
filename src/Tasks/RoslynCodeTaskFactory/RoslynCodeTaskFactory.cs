@@ -350,7 +350,7 @@ namespace Microsoft.Build.Tasks
                             if (String.IsNullOrWhiteSpace(includeAttribute?.Value))
                             {
                                 // A <Reference Include="" /> is not allowed.
-                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithElement", "Include", "Reference");
+                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithTaskElement", "Include", "Reference", taskName);
                                 return false;
                             }
 
@@ -536,10 +536,10 @@ namespace Microsoft.Build.Tasks
             // Start with the user specified references and include all of the default references that are language agnostic
             IEnumerable<string> references = taskInfo.References.Union(DefaultReferences[String.Empty]);
 
-            if (DefaultReferences.ContainsKey(taskInfo.CodeLanguage))
+            if (DefaultReferences.TryGetValue(taskInfo.CodeLanguage, out IEnumerable<string> value))
             {
                 // Append default references for the specific language
-                references = references.Union(DefaultReferences[taskInfo.CodeLanguage]);
+                references = references.Union(value);
             }
 
             List<string> directoriesToAddToAppDomain = new();
@@ -737,7 +737,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.Optimize = false;
                     managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
                     managedCompiler.References = references;
-                    managedCompiler.Sources = new ITaskItem[] { new TaskItem(sourceCodePath) };
+                    managedCompiler.Sources = [new TaskItem(sourceCodePath)];
                     managedCompiler.TargetType = "Library";
                     managedCompiler.UseSharedCompilation = false;
 

@@ -9,6 +9,8 @@ using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -624,6 +626,41 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        [Fact]
+        public void DoesNotCrashWhenUnEvaluatedWildCardLooksLikeUNC()
+        {
+            var content = """
+                <Project>
+
+                  <PropertyGroup>
+                    <A>$(B)\</A>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <None Include="$(A)\csc.*" />
+                    <None Update="2.txt">
+                      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+                    </None>
+                  </ItemGroup>
+
+                  <Target Name="a" />
+
+                </Project>
+                """.Cleanup();
+
+            using var env = TestEnvironment.Create();
+
+            var projectFiles = env.CreateTestProjectWithFiles(content);
+
+            env.SetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes", ".*");
+
+            EngineFileUtilities.CaptureLazyWildcardRegexes();
+
+            Project project = Should.NotThrow(() => new Project(projectFiles.ProjectFile));
+
+            project.GetConcatenatedItemsOfType("None").ShouldContain("csc.*");
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -656,7 +693,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             finally
             {
-                FileMatcher.ClearFileEnumerationsCache();
+                FileMatcher.ClearCaches();
             }
         }
 

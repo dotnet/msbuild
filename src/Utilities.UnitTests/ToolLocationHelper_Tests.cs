@@ -23,7 +23,6 @@ using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFra
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -31,7 +30,9 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolLocationHelper_Tests
     {
+#if FEATURE_CODETASKFACTORY
         private readonly ITestOutputHelper _output;
+#endif
 
 #if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
@@ -41,7 +42,9 @@ namespace Microsoft.Build.UnitTests
 
         public ToolLocationHelper_Tests(ITestOutputHelper output)
         {
+#if FEATURE_CODETASKFACTORY
             _output = output;
+#endif
             ToolLocationHelper.ClearStaticCaches();
         }
 
@@ -1111,7 +1114,7 @@ namespace Microsoft.Build.UnitTests
                     </Project>");
 
             ILogger logger = new MockLogger(_output);
-            ProjectCollection collection = new ProjectCollection();
+            using ProjectCollection collection = new ProjectCollection();
             Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, logger);
 
             bool success = p.Build(logger);
@@ -1152,7 +1155,7 @@ namespace Microsoft.Build.UnitTests
 
             ILogger logger = new MockLogger(_output);
 
-            ProjectCollection collection = new ProjectCollection();
+            using ProjectCollection collection = new ProjectCollection();
             Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, "4.0", logger);
 
             bool success = p.Build(logger);
@@ -1195,7 +1198,7 @@ namespace Microsoft.Build.UnitTests
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties.Add("VisualStudioVersion", "10.0");
 
-            ProjectCollection collection = new ProjectCollection(globalProperties);
+            using ProjectCollection collection = new ProjectCollection(globalProperties);
             Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, "4.0", logger);
 
             bool success = p.Build(logger);
@@ -1248,7 +1251,7 @@ namespace Microsoft.Build.UnitTests
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties.Add("VisualStudioVersion", "11.0");
 
-            ProjectCollection collection = new ProjectCollection(globalProperties);
+            using ProjectCollection collection = new ProjectCollection(globalProperties);
             Project p = ObjectModelHelpers.CreateInMemoryProject(collection, projectContents, "4.0", logger);
 
             bool success = p.Build(logger);
@@ -2142,7 +2145,7 @@ namespace Microsoft.Build.UnitTests
             string frameworkDirectory2064bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness64);
             string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
 
-            if (!EnvironmentUtilities.Is64BitOperatingSystem)
+            if (!Environment.Is64BitOperatingSystem)
             {
                 // "Not 64 bit OS "
                 return;
@@ -2163,7 +2166,7 @@ namespace Microsoft.Build.UnitTests
             pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "itanium");
             pathToFramework.ShouldBe(frameworkDirectory2064bit, StringCompareShould.IgnoreCase);
 
-            if (!EnvironmentUtilities.Is64BitProcess)
+            if (!Environment.Is64BitProcess)
             {
                 pathToFramework = ToolLocationHelper.GetPathToStandardLibraries(".NetFramework", "v3.5", string.Empty, "RandomPlatform");
                 pathToFramework.ShouldBe(frameworkDirectory2032bit, StringCompareShould.IgnoreCase);
@@ -2188,7 +2191,7 @@ namespace Microsoft.Build.UnitTests
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
 
-            if (!EnvironmentUtilities.Is64BitOperatingSystem)
+            if (!Environment.Is64BitOperatingSystem)
             {
                 // "Not 64 bit OS "
                 return;
@@ -2233,7 +2236,7 @@ namespace Microsoft.Build.UnitTests
             string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32);
             string frameworkDirectory20Current = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Current);
 
-            if (EnvironmentUtilities.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
                 // "Is a 64 bit OS "
                 return;
@@ -2271,7 +2274,7 @@ namespace Microsoft.Build.UnitTests
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
 
-            if (EnvironmentUtilities.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
                 // "Is 64 bit OS "
                 return;
@@ -2923,15 +2926,12 @@ namespace Microsoft.Build.UnitTests
         // Path to the fake SDk directory structure created under the temp directory.
         private readonly string _fakeStructureRoot;
         private readonly string _fakeStructureRoot2;
-        private readonly ITestOutputHelper _output;
 
         public GetPlatformExtensionSDKLocationsTestFixture(ITestOutputHelper output)
         {
 #if FEATURE_WIN32_REGISTRY
             getRegistrySubKeyDefaultValue = GetRegistrySubKeyDefaultValue;
 #endif
-
-            _output = output;
 
             _fakeStructureRoot = MakeFakeSDKStructure();
             _fakeStructureRoot2 = MakeFakeSDKStructure2();
@@ -3581,7 +3581,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
                 string propertyValue1 = project.GetPropertyValue("SDKLocation1");
                 string propertyValue2 = project.GetPropertyValue("SDKLocation2");
@@ -3653,7 +3653,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
                 string propertyValue1 = project.GetPropertyValue("SDKLocation1");
                 string propertyValue2 = project.GetPropertyValue("SDKLocation2");
@@ -3745,7 +3745,7 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(testProjectFile, tempProjectContents);
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 Project project = pc.LoadProject(testProjectFile);
                 string propertyValue1 = project.GetPropertyValue("SDKLocation1");
                 string propertyValue2 = project.GetPropertyValue("SDKLocation2");
@@ -4177,7 +4177,8 @@ namespace Microsoft.Build.UnitTests
 
                 File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), "Test");
 
-                Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents);
+                using var collection = new ProjectCollection();
+                Project project = ObjectModelHelpers.CreateInMemoryProject(collection, tempProjectContents);
 
                 string propertyValue = project.GetPropertyValue("PlatformSDKLocation");
                 string propsLocation = project.GetPropertyValue("PropsLocation");
@@ -4255,7 +4256,8 @@ namespace Microsoft.Build.UnitTests
                 File.WriteAllText(Path.Combine(platformDirectory, "SDKManifest.xml"), "Test");
                 File.WriteAllText(Path.Combine(platformDirectory2, "Platform.xml"), "Test");
 
-                Project project = ObjectModelHelpers.CreateInMemoryProject(new ProjectCollection(), tempProjectContents);
+                using var collection = new ProjectCollection();
+                Project project = ObjectModelHelpers.CreateInMemoryProject(collection, tempProjectContents);
 
                 string propertyValue = project.GetPropertyValue("PlatformSDKLocation");
                 string propsLocation = project.GetPropertyValue("PropsLocation");

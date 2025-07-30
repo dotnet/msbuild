@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -194,7 +192,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.MetadataCount.ShouldBe(s_builtInMetadataNames.Length + 2);
             item.DirectMetadataCount.ShouldBe(1);
 
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
+            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
             metadata.Count.ShouldBe(2);
             metadata["a"].EvaluatedValue.ShouldBe("override");
             metadata["b"].EvaluatedValue.ShouldBe("base");
@@ -274,7 +272,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -327,7 +326,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();
@@ -361,7 +361,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 </Project>
                 ");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlTextReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
 
             Project project = new Project(xml);
             MockLogger logger = new MockLogger();

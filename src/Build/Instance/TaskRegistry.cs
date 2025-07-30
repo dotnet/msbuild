@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -18,7 +19,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
@@ -66,64 +66,64 @@ namespace Microsoft.Build.Execution
         /// callbacks; as forcing those out of proc would be just setting them up for
         /// known failure.
         /// </summary>
-        private static bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
+        private static readonly bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
+        private const string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV4Filename = s_tasksV4SimpleName + ".dll";
+        private const string s_tasksV4Filename = $"{s_tasksV4SimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v4) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
+        private static readonly string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
+        private const string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV12Filename = s_tasksV12SimpleName + ".dll";
+        private const string s_tasksV12Filename = $"{s_tasksV12SimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v12) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
+        private static readonly string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
+        private const string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksCoreFilename = s_tasksCoreSimpleName + ".dll";
+        private const string s_tasksCoreFilename = $"{s_tasksCoreSimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v14+) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
+        private static readonly string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
 
         /// <summary>
         /// Monotonically increasing counter for registered tasks.
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal TaskRegistry(ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
 
             RootElementCache = projectRootElementCache;
         }
@@ -201,8 +201,8 @@ namespace Microsoft.Build.Execution
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         internal TaskRegistry(Toolset toolset, ProjectRootElementCacheBase projectRootElementCache)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache, nameof(projectRootElementCache));
-            ErrorUtilities.VerifyThrowInternalNull(toolset, nameof(toolset));
+            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
+            ErrorUtilities.VerifyThrowInternalNull(toolset);
 
             RootElementCache = projectRootElementCache;
             _toolset = toolset;
@@ -249,8 +249,7 @@ namespace Microsoft.Build.Execution
         /// <typeparam name="P">A type derived from IProperty</typeparam>
         /// <typeparam name="I">A type derived from IItem</typeparam>
         internal static void InitializeTaskRegistryFromUsingTaskElements<P, I>(
-            ILoggingService loggingService,
-            BuildEventContext buildEventContext,
+            LoggingContext loggingContext,
             IEnumerable<(ProjectUsingTaskElement projectUsingTaskXml, string directoryOfImportingFile)> registrations,
             TaskRegistry taskRegistry,
             Expander<P, I> expander,
@@ -262,8 +261,7 @@ namespace Microsoft.Build.Execution
             foreach ((ProjectUsingTaskElement projectUsingTaskXml, string directoryOfImportingFile) registration in registrations)
             {
                 RegisterTasksFromUsingTaskElement(
-                    loggingService,
-                    buildEventContext,
+                    loggingContext,
                     registration.directoryOfImportingFile,
                     registration.projectUsingTaskXml,
                     taskRegistry,
@@ -284,8 +282,7 @@ namespace Microsoft.Build.Execution
         /// <typeparam name="I">A type derived from IItem</typeparam>
         private static void RegisterTasksFromUsingTaskElement
             <P, I>(
-            ILoggingService loggingService,
-            BuildEventContext buildEventContext,
+            LoggingContext loggingContext,
             string directoryOfImportingFile,
             ProjectUsingTaskElement projectUsingTaskXml,
             TaskRegistry taskRegistry,
@@ -295,7 +292,7 @@ namespace Microsoft.Build.Execution
             where P : class, IProperty
             where I : class, IItem
         {
-            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile, nameof(directoryOfImportingFile));
+            ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile);
 #if DEBUG
             ErrorUtilities.VerifyThrowInternalError(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
 #endif
@@ -307,9 +304,8 @@ namespace Microsoft.Build.Execution
                     expanderOptions,
                     projectUsingTaskXml.ContainingProject.DirectoryPath,
                     projectUsingTaskXml.ConditionLocation,
-                    loggingService,
-                    buildEventContext,
-                    fileSystem))
+                    fileSystem,
+                    loggingContext))
             {
                 return;
             }
@@ -444,7 +440,15 @@ namespace Microsoft.Build.Execution
                 taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
-            taskRegistry.RegisterTask(taskName, AssemblyLoadInfo.Create(assemblyName, assemblyFile), taskFactory, taskFactoryParameters, parameterGroupAndTaskElementRecord, loggingService, buildEventContext, projectUsingTaskXml, ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
+            taskRegistry.RegisterTask(
+                taskName,
+                AssemblyLoadInfo.Create(assemblyName, assemblyFile),
+                taskFactory,
+                taskFactoryParameters,
+                parameterGroupAndTaskElementRecord,
+                loggingContext,
+                projectUsingTaskXml,
+                ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
         }
 
         private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
@@ -547,7 +551,7 @@ namespace Microsoft.Build.Execution
             // Try the override task registry first
             if (_toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 
@@ -606,7 +610,7 @@ namespace Microsoft.Build.Execution
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
             if (taskRecord == null && _toolset != null)
             {
-                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext.LoggingService, targetLoggingContext.BuildEventContext, RootElementCache);
+                TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext, RootElementCache);
                 taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
             }
 
@@ -667,7 +671,7 @@ namespace Microsoft.Build.Execution
 
             if (exactMatchRequired)
             {
-                return Enumerable.Empty<RegisteredTaskRecord>();
+                return [];
             }
 
             // look through all task declarations for partial matches
@@ -687,13 +691,12 @@ namespace Microsoft.Build.Execution
             string taskFactory,
             Dictionary<string, string> taskFactoryParameters,
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
-            ILoggingService loggingService,
-            BuildEventContext context,
+            LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
-            bool overrideTask = false)
+            bool overrideTask)
         {
             ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo, nameof(assemblyLoadInfo));
+            ErrorUtilities.VerifyThrowInternalNull(assemblyLoadInfo);
 
             // Lazily allocate the hashtable
             if (_taskRegistrations == null)
@@ -717,7 +720,8 @@ namespace Microsoft.Build.Execution
                 taskFactory,
                 taskFactoryParameters,
                 inlineTaskRecord,
-                Interlocked.Increment(ref _nextRegistrationOrderId));
+                Interlocked.Increment(ref _nextRegistrationOrderId),
+                projectUsingTaskInXml.ContainingProject.FullPath);
 
             if (overrideTask)
             {
@@ -733,7 +737,7 @@ namespace Microsoft.Build.Execution
                     {
                         if (rec.RegisteredName.Equals(taskIdentity.Name, StringComparison.OrdinalIgnoreCase))
                         {
-                            loggingService.LogError(context, null, new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
+                            loggingContext.LogError(new BuildEventFileInfo(projectUsingTaskInXml.OverrideLocation), "DuplicateOverrideUsingTaskElement", taskName);
                             break;
                         }
                     }
@@ -745,7 +749,7 @@ namespace Microsoft.Build.Execution
                     List<RegisteredTaskRecord> unqualifiedTaskNameMatches = new();
                     unqualifiedTaskNameMatches.Add(newRecord);
                     _overriddenTasks.Add(unqualifiedTaskName, unqualifiedTaskNameMatches);
-                    loggingService.LogComment(context, MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
+                    loggingContext.LogComment(MessageImportance.Low, "OverrideUsingTaskElementCreated", taskName, projectUsingTaskInXml.OverrideLocation);
                 }
             }
 
@@ -847,13 +851,13 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The singleton comparer to use when an exact match is desired
                 /// </summary>
-                private static RegisteredTaskIdentityComparer s_exact = new RegisteredTaskIdentityComparer(true /* exact match */);
+                private static readonly RegisteredTaskIdentityComparer s_exact = new RegisteredTaskIdentityComparer(true /* exact match */);
 
                 /// <summary>
                 /// The singleton comparer to use when a fuzzy match is desired.  Note that this still does an exact match on the
                 /// name, but does a fuzzy match on the task identity parameters.
                 /// </summary>
-                private static RegisteredTaskIdentityComparer s_fuzzy = new RegisteredTaskIdentityComparer(false /* fuzzy match */);
+                private static readonly RegisteredTaskIdentityComparer s_fuzzy = new RegisteredTaskIdentityComparer(false /* fuzzy match */);
 
                 /// <summary>
                 /// Keeps track of whether we're doing exact or fuzzy equivalency
@@ -1163,9 +1167,66 @@ namespace Microsoft.Build.Execution
             private int _registrationOrderId;
 
             /// <summary>
+            /// Full path to the file that contains definition of this task.
+            /// </summary>
+            private string _definingFileFullPath;
+
+            /// <summary>
+            /// Execution statistics for the tasks.
+            /// Not translatable - the statistics are anyway expected to be reset after each project request.
+            /// </summary>
+            internal Stats Statistics { get; private init; } = new Stats();
+
+            internal class Stats()
+            {
+                public short ExecutedCount { get; private set; } = 0;
+                public long TotalMemoryConsumption { get; private set; } = 0;
+                private readonly Stopwatch _executedSw  = new Stopwatch();
+                private long _memoryConsumptionOnStart;
+
+                public TimeSpan ExecutedTime => _executedSw.Elapsed;
+
+                public void ExecutionStarted()
+                {
+                    _memoryConsumptionOnStart = GetMemoryAllocated();
+                    _executedSw.Start();
+                    ExecutedCount++;
+                }
+
+                public void ExecutionStopped()
+                {
+                    _executedSw.Stop();
+                    TotalMemoryConsumption += GetMemoryAllocated() - _memoryConsumptionOnStart;
+                }
+
+                private static long GetMemoryAllocated()
+                {
+#if NET
+                    return GC.GetTotalAllocatedBytes(false);
+#else
+                    return GC.GetTotalMemory(false);
+#endif
+                }
+
+                public void Reset()
+                {
+                    ExecutedCount = 0;
+                    _executedSw.Reset();
+                    TotalMemoryConsumption = 0;
+                }
+            }
+
+            /// <summary>
             /// Constructor
             /// </summary>
-            internal RegisteredTaskRecord(string registeredName, AssemblyLoadInfo assemblyLoadInfo, string taskFactory, Dictionary<string, string> taskFactoryParameters, ParameterGroupAndTaskElementRecord inlineTask, int registrationOrderId)
+            internal RegisteredTaskRecord(
+                string registeredName,
+                AssemblyLoadInfo assemblyLoadInfo,
+                string taskFactory,
+                Dictionary<string, string> taskFactoryParameters,
+                ParameterGroupAndTaskElementRecord inlineTask,
+                int registrationOrderId,
+                string containingFileFullPath)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(assemblyLoadInfo, "AssemblyLoadInfo");
                 _registeredName = registeredName;
@@ -1193,11 +1254,39 @@ namespace Microsoft.Build.Execution
                 {
                     _parameterGroupAndTaskBody = new ParameterGroupAndTaskElementRecord();
                 }
+
+                _definingFileFullPath = containingFileFullPath;
             }
 
             private RegisteredTaskRecord()
             {
             }
+
+            /// <summary>
+            /// Evaluates whether the current task is assumed to be defined within the user code - as opposed
+            ///  to being a built-in task, or task authored by Microsoft brought to build via sdk, common targets or nuget.
+            /// </summary>
+            public bool ComputeIfCustom()
+            {
+                return
+                    (
+                        // There are occurrences of inline tasks within common targets (Microsoft.CodeAnalysis.Targets - SetEnvironmentVariable),
+                        //  so we need to check file as well (the very last condition).
+                        !string.IsNullOrEmpty(_parameterGroupAndTaskBody?.InlineTaskXmlBody) ||
+                        (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyName) &&
+                         !FileClassifier.IsMicrosoftAssembly(_taskFactoryAssemblyLoadInfo.AssemblyName)) ||
+                        (!string.IsNullOrEmpty(_taskFactoryAssemblyLoadInfo.AssemblyFile) &&
+                         // This condition will as well capture Microsoft tasks pulled from NuGet cache - since we decide based on assembly name.
+                         // Hence we do not have to add the 'IsMicrosoftPackageInNugetCache' call anywhere here 
+                         !FileClassifier.IsMicrosoftAssembly(Path.GetFileName(_taskFactoryAssemblyLoadInfo.AssemblyFile)) &&
+                         !FileClassifier.Shared.IsBuiltInLogic(_taskFactoryAssemblyLoadInfo.AssemblyFile)))
+                    // and let's consider all tasks imported by common targets as non custom logic.
+                    && !FileClassifier.Shared.IsBuiltInLogic(_definingFileFullPath);
+            }
+
+            public bool IsFromNugetCache
+                => FileClassifier.Shared.IsInNugetCache(_taskFactoryAssemblyLoadInfo.AssemblyFile) ||
+                   FileClassifier.Shared.IsInNugetCache(_definingFileFullPath);
 
             /// <summary>
             /// Gets the task name this record was registered with.
@@ -1550,7 +1639,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters);
+                    _taskFactoryWrapperInstance = new TaskFactoryWrapper(factory, loadedType, RegisteredName, TaskFactoryParameters, Statistics);
                 }
 
                 return true;
@@ -1617,8 +1706,8 @@ namespace Microsoft.Build.Execution
                     where P : class, IProperty
                     where I : class, IItem
                 {
-                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml, nameof(projectUsingTaskXml));
-                    ErrorUtilities.VerifyThrowArgumentNull(expander, nameof(expander));
+                    ErrorUtilities.VerifyThrowArgumentNull(projectUsingTaskXml);
+                    ErrorUtilities.VerifyThrowArgumentNull(expander);
 
                     ProjectUsingTaskBodyElement taskElement = projectUsingTaskXml.TaskBody;
                     if (taskElement != null)
@@ -1819,6 +1908,7 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _taskFactory);
                 translator.Translate(ref _parameterGroupAndTaskBody);
                 translator.Translate(ref _registrationOrderId);
+                translator.Translate(ref _definingFileFullPath);
 
                 IDictionary<string, string> localParameters = _taskFactoryParameters;
                 translator.TranslateDictionary(ref localParameters, count => CreateTaskFactoryParametersDictionary(count));

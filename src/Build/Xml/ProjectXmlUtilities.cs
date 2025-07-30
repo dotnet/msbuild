@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
 
@@ -98,7 +97,7 @@ namespace Microsoft.Build.Internal
             }
             else if (string.IsNullOrEmpty(element.NamespaceURI))
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) && Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
+                if (Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
                 {
                     bool validMSBuildProject = true;
                     foreach (XmlNode child in element.ChildNodes)

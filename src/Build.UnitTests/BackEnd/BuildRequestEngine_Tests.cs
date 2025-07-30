@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -53,7 +52,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
 
-            private IBuildComponentHost _host;
             private Thread _builderThread;
             private BuildRequestEntry _entry;
             private AutoResetEvent _continueEvent;
@@ -212,7 +210,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (!_builderThread.Join(5000))
                 {
-                    Assert.True(false, "Builder thread did not terminate on cancel.");
+                    Assert.Fail("Builder thread did not terminate on cancel.");
 #if FEATURE_THREAD_ABORT
                     _builderThread.Abort();
 #endif
@@ -225,12 +223,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public void InitializeComponent(IBuildComponentHost host)
             {
-                _host = host;
             }
 
             public void ShutdownComponent()
             {
-                _host = null;
             }
 
             #endregion
@@ -243,7 +239,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target>
             </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 return project.CreateProjectInstance();
             }
         }
@@ -255,13 +252,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private BuildResult _requestComplete_Result;
 
         private AutoResetEvent _requestResumedEvent;
-        private BuildRequest _requestResumed_Request;
 
         private AutoResetEvent _newRequestEvent;
         private BuildRequestBlocker _newRequest_Request;
 
         private AutoResetEvent _engineStatusChangedEvent;
-        private BuildRequestEngineStatus _engineStatusChanged_Status;
 
         private AutoResetEvent _newConfigurationEvent;
         private BuildRequestConfiguration _newConfiguration_Config;
@@ -270,7 +265,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private Exception _engineException_Exception;
 
         private AutoResetEvent _engineResourceRequestEvent;
-        private ResourceRequest _engineResourceRequest_Request;
 
         private IBuildRequestEngine _engine;
         private IConfigCache _cache;
@@ -534,11 +528,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int index = WaitHandle.WaitAny(events, 5000);
             if (WaitHandle.WaitTimeout == index)
             {
-                Assert.True(false, "Did not receive " + eventName + " callback before the timeout expired.");
+                Assert.Fail("Did not receive " + eventName + " callback before the timeout expired.");
             }
             else if (index == 0)
             {
-                Assert.True(false, "Received engine exception " + _engineException_Exception);
+                Assert.Fail("Received engine exception " + _engineException_Exception);
             }
         }
 
@@ -560,7 +554,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="request">The request being resumed</param>
         private void Engine_RequestResumed(BuildRequest request)
         {
-            _requestResumed_Request = request;
             _requestResumedEvent.Set();
         }
 
@@ -580,7 +573,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="newStatus">The new status for the engine</param>
         private void Engine_EngineStatusChanged(BuildRequestEngineStatus newStatus)
         {
-            _engineStatusChanged_Status = newStatus;
             _engineStatusChangedEvent.Set();
         }
 
@@ -610,7 +602,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="request">The resource request</param>
         private void Engine_ResourceRequest(ResourceRequest request)
         {
-            _engineResourceRequest_Request = request;
             _engineResourceRequestEvent.Set();
         }
     }

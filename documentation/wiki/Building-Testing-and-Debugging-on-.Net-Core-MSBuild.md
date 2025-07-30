@@ -44,10 +44,25 @@ Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugge
 
 ## Using the repository binaries to perform builds
 
-To build projects using the MSBuild binaries from the repository, you first need to do a build (command: `build.cmd`) which produces a bootstrap directory mimicking a Visual Studio (full framework flavor) or dotnet CLI (.net core flavor) installation.
+## Run tests from the command line
 
-Now, just point `dotnet ./artifacts/bin/bootstrap/<TARGET_FRAMEWORK>/MSBuild/MSBuild.dll` at a project file. (Change <TARGET_FRAMEWORK> to current target framework, for example net7.0, net8.0) 
+```shell
+build.cmd # to have a full build first
+.\artifacts\msbuild-build-env.bat
+cd test\YOURTEST.Tests # cd to the test folder that contains the test csproj file
+dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
+```
 
-Alternatively, if you want to test the msbuild binaries in a more realistic environment, you can overwrite the dotnet CLI msbuild binaries (found under a path like `~/dotnet/sdk/3.0.100-alpha1-009428/`) with the just-built MSBuild . You might have to kill existing `dotnet` processes before doing this. You can use [`Deploy-MSBuild.ps1 -runtime Core`](../Deploy-MSBuild.md#.NET-(Core)-SDK) to do the copy. Then, (using the previous dotnet example directory) just point `~/dotnet/dotnet build` at a project file.
+## Run tests in Visual Studio
+
+Use developer command prompt for Visual Studio or put devenv on you PATH
+
+```shell
+build.cmd # to have a full build first
+.\artifacts\msbuild-build-env.bat
+devenv MSBuild.sln
+```
+
+Note again that in Visual studio "Use previews of the .NET SDK (requires restart)" must be checked. See the above comment for how to enable this.
 
 See other debugging options [here](./Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#Debugging-MSBuild).

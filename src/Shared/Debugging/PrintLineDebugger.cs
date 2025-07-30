@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if DEBUG
 using System.IO;
+#endif
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
@@ -27,7 +29,7 @@ namespace Microsoft.Build.Shared.Debugging
 
                 var propertyInfo = commonWriterType.GetProperty("Writer", BindingFlags.Public | BindingFlags.Static);
 
-                ErrorUtilities.VerifyThrowInternalNull(propertyInfo, nameof(propertyInfo));
+                ErrorUtilities.VerifyThrowInternalNull(propertyInfo);
 
                 return propertyInfo;
             });
@@ -38,13 +40,17 @@ namespace Microsoft.Build.Shared.Debugging
         public static Lazy<PrintLineDebugger> DefaultWithProcessInfo =
             new Lazy<PrintLineDebugger>(() => Create(null, null, true));
 
+#if DEBUG
         private readonly string _id;
+#endif
 
         private readonly CommonWriterType _writerSetByThisInstance;
 
         public PrintLineDebugger(string id, CommonWriterType writer)
         {
+#if DEBUG
             _id = id ?? string.Empty;
+#endif
 
             if (writer != null)
             {
@@ -128,7 +134,7 @@ namespace Microsoft.Build.Shared.Debugging
 #if DEBUG
             var writer = GetWriter();
 
-            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), new[] { message });
+            writer?.Invoke(_id, CallsiteString(sourceFilePath, memberName, sourceLineNumber), [message]);
 #endif
         }
 
@@ -145,10 +151,12 @@ namespace Microsoft.Build.Shared.Debugging
 #endif
         }
 
+#if DEBUG
         private static string CallsiteString(string sourceFilePath, string memberName, int sourceLineNumber)
         {
             return $"@{Path.GetFileNameWithoutExtension(sourceFilePath)}.{memberName}({sourceLineNumber})";
         }
+#endif
 
         private void ReleaseUnmanagedResources()
         {

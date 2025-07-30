@@ -62,6 +62,7 @@ namespace Microsoft.Build.Tasks
             return ResolveAssemblyKey() && ResolveManifestKey();
         }
 
+#if FEATURE_PFX_SIGNING
         // We we use hash the contens of .pfx file so we can establish relationship file <-> container name, whithout
         // need to prompt for password. Note this is not used for any security reasons. With the departure from standard MD5 algoritm
         // we need as simple hash function for replacement. The data blobs we use (.pfx files)  are
@@ -87,6 +88,7 @@ namespace Microsoft.Build.Tasks
             result |= dw2;
             return result;
         }
+#endif
 
         private bool ResolveAssemblyKey()
         {
@@ -127,7 +129,7 @@ namespace Microsoft.Build.Tasks
                             fs = File.OpenRead(KeyFile);
                             int fileLength = (int)fs.Length;
                             var keyBytes = new byte[fileLength];
-                            fs.Read(keyBytes, 0, fileLength);
+                            fs.ReadFromStream(keyBytes, 0, fileLength);
 
                             UInt64 hash = HashFromBlob(keyBytes);
                             hash ^= HashFromBlob(userNameBytes); // modify it with the username hash, so each user would get different hash for the same key
@@ -216,7 +218,7 @@ namespace Microsoft.Build.Tasks
                     {
                         bool imported = false;
                         // first try it with no password
-                        var cert = new X509Certificate2();
+                        using var cert = new X509Certificate2();
                         var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         try
                         {

@@ -1,24 +1,13 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
-using static Microsoft.Build.Graph.UnitTests.ProjectGraphTests;
 
 #nullable disable
 
@@ -402,14 +391,14 @@ namespace Microsoft.Build.Graph.UnitTests
 
                 // Slashes here (and in the .slnf) are hardcoded as backslashes intentionally to support the common case.
                 TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "SimpleProject.sln",
-                    @"
+                    """
                     Microsoft Visual Studio Solution File, Format Version 12.00
                     # Visual Studio Version 16
                     VisualStudioVersion = 16.0.29326.124
                     MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""1\1\1.csproj"", ""{79B5EBA6-5D27-4976-BC31-14422245A59A}""
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project1", "1\1\1.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
                     EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""2"", ""2\2\2.proj"", ""{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}""
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "2", "2\2\2.proj", "{8EFCCA22-9D51-4268-90F7-A595E11FCB2D}"
                     EndProject
                     Global
                         GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -434,7 +423,7 @@ namespace Microsoft.Build.Graph.UnitTests
                             SolutionGuid = {DE7234EC-0C4D-4070-B66A-DCF1B4F0CFEF}
                         EndGlobalSection
                     EndGlobal
-                ");
+                    """);
 
                 ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
                 MockLogger logger = new();

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -79,7 +78,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Whether the cache should log activity to the Debug.Out stream
         /// </summary>
-        private static bool s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
+        private static readonly bool s_debugLogCacheActivity = Environment.GetEnvironmentVariable("MSBUILDDEBUGXMLCACHE") == "1";
 
         /// <summary>
         /// Whether the cache should check file content for cache entry invalidation.
@@ -87,7 +86,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// Value shall be true only in case of testing. Outside QA tests it shall be false.
         /// </remarks>
-        private static bool s_сheckFileContent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
+        private static readonly bool s_сheckFileContent = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDCACHECHECKFILECONTENT"));
 
 #if DEBUG
         /// <summary>
@@ -100,7 +99,7 @@ namespace Microsoft.Build.Evaluation
             /// Shall be always 0 or 1. Reentrance to the Get function (value > 1) could lead to race condition.
             /// </summary>
             [ThreadStatic]
-            private static int s_getEntriesNumber = 0;
+            private static int s_getEntriesNumber;
 
             public ReentrancyGuard()
             {
@@ -273,7 +272,7 @@ namespace Microsoft.Build.Evaluation
             try
             {
                 // We are about to load. Take a per-file lock to prevent multiple threads from duplicating the work multiple times.
-                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, () => new object());
+                object perFileLock = _fileLoadLocks.GetOrAdd(projectFile, static _ => new object());
                 lock (perFileLock)
                 {
                     // Call GetOrLoad again, this time with the OpenProjectRootElement callback.
@@ -395,7 +394,7 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath, nameof(oldFullPath));
+                ErrorUtilities.VerifyThrowArgumentLength(oldFullPath);
                 RenameEntryInternal(oldFullPath, projectRootElement);
             }
         }
@@ -438,13 +437,7 @@ namespace Microsoft.Build.Evaluation
             {
                 DebugTraceCache("Clearing strong refs: ", _strongCache.Count);
 
-                LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
                 _strongCache = new LinkedList<ProjectRootElement>();
-
-                foreach (ProjectRootElement projectRootElement in oldStrongCache)
-                {
-                    RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
-                }
 
                 // A scavenge of the weak cache is probably not worth it as
                 // the GC would have had to run immediately after the line above.
@@ -459,45 +452,8 @@ namespace Microsoft.Build.Evaluation
         {
             lock (_locker)
             {
-                if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
-                {
-                    LinkedList<ProjectRootElement> oldStrongCache = _strongCache;
-                    _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
-                    _strongCache = new LinkedList<ProjectRootElement>();
-
-                    foreach (ProjectRootElement projectRootElement in oldStrongCache)
-                    {
-                        RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
-                    }
-                }
-                else
-                {
-                    // Manually iterate through LinkedList so we can remove items during this iteration
-                    for (var listNode = _strongCache.First; listNode != null;)
-                    {
-                        var nextNode = listNode.Next;
-
-                        ProjectRootElement projectRootElement = listNode.Value;
-                        // Do not remove cache of files from immutable locations.
-                        // Those are mostly SDK project files and will be most probably needed in next builds.
-                        if (!FileClassifier.Shared.IsNonModifiable(projectRootElement.FullPath))
-                        {
-                            _weakCache.Remove(projectRootElement.FullPath);
-                            _strongCache.Remove(listNode);
-                            RaiseProjectRootElementRemovedFromStrongCache(projectRootElement);
-                        }
-
-                        listNode = nextNode;
-                    }
-
-                    // From weak list remove all which is not in strong list anymore
-                    IList<string> toBeRemovedFromWeakRefs = _weakCache.Keys.Except(_strongCache.Select(i => i.FullPath)).ToList();
-                    foreach (string victim in toBeRemovedFromWeakRefs)
-                    {
-                        _weakCache.Remove(victim);
-                    }
-                    _weakCache.Scavenge();
-                }
+                _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
+                _strongCache = new LinkedList<ProjectRootElement>();
             }
         }
 
@@ -540,10 +496,6 @@ namespace Microsoft.Build.Evaluation
                         {
                             _strongCache.AddFirst(kvp.Value);
                         }
-                        else
-                        {
-                            RaiseProjectRootElementRemovedFromStrongCache(kvp.Value);
-                        }
                     }
                 }
             }
@@ -562,7 +514,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement, nameof(projectRootElement));
+            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)
@@ -608,7 +560,6 @@ namespace Microsoft.Build.Evaluation
             if (existingWeakEntry != null && !object.ReferenceEquals(existingWeakEntry, projectRootElement))
             {
                 _strongCache.Remove(existingWeakEntry);
-                RaiseProjectRootElementRemovedFromStrongCache(existingWeakEntry);
             }
 
             DebugTraceCache("Adding: ", projectRootElement.FullPath);
@@ -654,7 +605,6 @@ namespace Microsoft.Build.Evaluation
 
                 DebugTraceCache("Shedding: ", node.Value.FullPath);
                 _strongCache.Remove(node);
-                RaiseProjectRootElementRemovedFromStrongCache(node.Value);
             }
         }
 
@@ -674,7 +624,6 @@ namespace Microsoft.Build.Evaluation
             if (strongCacheEntry != null)
             {
                 _strongCache.Remove(strongCacheEntry);
-                RaiseProjectRootElementRemovedFromStrongCache(strongCacheEntry.Value);
             }
 
             DebugTraceCache("Out of date dropped from XML cache: ", projectRootElement.FullPath);
@@ -724,7 +673,7 @@ namespace Microsoft.Build.Evaluation
             if (s_debugLogCacheActivity)
             {
                 string prefix = OutOfProcNode.IsOutOfProcNode ? "C" : "P";
-                Trace.WriteLine(prefix + " " + Process.GetCurrentProcess().Id + " | " + message + param1);
+                Trace.WriteLine($"{prefix} {Process.GetCurrentProcess().Id} | {message}{param1}");
             }
         }
     }
