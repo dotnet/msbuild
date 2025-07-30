@@ -1149,12 +1149,7 @@ namespace Microsoft.Build.Execution
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
             /// make possibly expensive calls over and over again.
             /// </summary>
-            private ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
-
-            /// <summary>
-            /// Lock object for initializing the cache
-            /// </summary>
-            private readonly object _taskNamesCreatableByFactoryLock = new object();
+            private readonly ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.
@@ -1240,6 +1235,7 @@ namespace Microsoft.Build.Execution
                 _taskIdentity = new RegisteredTaskIdentity(registeredName, taskFactoryParameters);
                 _parameterGroupAndTaskBody = inlineTask;
                 _registrationOrderId = registrationOrderId;
+                _taskNamesCreatableByFactory = new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
 
                 if (String.IsNullOrEmpty(taskFactory))
                 {
@@ -1362,19 +1358,6 @@ namespace Microsoft.Build.Execution
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
             {
-                // Double-checked locking pattern for thread-safe lazy initialization
-                if (_taskNamesCreatableByFactory == null)
-                {
-                    lock (_taskNamesCreatableByFactoryLock)
-                    {
-                        // Keep a cache of task identities which have been checked against the factory, this is useful because we ask this question everytime we get a registered task record or a taskFactory wrapper.
-                        if (_taskNamesCreatableByFactory == null)
-                        {
-                            _taskNamesCreatableByFactory = new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
-                        }
-                    }
-                }
-
                 RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
 
                 // See if the task name as already been checked against the factory, return the value if it has
