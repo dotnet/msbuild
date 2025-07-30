@@ -101,8 +101,6 @@ extends:
           isExperimental: false
           enableLocalization: true
           enableComponentGovernance: true
-          codeSignValidationEnabled: true
-          codeSignValidationBreak: true
 
     - template: eng\common\templates-official\post-build\post-build.yml@self
       parameters:
