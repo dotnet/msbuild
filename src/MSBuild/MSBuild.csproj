@@ -100,6 +100,7 @@
     <Compile Include="..\Shared\TempFileUtilities.cs">
       <Link>TempFileUtilities.cs</Link>
     </Compile>
+    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
