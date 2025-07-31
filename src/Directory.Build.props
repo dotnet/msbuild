@@ -59,8 +59,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Include shared MSBuild lock types for all projects -->
-    <Compile Include="$(MSBuildThisFileDirectory)MSBuildLockTypes.cs" Link="MSBuildLockTypes.cs" />
+    <!-- Include shared global usings for all projects -->
+    <Compile Include="$(MSBuildThisFileDirectory)GlobalUsings.cs" Link="GlobalUsings.cs" />
   </ItemGroup>
 
   <PropertyGroup>
