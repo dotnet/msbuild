@@ -12,7 +12,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 
-
 namespace Microsoft.Build.FileAccesses
 {
     internal sealed class FileAccessManager : IFileAccessManager
