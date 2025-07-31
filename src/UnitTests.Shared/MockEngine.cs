@@ -14,11 +14,7 @@ using Microsoft.Build.Logging;
 using Shouldly;
 using Xunit.Abstractions;
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
+
 
 #nullable disable
 

@@ -55,11 +55,6 @@ using FileInfo = Microsoft.IO.FileInfo;
 using Path = Microsoft.IO.Path;
 #endif
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
 
 #nullable disable
 

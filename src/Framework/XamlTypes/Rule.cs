@@ -10,11 +10,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Markup;
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
 
 #nullable disable
 

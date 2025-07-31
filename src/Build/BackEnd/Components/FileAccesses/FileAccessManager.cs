@@ -12,11 +12,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
 
 namespace Microsoft.Build.FileAccesses
 {

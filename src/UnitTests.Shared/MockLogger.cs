@@ -15,11 +15,7 @@ using Xunit;
 using Xunit.Abstractions;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
+
 
 #nullable disable
 

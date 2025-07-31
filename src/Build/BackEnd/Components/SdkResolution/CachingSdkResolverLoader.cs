@@ -6,11 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
 
 namespace Microsoft.Build.BackEnd.SdkResolution
 {

@@ -22,11 +22,6 @@ using Microsoft.IO;
 using System.IO;
 #endif
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
 
 namespace Microsoft.Build.Logging;
 

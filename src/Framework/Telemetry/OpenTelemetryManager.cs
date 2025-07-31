@@ -12,11 +12,6 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
 
 namespace Microsoft.Build.Framework.Telemetry
 {

@@ -4,12 +4,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 
-#if NET
-using LockType = System.Threading.Lock;
-#else
-using LockType = System.Object;
-#endif
-
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
