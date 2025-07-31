@@ -13,7 +13,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using ProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
-
 #nullable disable
 
 namespace Microsoft.Build.Tasks

@@ -29,8 +29,6 @@ using Microsoft.NET.StringTools;
 using System.Threading.Tasks;
 #endif
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.Internal

@@ -17,7 +17,6 @@ using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
-
 #nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging

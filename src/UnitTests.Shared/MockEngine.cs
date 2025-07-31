@@ -14,8 +14,6 @@ using Microsoft.Build.Logging;
 using Shouldly;
 using Xunit.Abstractions;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.UnitTests

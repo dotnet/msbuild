@@ -15,8 +15,6 @@ using Xunit;
 using Xunit.Abstractions;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.UnitTests

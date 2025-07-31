@@ -24,7 +24,6 @@ using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 
-
 #nullable disable
 
 namespace Microsoft.Build.Execution

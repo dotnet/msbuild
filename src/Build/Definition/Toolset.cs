@@ -25,7 +25,6 @@ using Microsoft.Win32;
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
-
 #nullable disable
 
 namespace Microsoft.Build.Evaluation

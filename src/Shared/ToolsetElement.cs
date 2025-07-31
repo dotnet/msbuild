@@ -8,8 +8,6 @@ using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.Evaluation

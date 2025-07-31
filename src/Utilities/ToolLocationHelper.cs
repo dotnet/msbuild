@@ -17,8 +17,6 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.Utilities

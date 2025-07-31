@@ -26,7 +26,6 @@ using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
 
 #endif
-
 #nullable disable
 
 namespace Microsoft.Build.BackEnd

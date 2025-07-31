@@ -10,8 +10,6 @@ using System.Runtime.Loader;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.Shared

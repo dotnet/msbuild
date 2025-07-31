@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.Shared.Concurrent

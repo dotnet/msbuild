@@ -9,8 +9,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
-
-
 #nullable disable
 
 namespace Microsoft.Build.Shared

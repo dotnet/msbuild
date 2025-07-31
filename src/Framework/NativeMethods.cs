@@ -20,7 +20,6 @@ using Microsoft.Build.Framework.Logging;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
-
 #nullable disable
 
 namespace Microsoft.Build.Framework;

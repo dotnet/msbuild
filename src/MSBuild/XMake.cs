@@ -55,7 +55,6 @@ using FileInfo = Microsoft.IO.FileInfo;
 using Path = Microsoft.IO.Path;
 #endif
 
-
 #nullable disable
 
 namespace Microsoft.Build.CommandLine
