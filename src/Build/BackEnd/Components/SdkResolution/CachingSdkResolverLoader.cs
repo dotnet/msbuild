@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
-
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>

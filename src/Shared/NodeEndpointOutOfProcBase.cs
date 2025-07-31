@@ -27,7 +27,6 @@ using System.Security.Principal;
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
-
 #endif
 
 #nullable disable
