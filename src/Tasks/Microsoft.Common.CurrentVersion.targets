@@ -5787,9 +5787,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <FilesToTrackFromOutputDirectories Include="@(FileWritesShareable)" Condition=" $(TrackFileWritesShareableOutsideOfProjectDirectory) == true "/>
     </ItemGroup>
     
-    <!-- Even if we don't allow cleaning filewrites from outside of the project bubble, we should still include FileWritesShareable that are inside the bubble -->
     <FindUnderPath Condition="!$(TrackFileWritesShareableOutsideOfProjectDirectory)" Path="$(MSBuildProjectDirectory)" Files="@(FileWritesShareable)" UpdateToAbsolutePaths="true">
-      <Output TaskParameter="InPath" ItemName="FilesToTrackFromOutputDirectories"/>
+      <Output TaskParameter="InPath" ItemName="FileWrites"/>
     </FindUnderPath>
 
     <!-- Find all files in the final output directory. -->
