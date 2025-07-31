@@ -18,7 +18,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -1807,10 +1807,17 @@ namespace Microsoft.Build.Evaluation
                 {
                     using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution, _sdkResolverService.GetType());
 
-                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio,
+                    sdkResult = _sdkResolverService.ResolveSdk(
+                        _submissionId,
+                        sdkReference,
+                        _evaluationLoggingContext,
+                        importElement.Location,
+                        solutionPath, projectPath,
+                        _interactive,
+                        _isRunningInVisualStudio,
                         failOnUnresolvedSdk: !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk));
                 }
-                catch (SdkResolverException e)
+                catch (Exception e) when (e is SdkResolverException or SdkResolverServiceException)
                 {
                     // We throw using e.Message because e.Message already contains the stack trace
                     // https://github.com/dotnet/msbuild/pull/6763
@@ -1877,6 +1884,30 @@ namespace Microsoft.Build.Evaluation
                     // Inserting at the beginning will mean that the properties or items from the SdkResult will be evaluated before
                     //  any projects from paths returned by the SDK Resolver.
                     projectList.Insert(0, CreateProjectForSdkResult(sdkResult));
+                }
+
+                if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+                {
+                    foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                    {
+                        _data.AddSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                    }
+                }
+
+                // TEMPORARY COMPAT SHIM: .NET SDK 10.0.100-preview.6 shipped with a resolver that didn't
+                // return environment variables. Take the _property_ it does set and promote it.
+                // REMOVE BY net10 RC.
+                if (sdkResult.PropertiesToAdd?.ContainsKey("DOTNET_EXPERIMENTAL_HOST_PATH") == true)
+                {
+                    // "S:\sdk\.dotnet\sdk\10.0.100-preview.6.25315.102\Sdks\Microsoft.NET.Sdk\Sdk"
+                    //                  ^5              ^4               ^3          ^2        ^1
+                    string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5),
+                        "dotnet.exe");
+                    if (File.Exists(dotnetExe))
+                    {
+
+                        _data.AddSdkResolvedEnvironmentVariable("DOTNET_HOST_PATH", dotnetExe);
+                    }
                 }
 
                 projects = projectList;
