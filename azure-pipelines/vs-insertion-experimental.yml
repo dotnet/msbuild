@@ -4,9 +4,9 @@ name: $(Date:yyyyMMdd).$(Rev:r)
 
 resources:
   pipelines:
-  - pipeline: 'MSBuild'
+  - pipeline: '/MSBuild-ExpPerf'
     project: 'DevDiv'
-    source: 'MSBuild'
+    source: 'MSBuild/MSBuild-ExpPerf'
     trigger:
       branches:
         include:
