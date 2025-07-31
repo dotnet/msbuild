@@ -22,7 +22,6 @@ using Microsoft.IO;
 using System.IO;
 #endif
 
-
 namespace Microsoft.Build.Logging;
 
 /// <summary>
