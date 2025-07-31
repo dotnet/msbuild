@@ -30,15 +30,6 @@ resources:
       branches:
         include: # trigger as a followup to servicing CI
           - vs*
-  - pipeline: 'MSBuild-ExpPerf'
-    project: 'DevDiv'
-    source: 'MSBuild/MSBuild-ExpPerf'
-    branch: exp/*
-    trigger:
-      branches:
-        include:
-          - exp/*
-          - perf/*
   repositories:
   - repository: 1ESPipelineTemplates
     type: git
