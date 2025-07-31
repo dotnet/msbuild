@@ -15,6 +15,12 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 namespace Microsoft.Build.Experimental
 {
     /// <summary>
@@ -446,7 +452,7 @@ namespace Microsoft.Build.Experimental
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
-            private readonly object _lock = new();
+            private readonly LockType _lock = new LockType();
             private readonly StringWriter _internalWriter;
 
             public RedirectConsoleWriter(Action<string> writeCallback)

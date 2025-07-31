@@ -22,6 +22,12 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
@@ -3023,7 +3029,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Protects the counts and lists below.
             /// </summary>
-            private readonly object _lockObj = new object();
+            private readonly LockType _lockObj = new LockType();
 
             /// <summary>
             /// On what attempt count should we stop failing?

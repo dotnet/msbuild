@@ -16,6 +16,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Utilities
@@ -1683,7 +1689,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// An object to hold the event shutdown lock
         /// </summary>
-        private readonly object _eventCloseLock = new object();
+        private readonly LockType _eventCloseLock = new LockType();
 
         /// <summary>
         /// Splitter for environment variables

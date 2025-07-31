@@ -17,6 +17,12 @@ using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Utilities
@@ -218,7 +224,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Lock object to synchronize chainedReferenceAssemblyPath dictionary
         /// </summary>
-        private static readonly object s_locker = new object();
+        private static readonly LockType s_locker = new LockType();
 
         /// <summary>
         /// Cache the results of calling the GetPathToReferenceAssemblies so that we do not recalculate it every time we call the method

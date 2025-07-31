@@ -13,6 +13,7 @@ using ColorResetter = Microsoft.Build.Logging.ColorResetter;
 using ColorSetter = Microsoft.Build.Logging.ColorSetter;
 using WriteHandler = Microsoft.Build.Logging.WriteHandler;
 
+
 #nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging

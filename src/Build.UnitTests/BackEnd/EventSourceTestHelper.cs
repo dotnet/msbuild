@@ -4,6 +4,12 @@
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
@@ -28,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private readonly string eventSourceName = "Microsoft-Build";
         private readonly List<EventWrittenEventArgs> emittedEvents;
-        private object _eventListLock = new object();
+        private LockType _eventListLock = new LockType();
         private EventSource? _eventSources = null;
 
         public EventSourceTestHelper()

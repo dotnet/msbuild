@@ -20,6 +20,12 @@ using Microsoft.Build.Framework.Logging;
 
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Framework;
@@ -581,7 +587,7 @@ internal static class NativeMethods
 
     private static bool IsMaxPathSet { get; set; }
 
-    private static readonly object MaxPathLock = new object();
+    private static readonly LockType MaxPathLock = new LockType();
 
     private static void SetMaxPath()
     {
@@ -945,7 +951,7 @@ internal static class NativeMethods
 
     private static SystemInformationData _systemInformation;
     private static bool _systemInformationInitialized;
-    private static readonly object SystemInformationLock = new object();
+    private static readonly LockType SystemInformationLock = new LockType();
 
     /// <summary>
     /// Architecture getter

@@ -14,6 +14,12 @@ using Microsoft.Build.Logging;
 using Shouldly;
 using Xunit.Abstractions;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
@@ -34,7 +40,7 @@ namespace Microsoft.Build.UnitTests
      **************************************************************************/
     public sealed class MockEngine : IBuildEngine7
     {
-        private readonly object _lockObj = new object();  // Protects _log, _output
+        private readonly LockType _lockObj = new LockType();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
         private readonly StringBuilder _log = new StringBuilder();
         private readonly ProjectCollection _projectCollection = new ProjectCollection();

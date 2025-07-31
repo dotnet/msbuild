@@ -12,6 +12,12 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Shared;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 namespace Microsoft.Build.FileAccesses
 {
     internal sealed class FileAccessManager : IFileAccessManager
@@ -27,7 +33,7 @@ namespace Microsoft.Build.FileAccesses
         private IScheduler? _scheduler;
         private IConfigCache? _configCache;
 
-        private object _handlersWriteLock = new object();
+        private LockType _handlersWriteLock = new LockType();
         private Handlers[] _handlers = Array.Empty<Handlers>();
         private string? _tempDirectory;
 

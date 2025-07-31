@@ -12,6 +12,12 @@ using System;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 namespace Microsoft.Build.Framework.Telemetry
 {
 
@@ -31,7 +37,7 @@ namespace Microsoft.Build.Framework.Telemetry
         public static OpenTelemetryManager Instance => s_instance.Value;
 
         private TelemetryState _telemetryState = TelemetryState.Uninitialized;
-        private readonly object _initializeLock = new();
+        private readonly LockType _initializeLock = new LockType();
         private double _sampleRate = TelemetryConstants.DefaultSampleRate;
 
 #if NETFRAMEWORK

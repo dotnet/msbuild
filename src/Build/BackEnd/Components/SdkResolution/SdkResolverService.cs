@@ -15,6 +15,12 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.BackEnd.SdkResolution
@@ -33,7 +39,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// A lock object used for this class.
         /// </summary>
-        private readonly object _lockObject = new object();
+        private readonly LockType _lockObject = new LockType();
 
         /// <summary>
         /// Stores resolver state by build submission ID.

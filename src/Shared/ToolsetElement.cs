@@ -8,6 +8,12 @@ using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Evaluation
@@ -20,7 +26,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Lock for process wide ToolsetConfigurationSection section cache
         /// </summary>
-        private static readonly object s_syncLock = new();
+        private static readonly LockType s_syncLock = new LockType();
 
         /// <summary>
         /// Process wide ToolsetConfigurationSection section cache

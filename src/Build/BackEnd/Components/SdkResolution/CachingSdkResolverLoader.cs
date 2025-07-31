@@ -6,6 +6,12 @@ using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 namespace Microsoft.Build.BackEnd.SdkResolution
 {
     /// <summary>
@@ -37,7 +43,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// A lock object protecting <see cref="_allResolvers"/> and <see cref="_resolversManifests"/>.
         /// </summary>
-        private readonly object _lock = new();
+        private readonly LockType _lock = new LockType();
 
         /// <summary>
         /// A static instance of <see cref="CachingSdkResolverLoader"/>.

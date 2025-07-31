@@ -9,6 +9,12 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Shared
@@ -376,7 +382,7 @@ namespace Microsoft.Build.Shared
         }
 
         private static bool? _runningTests;
-        private static readonly object _runningTestsLock = new object();
+        private static readonly LockType _runningTestsLock = new LockType();
 
         private static bool CheckIfRunningTests()
         {

@@ -10,6 +10,12 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows.Markup;
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.Framework.XamlTypes
@@ -390,7 +396,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// <summary>
         /// Thread synchronization.
         /// </summary>
-        private object _syncObject = new object();
+        private LockType _syncObject = new LockType();
 
         /// <summary>
         /// See the <see cref="EvaluatedCategories"/> property.

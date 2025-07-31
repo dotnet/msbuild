@@ -55,6 +55,12 @@ using FileInfo = Microsoft.IO.FileInfo;
 using Path = Microsoft.IO.Path;
 #endif
 
+#if NET
+using LockType = System.Threading.Lock;
+#else
+using LockType = System.Object;
+#endif
+
 #nullable disable
 
 namespace Microsoft.Build.CommandLine
@@ -119,7 +125,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The object used to synchronize access to shared build state
         /// </summary>
-        private static readonly object s_buildLock = new object();
+        private static readonly LockType s_buildLock = new LockType();
 
         /// <summary>
         /// Whether a build has started.
