@@ -777,7 +777,7 @@ namespace InlineTask
                 TaskResources = Shared.AssemblyResources.PrimaryResources
             };
 
-            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, new List<TaskPropertyInfo>(), out RoslynCodeTaskFactoryTaskInfo _);
+            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, new List<TaskPropertyInfo>(), buildEngine, out RoslynCodeTaskFactoryTaskInfo _);
 
             success.ShouldBeFalse();
 
@@ -803,7 +803,7 @@ namespace InlineTask
                 TaskResources = Shared.AssemblyResources.PrimaryResources
             };
 
-            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, parameters ?? new List<TaskPropertyInfo>(), out RoslynCodeTaskFactoryTaskInfo taskInfo);
+            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, parameters ?? new List<TaskPropertyInfo>(), buildEngine, out RoslynCodeTaskFactoryTaskInfo taskInfo);
 
             buildEngine.Errors.ShouldBe(0, buildEngine.Log);
 
@@ -845,7 +845,9 @@ namespace InlineTask
 
             if (verifySource)
             {
-                Verify(taskInfo.SourceCode, _verifySettings).GetAwaiter().GetResult();
+                // Verify the generated source code with line directives
+                string generatedSourceCode = RoslynCodeTaskFactory.GetSourceCode(taskInfo, parameters ?? new List<TaskPropertyInfo>());
+                Verify(generatedSourceCode, _verifySettings).GetAwaiter().GetResult();
             }
         }
     }
