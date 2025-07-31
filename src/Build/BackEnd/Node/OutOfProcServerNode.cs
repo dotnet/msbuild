@@ -15,7 +15,6 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-
 namespace Microsoft.Build.Experimental
 {
     /// <summary>
