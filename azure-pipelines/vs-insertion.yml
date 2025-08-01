@@ -12,7 +12,7 @@ trigger: none
 pr: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 schedules:
-  - cron: '0 * * * *' # Runs every hour at the top of the hour
+  - cron: '0 * * * *' # Runs every hour
     displayName: Hourly VS insertion main
     branches:
       include:
