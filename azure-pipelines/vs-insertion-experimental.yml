@@ -2,6 +2,14 @@
 trigger: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
+schedules:
+  - cron: '0 * * * *' # Runs every hour automatically
+    displayName: Hourly VS insertion exp
+    branches:
+      include:
+        - exp/*
+    always: false # Don't run if there are no code changes
+    
 resources:
   pipelines:
   - pipeline: 'MSBuildExpPerf'
