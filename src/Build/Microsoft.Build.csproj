@@ -525,8 +525,8 @@
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableLinkedMultiDictionaryConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectMetadataCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectPropertyCollectionConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableStringValuedListConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectInstancePropertyCollectionConverter.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />

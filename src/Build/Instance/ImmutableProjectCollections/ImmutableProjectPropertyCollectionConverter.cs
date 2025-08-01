@@ -13,14 +13,14 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Instance
 {
     /// <inheritdoc />
-    internal sealed class ImmutableProjectInstancePropertyCollectionConverter :
+    internal sealed class ImmutableProjectPropertyCollectionConverter :
         ImmutableElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>,
         IRetrievableValuedEntryHashSet<ProjectPropertyInstance>,
         IRetrievableUnescapedValuedEntryHashSet
     {
         private readonly Project _linkedProject;
 
-        public ImmutableProjectInstancePropertyCollectionConverter(
+        public ImmutableProjectPropertyCollectionConverter(
             Project linkedProject,
             IDictionary<string, ProjectProperty> projectElements,
             IDictionary<(string, int, int), ProjectProperty> constrainedProjectElements,

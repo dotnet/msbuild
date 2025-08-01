@@ -1077,7 +1077,7 @@ namespace Microsoft.Build.Execution
                 out IDictionary<string, ProjectProperty> elementsDictionary,
                 out IDictionary<(string, int, int), ProjectProperty> constrainedElementsDictionary);
 
-            var hashSet = new ImmutableProjectInstancePropertyCollectionConverter(
+            var hashSet = new ImmutableProjectPropertyCollectionConverter(
                                 linkedProject,
                                 elementsDictionary,
                                 constrainedElementsDictionary,

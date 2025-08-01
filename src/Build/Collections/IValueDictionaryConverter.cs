@@ -13,7 +13,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Gets a read-only dictionary representation of the values in this collection.
         /// </summary>
-        /// <returns>A readonly dead-end dictinary.</returns>
+        /// <returns>A read-only dictionary.</returns>
         IDictionary<string, string> ToReadOnlyDictionary();
     }
 }
