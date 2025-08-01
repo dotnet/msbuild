@@ -119,7 +119,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The object used to synchronize access to shared build state
         /// </summary>
-        private static readonly object s_buildLock = new object();
+        private static readonly LockType s_buildLock = new LockType();
 
         /// <summary>
         /// Whether a build has started.

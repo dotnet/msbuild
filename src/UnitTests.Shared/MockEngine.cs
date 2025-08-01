@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
      **************************************************************************/
     public sealed class MockEngine : IBuildEngine7
     {
-        private readonly object _lockObj = new object();  // Protects _log, _output
+        private readonly LockType _lockObj = new LockType();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
         private readonly StringBuilder _log = new StringBuilder();
         private readonly ProjectCollection _projectCollection = new ProjectCollection();
