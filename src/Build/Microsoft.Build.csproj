@@ -38,6 +38,8 @@
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
+    <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PooledObjects" PrivateAssets="all" />
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
@@ -80,6 +82,9 @@
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
+      <Link>IConstrainedEqualityComparer.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
     </Compile>
@@ -121,9 +126,6 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IsExternalInit.cs">
-      <Link>BuildCheck\Utilities\IsExternalInit.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
@@ -157,6 +159,7 @@
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\OutOfProcNodeFileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\ProcessReport.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\SdkResolverServiceException.cs" />
     <Compile Include="BackEnd\Shared\EventsCreatorHelper.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\AssemblyLoadsTracker.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\SdkResolverException.cs" />
@@ -378,6 +381,7 @@
       <Link>Collections\CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
+    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
     <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />

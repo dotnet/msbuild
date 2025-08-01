@@ -305,7 +305,6 @@ namespace Microsoft.Build.BackEnd
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
-            ErrorUtilities.VerifyThrowArgumentNull(batchBucket);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
