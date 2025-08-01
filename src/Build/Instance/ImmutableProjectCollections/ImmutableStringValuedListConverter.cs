@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -59,7 +60,20 @@ namespace Microsoft.Build.Instance
 
         public IEnumerator<string> GetEnumerator() => EnsureListInitialized().GetEnumerator();
 
-        public int IndexOf(string item) => EnsureListInitialized().IndexOf(item);
+        public int IndexOf(string item)
+        {
+            List<string> itemList = EnsureListInitialized();
+            for (int i = 0; i < itemList.Count; ++i)
+            {
+                string stringValue = itemList[i];
+                if (MSBuildNameIgnoreCaseComparer.Default.Equals(stringValue, item))
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
 
         IEnumerator IEnumerable.GetEnumerator() => EnsureListInitialized().GetEnumerator();
 
