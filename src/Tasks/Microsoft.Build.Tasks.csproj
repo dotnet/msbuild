@@ -49,6 +49,8 @@
     <Compile Include="..\Shared\NodePipeClient.cs" />
     <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
+    <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
@@ -199,9 +201,11 @@
     <Compile Include="AssemblyDependency\Node\OutOfProcRarClient.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNode.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeBuildEngine.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeShutdownReason.cs" />
+    <Compile Include="AssemblyDependency\Node\RarTaskParameters.cs" />
     <Compile Include="AssemblyFolder.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyRemapping.cs" />
