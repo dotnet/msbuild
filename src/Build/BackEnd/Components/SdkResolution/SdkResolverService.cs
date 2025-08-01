@@ -78,6 +78,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <inheritdoc cref="ISdkResolverService.SendPacket"/>
         public Action<INodePacket> SendPacket { get; }
 
+        /// <inheritdoc cref="ISdkResolverService.IsNodeShutDown"/>
+        public bool IsNodeShutDown { get; set; }
+
         /// <summary>
         /// Determines if the <see cref="SdkReference"/> is the same as the specified version.  If the <paramref name="sdk"/> object has <code>null</code> for the version,
         /// this method will always return true since <code>null</code> can match any version.

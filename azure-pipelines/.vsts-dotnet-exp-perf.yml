@@ -1,12 +1,12 @@
 trigger:
-- main
-- vs*
+- exp/*
+- perf/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
-#   SignType: real
+#   SignType: test
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -14,10 +14,6 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-- name: EnableOptProf
-  displayName: Enable OptProf data collection for this build
-  type: boolean
-  default: true
 - name: requireDefaultChannelsEnabled
   displayName: Require Default Channels
   type: boolean
@@ -31,7 +27,7 @@ variables:
     value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  # If we're not on a vs* branch, use main as our optprof collection branch
+  # Use main as our optprof collection branch by default.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
@@ -41,17 +37,8 @@ variables:
       value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
-  - ${{ if eq(parameters.EnableOptProf, false) }}:
-    - name: SkipApplyOptimizationData
-      value: true
-  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
-    - name: requireDefaultChannels
-      value: ${{ parameters.requireDefaultChannelsEnabled }}
-  - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
-    value: true
+    value: false
   - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
@@ -85,8 +72,7 @@ extends:
       sbom:
         enabled: false
       codeSignValidation:
-        enabled: true
-        break: true
+        enabled: false
         additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
       credscan:
         suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
@@ -98,14 +84,15 @@ extends:
       - template: eng/.vsts-dotnet-build-jobs.yml@self
         parameters:
           enableMicrobuild: true
-          isExperimental: false
-          enableLocalization: true
-          enableComponentGovernance: true
+          isExperimental: true
+          enableLocalization: false
+          enableComponentGovernance: false
 
-    - template: eng\common\templates-official\post-build\post-build.yml@self
+    - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
         publishingInfraVersion: 3
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
         requireDefaultChannels: ${{ variables.requireDefaultChannels }}
+        enableSigningValidation: false

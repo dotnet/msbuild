@@ -89,6 +89,8 @@ try {
     $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
     $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
     $buildToolFramework = "net"
+
+    $env:DOTNET_ROOT="$bootstrapRoot\core"
   }
 
   # Use separate artifacts folder for stage 2
