@@ -190,15 +190,21 @@ namespace Microsoft.Build.Internal
             {
                 // This will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard.
 #if NET
-                int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null, s_handshakeTimeout);
+                var handshakePart = _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null, s_handshakeTimeout);
 #else
-                int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null);
+                var handshakePart = _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null);
 #endif
-
-                if (handshakePart != component.Value)
+                if (handshakePart.IsSuccess)
                 {
-                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, component.Value);
-                    _pipeServer.WriteIntForHandshake(index + 1);
+                    if (handshakePart.Value != component.Value)
+                    {
+                        CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, component.Value);
+                        _pipeServer.WriteIntForHandshake(index + 1);
+                        return false;
+                    }
+                }
+                else
+                {
                     return false;
                 }
 
@@ -207,15 +213,21 @@ namespace Microsoft.Build.Internal
 
             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
 #if NET
-            _pipeServer.ReadEndOfHandshakeSignal(false, s_handshakeTimeout);
+            var result = _pipeServer.TryReadEndOfHandshakeSignal(false, s_handshakeTimeout);
 #else
-            _pipeServer.ReadEndOfHandshakeSignal(false);
+            var result = _pipeServer.TryReadEndOfHandshakeSignal(false);
 #endif
+            if (result.IsSuccess)
+            {
+                CommunicationsUtilities.Trace("Successfully connected to parent.");
+                _pipeServer.WriteEndOfHandshakeSignal();
 
-            CommunicationsUtilities.Trace("Successfully connected to parent.");
-            _pipeServer.WriteEndOfHandshakeSignal();
-
-            return true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
