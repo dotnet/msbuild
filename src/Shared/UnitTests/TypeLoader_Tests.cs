@@ -6,6 +6,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+#if NET
+using System.Runtime.Loader;
+#endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -223,7 +226,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-#if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
         /// Make sure that when we load multiple types out of the same assembly with different type filters that both the fullyqualified name matching and the
         /// partial name matching still work.
@@ -284,6 +286,9 @@ namespace Microsoft.Build.UnitTests
             LoadedType loadedType = loader.Load(String.Empty, AssemblyLoadInfo.Create(null, forwardingLoggerAssemblyLocation));
             Assert.NotNull(loadedType);
             Assert.Equal(forwardingLoggerAssemblyLocation, loadedType.Assembly.AssemblyLocation);
+#if NET
+            Assert.Equal(AssemblyLoadContext.GetLoadContext(firstPublicType.Assembly), AssemblyLoadContext.GetLoadContext(loadedType.Type.Assembly));
+#endif
             Assert.Equal(firstPublicType, loadedType.Type);
 
 
@@ -322,15 +327,14 @@ namespace Microsoft.Build.UnitTests
         {
             return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("ILogger") != null);
+                type.GetInterface("ILogger") != null;
         }
 
         private static bool IsForwardingLoggerClass(Type type, object unused)
         {
             return type.IsClass &&
                 !type.IsAbstract &&
-                (type.GetInterface("IForwardingLogger") != null);
+                type.GetInterface("IForwardingLogger") != null;
         }
-#endif
     }
 }
