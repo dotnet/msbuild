@@ -443,7 +443,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 var outputFile = testEnv.CreateFile("output.txt").Path;
 
-                var projectCount = 8;
+                var projectCount = 20;
 
                 // Create parent project file to run child projects in parallel
                 var parallelProjectContent = @$"
@@ -467,6 +467,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                             <LinesToWrite Include=""Line from Test{i + 1} at $([System.DateTime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))"" />
                             </ItemGroup>
                             <Target Name=""WriteToFile"">
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
                             <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
                             <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
                             <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
