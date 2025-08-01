@@ -52,7 +52,11 @@ namespace Microsoft.Build.BackEnd
                 int count = value.Count;
                 translator.Translate(ref count);
 
-                foreach (ProjectPropertyInstance instance in value)
+                // Use thread-safe enumeration to avoid concurrent modification exceptions.
+                // GetCopyOnReadEnumerable creates a defensive copy under lock to prevent
+                // InvalidOperationException in RetrievableEntryHashSet.Enumerator.MoveNext()
+                // when the collection is modified during enumeration by another thread.
+                foreach (ProjectPropertyInstance instance in value.GetCopyOnReadEnumerable(x => x))
                 {
                     ProjectPropertyInstance instanceForSerialization = instance;
                     translator.Translate(ref instanceForSerialization, ProjectPropertyInstance.FactoryForDeserialization);

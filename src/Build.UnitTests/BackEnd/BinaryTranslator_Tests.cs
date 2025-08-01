@@ -9,7 +9,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
 using Shouldly;
@@ -1430,6 +1432,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedValue);
 
             Assert.True(TranslationHelpers.CompareCollections(value, deserializedValue, comparer));
+        }
+
+        /// <summary>
+        /// Test that TranslateProjectPropertyInstanceDictionary is thread-safe and doesn't throw
+        /// InvalidOperationException when the dictionary is modified during enumeration
+        /// </summary>
+        [Fact]
+        public void TestTranslateProjectPropertyInstanceDictionary_ThreadSafe()
+        {
+            // Create a PropertyDictionary with some properties
+            var propertyDict = new PropertyDictionary<ProjectPropertyInstance>();
+            for (int i = 0; i < 10; i++)
+            {
+                var prop = ProjectPropertyInstance.Create($"Property{i}", $"Value{i}");
+                propertyDict.Set(prop);
+            }
+
+            // Test serialization
+            var propertyDictForWrite = propertyDict;
+            TranslationHelpers.GetWriteTranslator().TranslateProjectPropertyInstanceDictionary(ref propertyDictForWrite);
+
+            // Test deserialization
+            PropertyDictionary<ProjectPropertyInstance> deserializedDict = null;
+            TranslationHelpers.GetReadTranslator().TranslateProjectPropertyInstanceDictionary(ref deserializedDict);
+
+            // Verify the deserialized dictionary contains the same properties
+            Assert.Equal(propertyDict.Count, deserializedDict.Count);
+            for (int i = 0; i < 10; i++)
+            {
+                var originalProp = propertyDict[$"Property{i}"];
+                var deserializedProp = deserializedDict[$"Property{i}"];
+                Assert.NotNull(originalProp);
+                Assert.NotNull(deserializedProp);
+                Assert.Equal(originalProp.Name, deserializedProp.Name);
+                Assert.Equal(originalProp.EvaluatedValue, deserializedProp.EvaluatedValue);
+            }
         }
 
         /// <summary>
