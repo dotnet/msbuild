@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -81,9 +81,6 @@
     </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
-      <Link>IConstrainedEqualityComparer.cs</Link>
     </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
@@ -382,7 +379,6 @@
       <Link>Collections\CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
     <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
