@@ -37,6 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="..\GlobalUsings.cs">
+      <Link>GlobalUsings.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
