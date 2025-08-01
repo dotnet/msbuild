@@ -2,9 +2,6 @@
 trigger: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
-trigger: none
-pr: none
-name: $(Date:yyyyMMdd).$(Rev:r)
 schedules:
   - cron: '0 * * * *' # Runs every hour automatically
     displayName: Hourly VS insertion exp
