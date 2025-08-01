@@ -241,20 +241,16 @@ namespace Microsoft.Build.Collections
         {
             lock (_properties)
             {
-                return _properties.Values.GetEnumerator();
+                var snapshot = new List<T>(_properties.Values);
+                return snapshot.GetEnumerator();
             }
         }
 
         /// <summary>
-        /// Get an enumerator over entries
+        /// Get an enumerator over entries.
         /// </summary>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            lock (_properties)
-            {
-                return ((IEnumerable)_properties.Values).GetEnumerator();
-            }
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
 
         #region IEquatable<PropertyDictionary<T>> Members
 
@@ -449,7 +445,12 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<string, T>>)_properties).GetEnumerator();
+            lock (_properties)
+            {
+                // Create snapshot by converting the underlying collection
+                var snapshot = new List<KeyValuePair<string, T>>(_properties);
+                return snapshot.GetEnumerator();
+            }
         }
 
         #endregion
