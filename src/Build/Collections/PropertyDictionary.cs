@@ -249,7 +249,14 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Get an enumerator over entries.
         /// </summary>
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            lock (_properties)
+            {
+                var snapshot = new List<T>(_properties.Values);
+                return ((IEnumerable)snapshot).GetEnumerator();
+            }
+        }
 
 
         #region IEquatable<PropertyDictionary<T>> Members
