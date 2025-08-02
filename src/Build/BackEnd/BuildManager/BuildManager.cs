@@ -1223,7 +1223,7 @@ namespace Microsoft.Build.Execution
             BeginBuild(parameters);
             try
             {
-                var tcs = new TaskCompletionSource<BuildResult>();
+                var tcs = new TaskCompletionSource<BuildResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                 var submission = PendBuildRequest(requestData);
                 submission.ExecuteAsync(sub =>
@@ -1257,7 +1257,7 @@ namespace Microsoft.Build.Execution
             BeginBuild(parameters);
             try
             {
-                var tcs = new TaskCompletionSource<GraphBuildResult>();
+                var tcs = new TaskCompletionSource<GraphBuildResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
                 var submission = PendBuildRequest(requestData);
                 submission.ExecuteAsync(sub =>
