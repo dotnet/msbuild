@@ -1225,17 +1225,25 @@ namespace Microsoft.Build.Execution
             {
                 var tcs = new TaskCompletionSource<BuildResult>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-                var submission = PendBuildRequest(requestData);
-                submission.ExecuteAsync(sub =>
+                try
                 {
-                    var buildResult = sub.BuildResult!;
-                    if (buildResult.Exception == null && _threadException != null)
+                    var buildSubmission = PendBuildRequest(requestData);
+                    buildSubmission.ExecuteAsync(sub =>
                     {
-                        buildResult.Exception = _threadException.SourceException;
-                        _threadException = null;
-                    }
-                    tcs.SetResult(buildResult);
-                }, null);
+                        var buildResult = sub.BuildResult!;
+                        if (buildResult.Exception == null && _threadException != null)
+                        {
+                            buildResult.Exception = _threadException.SourceException;
+                            _threadException = null;
+                        }
+
+                        tcs.SetResult(buildResult);
+                    }, null);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
 
                 result = await tcs.Task.ConfigureAwait(false);
             }
@@ -1258,18 +1266,25 @@ namespace Microsoft.Build.Execution
             try
             {
                 var tcs = new TaskCompletionSource<GraphBuildResult>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-                var submission = PendBuildRequest(requestData);
-                submission.ExecuteAsync(sub =>
+                try
                 {
-                    var buildResult = sub.BuildResult!;
-                    if (buildResult.Exception == null && _threadException != null)
+                    var buildSubmission = PendBuildRequest(requestData);
+                    buildSubmission.ExecuteAsync(sub =>
                     {
-                        buildResult.Exception = _threadException.SourceException;
-                        _threadException = null;
-                    }
-                    tcs.SetResult(buildResult);
-                }, null);
+                        var buildResult = sub.BuildResult!;
+                        if (buildResult.Exception == null && _threadException != null)
+                        {
+                            buildResult.Exception = _threadException.SourceException;
+                            _threadException = null;
+                        }
+
+                        tcs.SetResult(buildResult);
+                    }, null);
+                }
+                catch (Exception ex)
+                {
+                    tcs.SetException(ex);
+                }
 
                 result = await tcs.Task.ConfigureAwait(false);
             }
