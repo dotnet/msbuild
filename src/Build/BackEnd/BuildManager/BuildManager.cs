@@ -969,6 +969,11 @@ namespace Microsoft.Build.Execution
             where TResultData : BuildResultBase
             => PendBuildRequest<TRequestData, TResultData>(requestData).Execute();
 
+        private async Task<TResultData> BuildRequestAsync<TRequestData, TResultData>(TRequestData requestData)
+            where TRequestData : BuildRequestData<TRequestData, TResultData>
+            where TResultData : BuildResultBase
+            => await PendBuildRequest<TRequestData, TResultData>(requestData).ExecuteAsync().ConfigureAwait(false);
+
         /// <summary>
         /// Convenience method. Submits a build request and blocks until the results are available.
         /// </summary>
@@ -1217,35 +1222,20 @@ namespace Microsoft.Build.Execution
         /// Convenience method. Submits a lone build request and returns a Task that will complete when results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
-        public async Task<BuildResult> BuildAsync(BuildParameters parameters, BuildRequestData requestData)
+        private async Task<TResultData> BuildAsync<TRequestData, TResultData>(BuildParameters parameters, TRequestData requestData)
+            where TRequestData : BuildRequestData<TRequestData, TResultData>
+            where TResultData : BuildResultBase
         {
-            BuildResult result;
+            TResultData result;
             BeginBuild(parameters);
             try
             {
-                var tcs = new TaskCompletionSource<BuildResult>(TaskCreationOptions.RunContinuationsAsynchronously);
-
-                try
+                result = await BuildRequestAsync<TRequestData, TResultData>(requestData).ConfigureAwait(false);
+                if (result.Exception == null && _threadException != null)
                 {
-                    var buildSubmission = PendBuildRequest(requestData);
-                    buildSubmission.ExecuteAsync(sub =>
-                    {
-                        var buildResult = sub.BuildResult!;
-                        if (buildResult.Exception == null && _threadException != null)
-                        {
-                            buildResult.Exception = _threadException.SourceException;
-                            _threadException = null;
-                        }
-
-                        tcs.SetResult(buildResult);
-                    }, null);
+                    result.Exception = _threadException.SourceException;
+                    _threadException = null;
                 }
-                catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                }
-
-                result = await tcs.Task.ConfigureAwait(false);
             }
             finally
             {
@@ -1256,45 +1246,18 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Convenience method. Submits a lone graph build request and returns a Task that will complete when results are available.
+        /// Convenience method.  Submits a lone build request and returns a Task that will complete when results are available.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
+        public async Task<BuildResult> BuildAsync(BuildParameters parameters, BuildRequestData requestData)
+            => await BuildAsync<BuildRequestData, BuildResult>(parameters, requestData).ConfigureAwait(false);
+
+        /// <summary>
+        /// Convenience method.  Submits a lone graph build request and returns a Task that will complete when results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public async Task<GraphBuildResult> BuildAsync(BuildParameters parameters, GraphBuildRequestData requestData)
-        {
-            GraphBuildResult result;
-            BeginBuild(parameters);
-            try
-            {
-                var tcs = new TaskCompletionSource<GraphBuildResult>(TaskCreationOptions.RunContinuationsAsynchronously);
-                try
-                {
-                    var buildSubmission = PendBuildRequest(requestData);
-                    buildSubmission.ExecuteAsync(sub =>
-                    {
-                        var buildResult = sub.BuildResult!;
-                        if (buildResult.Exception == null && _threadException != null)
-                        {
-                            buildResult.Exception = _threadException.SourceException;
-                            _threadException = null;
-                        }
-
-                        tcs.SetResult(buildResult);
-                    }, null);
-                }
-                catch (Exception ex)
-                {
-                    tcs.SetException(ex);
-                }
-
-                result = await tcs.Task.ConfigureAwait(false);
-            }
-            finally
-            {
-                EndBuild();
-            }
-
-            return result;
-        }
+            => await BuildAsync<GraphBuildRequestData, GraphBuildResult>(parameters, requestData).ConfigureAwait(false);
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.

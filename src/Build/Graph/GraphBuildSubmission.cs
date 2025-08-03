@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
@@ -43,6 +44,24 @@ namespace Microsoft.Build.Graph
             }
 
             ExecuteAsync(Clb, context, allowMainThreadBuild: false);
+        }
+
+        public override async Task<GraphBuildResult> ExecuteAsync(CancellationToken cancellationToken = default)
+        {
+            var tcs = new TaskCompletionSource<GraphBuildSubmission>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            try
+            {
+                ExecuteAsync(tcs.SetResult, null);
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+            }
+
+            var submission = await tcs.Task.ConfigureAwait(false);
+            var result = submission.BuildResult!;
+            return result;
         }
 
         /// <summary>

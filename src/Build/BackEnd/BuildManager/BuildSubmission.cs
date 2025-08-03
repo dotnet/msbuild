@@ -4,6 +4,7 @@
 using System;
 using System.Globalization;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
@@ -60,6 +61,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
         public abstract TResultData Execute();
+        /// <summary>
+        /// Starts the request and returns a Task that completes when results are available.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
+        public abstract Task<TResultData> ExecuteAsync(CancellationToken cancellationToken = default);
 
         private protected void ExecuteAsync(
             BuildSubmissionCompleteCallbackInternal<TRequestData, TResultData>? callback,
@@ -173,6 +179,24 @@ namespace Microsoft.Build.Execution
             }
 
             ExecuteAsync(Clb, context, allowMainThreadBuild: false);
+        }
+
+        public override async Task<BuildResult> ExecuteAsync(CancellationToken cancellationToken = default)
+        {
+            var tcs = new TaskCompletionSource<BuildSubmission>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            try
+            {
+                ExecuteAsync(tcs.SetResult, null);
+            }
+            catch (Exception ex)
+            {
+                tcs.SetException(ex);
+            }
+
+            var submission = await tcs.Task.ConfigureAwait(false);
+            var result = submission.BuildResult!;
+            return result;
         }
 
         /// <summary>
