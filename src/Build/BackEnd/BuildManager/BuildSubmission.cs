@@ -65,7 +65,7 @@ namespace Microsoft.Build.Execution
         /// Starts the request and returns a Task that completes when results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">The request has already been started or is already complete.</exception>
-        public abstract Task<TResultData> ExecuteAsync(CancellationToken cancellationToken = default);
+        public abstract Task<TResultData> ExecuteAsync();
 
         private protected void ExecuteAsync(
             BuildSubmissionCompleteCallbackInternal<TRequestData, TResultData>? callback,
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Execution
             ExecuteAsync(Clb, context, allowMainThreadBuild: false);
         }
 
-        public override async Task<BuildResult> ExecuteAsync(CancellationToken cancellationToken = default)
+        public override async Task<BuildResult> ExecuteAsync()
         {
             var tcs = new TaskCompletionSource<BuildSubmission>(TaskCreationOptions.RunContinuationsAsynchronously);
 

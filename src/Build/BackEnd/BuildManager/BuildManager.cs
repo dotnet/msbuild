@@ -1222,12 +1222,17 @@ namespace Microsoft.Build.Execution
         /// Convenience method. Submits a lone build request and returns a Task that will complete when results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
-        private async Task<TResultData> BuildAsync<TRequestData, TResultData>(BuildParameters parameters, TRequestData requestData)
+        private async Task<TResultData> BuildAsync<TRequestData, TResultData>(BuildParameters parameters, TRequestData requestData, CancellationToken cancellationToken = default)
             where TRequestData : BuildRequestData<TRequestData, TResultData>
             where TResultData : BuildResultBase
         {
             TResultData result;
             BeginBuild(parameters);
+#if NETFRAMEWORK
+            using var _ = cancellationToken.Register(CancelAllSubmissions);
+#else
+            await using var _ = cancellationToken.Register(CancelAllSubmissions).ConfigureAwait(false);
+#endif
             try
             {
                 result = await BuildRequestAsync<TRequestData, TResultData>(requestData).ConfigureAwait(false);
@@ -1249,15 +1254,15 @@ namespace Microsoft.Build.Execution
         /// Convenience method.  Submits a lone build request and returns a Task that will complete when results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
-        public async Task<BuildResult> BuildAsync(BuildParameters parameters, BuildRequestData requestData)
-            => await BuildAsync<BuildRequestData, BuildResult>(parameters, requestData).ConfigureAwait(false);
+        public async Task<BuildResult> BuildAsync(BuildParameters parameters, BuildRequestData requestData, CancellationToken cancellationToken = default)
+            => await BuildAsync<BuildRequestData, BuildResult>(parameters, requestData, cancellationToken).ConfigureAwait(false);
 
         /// <summary>
         /// Convenience method.  Submits a lone graph build request and returns a Task that will complete when results are available.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
-        public async Task<GraphBuildResult> BuildAsync(BuildParameters parameters, GraphBuildRequestData requestData)
-            => await BuildAsync<GraphBuildRequestData, GraphBuildResult>(parameters, requestData).ConfigureAwait(false);
+        public async Task<GraphBuildResult> BuildAsync(BuildParameters parameters, GraphBuildRequestData requestData, CancellationToken cancellationToken = default)
+            => await BuildAsync<GraphBuildRequestData, GraphBuildResult>(parameters, requestData, cancellationToken).ConfigureAwait(false);
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.

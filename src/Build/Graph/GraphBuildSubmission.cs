@@ -46,7 +46,7 @@ namespace Microsoft.Build.Graph
             ExecuteAsync(Clb, context, allowMainThreadBuild: false);
         }
 
-        public override async Task<GraphBuildResult> ExecuteAsync(CancellationToken cancellationToken = default)
+        public override async Task<GraphBuildResult> ExecuteAsync()
         {
             var tcs = new TaskCompletionSource<GraphBuildSubmission>(TaskCreationOptions.RunContinuationsAsynchronously);
 
