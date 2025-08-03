@@ -83,6 +83,9 @@ namespace Microsoft.Build.CommandLine
             validatorSettings.XmlResolver = null;
             validatorSettings.ValidationEventHandler += this.OnSchemaValidationError;
 
+            // On Core, resolving schemas from external URIs is not enabled by default.
+            validatorSettings.Schemas.XmlResolver = new XmlUrlResolver();
+
             XmlTextReader schemaReader = new XmlTextReader(schemaFile);
             schemaReader.DtdProcessing = DtdProcessing.Ignore;
 
