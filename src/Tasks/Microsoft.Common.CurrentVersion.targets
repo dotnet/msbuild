@@ -2132,51 +2132,33 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </MSBuild>
 
     <!--
+        Create a new item list with computed targets to avoid code duplication.
+        Use GetTargetPath when no specific targets are defined to avoid circular dependencies.
+        -->
+    <ItemGroup>
+      <_MSBuildProjectReferenceWithTargets Include="@(_MSBuildProjectReferenceExistent)">
+        <EffectiveTargets Condition="'%(_MSBuildProjectReferenceExistent.Targets)' != ''">%(_MSBuildProjectReferenceExistent.Targets)</EffectiveTargets>
+        <EffectiveTargets Condition="'%(_MSBuildProjectReferenceExistent.Targets)' == ''">GetTargetPath</EffectiveTargets>
+      </_MSBuildProjectReferenceWithTargets>
+    </ItemGroup>
+
+    <!--
         Build referenced projects when building from the command line.
         -->
     <MSBuild
-        Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="%(_MSBuildProjectReferenceExistent.Targets)"
+        Projects="@(_MSBuildProjectReferenceWithTargets)"
+        Targets="%(_MSBuildProjectReferenceWithTargets.EffectiveTargets)"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform);  %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
-        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != '' and '%(_MSBuildProjectReferenceExistent.Targets)' != ''"
+        Properties="%(_MSBuildProjectReferenceWithTargets.SetConfiguration); %(_MSBuildProjectReferenceWithTargets.SetPlatform);  %(_MSBuildProjectReferenceWithTargets.SetTargetFramework)"
+        Condition="'%(_MSBuildProjectReferenceWithTargets.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceWithTargets)' != ''"
         ContinueOnError="$(ContinueOnError)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
+        RemoveProperties="%(_MSBuildProjectReferenceWithTargets.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
 
       <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProjectReferencePaths"
-        Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)'=='true' or '$(DesignTimeBuild)' == 'true'" />
+        Condition="'%(_MSBuildProjectReferenceWithTargets.ReferenceOutputAssembly)'=='true' or '$(DesignTimeBuild)' == 'true'" />
       <Output TaskParameter="TargetOutputs"
-        ItemName="%(_MSBuildProjectReferenceExistent.OutputItemType)"
-        Condition="'%(_MSBuildProjectReferenceExistent.OutputItemType)' != ''" />
-
-    </MSBuild>
-
-    <!--
-        When no specific targets are defined for project references, use GetTargetPath to avoid circular dependencies
-        that can occur when default targets include ResolveProjectReferences.
-        -->
-    <MSBuild
-        Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="GetTargetPath"
-        BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform);  %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
-        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != '' and '%(_MSBuildProjectReferenceExistent.Targets)' == ''"
-        ContinueOnError="$(ContinueOnError)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
-
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProjectReferencePaths"
-        Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)'=='true' or '$(DesignTimeBuild)' == 'true'" />
-      <Output TaskParameter="TargetOutputs"
-        ItemName="%(_MSBuildProjectReferenceExistent.OutputItemType)"
-        Condition="'%(_MSBuildProjectReferenceExistent.OutputItemType)' != ''" />
-
-    </MSBuild>
-
-      <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProjectReferencePaths"
-        Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)'=='true' or '$(DesignTimeBuild)' == 'true'" />
-      <Output TaskParameter="TargetOutputs"
-        ItemName="%(_MSBuildProjectReferenceExistent.OutputItemType)"
-        Condition="'%(_MSBuildProjectReferenceExistent.OutputItemType)' != ''" />
+        ItemName="%(_MSBuildProjectReferenceWithTargets.OutputItemType)"
+        Condition="'%(_MSBuildProjectReferenceWithTargets.OutputItemType)' != ''" />
 
     </MSBuild>
 
