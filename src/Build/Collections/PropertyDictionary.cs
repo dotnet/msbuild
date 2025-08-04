@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -26,17 +27,15 @@ namespace Microsoft.Build.Collections
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
     /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
-    /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
-    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will
-    /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
-    /// the state of the enumeration until the collection has been fully copied.
-    ///
+    /// Uses ReaderWriterLockSlim to allow multiple concurrent readers while preventing deadlocks that can occur
+    /// with exclusive locks during enumeration.
+    /// 
     /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back
     /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
+    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>, IDisposable
         where T : class, IKeyed, IValued, IEquatable<T>
     {
         /// <summary>
@@ -46,11 +45,17 @@ namespace Microsoft.Build.Collections
         private readonly IRetrievableValuedEntryHashSet<T> _properties;
 
         /// <summary>
-        /// Creates empty dictionary
+        /// Reader-writer lock to prevent deadlocks during enumeration.
+        /// </summary>
+        private readonly ReaderWriterLockSlim _lock;
+
+        /// <summary>
+        /// Creates empty dictionary.
         /// </summary>
         public PropertyDictionary()
         {
             _properties = new RetrievableValuedEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -59,6 +64,7 @@ namespace Microsoft.Build.Collections
         internal PropertyDictionary(int capacity)
         {
             _properties = new RetrievableValuedEntryHashSet<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -79,6 +85,7 @@ namespace Microsoft.Build.Collections
         internal PropertyDictionary(MSBuildNameIgnoreCaseComparer comparer)
         {
             _properties = new RetrievableValuedEntryHashSet<T>(comparer);
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -100,6 +107,7 @@ namespace Microsoft.Build.Collections
         internal PropertyDictionary(IRetrievableValuedEntryHashSet<T> propertiesHashSet)
         {
             _properties = propertiesHashSet;
+            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -125,9 +133,14 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                lock (_properties)
+                _lock.EnterReadLock();
+                try
                 {
                     return _properties.Values;
+                }
+                finally
+                {
+                    _lock.ExitReadLock();
                 }
             }
         }
@@ -235,14 +248,21 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Gets an enumerator over all the properties in the collection
-        /// Enumeration is in undefined order
+        /// Enumeration is in undefined order.
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+            try
             {
-                var snapshot = new List<T>(_properties.Values);
-                return snapshot.GetEnumerator();
+                foreach (T item in _properties.Values)
+                {
+                    yield return item;
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -250,7 +270,6 @@ namespace Microsoft.Build.Collections
         /// Get an enumerator over entries.
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
 
         #region IEquatable<PropertyDictionary<T>> Members
 
@@ -279,7 +298,7 @@ namespace Microsoft.Build.Collections
 
             lock (_properties)
             {
-                foreach (T leftProp in this)
+                foreach (T leftProp in _properties.Values)
                 {
                     T rightProp = other[leftProp.Key];
                     if (rightProp?.Equals(leftProp) != true)
@@ -445,11 +464,17 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            lock (_properties)
+            _lock.EnterReadLock();
+            try
             {
-                // Create snapshot by converting the underlying collection
-                var snapshot = new List<KeyValuePair<string, T>>(_properties);
-                return snapshot.GetEnumerator();
+                foreach (KeyValuePair<string, T> kvp in (IEnumerable<KeyValuePair<string, T>>)_properties)
+                {
+                    yield return kvp;
+                }
+            }
+            finally
+            {
+                _lock.ExitReadLock();
             }
         }
 
@@ -479,9 +504,14 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
-            lock (_properties)
+            _lock.EnterWriteLock();
+            try
             {
                 _properties[projectProperty.Key] = projectProperty;
+            }
+            finally
+            {
+                _lock.ExitWriteLock();
             }
         }
 
@@ -522,7 +552,7 @@ namespace Microsoft.Build.Collections
             {
                 var dictionary = new Dictionary<string, string>(((ICollection<T>)_properties).Count, MSBuildNameIgnoreCaseComparer.Default);
 
-                foreach (T property in this)
+                foreach (T property in _properties.Values)
                 {
                     dictionary[property.Key] = property.EscapedValue;
                 }
@@ -585,5 +615,10 @@ namespace Microsoft.Build.Collections
                 }
             }
         }
+
+        /// <summary>
+        /// Dispose the reader-writer lock.
+        /// </summary>
+        public void Dispose() => _lock?.Dispose();
     }
 }
