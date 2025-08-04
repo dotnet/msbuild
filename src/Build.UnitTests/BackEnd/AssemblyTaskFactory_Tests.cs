@@ -534,7 +534,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                SetupTaskFactory(null, true /* want task host */);
+                SetupTaskFactory(null, true /* want task host */, true);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
 #if FEATURE_APPDOMAIN
@@ -567,7 +567,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                SetupTaskFactory(taskParameters, true /* want task host */);
+                SetupTaskFactory(taskParameters, true /* want task host */, isTaskHostFactory: true);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
 #if FEATURE_APPDOMAIN
@@ -596,7 +596,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITask createdTask = null;
             try
             {
-                SetupTaskFactory(null, true /* want task host */);
+                SetupTaskFactory(null, true /* want task host */, true);
 
                 IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Abstract out the creation of the new AssemblyTaskFactory with default task, and
         /// with some basic validation.
         /// </summary>
-        private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost)
+        private void SetupTaskFactory(IDictionary<string, string> factoryParameters, bool explicitlyLaunchTaskHost = false, bool isTaskHostFactory = false)
         {
             _taskFactory = new AssemblyTaskFactory();
 #if FEATURE_ASSEMBLY_LOCATION
@@ -688,6 +688,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #else
             _loadInfo = AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, null);
 #endif
+            if (explicitlyLaunchTaskHost)
+            {
+                factoryParameters ??= new Dictionary<string, string>();
+                factoryParameters.Add(Internal.Constants.TaskHostExplicitlyRequested, "true");
+            }
             _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, null, ElementLocation.Create("NONE"), String.Empty);
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
         }

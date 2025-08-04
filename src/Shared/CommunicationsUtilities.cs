@@ -80,6 +80,11 @@ namespace Microsoft.Build.Internal
         /// ARM64 process.
         /// </summary>
         Arm64 = 128,
+
+        /// <summary>
+        /// Using a long-running sidecar TaskHost process to reduce startup overhead and reuse in-memory caches.
+        /// </summary>
+        SidecarTaskHost = 256,
     }
 
     internal class Handshake
@@ -254,7 +259,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Lock trace to ensure we are logging in serial fashion.
         /// </summary>
-        private static readonly LockType s_traceLock = new LockType();
+        private static readonly object s_traceLock = new();
 
         /// <summary>
         /// Place to dump trace
