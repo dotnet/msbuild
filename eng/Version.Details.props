@@ -7,7 +7,6 @@ This file should be imported by eng/Versions.props
 <Project>
   <PropertyGroup>
     <!-- dotnet/runtime dependencies -->
-    <MicrosoftBclCryptographyPackageVersion>9.0.0</MicrosoftBclCryptographyPackageVersion>
     <SystemCodeDomPackageVersion>9.0.0</SystemCodeDomPackageVersion>
     <SystemCollectionsImmutablePackageVersion>9.0.0</SystemCollectionsImmutablePackageVersion>
     <SystemConfigurationConfigurationManagerPackageVersion>9.0.0</SystemConfigurationConfigurationManagerPackageVersion>
@@ -36,7 +35,6 @@ This file should be imported by eng/Versions.props
   <!--Property group for alternate package version names-->
   <PropertyGroup>
     <!-- dotnet/runtime dependencies -->
-    <MicrosoftBclCryptographyVersion>$(MicrosoftBclCryptographyPackageVersion)</MicrosoftBclCryptographyVersion>
     <SystemCodeDomVersion>$(SystemCodeDomPackageVersion)</SystemCodeDomVersion>
     <SystemCollectionsImmutableVersion>$(SystemCollectionsImmutablePackageVersion)</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>$(SystemConfigurationConfigurationManagerPackageVersion)</SystemConfigurationConfigurationManagerVersion>

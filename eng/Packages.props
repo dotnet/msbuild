@@ -8,7 +8,6 @@
     the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
      -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Bcl.Cryptography.Xml" Version="$(MicrosoftBclCryptographyVersion)" />
     <PackageVersion Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Collections" Version="$(MicrosoftCodeAnalysisCollectionsVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Contracts" Version="$(MicrosoftCodeAnalysisContractsVersion)" />
