@@ -2,19 +2,11 @@
 trigger: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
-schedules:
-  - cron: '0 * * * *' # Runs every hour automatically
-    displayName: Hourly VS insertion exp
-    branches:
-      include:
-        - exp/*
-    always: false # Don't run if there are no code changes
-    
 resources:
   pipelines:
-  - pipeline: 'MSBuildExpPerf'
+  - pipeline: 'MSBuild'
     project: 'DevDiv'
-    source: 'MSBuild/MSBuild-ExpPerf'
+    source: 'MSBuild'
     trigger:
       branches:
         include:
@@ -48,9 +40,9 @@ variables:
   - name: TeamEmail
     value: msbtm@microsoft.com
   - name: MSBuild_CI_BuildNumber
-    value: $(resources.pipeline.MSBuildExpPerf.runName)
+    value: $(resources.pipeline.MSBuild.runName)
   - name: MSBuild_CI_SourceVersion
-    value: $(resources.pipeline.MSBuildExpPerf.sourceCommit)
+    value: $(resources.pipeline.MSBuild.sourceCommit)
   - name: ArtifactPackagesPath
     value: $(Build.ArtifactStagingDirectory)/PackageArtifacts
 
@@ -88,11 +80,11 @@ extends:
         templateContext:
           inputs:
           - input: pipelineArtifact
-            pipeline: 'MSBuildExpPerf'
+            pipeline: 'MSBuild'
             artifactName: 'xsd'
             targetPath: '$(Pipeline.Workspace)/xsd'
           - input: pipelineArtifact
-            pipeline: 'MSBuildExpPerf'
+            pipeline: 'MSBuild'
             artifactName: 'PackageArtifacts'
             targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
             # the CI build creates a sourcebuild intermediate package that is not signed, remove it to avoid warning from Guardian
@@ -107,7 +99,7 @@ extends:
             targetType: inline
             script: |
               # Extract the last section after the last '/'
-              $fullBranch = "$(resources.pipeline.MSBuildExpPerf.sourceBranch)"
+              $fullBranch = "$(resources.pipeline.MSBuild.sourceBranch)"
               $branchSegments = $fullBranch -split '/'
               $branch = $branchSegments[-1]
               Write-Host "Setting drops branch to '$branch'"
@@ -120,7 +112,7 @@ extends:
             targetType: inline
             script: |
               # Extract VS version from branch name if it follows exp/vsXX.Y-somename pattern
-              $fullBranch = "$(resources.pipeline.MSBuildExpPerf.sourceBranch)"
+              $fullBranch = "$(resources.pipeline.MSBuild.sourceBranch)"
               $parameterTargetBranch = "${{ parameters.TargetBranch }}"
               $detectedTarget = "main" # Default target branch
 
