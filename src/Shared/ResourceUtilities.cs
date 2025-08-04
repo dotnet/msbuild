@@ -8,6 +8,7 @@ using System.Diagnostics;
 #endif
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Microsoft.Build.Eventing;
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
@@ -463,6 +464,9 @@ namespace Microsoft.Build.Shared
             }
             catch (InvalidOperationException e)
             {
+#if !NET  && !TASKHOST
+                MSBuildEventSource.Log.InvalidOperationExceptionDebug("ResourceUtilities", e.StackTrace is null ? "null" : e.StackTrace.ToString());
+#endif
 #if FEATURE_DEBUG_LAUNCH
                 Debug.Fail("The resource string \"" + resourceName + "\" was not found.");
 #endif

@@ -25,6 +25,7 @@ using Microsoft.Build.Shared;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Eventing;
 
 #nullable disable
 
@@ -483,6 +484,8 @@ namespace Microsoft.Build.BackEnd
             }
             catch (InvalidOperationException e)
             {
+                MSBuildEventSource.Log.InvalidOperationExceptionDebug("TaskExecutionHostException", e.StackTrace.ToString());
+
                 // handle invalid TaskItems in task outputs
                 _targetLoggingContext.LogError(
                     new BuildEventFileInfo(parameterLocation),

@@ -13,6 +13,7 @@ using Microsoft.Build.Shared;
 
 #if !TASKHOST
 using System.Threading.Tasks;
+using Microsoft.Build.Eventing;
 #endif
 
 namespace Microsoft.Build.Internal
@@ -135,8 +136,10 @@ namespace Microsoft.Build.Internal
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
                         gotValidConnection = false;
                     }
-                    catch (InvalidOperationException)
+                    catch (InvalidOperationException e)
                     {
+                        MSBuildEventSource.Log.InvalidOperationExceptionDebug("NodePipeServer", e.StackTrace is null ? "null" : e.StackTrace.ToString());
+
                         gotValidConnection = false;
                     }
 

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 #if !NET
 using Microsoft.Build.Internal;
@@ -425,6 +426,8 @@ namespace Microsoft.Build.BackEnd
                     }
                     catch (InvalidOperationException e)
                     {
+                        MSBuildEventSource.Log.InvalidOperationExceptionDebug("Batching engine exception", e.StackTrace.ToString());
+
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation,
                             "CannotEvaluateItemMetadata", metadataName, e.Message);
                     }

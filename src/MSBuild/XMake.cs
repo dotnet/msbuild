@@ -471,8 +471,10 @@ namespace Microsoft.Build.CommandLine
                         break;
                     }
                 }
-                catch (InvalidOperationException) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
+                catch (InvalidOperationException e) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
                 {
+                    MSBuildEventSource.Log.InvalidOperationExceptionDebug("Xmake 1", e.StackTrace.ToString());
+
                 }
             }
 
@@ -499,8 +501,10 @@ namespace Microsoft.Build.CommandLine
             {
                 counters = category.GetCounters(currentInstance);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
+                MSBuildEventSource.Log.InvalidOperationExceptionDebug("Xmake 2", e.StackTrace.ToString());
+
                 // This is a system-wide category, ignore those
                 return;
             }
@@ -549,8 +553,10 @@ namespace Microsoft.Build.CommandLine
                     Console.WriteLine("||{0,50}|{1}|{2,8}|", counter.CounterName, valueString, friendlyCounterType);
                 }
             }
-            catch (InvalidOperationException) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
+            catch (InvalidOperationException e) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
             {
+                MSBuildEventSource.Log.InvalidOperationExceptionDebug("Xmake 3", e.StackTrace.ToString());
+
             }
         }
 

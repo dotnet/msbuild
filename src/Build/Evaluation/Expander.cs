@@ -33,6 +33,7 @@ using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
+using Microsoft.Build.Eventing;
 
 #nullable disable
 
@@ -1063,6 +1064,8 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (InvalidOperationException ex)
                 {
+                    MSBuildEventSource.Log.InvalidOperationExceptionDebug("Expander 1", ex.StackTrace.ToString());
+
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotExpandItemMetadata", expression, ex.Message);
                 }
 
@@ -3277,6 +3280,8 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (InvalidOperationException ex)
                     {
+                        MSBuildEventSource.Log.InvalidOperationExceptionDebug("Expander 2", ex.StackTrace.ToString());
+
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", match.Name, ex.Message);
                     }
 
