@@ -5,16 +5,19 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
@@ -26,7 +29,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    internal static class Utilities
+    internal static partial class Utilities
     {
         /// <summary>
         /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current
@@ -81,7 +84,7 @@ namespace Microsoft.Build.Internal
         {
             ErrorUtilities.VerifyThrow(s != null, "Need value to set.");
 
-            if (s.IndexOf('<') != -1)
+            if (s.Contains('<'))
             {
                 // If the value looks like it probably contains XML markup ...
                 try
@@ -295,7 +298,12 @@ namespace Microsoft.Build.Internal
         }
 
         // used to find the xmlns attribute
-        private static readonly Regex s_xmlnsPattern = new Regex("xmlns=\"[^\"]*\"\\s*");
+#if NET
+        [GeneratedRegex("xmlns=\"[^\"]*\"\\s*")]
+        private static partial Regex XmlnsPattern { get; }
+#else
+        private static Regex XmlnsPattern { get; } = new Regex("xmlns=\"[^\"]*\"\\s*");
+#endif
 
         /// <summary>
         /// Removes the xmlns attribute from an XML string.
@@ -304,7 +312,7 @@ namespace Microsoft.Build.Internal
         /// <returns>The modified XML string.</returns>
         internal static string RemoveXmlNamespace(string xml)
         {
-            return s_xmlnsPattern.Replace(xml, String.Empty);
+            return XmlnsPattern.Replace(xml, String.Empty);
         }
 
         /// <summary>
@@ -312,19 +320,19 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static string CreateToolsVersionListString(IEnumerable<Toolset> toolsets)
         {
-            string toolsVersionList = String.Empty;
+            StringBuilder sb = StringBuilderCache.Acquire();
+
             foreach (Toolset toolset in toolsets)
             {
-                toolsVersionList += "\"" + toolset.ToolsVersion + "\", ";
+                if (sb.Length != 0)
+                {
+                    sb.Append(", ");
+                }
+
+                sb.Append('"').Append(toolset.ToolsVersion).Append('"');
             }
 
-            // Remove trailing comma and space
-            if (toolsVersionList.Length > 0)
-            {
-                toolsVersionList = toolsVersionList.Substring(0, toolsVersionList.Length - 2);
-            }
-
-            return toolsVersionList;
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         /// <summary>
@@ -591,6 +599,52 @@ namespace Microsoft.Build.Internal
             return environmentProperties;
         }
 
+#if !NET
+        /// <summary>
+        /// Ensures that the capacity of this list is at least the specified <paramref name="capacity"/>.
+        /// If the current capacity of the list is less than specified <paramref name="capacity"/>,
+        /// the capacity is increased by continuously twice current capacity until it is at least the specified <paramref name="capacity"/>.
+        /// </summary>
+        /// <typeparam name="T">The type contained in the list.</typeparam>
+        /// <param name="list">The list to adjust the capacity of.</param>
+        /// <param name="capacity">The minimum capacity to ensure.</param>
+        /// <returns>The new capacity of this list.</returns>
+        public static int EnsureCapacity<T>(this List<T> list, int capacity)
+        {
+            const int DefaultCapacity = 4;
+            const int MaxArrayLength = 0X7FFFFFC7;
+
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            }
+
+            if (capacity > list.Capacity)
+            {
+                // Implementation copied and slightly modified from List's internal implementation.
+                int newCapacity = list.Count == 0 ? DefaultCapacity : 2 * list.Capacity;
+
+                // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
+                // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
+                if ((uint)newCapacity > MaxArrayLength)
+                {
+                    newCapacity = MaxArrayLength;
+                }
+
+                // If the computed capacity is still less than specified, set to the original argument.
+                // Capacities exceeding Array.MaxLength will be surfaced as OutOfMemoryException by Array.Resize.
+                if (newCapacity < capacity)
+                {
+                    newCapacity = capacity;
+                }
+
+                list.Capacity = newCapacity;
+            }
+
+            return list.Capacity;
+        }
+#endif
+
         /// <summary>
         /// Extension to IEnumerable to get the count if it
         /// can be quickly gotten, otherwise 0.
@@ -611,19 +665,6 @@ namespace Microsoft.Build.Internal
             {
                 yield return entry.Value;
             }
-        }
-
-        public static IEnumerable<T> ToEnumerable<T>(this IEnumerator<T> enumerator)
-        {
-            while (enumerator.MoveNext())
-            {
-                yield return enumerator.Current;
-            }
-        }
-
-        public static T[] ToArray<T>(this IEnumerator<T> enumerator)
-        {
-            return enumerator.ToEnumerable().ToArray();
         }
 
         /// <summary>

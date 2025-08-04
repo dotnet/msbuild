@@ -1,12 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.Tracing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -32,7 +28,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private readonly string eventSourceName = "Microsoft-Build";
         private readonly List<EventWrittenEventArgs> emittedEvents;
-        private object _eventListLock = new object();
+        private LockType _eventListLock = new LockType();
         private EventSource? _eventSources = null;
 
         public EventSourceTestHelper()

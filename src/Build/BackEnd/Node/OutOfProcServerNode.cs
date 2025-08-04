@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -210,6 +208,16 @@ namespace Microsoft.Build.Experimental
         void INodePacketFactory.DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+        }
+
+        /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>
@@ -438,7 +446,7 @@ namespace Microsoft.Build.Experimental
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
-            private readonly object _lock = new();
+            private readonly LockType _lock = new LockType();
             private readonly StringWriter _internalWriter;
 
             public RedirectConsoleWriter(Action<string> writeCallback)

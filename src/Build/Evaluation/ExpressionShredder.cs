@@ -300,9 +300,9 @@ namespace Microsoft.Build.Evaluation
                         i--;
                     }
 
-                    // Grab the name, but continue to verify it's a well-formed expression
+                    // Grab the name boundaries, but continue to verify it's a well-formed expression
                     // before we store it.
-                    string name = expression.Substring(startOfName, i - startOfName);
+                    int nameLength = i - startOfName;
 
                     SinkWhitespace(expression, ref i);
 
@@ -378,7 +378,7 @@ namespace Microsoft.Build.Evaluation
                     if ((whatToShredFor & ShredderOptions.ItemTypes) != 0)
                     {
                         pair.Items ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
-                        pair.Items.Add(name);
+                        pair.Items.Add(expression.Substring(startOfName, nameLength));
                     }
 
                     i--;
@@ -428,7 +428,7 @@ namespace Microsoft.Build.Evaluation
 
                         itemName = firstPart;
                         metadataName = expression.Substring(startOfText, i - startOfText);
-                        qualifiedMetadataName = itemName + "." + metadataName;
+                        qualifiedMetadataName = $"{itemName}.{metadataName}";
                     }
                     else
                     {

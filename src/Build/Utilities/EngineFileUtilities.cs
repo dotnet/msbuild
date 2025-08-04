@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -588,7 +589,9 @@ namespace Microsoft.Build.Internal
 
         private static bool MatchesLazyWildcard(string fileSpec)
         {
-            return _regexMatchCache.Value.GetOrAdd(fileSpec, file => s_lazyWildCardExpansionRegexes!.Any(regex => regex.IsMatch(fileSpec)));
+            Debug.Assert(s_lazyWildCardExpansionRegexes is not null, $"If the user provided lazy wildcard regexes, {nameof(s_lazyWildCardExpansionRegexes)} should be populated");
+
+            return _regexMatchCache.Value.GetOrAdd(fileSpec, file => s_lazyWildCardExpansionRegexes.Any(regex => regex.IsMatch(fileSpec)));
         }
 
         /// <summary>

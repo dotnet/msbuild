@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         FileAttributes GetAttributes(string path);
 
-        public DateTime GetLastWriteTimeUtc(string path);
+        DateTime GetLastWriteTimeUtc(string path);
 
         bool DirectoryExists(string path);
 

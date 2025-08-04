@@ -186,7 +186,7 @@ namespace Microsoft.Build.BackEnd
                     if (// If multiple buckets were expanded - we do not want to repeat same error for same metadatum on a same line
                         bucket.BucketSequenceNumber == 0 &&
                         // Referring to unqualified metadata of other item (transform) is fine.
-                        child.Include.IndexOf("@(", StringComparison.Ordinal) == -1)
+                        !child.Include.Contains("@("))
                     {
                         expanderOptions |= ExpanderOptions.LogOnItemMetadataSelfReference;
                     }
@@ -476,18 +476,33 @@ namespace Microsoft.Build.BackEnd
                 var excludesUnescapedForComparison = EvaluateExcludePaths(excludes, originalItem.ExcludeLocation);
 
                 // Subtract any Exclude
-                items = items
-                    .Where(i => !excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()))
-                    .ToList();
+                items.RemoveAll(i => excludesUnescapedForComparison.Contains(((IItem)i).EvaluatedInclude.NormalizeForPathComparison()));
             }
 
             // Filter the metadata as appropriate
+            List<string> metadataToRemove = null;
             if (keepMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => !keepMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMetadataNames)
+                    {
+                        if (!keepMetadata.Contains(metadataName))
+                        {
+                            metadataToRemove.Add(metadataName);
+                        }
+                    }
+
+                    foreach(string metadataName in metadataToRemove)
                     {
                         item.RemoveMetadata(metadataName);
                     }
@@ -495,10 +510,26 @@ namespace Microsoft.Build.BackEnd
             }
             else if (removeMetadata != null)
             {
-                foreach (var item in items)
+                foreach (ProjectItemInstance item in items)
                 {
-                    var metadataToRemove = item.MetadataNames.Where(name => removeMetadata.Contains(name));
-                    foreach (var metadataName in metadataToRemove)
+                    if (metadataToRemove == null)
+                    {
+                        metadataToRemove = new List<string>();
+                    }
+                    else
+                    {
+                        metadataToRemove.Clear();
+                    }
+
+                    foreach (string metadataName in item.EnumerableMetadataNames)
+                    {
+                        if (removeMetadata.Contains(metadataName))
+                        {
+                            metadataToRemove.Add(metadataName);
+                        }
+                    }
+
+                    foreach (string metadataName in metadataToRemove)
                     {
                         item.RemoveMetadata(metadataName);
                     }
@@ -517,7 +548,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>A list of matching items</returns>
         private HashSet<string> EvaluateExcludePaths(IReadOnlyList<string> excludes, ElementLocation excludeLocation)
         {
-            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            HashSet<string> excludesUnescapedForComparison = new HashSet<string>(excludes.Count, StringComparer.OrdinalIgnoreCase);
             foreach (string excludeSplit in excludes)
             {
                 string[] excludeSplitFiles = EngineFileUtilities.GetFileListUnescaped(

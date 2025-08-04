@@ -12,8 +12,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
-#if NET7_0_OR_GREATER
-using System.Diagnostics.CodeAnalysis;
+#if NET
+using System.Buffers;
 #endif
 
 #if NETFRAMEWORK
@@ -34,15 +34,10 @@ public sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
 
-#if NET7_0_OR_GREATER
-    [StringSyntax(StringSyntaxAttribute.Regex)]
-    private const string ImmediateMessagePattern = @"\[CredentialProvider\]|--interactive";
-    private const RegexOptions Options = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture;
-
-    [GeneratedRegex(ImmediateMessagePattern, Options)]
-    private static partial Regex ImmediateMessageRegex();
+#if NET
+    private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
 #else
-    private static readonly string[] _immediateMessageKeywords = { "[CredentialProvider]", "--interactive" };
+    private static readonly string[] _authProviderMessageKeywords = ["[CredentialProvider]", "--interactive"];
 #endif
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
@@ -80,7 +75,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
     /// </summary>
-    private readonly object _lock = new();
+    private readonly LockType _lock = new LockType();
 
     /// <summary>
     /// A cancellation token to signal the rendering thread that it should exit.
@@ -164,11 +159,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// True if we've logged the ".NET SDK is preview" message.
     /// </summary>
     private bool _loggedPreviewMessage;
-
-    /// <summary>
-    /// The two directory separator characters to be passed to methods like <see cref="String.IndexOfAny(char[])"/>.
-    /// </summary>
-    private static readonly char[] PathSeparators = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
 
     /// <summary>
     /// One summary per finished project test run.
@@ -260,7 +250,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             string argsString = string.Join(" ", args);
 
-            MatchCollection tlMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off)", RegexOptions.IgnoreCase);
+            MatchCollection tlMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)", RegexOptions.IgnoreCase);
             tlArg = tlMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value ?? string.Empty;
 
             MatchCollection verbosityMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
@@ -282,19 +272,57 @@ public sealed partial class TerminalLogger : INodeLogger
             verbosity = parsedVerbosity;
         }
 
-        bool isDisabled =
-            tlArg.Equals("on", StringComparison.InvariantCultureIgnoreCase) ? false :
-            tlArg.Equals("off", StringComparison.InvariantCultureIgnoreCase) ? true :
-            tlEnvVariable.Equals("off", StringComparison.InvariantCultureIgnoreCase) || tlEnvVariable.Equals(bool.FalseString, StringComparison.InvariantCultureIgnoreCase);
+        // Command line arguments take precedence over environment variables
+        string effectiveValue = !string.IsNullOrEmpty(tlArg) ? tlArg : !string.IsNullOrEmpty(tlEnvVariable) ? tlEnvVariable : "auto";
 
-        if (isDisabled || !supportsAnsi || !outputIsScreen)
+        bool isForced = IsTerminalLoggerEnabled(effectiveValue);
+        bool isDisabled = IsTerminalLoggerDisabled(effectiveValue);
+
+        // if forced, always use the Terminal Logger
+        if (isForced)
+        {
+            return new TerminalLogger(verbosity, originalConsoleMode);
+        }
+        
+        // If explicitly disabled, always use console logger
+        if (isDisabled)
         {
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
             return new ConsoleLogger(verbosity);
         }
 
-        return new TerminalLogger(verbosity, originalConsoleMode);
+        // If not forced and system doesn't support terminal features, fall back to console logger
+        if (effectiveValue == "auto" && supportsAnsi && outputIsScreen)
+        {
+            return new TerminalLogger(verbosity, originalConsoleMode);
+        }
+        else
+        {
+            // otherwise the state only allows fallback to console logger
+            NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
+            return new ConsoleLogger(verbosity);
+        }
     }
+
+    /// <summary>
+    /// Checks if the given value indicates TerminalLogger should be enabled/forced.
+    /// </summary>
+    /// <param name="value">The value to check (from command line or environment variable)</param>
+    /// <returns>True if the value indicates TerminalLogger should be enabled</returns>
+    private static bool IsTerminalLoggerEnabled(string? value) =>
+        value is { Length: > 0 } &&
+            (value.Equals("on", StringComparison.InvariantCultureIgnoreCase) ||
+             value.Equals("true", StringComparison.InvariantCultureIgnoreCase));
+
+    /// <summary>
+    /// Checks if the given value indicates TerminalLogger should be disabled.
+    /// </summary>
+    /// <param name="value">The value to check (from command line or environment variable)</param>
+    /// <returns>True if the value indicates TerminalLogger should be disabled</returns>
+    private static bool IsTerminalLoggerDisabled(string? value) =>
+        value is { Length: > 0 } &&
+            (value.Equals("off", StringComparison.InvariantCultureIgnoreCase) ||
+             value.Equals("false", StringComparison.InvariantCultureIgnoreCase));
 
     #region INodeLogger implementation
 
@@ -389,7 +417,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
         else
         {
-            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, "InvalidVerbosity", parameterValue);
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string? errorCode, out string? helpKeyword, "InvalidVerbosity", parameterValue);
             throw new LoggerException(message, null, errorCode, helpKeyword);
         }
     }
@@ -706,7 +734,7 @@ public sealed partial class TerminalLogger : INodeLogger
                             }
 
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                $"{AnsiCodes.LinkPrefix}{urlString}{AnsiCodes.LinkInfix}{outputPathSpan.ToString()}{AnsiCodes.LinkSuffix}"));
+                                CreateLink(uri, outputPathSpan.ToString())));
                         }
                         else
                         {
@@ -735,6 +763,14 @@ public sealed partial class TerminalLogger : INodeLogger
             }
         }
     }
+
+    private static string? CreateLink(Uri? uri, string? linkText) =>
+        (uri, linkText) switch
+        {
+            (null, _) => string.IsNullOrEmpty(linkText) ? null : linkText,
+            (_, null) => null,
+            _ => $"{AnsiCodes.LinkPrefix}{uri}{AnsiCodes.LinkInfix}{linkText}{AnsiCodes.LinkSuffix}",
+        };
 
     private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
     {
@@ -884,22 +920,26 @@ public sealed partial class TerminalLogger : INodeLogger
                 }
             }
 
+            // auth provider messages should always be shown to the user.
+            if (IsAuthProviderMessage(message))
+            {
+                RenderImmediateMessage(message);
+                return;
+            }
+
             if (Verbosity > LoggerVerbosity.Quiet)
             {
-                // Show immediate messages to the user.
-                if (IsImmediateMessage(message))
-                {
-                    RenderImmediateMessage(message);
-                    return;
-                }
                 if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
                 {
-                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                    // when it's a preview version up to MaxCPUCount times, but that's
-                    // an implementation detail--the user cares about at most one.
-
-                    RenderImmediateMessage(message);
-                    _loggedPreviewMessage = true;
+                    // ensure we only log the preview message once for the entire build.
+                    if (!_loggedPreviewMessage)
+                    {
+                        // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                        // when it's a preview version up to MaxCPUCount times, but that's
+                        // an implementation detail--the user cares about at most one.
+                        RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, DoubleIndentation));
+                        _loggedPreviewMessage = true;
+                    }
                     return;
                 }
             }
@@ -976,7 +1016,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
                 if (hasProject)
                 {
-                    project!.AddBuildMessage(TerminalMessageSeverity.Message, message);
+                    project!.AddBuildMessage(TerminalMessageSeverity.Message, FormatInformationalMessage(e));
                 }
                 else
                 {
@@ -987,6 +1027,19 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    private static Uri? GenerateLinkForMessage(BuildMessageEventArgs e)
+    {
+        if (e.HelpKeyword is not null)
+        {
+            // generate a default help keyword based link? fw?...
+            return GenerateLinkForHelpKeyword(e.HelpKeyword);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
     /// <summary>
     /// The <see cref="IEventSource.WarningRaised"/> callback.
     /// </summary>
@@ -994,41 +1047,91 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
+        // auth provider messages are 'global' in nature and should be a) immediate reported, and b) not re-reported in the summary.
+        if (IsAuthProviderMessage(e.Message))
+        {
+            RenderImmediateMessage(FormatWarningMessage(e, Indentation));
+            return;
+        }
+
         if (buildEventContext is not null
             && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
             && Verbosity > LoggerVerbosity.Quiet)
         {
-            if ((!String.IsNullOrEmpty(e.Message) && IsImmediateMessage(e.Message!)) ||
-                IsImmediateWarning(e.Code))
+            // If the warning is not a 'global' auth provider message, but is immediate, we render it immediately
+            // but we don't early return so that the project also tracks it.
+            if (IsImmediateWarning(e.Code))
             {
                 RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             }
 
+            // This is the general case - _most_ warnings are not immediate, so we add them to the project summary
+            // and display them in the per-project and final summary.
             project.AddBuildMessage(TerminalMessageSeverity.Warning, FormatWarningMessage(e, TripleIndentation));
         }
         else
         {
-            // It is necessary to display warning messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
+            // It is necessary to display warning messages reported by MSBuild,
+            // even if it's not tracked in _projects collection or the verbosity is Quiet.
+            // The idea here (similar to the implementation in ErrorRaised) is that
+            // even in Quiet scenarios we need to show warnings/errors, even if not in
+            // full project-tree view
             RenderImmediateMessage(FormatWarningMessage(e, Indentation));
             _buildWarningsCount++;
         }
     }
+
+    private static Uri? GenerateLinkForWarning(BuildWarningEventArgs e)
+    {
+        if (e.HelpLink is not null && Uri.TryCreate(e.HelpLink, UriKind.Absolute, out Uri? uri))
+        {
+            return uri;
+        }
+        else if (e.HelpKeyword is not null)
+        {
+            // generate a default help keyword based link? fw?...
+            return GenerateLinkForHelpKeyword(e.HelpKeyword);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    private static Uri GenerateLinkForHelpKeyword(string helpKeyword) => new($"https://go.microsoft.com/fwlink/?LinkId={helpKeyword}");
 
     /// <summary>
     /// Detect markers that require special attention from a customer.
     /// </summary>
     /// <param name="message">Raised event.</param>
     /// <returns>true if marker is detected.</returns>
-    private bool IsImmediateMessage(string message) =>
-#if NET7_0_OR_GREATER
-        ImmediateMessageRegex().IsMatch(message);
+    private static bool IsAuthProviderMessage(string? message) =>
+#if NET
+        message is not null && message.AsSpan().ContainsAny(_authProviderMessageKeywords);
 #else
-        _immediateMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
+        message is not null && _authProviderMessageKeywords.Any(imk => message.IndexOf(imk, StringComparison.OrdinalIgnoreCase) >= 0);
 #endif
 
 
-    private bool IsImmediateWarning(string code) => code == "MSB3026";
+    private static bool IsImmediateWarning(string code) => code == "MSB3026";
 
+    private static Uri? GenerateLinkForError(BuildErrorEventArgs e)
+    {
+        if (e.HelpLink is not null && Uri.TryCreate(e.HelpLink, UriKind.Absolute, out Uri? uri))
+        {
+            return uri;
+        }
+        else if (e.HelpKeyword is not null)
+        {
+            // generate a default help keyword based link? fw?...
+            return GenerateLinkForHelpKeyword(e.HelpKeyword);
+        }
+        else
+        {
+            return null;
+        }
+    }
+    
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
@@ -1060,11 +1163,22 @@ public sealed partial class TerminalLogger : INodeLogger
     private void ThreadProc()
     {
         // 1_000 / 30 is a poor approx of 30Hz
+        var count = 0;
         while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
+            count++;
             lock (_lock)
             {
-                DisplayNodes();
+                // Querying the terminal for it's dimensions is expensive, so we only do it every 30 frames e.g. once a second.
+                if (count >= 30)
+                {
+                    count = 0;
+                    DisplayNodes();
+                }
+                else
+                {
+                    DisplayNodes(false);
+                }
             }
         }
 
@@ -1075,9 +1189,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    internal void DisplayNodes()
+    internal void DisplayNodes(bool updateSize = true)
     {
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: Terminal.Width, height: Terminal.Height);
+        var width = updateSize ? Terminal.Width : _currentFrame.Width;
+        var height = updateSize ? Terminal.Height : _currentFrame.Height;
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
@@ -1184,7 +1300,7 @@ public sealed partial class TerminalLogger : INodeLogger
             return null;
         }
 
-        int index = path.LastIndexOfAny(PathSeparators);
+        int index = path.AsSpan().LastIndexOfAny(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         return index >= 0
             ? $"{path.Substring(0, index + 1)}{AnsiCodes.MakeBold(path.Substring(index + 1))}"
             : path;
@@ -1196,13 +1312,55 @@ public sealed partial class TerminalLogger : INodeLogger
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Yellow),
+                code: AnsiCodes.Colorize(CreateLink(GenerateLinkForWarning(e), e.Code), TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent);
+                indent,
+                terminalWidth: Terminal.Width);
+    }
+
+    private string FormatInformationalMessage(BuildMessageEventArgs e)
+    {
+        return FormatEventMessage(
+                category: null,
+                subcategory: e.Subcategory,
+                message: e.Message,
+                code: CreateLink(GenerateLinkForMessage(e), e.Code),
+                file: HighlightFileName(e.File),
+                lineNumber: e.LineNumber,
+                endLineNumber: e.EndLineNumber,
+                columnNumber: e.ColumnNumber,
+                endColumnNumber: e.EndColumnNumber,
+                indent: string.Empty,
+                terminalWidth: Terminal.Width,
+                requireFileAndLinePortion: false);
+    }
+
+    /// <summary>
+    /// Renders message with just code/category/message data.
+    /// No file data is included. This can be used for immediate/one-time
+    /// messages that lack a specific project context, such as the .NET
+    /// SDK's 'preview version' message, while not removing the code.
+    /// </summary>
+    private string FormatSimpleMessageWithoutFileData(BuildMessageEventArgs e, string indent)
+    {
+        return FormatEventMessage(
+                category: AnsiCodes.Colorize("info", TerminalColor.Default),
+                subcategory: null,
+                message: e.Message,
+                code: AnsiCodes.Colorize(e.Code, TerminalColor.Default),
+                file: null,
+                lineNumber: 0,
+                endLineNumber: 0,
+                columnNumber: 0,
+                endColumnNumber: 0,
+                indent,
+                terminalWidth: Terminal.Width,
+                requireFileAndLinePortion: false,
+                prependIndentation: true);
     }
 
     private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
@@ -1211,63 +1369,74 @@ public sealed partial class TerminalLogger : INodeLogger
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Red),
+                code: AnsiCodes.Colorize(CreateLink(GenerateLinkForError(e), e.Code), TerminalColor.Red),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
-                indent);
+                indent,
+                terminalWidth: Terminal.Width);
     }
 
-    private string FormatEventMessage(
-            string category,
-            string subcategory,
+    private static string FormatEventMessage(
+            string? category,
+            string? subcategory,
             string? message,
-            string code,
+            string? code,
             string? file,
             int lineNumber,
             int endLineNumber,
             int columnNumber,
             int endColumnNumber,
-            string indent)
+            string indent,
+            int terminalWidth,
+            bool requireFileAndLinePortion = true,
+            bool prependIndentation = false)
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
-
-        if (string.IsNullOrEmpty(file))
+        if (prependIndentation)
         {
-            builder.Append("MSBUILD : ");    // Should not be localized.
+            builder.Append(indent);
         }
-        else
-        {
-            builder.Append(file);
 
-            if (lineNumber == 0)
+        if (requireFileAndLinePortion)
+        {
+            if (string.IsNullOrEmpty(file))
             {
-                builder.Append(" : ");
+                builder.Append("MSBUILD : ");    // Should not be localized.
             }
             else
             {
-                if (columnNumber == 0)
+                builder.Append(file);
+
+                if (lineNumber == 0)
                 {
-                    builder.Append(endLineNumber == 0 ?
-                        $"({lineNumber}): " :
-                        $"({lineNumber}-{endLineNumber}): ");
+                    builder.Append(" : ");
                 }
                 else
                 {
-                    if (endLineNumber == 0)
+                    if (columnNumber == 0)
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        builder.Append(endLineNumber == 0 ?
+                            $"({lineNumber}): " :
+                            $"({lineNumber}-{endLineNumber}): ");
                     }
                     else
                     {
-                        builder.Append(endColumnNumber == 0 ?
-                            $"({lineNumber}-{endLineNumber},{columnNumber}): " :
-                            $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        if (endLineNumber == 0)
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber}-{endColumnNumber}): ");
+                        }
+                        else
+                        {
+                            builder.Append(endColumnNumber == 0 ?
+                                $"({lineNumber}-{endLineNumber},{columnNumber}): " :
+                                $"({lineNumber},{columnNumber},{endLineNumber},{endColumnNumber}): ");
+                        }
                     }
                 }
             }
@@ -1279,19 +1448,29 @@ public sealed partial class TerminalLogger : INodeLogger
             builder.Append(' ');
         }
 
-        builder.Append($"{category} {code}: ");
+        if (!string.IsNullOrEmpty(category))
+        {
+            builder.Append(category);
+            builder.Append(' ');
+        }
+
+        if (!string.IsNullOrEmpty(code))
+        {
+            builder.Append(code);
+            builder.Append(": ");
+        }
 
         // render multi-line message in a special way
-        if (message.IndexOf('\n') >= 0)
+        if (message.Contains('\n'))
         {
             // Place the multiline message under the project in case of minimal and higher verbosity.
             string[] lines = message.Split(newLineStrings, StringSplitOptions.None);
 
             foreach (string line in lines)
             {
-                if (indent.Length + line.Length > Terminal.Width) // custom wrapping with indentation
+                if (indent.Length + line.Length > terminalWidth) // custom wrapping with indentation
                 {
-                    WrapText(builder, line, Terminal.Width, indent);
+                    WrapText(builder, line, terminalWidth, indent);
                 }
                 else
                 {

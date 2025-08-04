@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -124,6 +125,11 @@ namespace Microsoft.Build.Execution
         /// Properties originating from environment variables, gotten from the project collection
         /// </summary>
         private PropertyDictionary<ProjectPropertyInstance> _environmentVariableProperties;
+
+        /// <summary>
+        /// Properties originating from SDK resolution-reported environment variables
+        /// </summary>
+        private PropertyDictionary<ProjectPropertyInstance> _sdkResolvedEnvironmentVariableProperties;
 
         /// <summary>
         /// Items in the project. This is a dictionary of ordered lists of a single type of items keyed by item type.
@@ -541,6 +547,7 @@ namespace Microsoft.Build.Execution
             _actualTargets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
             _targets = new ObjectModel.ReadOnlyDictionary<string, ProjectTargetInstance>(_actualTargets);
             _environmentVariableProperties = projectToInheritFrom._environmentVariableProperties;
+            _sdkResolvedEnvironmentVariableProperties = projectToInheritFrom._sdkResolvedEnvironmentVariableProperties;
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(projectToInheritFrom._itemDefinitions, MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = projectToInheritFrom._hostServices;
             this.ProjectRootElementCache = projectToInheritFrom.ProjectRootElementCache;
@@ -661,6 +668,7 @@ namespace Microsoft.Build.Execution
             this.CreateEvaluatedIncludeSnapshotIfRequested(keepEvaluationCache, new ReadOnlyCollection<ProjectItem>(data.Items), projectItemToInstanceMap);
             this.CreateGlobalPropertiesSnapshot(data.GlobalPropertiesDictionary);
             this.CreateEnvironmentVariablePropertiesSnapshot(environmentVariableProperties);
+            this.CreateSdkResolvedEnvironmentVariablePropertiesSnapshot(data.SdkResolvedEnvironmentVariablePropertiesDictionary);
             this.CreateTargetsSnapshot(data.Targets, data.DefaultTargets, data.InitialTargets, data.BeforeTargets, data.AfterTargets);
             this.CreateImportsSnapshot(data.ImportClosure, data.ImportClosureWithDuplicates);
 
@@ -679,6 +687,16 @@ namespace Microsoft.Build.Execution
             _explicitToolsVersionSpecified = data.ExplicitToolsVersion != null;
 
             _isImmutable = immutable;
+        }
+
+        private void CreateSdkResolvedEnvironmentVariablePropertiesSnapshot(PropertyDictionary<ProjectPropertyInstance> sdkResolvedEnvironmentVariablePropertiesDictionary)
+        {
+            _sdkResolvedEnvironmentVariableProperties = new PropertyDictionary<ProjectPropertyInstance>(sdkResolvedEnvironmentVariablePropertiesDictionary.Count);
+
+            foreach (ProjectPropertyInstance environmentProperty in sdkResolvedEnvironmentVariablePropertiesDictionary)
+            {
+                _sdkResolvedEnvironmentVariableProperties.Set(environmentProperty.DeepClone());
+            }
         }
 
         /// <summary>
@@ -737,6 +755,16 @@ namespace Microsoft.Build.Execution
                     _environmentVariableProperties.Set(environmentProperty.DeepClone(_isImmutable));
                 }
 
+                if (that._sdkResolvedEnvironmentVariableProperties is PropertyDictionary<ProjectPropertyInstance> thatEnvProps)
+                {
+                    _sdkResolvedEnvironmentVariableProperties = new(thatEnvProps.Count);
+
+                    foreach (ProjectPropertyInstance sdkResolvedEnvironmentVariable in thatEnvProps)
+                    {
+                        _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentVariable.DeepClone(_isImmutable));
+                    }
+                }
+
                 this.DefaultTargets = new List<string>(that.DefaultTargets);
                 this.InitialTargets = new List<string>(that.InitialTargets);
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance,
@@ -775,6 +803,8 @@ namespace Microsoft.Build.Execution
                     _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
                     _environmentVariableProperties =
                         new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
+                    _sdkResolvedEnvironmentVariableProperties =
+                        new PropertyDictionary<ProjectPropertyInstance>(filter.PropertyFilters.Count);
 
                     // Filter each type of property.
                     foreach (var desiredProperty in filter.PropertyFilters)
@@ -791,10 +821,15 @@ namespace Microsoft.Build.Execution
                             _globalProperties.Set(globalProperty.DeepClone(isImmutable: true));
                         }
 
-                        var environmentProperty = that.GetProperty(desiredProperty);
+                        var environmentProperty = that._environmentVariableProperties.GetProperty(desiredProperty);
                         if (environmentProperty != null)
                         {
                             _environmentVariableProperties.Set(environmentProperty.DeepClone(isImmutable: true));
+                        }
+                        var sdkResolvedEnvironmentProperty = that._sdkResolvedEnvironmentVariableProperties?.GetProperty(desiredProperty);
+                        if (sdkResolvedEnvironmentProperty != null)
+                        {
+                            _sdkResolvedEnvironmentVariableProperties.Set(sdkResolvedEnvironmentProperty.DeepClone(isImmutable: true));
                         }
                     }
                 }
@@ -827,7 +862,7 @@ namespace Microsoft.Build.Execution
                                 // any extant metadata.
                                 // UNDONE: This could be achieved at lower GC cost by applying
                                 // the metadata filter at DeepClone time above.
-                                foreach (var metadataName in filteredItem.MetadataNames)
+                                foreach (var metadataName in filteredItem.EnumerableMetadataNames)
                                 {
                                     if (!itemFilter.Value.Contains(metadataName, StringComparer.OrdinalIgnoreCase))
                                     {
@@ -970,33 +1005,18 @@ namespace Microsoft.Build.Execution
                 result = instanceProvider.ImmutableInstance;
                 if (result == null)
                 {
-                    IDictionary<string, ProjectMetadataInstance> metadata = null;
+                    ImmutableDictionary<string, string> metadata = null;
                     if (projectItemDefinition.Metadata is IDictionary<string, ProjectMetadata> linkedMetadataDict)
                     {
-                        metadata = new ImmutableElementCollectionConverter<ProjectMetadata, ProjectMetadataInstance>(
-                                        linkedMetadataDict,
-                                        constrainedProjectElements: null,
-                                        ConvertCachedProjectMetadataToInstance);
+                        IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = linkedMetadataDict.Select(directMetadatum
+                            => new KeyValuePair<string, string>(directMetadatum.Key, directMetadatum.Value.EvaluatedValueEscaped));
+
+                        metadata = ImmutableDictionaryExtensions.EmptyMetadata
+                            .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
                     }
 
                     result = instanceProvider.GetOrSetImmutableInstance(
                         new ProjectItemDefinitionInstance(projectItemDefinition.ItemType, metadata));
-                }
-            }
-
-            return result;
-        }
-
-        private static ProjectMetadataInstance ConvertCachedProjectMetadataToInstance(ProjectMetadata projectMetadata)
-        {
-            ProjectMetadataInstance result = null;
-
-            if (projectMetadata is IImmutableInstanceProvider<ProjectMetadataInstance> instanceProvider)
-            {
-                result = instanceProvider.ImmutableInstance;
-                if (result == null)
-                {
-                    result = instanceProvider.GetOrSetImmutableInstance(new ProjectMetadataInstance(projectMetadata));
                 }
             }
 
@@ -1340,6 +1360,45 @@ namespace Microsoft.Build.Execution
         PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.EnvironmentVariablePropertiesDictionary
         {
             get => _environmentVariableProperties;
+        }
+
+        PropertyDictionary<ProjectPropertyInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.SdkResolvedEnvironmentVariablePropertiesDictionary
+        {
+            get => _sdkResolvedEnvironmentVariableProperties;
+        }
+
+        public void AddSdkResolvedEnvironmentVariable(string name, string value)
+        {
+            // If the property has already been set as an environment variable, we do not overwrite it.
+            if (_environmentVariableProperties.Contains(name))
+            {
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value);
+                return;
+            }
+            // If another SDK already set it, we do not overwrite it.
+            else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
+            {
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value);
+                return;
+            }
+
+            _sdkResolvedEnvironmentVariableProperties ??= new();
+
+            ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
+
+            _sdkResolvedEnvironmentVariableProperties.Set(property);
+
+            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
+            _environmentVariableProperties.Set(property);
+
+            // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
+            if (GetProperty(name) is null)
+            {
+                ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
+                   .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);
+            }
+
+            _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableSet", name, value);
         }
 
         /// <summary>
@@ -1843,6 +1902,13 @@ namespace Microsoft.Build.Execution
             SdkResult sdkResult)
         {
             _importPaths.Add(import.FullPath);
+            if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
+            {
+                foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                {
+                    _sdkResolvedEnvironmentVariableProperties.Set(ProjectPropertyInstance.Create(environmentVariable.Key, environmentVariable.Value, importElement.Location, isImmutable: true));
+                }
+            }
             ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this).RecordImportWithDuplicates(importElement, import, versionEvaluated);
         }
 
@@ -2306,7 +2372,9 @@ namespace Microsoft.Build.Execution
                     // Only emit the property if it does not exist in the global or environment properties dictionaries or differs from them.
                     if (!_globalProperties.Contains(property.Name) || !String.Equals(_globalProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (!_environmentVariableProperties.Contains(property.Name) || !String.Equals(_environmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
+                        if ((!_environmentVariableProperties.Contains(property.Name) || !String.Equals(_environmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
+                            && _sdkResolvedEnvironmentVariableProperties is not null
+                            && (!_sdkResolvedEnvironmentVariableProperties.Contains(property.Name) || !String.Equals(_sdkResolvedEnvironmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase)))
                         {
                             property.ToProjectPropertyElement(propertyGroupElement);
                         }
@@ -2640,7 +2708,12 @@ namespace Microsoft.Build.Execution
                 }
                 else /* Dev 12 and above */
                 {
-                    toolsVersion = visualStudioVersion.ToString(CultureInfo.InvariantCulture) + ".0";
+                    toolsVersion =
+#if NET
+                        string.Create(CultureInfo.InvariantCulture, $"{visualStudioVersion}.0");
+#else
+                        $"{visualStudioVersion.ToString(CultureInfo.InvariantCulture)}.0";
+#endif
                 }
 
                 string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
@@ -3161,7 +3234,7 @@ namespace Microsoft.Build.Execution
 
             if (Traits.Instance.EscapeHatches.DebugEvaluation)
             {
-                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Creating a ProjectInstance from an unevaluated state [{0}]", FullPath));
+                Trace.WriteLine($"MSBUILD: Creating a ProjectInstance from an unevaluated state [{FullPath}]");
             }
 
             ErrorUtilities.VerifyThrow(EvaluationId == BuildEventContext.InvalidEvaluationId, "Evaluation ID is invalid prior to evaluation");
@@ -3337,13 +3410,14 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+            ImmutableDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata != null)
             {
-                directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
+                    => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
 
-                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                directMetadata.ImportProperties(projectMetadataInstances);
+                directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
             }
 
             GetEvaluatedIncludesFromProjectItem(
@@ -3389,20 +3463,14 @@ namespace Microsoft.Build.Execution
                     itemTypeDefinition,
                     ConvertCachedItemDefinitionToInstance);
 
-            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+            ImmutableDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata is not null)
             {
-                if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
-                {
-                    directMetadata = new ImmutablePropertyCollectionConverter<ProjectMetadata, ProjectMetadataInstance>(metadataDict, ConvertCachedProjectMetadataToInstance);
-                }
-                else
-                {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
+                    => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
 
-                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                    directMetadata.ImportProperties(projectMetadataInstances);
-                }
+                directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
             }
 
             GetEvaluatedIncludesFromProjectItem(

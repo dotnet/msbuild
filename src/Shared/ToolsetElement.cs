@@ -20,7 +20,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Lock for process wide ToolsetConfigurationSection section cache
         /// </summary>
-        private static readonly object s_syncLock = new();
+        private static readonly LockType s_syncLock = new LockType();
 
         /// <summary>
         /// Process wide ToolsetConfigurationSection section cache
@@ -279,7 +279,7 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (element.ElementInformation.LineNumber != 0)
                         {
-                            locationString = String.Format("{0} ({1})", element.ElementInformation.Source, element.ElementInformation.LineNumber);
+                            locationString = $"{element.ElementInformation.Source} ({element.ElementInformation.LineNumber})";
                         }
                         else
                         {

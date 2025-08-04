@@ -13,11 +13,9 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
-using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -451,6 +449,28 @@ namespace Microsoft.Build.UnitTests
             duplicateSwitchErrorMessage.ShouldBeNull();
             multipleParametersAllowed.ShouldBeFalse();
             missingParametersErrorMessage.ShouldNotBeNull();
+            unquoteParameters.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("mt")]
+        [InlineData("MT")]
+        [InlineData("multithreaded")]
+        [InlineData("multiThreaded")]
+        public void MultiThreadedeParametersIdentificationTests(string multithreaded)
+        {
+            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch;
+            string duplicateSwitchErrorMessage;
+            bool multipleParametersAllowed;
+            string missingParametersErrorMessage;
+            bool unquoteParameters;
+            bool emptyParametersAllowed;
+
+            CommandLineSwitches.IsParameterizedSwitch(multithreaded, out parameterizedSwitch, out duplicateSwitchErrorMessage, out multipleParametersAllowed, out missingParametersErrorMessage, out unquoteParameters, out emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeFalse();
+            missingParametersErrorMessage.ShouldBeNull();
             unquoteParameters.ShouldBeTrue();
         }
 
@@ -1170,6 +1190,7 @@ namespace Microsoft.Build.UnitTests
                                         null,
 #endif
                                         1,
+                                        false,
                                         true,
                                         new StringWriter(),
                                         new StringWriter(),

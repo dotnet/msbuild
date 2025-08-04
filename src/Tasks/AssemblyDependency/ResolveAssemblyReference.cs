@@ -5,7 +5,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !NET
 using System.Globalization;
+#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +16,7 @@ using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -919,6 +922,11 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
+        /// Allow the task to run on the out-of-proc node if enabled for this build.
+        /// </summary>
+        public bool AllowOutOfProcNode { get; set; }
+
+        /// <summary>
         /// This is a list of all primary references resolved to full paths.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         ///     string FusionName - the fusion name for this dependency.
@@ -1331,6 +1339,9 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
+#if NET
+            return Convert.ToHexStringLower(a);
+#else
             var buffer = new StringBuilder(a.Length * 2);
             for (int i = 0; i < a.Length; ++i)
             {
@@ -1338,6 +1349,7 @@ namespace Microsoft.Build.Tasks
             }
 
             return buffer.ToString();
+#endif
         }
 
         /// <summary>
@@ -1559,25 +1571,28 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "AppConfigFile");
-            Log.LogMessage(importance, indent + AppConfigFile);
+            Log.LogMessage(importance, $"{indent}{AppConfigFile}");
 
             Log.LogMessage(importance, property, "AutoUnify");
-            Log.LogMessage(importance, indent + AutoUnify.ToString());
+            Log.LogMessage(importance, $"{indent}{AutoUnify}");
+
+            Log.LogMessage(importance, property, "EnableCustomCulture");
+            Log.LogMessage(importance, $"{indent}{EnableCustomCulture}");
 
             Log.LogMessage(importance, property, "EnableCustomCulture");
             Log.LogMessage(importance, $"{indent}{EnableCustomCulture}");
 
             Log.LogMessage(importance, property, "CopyLocalDependenciesWhenParentReferenceInGac");
-            Log.LogMessage(importance, indent + _copyLocalDependenciesWhenParentReferenceInGac);
+            Log.LogMessage(importance, $"{indent}{_copyLocalDependenciesWhenParentReferenceInGac}");
 
             Log.LogMessage(importance, property, "FindDependencies");
-            Log.LogMessage(importance, indent + _findDependencies);
+            Log.LogMessage(importance, $"{indent}{_findDependencies}");
 
             Log.LogMessage(importance, property, "TargetProcessorArchitecture");
-            Log.LogMessage(importance, indent + TargetProcessorArchitecture);
+            Log.LogMessage(importance, $"{indent}{TargetProcessorArchitecture}");
 
             Log.LogMessage(importance, property, "StateFile");
-            Log.LogMessage(importance, indent + StateFile);
+            Log.LogMessage(importance, $"{indent}{StateFile}");
 
             Log.LogMessage(importance, property, "InstalledAssemblySubsetTables");
             foreach (ITaskItem installedAssemblySubsetTable in InstalledAssemblySubsetTables)
@@ -1587,33 +1602,33 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "IgnoreInstalledAssemblySubsetTable");
-            Log.LogMessage(importance, indent + _ignoreDefaultInstalledAssemblySubsetTables);
+            Log.LogMessage(importance, $"{indent}{_ignoreDefaultInstalledAssemblySubsetTables}");
 
             Log.LogMessage(importance, property, "TargetFrameworkSubsets");
             foreach (string subset in _targetFrameworkSubsets)
             {
-                Log.LogMessage(importance, indent + subset);
+                Log.LogMessage(importance, $"{indent}{subset}");
             }
 
             Log.LogMessage(importance, property, "FullTargetFrameworkSubsetNames");
             foreach (string subset in FullTargetFrameworkSubsetNames)
             {
-                Log.LogMessage(importance, indent + subset);
+                Log.LogMessage(importance, $"{indent}{subset}");
             }
 
             Log.LogMessage(importance, property, "ProfileName");
-            Log.LogMessage(importance, indent + ProfileName);
+            Log.LogMessage(importance, $"{indent}{ProfileName}");
 
             Log.LogMessage(importance, property, "FullFrameworkFolders");
             foreach (string fullFolder in FullFrameworkFolders)
             {
-                Log.LogMessage(importance, indent + fullFolder);
+                Log.LogMessage(importance, $"{indent}{fullFolder}");
             }
 
             Log.LogMessage(importance, property, "LatestTargetFrameworkDirectories");
             foreach (string latestFolder in _latestTargetFrameworkDirectories)
             {
-                Log.LogMessage(importance, indent + latestFolder);
+                Log.LogMessage(importance, $"{indent}{latestFolder}");
             }
 
             Log.LogMessage(importance, property, "ProfileTablesLocation");
@@ -2871,7 +2886,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return String.Join(", ", subsetNames.ToArray());
+            return String.Join(", ", subsetNames);
         }
 
         /// <summary>
@@ -3234,6 +3249,25 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (AllowOutOfProcNode
+                && BuildEngine is IBuildEngine10 buildEngine10
+                && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
+            {
+                try
+                {
+#pragma warning disable CA2000 // The OutOfProcRarClient is disposable but its disposal is handled by RegisterTaskObject.
+                    _ = OutOfProcRarClient.GetInstance(buildEngine10).Execute(this);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                    CommunicationsUtilities.Trace("RAR out-of-proc test connection completed. Executing task in-proc.");
+                }
+                catch (Exception ex)
+                {
+                    // If the out-of-proc connection failed, fall back to in-proc.
+                    // TODO: Disable out-of-proc for the remainder of the build if any connection fails.
+                    CommunicationsUtilities.Trace("RAR out-of-proc connection failed, failing back to in-proc. Exception: {0}", ex);
+                }
+            }
+
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
@@ -3256,7 +3290,6 @@ namespace Microsoft.Build.Tasks
                     => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
-
         #endregion
     }
 }

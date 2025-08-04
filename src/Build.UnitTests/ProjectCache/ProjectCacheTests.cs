@@ -10,12 +10,12 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
+using Microsoft.Build.Internal;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.UnitTests;
@@ -24,13 +24,14 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.Sdk;
 using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 {
     public class ProjectCacheTests : IDisposable
     {
+        private static string s_currentTargetNETFramework = $"net{RunnerUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
+
         public ProjectCacheTests(ITestOutputHelper output)
         {
             _output = output;
@@ -47,22 +48,37 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         private const string AssemblyMockCache = nameof(AssemblyMockCache);
 
-        private static readonly Lazy<string> SamplePluginAssemblyPath =
+        private const string Configuration =
+#if DEBUG
+            "Debug";
+#else
+            "Release";
+#endif
+
+        private static readonly string s_currentFramework = GetCurrentFramework();
+
+        private static string GetCurrentFramework() =>
+#if RUNTIME_TYPE_NETCORE
+            s_currentTargetNETFramework;
+#else
+            "net472";
+#endif
+
+        private static readonly string s_samplePluginPath = Path.Combine(
+            BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
+            "..",
+            "..",
+            "..",
+            "Samples",
+            "ProjectCachePlugin");
+
+        private static readonly Lazy<string> s_samplePluginAssemblyPath =
             new Lazy<string>(
-                () =>
-                {
-                    return Directory.EnumerateFiles(
-                        Path.GetFullPath(
-                            Path.Combine(
-                                BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory,
-                                "..",
-                                "..",
-                                "..",
-                                "Samples",
-                                "ProjectCachePlugin")),
-                        "ProjectCachePlugin.dll",
-                        SearchOption.AllDirectories).First();
-                });
+                () => Path.Combine(
+                        Path.GetFullPath(s_samplePluginPath),
+                        Configuration,
+                        s_currentFramework,
+                        "ProjectCachePlugin.dll"));
 
         public class GraphCacheResponse
         {
@@ -74,7 +90,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 @$"
                     <ItemGroup>
                         <ProjectReferenceTargets Include=`Build` Targets=`Build` />
-                        <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
+                        <{ItemTypeNames.ProjectCachePlugin} Include=`{s_samplePluginAssemblyPath.Value}` />
                     </ItemGroup>
 
                     <Target Name=`Build` Returns=`@(ReturnValue)`>
@@ -919,7 +935,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             var buildParameters = new BuildParameters
             {
-                ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(SamplePluginAssemblyPath.Value)
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(s_samplePluginAssemblyPath.Value)
             };
 
             MockLogger logger;
@@ -1029,7 +1045,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 },
                 extraContentForAllNodes: @$"
 <ItemGroup>
-   <{ItemTypeNames.ProjectCachePlugin} Include='{SamplePluginAssemblyPath.Value}' />
+   <{ItemTypeNames.ProjectCachePlugin} Include='{s_samplePluginAssemblyPath.Value}' />
 </ItemGroup>
 ");
             var mockCache = new InstanceMockCache();
@@ -1065,7 +1081,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         2,
                         @$"
 <ItemGroup>
-   <{ItemTypeNames.ProjectCachePlugin} Include='{SamplePluginAssemblyPath.Value}' />
+   <{ItemTypeNames.ProjectCachePlugin} Include='{s_samplePluginAssemblyPath.Value}' />
 </ItemGroup>
 "
                     }
@@ -1127,7 +1143,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                     new BuildParameters
                     {
                         UseSynchronousLogging = true,
-                        ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(SamplePluginAssemblyPath.Value)
+                        ProjectCacheDescriptor = ProjectCacheDescriptor.FromAssemblyPath(s_samplePluginAssemblyPath.Value)
                     });
 
                 logger = buildSession.Logger;
@@ -1237,7 +1253,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 },
                 extraContentForAllNodes: @$"
 <ItemGroup>
-    <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
+    <{ItemTypeNames.ProjectCachePlugin} Include=`{s_samplePluginAssemblyPath.Value}` />
     <{ItemTypeNames.ProjectReferenceTargets} Include=`Build` Targets=`Build` />
 </ItemGroup>
 <Target Name=`Build`>
@@ -1332,7 +1348,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                 @$"
                     <Project>
                         <ItemGroup>
-                            <{ItemTypeNames.ProjectCachePlugin} Include=`{SamplePluginAssemblyPath.Value}` />
+                            <{ItemTypeNames.ProjectCachePlugin} Include=`{s_samplePluginAssemblyPath.Value}` />
                         </ItemGroup>
                         <Target Name=`Build`>
                             <Message Text=`Hello EngineShouldHandleExceptionsFromCachePlugin` Importance=`High` />
@@ -1668,10 +1684,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             var directory = _env.CreateFolder();
             string content = ObjectModelHelpers.CleanupFileContents(
-            """
+            $"""
             <Project Sdk="Microsoft.NET.Sdk">
                 <PropertyGroup>
-                    <TargetFramework>net8.0</TargetFramework>
+                    <TargetFramework>{s_currentTargetNETFramework}</TargetFramework>
                     <OutputType>Exe</OutputType>
                     <OutputPath>bin/</OutputPath>
                 </PropertyGroup>
@@ -1681,7 +1697,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             </Project>
             """);
             var projectPath = directory.CreateFile("app.csproj", content).Path;
-            directory.CreateFile("Program.cs",
+            directory.CreateFile(
+                "Program.cs",
             """
             using System;
             using System.IO;
@@ -1715,7 +1732,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             // Build and run the project
             string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
             success.ShouldBeTrue(output);
-            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
+
+            // Use dotnet exec instead of running the exe directly to ensure using the bootstrap's runtime (which may be newer than the installed one)
+            string appDllPath = Path.Combine(directory.Path, $"bin/{s_currentTargetNETFramework}/app.dll");
+            output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
             output.ShouldContain("A=1");
             output.ShouldContain("B=1");
 
@@ -1723,7 +1744,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             FileUtilities.DeleteNoThrow(file1.Path);
             output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
             success.ShouldBeTrue(output);
-            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+
+            output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
             output.ShouldNotContain("A=1");
             output.ShouldContain("B=1");
         }

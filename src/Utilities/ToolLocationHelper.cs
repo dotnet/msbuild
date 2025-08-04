@@ -9,7 +9,6 @@ using System.Linq;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Xml;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyFoldersFromConfig;
@@ -169,6 +168,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         Version170,
 
+        /// <summary>
+        /// Dev18
+        /// </summary>
+        Version180,
+
         // keep this up-to-date; always point to the last entry.
         /// <summary>
         /// The latest version available at the time of release
@@ -214,7 +218,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Lock object to synchronize chainedReferenceAssemblyPath dictionary
         /// </summary>
-        private static readonly object s_locker = new object();
+        private static readonly LockType s_locker = new LockType();
 
         /// <summary>
         /// Cache the results of calling the GetPathToReferenceAssemblies so that we do not recalculate it every time we call the method
@@ -1821,7 +1825,7 @@ namespace Microsoft.Build.Utilities
                 if (NativeMethodsShared.IsWindows && platformTarget != null)
                 {
                     // If we are a 32 bit operating system the we should always return the 32 bit directory, or we are targeting x86, arm is also 32 bit
-                    if (!EnvironmentUtilities.Is64BitOperatingSystem || platformTarget.Equals("x86", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm", StringComparison.OrdinalIgnoreCase))
+                    if (!Environment.Is64BitOperatingSystem || platformTarget.Equals("x86", StringComparison.OrdinalIgnoreCase) || platformTarget.Equals("arm", StringComparison.OrdinalIgnoreCase))
                     {
                         targetedArchitecture = SharedDotNetFrameworkArchitecture.Bitness32;
                     }
@@ -2068,6 +2072,7 @@ namespace Microsoft.Build.Utilities
                 VisualStudioVersion.Version150 => FrameworkLocationHelper.visualStudioVersion150,
                 VisualStudioVersion.Version160 => FrameworkLocationHelper.visualStudioVersion160,
                 VisualStudioVersion.Version170 => FrameworkLocationHelper.visualStudioVersion170,
+                VisualStudioVersion.Version180 => FrameworkLocationHelper.visualStudioVersion180,
                 _ => Unsupported()
             };
 
@@ -2863,7 +2868,7 @@ namespace Microsoft.Build.Utilities
             OpenBaseKey openBaseKey = new OpenBaseKey(RegistryHelper.OpenBaseKey);
             FileExists fileExists = new FileExists(File.Exists);
 
-            bool is64bitOS = EnvironmentUtilities.Is64BitOperatingSystem;
+            bool is64bitOS = Environment.Is64BitOperatingSystem;
 
             // Under WOW64 the HKEY_CURRENT_USER\SOFTWARE key is shared. This means the values are the same in the 64 bit and 32 bit views. This means we only need to get one view of this key.
             GatherSDKsFromRegistryImpl(platformMonikers, registryRoot, RegistryView.Default, RegistryHive.CurrentUser, getSubkeyNames, getRegistrySubKeyDefaultValue, openBaseKey, fileExists);
@@ -3584,7 +3589,7 @@ namespace Microsoft.Build.Utilities
             {
                 toolPath = Path.Combine(toolPath, fileName);
 
-                // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132 
+                // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132
                 if (!File.Exists(toolPath))
                 {
                     toolPath = null;
@@ -3738,9 +3743,13 @@ namespace Microsoft.Build.Utilities
         private static Version ConvertTargetFrameworkVersionToVersion(string targetFrameworkVersion)
         {
             // Trim off the v if is is there.
-            if (!string.IsNullOrEmpty(targetFrameworkVersion) && targetFrameworkVersion.Substring(0, 1).Equals("v", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(targetFrameworkVersion) && targetFrameworkVersion[0] is 'v' or 'V')
             {
-                targetFrameworkVersion = targetFrameworkVersion.Substring(1);
+#if NET
+                return Version.Parse(targetFrameworkVersion.AsSpan(1));
+#else
+                return new Version(targetFrameworkVersion.Substring(1));
+#endif
             }
 
             return new Version(targetFrameworkVersion);
@@ -3859,8 +3868,13 @@ namespace Microsoft.Build.Utilities
                     // only add if the version folder name is of the right format
                     if (folder.Name.Length >= 4 && folder.Name.StartsWith("v", StringComparison.OrdinalIgnoreCase))
                     {
-                        Version ver;
-                        if (Version.TryParse(folder.Name.Substring(1), out ver))
+                        if (Version.TryParse(
+#if NET
+                            folder.Name.AsSpan(1),
+#else
+                            folder.Name.Substring(1),
+#endif
+                            out _))
                         {
                             frameworkVersions.Add(folder.Name);
                         }
@@ -3982,10 +3996,14 @@ namespace Microsoft.Build.Utilities
 
             public int Compare(string versionX, string versionY)
             {
+#if NET
+                return Version.Parse(versionX.AsSpan(1)).CompareTo(Version.Parse(versionY.AsSpan(1)));
+#else
                 return new Version(versionX.Substring(1)).CompareTo(new Version(versionY.Substring(1)));
+#endif
             }
         }
 
-        #endregion
+#endregion
     }
 }

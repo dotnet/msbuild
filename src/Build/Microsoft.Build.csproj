@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -38,12 +38,14 @@
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
+    <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PooledObjects" PrivateAssets="all" />
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
@@ -80,9 +82,6 @@
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
-      <Link>IConstrainedEqualityComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
     </Compile>
@@ -96,6 +95,7 @@
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
+    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
@@ -124,9 +124,6 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IsExternalInit.cs">
-      <Link>BuildCheck\Utilities\IsExternalInit.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
@@ -150,6 +147,7 @@
     <Compile Include="BackEnd\Components\Caching\ConfigCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\Caching\ResultsCacheWithOverride.cs" />
     <Compile Include="BackEnd\Components\ProjectCache\*.cs" />
+    <Compile Include="BackEnd\Components\ProjectCache\Experimental\*.cs" />
     <Compile Include="BackEnd\Components\Communications\CurrentHost.cs" />
     <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\SerializationContractInitializer.cs" />
@@ -362,6 +360,7 @@
     <Compile Include="BackEnd\Components\Communications\NodeInfo.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderInProc.cs" />
+    <Compile Include="BackEnd\Components\Communications\RarNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\IBuildComponent.cs" />
     <Compile Include="BackEnd\Components\IBuildComponentHost.cs" />
     <Compile Include="BackEnd\Components\Scheduler\IScheduler.cs" />
@@ -380,7 +379,6 @@
       <Link>Collections\CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
     <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />

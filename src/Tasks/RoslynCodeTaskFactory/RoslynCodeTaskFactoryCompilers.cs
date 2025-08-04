@@ -4,10 +4,12 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+#if RUNTIME_TYPE_NETCORE
+using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
+#endif
 
 #nullable disable
 
