@@ -3,7 +3,7 @@
 
 
 # Runs in 3 modes:
-# 1. hourly main insertion from latest main CI.
+# 1. daily main insertion from latest main CI.
 #   - can be disabled in the UI by adding a custom schedule for any branch.
 # 2. trigger insert as a followup to a servicing CI run.
 #   - can be disabled in the UI by adding a custom CI trigger.
@@ -11,9 +11,10 @@
 trigger: none
 pr: none
 name: $(Date:yyyyMMdd).$(Rev:r)
+
 schedules:
-  - cron: '0 * * * *' # Runs every hour
-    displayName: Hourly VS insertion main
+  - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
+    displayName: Daily VS insertion main
     branches:
       include:
         - main
@@ -24,7 +25,7 @@ resources:
   - pipeline: 'MSBuild'
     project: 'DevDiv'
     source: 'MSBuild'
-    branch: main # for hourly main scheduled insertion
+    branch: main # for daily main scheduled insertion
     trigger:
       branches:
         include: # trigger as a followup to servicing CI
