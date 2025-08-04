@@ -23,8 +23,9 @@ using System.Security.AccessControl;
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
+#if !NET && !TASKHOST
 using Microsoft.Build.Eventing;
-
+#endif
 
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
@@ -480,7 +481,11 @@ namespace Microsoft.Build.BackEnd
 
                         gotValidConnection = false;
                     }
+#if !NET && !TASKHOST
                     catch (InvalidOperationException e)
+#else
+                    catch (InvalidOperationException)
+#endif
                     {
 #if !NET && !TASKHOST
                         MSBuildEventSource.Log.InvalidOperationExceptionDebug("node endpoint invalid connection", e.StackTrace.ToString());

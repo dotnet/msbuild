@@ -362,7 +362,11 @@ namespace Microsoft.Build.BackEnd
                             {
                                 CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup", msbuildProcess.Id, msbuildProcess.ExitCode);
                             }
+#if !NET
                             catch (InvalidOperationException e)
+#else
+                            catch (InvalidOperationException)
+#endif
                             {
                                 // This case is common on Windows where we called CreateProcess and the Process object
                                 // can't get the exit code.

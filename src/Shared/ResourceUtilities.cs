@@ -8,7 +8,9 @@ using System.Diagnostics;
 #endif
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if !NET && !TASKHOST
 using Microsoft.Build.Eventing;
+#endif
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared

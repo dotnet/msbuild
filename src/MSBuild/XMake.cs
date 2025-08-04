@@ -474,7 +474,6 @@ namespace Microsoft.Build.CommandLine
                 catch (InvalidOperationException e) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
                 {
                     MSBuildEventSource.Log.InvalidOperationExceptionDebug("Xmake 1", e.StackTrace.ToString());
-
                 }
             }
 
@@ -556,7 +555,6 @@ namespace Microsoft.Build.CommandLine
             catch (InvalidOperationException e) // Instance 'WmiApSrv' does not exist in the specified Category. (??)
             {
                 MSBuildEventSource.Log.InvalidOperationExceptionDebug("Xmake 3", e.StackTrace.ToString());
-
             }
         }
 
