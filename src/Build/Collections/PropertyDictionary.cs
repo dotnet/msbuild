@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -35,7 +36,7 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>, IDisposable
+    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
         where T : class, IKeyed, IValued, IEquatable<T>
     {
         /// <summary>
@@ -47,7 +48,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Reader-writer lock to prevent deadlocks during enumeration.
         /// </summary>
-        private readonly ReaderWriterLockSlim _lock;
+        private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.SupportsRecursion);
 
         /// <summary>
         /// Creates empty dictionary.
@@ -55,7 +56,6 @@ namespace Microsoft.Build.Collections
         public PropertyDictionary()
         {
             _properties = new RetrievableValuedEntryHashSet<T>(MSBuildNameIgnoreCaseComparer.Default);
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -64,7 +64,6 @@ namespace Microsoft.Build.Collections
         internal PropertyDictionary(int capacity)
         {
             _properties = new RetrievableValuedEntryHashSet<T>(capacity, MSBuildNameIgnoreCaseComparer.Default);
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -85,7 +84,6 @@ namespace Microsoft.Build.Collections
         internal PropertyDictionary(MSBuildNameIgnoreCaseComparer comparer)
         {
             _properties = new RetrievableValuedEntryHashSet<T>(comparer);
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -107,7 +105,6 @@ namespace Microsoft.Build.Collections
         internal PropertyDictionary(IRetrievableValuedEntryHashSet<T> propertiesHashSet)
         {
             _properties = propertiesHashSet;
-            _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         }
 
         /// <summary>
@@ -133,14 +130,9 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                _lock.EnterReadLock();
-                try
+                using (_lock.EnterDisposableReadLock())
                 {
                     return _properties.Values;
-                }
-                finally
-                {
-                    _lock.ExitReadLock();
                 }
             }
         }
@@ -252,17 +244,12 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            _lock.EnterReadLock();
-            try
+            using (_lock.EnterDisposableReadLock())
             {
                 foreach (T item in _properties.Values)
                 {
                     yield return item;
                 }
-            }
-            finally
-            {
-                _lock.ExitReadLock();
             }
         }
 
@@ -471,17 +458,12 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            _lock.EnterReadLock();
-            try
+            using (_lock.EnterDisposableReadLock())
             {
                 foreach (KeyValuePair<string, T> kvp in (IEnumerable<KeyValuePair<string, T>>)_properties)
                 {
                     yield return kvp;
                 }
-            }
-            finally
-            {
-                _lock.ExitReadLock();
             }
         }
 
@@ -511,14 +493,9 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
-            _lock.EnterWriteLock();
-            try
+            using (_lock.EnterDisposableWriteLock())
             {
                 _properties[projectProperty.Key] = projectProperty;
-            }
-            finally
-            {
-                _lock.ExitWriteLock();
             }
         }
 
@@ -622,10 +599,5 @@ namespace Microsoft.Build.Collections
                 }
             }
         }
-
-        /// <summary>
-        /// Dispose the reader-writer lock.
-        /// </summary>
-        public void Dispose() => _lock?.Dispose();
     }
 }
