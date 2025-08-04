@@ -31,7 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
-    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
