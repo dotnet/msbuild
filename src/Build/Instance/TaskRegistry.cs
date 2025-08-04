@@ -1147,7 +1147,9 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Cache of task names which can be created by the factory.
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
-            /// make possibly expensive calls over and over again.
+            /// make possibly expensive calls over and over again. We intentionally do not use a ConcurrentDictionary here
+            /// for performance reasons, since a concurrent dictionary is much larger than a regular dictionary. The usage
+            /// scope is limited, so we can just lock on a regular dictionary.
             /// </summary>
             private readonly Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
