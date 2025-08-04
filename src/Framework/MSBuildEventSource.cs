@@ -697,11 +697,13 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(96, shutdownReason);
         }
-        #endregion
-        [Event(97, Keywords = EventKeywords.All)]
+
+        [Event(97, Keywords = Keywords.All)]
         public void InvalidOperationExceptionDebug(string message, string stackTrace)
         {
             WriteEvent(97, message, stackTrace);
         }
+        #endregion
+
     }
 }
