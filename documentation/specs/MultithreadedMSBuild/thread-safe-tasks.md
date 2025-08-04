@@ -52,29 +52,24 @@ public interface IThreadSafeTask : ITask
 
 **Option B:** Parameter-based approach
 ```csharp
-public interface IThreadSafeTask : ITask
+public interface IThreadSafeTask
 {
     bool Execute(ITaskExecutionContext context);
 }
 ```
 
 **Pros of Option A:**
-- Better feature decoupling for future extensibility. For example, if we add async support, we need only one method (`ExecuteAsync()`) instead of two (`ExecuteAsync()` and `ExecuteAsync(ITaskExecutionContext context)`).
+- Better feature decoupling for future extensibility. For example, if we add async support, we need only one method (`ExecuteAsync()`) instead of two (`ExecuteAsync()` and `ExecuteAsync(ITaskExecutionContext context)`). 
 
 **Pros of Option B:**
 - ExecutionContext is explicitly visible in the method signature
 
-**Interface Inheritance:**
-Both options can either extend `ITask` (as shown above) or be independent:
-```csharp
-public interface IThreadSafeTask
-{
-    // Same members as above
-}
-```
+**Question:** For Option B, we need to decide whether MSBuild should support async task execution (using `ExecuteAsync` methods) to avoid creating multiple overloads of the execute method in the `IThreadSafeTask` interface.
 
-**Independent Interface Benefits:**
-An independent interface allows task authors to have two versions of the same task in one assembly using different namespaces. Older MSBuild versions will locate and use only the `ITask` version, while newer MSBuild versions will locate both and call the appropriate version.
+**Interface Inheritance:**
+Both options can either extend `ITask` or be independent. It seems more aligned with SOLID principles to extend `ITask` in Option A and have an independent interface in Option B.
+
+**Note:** An independent interface allows task authors to have two versions of the same task in one assembly using different namespaces. Older MSBuild versions will locate and use only the `ITask` version, while newer MSBuild versions will locate both and call the appropriate version.
 
 **Limitations:**
 - Breaks when tasks are located by full type name
@@ -162,6 +157,8 @@ public class MyTask : Task
 - Unclear how to scale this approach in case we add more features
 
 **Note:** If an older MSBuild version cannot load the `Execute(ITaskExecutionContext context)` method due to missing types, it may automatically fall back to the `Execute()` method if it is available.
+
+**Question:** Which set of options above should MSBuild support?
 
 ## ExecutionContext API
 
@@ -264,4 +261,6 @@ public abstract class TaskExecutionContext
 
 **Note:**
 - Default implementations allow backward compatibility for customers who extend the class.
+
+**Question:** Which option is better?
 
