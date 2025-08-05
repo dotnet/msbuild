@@ -841,20 +841,107 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static HandshakeOptions GetHandshakeOptions(
             bool taskHost,
-            TaskHostParameters taskHostParameters,
+            in TaskHostParameters taskHostParameters,
             string architectureFlagToSet = null,
             bool nodeReuse = false,
             bool lowPriority = false)
         {
-            // For non-empty struct parameters, convert to dictionary and use existing method
-            // This ensures consistent behavior while gradually transitioning to struct usage
-            if (!string.IsNullOrEmpty(taskHostParameters.Runtime) || !string.IsNullOrEmpty(taskHostParameters.Architecture))
+            HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
+
+            int clrVersion = 0;
+
+            // We don't know about the TaskHost.
+            if (taskHost)
             {
-                return GetHandshakeOptions(taskHost, architectureFlagToSet, nodeReuse, lowPriority, taskHostParameters.ToDictionary());
+                // Check if we have any meaningful parameters in the struct
+                bool hasRuntimeOrArch = !string.IsNullOrEmpty(taskHostParameters.Runtime) || !string.IsNullOrEmpty(taskHostParameters.Architecture);
+                
+                // No parameters given, default to current
+                if (!hasRuntimeOrArch)
+                {
+                    clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                    architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                }
+                else // Figure out flags based on parameters given
+                {
+                    string runtimeVersion = taskHostParameters.Runtime;
+                    string architecture = taskHostParameters.Architecture;
+                    
+                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(runtimeVersion), "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(architecture), "Should always have an explicit architecture when we call this method.");
+
+                    if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+                    {
+                        clrVersion = 2;
+                    }
+                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
+                    {
+                        clrVersion = 4;
+                    }
+                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
+                    {
+                        clrVersion = 5;
+                    }
+                    else
+                    {
+                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                    }
+
+                    architectureFlagToSet = architecture;
+                }
             }
 
-            // Use existing method for null parameters
-            return GetHandshakeOptions(taskHost, architectureFlagToSet, nodeReuse, lowPriority, (IDictionary<string, string>)null);
+            if (!string.IsNullOrEmpty(architectureFlagToSet))
+            {
+                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+                {
+                    context |= HandshakeOptions.X64;
+                }
+                else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
+                {
+                    context |= HandshakeOptions.Arm64;
+                }
+            }
+
+            switch (clrVersion)
+            {
+                case 0:
+                // Not a taskhost, runtime must match
+                case 4:
+                    // Default for MSBuild running on .NET Framework 4,
+                    // not represented in handshake
+                    break;
+                case 2:
+                    context |= HandshakeOptions.CLR2;
+                    break;
+                case >= 5:
+                    context |= HandshakeOptions.NET;
+                    break;
+                default:
+                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    break;
+            }
+
+            if (nodeReuse)
+            {
+                context |= HandshakeOptions.NodeReuse;
+            }
+            if (lowPriority)
+            {
+                context |= HandshakeOptions.LowPriority;
+            }
+#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
+            // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
+            // Both the client and the host will calculate this separately, and the idea is that if they come out the same
+            // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
+            // to the username check which is also done on connection.
+            if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+            {
+                context |= HandshakeOptions.Administrator;
+            }
+#endif
+
+            return context;
         }
 
         /// <summary>
