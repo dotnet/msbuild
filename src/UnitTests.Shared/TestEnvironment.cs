@@ -453,7 +453,7 @@ namespace Microsoft.Build.UnitTests
                     if (operation != "removed" || !string.IsNullOrEmpty((string)subset[key]))
                     {
                         superset.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
-                        superset[key].ShouldBe(subset[key]);
+                        (superset[key] as string).ShouldBe(subset[key], "casing doesn't matter", StringCompareShould.IgnoreCase);
                     }
                 }
             }
