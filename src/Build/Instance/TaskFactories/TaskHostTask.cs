@@ -70,14 +70,6 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentQueue<INodePacket> _receivedPackets;
 
         /// <summary>
-        /// The set of parameters used to decide which host to launch.
-        /// Keep for API compatibility, actual usage moved to struct version.
-        /// </summary>
-#pragma warning disable IDE0052 // Remove unread private members
-        private IDictionary<string, string> _taskHostParameters;
-#pragma warning restore IDE0052 // Remove unread private members
-
-        /// <summary>
         /// The structured task host parameters for better performance.
         /// </summary>
         private TaskHostParameters _taskHostParametersStruct;
@@ -158,7 +150,6 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
-            _taskHostParameters = taskHostParameters;
             _taskHostParametersStruct = TaskHostParameters.FromDictionary(taskHostParameters);
 
             _packetFactory = new NodePacketFactory();
