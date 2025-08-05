@@ -640,6 +640,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using (var env = TestEnvironment.Create(_output))
             {
+                _ = env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", allowTargetOutputsLogging ? "1" : null);
+
                 string content = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
     <ItemGroup>
