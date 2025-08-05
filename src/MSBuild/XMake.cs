@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -233,13 +233,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         [LoaderOptimization(LoaderOptimization.MultiDomain)]
 #endif
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-        public static int Main(
-#if !FEATURE_GET_COMMANDLINE
-            string[] args
-#endif
-            )
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        public static int Main()
         {
             // Setup the console UI.
             using AutomaticEncodingRestorer _ = new();
@@ -263,35 +257,18 @@ namespace Microsoft.Build.CommandLine
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(
-#if FEATURE_GET_COMMANDLINE
-                    Environment.CommandLine))
-#else
-                    ConstructArrayArg(args)))
-#endif
+                CanRunServerBasedOnCommandLineSwitches(Environment.CommandLine))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
 
                 // Use the client app to execute build in msbuild server. Opt-in feature.
-                exitCode = ((s_initialized && MSBuildClientApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                Environment.CommandLine,
-#else
-                ConstructArrayArg(args),
-#endif
-                s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                exitCode = (s_initialized && MSBuildClientApp.Execute(Environment.CommandLine, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1;
             }
             else
             {
                 // return 0 on success, non-zero on failure
-                exitCode = ((s_initialized && Execute(
-#if FEATURE_GET_COMMANDLINE
-                Environment.CommandLine)
-#else
-                ConstructArrayArg(args))
-#endif
-                == ExitType.Success) ? 0 : 1);
+                exitCode = (s_initialized && Execute(Environment.CommandLine) == ExitType.Success) ? 0 : 1;
             }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -310,12 +287,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
         /// </remarks>
-        private static bool CanRunServerBasedOnCommandLineSwitches(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine)
-#else
-            string[] commandLine)
-#endif
+        private static bool CanRunServerBasedOnCommandLineSwitches(string commandLine)
         {
             bool canRunServer = true;
             try
@@ -383,23 +355,6 @@ namespace Microsoft.Build.CommandLine
 
             return false;
         }
-
-#if !FEATURE_GET_COMMANDLINE
-        /// <summary>
-        /// Insert the command executable path as the first element of the args array.
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        private static string[] ConstructArrayArg(string[] args)
-        {
-            string[] newArgArray = new string[args.Length + 1];
-
-            newArgArray[0] = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            Array.Copy(args, 0, newArgArray, 1, args.Length);
-
-            return newArgArray;
-        }
-#endif // !FEATURE_GET_COMMANDLINE
 
         /// <summary>
         /// Append output file with elapsedTime
@@ -647,12 +602,7 @@ namespace Microsoft.Build.CommandLine
         /// is ignored.</param>
         /// <returns>A value of type ExitType that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static ExitType Execute(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine)
-#else
-            string[] commandLine)
-#endif
+        public static ExitType Execute(string commandLine)
         {
             DebuggerLaunchCheck();
 
@@ -669,9 +619,7 @@ namespace Microsoft.Build.CommandLine
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
-#if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine);
-#endif
 
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 
@@ -683,14 +631,7 @@ namespace Microsoft.Build.CommandLine
             TextWriter targetsWriter = null;
             try
             {
-#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStart(commandLine);
-#else
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.MSBuildExeStart(string.Join(" ", commandLine));
-                }
-#endif
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -710,10 +651,8 @@ namespace Microsoft.Build.CommandLine
                 LoggerVerbosity verbosity = LoggerVerbosity.Normal;
                 LoggerVerbosity originalVerbosity = LoggerVerbosity.Normal;
                 List<DistributedLoggerRecord> distributedLoggerRecords = null;
-#if FEATURE_XML_SCHEMA_VALIDATION
                 bool needToValidateProject = false;
                 string schemaFile = null;
-#endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
 #if FEATURE_NODE_REUSE
@@ -757,10 +696,8 @@ namespace Microsoft.Build.CommandLine
                                             ref verbosity,
                                             ref originalVerbosity,
                                             ref distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
                                             ref needToValidateProject,
                                             ref schemaFile,
-#endif
                                             ref cpuCount,
                                             ref multiThreaded,
                                             ref enableNodeReuse,
@@ -790,11 +727,7 @@ namespace Microsoft.Build.CommandLine
                                             ref getTargetResult,
                                             ref getResultOutputFile,
                                             recursing: false,
-#if FEATURE_GET_COMMANDLINE
                                             commandLine);
-#else
-                                            string.Join(' ', commandLine));
-#endif
 
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
@@ -881,35 +814,34 @@ namespace Microsoft.Build.CommandLine
                                 loggers,
                                 verbosity,
                                 distributedLoggerRecords.ToArray(),
-#if FEATURE_XML_SCHEMA_VALIDATION
-                                needToValidateProject, schemaFile,
-#endif
-                                    cpuCount,
-                                    multiThreaded,
-                                    enableNodeReuse,
-                                    preprocessWriter,
-                                    targetsWriter,
-                                    detailedSummary,
-                                    warningsAsErrors,
-                                    warningsNotAsErrors,
-                                    warningsAsMessages,
-                                    enableRestore,
-                                    profilerLogger,
-                                    enableProfiler,
-                                    interactive,
-                                    isolateProjects,
-                                    graphBuildOptions,
-                                    lowPriority,
-                                    question,
-                                    isBuildCheckEnabled,
-                                    inputResultsCaches,
-                                    outputResultsCache,
-                                    saveProjectResult: outputPropertiesItemsOrTargetResults,
-                                    ref result,
+                                needToValidateProject,
+                                schemaFile,
+                                cpuCount,
+                                multiThreaded,
+                                enableNodeReuse,
+                                preprocessWriter,
+                                targetsWriter,
+                                detailedSummary,
+                                warningsAsErrors,
+                                warningsNotAsErrors,
+                                warningsAsMessages,
+                                enableRestore,
+                                profilerLogger,
+                                enableProfiler,
+                                interactive,
+                                isolateProjects,
+                                graphBuildOptions,
+                                lowPriority,
+                                question,
+                                isBuildCheckEnabled,
+                                inputResultsCaches,
+                                outputResultsCache,
+                                saveProjectResult: outputPropertiesItemsOrTargetResults,
+                                ref result,
 #if FEATURE_REPORTFILEACCESSES
-                                    reportFileAccesses,
+                                reportFileAccesses,
 #endif
-                                    commandLine))
+                                commandLine))
                         {
                             exitType = ExitType.BuildError;
                         }
@@ -1093,14 +1025,7 @@ namespace Microsoft.Build.CommandLine
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();
 
-#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
-#else
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
-                }
-#endif
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!
@@ -1293,10 +1218,8 @@ namespace Microsoft.Build.CommandLine
             ILogger[] loggers,
             LoggerVerbosity verbosity,
             DistributedLoggerRecord[] distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
             bool needToValidateProject,
             string schemaFile,
-#endif
             int cpuCount,
             bool multiThreaded,
             bool enableNodeReuse,
@@ -1322,11 +1245,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
             bool reportFileAccesses,
 #endif
-#if FEATURE_GET_COMMANDLINE
             string commandLine)
-#else
-            string[] commandLine)
-#endif
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
@@ -1430,7 +1349,6 @@ namespace Microsoft.Build.CommandLine
 
                 bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
 
-#if FEATURE_XML_SCHEMA_VALIDATION
                 // If the user has requested that the schema be validated, do that here.
                 if (needToValidateProject && !isSolution)
                 {
@@ -1448,7 +1366,6 @@ namespace Microsoft.Build.CommandLine
                     // we can safely assume that the project successfully validated.
                     projectCollection.UnloadProject(project);
                 }
-#endif
 
                 if (isPreprocess)
                 {
@@ -1500,11 +1417,7 @@ namespace Microsoft.Build.CommandLine
 
                     parameters.EnableNodeReuse = enableNodeReuse;
                     parameters.LowPriority = lowPriority;
-#if FEATURE_ASSEMBLY_LOCATION
                     parameters.NodeExeLocation = Assembly.GetExecutingAssembly().Location;
-#else
-                    parameters.NodeExeLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-#endif
                     parameters.MaxNodeCount = cpuCount;
                     parameters.MultiThreaded = multiThreaded;
                     parameters.Loggers = projectCollection.Loggers;
@@ -1565,13 +1478,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
-                        var commandLineString =
-#if FEATURE_GET_COMMANDLINE
-                            commandLine;
-#else
-                            string.Join(" ", commandLine);
-#endif
-                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString));
+                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLine));
 
                         // Log a message for every response file and include it in log
                         foreach (var responseFilePath in s_includedResponseFiles)
@@ -2003,26 +1910,14 @@ namespace Microsoft.Build.CommandLine
         /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <param name="fullCommandLine"></param>
         /// <returns>Combined bag of switches.</returns>
-        private static void GatherAllSwitches(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine,
-#else
-            string[] commandLine,
-#endif
-            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
+        private static void GatherAllSwitches(string commandLine, out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
         {
             ResetGatheringSwitchesState();
 
-#if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
             var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
 
             s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
-#else
-            var commandLineArgs = new List<string>(commandLine);
-
-            s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-#endif
 
 #if USE_MSBUILD_DLL_EXTN
             var msbuildExtn = ".dll";
@@ -2037,11 +1932,7 @@ namespace Microsoft.Build.CommandLine
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs.RemoveAt(0);
 
-#if FEATURE_GET_COMMANDLINE
             fullCommandLine = $"'{commandLine}'";
-#else
-            fullCommandLine = $"'{string.Join(' ', commandLine)}'";
-#endif
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
@@ -2518,10 +2409,8 @@ namespace Microsoft.Build.CommandLine
             ref LoggerVerbosity verbosity,
             ref LoggerVerbosity originalVerbosity,
             ref List<DistributedLoggerRecord> distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
             ref bool needToValidateProject,
             ref string schemaFile,
-#endif
             ref int cpuCount,
             ref bool multiThreaded,
             ref bool enableNodeReuse,
@@ -2658,10 +2547,8 @@ namespace Microsoft.Build.CommandLine
                                                            ref verbosity,
                                                            ref originalVerbosity,
                                                            ref distributedLoggerRecords,
-#if FEATURE_XML_SCHEMA_VALIDATION
                                                            ref needToValidateProject,
                                                            ref schemaFile,
-#endif
                                                            ref cpuCount,
                                                            ref multiThreaded,
                                                            ref enableNodeReuse,
@@ -2807,11 +2694,9 @@ namespace Microsoft.Build.CommandLine
                         Console.WriteLine($"{Path.Combine(s_exePath, s_exeName)} {equivalentCommandLine} {projectFile}");
                     }
 
-#if FEATURE_XML_SCHEMA_VALIDATION
                     // figure out if the project needs to be validated against a schema
                     needToValidateProject = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Validate);
                     schemaFile = ProcessValidateSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Validate]);
-#endif
                     invokeBuild = true;
 
                     if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.WarningsNotAsErrors) &&
@@ -4178,7 +4063,7 @@ namespace Microsoft.Build.CommandLine
             loggerParameters += ";FORWARDPROJECTCONTEXTEVENTS";
 
             // Gets the currently loaded assembly in which the specified class is defined
-            Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
+            Assembly engineAssembly = typeof(ProjectCollection).Assembly;
             string loggerClassName = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
             string loggerAssemblyName = engineAssembly.GetName().FullName;
             LoggerDescription forwardingLoggerDescription = new LoggerDescription(loggerClassName, loggerAssemblyName, null, loggerParameters, effectiveVerbosity);
@@ -4237,7 +4122,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Gets the currently loaded assembly in which the specified class is defined
-                Assembly engineAssembly = typeof(ProjectCollection).GetTypeInfo().Assembly;
+                Assembly engineAssembly = typeof(ProjectCollection).Assembly;
                 string loggerClassName = "Microsoft.Build.Logging.DistributedFileLogger";
                 string loggerAssemblyName = engineAssembly.GetName().FullName;
                 // Node the verbosity parameter is not used by the Distributed file logger so changing it here has no effect. It must be changed in the distributed file logger
@@ -4616,7 +4501,6 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-#if FEATURE_XML_SCHEMA_VALIDATION
         /// <summary>
         /// Figures out if the project needs to be validated against a schema.
         /// </summary>
@@ -4637,7 +4521,6 @@ namespace Microsoft.Build.CommandLine
 
             return schemaFile;
         }
-#endif
 
         /// <summary>
         /// Given an invalid ToolsVersion string and the collection of valid toolsets,

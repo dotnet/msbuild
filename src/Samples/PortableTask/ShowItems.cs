@@ -15,7 +15,7 @@ namespace PortableTask
 
         public override bool Execute()
         {
-            Assembly coreAssembly = typeof(object).GetTypeInfo().Assembly;
+            Assembly coreAssembly = typeof(object).Assembly;
 
             var coreAssemblyFileVersion = coreAssembly.GetCustomAttribute<AssemblyFileVersionAttribute>();
             if (coreAssemblyFileVersion == null)

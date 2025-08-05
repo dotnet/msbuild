@@ -10,7 +10,6 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using System.Runtime.Remoting.Lifetime;
 using System.Runtime.Remoting;
 #endif
-using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
@@ -340,7 +339,7 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable SYSLIB0050
             // Types which are not serializable and are not IExtendedBuildEventArgs as
             // those always implement custom serialization by WriteToStream and CreateFromStream.
-            if (!e.GetType().GetTypeInfo().IsSerializable &&
+            if (!e.GetType().IsSerializable &&
                 e is not IExtendedBuildEventArgs &&
                 e is not GeneratedFileUsedEventArgs)
 #pragma warning restore SYSLIB0050

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -77,7 +76,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                ErrorUtilities.ThrowInternalError("Unhandled intrinsic task type {0}", taskInstance.GetType().GetTypeInfo().BaseType);
+                ErrorUtilities.ThrowInternalError("Unhandled intrinsic task type {0}", taskInstance.GetType().BaseType);
                 return null;
             }
         }

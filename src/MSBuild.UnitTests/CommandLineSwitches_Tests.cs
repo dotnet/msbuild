@@ -474,7 +474,6 @@ namespace Microsoft.Build.UnitTests
             unquoteParameters.ShouldBeTrue();
         }
 
-#if FEATURE_XML_SCHEMA_VALIDATION
         [Theory]
         [InlineData("validate")]
         [InlineData("VALIDATE")]
@@ -498,7 +497,6 @@ namespace Microsoft.Build.UnitTests
             missingParametersErrorMessage.ShouldBeNull();
             unquoteParameters.ShouldBeTrue();
         }
-#endif
 
         [Theory]
         [InlineData("preprocess")]
@@ -1185,10 +1183,8 @@ namespace Microsoft.Build.UnitTests
                                         Array.Empty<ILogger>(),
                                         LoggerVerbosity.Normal,
                                         Array.Empty<DistributedLoggerRecord>(),
-#if FEATURE_XML_SCHEMA_VALIDATION
                                         false,
                                         null,
-#endif
                                         1,
                                         false,
                                         true,
@@ -1545,11 +1541,7 @@ namespace Microsoft.Build.UnitTests
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
 
-#if FEATURE_GET_COMMANDLINE
             MSBuildApp.Execute(@"msbuild.exe " + project + " /t:foo.bar").ShouldBe(MSBuildApp.ExitType.SwitchError);
-#else
-            MSBuildApp.Execute(new[] { @"msbuild.exe", project, "/t:foo.bar" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
-#endif
         }
 
         /// <summary>

@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (_centralForwardingLoggerSinkId == -1)
                 {
                     // Create a forwarding logger which forwards all events to an eventSourceSink
-                    Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
+                    Assembly engineAssembly = typeof(LoggingService).Assembly;
                     string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
                     LoggerDescription centralForwardingLoggerDescription = new LoggerDescription(
