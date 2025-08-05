@@ -17,6 +17,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.Abstractions;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable
@@ -39,6 +40,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
+        private readonly ITestOutputHelper _output;
+
 #pragma warning disable xUnit1013
 
         /// <summary>
@@ -54,8 +57,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Called prior to each test.
         /// </summary>
-        public TargetEntry_Tests()
+        public TargetEntry_Tests(ITestOutputHelper output)
         {
+            _output = output;
             _nodeRequestId = 1;
             _host = new MockHost();
             _host.OnLoggingThreadException += this.LoggingException;
@@ -634,7 +638,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [InlineData(true, true)]
         public void TestTargetOutputsOnFinishedEvent(bool returnsEnabledForThisProject, bool allowTargetOutputsLogging)
         {
-            try
+            using (var env = TestEnvironment.Create(_output))
             {
                 string content = @"
 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
@@ -652,14 +656,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
     <Target Name=`c` Outputs=`%(SomeItem2.Filename)`/>
 </Project>
         ";
+                var logger = new MockLogger(_output);
+                Helpers.BuildProjectWithNewOMExpectSuccess(content, enableTargetOutputLogging: allowTargetOutputsLogging, logger: logger);
 
-                MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content, enableTargetOutputLogging: allowTargetOutputsLogging);
+                Assert.Equal(3, logger.TargetFinishedEvents.Count);
 
-                Assert.Equal(3, log.TargetFinishedEvents.Count);
-
-                TargetFinishedEventArgs targeta = log.TargetFinishedEvents[2];
-                TargetFinishedEventArgs targetb = log.TargetFinishedEvents[0];
-                TargetFinishedEventArgs targetc = log.TargetFinishedEvents[1];
+                TargetFinishedEventArgs targeta = logger.TargetFinishedEvents[2];
+                TargetFinishedEventArgs targetb = logger.TargetFinishedEvents[0];
+                TargetFinishedEventArgs targetc = logger.TargetFinishedEvents[1];
 
                 Assert.NotNull(targeta);
                 Assert.NotNull(targetb);
@@ -674,14 +678,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IEnumerable targetOutputsC = targetc.TargetOutputs;
 
                 Assert.Null(targetOutputsA);
-                if (!allowTargetOutputsLogging)
+                if (allowTargetOutputsLogging)
                 {
-                    Assert.Null(targetOutputsB);
-                    Assert.Null(targetOutputsC);
-                }
-                else
-                {
-
                     if (returnsEnabledForThisProject)
                     {
                         // b should have stuff, c should not have stuff, because only B has Returns
@@ -707,11 +705,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         Assert.Equal("item2", outputListC[0].ItemSpec);
                     }
                 }
-            }
-            finally
-            {
-                // make sure we clear any env var trait/state
-                Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", null);
+                else
+                {
+                    Assert.Null(targetOutputsB);
+                    Assert.Null(targetOutputsC);
+                }
             }
         }
 
