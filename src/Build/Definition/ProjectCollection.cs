@@ -176,6 +176,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private bool _onlyLogCriticalEvents;
 
+        private bool _enableTargetOutputLogging;
+
         /// <summary>
         /// Whether reevaluation is temporarily disabled on projects in this collection.
         /// This is useful when the host expects to make a number of reads and writes
@@ -279,7 +281,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
-            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false, reuseProjectRootElementCache: false)
+            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false)
         {
         }
 
@@ -298,9 +300,10 @@ namespace Microsoft.Build.Evaluation
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
-        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="ProjectCollection.Dispose()"/> has to called to clear resources used by async logging.</param>
+        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="Dispose()"/> has to called to clear resources used by async logging.</param>
         /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
-        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache)
+        /// <param name="enableTargetOutputLogging">If set to true, loggers will collect and send Target outputs when targets are finished executing.</param>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -328,11 +331,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
+            EnableTargetOutputLogging = enableTargetOutputLogging;
 
             try
             {
                 _loggerMode = useAsynchronousLogging ? LoggerMode.Asynchronous : LoggerMode.Synchronous;
-                CreateLoggingService(maxNodeCount, onlyLogCriticalEvents);
+                CreateLoggingService(maxNodeCount, onlyLogCriticalEvents, enableTargetOutputLogging);
 
                 RegisterLoggers(loggers);
                 RegisterForwardingLoggers(remoteLoggers);
@@ -432,7 +436,7 @@ namespace Microsoft.Build.Evaluation
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
                     var local = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false);
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false);
 
                     if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
                     {
@@ -711,6 +715,35 @@ namespace Microsoft.Build.Evaluation
                 {
                     OnProjectCollectionChanged(
                         new ProjectCollectionChangedEventArgs(ProjectCollectionChangedState.OnlyLogCriticalEvents));
+                }
+            }
+        }
+
+        public bool EnableTargetOutputLogging
+        {
+            get
+            {
+                using (_locker.EnterDisposableReadLock())
+                {
+                    return _enableTargetOutputLogging;
+                }
+            }
+            set
+            {
+                bool sendEvent = false;
+                using (_locker.EnterDisposableWriteLock())
+                {
+                    if (_enableTargetOutputLogging != value)
+                    {
+                        _enableTargetOutputLogging = value;
+                        sendEvent = true;
+                    }
+                }
+
+                if (sendEvent)
+                {
+                    OnProjectCollectionChanged(
+                        new ProjectCollectionChangedEventArgs(ProjectCollectionChangedState.EnableTargetOutputLogging));
                 }
             }
         }
@@ -1331,7 +1364,7 @@ namespace Microsoft.Build.Evaluation
 
                 // UNDONE: Logging service should not shut down when all loggers are unregistered.
                 // VS unregisters all loggers on the same project collection often. To workaround this, we have to create it again now!
-                CreateLoggingService(MaxNodeCount, OnlyLogCriticalEvents);
+                CreateLoggingService(MaxNodeCount, OnlyLogCriticalEvents, EnableTargetOutputLogging);
             }
 
             OnProjectCollectionChanged(new ProjectCollectionChangedEventArgs(ProjectCollectionChangedState.Loggers));
@@ -1765,11 +1798,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Create a new logging service
         /// </summary>
-        private void CreateLoggingService(int maxCPUCount, bool onlyLogCriticalEvents)
+        private void CreateLoggingService(int maxCPUCount, bool onlyLogCriticalEvents, bool enableTargetOutputLogging)
         {
             _loggingService = BackEnd.Logging.LoggingService.CreateLoggingService(_loggerMode, 0 /*Evaluation can be done as if it was on node "0"*/);
             _loggingService.MaxCPUCount = maxCPUCount;
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
+            _loggingService.EnableTargetOutputLogging = enableTargetOutputLogging;
         }
 
         /// <summary>
