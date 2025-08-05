@@ -648,7 +648,7 @@ public sealed partial class TerminalLogger : INodeLogger
             }
             System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
 
-            TerminalProjectInfo projectInfo = new(c, evalInfo, CreateStopwatch?.Invoke());
+            TerminalProjectInfo projectInfo = new(c, evalInfo, e.TargetNames?.Split(';'), CreateStopwatch?.Invoke());
             _projects[c] = projectInfo;
 
             // First ever restore in the build is starting.
@@ -698,8 +698,6 @@ public sealed partial class TerminalLogger : INodeLogger
                     EraseNodes();
 
                     string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
                     // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
                     // reported during build.
                     string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
@@ -733,17 +731,25 @@ public sealed partial class TerminalLogger : INodeLogger
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
                     // and it is hard to see if project finished, or did not run at all.
-                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
+                    else if (project.Outputs is not null || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
                         string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
                         Terminal.Write(projectFinishedHeader);
 
                         // Print the output path as a link if we have it.
-                        if (outputPath is { } outputPathSpan)
+                        if (project.Outputs is not null)
                         {
-                            (var projectDisplayPath, var urlLink) = DetermineOutputPathToRender(outputPathSpan, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(urlLink, projectDisplayPath.ToString())));
+                            if (project.Outputs.Count == 1)
+                            {
+                                (ReadOnlyMemory<char> path, var kind) = project.Outputs[0];
+                                (var projectDisplayPath, var urlLink) = DetermineOutputPathToRender(path, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
+                                var glyph = GetGlyphForKind(kind);
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", $"{glyph}{CreateLink(urlLink, projectDisplayPath.ToString())}"));
+                            }
+                            else
+                            {
+                            }
                         }
                         else
                         {
@@ -772,7 +778,7 @@ public sealed partial class TerminalLogger : INodeLogger
             }
         }
     }
-    
+
     private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
     {
         var buildEventContext = evalFinish.BuildEventContext;
@@ -794,6 +800,46 @@ public sealed partial class TerminalLogger : INodeLogger
                     // We already have both properties, no need to continue.
                     break;
                 }
+                switch (property.Name)
+                {
+                    case "TargetFramework":
+                        tfm = property.Value;
+                        break;
+                    case "RuntimeIdentifier":
+                        rid = property.Value;
+                        break;
+                }
+            }
+            var evalInfo = new EvalProjectInfo(c, evalFinish.ProjectFile!, tfm, rid);
+            _evals[c] = evalInfo;
+        }
+    }
+
+    private string GetGlyphForKind(ProjectOutputKind kind) => kind switch
+    {
+        ProjectOutputKind.Library => "🗄️",
+        ProjectOutputKind.Executable => "🏃",
+        ProjectOutputKind.Package => "📦",
+        ProjectOutputKind.Unknown => "❓",
+        _ => throw new NotImplementedException(),
+    };
+
+    private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
+    {
+        var buildEventContext = evalFinish.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        EvalContext c = new(buildEventContext);
+
+        if (!_evals.TryGetValue(c, out EvalProjectInfo _))
+        {
+            string? tfm = null;
+            string? rid = null;
+            foreach (var property in evalFinish.EnumerateProperties())
+            {
                 switch (property.Name)
                 {
                     case "TargetFramework":
@@ -995,7 +1041,8 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 foreach (ITaskItem output in targetOutputs)
                 {
-                    project.OutputPath = output.ItemSpec.AsMemory();
+                    project.Outputs ??= [];
+                    project.Outputs.Add(new(output.ItemSpec.AsMemory(), ProjectOutputKind.Unknown));
                     break;
                 }
             }
@@ -1057,7 +1104,8 @@ public sealed partial class TerminalLogger : INodeLogger
                     message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
                 {
                     ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-                    project!.OutputPath = outputPath;
+                    project!.Outputs ??= [];
+                    project.Outputs.Add(new (outputPath, ProjectOutputKind.Unknown));
                     return;
                 }
             }
