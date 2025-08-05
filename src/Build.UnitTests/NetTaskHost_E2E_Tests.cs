@@ -21,17 +21,16 @@ namespace Microsoft.Build.Engine.UnitTests
         public void NetTaskHostTest()
         {
             using TestEnvironment env = TestEnvironment.Create();
-            var bootstrapCoreFolder = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
-            _ = env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", Path.Combine(RunnerUtilities.BootstrapRootPath, "core"));
-            _ = env.SetEnvironmentVariable("MSBuildAssemblyDirectory", Path.Combine(RunnerUtilities.BootstrapRootPath, "core", "sdk", RunnerUtilities.BootstrapSdkVersion));
-
+            var bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:m", out bool successTestTask);
-            successTestTask.ShouldBeTrue();
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{testProjectPath} -restore -v:n",
+                out bool successTestTask);
+            successTestTask.ShouldBeTrue(testTaskOutput);
 
             testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
-            testTaskOutput.ShouldContain($"Process path: {Path.Combine(bootstrapCoreFolder, Constants.DotnetProcessName)}");
+            testTaskOutput.ShouldContain($"Process path: {bootstrapCorePath}", customMessage: testTaskOutput);
         }
     }
 }
