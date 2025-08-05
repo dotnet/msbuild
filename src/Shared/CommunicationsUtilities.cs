@@ -839,7 +839,7 @@ namespace Microsoft.Build.Internal
         /// Gets handshake options using the new TaskHostParameters struct instead of dictionary.
         /// This overload provides better performance by avoiding dictionary allocation.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptionsWithStruct(
+        internal static HandshakeOptions GetHandshakeOptions(
             bool taskHost,
             TaskHostParameters taskHostParameters,
             string architectureFlagToSet = null,

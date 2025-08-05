@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetHandshakeOptionsWithStruct_ShouldDelegateToOriginalMethod()
+        public void GetHandshakeOptions_WithStruct_ShouldDelegateToOriginalMethod()
         {
             var structParams = new Microsoft.Build.Internal.TaskHostParameters("net", "x64");
             var dictParams = new Dictionary<string, string>
@@ -217,7 +217,7 @@ namespace Microsoft.Build.UnitTests
                 { Microsoft.Build.Shared.XMakeAttributes.architecture, "x64" }
             };
 
-            var structResult = CommunicationsUtilities.GetHandshakeOptionsWithStruct(taskHost: true, structParams);
+            var structResult = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, structParams);
             var dictResult = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: dictParams);
 
             structResult.ShouldBe(dictResult);

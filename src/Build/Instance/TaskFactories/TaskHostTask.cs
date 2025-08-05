@@ -292,7 +292,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptionsWithStruct(taskHost: true, _taskHostParametersStruct);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, _taskHostParametersStruct);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
                 }
 
