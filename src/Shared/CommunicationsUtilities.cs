@@ -1126,10 +1126,10 @@ namespace Microsoft.Build.Internal
             _msBuildAssemblyPath = msBuildAssemblyPath ?? string.Empty;
         }
 
-        public string Runtime => _runtime;
-        public string Architecture => _architecture;
-        public string DotnetHostPath => _dotnetHostPath;
-        public string MSBuildAssemblyPath => _msBuildAssemblyPath;
+        public string Runtime => _runtime ?? string.Empty;
+        public string Architecture => _architecture ?? string.Empty;
+        public string DotnetHostPath => _dotnetHostPath ?? string.Empty;
+        public string MSBuildAssemblyPath => _msBuildAssemblyPath ?? string.Empty;
 
         /// <summary>
         /// Tries to get a parameter value by key, mimicking Dictionary.TryGetValue behavior.
