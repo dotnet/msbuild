@@ -71,8 +71,16 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// The set of parameters used to decide which host to launch.
+        /// Keep for API compatibility, actual usage moved to struct version.
         /// </summary>
+#pragma warning disable IDE0052 // Remove unread private members
         private IDictionary<string, string> _taskHostParameters;
+#pragma warning restore IDE0052 // Remove unread private members
+
+        /// <summary>
+        /// The structured task host parameters for better performance.
+        /// </summary>
+        private TaskHostParameters _taskHostParametersStruct;
 
         /// <summary>
         /// The type of the task that we are wrapping.
@@ -151,6 +159,7 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _taskHostParameters = taskHostParameters;
+            _taskHostParametersStruct = TaskHostParameters.FromDictionary(taskHostParameters);
 
             _packetFactory = new NodePacketFactory();
 
@@ -253,8 +262,8 @@ namespace Microsoft.Build.BackEnd
         public bool Execute()
         {
             // log that we are about to spawn the task host
-            string runtime = _taskHostParameters[XMakeAttributes.runtime];
-            string architecture = _taskHostParameters[XMakeAttributes.architecture];
+            string runtime = _taskHostParametersStruct.Runtime;
+            string architecture = _taskHostParametersStruct.Architecture;
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
 
             // set up the node
@@ -292,7 +301,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptionsWithStruct(taskHost: true, _taskHostParametersStruct);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
                 }
 

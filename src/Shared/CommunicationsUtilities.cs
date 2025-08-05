@@ -836,6 +836,28 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
+        /// Gets handshake options using the new TaskHostParameters struct instead of dictionary.
+        /// This overload provides better performance by avoiding dictionary allocation.
+        /// </summary>
+        internal static HandshakeOptions GetHandshakeOptionsWithStruct(
+            bool taskHost,
+            TaskHostParameters taskHostParameters,
+            string architectureFlagToSet = null,
+            bool nodeReuse = false,
+            bool lowPriority = false)
+        {
+            // For non-empty struct parameters, convert to dictionary and use existing method
+            // This ensures consistent behavior while gradually transitioning to struct usage
+            if (!string.IsNullOrEmpty(taskHostParameters.Runtime) || !string.IsNullOrEmpty(taskHostParameters.Architecture))
+            {
+                return GetHandshakeOptions(taskHost, architectureFlagToSet, nodeReuse, lowPriority, taskHostParameters.ToDictionary());
+            }
+
+            // Use existing method for null parameters
+            return GetHandshakeOptions(taskHost, architectureFlagToSet, nodeReuse, lowPriority, (IDictionary<string, string>)null);
+        }
+
+        /// <summary>
         /// Gets the value of an integer environment variable, or returns the default if none is set or it cannot be converted.
         /// </summary>
         internal static int GetIntegerVariableOrDefault(string environmentVariable, int defaultValue)
@@ -1083,5 +1105,118 @@ namespace Microsoft.Build.Internal
         }
 
         public override string ToString() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
+    }
+
+    /// <summary>
+    /// Represents task host parameters in a structured format with named fields.
+    /// Replaces Dictionary&lt;string, string&gt; for better performance by avoiding allocation.
+    /// </summary>
+    internal readonly struct TaskHostParameters
+    {
+        private readonly string _runtime;
+        private readonly string _architecture;
+        private readonly string _dotnetHostPath;
+        private readonly string _msBuildAssemblyPath;
+
+        public TaskHostParameters(string runtime, string architecture, string dotnetHostPath = null, string msBuildAssemblyPath = null)
+        {
+            _runtime = runtime ?? string.Empty;
+            _architecture = architecture ?? string.Empty;
+            _dotnetHostPath = dotnetHostPath ?? string.Empty;
+            _msBuildAssemblyPath = msBuildAssemblyPath ?? string.Empty;
+        }
+
+        public string Runtime => _runtime;
+        public string Architecture => _architecture;
+        public string DotnetHostPath => _dotnetHostPath;
+        public string MSBuildAssemblyPath => _msBuildAssemblyPath;
+
+        /// <summary>
+        /// Tries to get a parameter value by key, mimicking Dictionary.TryGetValue behavior.
+        /// </summary>
+        public bool TryGetValue(string key, out string value)
+        {
+            switch (key)
+            {
+                case XMakeAttributes.runtime:
+                    value = Runtime;
+                    return !string.IsNullOrEmpty(value);
+                case XMakeAttributes.architecture:
+                    value = Architecture;
+                    return !string.IsNullOrEmpty(value);
+                case "DotnetHostPath":
+                    value = DotnetHostPath;
+                    return !string.IsNullOrEmpty(value);
+                case "MSBuildAssemblyPath":
+                    value = MSBuildAssemblyPath;
+                    return !string.IsNullOrEmpty(value);
+                default:
+                    value = null;
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets a parameter value by key, mimicking Dictionary indexer behavior.
+        /// </summary>
+        public string this[string key]
+        {
+            get
+            {
+                if (TryGetValue(key, out string value))
+                {
+                    return value;
+                }
+                throw new KeyNotFoundException($"The given key '{key}' was not present in the TaskHostParameters.");
+            }
+        }
+
+        /// <summary>
+        /// Creates a TaskHostParameters from a dictionary for backward compatibility.
+        /// </summary>
+        public static TaskHostParameters FromDictionary(IDictionary<string, string> dictionary)
+        {
+            if (dictionary == null)
+            {
+                return new TaskHostParameters();
+            }
+
+            dictionary.TryGetValue(XMakeAttributes.runtime, out string runtime);
+            dictionary.TryGetValue(XMakeAttributes.architecture, out string architecture);
+            dictionary.TryGetValue("DotnetHostPath", out string dotnetHostPath);
+            dictionary.TryGetValue("MSBuildAssemblyPath", out string msBuildAssemblyPath);
+
+            return new TaskHostParameters(runtime, architecture, dotnetHostPath, msBuildAssemblyPath);
+        }
+
+        /// <summary>
+        /// Converts to a dictionary for backward compatibility.
+        /// </summary>
+        public IDictionary<string, string> ToDictionary()
+        {
+            var dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            
+            if (!string.IsNullOrEmpty(Runtime))
+            {
+                dictionary[XMakeAttributes.runtime] = Runtime;
+            }
+            
+            if (!string.IsNullOrEmpty(Architecture))
+            {
+                dictionary[XMakeAttributes.architecture] = Architecture;
+            }
+            
+            if (!string.IsNullOrEmpty(DotnetHostPath))
+            {
+                dictionary["DotnetHostPath"] = DotnetHostPath;
+            }
+            
+            if (!string.IsNullOrEmpty(MSBuildAssemblyPath))
+            {
+                dictionary["MSBuildAssemblyPath"] = MSBuildAssemblyPath;
+            }
+
+            return dictionary;
+        }
     }
 }
