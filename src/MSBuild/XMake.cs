@@ -2581,7 +2581,6 @@ namespace Microsoft.Build.CommandLine
 #endif
 
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
-            isTaskInputLoggingRequired = useTerminalLogger;
 
             // This is temporary until we can remove the need for the environment variable.
                 // DO NOT use this environment variable for any new features as it will be removed without further notice.
@@ -2782,8 +2781,8 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
+
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
-                    isTaskInputLoggingRequired = isTaskInputLoggingRequired || isBuildCheckEnabled;
 
                     inputResultsCaches = ProcessInputResultsCaches(commandLineSwitches);
 
@@ -2801,6 +2800,10 @@ namespace Microsoft.Build.CommandLine
                         out profilerLogger,
                         out enableProfiler,
                         ref detailedSummary);
+
+                    var isLoggerThatRequiresTaskInputsConfigured = loggers.Any(l => l is TerminalLogger || l is BinaryLogger);
+                    isTaskInputLoggingRequired = isTaskInputLoggingRequired || isLoggerThatRequiresTaskInputsConfigured || isBuildCheckEnabled;
+
 
                     // We're finished with defining individual loggers' verbosity at this point, so we don't need to worry about messing them up.
                     if (Traits.Instance.DebugEngine)
