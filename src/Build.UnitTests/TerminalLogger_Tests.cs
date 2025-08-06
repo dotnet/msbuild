@@ -271,6 +271,16 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
+        private BuildMessageEventArgs MakeBuildOutputEventArgs(string projectFilePath, BuildEventContext? buildEventContext = null)
+        {
+            var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+            var outputPath = Path.ChangeExtension(projectFilePath, "dll");
+            var messageString = $"{projectName} -> {outputPath}";
+            var args = MakeMessageEventArgs(messageString, MessageImportance.High, buildEventContext: buildEventContext);
+            args.ProjectFile = projectFilePath;
+            return args;
+        }
+
         private BuildMessageEventArgs MakeTaskCommandLineEventArgs(string message, MessageImportance importance, BuildEventContext? buildEventContext = null)
         {
             return new TaskCommandLineEventArgs(message, "Task", importance)
@@ -308,19 +318,19 @@ namespace Microsoft.Build.UnitTests
 
         #region Build summary tests
 
-        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks, string? projectFile = null)
+        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action? additionalCallbacks = null, string? projectFile = null, List<(string, string)>? properties = null)
         {
             projectFile ??= _projectFile;
 
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile));
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile, properties: properties));
 
             ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile));
 
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFile, "Build"));
             TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFile, "Task"));
 
-            additionalCallbacks();
+            additionalCallbacks?.Invoke();
 
             TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(projectFile, "Task", succeeded));
             TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "Build", succeeded));
@@ -569,11 +579,7 @@ namespace Microsoft.Build.UnitTests
         public Task PrintProjectOutputDirectoryLink()
         {
             // Send message in order to set project output path
-            BuildMessageEventArgs e = MakeMessageEventArgs(
-                    $"㐇𠁠𪨰𫠊𫦠𮚮⿕ -> {_projectFileWithNonAnsiSymbols.Replace("proj", "dll")}",
-                    MessageImportance.High);
-            e.ProjectFile = _projectFileWithNonAnsiSymbols;
-
+            BuildMessageEventArgs e = MakeBuildOutputEventArgs(_projectFileWithNonAnsiSymbols);
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 MessageRaised?.Invoke(_eventSender, e);
@@ -804,7 +810,7 @@ namespace Microsoft.Build.UnitTests
 
             // now create a new project with a different target framework that runs on the same node
             var buildContext2 = MakeBuildEventContext(evalId: 2, projectContextId: 2);
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tf2")], buildEventContext: buildContext2));            
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tf2")], buildEventContext: buildContext2));
             ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
 
@@ -913,6 +919,30 @@ namespace Microsoft.Build.UnitTests
                 ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has no link because it has no link or keyword"));
             });
 
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectFinishedReportsRuntimeIdentifier()
+        {
+            // this project will report a RID and so will show a RID in the build output
+            var buildOutputEvent = MakeBuildOutputEventArgs(_projectFile);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
+            {
+                MessageRaised?.Invoke(_eventSender, buildOutputEvent);
+            });
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectFinishedReportsTargetFrameworkAndRuntimeIdentifier()
+        {
+            // this project will report a TFM and a RID and so will show a both in the output
+            var buildOutputEvent = MakeBuildOutputEventArgs(_projectFile);
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
+            {
+                MessageRaised?.Invoke(_eventSender, buildOutputEvent);
+            });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
     }
