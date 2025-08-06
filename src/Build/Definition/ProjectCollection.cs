@@ -285,6 +285,29 @@ namespace Microsoft.Build.Evaluation
         {
         }
 
+        /// <summary>
+        /// Instantiates a project collection with specified global properties and loggers and using the
+        /// specified toolset locations, node count, and setting of onlyLogCriticalEvents.
+        /// Global properties and loggers may be null.
+        /// Throws InvalidProjectFileException if any of the global properties are reserved.
+        /// May throw InvalidToolsetDefinitionException.
+        /// </summary>
+        /// <param name="globalProperties">The default global properties to use. May be null.</param>
+        /// <param name="loggers">The loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="remoteLoggers">Any remote loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
+        /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
+        /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="Dispose()"/> has to called to clear resources used by async logging.</param>
+        /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
+        /// <remarks>
+        /// This constructor disables target output logging, so TerminalLogger and other loggers may not work well. Prefer <see cref="ProjectCollection(IDictionary{string, string}, IEnumerable{ILogger}, IEnumerable{ForwardingLoggerRecord}, ToolsetDefinitionLocations, int, bool, bool, bool, bool, bool)"/> instead to control this behavior.
+        /// </remarks>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache) :
+            this(globalProperties: globalProperties, loggers: loggers, remoteLoggers: remoteLoggers, toolsetDefinitionLocations: toolsetDefinitionLocations, maxNodeCount: maxNodeCount, onlyLogCriticalEvents: onlyLogCriticalEvents, loadProjectsReadOnly: loadProjectsReadOnly, useAsynchronousLogging: useAsynchronousLogging, reuseProjectRootElementCache: reuseProjectRootElementCache, enableTargetOutputLogging: false)
+        {
+        }
 
         /// <summary>
         /// Instantiates a project collection with specified global properties and loggers and using the
