@@ -49,6 +49,8 @@ jobs:
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+    env:
+      ForceUseXCopyMSBuild: 1
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
