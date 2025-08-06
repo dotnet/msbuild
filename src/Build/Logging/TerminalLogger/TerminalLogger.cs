@@ -908,7 +908,16 @@ public sealed partial class TerminalLogger : INodeLogger
                 AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
                 buildResult,
                 duration),
-            (null, null, _) => "" // this is a weird pattern - what should we do?
+            (null, null, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
+                Indentation,
+                projectFile,
+                buildResult,
+                duration),
+            (null, null, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
+                Indentation,
+                projectFile,
+                buildResult,
+                duration),
         };
     }
 

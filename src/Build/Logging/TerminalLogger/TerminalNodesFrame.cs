@@ -3,6 +3,7 @@
 
 using System;
 using System.Text;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
 
@@ -83,7 +84,24 @@ internal sealed class TerminalNodesFrame
         }
 
         var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
-        return $"{TerminalLogger.Indentation}{project}{(targetFramework is null ? string.Empty : " ")}{AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor)} {AnsiCodes.Colorize(runtimeIdentifier, TerminalLogger.RuntimeIdentifierColor)} {AnsiCodes.SetCursorHorizontal(MaxColumn)}{AnsiCodes.MoveCursorBackward(targetWithoutAnsiLength + durationString.Length + 1)}{renderedTarget} {durationString}".AsSpan();
+        var builder = StringBuilderCache.Acquire(renderedWidth);
+        builder.Append(TerminalLogger.Indentation).Append(project);
+        if (!string.IsNullOrWhiteSpace(targetFramework))
+        {
+            builder.Append(' ').Append(AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor));
+        }
+        if (!string.IsNullOrWhiteSpace(runtimeIdentifier))
+        {
+            builder.Append(' ').Append(AnsiCodes.Colorize(runtimeIdentifier, TerminalLogger.RuntimeIdentifierColor));
+        }
+        builder.Append(' ').Append(AnsiCodes.SetCursorHorizontal(MaxColumn))
+               .Append(AnsiCodes.MoveCursorBackward(targetWithoutAnsiLength + durationString.Length + 1))
+               .Append(renderedTarget)
+               .Append(' ')
+               .Append(durationString);
+        var span = builder.ToString().AsSpan();
+        StringBuilderCache.Release(builder);
+        return span;
 
         static int Length(string durationString, string project, string? targetFramework, string? runtimeIdentifier, int targetWithoutAnsiLength) =>
                 TerminalLogger.Indentation.Length +
