@@ -192,8 +192,6 @@ function InitializeDotNetCli([bool]$install, [bool]$createSdkLocationFile) {
     if (-not (Test-Path(Join-Path $dotnetRoot "sdk\$dotnetSdkVersion"))) {
       if ($install) {
         InstallDotNetSdk $dotnetRoot $dotnetSdkVersion
-        # Installing SDK 5 to cover the build of all projects within the repo 
-        InstallDotNetSdk $dotnetRoot "5.0.408"
       } else {
         Write-PipelineTelemetryError -Category 'InitializeToolset' -Message "Unable to find dotnet with SDK version '$dotnetSdkVersion'"
         ExitWithExitCode 1
@@ -295,11 +293,6 @@ function InstallDotNet([string] $dotnetRoot,
     InstallDir = $dotnetRoot
   }
 
-  $fixedVersionInstallParameters = @{
-    Version = $version
-    InstallDir = "5.0.408"
-  }
-
   if ($architecture) { $installParameters.Architecture = $architecture }
   if ($runtime) { $installParameters.Runtime = $runtime }
   if ($skipNonVersionedFiles) { $installParameters.SkipNonVersionedFiles = $skipNonVersionedFiles }
@@ -307,7 +300,6 @@ function InstallDotNet([string] $dotnetRoot,
 
   $variations = @()
   $variations += @($installParameters)
-  $variations += @($fixedVersionInstallParameters)
 
   $dotnetBuilds = $installParameters.Clone()
   $dotnetbuilds.AzureFeed = "https://ci.dot.net/public"
@@ -333,7 +325,6 @@ function InstallDotNet([string] $dotnetRoot,
     }
     Write-Host "Attempting to install dotnet from $location."
     try {
-      Write-Host "SDK version being installed $version"
       & $installScript @variation
       $installSuccess = $true
       break
@@ -400,7 +391,7 @@ function InitializeVisualStudioMSBuild([bool]$install, [object]$vsRequirements =
 
   # Locate Visual Studio installation or download x-copy msbuild.
   $vsInfo = LocateVisualStudio $vsRequirements
-  if ($vsInfo -ne $null) {
+  if ($vsInfo -ne $null -and $env:ForceUseXCopyMSBuild -eq $null) {
     $vsInstallDir = $vsInfo.installationPath
     $vsMajorVersion = $vsInfo.installationVersion.Split('.')[0]
 
