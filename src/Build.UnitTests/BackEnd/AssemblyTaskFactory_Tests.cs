@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         public AssemblyTaskFactory_Tests()
         {
-            SetupTaskFactory(null, false, false);
+            SetupTaskFactory(null, false);
         }
 
         #region AssemblyTaskFactory
@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                SetupTaskFactory(taskParameters, false /* don't want task host */, false);
+                SetupTaskFactory(taskParameters, false /* don't want task host */);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
 #if FEATURE_APPDOMAIN
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.any);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.GetCurrentMSBuildArchitecture());
 
-                SetupTaskFactory(taskParameters, false /* don't want task host */, false);
+                SetupTaskFactory(taskParameters, false /* don't want task host */);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
 #if FEATURE_APPDOMAIN
@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IDictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 factoryParameters.Add(XMakeAttributes.runtime, XMakeAttributes.GetCurrentMSBuildRuntime());
 
-                SetupTaskFactory(factoryParameters, false /* don't want task host */, false);
+                SetupTaskFactory(factoryParameters, false /* don't want task host */);
 
                 IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 taskParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);
 
-                SetupTaskFactory(taskParameters, false /* don't want task host */, false);
+                SetupTaskFactory(taskParameters, false /* don't want task host */);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), null,
 #if FEATURE_APPDOMAIN
@@ -502,7 +502,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IDictionary<string, string> factoryParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 factoryParameters.Add(XMakeAttributes.runtime, XMakeAttributes.MSBuildRuntimeValues.clr2);
 
-                SetupTaskFactory(factoryParameters, false /* don't want task host */, false);
+                SetupTaskFactory(factoryParameters, false /* don't want task host */);
 
                 IDictionary<string, string> taskParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 taskParameters.Add(XMakeAttributes.architecture, XMakeAttributes.MSBuildArchitectureValues.any);

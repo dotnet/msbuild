@@ -480,7 +480,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}.", pipeName, result.ErrorMessage.TrimEnd());
+                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, result.ErrorMessage.TrimEnd());
                     nodeStream?.Dispose();
                     return null;
                 }
