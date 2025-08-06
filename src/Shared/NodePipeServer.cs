@@ -189,12 +189,14 @@ namespace Microsoft.Build.Internal
             foreach (var component in HandshakeComponents.EnumerateComponents())
             {
                 // This will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard.
+
+                if (
+
+                    _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null,
 #if NET
-                var handshakePart = _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null, s_handshakeTimeout);
-#else
-                var handshakePart = _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null);
+                     s_handshakeTimeout,
 #endif
-                if (handshakePart.IsSuccess)
+                     out HandshakeResult handshakePart))
                 {
                     if (handshakePart.Value != component.Value)
                     {
@@ -212,12 +214,12 @@ namespace Microsoft.Build.Internal
             }
 
             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+
+            if (_pipeServer.TryReadEndOfHandshakeSignal(false,
 #if NET
-            var result = _pipeServer.TryReadEndOfHandshakeSignal(false, s_handshakeTimeout);
-#else
-            var result = _pipeServer.TryReadEndOfHandshakeSignal(false);
+            s_handshakeTimeout,
 #endif
-            if (result.IsSuccess)
+            out HandshakeResult _))
             {
                 CommunicationsUtilities.Trace("Successfully connected to parent.");
                 _pipeServer.WriteEndOfHandshakeSignal();

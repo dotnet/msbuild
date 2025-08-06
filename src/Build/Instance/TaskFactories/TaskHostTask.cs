@@ -127,7 +127,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// This separates the cause where we force all tasks to run in a task host via environment variables and TaskHostFactory
-        /// The difference is that TaskHostFactory requires the TaskHost to be transiend e.g. to expire after build.
+        /// The difference is that TaskHostFactory requires the TaskHost to be transient e.g. to expire after build.
         /// </summary>
         private bool _taskHostFactoryExplicitlyRequested = false;
 

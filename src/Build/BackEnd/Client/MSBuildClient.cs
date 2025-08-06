@@ -619,16 +619,16 @@ namespace Microsoft.Build.Experimental
             while (tryAgain && sw.ElapsedMilliseconds < timeoutMilliseconds)
             {
                 tryAgain = false;
-               
-                var result = NodeProviderOutOfProcBase.TryConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
 
-                if (result.IsSuccess)
+
+                if (NodeProviderOutOfProcBase.TryConnectToPipeStream(
+                    _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds), out HandshakeResult result))
                 {
                     return true;
                 }
                 else
                 {
-                    if (result.Status is not HandshakeStatus.HandshakeTimeout && sw.ElapsedMilliseconds < timeoutMilliseconds)
+                    if (result.Status is not HandshakeStatus.Timeout && sw.ElapsedMilliseconds < timeoutMilliseconds)
                     {
                         CommunicationsUtilities.Trace("Retrying to connect to server after {0} ms", sw.ElapsedMilliseconds);
                         // This solves race condition for time in which server started but have not yet listen on pipe or
@@ -645,7 +645,6 @@ namespace Microsoft.Build.Experimental
                 }
             }
 
-            // For some reason this is required otherwise VS complains that not all codepths return a value.
             return false;
         }
 

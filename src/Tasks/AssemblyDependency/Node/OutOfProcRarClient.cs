@@ -55,8 +55,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             if (!_pipeClient.IsConnected)
             {
                 // Don't set a timeout since the build manager already blocks until the server is running.
-                var result = _pipeClient.ConnectToServer(0);
-                if (result.IsFailure)
+                if (!_pipeClient.ConnectToServer(0))
                 {
                     return false;
                 }

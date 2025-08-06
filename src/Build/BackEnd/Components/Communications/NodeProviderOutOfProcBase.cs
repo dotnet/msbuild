@@ -474,19 +474,13 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                var result = TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
-                if (result.IsSuccess)
+                if (TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout, out HandshakeResult result))
                 {
                     return nodeStream;
                 }
                 else
                 {
-                    // Can be:
-                    // UnauthorizedAccessException -- Couldn't connect, might not be a node.
-                    // IOException -- Couldn't connect, already in use.
-                    // TimeoutException -- Couldn't connect, might not be a node.
-                    // InvalidOperationException – Couldn’t connect, probably a different build
-                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}.", pipeName);
+                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}.", pipeName, result.ErrorMessage.TrimEnd());
                     nodeStream?.Dispose();
                     return null;
                 }
@@ -513,7 +507,7 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
         /// </remarks>
-        internal static HandshakeResult TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
+        internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {
             nodeStream.Connect(timeout);
 
@@ -543,19 +537,22 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
             if (
+
+            nodeStream.TryReadEndOfHandshakeSignal(true,
 #if NETCOREAPP2_1_OR_GREATER
-            nodeStream.TryReadEndOfHandshakeSignal(true, timeout).IsSuccess)
-#else
-            nodeStream.TryReadEndOfHandshakeSignal(true).IsSuccess)
+            timeout,
 #endif
+            out HandshakeResult innerResult))
             {
                 // We got a connection.
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
-                return HandshakeResult.Success(0);
+                result = HandshakeResult.Success(0);
+                return true;
             }
             else
             {
-                return HandshakeResult.Failure(HandshakeStatus.Failure, null);
+                result = innerResult;
+                return false;
             }
         }
 

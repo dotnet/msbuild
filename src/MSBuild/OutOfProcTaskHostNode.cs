@@ -160,7 +160,7 @@ namespace Microsoft.Build.CommandLine
         private bool _updateEnvironmentAndLog;
 
         /// <summary>
-        /// setting this to true means we're runnign a long-lived sidecar node.
+        /// setting this to true means we're running a long-lived sidecar node.
         /// </summary>
         private bool _nodeReuse;
 

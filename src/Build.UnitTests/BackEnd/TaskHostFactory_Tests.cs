@@ -83,7 +83,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact(Skip = "Environment variable issue")]
-        public void TransiendAndSidecarNodeCanCoexist()
+        public void TransientandSidecarNodeCanCoexist()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {

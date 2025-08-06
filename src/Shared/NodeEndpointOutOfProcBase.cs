@@ -415,15 +415,13 @@ namespace Microsoft.Build.BackEnd
                         int index = 0;
                         foreach (var component in handshakeComponents.EnumerateComponents())
                         {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                            var result = _pipeServer.TryReadIntForHandshake(
-                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                           
+                            if (_pipeServer.TryReadIntForHandshake(
+                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
-                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
+                             ClientConnectTimeout, /* wait a long time for the handshake from this side */
 #endif
-                            );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                            if (result.IsFailure)
+                              out HandshakeResult result))
                             {
                                 CommunicationsUtilities.Trace($"Handshake failed with error: {result.ErrorMessage}");
                             }
@@ -445,12 +443,13 @@ namespace Microsoft.Build.BackEnd
                         if (gotValidConnection)
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+
+                            if (
 #if NETCOREAPP2_1_OR_GREATER
-                            var result = _pipeServer.TryReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
+                            _pipeServer.TryReadEndOfHandshakeSignal(false, ClientConnectTimeout, out HandshakeResult _)) /* wait a long time for the handshake from this side */
 #else
-                            var result = _pipeServer.TryReadEndOfHandshakeSignal(false);
+                            _pipeServer.TryReadEndOfHandshakeSignal(false, out HandshakeResult _))
 #endif
-                            if (result.IsSuccess)
                             {
                                 CommunicationsUtilities.Trace("Successfully connected to parent.");
                                 _pipeServer.WriteEndOfHandshakeSignal();
