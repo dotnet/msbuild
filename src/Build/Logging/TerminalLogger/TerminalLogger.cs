@@ -1400,24 +1400,7 @@ public sealed partial class TerminalLogger : INodeLogger
             _targetsListeningForTasks.Remove(new TargetContext(taskParameterEventArgs.BuildEventContext!));
             // Based on what the output was, figure out what to do with it
             taskOutput.Apply(taskParameterEventArgs);
-            switch (taskParameterEventArgs.ItemType)
-            {
-                case "MainAssembly":
-                    // This is the main assembly, so we can set the output path to the project.
-                    if (_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext!), out var project))
-                    {
-                        var results = TryDetectOutputPath(taskParameterEventArgs.Items, project);
-                        if (results is not null)
-                        {
-                            project.Outputs ??= [];
-                            project.Outputs.AddRange(results);
-                        }
-                    }
-                    break;
-            }
         }
-
-        return;
     }
 
     public void TrySetMainAssemblyAsProjectOutput(TaskParameterEventArgs taskParameterEventArgs)
