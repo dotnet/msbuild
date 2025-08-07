@@ -56,6 +56,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool MSBuildCacheFileEnumerations = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildCacheFileEnumerations"));
 
+        /// <summary>
+        /// Use Microsoft.Extensions.FileSystemGlobbing for IMSBuildGlob implementation instead of the built-in implementation
+        /// </summary>
+        public readonly bool UseFileSystemGlobbingForMSBuildGlob = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_USE_FILESYSTEMGLOBBING"));
+
         public readonly bool EnableAllPropertyFunctions = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS") == "1";
 
         /// <summary>
