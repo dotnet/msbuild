@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of parameters used to decide which host to launch.
         /// </summary>
-        private IDictionary<string, string> _taskHostParameters;
+        private TaskHostParameters _taskHostParameters;
 
         /// <summary>
         /// The type of the task that we are wrapping.
@@ -150,7 +150,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
-            _taskHostParameters = taskHostParameters;
+            _taskHostParameters = TaskHostParameters.FromDictionary(taskHostParameters);
 
             _packetFactory = new NodePacketFactory();
 
@@ -253,8 +253,8 @@ namespace Microsoft.Build.BackEnd
         public bool Execute()
         {
             // log that we are about to spawn the task host
-            string runtime = _taskHostParameters[XMakeAttributes.runtime];
-            string architecture = _taskHostParameters[XMakeAttributes.architecture];
+            string runtime = _taskHostParameters.Runtime;
+            string architecture = _taskHostParameters.Architecture;
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
 
             // set up the node
@@ -292,7 +292,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
                 }
 
