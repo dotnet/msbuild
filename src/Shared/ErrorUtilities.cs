@@ -199,11 +199,33 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Overload for one string format argument.
         /// </summary>
+        internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, int arg0)
+        {
+            if (!condition)
+            {
+                ThrowInternalError(unformattedMessage, arg0);
+            }
+        }
+
+        /// <summary>
+        /// Overload for one string format argument.
+        /// </summary>
         internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, object arg0)
         {
             if (!condition)
             {
                 ThrowInternalError(unformattedMessage, arg0);
+            }
+        }
+
+        /// <summary>
+        /// Overload for two string format arguments.
+        /// </summary>
+        internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, int arg0, int arg1)
+        {
+            if (!condition)
+            {
+                ThrowInternalError(unformattedMessage, arg0, arg1);
             }
         }
 
