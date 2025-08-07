@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 
 #nullable disable
 
@@ -28,7 +27,7 @@ namespace Microsoft.Build.Framework
             Output = output;
             Required = required;
             Type elementType = typeOfParameter.IsArray ? typeOfParameter.GetElementType() : typeOfParameter;
-            IsValueTypeOutputParameter = elementType.GetTypeInfo().IsValueType || elementType.FullName.Equals("System.String");
+            IsValueTypeOutputParameter = elementType.IsValueType || elementType.FullName.Equals("System.String");
             IsAssignableToITask = typeof(ITaskItem).IsAssignableFrom(elementType);
         }
 
