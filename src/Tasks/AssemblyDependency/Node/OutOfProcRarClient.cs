@@ -55,10 +55,13 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             if (!_pipeClient.IsConnected)
             {
                 // Don't set a timeout since the build manager already blocks until the server is running.
-                _pipeClient.ConnectToServer(0);
+                if (!_pipeClient.ConnectToServer(0))
+                {
+                    return false;
+                }
             }
 
-            // TODO: Use RAR task to create the request packet.
+             // TODO: Use RAR task to create the request packet.
             _pipeClient.WritePacket(new RarNodeExecuteRequest());
 
             // TODO: Use response packet to set RAR task outputs.

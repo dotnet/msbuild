@@ -467,8 +467,16 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
-                return nodeStream;
+                if (TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout, out HandshakeResult result))
+                {
+                    return nodeStream;
+                }
+                else
+                {
+                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, result.ErrorMessage.TrimEnd());
+                    nodeStream?.Dispose();
+                    return null;
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -492,7 +500,7 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
         /// </remarks>
-        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
+        internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {
             nodeStream.Connect(timeout);
 
@@ -521,13 +529,24 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
+            if (
+
+            nodeStream.TryReadEndOfHandshakeSignal(true,
 #if NETCOREAPP2_1_OR_GREATER
-            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
-#else
-            nodeStream.ReadEndOfHandshakeSignal(true);
+            timeout,
 #endif
-            // We got a connection.
-            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+            out HandshakeResult innerResult))
+            {
+                // We got a connection.
+                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                result = HandshakeResult.Success(0);
+                return true;
+            }
+            else
+            {
+                result = innerResult;
+                return false;
+            }
         }
 
         /// <summary>
