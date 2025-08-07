@@ -5,7 +5,7 @@ param (
     $verbosity = 'minimal'
     )
 
-. $PSScriptRoot\restore-toolset.ps1
+. $PSScriptRoot\restore-dotnet-coverage.ps1
 
 try {
   Set-Location $repoRoot

@@ -26,7 +26,7 @@ while [[ $# > 0 ]]; do
 done
 
 eng_root="${repoRoot%%/}/eng"
-. "$eng_root/restore-toolset.sh"
+. "$eng_root/restore-dotnet-coverage.sh"
 
 artifacts_dir="${repoRoot%%/}/artifacts"
 tools_dir="${repoRoot%%/}/.tools"
