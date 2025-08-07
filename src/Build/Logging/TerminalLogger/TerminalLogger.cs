@@ -43,6 +43,19 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
+    internal record struct NodeContext(int Id)
+    {
+        public NodeContext(BuildEventContext context)
+            : this(context.NodeId)
+        {
+        }
+
+        /// <summary>
+        /// Node Ids are 1-based, so if we want to use them in an array we need a consistent way to map them.
+        /// </summary>
+        public readonly int ArrayIndex => Id - 1;
+    }
+
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
     /// </summary>
@@ -63,6 +76,37 @@ public sealed partial class TerminalLogger : INodeLogger
             : this(context.EvaluationId)
         {
         }
+    }
+
+    internal record struct TargetContext(int Id)
+    {
+        public TargetContext(BuildEventContext context)
+            : this(context.TargetId)
+        {
+        }
+    }
+
+    internal record struct TaskContext(int Id)
+    {
+        public TaskContext(BuildEventContext context)
+            : this(context.TaskId)
+        {
+        }
+    }
+
+    internal interface ITaskOutput
+    {
+        bool AppliesToTaskOutput(TaskParameterEventArgs args);
+    }
+
+    internal record struct TaskItemOutput(string ItemType) : ITaskOutput
+    {
+        public bool AppliesToTaskOutput(TaskParameterEventArgs args) => args.ItemType == ItemType;
+    }
+
+    internal record struct TaskPropertyOutput(string PropertyName) : ITaskOutput
+    {
+        public bool AppliesToTaskOutput(TaskParameterEventArgs args) => args.PropertyName == PropertyName;
     }
 
     private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
@@ -120,9 +164,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
 
-    // tracks target context ids of targets that we've skipped and need to listen for 
-    // taskoutput parameter events to patch up
-    private readonly Dictionary<int, string> _trackedTargetIds = new();
+    /// <summary>
+    /// Tracks target context ids of targets that we've skipped. For these targets, we need to listen for
+    /// taskoutput parameter events to patch up missing outputs.
+    /// </summary>
+    private readonly Dictionary<TargetContext, string> _targetNamesForSkippedOutputs = new();
 
     /// <summary>
     /// Number of build errors.
@@ -651,8 +697,8 @@ public sealed partial class TerminalLogger : INodeLogger
             if (e.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
-                int nodeIndex = NodeIndexForContext(e.BuildEventContext);
-                _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
+                var nodeContext = new NodeContext(e.BuildEventContext);
+                _nodes[nodeContext.ArrayIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
     }
@@ -744,7 +790,7 @@ public sealed partial class TerminalLogger : INodeLogger
                             }
                             else
                             {
-                                // render each output on a new line underneath the project header, indented by another level of indentation, 
+                                // render each output on a new line underneath the project header, indented by another level of indentation,
                                 // and with a ∟ glyph
                                 Terminal.WriteLine("");
                                 foreach (var output in project.Outputs)
@@ -999,9 +1045,10 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// some targets have tasks/items/properties that we need to get the details of, so we track that here so we're not flooding the central node with events.
+    /// These tasks will be watched for specific kinds of their outputs, typically because
+    /// they produce important artifacts that we want to track.
     /// </summary>
-    private readonly Dictionary<int, string> _targetIdsToTrackTasksOf = new();
+    private readonly Dictionary<TaskContext, ITaskOutput> _tasksToWatchForOutputs = new();
 
     /// <summary>
     /// The <see cref="IEventSource.TargetStarted"/> callback.
@@ -1032,7 +1079,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     break;
                 case "CopyFilesToOutputDirectory":
                     // The Copy task in this target is used to copy the main assembly to the output directory.
-                    _targetIdsToTrackTasksOf[e.BuildEventContext!.TargetId] = "MainAssembly";
+                    _tasksToWatchForOutputs[new(e.BuildEventContext!)] = new TaskItemOutput("MainAssembly");
                     break;
             }
 
@@ -1043,8 +1090,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void UpdateNodeStatus(BuildEventContext buildEventContext, TerminalNodeStatus? nodeStatus)
     {
-        int nodeIndex = NodeIndexForContext(buildEventContext);
-        _nodes[nodeIndex] = nodeStatus;
+        _nodes[new NodeContext(buildEventContext).ArrayIndex] = nodeStatus;
     }
 
     /// <summary>
@@ -1071,10 +1117,11 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        // TODO: we should probably have something more like a target-name-based switch here too - 
+        // TODO: we should probably have something more like a target-name-based switch here too -
         //       the sourceroots being at the end here feels awkward.
         var detectedOutputs =
-            e.TargetName switch {
+            e.TargetName switch
+            {
                 "GenerateNuspec" => TryDetectPackages(e.TargetOutputs, project),
                 "PublishItemsOutputGroup" => TryDetectPublishOutputs(e.TargetOutputs, project),
                 _ => null
@@ -1171,7 +1218,7 @@ public sealed partial class TerminalLogger : INodeLogger
         // If we don't know how to handle the outputs, return an empty enumerable.
         Debug.Assert(false, "Unsupported outputs type in TerminalLogger: " + outputs.GetType().FullName);
         return Enumerable.Empty<string>();
-    } 
+    }
 
     private List<(ReadOnlyMemory<char>, ProjectOutputKind)>? TryDetectOutputPath(IEnumerable outputs, TerminalProjectInfo project)
     {
@@ -1247,72 +1294,105 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        if (e is TargetSkippedEventArgs skipArgs && skipArgs.BuildEventContext is not null && skipArgs.BuildEventContext is not { TargetId: -1 } )
+        switch (e)
         {
-            // this was forwarded by the child node, so it must be a target we need to track for skipped-output purposes
-            _trackedTargetIds[skipArgs.BuildEventContext!.TargetId] = skipArgs.TargetName;
+            case TargetSkippedEventArgs skipArgs:
+                TrackSkippedTarget(skipArgs);
+                return;
+            case TaskParameterEventArgs tpea:
+                if (tpea is { Kind: TaskParameterMessageKind.SkippedTargetOutputs })
+                {
+                    LookForTargetOutputs(tpea);
+                }
+                else if (tpea is { Kind: TaskParameterMessageKind.TaskOutput })
+                {
+                    LookForTaskOutputs(tpea);
+                }
+
+                return;
+            default:
+                HandleActualMessages(e);
+                return;
+        };
+    }
+
+    private void TrackSkippedTarget(TargetSkippedEventArgs skipArgs)
+    {
+        // this was forwarded by the child node, so it must be a target we need to track for skipped-output purposes
+        var targetContext = new TargetContext(skipArgs.BuildEventContext!);
+        _targetNamesForSkippedOutputs[targetContext] = skipArgs.TargetName;
+    }
+
+    private void LookForTargetOutputs(TaskParameterEventArgs taskParameterEventArgs)
+    {
+        var targetContext = new TargetContext(taskParameterEventArgs.BuildEventContext!);
+        if (!_targetNamesForSkippedOutputs.TryGetValue(targetContext, out string? targetName))
+        {
+            // we're not looking for this target, so skip
             return;
         }
 
-        if (e is TaskParameterEventArgs taskParameterEventArgs)
+        if (taskParameterEventArgs.Items is null)
         {
-            if (taskParameterEventArgs.Kind == TaskParameterMessageKind.SkippedTargetOutputs &&
-                _trackedTargetIds.TryGetValue(taskParameterEventArgs.BuildEventContext!.TargetId, out var targetName))
-            {
-                _trackedTargetIds.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
-                // based on the target name, we can determine which outputs to patch up
-                if (taskParameterEventArgs.Items is null)
-                {
-                    // we only care about Targets that finish here for output-detection purposes, so we can exit if there are no outputs.
-                    return;
-                }
-                if (!_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
-                {
-                    // we need a project to associate the outputs with, so exit if we don't have one.
-                    return;
-                }
+            // we only care about Targets that have outputs here for output-detection purposes, so we can exit if there are no outputs.
+            return;
+        }
 
-                var detectedOutputs =
-                    targetName switch
-                    {
-                        "CopyFilesToOutputDirectory" => TryDetectOutputPath(taskParameterEventArgs.Items, project),
-                        "GenerateNuspec" => TryDetectPackages(taskParameterEventArgs.Items, project),
-                        "PublishItemsOutputGroup" => TryDetectPublishOutputs(taskParameterEventArgs.Items, project),
-                        _ => null
-                    };
-                if (detectedOutputs is not null)
-                {
-                    project.Outputs ??= [];
-                    project.Outputs.AddRange(detectedOutputs);
-                }
-                return;
-            }
-            else if (taskParameterEventArgs.Kind == TaskParameterMessageKind.TaskOutput
-                && _targetIdsToTrackTasksOf.TryGetValue(taskParameterEventArgs.BuildEventContext!.TargetId, out string? taskName)
-                && taskParameterEventArgs.ItemType == taskName)
+        if (!_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext!), out TerminalProjectInfo? project))
+        {
+            // we need a project to associate the outputs with, so exit if we don't have one.
+            return;
+        }
+
+        // based on the target name, we can determine which outputs to patch up
+        var detectedOutputs =
+            targetName switch
             {
-                // Based on what the output was, figure out what to do with it
-                _targetIdsToTrackTasksOf.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
-                switch (taskParameterEventArgs.ItemType)
-                {
-                    case "MainAssembly":
-                        // This is the main assembly, so we can set the output path to the project.
-                        if (_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext), out TerminalProjectInfo? project))
+                "CopyFilesToOutputDirectory" => TryDetectOutputPath(taskParameterEventArgs.Items, project),
+                "GenerateNuspec" => TryDetectPackages(taskParameterEventArgs.Items, project),
+                "PublishItemsOutputGroup" => TryDetectPublishOutputs(taskParameterEventArgs.Items, project),
+                _ => null,
+            };
+        if (detectedOutputs is not null)
+        {
+            project.Outputs ??= [];
+            project.Outputs.AddRange(detectedOutputs);
+        }
+        return;
+    }
+
+    private void LookForTaskOutputs(TaskParameterEventArgs taskParameterEventArgs)
+    {
+        var taskContext = new TaskContext(taskParameterEventArgs.BuildEventContext!);
+        if (_tasksToWatchForOutputs.TryGetValue(taskContext, out ITaskOutput? taskOutput)
+            && taskOutput.AppliesToTaskOutput(taskParameterEventArgs))
+        {
+            // Based on what the output was, figure out what to do with it
+            _tasksToWatchForOutputs.Remove(taskContext);
+            switch (taskParameterEventArgs.ItemType)
+            {
+                case "MainAssembly":
+                    // This is the main assembly, so we can set the output path to the project.
+                    if (_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext!), out var project))
+                    {
+                        var results = TryDetectOutputPath(taskParameterEventArgs.Items, project);
+                        if (results is not null)
                         {
-                            var results = TryDetectOutputPath(taskParameterEventArgs.Items, project);
-                            if (results is not null)
-                            {
-                                project.Outputs ??= [];
-                                project.Outputs.AddRange(results);
-                            }
+                            project.Outputs ??= [];
+                            project.Outputs.AddRange(results);
                         }
-                        break;
-                }
-                return;
+                    }
+                    break;
             }
         }
 
+        return;
+    }
+
+    private void HandleActualMessages(BuildMessageEventArgs e)
+    {
         string? message = e.Message;
+        var buildEventContext = e.BuildEventContext!;
 
         if (message is not null && e.Importance == MessageImportance.High)
         {
@@ -1323,27 +1403,25 @@ public sealed partial class TerminalLogger : INodeLogger
                 return;
             }
 
-            if (Verbosity > LoggerVerbosity.Quiet)
+            // ensure we only log the preview message once for the entire build.
+            if (Verbosity > LoggerVerbosity.Quiet && e is { Code: "NETSDK1057" } && !_loggedPreviewMessage)
             {
-                if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+                if (!_loggedPreviewMessage)
                 {
-                    // ensure we only log the preview message once for the entire build.
-                    if (!_loggedPreviewMessage)
-                    {
-                        // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                        // when it's a preview version up to MaxCPUCount times, but that's
-                        // an implementation detail--the user cares about at most one.
-                        RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, DoubleIndentation));
-                        _loggedPreviewMessage = true;
-                    }
-                    return;
+                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                    // when it's a preview version up to MaxCPUCount times, but that's
+                    // an implementation detail--the user cares about at most one.
+                    RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, DoubleIndentation));
+                    _loggedPreviewMessage = true;
                 }
+                return;
             }
 
             if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
                 && project.IsTestProject)
             {
-                var node = _nodes[NodeIndexForContext(buildEventContext)];
+                var nodeContext = new NodeContext(buildEventContext);
+                var node = _nodes[nodeContext.ArrayIndex];
 
                 // Consumes test update messages produced by VSTest and MSTest runner.
                 if (node != null && e is IExtendedBuildEventArgs extendedMessage)
@@ -1678,15 +1756,6 @@ public sealed partial class TerminalLogger : INodeLogger
             EraseNodes();
             Terminal.WriteLine(message);
         }
-    }
-
-    /// <summary>
-    /// Returns the <see cref="_nodes"/> index corresponding to the given <see cref="BuildEventContext"/>.
-    /// </summary>
-    private int NodeIndexForContext(BuildEventContext context)
-    {
-        // Node IDs reported by the build are 1-based.
-        return context.NodeId - 1;
     }
 
     /// <summary>
