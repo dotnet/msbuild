@@ -509,26 +509,26 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 var sdkVersion = ExtractSdkVersionFromPath(path);
-                if (sdkVersion < MinimumSdkVersion)
+                if (sdkVersion is null or < MinimumSdkVersion)
                 {
-                    throw new InvalidProjectFileException($"SDK version {sdkVersion} is below the minimum required version. {ErrorMessage}");
+                    throw new InvalidProjectFileException($"SDK version {sdkVersion} is below the minimum required version of {MinimumSdkVersion}. {ErrorMessage}");
                 }
             }
         }
 
-        private static int ExtractSdkVersionFromPath(string path)
+        private static int? ExtractSdkVersionFromPath(string path)
         {
             string lastDirectoryName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
 
             if (string.IsNullOrEmpty(lastDirectoryName))
             {
-                return 0;
+                return null;
             }
 
             int dotIndex = lastDirectoryName.IndexOf('.');
             if (dotIndex <= 0)
             {
-                return 0;
+                return null;
             }
 
             return int.TryParse(lastDirectoryName.Substring(0, dotIndex), out int majorVersion) ? majorVersion : 0;
