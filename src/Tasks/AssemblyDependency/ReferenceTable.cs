@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -2673,12 +2674,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private ITaskItem SetItemMetadata(List<ITaskItem> relatedItems, List<ITaskItem> satelliteItems, List<ITaskItem> serializationAssemblyItems, List<ITaskItem> scatterItems, string fusionName, Reference reference, AssemblyNameExtension assemblyName)
         {
-            // Set up the main item.
-            TaskItem referenceItem = new TaskItem();
-            referenceItem.ItemSpec = reference.FullPath;
-
-            IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
-            referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
+            // Set up the main item with the first source item we encounter.
+            TaskItem referenceItem = null;
 
             // If there was a primary source item, then forward metadata from it.
             // It's important that the metadata from the primary source item
@@ -2690,57 +2687,60 @@ namespace Microsoft.Build.Tasks
             // the project file that happened to have this reference as a dependency.
             if (reference.PrimarySourceItem != null)
             {
+                referenceItem = new TaskItem(reference.FullPath);
                 reference.PrimarySourceItem.CopyMetadataTo(referenceItem);
             }
             else
             {
-                bool hasImplementationFile = referenceItem.GetMetadata(ItemMetadataNames.winmdImplmentationFile).Length > 0;
-                bool hasImageRuntime = referenceItem.GetMetadata(ItemMetadataNames.imageRuntime).Length > 0;
-                bool hasWinMDFile = referenceItem.GetMetadata(ItemMetadataNames.winMDFile).Length > 0;
-
                 // If there were non-primary source items, then forward metadata from them.
                 ICollection<ITaskItem> sourceItems = reference.GetSourceItems();
                 foreach (ITaskItem sourceItem in sourceItems)
                 {
+                    referenceItem ??= new TaskItem(reference.FullPath);
                     sourceItem.CopyMetadataTo(referenceItem);
-                }
-
-                // If the item originally did not have the implementation file metadata then we do not want to get it from the set of primary source items
-                // since the implementation file is something specific to the source item and not supposed to be propagated.
-                if (!hasImplementationFile)
-                {
-                    referenceItem.RemoveMetadata(ItemMetadataNames.winmdImplmentationFile);
-                }
-
-                // If the item originally did not have the ImageRuntime metadata then we do not want to get it from the set of primary source items
-                // since the ImageRuntime is something specific to the source item and not supposed to be propagated.
-                if (!hasImageRuntime)
-                {
-                    referenceItem.RemoveMetadata(ItemMetadataNames.imageRuntime);
-                }
-
-                // If the item originally did not have the WinMDFile metadata then we do not want to get it from the set of primary source items
-                // since the WinMDFile is something specific to the source item and not supposed to be propigated
-                if (!hasWinMDFile)
-                {
-                    referenceItem.RemoveMetadata(ItemMetadataNames.winMDFile);
                 }
             }
 
-            referenceItem.SetMetadata(ItemMetadataNames.version, reference.ReferenceVersion == null ? string.Empty : reference.ReferenceVersion.ToString());
+            // PERF: Order adds/removes after the initial copy to allow copy-on-write cloning between TaskItems.
+            // Overwrite any common metadata copied from source items.
+            IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
+            referenceItemAsMetadataContainer.ImportMetadata(
+                EnumerateCommonMetadata(reference, assemblyName, _frameworkPaths, _installedAssemblies));
 
-            // Unset fusionName so we don't have to unset it later.
-            referenceItem.RemoveMetadata(ItemMetadataNames.fusionName);
+            // Some metadata should not be forwarded between the parent and child items.
+            // Set up a base item for related files. If we need to exclude any metadata, this will be a clone of the parent item.
+            TaskItem relatedItemBase = referenceItem;
 
             List<string> relatedFileExtensions = reference.GetRelatedFileExtensions();
             List<string> satellites = reference.GetSatelliteFiles();
             List<string> serializationAssemblyFiles = reference.GetSerializationAssemblyFiles();
             string[] scatterFiles = reference.GetScatterFiles();
-            Dictionary<string, string> nonForwardableMetadata = null;
-            if (relatedFileExtensions.Count > 0 || satellites.Count > 0 || serializationAssemblyFiles.Count > 0 || scatterFiles.Length > 0)
+            bool hasRelatedFiles = relatedFileExtensions.Count > 0 || satellites.Count > 0 || serializationAssemblyFiles.Count > 0 || scatterFiles.Length > 0;
+
+            // Remove metadata entries should not be copied to the output item or any related files.
+            // The specific metadata to remove depends on whether we found related files and the type of source item.
+            if (hasRelatedFiles)
             {
-                // Unset non-forwardable metadata now so we don't have to do it for individual items.
-                nonForwardableMetadata = RemoveNonForwardableMetadata(referenceItem);
+                relatedItemBase = new TaskItem(referenceItem);
+                (relatedItemBase as IMetadataContainer).RemoveMetadataRange([
+                    ItemMetadataNames.fusionName,
+                    ItemMetadataNames.imageRuntime,
+                    ItemMetadataNames.winmdImplmentationFile,
+                    ItemMetadataNames.winMDFile,
+                    !Traits.Instance.EscapeHatches.TargetPathForRelatedFiles ? ItemMetadataNames.targetPath : string.Empty,
+                ]);
+            }
+            else if (reference.PrimarySourceItem == null)
+            {
+                referenceItemAsMetadataContainer.RemoveMetadataRange([
+                    ItemMetadataNames.fusionName,
+                    string.IsNullOrEmpty(reference.ImageRuntime) ? ItemMetadataNames.imageRuntime : string.Empty,
+                    ItemMetadataNames.winmdImplmentationFile,
+                    ItemMetadataNames.winMDFile]);
+            }
+            else
+            {
+                referenceItem.RemoveMetadata(ItemMetadataNames.fusionName);
             }
 
             // Now clone all properties onto the related files.
@@ -2748,7 +2748,7 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem item = new TaskItem(reference.FullPathWithoutExtension + relatedFileExtension);
                 // Clone metadata.
-                referenceItem.CopyMetadataTo(item);
+                relatedItemBase.CopyMetadataTo(item);
 
                 // Add the related item.
                 relatedItems.Add(item);
@@ -2759,7 +2759,7 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem item = new TaskItem(Path.Combine(reference.DirectoryName, satelliteFile));
                 // Clone metadata.
-                referenceItem.CopyMetadataTo(item);
+                relatedItemBase.CopyMetadataTo(item);
                 // Set the destination directory.
                 item.SetMetadata(ItemMetadataNames.destinationSubDirectory, FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(satelliteFile)));
 
@@ -2772,7 +2772,7 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem item = new TaskItem(Path.Combine(reference.DirectoryName, serializationAssemblyFile));
                 // Clone metadata.
-                referenceItem.CopyMetadataTo(item);
+                relatedItemBase.CopyMetadataTo(item);
 
                 // Add the serialization assembly item.
                 serializationAssemblyItems.Add(item);
@@ -2783,82 +2783,58 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem item = new TaskItem(Path.Combine(reference.DirectoryName, scatterFile));
                 // Clone metadata.
-                referenceItem.CopyMetadataTo(item);
+                relatedItemBase.CopyMetadataTo(item);
 
                 // Add the satellite item.
                 scatterItems.Add(item);
             }
 
-            // As long as the item has not come from somewhere else say it came from rar (p2p's can come from somewhere else).
-            if (referenceItem.GetMetadata(ItemMetadataNames.msbuildReferenceSourceTarget).Length == 0)
+            // This metadatum is created early so it can be copied to a WinMD implementation item if found.
+            KeyValuePair<string, string> sourceItemMetadatum = default;
+            string referenceSourceTarget = referenceItem.GetMetadata(ItemMetadataNames.msbuildReferenceSourceTarget);
+            if (!string.IsNullOrEmpty(referenceSourceTarget))
             {
-                referenceItem.SetMetadata(ItemMetadataNames.msbuildReferenceSourceTarget, "ResolveAssemblyReference");
+                // As long as the item has not come from somewhere else say it came from rar (p2p's can come from somewhere else).
+                sourceItemMetadatum = new(ItemMetadataNames.msbuildReferenceSourceTarget, "ResolveAssemblyReference");
+            }
+            else if (referenceSourceTarget.Equals("ProjectReference", StringComparison.Ordinal) && reference.PrimarySourceItem != null)
+            {
+                string originalItemSpec = reference.PrimarySourceItem.GetMetadata("OriginalItemSpec");
+                sourceItemMetadatum = new(ItemMetadataNames.projectReferenceOriginalItemSpec, originalItemSpec);
             }
 
-            if (referenceItem.GetMetadata(ItemMetadataNames.msbuildReferenceSourceTarget).Equals("ProjectReference"))
+            // The ImplementationAssembly is only set if the implementation file exits on disk
+            bool hasValidWinMDImplementationFile = reference.IsWinMDFile
+                && reference.ImplementationAssembly != null
+                && VerifyArchitectureOfImplementationDll(reference.ImplementationAssembly, reference.FullPath);
+            if (hasValidWinMDImplementationFile)
             {
-                if (reference.PrimarySourceItem != null)
+                // Copy the reference source metadata if we are modifying it.
+                if (!string.IsNullOrEmpty(sourceItemMetadatum.Key))
                 {
-                    referenceItem.SetMetadata(ItemMetadataNames.projectReferenceOriginalItemSpec, reference.PrimarySourceItem.GetMetadata("OriginalItemSpec"));
+                    relatedItemBase.SetMetadata(sourceItemMetadatum.Key, sourceItemMetadatum.Value);
                 }
+
+                // Add the implementation item as a related file
+                ITaskItem item = new TaskItem(reference.ImplementationAssembly);
+                // Clone metadata.
+                relatedItemBase.CopyMetadataTo(item);
+
+                // Add the related item.
+                relatedItems.Add(item);
             }
 
-            if (reference.IsWinMDFile)
-            {
-                // The ImplementationAssembly is only set if the implementation file exits on disk
-                if (reference.ImplementationAssembly != null)
-                {
-                    if (VerifyArchitectureOfImplementationDll(reference.ImplementationAssembly, reference.FullPath))
-                    {
-                        // Add the implementation item as a related file
-                        ITaskItem item = new TaskItem(reference.ImplementationAssembly);
-                        // Clone metadata.
-                        referenceItem.CopyMetadataTo(item);
-
-                        // Add the related item.
-                        relatedItems.Add(item);
-
-                        referenceItem.SetMetadata(ItemMetadataNames.winmdImplmentationFile, Path.GetFileName(reference.ImplementationAssembly));
-                        // This may have been set previously (before it was removed so we could more efficiently set metadata on the various related files).
-                        // This version should take priority, so we remove it from nonForwardableMetadata if it's there to prevent the correct value from
-                        // being overwritten.
-                        nonForwardableMetadata?.Remove(ItemMetadataNames.winmdImplmentationFile);
-                    }
-                }
-
-                // This may have been set previously (before it was removed so we could more efficiently set metadata on the various related files).
-                // This version should take priority, so we remove it from nonForwardableMetadata if it's there to prevent the correct value from
-                // being overwritten.
-                nonForwardableMetadata?.Remove(ItemMetadataNames.winMDFileType);
-                if (reference.IsManagedWinMDFile)
-                {
-                    referenceItem.SetMetadata(ItemMetadataNames.winMDFileType, "Managed");
-                }
-                else
-                {
-                    referenceItem.SetMetadata(ItemMetadataNames.winMDFileType, "Native");
-                }
-
-                // This may have been set previously (before it was removed so we could more efficiently set metadata on the various related files).
-                // This version should take priority, so we remove it from nonForwardableMetadata if it's there to prevent the correct value from
-                // being overwritten.
-                nonForwardableMetadata?.Remove(ItemMetadataNames.winMDFile);
-                referenceItem.SetMetadata(ItemMetadataNames.winMDFile, "true");
-            }
-
-            // Set the FusionName late, so we don't copy it to the derived items, but it's still available on referenceItem.
-            referenceItem.SetMetadata(ItemMetadataNames.fusionName, fusionName);
-
-            // nonForwardableMetadata should be null here if relatedFileExtensions, satellites, serializationAssemblyFiles, and scatterFiles were all empty.
-            if (nonForwardableMetadata != null)
-            {
-                referenceItemAsMetadataContainer.ImportMetadata(nonForwardableMetadata);
-            }
+            referenceItemAsMetadataContainer.ImportMetadata(
+                EnumeratePrimaryMetadata(reference, sourceItemMetadatum, fusionName, hasValidWinMDImplementationFile));
 
             return referenceItem;
 
             // Enumerate common metadata with an iterator to allow using a more efficient bulk-set operation.
-            IEnumerable<KeyValuePair<string, string>> EnumerateCommonMetadata()
+            static IEnumerable<KeyValuePair<string, string>> EnumerateCommonMetadata(
+                Reference reference,
+                AssemblyNameExtension assemblyName,
+                string[] frameworkPaths,
+                InstalledAssemblies installedAssemblies)
             {
                 yield return new KeyValuePair<string, string>(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
 
@@ -2871,9 +2847,9 @@ namespace Microsoft.Build.Tasks
                     yield return new KeyValuePair<string, string>(ItemMetadataNames.redist, reference.RedistName);
                 }
 
-                if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
+                if (Reference.IsFrameworkFile(reference.FullPath, frameworkPaths) || (installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
                 {
-                    if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
+                    if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, frameworkPaths, installedAssemblies))
                     {
                         yield return new KeyValuePair<string, string>(ItemMetadataNames.frameworkFile, "true");
                     }
@@ -2889,6 +2865,34 @@ namespace Microsoft.Build.Tasks
                 if (reference.IsRedistRoot != null)
                 {
                     yield return new KeyValuePair<string, string>(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
+                }
+
+                yield return new KeyValuePair<string, string>(ItemMetadataNames.version, reference.ReferenceVersion == null ? string.Empty : reference.ReferenceVersion.ToString());
+            }
+
+            // Enumerate metadata which should only be set on the primary output reference item.
+            static IEnumerable<KeyValuePair<string, string>> EnumeratePrimaryMetadata(
+                Reference reference,
+                KeyValuePair<string, string> sourceItemMetadatum,
+                string fusionName,
+                bool hasValidWinMDImplementationFile)
+            {
+                yield return new KeyValuePair<string, string>(ItemMetadataNames.fusionName, fusionName);
+
+                if (!string.IsNullOrEmpty(sourceItemMetadatum.Key))
+                {
+                    yield return sourceItemMetadatum;
+                }
+
+                if (hasValidWinMDImplementationFile)
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.winmdImplmentationFile, Path.GetFileName(reference.ImplementationAssembly));
+                }
+
+                if (reference.IsWinMDFile)
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.winMDFileType, reference.IsManagedWinMDFile ? "Managed" : "Native");
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.winMDFile, "true");
                 }
             }
         }
@@ -3013,33 +3017,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return machineType;
-        }
-
-        /// <summary>
-        /// Some metadata should not be forwarded between the parent and child items.
-        /// </summary>
-        /// <returns>The metadata that were removed.</returns>
-        private static Dictionary<string, string> RemoveNonForwardableMetadata(ITaskItem item)
-        {
-            Dictionary<string, string> removedMetadata = new Dictionary<string, string>();
-            RemoveMetadatum(ItemMetadataNames.winmdImplmentationFile, item, removedMetadata);
-            RemoveMetadatum(ItemMetadataNames.imageRuntime, item, removedMetadata);
-            RemoveMetadatum(ItemMetadataNames.winMDFile, item, removedMetadata);
-            if (!Traits.Instance.EscapeHatches.TargetPathForRelatedFiles)
-            {
-                RemoveMetadatum(ItemMetadataNames.targetPath, item, removedMetadata);
-            }
-            return removedMetadata;
-        }
-
-        private static void RemoveMetadatum(string key, ITaskItem item, Dictionary<string, string> removedMetadata)
-        {
-            string meta = item.GetMetadata(key);
-            if (!String.IsNullOrEmpty(meta))
-            {
-                removedMetadata.Add(key, meta);
-            }
-            item.RemoveMetadata(key);
         }
 
         /// <summary>
