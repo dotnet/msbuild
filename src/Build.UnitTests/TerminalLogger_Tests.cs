@@ -279,7 +279,11 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private void SynthesizeBuildOutputForProject(string projectFilePath, BuildEventContext? buildEventContext = null)
+        /// <summary>
+        /// This creates the expected pattern of messages for a project with an output type of library. It's on you to make sure
+        /// that the project you pass in is _recognized_ as a library.
+        /// </summary>
+        private void SynthesizeBuildOutputForLibraryProject(string projectFilePath, BuildEventContext? buildEventContext = null)
         {
             /// need to 
             /// * start the CopyFilesToOutputDirectory Target with a given target id
@@ -296,7 +300,7 @@ namespace Microsoft.Build.UnitTests
             var taskContext = MakeBuildEventContext(targetContext, taskId: 10);
             TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFilePath, "Copy", taskContext));
 
-            var taskOutputArgs = MakeTaskOutputItemArgs("MainAssembly", [outputPath]);
+            var taskOutputArgs = MakeTaskOutputItemArgs("MainAssembly", [outputPath], taskContext);
             MessageRaised?.Invoke(_eventSender, taskOutputArgs);
         }
 
@@ -605,10 +609,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintProjectOutputDirectoryLink()
         {
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
-            {
-                SynthesizeBuildOutputForProject(_projectFileWithNonAnsiSymbols);
-            }, _projectFileWithNonAnsiSymbols);
+            InvokeLoggerCallbacksForSimpleProject(
+                succeeded: true,
+                properties: [("OutputType", "Library")],
+                projectFile: _projectFileWithNonAnsiSymbols,
+                additionalCallbacks: () =>
+                {
+                    SynthesizeBuildOutputForLibraryProject(_projectFileWithNonAnsiSymbols);
+                });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -934,9 +942,9 @@ namespace Microsoft.Build.UnitTests
         public async Task ProjectFinishedReportsRuntimeIdentifier()
         {
             // this project will report a RID and so will show a RID in the build output
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("RuntimeIdentifier", "win-x64"), ("OutputType", "Library")], additionalCallbacks: () =>
             {
-                SynthesizeBuildOutputForProject(_projectFile);
+                SynthesizeBuildOutputForLibraryProject(_projectFile);
             });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -945,9 +953,9 @@ namespace Microsoft.Build.UnitTests
         public async Task ProjectFinishedReportsTargetFrameworkAndRuntimeIdentifier()
         {
             // this project will report a TFM and a RID and so will show a both in the output
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64"), ("OutputType", "Library")], additionalCallbacks: () =>
             {
-                SynthesizeBuildOutputForProject(_projectFile);
+                SynthesizeBuildOutputForLibraryProject(_projectFile);
             });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }

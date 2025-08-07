@@ -36,7 +36,7 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         eventSource.BuildFinished += ForwardEventUnconditionally;
         eventSource.ProjectStarted += ForwardEventUnconditionally;
         eventSource.ProjectFinished += ForwardEventUnconditionally;
-        eventSource.TargetStarted += TrackRelevantTargets;;
+        eventSource.TargetStarted += TrackRelevantTargets;
         eventSource.TargetFinished += ScrubOutputsFromIrrelevantTargets;
         eventSource.TaskStarted += TaskStarted;
 
@@ -71,6 +71,7 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
     /// some targets have tasks/items/properties that we need to get the details of, so we track that here so we're not flooding the central node with events.
     /// </summary>
     private readonly Dictionary<int, string> _targetIdsToTrackTasksOf = new();
+    private readonly HashSet<int> _taskIdsToTrackOutputsOf = new();
 
     /// <summary>
     /// sets up some bookkeeping for per-target tracking on the nodes to help filter input to the central node
@@ -83,7 +84,7 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         {
             case "CopyFilesToOutputDirectory":
                 // The Copy task in this target is used to copy the main assembly to the output directory.
-                _targetIdsToTrackTasksOf[e.BuildEventContext!.TargetId] = "MainAssembly";
+                _targetIdsToTrackTasksOf[e.BuildEventContext!.TargetId] = "Copy";
                 break;
         }
         BuildEventRedirector?.ForwardEvent(e);
@@ -121,10 +122,23 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
 
     public void TaskStarted(object sender, TaskStartedEventArgs e)
     {
+        if (e.BuildEventContext is null)
+        {
+            return;
+        }
+
         // The central node updates the 'in-flight' node status on the terminal
         // when a node starts the MSBuild task, so we need to forward these along so that behavior still works.
-        if (e.BuildEventContext is not null && e.TaskName == "MSBuild")
+        if (e.TaskName == "MSBuild")
         {
+            BuildEventRedirector?.ForwardEvent(e);
+        }
+
+        if (_targetIdsToTrackTasksOf.TryGetValue(e.BuildEventContext.TargetId, out string? taskName) && e.TaskName == taskName)
+        {
+            _taskIdsToTrackOutputsOf.Add(e.BuildEventContext.TaskId);
+            // If the task is one we care about, forward the started event
+            // so that the terminal logger can display it.
             BuildEventRedirector?.ForwardEvent(e);
         }
     }
@@ -162,10 +176,10 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
             }
             // tracked Task outputs
             else if (taskParameterEventArgs.Kind == TaskParameterMessageKind.TaskOutput
-                     && _targetIdsToTrackTasksOf.TryGetValue(taskParameterEventArgs.BuildEventContext!.TargetId, out string? outputNameToTrack)
-                     && taskParameterEventArgs.ItemType == outputNameToTrack)
+                     && _taskIdsToTrackOutputsOf.Contains(taskParameterEventArgs.BuildEventContext!.TaskId))
             {
                 _targetIdsToTrackTasksOf.Remove(taskParameterEventArgs.BuildEventContext.TargetId);
+                _taskIdsToTrackOutputsOf.Remove(taskParameterEventArgs.BuildEventContext.TaskId);
                 // If the task outputs are from a target we care about, forward them
                 // so that the terminal logger can display them.
                 BuildEventRedirector?.ForwardEvent(taskParameterEventArgs);
