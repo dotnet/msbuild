@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Collections
 {
     /// <summary>
-    /// This represents a specialized property dictionary which can provide a read-only dictionary without additonal allocations.
+    /// This represents a specialized property dictionary which can provide a read-only dictionary without additional allocations.
     /// </summary>
     internal interface IValueDictionaryConverter
     {
