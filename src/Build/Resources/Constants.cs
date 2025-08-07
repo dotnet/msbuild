@@ -168,6 +168,16 @@ namespace Microsoft.Build.Internal
         internal const string MSBuildAssemblyPath = nameof(MSBuildAssemblyPath);
 
         /// <summary>
+        /// The constant for the storing full path to the resolved dotnet.
+        /// </summary>
+        internal const string DotnetHostPath = nameof(DotnetHostPath);
+
+        /// <summary>
+        /// The constant for the storing the relative path to MSBuild assembly.
+        /// </summary>
+        internal const string MSBuildAssemblyPath = nameof(MSBuildAssemblyPath);
+
+        /// <summary>
         /// Current version of this MSBuild Engine assembly in the
         /// form, e.g, "4.0"
         /// </summary>
