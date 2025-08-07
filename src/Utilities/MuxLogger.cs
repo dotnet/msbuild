@@ -342,7 +342,7 @@ namespace Microsoft.Build.Utilities
             /// <summary>
             /// Object used to synchronize access to internals.
             /// </summary>
-            private readonly LockType _syncLock = new LockType();
+            private readonly object _syncLock = new object();
 
             /// <summary>
             /// List of loggers

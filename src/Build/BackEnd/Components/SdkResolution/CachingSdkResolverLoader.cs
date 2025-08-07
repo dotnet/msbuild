@@ -37,7 +37,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// A lock object protecting <see cref="_allResolvers"/> and <see cref="_resolversManifests"/>.
         /// </summary>
-        private readonly LockType _lock = new LockType();
+        private readonly object _lock = new();
 
         /// <summary>
         /// A static instance of <see cref="CachingSdkResolverLoader"/>.

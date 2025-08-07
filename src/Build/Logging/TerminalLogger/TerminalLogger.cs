@@ -75,7 +75,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
     /// </summary>
-    private readonly LockType _lock = new LockType();
+    private readonly object _lock = new();
 
     /// <summary>
     /// A cancellation token to signal the rendering thread that it should exit.

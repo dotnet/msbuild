@@ -3023,7 +3023,7 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Protects the counts and lists below.
             /// </summary>
-            private readonly LockType _lockObj = new LockType();
+            private readonly object _lockObj = new object();
 
             /// <summary>
             /// On what attempt count should we stop failing?
