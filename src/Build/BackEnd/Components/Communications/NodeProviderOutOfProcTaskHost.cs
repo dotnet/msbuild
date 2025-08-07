@@ -490,7 +490,8 @@ namespace Microsoft.Build.BackEnd
                 return msbuildAssemblyPath;
             }
 
-            throw new InvalidProjectFileException("Path to MSBuild.dll is not defined. Check if used SDK supports .NET Task Host.");
+            throw new InvalidProjectFileException("Task will be failed to be loaded because it requires the use of the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be located for the specified version. " +
+                "See https://aka.ms/nettaskhost for details about how to resolve this error.");
 
             static void ValidateNetHostSdkVersion(string path)
             {

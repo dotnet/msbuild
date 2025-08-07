@@ -156,17 +156,6 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal const string SubToolsetVersionPropertyName = VisualStudioVersionPropertyName;
 
-
-        /// <summary>
-        /// The constant for the storing full path to the resolved dotnet.
-        /// </summary>
-        internal const string DotnetHostPath = nameof(DotnetHostPath);
-
-        /// <summary>
-        /// The constant for the storing the relative path to MSBuild assembly.
-        /// </summary>
-        internal const string MSBuildAssemblyPath = nameof(MSBuildAssemblyPath);
-
         /// <summary>
         /// The constant for the storing full path to the resolved dotnet.
         /// </summary>

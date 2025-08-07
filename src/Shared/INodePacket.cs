@@ -266,8 +266,29 @@ namespace Microsoft.Build.BackEnd
         #endregion
     }
 
+    /// <summary>
+    /// Provides utilities for handling node packet types and extended headers in MSBuild's distributed build system.
+    /// 
+    /// This class manages the communication protocol between build nodes, including:
+    /// - Packet versioning for protocol compatibility
+    /// - Extended header flags for enhanced packet metadata
+    /// - Type extraction and manipulation for network communication
+    /// 
+    /// The packet format uses the upper 2 bits (6-7) for flags while preserving
+    /// the lower 6 bits for the actual packet type enumeration.
+    /// </summary>
     internal static class NodePacketTypeExtensions
     {
+        /// <summary>
+        /// Defines the communication protocol version for node communication.
+        /// 
+        /// Version 1: Introduced for the .NET Task Host protocol. This version
+        /// excludes the translation of appDomainConfig within TaskHostConfiguration
+        /// to maintain backward compatibility and reduce serialization overhead.
+        /// 
+        /// When incrementing this version, ensure compatibility with existing
+        /// task hosts and update the corresponding deserialization logic.
+        /// </summary>
         public const byte PacketVersion = 1;
 
         // Flag bits in upper 2 bits
@@ -307,7 +328,13 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-        // Read extended header (returns packet version)
+        /// <summary>
+        /// Reads the protocol version from an extended header in the stream.
+        /// This method expects the stream to be positioned at the version byte.
+        /// </summary>
+        /// <param name="stream">The stream to read the version byte from.</param>
+        /// <returns>The protocol version byte read from the stream.</returns>
+        /// <exception cref="EndOfStreamException">Thrown when the stream ends unexpectedly while reading the version.</exception>
         public static byte ReadVersion(Stream stream)
         {
             int value = stream.ReadByte();
@@ -319,7 +346,12 @@ namespace Microsoft.Build.BackEnd
             return (byte)value;
         }
 
-        // Write extended header with version
+        /// <summary>
+        /// Writes the protocol version byte to the extended header in the stream.
+        /// This is typically called after writing a packet type with the extended header flag.
+        /// </summary>
+        /// <param name="stream">The stream to write the version byte to.</param>
+        /// <param name="version">The protocol version to write to the stream.</param>
         public static void WriteVersion(Stream stream, byte version) => stream.WriteByte(version);
     }
 }
