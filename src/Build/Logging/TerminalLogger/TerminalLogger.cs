@@ -94,19 +94,30 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+
+    internal record struct TargetTaskOutput(string TaskName, ITaskOutput TaskOutput)
+    {
+        public bool AppliesToTask(TaskStartedEventArgs args) => args.TaskName == TaskName;
+    }
+
     internal interface ITaskOutput
     {
         bool AppliesToTaskOutput(TaskParameterEventArgs args);
+        void Apply(TaskParameterEventArgs args);
     }
 
-    internal record struct TaskItemOutput(string ItemType) : ITaskOutput
+    internal record struct TaskItemOutput(string ItemType, Action<TaskParameterEventArgs> handler) : ITaskOutput
     {
         public bool AppliesToTaskOutput(TaskParameterEventArgs args) => args.ItemType == ItemType;
+
+        public void Apply(TaskParameterEventArgs args) => handler(args);
     }
 
-    internal record struct TaskPropertyOutput(string PropertyName) : ITaskOutput
+    internal record struct TaskPropertyOutput(string PropertyName, Action<TaskParameterEventArgs> handler) : ITaskOutput
     {
         public bool AppliesToTaskOutput(TaskParameterEventArgs args) => args.PropertyName == PropertyName;
+
+        public void Apply(TaskParameterEventArgs args) => handler(args);
     }
 
     private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
@@ -1044,6 +1055,8 @@ public sealed partial class TerminalLogger : INodeLogger
         };
     }
 
+    private readonly Dictionary<TargetContext, TargetTaskOutput> _targetsListeningForTasks = new();
+
     /// <summary>
     /// These tasks will be watched for specific kinds of their outputs, typically because
     /// they produce important artifacts that we want to track.
@@ -1079,7 +1092,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     break;
                 case "CopyFilesToOutputDirectory":
                     // The Copy task in this target is used to copy the main assembly to the output directory.
-                    _tasksToWatchForOutputs[new(e.BuildEventContext!)] = new TaskItemOutput("MainAssembly");
+                    _targetsListeningForTasks[new(e.BuildEventContext!)] = new TargetTaskOutput("Copy", new TaskItemOutput("MainAssembly", TrySetMainAssemblyAsProjectOutput));
                     break;
             }
 
@@ -1271,7 +1284,12 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
+        if (buildEventContext is null)
+        {
+            return;
+        }
+        
+        if (_restoreContext is null  && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
             UpdateNodeStatus(buildEventContext, null);
@@ -1279,6 +1297,16 @@ public sealed partial class TerminalLogger : INodeLogger
             if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
             {
                 project.Stopwatch.Stop();
+            }
+        }
+
+        if (_targetsListeningForTasks.TryGetValue(new TargetContext(buildEventContext), out var targetTaskOutput))
+        {
+            // If we are listening for this task, we need to check if it is the one we are interested in.
+            if (targetTaskOutput.AppliesToTask(e))
+            {
+                // If it is, we need to register it for output watching.
+                _tasksToWatchForOutputs[new TaskContext(buildEventContext)] = targetTaskOutput.TaskOutput;
             }
         }
     }
@@ -1367,8 +1395,11 @@ public sealed partial class TerminalLogger : INodeLogger
         if (_tasksToWatchForOutputs.TryGetValue(taskContext, out ITaskOutput? taskOutput)
             && taskOutput.AppliesToTaskOutput(taskParameterEventArgs))
         {
-            // Based on what the output was, figure out what to do with it
+            // cleanup both us and our parent to prevent leaks
             _tasksToWatchForOutputs.Remove(taskContext);
+            _targetsListeningForTasks.Remove(new TargetContext(taskParameterEventArgs.BuildEventContext!));
+            // Based on what the output was, figure out what to do with it
+            taskOutput.Apply(taskParameterEventArgs);
             switch (taskParameterEventArgs.ItemType)
             {
                 case "MainAssembly":
@@ -1387,6 +1418,20 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         return;
+    }
+
+    public void TrySetMainAssemblyAsProjectOutput(TaskParameterEventArgs taskParameterEventArgs)
+    {
+        // This is the main assembly, so we can set the output path to the project.
+        if (_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext!), out var project))
+        {
+            var results = TryDetectOutputPath(taskParameterEventArgs.Items, project);
+            if (results is not null)
+            {
+                project.Outputs ??= [];
+                project.Outputs.AddRange(results);
+            }
+        }
     }
 
     private void HandleActualMessages(BuildMessageEventArgs e)

@@ -188,6 +188,17 @@ namespace Microsoft.Build.UnitTests
             targetId: 1,
             taskId: 1);
         }
+        private BuildEventContext MakeBuildEventContext(BuildEventContext baseCtx, int? targetId = null, int? taskId = null)
+        {
+            return new BuildEventContext(
+                submissionId: baseCtx.SubmissionId,
+                nodeId: baseCtx.NodeId,
+                evaluationId: baseCtx.EvaluationId,
+                projectInstanceId: baseCtx.ProjectInstanceId,
+                projectContextId: baseCtx.ProjectContextId,
+                targetId: targetId ?? baseCtx.TargetId,
+                taskId: taskId ?? baseCtx.TaskId);
+        }
 
         private BuildStartedEventArgs MakeBuildStartedEventArgs(BuildEventContext? buildEventContext = null)
         {
@@ -271,14 +282,33 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private BuildMessageEventArgs MakeBuildOutputEventArgs(string projectFilePath, BuildEventContext? buildEventContext = null)
+        private void SynthesizeBuildOutputForProject(string projectFilePath, BuildEventContext? buildEventContext = null)
         {
+            /// need to 
+            /// * start the CopyFilesToOutputDirectory Target with a given target id
+            /// * start the Copy task with that same target id
+            /// * send a TaskParameterEventArgs of kind TaskOutput with the ItemType set to MainAssembly
             var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
             var outputPath = Path.ChangeExtension(projectFilePath, "dll");
             var messageString = $"{projectName} -> {outputPath}";
-            var args = MakeMessageEventArgs(messageString, MessageImportance.High, buildEventContext: buildEventContext);
-            args.ProjectFile = projectFilePath;
-            return args;
+            var baseBEC = buildEventContext ?? MakeBuildEventContext();
+
+            var targetContext = MakeBuildEventContext(baseBEC, targetId: 10);
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFilePath, "CopyFilesToOutputDirectory", targetContext));
+
+            var taskContext = MakeBuildEventContext(targetContext, taskId: 10);
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFilePath, "Copy", taskContext));
+
+            var taskOutputArgs = MakeTaskOutputItemArgs("MainAssembly", [outputPath]);
+            MessageRaised?.Invoke(_eventSender, taskOutputArgs);
+        }
+
+        private TaskParameterEventArgs MakeTaskOutputItemArgs(string itemType, List<string> items, BuildEventContext? buildEventContext = null)
+        {
+            return new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, itemType, items, logItemMetadata: false, DateTime.UtcNow)
+            {
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext()
+            };
         }
 
         private BuildMessageEventArgs MakeTaskCommandLineEventArgs(string message, MessageImportance importance, BuildEventContext? buildEventContext = null)
@@ -578,11 +608,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintProjectOutputDirectoryLink()
         {
-            // Send message in order to set project output path
-            BuildMessageEventArgs e = MakeBuildOutputEventArgs(_projectFileWithNonAnsiSymbols);
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, e);
+                SynthesizeBuildOutputForProject(_projectFileWithNonAnsiSymbols);
             }, _projectFileWithNonAnsiSymbols);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -926,10 +954,9 @@ namespace Microsoft.Build.UnitTests
         public async Task ProjectFinishedReportsRuntimeIdentifier()
         {
             // this project will report a RID and so will show a RID in the build output
-            var buildOutputEvent = MakeBuildOutputEventArgs(_projectFile);
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
             {
-                MessageRaised?.Invoke(_eventSender, buildOutputEvent);
+                SynthesizeBuildOutputForProject(_projectFile);
             });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -938,10 +965,9 @@ namespace Microsoft.Build.UnitTests
         public async Task ProjectFinishedReportsTargetFrameworkAndRuntimeIdentifier()
         {
             // this project will report a TFM and a RID and so will show a both in the output
-            var buildOutputEvent = MakeBuildOutputEventArgs(_projectFile);
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
             {
-                MessageRaised?.Invoke(_eventSender, buildOutputEvent);
+                SynthesizeBuildOutputForProject(_projectFile);
             });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
