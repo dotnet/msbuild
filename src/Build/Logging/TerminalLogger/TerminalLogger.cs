@@ -749,7 +749,7 @@ public sealed partial class TerminalLogger : INodeLogger
                                 Terminal.WriteLine("");
                                 foreach (var output in project.Outputs)
                                 {
-                                    Terminal.WriteLine($"{DoubleIndentation}∟{GetTargetOutputRenderable(output, workingDirMemory, project.SourceRoot)}");
+                                    Terminal.WriteLine($"{DoubleIndentation}∟{GetTargetOutputRenderable(output, workingDirMemory, project.SourceRoot).ToString()}");
                                 }
                             }
                         }
