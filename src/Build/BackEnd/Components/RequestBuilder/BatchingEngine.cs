@@ -359,6 +359,10 @@ namespace Microsoft.Build.BackEnd
                             // from the List.BinarySearch() method
                             buckets.Insert(~matchingBucketIndex, matchingBucket);
                         }
+                        else
+                        {
+                            matchingBucket.Lookup.InitializeCapacity(items.Count);
+                        }
 
                         // We already have a bucket for this type of item, so add this item to
                         // the bucket.
