@@ -91,16 +91,35 @@ namespace Microsoft.Build.Internal
 
         protected readonly HandshakeComponents _handshakeComponents;
 
-        internal Handshake(HandshakeOptions nodeType)
-            : this(nodeType, includeSessionId: true)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
+        /// and optional predefined tools directory.
+        /// </summary>
+        /// <param name="nodeType">
+        /// The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
+        /// </param>
+        /// <param name="predefinedToolsDirectory">
+        /// An optional directory path used for .NET TaskHost handshake salt calculation (only on .NET Framework).
+        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt 
+        /// to ensure the child dotnet process connects with the expected tools directory context.
+        /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
+        /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
+        /// </param>
+        internal Handshake(HandshakeOptions nodeType, string predefinedToolsDirectory = null)
+            : this(nodeType, includeSessionId: true, predefinedToolsDirectory)
         {
         }
 
         // Helper method to validate handshake option presense.
         internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
 
-        protected Handshake(HandshakeOptions nodeType, bool includeSessionId)
+        // Source options of the handshake.
+        internal HandshakeOptions HandshakeOptions { get; }
+
+        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
         {
+            HandshakeOptions = nodeType;
+
             // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
             var options = (int)nodeType | (handshakeVersion << 24);
@@ -109,7 +128,7 @@ namespace Microsoft.Build.Internal
             // Calculate salt from environment and tools directory
             bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-            string toolsDirectory = GetToolsDirectory(isNetTaskHost);
+            string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
             CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
@@ -128,13 +147,12 @@ namespace Microsoft.Build.Internal
                 : CreateStandardComponents(options, salt, sessionId);
         }
 
-        private static string GetToolsDirectory(bool isNetTaskHost) =>
+        private string GetToolsDirectory(bool isNetTaskHost, string predefinedToolsDirectory) =>
 #if NETFRAMEWORK
             isNetTaskHost
 
-                // For .NET TaskHost assembly directory sets the expectation for the child dotnet process to connect to.
-                // It's possible that MSBuild will attempt to connect to an incompatible version of MSBuild.
-                ? BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory
+                // For .NET TaskHost assembly directory we set the expectation for the child dotnet process to connect to.
+                ? predefinedToolsDirectory
                 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 #else
             BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
@@ -187,7 +205,7 @@ namespace Microsoft.Build.Internal
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType, includeSessionId: false)
+            : base(nodeType, includeSessionId: false, predefinedToolsDirectory: null)
         {
         }
 
@@ -730,6 +748,7 @@ namespace Microsoft.Build.Internal
                 }
                 totalBytesRead += bytesRead;
             }
+
             return totalBytesRead;
         }
 #endif
