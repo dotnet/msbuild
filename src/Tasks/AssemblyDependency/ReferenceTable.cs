@@ -2835,7 +2835,10 @@ namespace Microsoft.Build.Tasks
                 string[] frameworkPaths,
                 InstalledAssemblies installedAssemblies)
             {
-                yield return new KeyValuePair<string, string>(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
+                if (!string.IsNullOrEmpty(reference.ResolvedSearchPath))
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
+                }
 
                 // Set the CopyLocal metadata.
                 yield return new KeyValuePair<string, string>(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
