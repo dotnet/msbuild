@@ -2791,7 +2791,7 @@ namespace Microsoft.Build.Tasks
             // This metadatum is created early so it can be copied to a WinMD implementation item if found.
             KeyValuePair<string, string> sourceItemMetadatum = default;
             string referenceSourceTarget = referenceItem.GetMetadata(ItemMetadataNames.msbuildReferenceSourceTarget);
-            if (!string.IsNullOrEmpty(referenceSourceTarget))
+            if (string.IsNullOrEmpty(referenceSourceTarget))
             {
                 // As long as the item has not come from somewhere else say it came from rar (p2p's can come from somewhere else).
                 sourceItemMetadatum = new(ItemMetadataNames.msbuildReferenceSourceTarget, "ResolveAssemblyReference");
