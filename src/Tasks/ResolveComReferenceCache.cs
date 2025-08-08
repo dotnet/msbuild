@@ -14,13 +14,13 @@ namespace Microsoft.Build.Tasks
     /// Stores timestamps of COM components processed in the last run. The problem here is that installing/uninstalling
     /// COM components does not update their timestamps with the current time (for a good reason). So if you revert to
     /// an earlier revision of a COM component, its timestamp can go back in time and we still need to regenerate its
-    /// wrapper. So in ResolveComReference we compare the stored timestamp with the current component timestamp, and if 
+    /// wrapper. So in ResolveComReference we compare the stored timestamp with the current component timestamp, and if
     /// they are different, we regenerate the wrapper.
     /// </remarks>
     internal sealed class ResolveComReferenceCache : StateFileBase, ITranslatable
     {
         /// <summary>
-        /// Component timestamps. 
+        /// Component timestamps.
         /// Key: Component path on disk
         /// Value: DateTime struct
         /// </summary>

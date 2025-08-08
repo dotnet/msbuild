@@ -347,7 +347,7 @@ namespace Microsoft.Build.BackEnd
 
                 taskHost?.MarkAsInactive();
 
-                // Now all task batches are done, apply all item adds to the outer 
+                // Now all task batches are done, apply all item adds to the outer
                 // target batch; we do this even if the task wasn't found (in that case,
                 // no items or properties will have been added to the scope)
                 if (buckets != null)
@@ -414,14 +414,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Change to the project root directory.
                     // If that directory does not exist, do nothing. (Do not check first as it is almost always there and it is slow)
-                    // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project. 
+                    // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
                     // No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
                     NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
                 }
 
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
-                    // We need to find the task before logging the task started event so that the using task statement comes before the task started event 
+                    // We need to find the task before logging the task started event so that the using task statement comes before the task started event
                     IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
                     TaskRequirements? requirements = _taskExecutionHost.FindTask(taskIdentityParameters);
                     if (requirements != null)
@@ -519,15 +519,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private IDictionary<string, string> GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
-            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method. 
+            ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method.
 
             string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
             string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
 
             IDictionary<string, string> taskIdentityParameters = null;
 
-            // only bother to create a task identity parameter set if we're putting anything in there -- otherwise, 
-            // a null set will be treated as equivalent to all parameters being "don't care". 
+            // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
+            // a null set will be treated as equivalent to all parameters being "don't care".
             if (msbuildRuntime != String.Empty || msbuildArchitecture != String.Empty)
             {
                 taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -825,7 +825,7 @@ namespace Microsoft.Build.BackEnd
 
                     // Set the property "MSBuildLastTaskResult" to reflect whether the task succeeded or not.
                     // The main use of this is if ContinueOnError is true -- so that the next task can consult the result.
-                    // So we want it to be "false" even if ContinueOnError is true. 
+                    // So we want it to be "false" even if ContinueOnError is true.
                     // The constants "true" and "false" should NOT be localized. They become property values.
                     bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, taskResult ? "true" : "false", true/* may be reserved */, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
                 }
@@ -894,7 +894,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
                     {
-                        // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with 
+                        // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
                         // a debugger attached to break on 2nd chance exceptions.
                         // That requires that there needs to be a way to not catch here, by setting an environment variable.
                         if (ExceptionHandling.IsCriticalException(taskException) || (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1"))

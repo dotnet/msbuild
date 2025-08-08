@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void LoggerDescriptionCustomSerialization()
         {
-  
+
             string className = "Class";
             string loggerAssemblyName = "Class";
             string loggerFileAssembly = null;

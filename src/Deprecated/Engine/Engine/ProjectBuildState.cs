@@ -17,7 +17,7 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This class is used to maintain a state of execution of a build request. Once a build request is
-    /// received it is wrapped in this class 
+    /// received it is wrapped in this class
     /// </summary>
     [DebuggerDisplay("ProjectBuildState (NameOfTargetInProgress={NameOfTargetInProgress}, NameOfBlockingTarget={NameOfBlockingTarget}, BuildResult={BuildResult}, BuildComplete={BuildComplete})")]
     internal sealed class ProjectBuildState
@@ -152,7 +152,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Remove the top blocking target 
+        /// Remove the top blocking target
         /// </summary>
         internal void RemoveBlockingTarget()
         {
@@ -161,7 +161,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Add another blocking target 
+        /// Add another blocking target
         /// </summary>
         internal void AddBlockingTarget(string targetName)
         {
@@ -218,7 +218,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This method return true if a given target name appears anywhere in the list of 
+        /// This method return true if a given target name appears anywhere in the list of
         /// blocking targets
         /// </summary>
         internal bool ContainsBlockingTarget(string name)
@@ -233,7 +233,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method is used by the target cycle detector to find the parent target for
-        /// the given target. The parent only exists if there is at least 1 
+        /// the given target. The parent only exists if there is at least 1
         /// blocking target. If there is less than 1 blocking target the parent is determined
         /// by the orgin of the build request that caused this build context.
         /// </summary>

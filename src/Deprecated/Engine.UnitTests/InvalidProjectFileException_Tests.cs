@@ -30,11 +30,11 @@ namespace Microsoft.Build.UnitTests
         public void SerializeDeserialize()
         {
             InvalidProjectFileException e = new InvalidProjectFileException(
-                "projectFile", 
+                "projectFile",
                 1, 2, 3, 4,
                 "message",
                 "errorSubcategory",
-                "errorCode", 
+                "errorCode",
                 "helpKeyword");
 
             using (MemoryStream memstr = new MemoryStream())
