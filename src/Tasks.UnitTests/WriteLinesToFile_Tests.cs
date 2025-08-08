@@ -3,7 +3,12 @@
 
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
@@ -366,6 +371,133 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 File.Exists(file.Path).ShouldBeTrue();
                 File.ReadAllText(file.Path).ShouldBeEmpty();
+            }
+        }
+
+        [Fact]
+        public void TransactionalModeHandlesConcurrentWritesSuccessfully()
+        {
+            using (var testEnv = TestEnvironment.Create(_output))
+            {
+                var outputFile = testEnv.CreateFile("output.txt").Path;
+                
+                var projectCount = 8;
+
+                // Create parent project file to run child projects in parallel
+                var parallelProjectContent = @$"
+                    <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                        <ItemGroup>
+                    {string.Join("\n", Enumerable.Range(1, projectCount).Select(i => $@"<Project Include=""TestProject{i}.csproj"" />"))}
+                        </ItemGroup>
+                        <Target Name=""Build"">
+                        <MSBuild Projects=""@(Project)"" Targets=""WriteToFile"" BuildInParallel=""true""/>
+                        </Target>
+                    </Project>";
+
+                var parallelProjectFile = testEnv.CreateFile("ParallelBuildProject.csproj", parallelProjectContent).Path;
+
+                // Create child project instances similar to the provided .csproj files with Transactional mode
+                for (int i = 0; i < projectCount; i++)
+                {
+                    var projectContent = @$"
+                        <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                            <ItemGroup>
+                            <LinesToWrite Include=""Line from Test{i + 1} at $([System.DateTime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))"" />
+                            </ItemGroup>
+                            <Target Name=""WriteToFile"">
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Transactional=""true""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Transactional=""true""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)"" Transactional=""true""/>
+                            </Target>
+                        </Project>";
+
+                    testEnv.CreateFile($"TestProject{i + 1}.csproj", projectContent);
+                }
+
+                // Create and run the parent project
+                var parallelProject = new ProjectInstance(parallelProjectFile);
+                var buildManager = BuildManager.DefaultBuildManager;
+                var buildParameters = new BuildParameters
+                {
+                    MaxNodeCount = Environment.ProcessorCount // Simulate BuildInParallel
+                };
+
+                var buildRequestData = new BuildRequestData(parallelProject, new[] { "Build" }, null);
+                var buildResult = buildManager.Build(buildParameters, buildRequestData);
+
+                // Verify build result
+                buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                // Verify output file exists and contains content from one of the projects
+                File.Exists(outputFile).ShouldBeTrue();
+                var content = File.ReadAllText(outputFile);
+                content.ShouldNotBeEmpty();
+                content.ShouldMatch(@"Line from Test\d+ at \d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}" + Environment.NewLine);
+            }
+        }
+
+        [Fact]
+        public void TransactionalModeHandlesConcurrentWritesFailed()
+        {
+            using (var testEnv = TestEnvironment.Create(_output))
+            {
+                var outputFile = testEnv.CreateFile("output.txt").Path;
+
+                var projectCount = 50;
+
+                // Create parent project file to run child projects in parallel
+                var parallelProjectContent = @$"
+                    <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                        <ItemGroup>
+                    {string.Join("\n", Enumerable.Range(1, projectCount).Select(i => $@"<Project Include=""TestProject{i}.csproj"" />"))}
+                        </ItemGroup>
+                        <Target Name=""Build"">
+                        <MSBuild Projects=""@(Project)"" Targets=""WriteToFile"" BuildInParallel=""true""/>
+                        </Target>
+                    </Project>";
+
+                var parallelProjectFile = testEnv.CreateFile("ParallelBuildProject.csproj", parallelProjectContent).Path;
+
+                // Create child project instances similar to the provided .csproj files without Transactional mode
+                for (int i = 0; i < projectCount; i++)
+                {
+                    var projectContent = @$"
+                        <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                            <ItemGroup>
+                            <LinesToWrite Include=""Line from Test{i + 1} at $([System.DateTime]::Now.ToString('yyyy-MM-dd HH:mm:ss'))"" />
+                            </ItemGroup>
+                            <Target Name=""WriteToFile"">
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+W                           <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            <WriteLinesToFile File=""{outputFile}"" Lines=""@(LinesToWrite)""/>
+                            </Target>
+                        </Project>";
+
+                    testEnv.CreateFile($"TestProject{i + 1}.csproj", projectContent);
+                }
+
+                // Create and run the parent project
+                var parallelProject = new ProjectInstance(parallelProjectFile);
+                var buildManager = BuildManager.DefaultBuildManager;
+                var buildParameters = new BuildParameters
+                {
+                    MaxNodeCount = Environment.ProcessorCount // Simulate BuildInParallel
+                };
+
+                var buildRequestData = new BuildRequestData(parallelProject, new[] { "Build" }, null);
+                var buildResult = buildManager.Build(buildParameters, buildRequestData);
+
+                // Verify build result
+                buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
             }
         }
     }
