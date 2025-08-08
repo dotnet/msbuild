@@ -52,7 +52,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Whether to write information about why we evaluate to debug output.
         /// </summary>
-        internal static readonly bool s_debugEvaluation = (Environment.GetEnvironmentVariable("MSBUILDDEBUGEVALUATION") != null);
+        private static readonly bool s_debugEvaluation = (Environment.GetEnvironmentVariable("MSBUILDDEBUGEVALUATION") != null);
 
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
@@ -2065,7 +2065,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (Xml.Count > 0) // don't log empty projects, evaluation is not interesting
                             {
-                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1}] [PC Hash {2}]", Xml.LastDirtyReason, FullPath, ProjectCollection.GetHashCode()));
+                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because of version mismatch [{0}] [PC Hash {1}]", FullPath, ProjectCollection.GetHashCode()));
                             }
                         }
 
@@ -2088,12 +2088,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (s_debugEvaluation)
                             {
-                                string reason = import.ImportedProject.LastDirtyReason;
-
-                                if (reason != null)
-                                {
-                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath, ProjectCollection.GetHashCode()));
-                                }
+                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because version numbers are mismatched [{0} - {1}] [PC Hash {2}]", FullPath, import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath, ProjectCollection.GetHashCode()));
                             }
 
                             return true;

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -136,11 +135,6 @@ namespace Microsoft.Build.Construction
         /// by an external means.
         /// </summary>
         private DateTime _lastWriteTimeWhenReadUtc;
-
-        /// <summary>
-        /// Reason it was last marked dirty; unlocalized, for debugging
-        /// </summary>
-        private string _dirtyReason = "first created project {0}";
 
         internal ProjectRootElementLink RootLink => (ProjectRootElementLink)Link;
 
@@ -691,13 +685,6 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal ProjectExtensionsElement ProjectExtensions
             => GetChildrenReversedOfType<ProjectExtensionsElement>().FirstOrDefault();
-
-        /// <summary>
-        /// Returns an unlocalized indication of how this file was last dirtied.
-        /// This is for debugging purposes only.
-        /// String formatting only occurs when retrieved.
-        /// </summary>
-        internal string LastDirtyReason => _dirtyReason;
 
         /// <summary>
         /// Initialize an in-memory empty ProjectRootElement instance that CANNOT be saved later.
@@ -1828,8 +1815,6 @@ namespace Microsoft.Build.Construction
             }
 
             IncrementVersion();
-
-            _dirtyReason = reason is not null && Project.s_debugEvaluation ? String.Format(CultureInfo.InvariantCulture, reason, param) : null;
 
             _timeLastChangedUtc = DateTime.UtcNow;
 
