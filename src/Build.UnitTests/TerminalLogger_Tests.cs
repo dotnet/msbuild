@@ -37,6 +37,8 @@ namespace Microsoft.Build.UnitTests
         private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
         private readonly string _projectFileWithNonAnsiSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/㐇𠁠𪨰𫠊𫦠𮚮⿕.proj" : @"C:\src\проектТерминал\㐇𠁠𪨰𫠊𫦠𮚮⿕.proj";
 
+        private readonly string _exeSuffix = NativeMethods.IsUnixLike ? "" : ".exe";
+
         private StringWriter _outputWriter = new();
 
         private readonly Terminal _mockTerminal;
@@ -216,9 +218,9 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private ProjectStartedEventArgs MakeProjectStartedEventArgs(string projectFile, string targetNames = "Build", BuildEventContext? buildEventContext = null)
+        private ProjectStartedEventArgs MakeProjectStartedEventArgs(string projectFile, string[]? targetNames = null, BuildEventContext? buildEventContext = null)
         {
-            return new ProjectStartedEventArgs("", "", projectFile, targetNames, new Dictionary<string, string>(), new List<DictionaryEntry>())
+            return new ProjectStartedEventArgs("", "", projectFile, string.Join(";", targetNames ?? ["Build"]), new Dictionary<string, string>(), new List<DictionaryEntry>())
             {
                 BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
@@ -240,11 +242,12 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        private TargetFinishedEventArgs MakeTargetFinishedEventArgs(string projectFile, string targetName, bool succeeded, BuildEventContext? buildEventContext = null)
+        private TargetFinishedEventArgs MakeTargetFinishedEventArgs(string projectFile, string targetName, bool succeeded, IEnumerable<string>? targetOutputs = null, BuildEventContext? buildEventContext = null)
         {
             return new TargetFinishedEventArgs("", "", targetName, projectFile, targetFile: projectFile, succeeded)
             {
                 BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
+                TargetOutputs = targetOutputs
             };
         }
 
@@ -294,7 +297,30 @@ namespace Microsoft.Build.UnitTests
             /// * send a TaskParameterEventArgs of kind TaskOutput with the ItemType set to MainAssembly
             var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
             var outputPath = Path.ChangeExtension(projectFilePath, "dll");
-            var messageString = $"{projectName} -> {outputPath}";
+            var baseBEC = buildEventContext ?? MakeBuildEventContext();
+
+            var targetContext = MakeBuildEventContext(baseBEC, targetId: 10);
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFilePath, "CopyFilesToOutputDirectory", targetContext));
+
+            var taskContext = MakeBuildEventContext(targetContext, taskId: 10);
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFilePath, "Copy", taskContext));
+
+            var taskOutputArgs = MakeTaskOutputItemArgs("MainAssembly", [outputPath], taskContext);
+            MessageRaised?.Invoke(_eventSender, taskOutputArgs);
+        }
+
+        /// <summary>
+        /// This creates the expected pattern of messages for a project with an output type of library. It's on you to make sure
+        /// that the project you pass in is _recognized_ as a library.
+        /// </summary>
+        private void SynthesizeBuildOutputForExecutableProject(string projectFilePath, BuildEventContext? buildEventContext = null)
+        {
+            /// need to 
+            /// * start the CopyFilesToOutputDirectory Target with a given target id
+            /// * start the Copy task with that same target id
+            /// * send a TaskParameterEventArgs of kind TaskOutput with the ItemType set to MainAssembly
+            var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+            var outputPath = Path.ChangeExtension(projectFilePath, _exeSuffix);
             var baseBEC = buildEventContext ?? MakeBuildEventContext();
 
             var targetContext = MakeBuildEventContext(baseBEC, targetId: 10);
@@ -835,7 +861,7 @@ namespace Microsoft.Build.UnitTests
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
             StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tfName")]));
 
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, "Build"));
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
             TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
 
@@ -847,7 +873,7 @@ namespace Microsoft.Build.UnitTests
             // now create a new project with a different target framework that runs on the same node
             var buildContext2 = MakeBuildEventContext(evalId: 2, projectContextId: 2);
             StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tf2")], buildEventContext: buildContext2));
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, buildEventContext: buildContext2));
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
 
             _terminallogger.DisplayNodes();
@@ -978,6 +1004,86 @@ namespace Microsoft.Build.UnitTests
                 SynthesizeBuildOutputForLibraryProject(_projectFile);
             });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectFinishedReportsTargetFrameworkAndRuntimeIdentifierForExe()
+        {
+            // this project will report a TFM and a RID and so will show a both in the output
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64"), ("OutputType", "Exe")], additionalCallbacks: () =>
+            {
+                SynthesizeBuildOutputForExecutableProject(_projectFile);
+            });
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectThatPackagesEmitsSinglePackageOutput()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPackagingProject(succeeded: true, numberOfPackages: 1);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectThatPackagesNPackagesEmitsMultiplePackageOutputs()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPackagingProject(succeeded: true, numberOfPackages: 10);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ExecutableProjectThatHasPublishOutputEmitsPublishExe()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPublishingProject(succeeded: true, isExecutable: true, properties: [("OutputType", "Exe")]);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task LibraryProjectThatHasPublishOutputEmitsPublishDll()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPublishingProject(succeeded: true, isExecutable: false, properties: [("OutputType", "Library")]);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        private void InvokeLoggerCallbacksForPackagingProject(bool succeeded, int numberOfPackages = 1, string? projectFile = null, List<(string, string)>? properties = null)
+        {
+            projectFile ??= _projectFile;
+
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile, properties: properties));
+
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile, targetNames: ["Pack"]));
+
+            var packageRootDir = Path.Combine(Path.GetDirectoryName(projectFile)!, "bin", "Release");
+            List<string> packageOutputPaths =
+                numberOfPackages == 1
+                 ? [Path.Combine(packageRootDir, Path.GetFileNameWithoutExtension(projectFile) + ".nupkg")]
+                 : [.. Enumerable.Range(0, numberOfPackages).Select(i => Path.Combine(packageRootDir, $"{Path.GetFileNameWithoutExtension(projectFile)}{i}.nupkg"))];
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "GenerateNuspec", succeeded: true, targetOutputs: packageOutputPaths));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+        }
+        
+        private void InvokeLoggerCallbacksForPublishingProject(bool succeeded, string? projectFile = null, bool isExecutable = false, List<(string, string)>? properties = null)
+        {
+            projectFile ??= _projectFile;
+
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile, properties: properties));
+
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile, targetNames: ["Publish"]));
+
+            var projectOutputRoot = Path.Combine(Path.GetDirectoryName(projectFile)!, "bin", "Release");
+            var publishOutputPath = Path.Combine(projectOutputRoot, Path.GetFileNameWithoutExtension(projectFile) + (isExecutable ? _exeSuffix : ".dll"));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "PublishItemsOutputGroup", succeeded: true, targetOutputs: [publishOutputPath]));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
     }
 }

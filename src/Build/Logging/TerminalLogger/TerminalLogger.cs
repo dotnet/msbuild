@@ -867,8 +867,9 @@ public sealed partial class TerminalLogger : INodeLogger
             SdkOutputType outputType = SdkOutputType.Unknown;
             foreach (var property in evalFinish.EnumerateProperties())
             {
-                if (tfm is not null && rid is not null)
+                if (tfm is not null && rid is not null && outputType != SdkOutputType.Unknown)
                 {
+                    // perf - we short-circuit once we've computed all the values 
                     // We already have both properties, no need to continue.
                     break;
                 }
@@ -1111,8 +1112,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
-        // For cache plugin projects which result in a cache hit, ensure the output path is set
-        // to the item spec corresponding to the GetTargetPath target upon completion.
         var buildEventContext = e.BuildEventContext;
         var targetOutputs = e.TargetOutputs;
         if (_restoreContext is not null || buildEventContext is null)
