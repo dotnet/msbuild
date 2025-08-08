@@ -490,28 +490,26 @@ namespace Microsoft.Build.BackEnd
                 return msbuildAssemblyPath;
             }
 
-            throw new InvalidProjectFileException("Task will be failed to be loaded because it requires the use of the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be located for the specified version. " +
-                "See https://aka.ms/nettaskhost for details about how to resolve this error.");
+            throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("NETHostTaskLoad_Failed"));
 
             static void ValidateNetHostSdkVersion(string path)
             {
                 const int MinimumSdkVersion = 10;
-                const string ErrorMessage = "Net TaskHost is only supported starting from SDK version 10 or later.";
 
                 if (string.IsNullOrEmpty(path))
                 {
-                    ErrorUtilities.ThrowInternalError("SDK path cannot be null or empty.");
+                    ErrorUtilities.ThrowInternalError(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
                 }
 
                 if (!FileSystems.Default.DirectoryExists(path))
                 {
-                    ErrorUtilities.ThrowInternalError($"The directory does not exist: {path}.");
+                    ErrorUtilities.ThrowInternalError(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
                 }
 
                 var sdkVersion = ExtractSdkVersionFromPath(path);
                 if (sdkVersion is null or < MinimumSdkVersion)
                 {
-                    throw new InvalidProjectFileException($"SDK version {sdkVersion} is below the minimum required version of {MinimumSdkVersion}. {ErrorMessage}");
+                    throw new InvalidProjectFileException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NETHostVersion_Failed", sdkVersion, MinimumSdkVersion));
                 }
             }
         }
