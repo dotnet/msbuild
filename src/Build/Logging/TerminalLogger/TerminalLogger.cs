@@ -869,7 +869,7 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 if (tfm is not null && rid is not null && outputType != SdkOutputType.Unknown)
                 {
-                    // perf - we short-circuit once we've computed all the values 
+                    // perf - we short-circuit once we've computed all the values
                     // We already have both properties, no need to continue.
                     break;
                 }
@@ -1156,10 +1156,8 @@ public sealed partial class TerminalLogger : INodeLogger
 
         if (e.TargetName == "InitializeSourceRootMappedPaths" && project.SourceRoot is null)
         {
-            project.SourceRoot =
-                (targetOutputs as IEnumerable<ITaskItem>)?
-                .FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")))
-                ?.ItemSpec.AsMemory();
+            TryDetectSourceRoots(targetOutputs, project);
+            return;
         }
     }
 
@@ -1287,7 +1285,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return;
         }
-        
+
         if (_restoreContext is null  && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
@@ -1329,7 +1327,7 @@ public sealed partial class TerminalLogger : INodeLogger
             case TaskParameterEventArgs tpea:
                 if (tpea is { Kind: TaskParameterMessageKind.SkippedTargetOutputs })
                 {
-                    LookForTargetOutputs(tpea);
+                    LookForTargetOutputsFromSkippedTargetNotification(tpea);
                 }
                 else if (tpea is { Kind: TaskParameterMessageKind.TaskOutput })
                 {
@@ -1345,12 +1343,32 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void TrackSkippedTarget(TargetSkippedEventArgs skipArgs)
     {
+        // what to do if this has been built originally elsewhere...
+        if (skipArgs.SkipReason == TargetSkipReason.PreviouslyBuiltSuccessfully)
+        {
+            if (skipArgs.TargetName == "InitializeSourceRootMappedPaths")
+            {
+                // if the sourceRoots we're looking for have been set on another project, we can look them
+                // up and apply them to _this_ project!
+                if (_projects.TryGetValue(new ProjectContext(skipArgs.OriginalBuildEventContext), out TerminalProjectInfo? originalProject)
+                    && originalProject.SourceRoot is not null
+                    && _projects.TryGetValue(new ProjectContext(skipArgs.BuildEventContext!), out TerminalProjectInfo? currentProject)
+                    && currentProject.SourceRoot is null
+                )
+                {
+                    currentProject.SourceRoot = originalProject.SourceRoot;
+                    return;
+                }
+            }
+        }
+
+
         // this was forwarded by the child node, so it must be a target we need to track for skipped-output purposes
         var targetContext = new TargetContext(skipArgs.BuildEventContext!);
         _targetNamesForSkippedOutputs[targetContext] = skipArgs.TargetName;
     }
 
-    private void LookForTargetOutputs(TaskParameterEventArgs taskParameterEventArgs)
+    private void LookForTargetOutputsFromSkippedTargetNotification(TaskParameterEventArgs taskParameterEventArgs)
     {
         var targetContext = new TargetContext(taskParameterEventArgs.BuildEventContext!);
         if (!_targetNamesForSkippedOutputs.TryGetValue(targetContext, out string? targetName))
@@ -1384,8 +1402,29 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             project.Outputs ??= [];
             project.Outputs.AddRange(detectedOutputs);
+            return;
         }
-        return;
+
+        if (targetName == "InitializeSourceRootMappedPaths")
+        {
+            TryDetectSourceRoots(taskParameterEventArgs.Items, project);
+            return;
+        }     
+    }
+
+    private void TryDetectSourceRoots(IEnumerable outputs, TerminalProjectInfo project)
+    {
+        var mappedOutputs = outputs as IEnumerable<ITaskItem>;
+        if (mappedOutputs is null || !mappedOutputs.Any())
+        {
+            // If there are no outputs, we don't have anything to set.
+            return;
+        }
+
+        project.SourceRoot =
+            mappedOutputs
+            .FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")))
+            ?.ItemSpec.AsMemory();
     }
 
     private void LookForTaskOutputs(TaskParameterEventArgs taskParameterEventArgs)
