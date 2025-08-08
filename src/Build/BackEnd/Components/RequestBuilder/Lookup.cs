@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
@@ -856,22 +855,39 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private static void ApplyMetadataModificationsToItem(MetadataModifications modificationsToApply, ProjectItemInstance itemToModify)
         {
-            // PERF: Avoid additional allocations by going through the interfaces - ProjectItemInstance hides some symbols
-            // from its public API.
-            ITaskItem taskItem = itemToModify;
-            IMetadataContainer metadataContainer = itemToModify;
-
             // Remove any metadata from the item which is slated for removal.  The indexer in the modifications table will
             // return a modification with Remove == true either if there is an explicit entry for that name in the modifications
             // or if keepOnlySpecified == true and there is no entry for that name.
-            if (modificationsToApply.KeepOnlySpecified && metadataContainer.HasCustomMetadata)
+            if (modificationsToApply.KeepOnlySpecified)
             {
-                foreach (KeyValuePair<string, string> m in metadataContainer.BackingMetadata.Dictionary)
+
+                // Perf: Avoid boxing when possible by getting the underlying struct enumerator if available.
+                List<string> metadataToRemove = new List<string>(); ;
+                if (itemToModify.Metadata is CopyOnWritePropertyDictionary<ProjectMetadataInstance> copyOnWritePropertyMetadata)
                 {
-                    if (modificationsToApply[m.Key].Remove)
+                    foreach (var m in copyOnWritePropertyMetadata)
                     {
-                        taskItem.RemoveMetadata(m.Key);
+                        string name = m.Value.Name;
+                        if (modificationsToApply[name].Remove)
+                        {
+                            metadataToRemove.Add(name);
+                        }
                     }
+                }
+                else
+                {
+                    foreach (var m in itemToModify.Metadata)
+                    {
+                        if (modificationsToApply[m.Name].Remove)
+                        {
+                            metadataToRemove.Add(m.Name);
+                        }
+                    }
+                }
+
+                foreach (var metadataName in metadataToRemove)
+                {
+                    itemToModify.RemoveMetadata(metadataName);
                 }
             }
 
@@ -880,11 +896,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (modificationPair.Value.Remove)
                 {
-                    taskItem.RemoveMetadata(modificationPair.Key);
+                    itemToModify.RemoveMetadata(modificationPair.Key);
                 }
                 else if (modificationPair.Value.NewValue != null)
                 {
-                    taskItem.SetMetadata(modificationPair.Key, modificationPair.Value.NewValue);
+                    itemToModify.SetMetadata(modificationPair.Key, modificationPair.Value.NewValue);
                 }
             }
         }
