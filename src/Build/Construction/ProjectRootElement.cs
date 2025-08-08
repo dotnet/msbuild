@@ -116,11 +116,6 @@ namespace Microsoft.Build.Construction
         private ElementLocation _projectFileLocation;
 
         /// <summary>
-        /// The project file's full path, escaped.
-        /// </summary>
-        private string _escapedFullPath;
-
-        /// <summary>
         /// The directory that the project is in.
         /// Essential for evaluating relative paths.
         /// If the project is not loaded from disk, returns the current-directory from
@@ -146,11 +141,6 @@ namespace Microsoft.Build.Construction
         /// Reason it was last marked dirty; unlocalized, for debugging
         /// </summary>
         private string _dirtyReason = "first created project {0}";
-
-        /// <summary>
-        /// Parameter to be formatted into the dirty reason
-        /// </summary>
-        private string _dirtyParameter = String.Empty;
 
         internal ProjectRootElementLink RootLink => (ProjectRootElementLink)Link;
 
@@ -184,19 +174,11 @@ namespace Microsoft.Build.Construction
             ProjectParser.Parse(document, this);
         }
 
-        private readonly bool _isEphemeral = false;
-
-        private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions, bool isEphemeral)
-            : this(projectRootElementCache, projectFileOptions)
-        {
-            _isEphemeral = isEphemeral;
-        }
-
         /// <summary>
         /// Initialize an in-memory, empty ProjectRootElement instance that can be saved later.
         /// Leaves the project dirty, indicating there are unsaved changes.
         /// </summary>
-        private ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
+        internal ProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
@@ -337,8 +319,6 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(GetAllChildrenOfType<ProjectImportElement>());
 
-        internal bool IsEphemeral => _isEphemeral;
-
         /// <summary>
         /// Get a read-only collection of the child property groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
@@ -398,7 +378,7 @@ namespace Microsoft.Build.Construction
             // Used during solution load to ensure solutions which were created from a file have a location.
         }
 
-        public string EscapedFullPath => _escapedFullPath ?? (_escapedFullPath = ProjectCollection.Escape(FullPath));
+        public string EscapedFullPath => ProjectCollection.Escape(FullPath);
 
         /// <summary>
         /// Full path to the project file.
@@ -434,7 +414,6 @@ namespace Microsoft.Build.Construction
                 }
 
                 _projectFileLocation = ElementLocation.Create(newFullPath);
-                _escapedFullPath = null;
                 _directory = Path.GetDirectoryName(newFullPath);
 
                 if (XmlDocument != null)
@@ -705,15 +684,6 @@ namespace Microsoft.Build.Construction
         internal bool IsMemberOfProjectCollection => _projectFileLocation != null;
 
         /// <summary>
-        /// Indicates whether there are any targets in this project
-        /// that use the "Returns" attribute.  If so, then this project file
-        /// is automatically assumed to be "Returns-enabled", and the default behavior
-        /// for targets without Returns attributes changes from using the Outputs to
-        /// returning nothing by default.
-        /// </summary>
-        internal bool ContainsTargetsWithReturnsAttribute { get; set; }
-
-        /// <summary>
         /// Gets the ProjectExtensions child, if any, otherwise null.
         /// </summary>
         /// <remarks>
@@ -727,8 +697,7 @@ namespace Microsoft.Build.Construction
         /// This is for debugging purposes only.
         /// String formatting only occurs when retrieved.
         /// </summary>
-        internal string LastDirtyReason
-            => _dirtyReason == null ? null : String.Format(CultureInfo.InvariantCulture, _dirtyReason, _dirtyParameter);
+        internal string LastDirtyReason => _dirtyReason;
 
         /// <summary>
         /// Initialize an in-memory empty ProjectRootElement instance that CANNOT be saved later.
@@ -739,7 +708,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache);
 
-            return new ProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions, isEphemeral: true);
+            return new EphemeralProjectRootElement(projectRootElementCache, Project.DefaultNewProjectTemplateOptions);
         }
 
         /// <summary>
@@ -1847,7 +1816,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal sealed override void MarkDirty(string reason, string param)
         {
-            if (_isEphemeral)
+            if (this is EphemeralProjectRootElement)
             {
                 return;
             }
@@ -1860,8 +1829,7 @@ namespace Microsoft.Build.Construction
 
             IncrementVersion();
 
-            _dirtyReason = reason;
-            _dirtyParameter = param;
+            _dirtyReason = reason is not null && Project.s_debugEvaluation ? String.Format(CultureInfo.InvariantCulture, reason, param) : null;
 
             _timeLastChangedUtc = DateTime.UtcNow;
 
@@ -2105,7 +2073,6 @@ namespace Microsoft.Build.Construction
                 }
 
                 _projectFileLocation = ElementLocation.Create(fullPath);
-                _escapedFullPath = null;
                 _directory = Path.GetDirectoryName(fullPath);
 
                 if (XmlDocument != null)
@@ -2170,6 +2137,14 @@ namespace Microsoft.Build.Construction
             {
                 ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges", null);
             }
+        }
+    }
+
+    internal class EphemeralProjectRootElement : ProjectRootElement
+    {
+        internal EphemeralProjectRootElement(ProjectRootElementCacheBase projectRootElementCache, NewProjectFileOptions projectFileOptions)
+            : base(projectRootElementCache, projectFileOptions)
+        {
         }
     }
 }
