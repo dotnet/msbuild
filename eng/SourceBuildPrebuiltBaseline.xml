@@ -7,6 +7,8 @@
     <Usage Id="jnm2.ReferenceAssemblies.net35" Version="1.0.1" IsDirectDependency="true" />
     <Usage Id="Microsoft.AspNetCore.App.Runtime.win-x64" Version="5.0.17" />
     <Usage Id="Microsoft.AspNetCore.App.Runtime.win-x86" Version="5.0.17" />
+    <Usage Id="Microsoft.AspNetCore.App.Ref" Version="5.0.0" />
+    <Usage Id="Microsoft.NETCore.App.Ref" Version="5.0.0" />
     <Usage Id="Microsoft.Build" Version="14.3.0" IsDirectDependency="true" />
     <Usage Id="Microsoft.Build.CentralPackageVersions" Version="2.0.1" />
     <Usage Id="Microsoft.Build.Framework" Version="14.3.0" IsDirectDependency="true" />
@@ -23,9 +25,9 @@
     <Usage Id="Microsoft.Diagnostics.NETCore.Client" Version="0.2.61701" />
     <Usage Id="Microsoft.Diagnostics.Runtime" Version="1.1.57604" />
     <Usage Id="Microsoft.Diagnostics.Tracing.TraceEvent" Version="2.0.49" />
-    <Usage Id="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.24623.4" />
+    <Usage Id="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.25405.2" />
     <Usage Id="Microsoft.DotNet.PlatformAbstractions" Version="2.1.0" />
-    <Usage Id="Microsoft.DotNet.SourceBuild.Tasks" Version="6.0.0-beta.24623.4" IsDirectDependency="true" IsAutoReferenced="true" />
+    <Usage Id="Microsoft.DotNet.SourceBuild.Tasks" Version="6.0.0-beta.25405.2" IsDirectDependency="true" IsAutoReferenced="true" />
     <Usage Id="Microsoft.DotNet.XliffTasks" Version="1.0.0-beta.21431.1" IsDirectDependency="true" IsAutoReferenced="true" />
     <Usage Id="Microsoft.Extensions.DependencyModel" Version="5.0.0" IsDirectDependency="true" />
     <Usage Id="Microsoft.Net.Compilers.Toolset" Version="3.9.0-2.20574.26" IsDirectDependency="true" IsAutoReferenced="true" />
