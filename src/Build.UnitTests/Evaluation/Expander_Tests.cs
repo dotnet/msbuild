@@ -1940,7 +1940,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogDoesntContain("%29");
         }
 
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void TestGetPathToReferenceAssembliesAsFunction()
         {
