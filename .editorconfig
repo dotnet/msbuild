@@ -1,4 +1,4 @@
-# editorconfig.org
+﻿# editorconfig.org
 
 # top-most EditorConfig file
 root = true
@@ -162,6 +162,9 @@ dotnet_code_quality.ca2208.api_surface = public
 
 # CA1852: Seal internal types
 dotnet_diagnostic.ca1852.severity = warning
+
+# CA2000: Dispose objects before losing scope
+dotnet_diagnostic.ca2000.severity = error
 
 # RS0037: Enable tracking of nullability of reference types in the declared API
 # Our API is not annotated but new classes get nullable enabled so disable this.
@@ -409,3 +412,6 @@ dotnet_diagnostic.IDE0290.severity = suggestion
 dotnet_diagnostic.IDE0300.severity = suggestion
 dotnet_diagnostic.IDE0301.severity = suggestion
 dotnet_diagnostic.IDE0305.severity = suggestion
+
+# Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
+dotnet_diagnostic.SA1010.severity = none
