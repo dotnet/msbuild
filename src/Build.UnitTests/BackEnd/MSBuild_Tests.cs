@@ -361,7 +361,7 @@ namespace Microsoft.Build.UnitTests
         /// However, it's a situation where the project author doesn't have control over the
         /// property value and so he can't escape it himself.
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();

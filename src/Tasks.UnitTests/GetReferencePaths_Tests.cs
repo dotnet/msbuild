@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void TestGeneralFrameworkMonikerGood()
         {
             string targetFrameworkMoniker = ".NetFramework, Version=v4.5";
