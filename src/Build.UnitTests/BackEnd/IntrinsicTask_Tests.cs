@@ -246,8 +246,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Equal("a1", i1Group.First().EvaluatedInclude);
             Assert.Equal("b1", i2Group.First().EvaluatedInclude);
         }
@@ -698,7 +698,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             Assert.Empty(i1Group);
         }
 
@@ -721,7 +721,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             Assert.Equal("a1", i1Group.First().EvaluatedInclude);
             Assert.Equal("m1", i1Group.First().GetMetadataValue("m"));
         }
@@ -747,7 +747,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateLookup(properties);
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
             Assert.Equal("v0", i1Group.First().EvaluatedInclude);
         }
 
@@ -818,8 +818,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Equal("a.cpp", i1Group.First().EvaluatedInclude);
             Assert.Equal("a.obj", i2Group.First().EvaluatedInclude);
         }
@@ -842,7 +842,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Equal("a.cpp", i2Group.First().EvaluatedInclude);
             Assert.Equal("a.obj", i2Group.First().GetMetadataValue("m"));
         }
@@ -863,8 +863,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Equal("a1", i1Group.First().EvaluatedInclude);
             Assert.Equal("b2", i2Group.First().EvaluatedInclude);
         }
@@ -887,8 +887,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Single(i1Group);
             Assert.Single(i2Group);
             Assert.Equal("a1", i1Group.First().EvaluatedInclude);
@@ -998,8 +998,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateLookup(properties);
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
             Assert.Equal("v0", i1Group.First().EvaluatedInclude);
             Assert.Equal("a2", i2Group.First().EvaluatedInclude);
         }
@@ -1025,8 +1025,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
 
             Assert.Equal("a1", i1Group.First().EvaluatedInclude);
             Assert.Equal("a2", i1Group.ElementAt(1).EvaluatedInclude);
@@ -1059,7 +1059,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
 
             Assert.Equal(2, i2Group.Count);
             Assert.Equal("a1", i2Group.First().EvaluatedInclude);
@@ -1116,8 +1116,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = GenerateLookup(task.Project);
             ExecuteTask(task, lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
-            ICollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i2Group = lookup.GetItems("i2");
 
             Assert.Equal("b1", i1Group.First().EvaluatedInclude);
             Assert.Equal("b1", i1Group.ElementAt(1).EvaluatedInclude);
@@ -2049,7 +2049,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
-            ICollection<ProjectItemInstance> items = lookup.GetItems("I2");
+            IReadOnlyCollection<ProjectItemInstance> items = lookup.GetItems("I2");
             items.Count.ShouldBe(3);
             items.ElementAt(0).EvaluatedInclude.ShouldBe("a2");
             items.ElementAt(1).EvaluatedInclude.ShouldBe("c2");
@@ -2084,7 +2084,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             IntrinsicTask task = CreateIntrinsicTask(content);
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
-            ICollection<ProjectItemInstance> items = lookup.GetItems("I3");
+            IReadOnlyCollection<ProjectItemInstance> items = lookup.GetItems("I3");
             items.ShouldBeEmpty();
         }
 
@@ -2143,7 +2143,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             task.ExecuteTask(lookup);
 
-            ICollection<ProjectItemInstance> i0Group = lookup.GetItems("i0");
+            IReadOnlyCollection<ProjectItemInstance> i0Group = lookup.GetItems("i0");
 
             Assert.Equal(3, i0Group.Count);
             Assert.Equal("a1", i0Group.First().EvaluatedInclude);
@@ -2224,7 +2224,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             task.ExecuteTask(lookup);
 
-            ICollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
+            IReadOnlyCollection<ProjectItemInstance> i1Group = lookup.GetItems("i1");
 
             Assert.Single(i1Group);
             Assert.Equal("x", i1Group.First().EvaluatedInclude);
@@ -2267,7 +2267,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             task.ExecuteTask(lookup);
 
-            ICollection<ProjectItemInstance> linkGroup = lookup.GetItems("link");
+            IReadOnlyCollection<ProjectItemInstance> linkGroup = lookup.GetItems("link");
 
             Assert.Equal(4, linkGroup.Count);
             Assert.Equal("A_PCH", linkGroup.First().EvaluatedInclude);
@@ -3111,7 +3111,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             task.ExecuteTask(lookup);
 
-            ICollection<ProjectItemInstance> i0Group = lookup.GetItems("i0");
+            IReadOnlyCollection<ProjectItemInstance> i0Group = lookup.GetItems("i0");
 
             Assert.Equal(4, i0Group.Count);
             foreach (ProjectItemInstance item in i0Group)
