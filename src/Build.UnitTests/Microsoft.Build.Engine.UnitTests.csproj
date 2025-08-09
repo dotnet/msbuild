@@ -5,6 +5,7 @@
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_UNITTESTS</DefineConstants>
 
