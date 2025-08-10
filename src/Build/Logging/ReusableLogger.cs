@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
@@ -19,6 +20,7 @@ namespace Microsoft.Build.Logging;
 /// This class needs to always implement the most-recent IEventSource interface so that it doesn't act as a limiter on the capabilities
 /// of ILoggers passed to it.
 /// </remarks>
+[DebuggerDisplay("{OriginalLogger}")]
 internal class ReusableLogger : INodeLogger, IEventSource5
 {
     /// <summary>
@@ -367,7 +369,7 @@ internal class ReusableLogger : INodeLogger, IEventSource5
         else
         {
             ErrorUtilities.VerifyThrow(_designTimeEventSource != null, "Already unregistered for design-time.");
-            UnregisterForEvents(_designTimeEventSource);
+            UnregisterForEvents(_designTimeEventSource!);
             _originalLogger.Shutdown();
         }
     }
