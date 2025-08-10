@@ -134,7 +134,7 @@ internal class ReusableLogger : INodeLogger, IEventSource5
     public ReusableLogger(ILogger? originalLogger)
     {
         ErrorUtilities.VerifyThrowArgumentNull(originalLogger);
-        _originalLogger = originalLogger;
+        _originalLogger = originalLogger!;
     }
 
     #region IEventSource Members
