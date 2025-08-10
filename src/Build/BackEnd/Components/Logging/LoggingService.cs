@@ -9,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
@@ -1778,7 +1777,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ILogger UnwrapLoggerType(ILogger log)
             {
-                while (log is ProjectCollection.ReusableLogger reusableLogger)
+                while (log is Microsoft.Build.Logging.ReusableLogger reusableLogger)
                 {
                     log = reusableLogger.OriginalLogger;
                 }
@@ -1824,7 +1823,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </remarks>
         private void UpdateMinimumMessageImportance(ILogger logger)
         {
-            var innerLogger = (logger is ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
+            var innerLogger = (logger is Build.Logging.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
             MessageImportance? minimumImportance = innerLogger switch
             {
