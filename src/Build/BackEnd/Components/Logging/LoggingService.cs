@@ -12,6 +12,7 @@ using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
@@ -1108,7 +1109,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 EventSourceSink eventSourceSink = new EventSourceSink();
 
                 // If the logger is already in the list it should not be registered again.
-                if (_loggers.Contains(centralLogger))
+                // Note here that we are checking for direct equivalence (fast)
+                // and if we're dealing with a reusable logger, we need to check its original logger (slower)
+                if (_loggers.Contains(centralLogger) || _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger))
                 {
                     return false;
                 }
