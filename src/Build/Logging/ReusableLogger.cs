@@ -501,6 +501,7 @@ internal class ReusableLogger : INodeLogger, IEventSource5
         _taskStartedEventHandler = null;
         _buildWarningEventHandler = null;
         _telemetryEventHandler = null;
+        _workerNodeTelemetryLoggedHandler = null;
     }
 
     /// <summary>
