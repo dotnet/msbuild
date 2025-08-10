@@ -452,8 +452,6 @@ internal class ReusableLogger : INodeLogger, IEventSource5
         }
     }
 
-    private void WorkerNodeTelemetryLoggedHandler(object? sender, WorkerNodeTelemetryEventArgs e) => WorkerNodeTelemetryLogged?.Invoke(sender, e);
-
     /// <summary>
     /// Unregisters for all events on the specified event source.
     /// </summary>
@@ -583,4 +581,9 @@ internal class ReusableLogger : INodeLogger, IEventSource5
     /// Handler for telemetry events.
     /// </summary>
     private void TelemetryLoggedHandler(object sender, TelemetryEventArgs e) => TelemetryLogged?.Invoke(sender, e);
+
+    /// <summary>
+    /// Handler for worker node telemetry logged events.
+    /// </summary>
+    private void WorkerNodeTelemetryLoggedHandler(object? sender, WorkerNodeTelemetryEventArgs e) => WorkerNodeTelemetryLogged?.Invoke(sender, e);
 }
