@@ -7,14 +7,12 @@ jobs:
 - job: BootstrapMSBuildOnFullFrameworkWindows
   displayName: "Windows Full"
   pool:
-    vmImage: 'windows-2022'
+    vmImage: 'windows.server.amd64.vs2019'
   steps:
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-    env:
-      ForceUseXCopyMSBuild: 1
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
