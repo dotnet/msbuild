@@ -1955,7 +1955,7 @@ namespace Microsoft.Build.UnitTests
         /// its corresponding reference assemblies are installed.
         /// If they are not installed, the test should be ignored.
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         [Trait("Category", "mono-osx-failing")]
         public void GetPathToReferenceAssembliesDefaultLocation45()
         {
