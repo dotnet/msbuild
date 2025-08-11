@@ -5,6 +5,11 @@ using System;
 
 namespace Microsoft.Build.Framework
 {
+    /// <summary>
+    /// A readonly struct that represents task host parameters used to determine which host process to launch.
+    /// This struct provides a performance-optimized alternative to Dictionary&lt;string, string&gt; by avoiding
+    /// allocations for small, known parameter sets while maintaining API compatibility.
+    /// </summary>
     public readonly struct TaskHostParameters
     {
         private readonly string _runtime;
@@ -12,6 +17,13 @@ namespace Microsoft.Build.Framework
         private readonly string _dotnetHostPath;
         private readonly string _msBuildAssemblyPath;
 
+        /// <summary>
+        /// Initializes a new instance of the TaskHostParameters struct with the specified parameters.
+        /// </summary>
+        /// <param name="runtime">The target runtime identifier (e.g., "net8.0", "net472"). Defaults to empty string if null.</param>
+        /// <param name="architecture">The target architecture (e.g., "x64", "x86", "arm64"). Defaults to empty string if null.</param>
+        /// <param name="dotnetHostPath">The path to the dotnet host executable. Defaults to empty string if null.</param>
+        /// <param name="msBuildAssemblyPath">The path to the MSBuild assembly. Defaults to empty string if null.</param>
         public TaskHostParameters(string? runtime = null, string? architecture = null, string? dotnetHostPath = null, string? msBuildAssemblyPath = null)
         {
             _runtime = runtime ?? string.Empty;
@@ -20,17 +32,37 @@ namespace Microsoft.Build.Framework
             _msBuildAssemblyPath = msBuildAssemblyPath ?? string.Empty;
         }
 
+        /// <summary>
+        /// Gets the target runtime identifier (e.g., "net8.0", "net472").
+        /// </summary>
+        /// <value>The runtime identifier, or an empty string if not specified.</value>
         public string Runtime => _runtime ?? string.Empty;
 
+        /// <summary>
+        /// Gets the target architecture (e.g., "x64", "x86", "arm64").
+        /// </summary>
+        /// <value>The architecture identifier, or an empty string if not specified.</value>
         public string Architecture => _architecture ?? string.Empty;
 
+        /// <summary>
+        /// Gets the path to the dotnet host executable.
+        /// </summary>
+        /// <value>The dotnet host path, or an empty string if not specified.</value>
         public string DotnetHostPath => _dotnetHostPath ?? string.Empty;
 
+        /// <summary>
+        /// Gets the path to the MSBuild assembly.
+        /// </summary>
+        /// <value>The MSBuild assembly path, or an empty string if not specified.</value>
         public string MSBuildAssemblyPath => _msBuildAssemblyPath ?? string.Empty;
 
         /// <summary>
-        /// Checks if a specific parameter by name is empty or null
+        /// Determines whether a specific parameter in the TaskHostParameters instance is empty or null.
         /// </summary>
+        /// <param name="parameters">The TaskHostParameters instance to check.</param>
+        /// <param name="parameterName">The name of the parameter to check (Runtime, Architecture, DotnetHostPath, or MSBuildAssemblyPath).</param>
+        /// <returns><c>true</c> if all parameters are empty or the specified parameter is empty; otherwise, <c>false</c>.</returns>
+        /// <exception cref="ArgumentException">Thrown when the parameter name is not recognized.</exception>
         public static bool IsEmptyParameter(TaskHostParameters parameters, string parameterName) =>
             parameterName?.ToLowerInvariant() switch
             {
@@ -42,8 +74,10 @@ namespace Microsoft.Build.Framework
             };
 
         /// <summary>
-        /// Checks if all parameters in this instance are empty
+        /// Determines whether all parameters in the TaskHostParameters instance are empty or null.
         /// </summary>
+        /// <param name="parameters">The TaskHostParameters instance to check.</param>
+        /// <returns><c>true</c> if all parameters (Runtime, Architecture, DotnetHostPath, and MSBuildAssemblyPath) are empty or null; otherwise, <c>false</c>.</returns>
         public static bool IsEmptyParameters(TaskHostParameters parameters) =>
             string.IsNullOrEmpty(parameters.Runtime) &&
             string.IsNullOrEmpty(parameters.Architecture) &&
