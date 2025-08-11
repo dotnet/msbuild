@@ -12,49 +12,49 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public readonly struct TaskHostParameters
     {
-        private readonly string _runtime;
-        private readonly string _architecture;
-        private readonly string _dotnetHostPath;
-        private readonly string _msBuildAssemblyPath;
+        private readonly string? _runtime;
+        private readonly string? _architecture;
+        private readonly string? _dotnetHostPath;
+        private readonly string? _msBuildAssemblyPath;
 
         /// <summary>
         /// Initializes a new instance of the TaskHostParameters struct with the specified parameters.
         /// </summary>
-        /// <param name="runtime">The target runtime identifier (e.g., "net8.0", "net472"). Defaults to empty string if null.</param>
-        /// <param name="architecture">The target architecture (e.g., "x64", "x86", "arm64"). Defaults to empty string if null.</param>
-        /// <param name="dotnetHostPath">The path to the dotnet host executable. Defaults to empty string if null.</param>
-        /// <param name="msBuildAssemblyPath">The path to the MSBuild assembly. Defaults to empty string if null.</param>
+        /// <param name="runtime">The target runtime identifier (e.g., "net8.0", "net472").</param>
+        /// <param name="architecture">The target architecture (e.g., "x64", "x86", "arm64").</param>
+        /// <param name="dotnetHostPath">The path to the dotnet host executable.</param>
+        /// <param name="msBuildAssemblyPath">The path to the MSBuild assembly.</param>
         public TaskHostParameters(string? runtime = null, string? architecture = null, string? dotnetHostPath = null, string? msBuildAssemblyPath = null)
         {
-            _runtime = runtime ?? string.Empty;
-            _architecture = architecture ?? string.Empty;
-            _dotnetHostPath = dotnetHostPath ?? string.Empty;
-            _msBuildAssemblyPath = msBuildAssemblyPath ?? string.Empty;
+            _runtime = runtime;
+            _architecture = architecture;
+            _dotnetHostPath = dotnetHostPath;
+            _msBuildAssemblyPath = msBuildAssemblyPath;
         }
 
         /// <summary>
         /// Gets the target runtime identifier (e.g., "net8.0", "net472").
         /// </summary>
         /// <value>The runtime identifier, or an empty string if not specified.</value>
-        public string Runtime => _runtime ?? string.Empty;
+        public string? Runtime => _runtime;
 
         /// <summary>
         /// Gets the target architecture (e.g., "x64", "x86", "arm64").
         /// </summary>
         /// <value>The architecture identifier, or an empty string if not specified.</value>
-        public string Architecture => _architecture ?? string.Empty;
+        public string? Architecture => _architecture;
 
         /// <summary>
         /// Gets the path to the dotnet host executable.
         /// </summary>
         /// <value>The dotnet host path, or an empty string if not specified.</value>
-        public string DotnetHostPath => _dotnetHostPath ?? string.Empty;
+        public string? DotnetHostPath => _dotnetHostPath;
 
         /// <summary>
         /// Gets the path to the MSBuild assembly.
         /// </summary>
         /// <value>The MSBuild assembly path, or an empty string if not specified.</value>
-        public string MSBuildAssemblyPath => _msBuildAssemblyPath ?? string.Empty;
+        public string? MSBuildAssemblyPath => _msBuildAssemblyPath;
 
         /// <summary>
         /// Determines whether a specific parameter in the TaskHostParameters instance is empty or null.

@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 SetupTaskFactory(factoryParameters, false /* don't want task host */);
 
-                TaskHostParameters taskParameters = new TaskHostParameters(string.Empty, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
+                TaskHostParameters taskParameters = new(null, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
 #if FEATURE_APPDOMAIN

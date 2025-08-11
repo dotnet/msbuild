@@ -629,6 +629,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable?");
             }
+
             return mergedRuntime;
         }
 
