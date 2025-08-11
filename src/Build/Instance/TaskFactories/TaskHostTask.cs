@@ -133,7 +133,7 @@ namespace Microsoft.Build.BackEnd
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
-            IDictionary<string, string> taskHostParameters,
+            TaskHostParameters taskHostParameters,
             LoadedType taskType
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
@@ -150,7 +150,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
-            _taskHostParameters = TaskHostParameters.FromDictionary(taskHostParameters);
+            _taskHostParameters = taskHostParameters;
 
             _packetFactory = new NodePacketFactory();
 
@@ -292,7 +292,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, _taskHostParameters);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
                 }
 

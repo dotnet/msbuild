@@ -50,14 +50,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 Assert.Equal(x.TaskFactoryAttributeName, y.TaskFactoryAttributeName);
                 Assert.Equal(x.ParameterGroupAndTaskBody, y.ParameterGroupAndTaskBody, new ParamterGroupAndTaskBodyComparer());
 
-                Helpers.AssertDictionariesEqual(
-                    x.TaskFactoryParameters,
-                    y.TaskFactoryParameters,
-                    (xp, yp) =>
-                    {
-                        Assert.Equal(xp.Key, yp.Key);
-                        Assert.Equal(xp.Value, yp.Value);
-                    });
+                Assert.Equal(x.TaskFactoryParameters.Runtime, y.TaskFactoryParameters.Runtime);
+                Assert.Equal(x.TaskFactoryParameters.Architecture, y.TaskFactoryParameters.Architecture);
 
                 return true;
             }

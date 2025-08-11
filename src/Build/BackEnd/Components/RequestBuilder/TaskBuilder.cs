@@ -420,7 +420,7 @@ namespace Microsoft.Build.BackEnd
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
                     // We need to find the task before logging the task started event so that the using task statement comes before the task started event
-                    IDictionary<string, string> taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
+                    TaskHostParameters taskIdentityParameters = GatherTaskIdentityParameters(bucket.Expander);
                     (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) = _taskExecutionHost.FindTask(taskIdentityParameters);
                     string taskAssemblyLocation = taskFactoryWrapper?.TaskFactoryLoadedType?.Path;
 
@@ -524,31 +524,26 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Returns the set of parameters that can contribute to a task's identity, and their values for this particular task.
+        /// Returns TaskHostParameters that can contribute to a task's identity, and their values for this particular task.
         /// </summary>
-        private IDictionary<string, string> GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
+        private TaskHostParameters GatherTaskIdentityParameters(Expander<ProjectPropertyInstance, ProjectItemInstance> expander)
         {
             ErrorUtilities.VerifyThrowInternalNull(_taskNode, "taskNode"); // taskNode should never be null when we're calling this method.
 
             string msbuildArchitecture = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildArchitecture ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildArchitectureLocation ?? ElementLocation.EmptyLocation);
             string msbuildRuntime = expander.ExpandIntoStringAndUnescape(_taskNode.MSBuildRuntime ?? String.Empty, ExpanderOptions.ExpandAll, _taskNode.MSBuildRuntimeLocation ?? ElementLocation.EmptyLocation);
 
-            IDictionary<string, string> taskIdentityParameters = null;
-
             // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
             // a null set will be treated as equivalent to all parameters being "don't care".
             if (msbuildRuntime != String.Empty || msbuildArchitecture != String.Empty)
             {
-                taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                msbuildArchitecture = msbuildArchitecture == string.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
+                msbuildRuntime = msbuildRuntime == string.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
 
-                msbuildArchitecture = msbuildArchitecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
-                msbuildRuntime = msbuildRuntime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
-
-                taskIdentityParameters.Add(XMakeAttributes.runtime, msbuildRuntime);
-                taskIdentityParameters.Add(XMakeAttributes.architecture, msbuildArchitecture);
+                return new TaskHostParameters(msbuildRuntime, msbuildArchitecture);
             }
 
-            return taskIdentityParameters;
+            return new TaskHostParameters();
         }
 
 #if FEATURE_APARTMENT_STATE
@@ -560,7 +555,7 @@ namespace Microsoft.Build.BackEnd
         /// Any bug fixes made to this code, please ensure that you also fix that code.
         /// </comment>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is caught and rethrown in the correct thread.")]
-        private WorkUnitResult ExecuteTaskInSTAThread(ItemBucket bucket, TaskLoggingContext taskLoggingContext, IDictionary<string, string> taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
+        private WorkUnitResult ExecuteTaskInSTAThread(ItemBucket bucket, TaskLoggingContext taskLoggingContext, TaskHostParameters taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             Thread staThread = null;
@@ -655,7 +650,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initializes and executes the task.
         /// </summary>
-        private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, IDictionary<string, string> taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
+        private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, TaskHostParameters taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
             if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters))
             {

@@ -739,109 +739,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static HandshakeOptions GetHandshakeOptions(
             bool taskHost,
-            string architectureFlagToSet = null,
-            bool nodeReuse = false,
-            bool lowPriority = false,
-            IDictionary<string, string> taskHostParameters = null)
-        {
-            HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
-
-            int clrVersion = 0;
-
-            // We don't know about the TaskHost.
-            if (taskHost)
-            {
-                // No parameters given, default to current
-                if (taskHostParameters == null)
-                {
-                    clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
-                    architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
-                }
-                else // Figure out flags based on parameters given
-                {
-                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.runtime, out string runtimeVersion), "Should always have an explicit runtime when we call this method.");
-                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.architecture, out string architecture), "Should always have an explicit architecture when we call this method.");
-
-                    if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 2;
-                    }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 4;
-                    }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 5;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                    }
-
-                    architectureFlagToSet = architecture;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(architectureFlagToSet))
-            {
-                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
-                {
-                    context |= HandshakeOptions.X64;
-                }
-                else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
-                {
-                    context |= HandshakeOptions.Arm64;
-                }
-            }
-
-            switch (clrVersion)
-            {
-                case 0:
-                // Not a taskhost, runtime must match
-                case 4:
-                    // Default for MSBuild running on .NET Framework 4,
-                    // not represented in handshake
-                    break;
-                case 2:
-                    context |= HandshakeOptions.CLR2;
-                    break;
-                case >= 5:
-                    context |= HandshakeOptions.NET;
-                    break;
-                default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
-                    break;
-            }
-
-            if (nodeReuse)
-            {
-                context |= HandshakeOptions.NodeReuse;
-            }
-            if (lowPriority)
-            {
-                context |= HandshakeOptions.LowPriority;
-            }
-#if FEATURE_SECURITY_PRINCIPAL_WINDOWS
-            // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
-            // Both the client and the host will calculate this separately, and the idea is that if they come out the same
-            // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
-            // to the username check which is also done on connection.
-            if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
-            {
-                context |= HandshakeOptions.Administrator;
-            }
-#endif
-            return context;
-        }
-
-        /// <summary>
-        /// Gets handshake options using the new TaskHostParameters struct instead of dictionary.
-        /// This overload provides better performance by avoiding dictionary allocation.
-        /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(
-            bool taskHost,
-            in TaskHostParameters taskHostParameters,
+            TaskHostParameters taskHostParameters = new(),
             string architectureFlagToSet = null,
             bool nodeReuse = false,
             bool lowPriority = false)
@@ -853,79 +751,59 @@ namespace Microsoft.Build.Internal
             // We don't know about the TaskHost.
             if (taskHost)
             {
-                // Check if we have any meaningful parameters in the struct
-                bool hasRuntimeOrArch = !string.IsNullOrEmpty(taskHostParameters.Runtime) || !string.IsNullOrEmpty(taskHostParameters.Architecture);
-                
                 // No parameters given, default to current
-                if (!hasRuntimeOrArch)
+                if (TaskHostParameters.IsEmptyParameters(taskHostParameters))
                 {
                     clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
                     architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
                 else // Figure out flags based on parameters given
                 {
-                    string runtimeVersion = taskHostParameters.Runtime;
-                    string architecture = taskHostParameters.Architecture;
-                    
-                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(runtimeVersion), "Should always have an explicit runtime when we call this method.");
-                    ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(architecture), "Should always have an explicit architecture when we call this method.");
+                    ErrorUtilities.VerifyThrow(TaskHostParameters.IsEmptyParameter(taskHostParameters, nameof(TaskHostParameters.Runtime)), "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(TaskHostParameters.IsEmptyParameter(taskHostParameters, nameof(TaskHostParameters.Architecture)), "Should always have an explicit architecture when we call this method.");
 
-                    if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+                    clrVersion = taskHostParameters.Runtime.ToLowerInvariant() switch
                     {
-                        clrVersion = 2;
-                    }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 4;
-                    }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 5;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                    }
+                        var runtime when runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase) => 2,
+                        var runtime when runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase) => 4,
+                        var runtime when runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase) => 5,
+                        _ => throw new InvalidOperationException("Unreachable code: unknown runtime value")
+                    };
 
-                    architectureFlagToSet = architecture;
+                    architectureFlagToSet = taskHostParameters.Architecture;
                 }
             }
 
             if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
-                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+                context |= architectureFlagToSet.ToLowerInvariant() switch
                 {
-                    context |= HandshakeOptions.X64;
-                }
-                else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
-                {
-                    context |= HandshakeOptions.Arm64;
-                }
+                    XMakeAttributes.MSBuildArchitectureValues.x64 => HandshakeOptions.X64,
+                    XMakeAttributes.MSBuildArchitectureValues.arm64 => HandshakeOptions.Arm64,
+                    _ => HandshakeOptions.None
+                };
             }
 
-            switch (clrVersion)
+            if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
-                case 0:
-                // Not a taskhost, runtime must match
-                case 4:
-                    // Default for MSBuild running on .NET Framework 4,
-                    // not represented in handshake
-                    break;
-                case 2:
-                    context |= HandshakeOptions.CLR2;
-                    break;
-                case >= 5:
-                    context |= HandshakeOptions.NET;
-                    break;
-                default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
-                    break;
+                var architectureFlag = architectureFlagToSet.ToLowerInvariant() switch
+                {
+                    var arch when arch.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase) => HandshakeOptions.X64,
+                    var arch when arch.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase) => HandshakeOptions.Arm64,
+                    _ => (HandshakeOptions?)null
+                };
+
+                if (architectureFlag.HasValue)
+                {
+                    context |= architectureFlag.Value;
+                }
             }
 
             if (nodeReuse)
             {
                 context |= HandshakeOptions.NodeReuse;
             }
+
             if (lowPriority)
             {
                 context |= HandshakeOptions.LowPriority;
@@ -940,7 +818,6 @@ namespace Microsoft.Build.Internal
                 context |= HandshakeOptions.Administrator;
             }
 #endif
-
             return context;
         }
 
@@ -1192,118 +1069,5 @@ namespace Microsoft.Build.Internal
         }
 
         public override string ToString() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
-    }
-
-    /// <summary>
-    /// Represents task host parameters in a structured format with named fields.
-    /// Replaces Dictionary&lt;string, string&gt; for better performance by avoiding allocation.
-    /// </summary>
-    internal readonly struct TaskHostParameters
-    {
-        private readonly string _runtime;
-        private readonly string _architecture;
-        private readonly string _dotnetHostPath;
-        private readonly string _msBuildAssemblyPath;
-
-        public TaskHostParameters(string runtime, string architecture, string dotnetHostPath = null, string msBuildAssemblyPath = null)
-        {
-            _runtime = runtime ?? string.Empty;
-            _architecture = architecture ?? string.Empty;
-            _dotnetHostPath = dotnetHostPath ?? string.Empty;
-            _msBuildAssemblyPath = msBuildAssemblyPath ?? string.Empty;
-        }
-
-        public string Runtime => _runtime ?? string.Empty;
-        public string Architecture => _architecture ?? string.Empty;
-        public string DotnetHostPath => _dotnetHostPath ?? string.Empty;
-        public string MSBuildAssemblyPath => _msBuildAssemblyPath ?? string.Empty;
-
-        /// <summary>
-        /// Tries to get a parameter value by key, mimicking Dictionary.TryGetValue behavior.
-        /// </summary>
-        public bool TryGetValue(string key, out string value)
-        {
-            switch (key)
-            {
-                case XMakeAttributes.runtime:
-                    value = Runtime;
-                    return !string.IsNullOrEmpty(value);
-                case XMakeAttributes.architecture:
-                    value = Architecture;
-                    return !string.IsNullOrEmpty(value);
-                case "DotnetHostPath":
-                    value = DotnetHostPath;
-                    return !string.IsNullOrEmpty(value);
-                case "MSBuildAssemblyPath":
-                    value = MSBuildAssemblyPath;
-                    return !string.IsNullOrEmpty(value);
-                default:
-                    value = null;
-                    return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets a parameter value by key, mimicking Dictionary indexer behavior.
-        /// </summary>
-        public string this[string key]
-        {
-            get
-            {
-                if (TryGetValue(key, out string value))
-                {
-                    return value;
-                }
-                throw new KeyNotFoundException($"The given key '{key}' was not present in the TaskHostParameters.");
-            }
-        }
-
-        /// <summary>
-        /// Creates a TaskHostParameters from a dictionary for backward compatibility.
-        /// </summary>
-        public static TaskHostParameters FromDictionary(IDictionary<string, string> dictionary)
-        {
-            if (dictionary == null)
-            {
-                return new TaskHostParameters();
-            }
-
-            dictionary.TryGetValue(XMakeAttributes.runtime, out string runtime);
-            dictionary.TryGetValue(XMakeAttributes.architecture, out string architecture);
-            dictionary.TryGetValue("DotnetHostPath", out string dotnetHostPath);
-            dictionary.TryGetValue("MSBuildAssemblyPath", out string msBuildAssemblyPath);
-
-            return new TaskHostParameters(runtime, architecture, dotnetHostPath, msBuildAssemblyPath);
-        }
-
-        /// <summary>
-        /// Converts to a dictionary for backward compatibility.
-        /// </summary>
-        public IDictionary<string, string> ToDictionary()
-        {
-            var dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            
-            if (!string.IsNullOrEmpty(Runtime))
-            {
-                dictionary[XMakeAttributes.runtime] = Runtime;
-            }
-            
-            if (!string.IsNullOrEmpty(Architecture))
-            {
-                dictionary[XMakeAttributes.architecture] = Architecture;
-            }
-            
-            if (!string.IsNullOrEmpty(DotnetHostPath))
-            {
-                dictionary["DotnetHostPath"] = DotnetHostPath;
-            }
-            
-            if (!string.IsNullOrEmpty(MSBuildAssemblyPath))
-            {
-                dictionary["MSBuildAssemblyPath"] = MSBuildAssemblyPath;
-            }
-
-            return dictionary;
-        }
     }
 }

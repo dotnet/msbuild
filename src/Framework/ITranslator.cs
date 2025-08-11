@@ -308,6 +308,12 @@ namespace Microsoft.Build.BackEnd
         void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer);
 
         /// <summary>
+        /// Translates TaskHostParameters.
+        /// </summary>
+        /// <param name="taskHostParameters">The TaskHostParameters to be translated.</param>
+        void TranslateTaskHostParameters(ref TaskHostParameters taskHostParameters);
+
+        /// <summary>
         /// Translates a dictionary of { string, string } adding additional entries.
         /// </summary>
         /// <param name="dictionary">The dictionary to be translated.</param>

@@ -504,7 +504,7 @@ namespace Microsoft.Build.Evaluation
 
             TaskHostParameters parameters = new TaskHostParameters(runtime, architecture);
 
-            HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, parameters);
+            HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
 
             string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredContext);
 #if NETFRAMEWORK

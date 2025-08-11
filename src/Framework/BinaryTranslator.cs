@@ -871,6 +871,20 @@ namespace Microsoft.Build.BackEnd
 
                 str = _interner.ReadPath();
             }
+
+            /// <summary>
+            /// Translates TaskHostParameters.
+            /// </summary>
+            /// <param name="taskHostParameters">The TaskHostParameters to be translated.</param>
+            public void TranslateTaskHostParameters(ref TaskHostParameters taskHostParameters)
+            {
+                string runtime = _reader.ReadString();
+                string architecture = _reader.ReadString();
+                string dotnetHostPath = _reader.ReadString();
+                string msBuildAssemblyPath = _reader.ReadString();
+
+                taskHostParameters = new TaskHostParameters(runtime, architecture, dotnetHostPath, msBuildAssemblyPath);
+            }
         }
 
         /// <summary>
@@ -1585,6 +1599,18 @@ namespace Microsoft.Build.BackEnd
                     Translate(ref key);
                     Translate(ref val);
                 }
+            }
+
+            /// <summary>
+            /// Translates TaskHostParameters.
+            /// </summary>
+            /// <param name="taskHostParameters">The TaskHostParameters to be translated.</param>
+            public void TranslateTaskHostParameters(ref TaskHostParameters taskHostParameters)
+            {
+                _writer.Write(taskHostParameters.Runtime);
+                _writer.Write(taskHostParameters.Architecture);
+                _writer.Write(taskHostParameters.DotnetHostPath ?? string.Empty);
+                _writer.Write(taskHostParameters.MSBuildAssemblyPath ?? string.Empty);
             }
 
             /// <summary>

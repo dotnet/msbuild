@@ -50,9 +50,9 @@ namespace Microsoft.Build.BackEnd
 #endif
 
         /// <summary>
-        ///  the set of parameters owned by this particular task host
+        ///  the set of parameters owned by this particular task host.
         /// </summary>
-        private IDictionary<string, string> _factoryIdentityParameters;
+        private TaskHostParameters _factoryIdentityParameters;
 
         /// <summary>
         /// Tracks whether, in the UsingTask invocation, we were specifically asked to use
@@ -138,7 +138,7 @@ namespace Microsoft.Build.BackEnd
         /// The taskFactoryLoggingHost will log messages in the context of the target where the task is first used.
         /// </para>
         /// </remarks>
-        public bool Initialize(string taskName, IDictionary<string, string> factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
+        public bool Initialize(string taskName, TaskHostParameters factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
             ErrorUtilities.ThrowInternalError("Use internal call to properly initialize the assembly task factory");
             return false;
@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
-        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost, IDictionary<string, string> taskIdentityParameters)
+        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost, TaskHostParameters taskIdentityParameters)
         {
             ErrorUtilities.ThrowInternalError("Use internal call to properly create a task instance from the assembly task factory");
             return null;
@@ -247,23 +247,21 @@ namespace Microsoft.Build.BackEnd
         /// Initialize the factory from the task registry
         /// </summary>
         internal LoadedType InitializeFactory(
-                AssemblyLoadInfo loadInfo,
-                string taskName,
-                IDictionary<string, TaskPropertyInfo> taskParameters,
-                string taskElementContents,
-                IDictionary<string, string> taskFactoryIdentityParameters,
-                bool taskHostFactoryExplicitlyRequested,
-                TargetLoggingContext targetLoggingContext,
-                ElementLocation elementLocation,
-                string taskProjectFile)
+            AssemblyLoadInfo loadInfo,
+            string taskName,
+            IDictionary<string, TaskPropertyInfo> taskParameters,
+            string taskElementContents,
+            TaskHostParameters taskFactoryIdentityParameters,
+            bool taskHostFactoryExplicitlyRequested,
+            TargetLoggingContext targetLoggingContext,
+            ElementLocation elementLocation,
+            string taskProjectFile)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
+
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
-            if (taskFactoryIdentityParameters != null)
-            {
-                _factoryIdentityParameters = new Dictionary<string, string>(taskFactoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
-            }
+            _factoryIdentityParameters = taskFactoryIdentityParameters;
 
             _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
 
@@ -313,21 +311,25 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Create an instance of the wrapped ITask for a batch run of the task.
         /// </summary>
-        internal ITask CreateTaskInstance(ElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskIdentityParameters,
+        internal ITask CreateTaskInstance(
+            ElementLocation taskLocation,
+            TaskLoggingContext taskLoggingContext,
+            IBuildComponentHost buildComponentHost,
+            TaskHostParameters taskIdentityParameters,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc)
         {
             bool useTaskFactory = false;
-            IDictionary<string, string> mergedParameters = null;
+            TaskHostParameters mergedParameters = new TaskHostParameters();
             _taskLoggingContext = taskLoggingContext;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
             // still launch the task factory, it will be with parameters corresponding to the
             // current process.
-            if ((_factoryIdentityParameters?.Count > 0) || (taskIdentityParameters?.Count > 0))
+            if (!TaskHostParameters.IsEmptyParameters(_factoryIdentityParameters) || !TaskHostParameters.IsEmptyParameters(taskIdentityParameters))
             {
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
@@ -346,24 +348,28 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
-                mergedParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                // Ensure we have proper runtime and architecture values
+                string runtime = !string.IsNullOrEmpty(mergedParameters.Runtime)
+                    ? mergedParameters.Runtime
+                    : XMakeAttributes.GetCurrentMSBuildRuntime();
 
-                if (!mergedParameters.ContainsKey(XMakeAttributes.runtime))
-                {
-                    mergedParameters[XMakeAttributes.runtime] = XMakeAttributes.GetCurrentMSBuildRuntime();
-                }
+                string architecture = !string.IsNullOrEmpty(mergedParameters.Architecture)
+                    ? mergedParameters.Architecture
+                    : XMakeAttributes.GetCurrentMSBuildArchitecture();
 
-                if (!mergedParameters.ContainsKey(XMakeAttributes.architecture))
-                {
-                    mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
-                }
+                // Create final parameters with defaults if needed
+                var finalParameters = new TaskHostParameters(
+                    runtime,
+                    architecture,
+                    mergedParameters.DotnetHostPath,
+                    mergedParameters.MSBuildAssemblyPath);
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 TaskHostTask task = new TaskHostTask(
                     taskLocation,
                     taskLoggingContext,
                     buildComponentHost,
-                    mergedParameters,
+                    finalParameters,
                     _loadedType
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
@@ -416,7 +422,7 @@ namespace Microsoft.Build.BackEnd
         /// Is the given task name able to be created by the task factory. In the case of an assembly task factory
         /// this question is answered by checking the assembly wrapped by the task factory to see if it exists.
         /// </summary>
-        internal bool TaskNameCreatableByFactory(string taskName, IDictionary<string, string> taskIdentityParameters, string taskProjectFile, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
+        internal bool TaskNameCreatableByFactory(string taskName, TaskHostParameters taskIdentityParameters, string taskProjectFile, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
         {
             if (!TaskIdentityParametersMatchFactory(_factoryIdentityParameters, taskIdentityParameters))
             {
@@ -468,21 +474,20 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Validates the given set of parameters, logging the appropriate errors as necessary.
         /// </summary>
-        private static void VerifyThrowIdentityParametersValid(IDictionary<string, string> identityParameters, IElementLocation errorLocation, string taskName, string runtimeName, string architectureName)
+        private static void VerifyThrowIdentityParametersValid(TaskHostParameters identityParameters, IElementLocation errorLocation, string taskName, string runtimeName, string architectureName)
         {
             // validate the task factory parameters
-            if (identityParameters?.Count > 0)
+            if (!TaskHostParameters.IsEmptyParameters(identityParameters))
             {
-                string runtime;
-                if (identityParameters.TryGetValue(XMakeAttributes.runtime, out runtime))
+                if (!TaskHostParameters.IsEmptyParameter(identityParameters, "Runtime"))
                 {
-                    if (!XMakeAttributes.IsValidMSBuildRuntimeValue(runtime))
+                    if (!XMakeAttributes.IsValidMSBuildRuntimeValue(identityParameters.Runtime))
                     {
                         ProjectErrorUtilities.ThrowInvalidProject(
                                     errorLocation,
                                     "TaskLoadFailureInvalidTaskHostFactoryParameter",
                                     taskName,
-                                    runtime,
+                                    identityParameters.Runtime,
                                     runtimeName,
                                     XMakeAttributes.MSBuildRuntimeValues.clr2,
                                     XMakeAttributes.MSBuildRuntimeValues.clr4,
@@ -491,16 +496,15 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                string architecture;
-                if (identityParameters.TryGetValue(XMakeAttributes.architecture, out architecture))
+                if (!TaskHostParameters.IsEmptyParameter(identityParameters, "Architecture"))
                 {
-                    if (!XMakeAttributes.IsValidMSBuildArchitectureValue(architecture))
+                    if (!XMakeAttributes.IsValidMSBuildArchitectureValue(identityParameters.Architecture))
                     {
                         ProjectErrorUtilities.ThrowInvalidProject(
                                     errorLocation,
                                     "TaskLoadFailureInvalidTaskHostFactoryParameter",
                                     taskName,
-                                    architecture,
+                                    identityParameters.Architecture,
                                     architectureName,
                                     XMakeAttributes.MSBuildArchitectureValues.x86,
                                     XMakeAttributes.MSBuildArchitectureValues.x64,
@@ -515,25 +519,21 @@ namespace Microsoft.Build.BackEnd
         /// Given the set of parameters that are set to the factory, and the set of parameters coming from the task invocation that we're searching for
         /// a matching record to, determine whether the parameters match this record.
         /// </summary>
-        private static bool TaskIdentityParametersMatchFactory(IDictionary<string, string> factoryIdentityParameters, IDictionary<string, string> taskIdentityParameters)
+        private static bool TaskIdentityParametersMatchFactory(TaskHostParameters factoryIdentityParameters, TaskHostParameters taskIdentityParameters)
         {
-            if (taskIdentityParameters == null || taskIdentityParameters.Count == 0 || factoryIdentityParameters == null || factoryIdentityParameters.Count == 0)
+            if (TaskHostParameters.IsEmptyParameters(taskIdentityParameters) || TaskHostParameters.IsEmptyParameters(factoryIdentityParameters))
             {
                 // either the task or the using task doesn't care about anything, in which case we match by default.
                 return true;
             }
 
-            string taskArchitecture;
-            string taskRuntime;
-            taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out taskRuntime);
-            string usingTaskRuntime;
-            factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out usingTaskRuntime);
+            string taskRuntime = taskIdentityParameters.Runtime;
+            string usingTaskRuntime = factoryIdentityParameters.Runtime;
 
             if (XMakeAttributes.RuntimeValuesMatch(taskRuntime, usingTaskRuntime))
             {
-                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out taskArchitecture);
-                string usingTaskArchitecture;
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out usingTaskArchitecture);
+                string taskArchitecture = taskIdentityParameters.Architecture;
+                string usingTaskArchitecture = factoryIdentityParameters.Architecture;
 
                 if (XMakeAttributes.ArchitectureValuesMatch(taskArchitecture, usingTaskArchitecture))
                 {
@@ -547,93 +547,127 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Given a set of task parameters from the UsingTask and from the task invocation, generate a dictionary that combines the two, or throws if the merge
-        /// is impossible (we shouldn't ever get to this point if it is ...)
+        /// Merges task parameters from UsingTask and task invocation into a single TaskHostParameters instance.
+        /// Throws if the merge is impossible.
         /// </summary>
-        private static IDictionary<string, string> MergeTaskFactoryParameterSets(IDictionary<string, string> factoryIdentityParameters, IDictionary<string, string> taskIdentityParameters)
+        private static TaskHostParameters MergeTaskFactoryParameterSets(
+            TaskHostParameters factoryIdentityParameters,
+            TaskHostParameters taskIdentityParameters)
         {
-            IDictionary<string, string> mergedParameters = null;
-            if (factoryIdentityParameters == null || factoryIdentityParameters.Count == 0)
+            bool factoryIsEmpty = TaskHostParameters.IsEmptyParameters(factoryIdentityParameters);
+            bool taskIsEmpty = TaskHostParameters.IsEmptyParameters(taskIdentityParameters);
+
+            // Handle empty parameter cases
+            if (factoryIsEmpty && taskIsEmpty)
             {
-                mergedParameters = new Dictionary<string, string>(taskIdentityParameters, StringComparer.OrdinalIgnoreCase);
-            }
-            else if (taskIdentityParameters == null || taskIdentityParameters.Count == 0)
-            {
-                mergedParameters = new Dictionary<string, string>(factoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
-            }
-
-            string mergedRuntime;
-            string mergedArchitecture;
-            if (mergedParameters != null)
-            {
-                mergedParameters.TryGetValue(XMakeAttributes.runtime, out mergedRuntime);
-                mergedParameters.TryGetValue(XMakeAttributes.architecture, out mergedArchitecture);
-
-                mergedParameters[XMakeAttributes.runtime] = XMakeAttributes.GetExplicitMSBuildRuntime(mergedRuntime);
-                mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetExplicitMSBuildArchitecture(mergedArchitecture);
-            }
-            else
-            {
-                mergedParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-                taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string usingTaskRuntime);
-
-                if (!XMakeAttributes.TryMergeRuntimeValues(taskRuntime, usingTaskRuntime, out mergedRuntime))
-                {
-                    ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable?");
-                }
-                else
-                {
-                    mergedParameters.Add(XMakeAttributes.runtime, mergedRuntime);
-                }
-
-                taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
-                factoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string usingTaskArchitecture);
-
-                if (!XMakeAttributes.TryMergeArchitectureValues(taskArchitecture, usingTaskArchitecture, out mergedArchitecture))
-                {
-                    ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable?");
-                }
-                else
-                {
-                    mergedParameters.Add(XMakeAttributes.architecture, mergedArchitecture);
-                }
+                return CreateEmptyParameters();
             }
 
-            return mergedParameters;
+            if (factoryIsEmpty)
+            {
+                return CreateFromTaskParameters(taskIdentityParameters);
+            }
+
+            if (taskIsEmpty)
+            {
+                return CreateFromFactoryParameters(factoryIdentityParameters);
+            }
+
+            // Both parameter sets exist - merge them
+            return MergeParameters(factoryIdentityParameters, taskIdentityParameters);
+        }
+
+        private static TaskHostParameters CreateEmptyParameters()
+        {
+            string runtime = XMakeAttributes.GetExplicitMSBuildRuntime(null);
+            string architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(null);
+
+            return new TaskHostParameters(runtime, architecture, null, null);
+        }
+
+        private static TaskHostParameters CreateFromTaskParameters(TaskHostParameters taskParameters)
+        {
+            string runtime = XMakeAttributes.GetExplicitMSBuildRuntime(taskParameters.Runtime);
+            string architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(taskParameters.Architecture);
+
+            return new TaskHostParameters(
+                runtime,
+                architecture,
+                taskParameters.DotnetHostPath,
+                taskParameters.MSBuildAssemblyPath);
+        }
+
+        private static TaskHostParameters CreateFromFactoryParameters(TaskHostParameters factoryParameters)
+        {
+            string runtime = XMakeAttributes.GetExplicitMSBuildRuntime(factoryParameters.Runtime);
+            string architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryParameters.Architecture);
+
+            return new TaskHostParameters(
+                runtime,
+                architecture,
+                factoryParameters.DotnetHostPath,
+                factoryParameters.MSBuildAssemblyPath);
+        }
+
+        private static TaskHostParameters MergeParameters(
+            TaskHostParameters factoryParameters,
+            TaskHostParameters taskParameters)
+        {
+            string mergedRuntime = MergeRuntimeValues(taskParameters.Runtime, factoryParameters.Runtime);
+            string mergedArchitecture = MergeArchitectureValues(taskParameters.Architecture, factoryParameters.Architecture);
+
+            // Task parameters take precedence over factory parameters for paths
+            string mergedDotnetHostPath = GetPreferredValue(taskParameters.DotnetHostPath, factoryParameters.DotnetHostPath);
+            string mergedMSBuildAssemblyPath = GetPreferredValue(taskParameters.MSBuildAssemblyPath, factoryParameters.MSBuildAssemblyPath);
+
+            return new TaskHostParameters(mergedRuntime, mergedArchitecture, mergedDotnetHostPath, mergedMSBuildAssemblyPath);
+        }
+
+        private static string MergeRuntimeValues(string taskRuntime, string factoryRuntime)
+        {
+            if (!XMakeAttributes.TryMergeRuntimeValues(taskRuntime, factoryRuntime, out string mergedRuntime))
+            {
+                ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable?");
+            }
+            return mergedRuntime;
+        }
+
+        private static string MergeArchitectureValues(string taskArchitecture, string factoryArchitecture)
+        {
+            if (!XMakeAttributes.TryMergeArchitectureValues(taskArchitecture, factoryArchitecture, out string mergedArchitecture))
+            {
+                ErrorUtilities.ThrowInternalError("How did we get two architecture values that were unmergeable?");
+            }
+            return mergedArchitecture;
+        }
+
+        private static string GetPreferredValue(string preferredValue, string fallbackValue)
+        {
+            return !string.IsNullOrEmpty(preferredValue) ? preferredValue : fallbackValue;
         }
 
         /// <summary>
         /// Returns true if the provided set of task host parameters matches the current process,
         /// and false otherwise.
         /// </summary>
-        private static bool TaskHostParametersMatchCurrentProcess(IDictionary<string, string> mergedParameters)
+        private static bool TaskHostParametersMatchCurrentProcess(TaskHostParameters mergedParameters)
         {
-            if (mergedParameters == null || mergedParameters.Count == 0)
-            {
-                // We don't care, so they match by default.
-                return true;
-            }
-
-            string runtime;
-            if (mergedParameters.TryGetValue(XMakeAttributes.runtime, out runtime))
+            if (!TaskHostParameters.IsEmptyParameter(mergedParameters, "Runtime"))
             {
                 string currentRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(XMakeAttributes.MSBuildRuntimeValues.currentRuntime);
 
-                if (!currentRuntime.Equals(XMakeAttributes.GetExplicitMSBuildRuntime(runtime), StringComparison.OrdinalIgnoreCase))
+                if (!currentRuntime.Equals(XMakeAttributes.GetExplicitMSBuildRuntime(mergedParameters.Runtime), StringComparison.OrdinalIgnoreCase))
                 {
                     // runtime doesn't match
                     return false;
                 }
             }
 
-            string architecture;
-            if (mergedParameters.TryGetValue(XMakeAttributes.architecture, out architecture))
+            if (!TaskHostParameters.IsEmptyParameter(mergedParameters, "Architecture"))
             {
                 string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
 
-                if (!currentArchitecture.Equals(XMakeAttributes.GetExplicitMSBuildArchitecture(architecture), StringComparison.OrdinalIgnoreCase))
+                if (!currentArchitecture.Equals(XMakeAttributes.GetExplicitMSBuildArchitecture(mergedParameters.Architecture), StringComparison.OrdinalIgnoreCase))
                 {
                     // architecture doesn't match
                     return false;

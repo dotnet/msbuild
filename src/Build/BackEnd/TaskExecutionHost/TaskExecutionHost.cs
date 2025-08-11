@@ -271,7 +271,7 @@ namespace Microsoft.Build.BackEnd
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch
         /// </summary>
         /// <returns>The task requirements and task factory wrapper if the task is found, (null, null) otherwise.</returns>
-        public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(IDictionary<string, string> taskIdentityParameters)
+        public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(TaskHostParameters taskIdentityParameters)
         {
             _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
 
@@ -302,7 +302,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific batch of the current task.
         /// </summary>
-        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
+        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, TaskHostParameters taskIdentityParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
 
@@ -860,7 +860,7 @@ namespace Microsoft.Build.BackEnd
         /// If the set of task identity parameters are defined, only tasks that match that identity are chosen.
         /// </summary>
         /// <returns>The Type of the task, or null if it was not found.</returns>
-        private TaskFactoryWrapper FindTaskInRegistry(IDictionary<string, string> taskIdentityParameters)
+        private TaskFactoryWrapper FindTaskInRegistry(TaskHostParameters taskIdentityParameters)
         {
             if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
             {
@@ -871,11 +871,11 @@ namespace Microsoft.Build.BackEnd
 
                     if (returnClass == null)
                     {
-                        returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, true /* exact match */, _targetLoggingContext, _taskLocation);
+                        returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, new TaskHostParameters(), true /* exact match */, _targetLoggingContext, _taskLocation);
 
                         if (returnClass == null)
                         {
-                            returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, false /* fuzzy match */, _targetLoggingContext, _taskLocation);
+                            returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, new TaskHostParameters(), false /* fuzzy match */, _targetLoggingContext, _taskLocation);
 
                             if (returnClass == null)
                             {
@@ -892,14 +892,14 @@ namespace Microsoft.Build.BackEnd
                         string usingTaskRuntime = null;
                         string usingTaskArchitecture = null;
 
-                        if (returnClass.FactoryIdentityParameters != null)
+                        if (!TaskHostParameters.IsEmptyParameters(returnClass.FactoryIdentityParameters))
                         {
-                            returnClass.FactoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out usingTaskRuntime);
-                            returnClass.FactoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out usingTaskArchitecture);
+                            usingTaskRuntime = returnClass.FactoryIdentityParameters.Runtime;
+                            usingTaskArchitecture = returnClass.FactoryIdentityParameters.Architecture;
                         }
 
-                        taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
-                        taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
+                        var taskRuntime = taskIdentityParameters.Runtime;
+                        var taskArchitecture = taskIdentityParameters.Architecture;
 
                         _targetLoggingContext.LogError(
                                 new BuildEventFileInfo(_taskLocation),
@@ -919,13 +919,13 @@ namespace Microsoft.Build.BackEnd
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
                     Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, new TaskHostParameters());
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
                     Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, new TaskHostParameters());
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }
@@ -936,7 +936,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates the task.
         /// </summary>
-        private ITask InstantiateTask(IDictionary<string, string> taskIdentityParameters)
+        private ITask InstantiateTask(TaskHostParameters taskIdentityParameters)
         {
             ITask task = null;
 
@@ -955,9 +955,9 @@ namespace Microsoft.Build.BackEnd
                     TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
                     try
                     {
-                        task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                            taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
-                            _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                        task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2
+                            ? taskFactory2.CreateTask(loggingHost, taskIdentityParameters)
+                            : _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
                     }
                     finally
                     {

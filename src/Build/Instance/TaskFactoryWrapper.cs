@@ -71,7 +71,7 @@ namespace Microsoft.Build.Execution
         /// The set of special parameters that, along with the name, contribute to the identity of
         /// this factory.
         /// </summary>
-        private IDictionary<string, string> _factoryIdentityParameters;
+        private TaskHostParameters _factoryIdentityParameters;
 
         /// <summary>
         /// An execution statistics holder.
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Execution
             ITaskFactory taskFactory,
             LoadedType taskFactoryLoadInfo,
             string taskName,
-            IDictionary<string, string> factoryIdentityParameters,
+            TaskHostParameters factoryIdentityParameters,
             TaskRegistry.RegisteredTaskRecord.Stats? statistics = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskFactory);
@@ -167,13 +167,7 @@ namespace Microsoft.Build.Execution
         /// The set of task identity parameters that were set on
         /// this particular factory's UsingTask statement.
         /// </summary>
-        public IDictionary<string, string> FactoryIdentityParameters
-        {
-            get
-            {
-                return _factoryIdentityParameters;
-            }
-        }
+        public TaskHostParameters FactoryIdentityParameters => _factoryIdentityParameters;
 
         #endregion
 

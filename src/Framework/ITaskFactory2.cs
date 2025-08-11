@@ -35,7 +35,7 @@ namespace Microsoft.Build.Framework
         /// The taskFactoryLoggingHost will log messages in the context of the target where the task is first used.
         /// </para>
         /// </remarks>
-        bool Initialize(string taskName, IDictionary<string, string> factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost);
+        bool Initialize(string taskName, TaskHostParameters factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost);
 
         /// <summary>
         /// Create an instance of the task to be used, with an optional set of "special" parameters set on the individual task invocation using
@@ -58,6 +58,6 @@ namespace Microsoft.Build.Framework
         /// <returns>
         /// The generated task, or <c>null</c> if the task failed to be created.
         /// </returns>
-        ITask CreateTask(IBuildEngine taskFactoryLoggingHost, IDictionary<string, string> taskIdentityParameters);
+        ITask CreateTask(IBuildEngine taskFactoryLoggingHost, TaskHostParameters taskIdentityParameters);
     }
 }

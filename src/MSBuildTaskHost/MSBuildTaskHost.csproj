@@ -76,6 +76,7 @@
     <Compile Include="..\Shared\IsExternalInit.cs" />
     <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
+    <Compile Include="..\Framework\TaskHostParameters.cs" />
     <Compile Include="..\Framework\ErrorUtilities.cs">
       <Link>ErrorUtilities.cs</Link>
     </Compile>
