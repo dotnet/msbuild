@@ -1003,12 +1003,12 @@ namespace Microsoft.Build.Execution
             {
                 translator.Translate(ref _name);
 
-                IDictionary<string, string> taskIdentityParameters = TaskHostParameters.ToDictionary(_taskIdentityParameters);
-                translator.TranslateDictionary(ref taskIdentityParameters, count => taskIdentityParameters);
+                TaskHostParameters taskIdentityParameters = _taskIdentityParameters;
+                translator.TranslateTaskHostParameters(ref taskIdentityParameters);
 
-                if (translator.Mode == TranslationDirection.ReadFromStream && taskIdentityParameters != null)
+                if (translator.Mode == TranslationDirection.ReadFromStream && !TaskHostParameters.IsEmptyParameters(taskIdentityParameters))
                 {
-                    _taskIdentityParameters = TaskHostParameters.FromDictionary(taskIdentityParameters);
+                    _taskIdentityParameters = taskIdentityParameters;
                 }
             }
         }
