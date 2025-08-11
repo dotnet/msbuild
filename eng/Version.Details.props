@@ -30,7 +30,7 @@ This file should be imported by eng/Versions.props
     <!-- nuget/nuget.client dependencies -->
     <NuGetBuildTasksPackageVersion>6.15.0-preview.1.86</NuGetBuildTasksPackageVersion>
     <!-- dotnet/roslyn dependencies -->
-    <MicrosoftNetCompilersToolsetPackageVersion>5.0.0-2.25408.10</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>5.0.0-1.25377.1</MicrosoftNetCompilersToolsetPackageVersion>
   </PropertyGroup>
   <!--Property group for alternate package version names-->
   <PropertyGroup>
