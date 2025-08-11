@@ -32,24 +32,22 @@ namespace Microsoft.Build.Framework
         /// Checks if a specific parameter by name is empty or null
         /// </summary>
         public static bool IsEmptyParameter(TaskHostParameters parameters, string parameterName) =>
-            IsEmptyParameters(parameters) ||
-            (parameterName?.ToLowerInvariant() switch
+            parameterName?.ToLowerInvariant() switch
             {
                 nameof(Runtime) => string.IsNullOrEmpty(parameters.Runtime),
                 nameof(Architecture) => string.IsNullOrEmpty(parameters.Architecture),
                 nameof(DotnetHostPath) => string.IsNullOrEmpty(parameters.DotnetHostPath),
                 nameof(MSBuildAssemblyPath) => string.IsNullOrEmpty(parameters.MSBuildAssemblyPath),
                 _ => throw new ArgumentException($"Unknown parameter name: {parameterName}", nameof(parameterName))
-            });
+            };
 
         /// <summary>
         /// Checks if all parameters in this instance are empty
         /// </summary>
         public static bool IsEmptyParameters(TaskHostParameters parameters) =>
-            IsEmptyParameters(parameters) ||
-            (string.IsNullOrEmpty(parameters.Runtime) &&
-             string.IsNullOrEmpty(parameters.Architecture) &&
-             string.IsNullOrEmpty(parameters.DotnetHostPath) &&
-             string.IsNullOrEmpty(parameters.MSBuildAssemblyPath));
+            string.IsNullOrEmpty(parameters.Runtime) &&
+            string.IsNullOrEmpty(parameters.Architecture) &&
+            string.IsNullOrEmpty(parameters.DotnetHostPath) &&
+            string.IsNullOrEmpty(parameters.MSBuildAssemblyPath);
     }
 }
