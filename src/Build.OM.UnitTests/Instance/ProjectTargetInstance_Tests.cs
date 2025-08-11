@@ -142,7 +142,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     </Project>
                 ";
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             ProjectInstance instance = project.CreateProjectInstance();
             ProjectTargetInstance target = instance.Targets["t"];
