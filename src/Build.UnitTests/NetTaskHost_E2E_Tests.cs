@@ -27,7 +27,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:m", out bool successTestTask);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:m", out bool successTestTask, timeoutMilliseconds: 5000000);
             successTestTask.ShouldBeTrue();
 
             testTaskOutput.ShouldContain($"The task is executed in process: dotnet");

@@ -759,8 +759,8 @@ namespace Microsoft.Build.Internal
                 }
                 else // Figure out flags based on parameters given
                 {
-                    ErrorUtilities.VerifyThrow(TaskHostParameters.IsEmptyParameter(taskHostParameters, nameof(TaskHostParameters.Runtime)), "Should always have an explicit runtime when we call this method.");
-                    ErrorUtilities.VerifyThrow(TaskHostParameters.IsEmptyParameter(taskHostParameters, nameof(TaskHostParameters.Architecture)), "Should always have an explicit architecture when we call this method.");
+                    ErrorUtilities.VerifyThrow(!TaskHostParameters.IsEmptyParameter(taskHostParameters, nameof(TaskHostParameters.Runtime)), "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(!TaskHostParameters.IsEmptyParameter(taskHostParameters, nameof(TaskHostParameters.Architecture)), "Should always have an explicit architecture when we call this method.");
 
                     clrVersion = taskHostParameters.Runtime.ToLowerInvariant() switch
                     {

@@ -976,11 +976,23 @@ namespace Microsoft.Build.Execution
                     }
                     else
                     {
-                        // For fuzzy match, we only care about runtime and architecture compatibility
-                        string runtimeX = x.Runtime;
-                        string runtimeY = y.Runtime;
-                        string architectureX = x.Architecture;
-                        string architectureY = y.Architecture;
+                        // we need to fuzzy-match the parameters as well
+                        string runtimeX = null;
+                        string runtimeY = null;
+                        string architectureX = null;
+                        string architectureY = null;
+
+                        if (!TaskHostParameters.IsEmptyParameters(x))
+                        {
+                            runtimeX = x.Runtime;
+                            architectureX = x.Architecture;
+                        }
+
+                        if (!TaskHostParameters.IsEmptyParameters(y))
+                        {
+                            runtimeY = y.Runtime;
+                            architectureY = y.Architecture;
+                        }
 
                         // null is OK -- it's treated as a "don't care"
                         if (!XMakeAttributes.RuntimeValuesMatch(runtimeX, runtimeY))
@@ -1181,9 +1193,14 @@ namespace Microsoft.Build.Execution
                 _registrationOrderId = registrationOrderId;
                 _taskNamesCreatableByFactory = new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
 
-                if (String.IsNullOrEmpty(taskFactory))
+                if (string.IsNullOrEmpty(taskFactory))
                 {
-                    ErrorUtilities.VerifyThrow(TaskHostParameters.IsEmptyParameters(taskFactoryParameters), "if the parameter dictionary is non-null, it should contain both parameters when we get here!");
+                    if (!TaskHostParameters.IsEmptyParameters(taskFactoryParameters))
+                    {
+                        ErrorUtilities.VerifyThrow(
+                            !TaskHostParameters.IsEmptyParameter(taskFactoryParameters, nameof(taskFactoryParameters.Runtime)) && !TaskHostParameters.IsEmptyParameter(taskFactoryParameters, nameof(taskFactoryParameters.Architecture)),
+                            "if the taskFactoryParameters is non-null, it should contain both parameters (runtime/architecture) when we get here!");
+                    }
 
                     _taskFactory = AssemblyTaskFactory;
                 }

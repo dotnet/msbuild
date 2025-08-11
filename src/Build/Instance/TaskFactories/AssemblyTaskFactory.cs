@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd
             // validate the task factory parameters
             if (!TaskHostParameters.IsEmptyParameters(identityParameters))
             {
-                if (!TaskHostParameters.IsEmptyParameter(identityParameters, "Runtime"))
+                if (!TaskHostParameters.IsEmptyParameter(identityParameters, nameof(TaskHostParameters.Runtime)))
                 {
                     if (!XMakeAttributes.IsValidMSBuildRuntimeValue(identityParameters.Runtime))
                     {
@@ -496,7 +496,7 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                if (!TaskHostParameters.IsEmptyParameter(identityParameters, "Architecture"))
+                if (!TaskHostParameters.IsEmptyParameter(identityParameters, nameof(TaskHostParameters.Architecture)))
                 {
                     if (!XMakeAttributes.IsValidMSBuildArchitectureValue(identityParameters.Architecture))
                     {
@@ -652,7 +652,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private static bool TaskHostParametersMatchCurrentProcess(TaskHostParameters mergedParameters)
         {
-            if (!TaskHostParameters.IsEmptyParameter(mergedParameters, "Runtime"))
+            if (!TaskHostParameters.IsEmptyParameter(mergedParameters, nameof(TaskHostParameters.Runtime)))
             {
                 string currentRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(XMakeAttributes.MSBuildRuntimeValues.currentRuntime);
 
@@ -663,7 +663,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (!TaskHostParameters.IsEmptyParameter(mergedParameters, "Architecture"))
+            if (!TaskHostParameters.IsEmptyParameter(mergedParameters, nameof(TaskHostParameters.Architecture)))
             {
                 string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
 

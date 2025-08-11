@@ -32,7 +32,7 @@ namespace Microsoft.Build.Framework
         /// Checks if a specific parameter by name is empty or null
         /// </summary>
         public static bool IsEmptyParameter(TaskHostParameters parameters, string parameterName) =>
-            parameterName?.ToLowerInvariant() switch
+            parameterName switch
             {
                 nameof(Runtime) => string.IsNullOrEmpty(parameters.Runtime),
                 nameof(Architecture) => string.IsNullOrEmpty(parameters.Architecture),
