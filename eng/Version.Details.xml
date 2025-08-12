@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="6a953e76162f3f079405f80e28664fa51b136740" BarId="276981" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="8c7b3dcd2bd657c11b12973f1214e7c3c616b174" BarId="278647" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="9.0.0">
@@ -114,9 +114,9 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>eb38c4a6cccfce5ee9415da1a930fc6534194b2b</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25402.2">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25408.10">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>8faa31814969a3da7e92233fe963966debcdc431</Sha>
+      <Sha>7ead97fc404947f81a4ee3c6543212d60fddfd03</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25408.3">
       <Uri>https://github.com/dotnet/arcade</Uri>
