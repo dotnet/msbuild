@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// A lock object used for this class.
         /// </summary>
-        private readonly LockType _lockObject = new LockType();
+        private readonly object _lockObject = new object();
 
         /// <summary>
         /// Stores resolver state by build submission ID.

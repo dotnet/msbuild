@@ -24,7 +24,6 @@ using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
-
 #endif
 
 #nullable disable

@@ -91,7 +91,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Lock for task registry initialization
         /// </summary>
-        private readonly LockType _taskRegistryLock = new LockType();
+        private readonly object _taskRegistryLock = new object();
 
         /// <summary>
         /// indicates if the default tasks file has already been scanned
