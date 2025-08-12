@@ -739,7 +739,7 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static HandshakeOptions GetHandshakeOptions(
             bool taskHost,
-            TaskHostParameters taskHostParameters = new(),
+            in TaskHostParameters taskHostParameters,
             string architectureFlagToSet = null,
             bool nodeReuse = false,
             bool lowPriority = false)
@@ -819,6 +819,18 @@ namespace Microsoft.Build.Internal
             }
 #endif
             return context;
+        }
+
+        /// <summary>
+        /// Given the appropriate information, return the equivalent HandshakeOptions.
+        /// </summary>
+        internal static HandshakeOptions GetHandshakeOptions(
+            bool taskHost,
+            string architectureFlagToSet = null,
+            bool nodeReuse = false,
+            bool lowPriority = false)
+        {
+            return GetHandshakeOptions(taskHost, in TaskHostParameters.Empty, architectureFlagToSet, nodeReuse, lowPriority);
         }
 
         /// <summary>

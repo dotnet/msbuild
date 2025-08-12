@@ -18,6 +18,11 @@ namespace Microsoft.Build.Framework
         private readonly string? _msBuildAssemblyPath;
 
         /// <summary>
+        /// A static empty instance to avoid allocations when default parameters are needed.
+        /// </summary>
+        public static readonly TaskHostParameters Empty = new();
+
+        /// <summary>
         /// Initializes a new instance of the TaskHostParameters struct with the specified parameters.
         /// </summary>
         /// <param name="runtime">The target runtime identifier (e.g., "net8.0", "net472").</param>
