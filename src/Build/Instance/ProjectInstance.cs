@@ -3486,12 +3486,12 @@ namespace Microsoft.Build.Execution
                     itemTypeDefinition,
                     ConvertCachedItemDefinitionToInstance);
 
-            ImmutableDictionary<string, string> directMetadata = null;
+            IReadOnlyDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata is not null)
             {
                 if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
                 {
-                    directMetadata = new ImmutableProjectMetadataCollectionConverter(item, metadataDict, ConvertCachedProjectMetadataToInstance);
+                    directMetadata = new ImmutableProjectMetadataCollectionConverter(item, metadataDict);
                 }
                 else
                 {
@@ -3500,7 +3500,7 @@ namespace Microsoft.Build.Execution
 
                     directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
                         .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
-                } 
+                }
             }
 
             GetEvaluatedIncludesFromProjectItem(
