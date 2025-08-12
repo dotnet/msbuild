@@ -1039,7 +1039,7 @@ namespace Microsoft.Build.BackEnd
                 SchedulableRequest[] unscheduledRequests = _requestBufferPool.Rent(_schedulingData.UnscheduledRequestsCount);
          
                 var numRead = 0;
-                while (numRead < unscheduledRequests.Length && _schedulingData.UnscheduledRequestsWhichCanBeScheduled.MoveNext())
+                while (numRead < _schedulingData.UnscheduledRequestsCount && _schedulingData.UnscheduledRequestsWhichCanBeScheduled.MoveNext())
                 {
                     unscheduledRequests[numRead] = _schedulingData.UnscheduledRequestsWhichCanBeScheduled.Current;
                     numRead++;
