@@ -504,6 +504,10 @@ namespace Microsoft.Build.BackEnd
                                 // as a result we need separate sets of item and property collections to track changes
                                 if (dependencyResult == DependencyAnalysisResult.IncrementalBuild)
                                 {
+                                    // Ensure that these lookups stop at the current scope, regardless of whether items were added.
+                                    lookupForInference.TruncateLookupsForItemTypes(upToDateTargetInputs.ItemTypes);
+                                    lookupForExecution.TruncateLookupsForItemTypes(changedTargetInputs.ItemTypes);
+
                                     // subset the relevant items to those that are up-to-date
                                     foreach (string itemType in upToDateTargetInputs.ItemTypes)
                                     {

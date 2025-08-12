@@ -698,14 +698,14 @@ namespace Microsoft.Build.BackEnd
                         // them.
                         if (!changedTargetInputs.ItemTypes.Contains(inputItems[0].ItemType))
                         {
-                            changedTargetInputs.AddEmptyMarker(inputItems[0].ItemType);
+                            changedTargetInputs.ImportItemsOfType(inputItems[0].ItemType, Array.Empty<ProjectItemInstance>());
                         }
 
                         // We need to perform the same operation on the up-to-date side
                         // too.
                         if (!upToDateTargetInputs.ItemTypes.Contains(inputItems[0].ItemType))
                         {
-                            upToDateTargetInputs.AddEmptyMarker(inputItems[0].ItemType);
+                            upToDateTargetInputs.ImportItemsOfType(inputItems[0].ItemType, Array.Empty<ProjectItemInstance>());
                         }
                     }
                 }
