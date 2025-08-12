@@ -1040,7 +1040,7 @@ namespace Microsoft.Build.BackEnd
 
                 int numRead = 0;
                 SchedulingData.UnscheduledRequestsWhichCanBeScheduledEnumerator unscheduledRequestsRead = _schedulingData.UnscheduledRequestsWhichCanBeScheduled.GetEnumerator();
-                while (numRead < unscheduledRequests.Length && unscheduledRequestsRead.MoveNext())
+                while (numRead < _schedulingData.UnscheduledRequestsCount && unscheduledRequestsRead.MoveNext())
                 {
                     unscheduledRequests[numRead] = unscheduledRequestsRead.Current;
                     numRead++;
