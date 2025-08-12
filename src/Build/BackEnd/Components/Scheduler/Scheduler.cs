@@ -1037,11 +1037,12 @@ namespace Microsoft.Build.BackEnd
             if (idleNodes.Contains(InProcNodeId))
             {
                 SchedulableRequest[] unscheduledRequests = _requestBufferPool.Rent(_schedulingData.UnscheduledRequestsCount);
-         
-                var numRead = 0;
-                while (numRead < unscheduledRequests.Length && _schedulingData.UnscheduledRequestsWhichCanBeScheduled.MoveNext())
+
+                int numRead = 0;
+                SchedulingData.UnscheduledRequestsWhichCanBeScheduledEnumerator unscheduledRequestsRead = _schedulingData.UnscheduledRequestsWhichCanBeScheduled.GetEnumerator();
+                while (numRead < unscheduledRequests.Length && unscheduledRequestsRead.MoveNext())
                 {
-                    unscheduledRequests[numRead] = _schedulingData.UnscheduledRequestsWhichCanBeScheduled.Current;
+                    unscheduledRequests[numRead] = unscheduledRequestsRead.Current;
                     numRead++;
                 }
 
