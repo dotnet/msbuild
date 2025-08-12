@@ -523,7 +523,8 @@ namespace Microsoft.Build.BackEnd
                 if (scope.Items != null)
                 {
                     groupFound = scope.Items[itemType];
-                    if (groupFound?.Count > 0 || scope.ItemTypesToTruncateAtThisScope.Contains(itemType))
+                    if (groupFound?.Count > 0
+                        || (scope.ItemTypesToTruncateAtThisScope != null && scope.ItemTypesToTruncateAtThisScope.Contains(itemType)))
                     {
                         // Found a group: we go no further
                         break;
