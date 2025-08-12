@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.BuildException;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -878,10 +879,10 @@ namespace Microsoft.Build.BackEnd
             /// <param name="taskHostParameters">The TaskHostParameters to be translated.</param>
             public void TranslateTaskHostParameters(ref TaskHostParameters taskHostParameters)
             {
-                string runtime = _reader.ReadString();
-                string architecture = _reader.ReadString();
-                string dotnetHostPath = _reader.ReadString();
-                string msBuildAssemblyPath = _reader.ReadString();
+                string runtime = _reader.ReadOptionalString();
+                string architecture = _reader.ReadOptionalString();
+                string dotnetHostPath = _reader.ReadOptionalString();
+                string msBuildAssemblyPath = _reader.ReadOptionalString();
 
                 taskHostParameters = new TaskHostParameters(runtime, architecture, dotnetHostPath, msBuildAssemblyPath);
             }
@@ -1607,10 +1608,10 @@ namespace Microsoft.Build.BackEnd
             /// <param name="taskHostParameters">The TaskHostParameters to be translated.</param>
             public void TranslateTaskHostParameters(ref TaskHostParameters taskHostParameters)
             {
-                _writer.Write(taskHostParameters.Runtime);
-                _writer.Write(taskHostParameters.Architecture);
-                _writer.Write(taskHostParameters.DotnetHostPath ?? string.Empty);
-                _writer.Write(taskHostParameters.MSBuildAssemblyPath ?? string.Empty);
+                _writer.WriteOptionalString(taskHostParameters.Runtime);
+                _writer.WriteOptionalString(taskHostParameters.Architecture);
+                _writer.WriteOptionalString(taskHostParameters.DotnetHostPath ?? string.Empty);
+                _writer.WriteOptionalString(taskHostParameters.MSBuildAssemblyPath ?? string.Empty);
             }
 
             /// <summary>
