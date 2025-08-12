@@ -246,46 +246,13 @@ namespace Microsoft.Build.BackEnd
             IEqualityComparer<string> comparer)
         {
             // Defensive copy since immutable dictionaries are expected to be overwritten.
-            ImmutableDictionary<string, string> localDict = dictionary;
+            IReadOnlyDictionary<string, string> localDict = dictionary;
 
-            if (!translator.TranslateNullable(localDict))
+            TranslateDictionary(translator, ref localDict, comparer);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
             {
-                return;
-            }
-
-            if (translator.Mode == TranslationDirection.WriteToStream)
-            {
-                int count = localDict.Count;
-                translator.Translate(ref count);
-
-                foreach (KeyValuePair<string, string> kvp in localDict)
-                {
-                    string key = kvp.Key;
-                    string value = kvp.Value;
-
-                    translator.Translate(ref key);
-                    translator.Translate(ref value);
-                }
-            }
-            else
-            {
-                int count = default;
-                translator.Translate(ref count);
-
-                ImmutableDictionary<string, string>.Builder builder = ImmutableDictionary.Create<string, string>(comparer).ToBuilder();
-
-                for (int i = 0; i < count; i++)
-                {
-                    string key = null;
-                    string value = null;
-
-                    translator.Translate(ref key);
-                    translator.Translate(ref value);
-
-                    builder[key] = value;
-                }
-
-                dictionary = builder.ToImmutable();
+                dictionary = (ImmutableDictionary<string, string>)localDict;
             }
         }
 #endif
