@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks.Xaml
         private TaskLoggingHelper _logPrivate;
 
         /// <summary>
-        /// The command line for this task. 
+        /// The command line for this task.
         /// </summary>
         private string _commandLine;
 
@@ -85,12 +85,12 @@ namespace Microsoft.Build.Tasks.Xaml
         protected internal Dictionary<string, CommandLineToolSwitch> ActiveToolSwitches { get; } = new Dictionary<string, CommandLineToolSwitch>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Overridden to use UTF16, which works better than UTF8 for older versions of CL, LIB, etc. 
+        /// Overridden to use UTF16, which works better than UTF8 for older versions of CL, LIB, etc.
         /// </summary>
         protected override Encoding ResponseFileEncoding { get; } = Encoding.Unicode;
 
         /// <summary>
-        /// Made a property to abstract out the "if null, call GenerateCommands()" logic. 
+        /// Made a property to abstract out the "if null, call GenerateCommands()" logic.
         /// </summary>
         private string CommandLine
         {
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// Replace an existing switch with the specifed one of the same name. 
+        /// Replace an existing switch with the specifed one of the same name.
         /// </summary>
         public void ReplaceToolSwitch(CommandLineToolSwitch switchToAdd)
         {
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// Creates the command line and returns it as a string by:
         /// 1. Adding all switches with the default set to the active switch list
         /// 2. Customizing the active switch list (overridden in derived classes)
-        /// 3. Iterating through the list and appending switches 
+        /// 3. Iterating through the list and appending switches
         /// </summary>
         protected override string GenerateResponseFileCommands()
         {
@@ -290,7 +290,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 return true;
             }
 
-            // We don't want to use ToolTask's implementation because it doesn't report the command line that failed. 
+            // We don't want to use ToolTask's implementation because it doesn't report the command line that failed.
             if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
                 _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailedAccessDenied", CommandLine, ExitCode);

@@ -214,7 +214,7 @@ internal static class NativeMethods
         // 32-bit ARMv6
         ARMV6,
 
-        // PowerPC 64-bit (little-endian) 
+        // PowerPC 64-bit (little-endian)
         PPC64LE,
 
         // Who knows
@@ -490,7 +490,6 @@ internal static class NativeMethods
     public static int GetLogicalCoreCount()
     {
         int numberOfCpus = Environment.ProcessorCount;
-#if !MONO
         // .NET on Windows returns a core count limited to the current NUMA node
         //     https://github.com/dotnet/runtime/issues/29686
         // so always double-check it.
@@ -502,7 +501,6 @@ internal static class NativeMethods
                 numberOfCpus = result;
             }
         }
-#endif
 
         return numberOfCpus;
     }
@@ -661,37 +659,6 @@ internal static class NativeMethods
 #endif
     }
 
-    private static readonly object IsMonoLock = new object();
-
-    private static bool? _isMono;
-
-    /// <summary>
-    /// Gets a flag indicating if we are running under MONO
-    /// </summary>
-    internal static bool IsMono
-    {
-        get
-        {
-            if (_isMono != null)
-            {
-                return _isMono.Value;
-            }
-
-            lock (IsMonoLock)
-            {
-                if (_isMono == null)
-                {
-                    // There could be potentially expensive TypeResolve events, so cache IsMono.
-                    // Also, VS does not host Mono runtimes, so turn IsMono off when msbuild is running under VS
-                    _isMono = !BuildEnvironmentState.s_runningInVisualStudio &&
-                              Type.GetType("Mono.Runtime") != null;
-                }
-            }
-
-            return _isMono.Value;
-        }
-    }
-
 #if !CLR2COMPATIBILITY
     private static bool? _isWindows;
 #endif
@@ -750,8 +717,6 @@ internal static class NativeMethods
         {
 #if RUNTIME_TYPE_NETCORE
             const string frameworkName = ".NET";
-#elif MONO
-            const string frameworkName = "Mono";
 #else
             const string frameworkName = ".NET Framework";
 #endif
@@ -1539,7 +1504,7 @@ internal static class NativeMethods
             // On posix OSes we expect console always supports VT100 coloring unless it is explicitly marked as "dumb".
             acceptAnsiColorCodes = Environment.GetEnvironmentVariable("TERM") != "dumb";
             // It wasn't redirected as tested above so we assume output is screen/console
-            outputIsScreen = true; 
+            outputIsScreen = true;
         }
         return (acceptAnsiColorCodes, outputIsScreen, originalConsoleMode);
     }

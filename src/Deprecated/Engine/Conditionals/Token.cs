@@ -44,7 +44,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>

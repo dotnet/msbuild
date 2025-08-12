@@ -89,7 +89,7 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// This property generates the logger name by appending together the class name and assembly name
         /// </summary>
-        internal string Name
+        public string Name
         {
             get
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
-                    return _loggerAssembly.AssemblyFile;
+                    return _loggerAssembly.AssemblyFile ?? _loggerAssembly.AssemblyName;
                 }
             }
         }

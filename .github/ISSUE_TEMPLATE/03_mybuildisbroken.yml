@@ -1,7 +1,6 @@
 name: 😵 My Build is Broken
 description: Use this template for helping figure out what's wrong with your build.
 title: "[Broken Build]: "
-labels: ["needs-triage"]
 body:
   - type: markdown
     attributes:

@@ -14,9 +14,9 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// This class is responsible for serializing and deserializing anything that is not 
-    /// officially supported by ITranslator, but that we still want to do 
-    /// custom translation of.  
+    /// This class is responsible for serializing and deserializing anything that is not
+    /// officially supported by ITranslator, but that we still want to do
+    /// custom translation of.
     /// </summary>
     internal static class TranslatorExtensions
     {

@@ -156,6 +156,43 @@ public class ExtendedBuildEventArgs_Tests
         argDeserialized.Should().BeEquivalentTo(arg);
     }
 
+    [InlineData(true)]
+    [InlineData(false)]
+    [Theory]
+    public void ExtendedCriticalMessageEventArgs_SerializationDeserialization(bool withOptionalData)
+    {
+        ExtendedCriticalBuildMessageEventArgs arg = new(
+            type: "TypeOfExtendedCustom",
+            subcategory: withOptionalData ? "sub-type" : null,
+            code: withOptionalData ? "a-code" : null,
+            file: withOptionalData ? ".\\dev\\my.csproj" : null,
+            lineNumber: withOptionalData ? 1 : default,
+            columnNumber: withOptionalData ? 2 : default,
+            endLineNumber: withOptionalData ? 3 : default,
+            endColumnNumber: withOptionalData ? 4 : default,
+            message: withOptionalData ? "a message with args {0} {1}" : null,
+            helpKeyword: withOptionalData ? "MSBT123" : null,
+            senderName: withOptionalData ? $"UnitTest {Guid.NewGuid()}" : null,
+            eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
+            messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
+        {
+            ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+            ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
+            BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+        };
+
+        using MemoryStream stream = new MemoryStream();
+        using BinaryWriter bw = new BinaryWriter(stream);
+        arg.WriteToStream(bw);
+
+        stream.Position = 0;
+        using BinaryReader br = new BinaryReader(stream);
+        ExtendedBuildMessageEventArgs argDeserialized = new();
+        argDeserialized.CreateFromStream(br, 80);
+
+        argDeserialized.Should().BeEquivalentTo(arg);
+    }
+
     [Fact]
     public void ExtendedCustomBuildEventArgs_Ctors()
     {
@@ -214,5 +251,15 @@ public class ExtendedBuildEventArgs_Tests
         ea = new ExtendedBuildMessageEventArgs("type", null, null, null, 1, 2, 3, 4, null, null, null, default);
         ea = new ExtendedBuildMessageEventArgs("type", null, null, null, 1, 2, 3, 4, null, null, null, default, DateTime.Now);
         ea = new ExtendedBuildMessageEventArgs("type", null, null, null, 1, 2, 3, 4, null, null, null, default, DateTime.Now, null);
+    }
+
+    [Fact]
+    public void ExtendedCriticalBuildMessageEventArgs_Ctors()
+    {
+        var ea = new ExtendedCriticalBuildMessageEventArgs();
+        ea = new ExtendedCriticalBuildMessageEventArgs("type");
+        ea = new ExtendedCriticalBuildMessageEventArgs("type", "Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender");
+        ea = new ExtendedCriticalBuildMessageEventArgs("type", "Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "sender", DateTime.Now);
+        ea = new ExtendedCriticalBuildMessageEventArgs("type", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "sender", DateTime.Now, "arg1", "arg2");
     }
 }

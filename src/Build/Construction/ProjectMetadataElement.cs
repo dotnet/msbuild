@@ -74,7 +74,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the unevaluated value. 
+        /// Gets or sets the unevaluated value.
         /// Returns empty string if it is not present.
         /// </summary>
         public string Value
