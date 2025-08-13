@@ -331,8 +331,7 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile) ||
-                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) ||
-                    IsInteractiveBuild(commandLineSwitches))
+                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]))
                 {
                     canRunServer = false;
                     if (KnownTelemetry.PartialBuildTelemetry != null)
@@ -352,36 +351,6 @@ namespace Microsoft.Build.CommandLine
             }
 
             return canRunServer;
-        }
-
-        private static bool IsInteractiveBuild(CommandLineSwitches commandLineSwitches)
-        {
-            // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
-            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Interactive) &&
-                ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Interactive], true, "InvalidInteractiveValue"))
-            {
-                return true;
-            }
-
-            // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
-            foreach (string parameter in commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property])
-            {
-                // split each <prop>=<value> string into 2 pieces, breaking on the first = that is found
-                string[] parameterSections = parameter.Split(s_propertyValueSeparator, 2);
-
-                if (parameterSections.Length == 2 &&
-                    parameterSections[0].Length > 0 &&
-                    string.Equals("NuGetInteractive", parameterSections[0], StringComparison.OrdinalIgnoreCase))
-                {
-                    string nuGetInteractiveValue = parameterSections[1].Trim('"', ' ');
-                    if (!string.Equals("false", nuGetInteractiveValue, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
 #if !FEATURE_GET_COMMANDLINE
