@@ -1352,8 +1352,6 @@ namespace Microsoft.Build.CommandLine
 
                 // Targeted perf optimization for the case where we only have our own parallel console logger, and verbosity is quiet. In such a case
                 // we know we won't emit any messages except for errors and warnings, so the engine should not bother even logging them.
-                // If we're using the original serial console logger we can't do this, as it shows project started/finished context
-                // around errors and warnings.
                 // Telling the engine to not bother logging non-critical messages means that typically it can avoid loading any resources in the successful
                 // build case.
                 if (loggers.Length == 1 &&

@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests
             var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
-            // build and log into binary logger, mock logger, serial and parallel console loggers
+            // build and log into binary logger, mock logger and parallel console loggers
             // no logging on evaluation
             using (ProjectCollection collection = new())
             {

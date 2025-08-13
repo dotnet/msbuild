@@ -8,6 +8,7 @@ using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
+using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
 
 #nullable disable
 
@@ -145,14 +146,6 @@ namespace Microsoft.Build.Logging
             }
 
             _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
-            if (this is FileLogger)
-            {
-                KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "parallel";
-            }
-            else
-            {
-                KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerType = "parallel";
-            }
 
             if (_showSummary != null)
             {
