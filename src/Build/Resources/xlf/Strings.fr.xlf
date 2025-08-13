@@ -577,6 +577,18 @@
         <target state="translated">Le métaprojet "{0}" a été généré.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NETHostTaskLoad_Failed">
+        <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="new">The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostVersion_Failed">
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100 or later.</source>
+        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100 or later.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Impossible d'effectuer l'opération car la méthode BeginBuild n'a pas encore été appelée.</target>
@@ -826,6 +838,16 @@
       {1}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
+      </trans-unit>
+      <trans-unit id="SDKPathCheck_Failed">
+        <source>The directory does not exist: {0}.</source>
+        <target state="new">The directory does not exist: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKPathResolution_Failed">
+        <source>SDK path cannot be null or empty.</source>
+        <target state="new">SDK path cannot be null or empty.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".

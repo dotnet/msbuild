@@ -2410,6 +2410,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OpenTelemetryLoadFailed" xml:space="preserve">
     <value>Loading telemetry libraries failed with exception: {0}.</value>
   </data>
+  <data name="NETHostTaskLoad_Failed" xml:space="preserve">
+    <value>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
+  </data>
+  <data name="NETHostVersion_Failed" xml:space="preserve">
+    <value>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100 or later.</value>
+  </data>
+  <data name="SDKPathResolution_Failed" xml:space="preserve">
+    <value>SDK path cannot be null or empty.</value>
+  </data>
+  <data name="SDKPathCheck_Failed" xml:space="preserve">
+    <value>The directory does not exist: {0}.</value>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 

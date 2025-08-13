@@ -116,6 +116,11 @@ namespace Microsoft.Build.Internal
         internal const string DotnetHostPathEnvVarName = "DOTNET_HOST_PATH";
 
         /// <summary>
+        /// The project property name used to get the path to the MSBuild assembly.
+        /// </summary>
+        internal const string RuntimeIdentifierGraphPath = nameof(RuntimeIdentifierGraphPath);
+
+        /// <summary>
         /// Defines the name of dotnet process based on the operating system.
         /// </summary>
         internal static readonly string DotnetProcessName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";

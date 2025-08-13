@@ -555,11 +555,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             string hostPath = lookup.GetProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
-            string msBuildAssemblyPath = Path.GetDirectoryName(lookup.GetProperty("RuntimeIdentifierGraphPath")?.EvaluatedValue) ?? string.Empty;
-            if (!string.IsNullOrEmpty(hostPath) && !string.IsNullOrEmpty(msBuildAssemblyPath))
+            string msBuildAssemblyDirectoryPath = Path.GetDirectoryName(lookup.GetProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue) ?? string.Empty;
+            if (!string.IsNullOrEmpty(hostPath) && !string.IsNullOrEmpty(msBuildAssemblyDirectoryPath))
             {
                 taskIdentityParameters.Add(Constants.DotnetHostPath, hostPath);
-                taskIdentityParameters.Add(Constants.MSBuildAssemblyPath, msBuildAssemblyPath);
+                taskIdentityParameters.Add(Constants.MSBuildAssemblyPath, msBuildAssemblyDirectoryPath);
             }
 
             return taskIdentityParameters;
