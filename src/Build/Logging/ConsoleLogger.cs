@@ -39,7 +39,7 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// This class implements the default logger that outputs event data
     /// to the console (stdout).
-    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger or ParallelConsoleLogger.
+    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger: ParallelConsoleLogger.
     /// </summary>
     /// <remarks>This class is not thread safe.</remarks>
     public class ConsoleLogger : INodeLogger
