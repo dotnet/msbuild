@@ -564,7 +564,6 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         public void TestVerbosityLessThan(LoggerVerbosity loggerVerbosity, LoggerVerbosity checkVerbosity, bool expectedResult)
         {
-            new SerialConsoleLogger(loggerVerbosity).IsVerbosityAtLeast(checkVerbosity).ShouldBe(expectedResult);
             new ParallelConsoleLogger(loggerVerbosity).IsVerbosityAtLeast(checkVerbosity).ShouldBe(expectedResult);
         }
 
@@ -1192,58 +1191,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SingleLineFormatNoop()
-        {
-            string s = "foo";
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 0);
-
-            // should be a no-op
-            ss.ShouldBe($"foo{Environment.NewLine}");
-        }
-
-        [Fact]
-        public void MultilineFormatWindowsLineEndings()
-        {
-            string newline = "\r\n";
-            string s = "foo" + newline + "bar" +
-                       newline + "baz" + newline;
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 4);
-
-            // should convert lines to system format
-            ss.ShouldBe($"    foo{Environment.NewLine}    bar{Environment.NewLine}    baz{Environment.NewLine}    {Environment.NewLine}");
-        }
-
-        [Fact]
-        public void MultilineFormatUnixLineEndings()
-        {
-            string s = "foo\nbar\nbaz\n";
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 0);
-
-            // should convert lines to system format
-            ss.ShouldBe($"foo{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}");
-        }
-
-        [Fact]
-        public void MultilineFormatMixedLineEndings()
-        {
-            string s = "\n" + "foo" + "\r\n\r\n" + "bar" + "\n" + "baz" + "\n\r\n\n" +
-                "jazz" + "\r\n" + "razz" + "\n\n" + "matazz" + "\n" + "end";
-
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 0);
-
-            // should convert lines to system format
-            ss.ShouldBe($"{Environment.NewLine}foo{Environment.NewLine}{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}jazz{Environment.NewLine}razz{Environment.NewLine}{Environment.NewLine}matazz{Environment.NewLine}end{Environment.NewLine}");
-        }
-
-        [Fact]
         public void NestedProjectMinimal()
         {
             EventSourceSink es = new EventSourceSink();
@@ -1425,23 +1372,13 @@ namespace Microsoft.Build.UnitTests
             string prop1;
             string prop2;
             string prop3;
-            if (cl is SerialConsoleLogger scl)
-            {
-                var propertyList = scl.ExtractPropertyList(properties);
-                scl.WriteProperties(propertyList);
-                prop1 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop1", "val1");
-                prop2 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop2", "val2");
-                prop3 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "pro(p3)", "va;%3b;l3");
-            }
-            else
-            {
-                BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                ((ParallelConsoleLogger)cl).WriteProperties(buildEvent, properties);
-                prop1 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop1", "val1");
-                prop2 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop2", "val2");
-                prop3 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "pro(p3)", "va;%3b;l3");
-            }
+
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            ((ParallelConsoleLogger)cl).WriteProperties(buildEvent, properties);
+            prop1 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop1", "val1");
+            prop2 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop2", "val2");
+            prop3 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "pro(p3)", "va;%3b;l3");
             string log = sc.ToString();
 
             _output.WriteLine("[" + log + "]");
@@ -1468,11 +1405,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayPropertiesList()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-
-            WriteAndValidateProperties(cl, sc, true);
-
-            sc = new SimulatedConsole();
+           
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1487,9 +1420,6 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayPropertiesListInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
-
-            WriteAndValidateProperties(cl, sc, false);
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
@@ -1505,17 +1435,11 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayEnvironmentInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
-            WriteEnvironment(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
             WriteEnvironment(cl2, sc, false);
         }
-
-
 
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
@@ -1524,12 +1448,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayEnvironmentInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
-            cl.Parameters = "ShowEnvironment";
-            cl.ParseParameters();
-            WriteEnvironment(cl, sc, true);
 
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1546,10 +1465,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayEnvironmentInDiagnostic()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-            WriteEnvironment(cl, sc, true);
 
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1563,17 +1479,11 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayEnvironmentInMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
 
-            WriteEnvironment(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
 
             WriteEnvironment(cl2, sc, false);
         }
-
-
 
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
@@ -1582,12 +1492,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayEnvironmentInMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
-            cl.Parameters = "ShowEnvironment";
-            cl.ParseParameters();
-            WriteEnvironment(cl, sc, true);
-
-            sc = new SimulatedConsole();
+           
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1604,20 +1509,13 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayPropertiesListIfDisabled()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-            cl.Parameters = "noitemandpropertylist";
-            cl.ParseParameters();
 
-            WriteAndValidateProperties(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             cl2.Parameters = "noitemandpropertylist";
             cl2.ParseParameters();
 
-            WriteAndValidateProperties(cl, sc, false);
+            WriteAndValidateProperties(cl2, sc, false);
         }
-
 
         /// <summary>
         /// Create some items and log them
@@ -1680,24 +1578,12 @@ namespace Microsoft.Build.UnitTests
             string item3spec;
             string item3metadatum = string.Empty;
 
-            if (cl is SerialConsoleLogger scl)
-            {
-                SortedList itemList = scl.ExtractItemList(items);
-                scl.WriteItems(itemList);
-                item1spec = "spec" + Environment.NewLine;
-                item2spec = "spec2" + Environment.NewLine;
-                item3spec = "(spec;3" + Environment.NewLine;
-                item3metadatum = "f)oo = !@#" + Environment.NewLine;
-            }
-            else
-            {
-                BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
-                item1spec = Environment.NewLine + "    spec" + Environment.NewLine;
-                item2spec = Environment.NewLine + "    spec2" + Environment.NewLine;
-                item3spec = Environment.NewLine + "    (spec;3" + Environment.NewLine;
-            }
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
+            item1spec = Environment.NewLine + "    spec" + Environment.NewLine;
+            item2spec = Environment.NewLine + "    spec2" + Environment.NewLine;
+            item3spec = Environment.NewLine + "    (spec;3" + Environment.NewLine;
 
             item1type = "type" + Environment.NewLine;
             item2type = "type2" + Environment.NewLine;
@@ -1706,8 +1592,6 @@ namespace Microsoft.Build.UnitTests
             string log = sc.ToString();
 
             _output.WriteLine("[" + log + "]");
-
-
 
             // Being careful not to make locale assumptions here, eg about sorting
             if (expectToSeeLogging)
@@ -1749,37 +1633,15 @@ namespace Microsoft.Build.UnitTests
         {
             Hashtable items = new Hashtable();
 
-            for (int i = 0; i < 2; i++)
-            {
-                BaseConsoleLogger cl = null;
-                SimulatedConsole sc = new SimulatedConsole();
-                if (i == 0)
-                {
-                    cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                }
-                else
-                {
-                    cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                }
+            SimulatedConsole sc = new SimulatedConsole();
+            BaseConsoleLogger cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
+            string log = sc.ToString();
 
-                if (cl is SerialConsoleLogger scl)
-                {
-                    SortedList itemList = scl.ExtractItemList(items);
-                    scl.WriteItems(itemList);
-                }
-                else
-                {
-                    BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                    buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                    ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
-                }
-
-                string log = sc.ToString();
-
-                // There should be nothing in the log
-                log.Length.ShouldBe(0);
-                _output.WriteLine("Iteration of i: " + i + "[" + log + "]");
-            }
+            // There should be nothing in the log
+            log.Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -1791,29 +1653,16 @@ namespace Microsoft.Build.UnitTests
         {
             Hashtable properties = new Hashtable();
 
-            for (int i = 0; i < 2; i++)
-            {
-                SimulatedConsole sc = new SimulatedConsole();
-                if (i == 0)
-                {
-                    var cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                    var propertyList = cl.ExtractPropertyList(properties);
-                    cl.WriteProperties(propertyList);
-                }
-                else
-                {
-                    var cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                    BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                    buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                    cl.WriteProperties(buildEvent, properties);
-                }
+            SimulatedConsole sc = new SimulatedConsole();
+            var cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            cl.WriteProperties(buildEvent, properties);
 
-                string log = sc.ToString();
+            string log = sc.ToString();
 
-                // There should be nothing in the log
-                log.Length.ShouldBe(0);
-                _output.WriteLine("Iteration of i: " + i + "[" + log + "]");
-            }
+            // There should be nothing in the log
+            log.Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -1823,11 +1672,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayItemsList()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
 
-            WriteAndValidateItems(cl, sc, true);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1842,11 +1687,7 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayItemListInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
-            WriteAndValidateItems(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
             WriteAndValidateItems(cl2, sc, false);
@@ -1859,13 +1700,7 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayItemListIfDisabled()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-            cl.Parameters = "noitemandpropertylist";
-            cl.ParseParameters();
 
-            WriteAndValidateItems(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             cl2.Parameters = "noitemandpropertylist";
             cl2.ParseParameters();
@@ -1877,17 +1712,7 @@ namespace Microsoft.Build.UnitTests
         public void ParametersEmptyTests()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger L = new SerialConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
 
-            L.Parameters = "";
-            L.ParseParameters();
-            L.ShowSummary.ShouldBeNull();
-
-            L.Parameters = null;
-            L.ParseParameters();
-            L.ShowSummary.ShouldBeNull();
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             cl2.Parameters = "noitemandpropertylist";
             cl2.ParseParameters();
@@ -1899,29 +1724,13 @@ namespace Microsoft.Build.UnitTests
         public void ParametersParsingTests()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger L = new SerialConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
 
-            L.Parameters = "NoSuMmaRy";
-            L.ParseParameters();
-            L.ShowSummary.ShouldNotBeNull();
-            ((bool)L.ShowSummary).ShouldBeFalse();
+            ParallelConsoleLogger L = new ParallelConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
 
             L.Parameters = ";;NoSuMmaRy;";
             L.ParseParameters();
             L.ShowSummary.ShouldNotBeNull();
-            ((bool)L.ShowSummary).ShouldBeFalse();
 
-            sc = new SimulatedConsole();
-            ParallelConsoleLogger L2 = new ParallelConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
-
-            L2.Parameters = "NoSuMmaRy";
-            L2.ParseParameters();
-            L.ShowSummary.ShouldNotBeNull();
-            ((bool)L.ShowSummary).ShouldBeFalse();
-
-            L2.Parameters = ";;NoSuMmaRy;";
-            L2.ParseParameters();
-            L.ShowSummary.ShouldNotBeNull();
             ((bool)L.ShowSummary).ShouldBeFalse();
         }
 
