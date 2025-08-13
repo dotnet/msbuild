@@ -761,7 +761,6 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 bool taskReturned = false;
-                Exception taskException = null;
 
                 // If this is the MSBuild task, we need to execute it's special internal method.
                 try
@@ -774,7 +773,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             _continueOnError = ContinueOnError.ErrorAndStop;
 
-                            taskException = new InvalidProjectFileException(
+                            throw new InvalidProjectFileException(
                                 taskHost.ProjectFileOfTaskNode,
                                 taskHost.LineNumberOfTaskNode,
                                 taskHost.ColumnNumberOfTaskNode,
@@ -816,139 +815,111 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (ExceptionHandling.IsCriticalException(ex) || Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1")
                 {
-                    if (ExceptionHandling.IsCriticalException(ex) || Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1")
-                    {
-                        taskLoggingContext.LogFatalTaskError(
-                            ex,
-                            new BuildEventFileInfo(_targetChildInstance.Location),
-                            _taskNode.Name);
+                    taskLoggingContext.LogFatalTaskError(
+                        ex,
+                        new BuildEventFileInfo(_targetChildInstance.Location),
+                        _taskNode.Name);
 
-                        throw new CriticalTaskException(ex);
-                    }
-
-                    taskException = ex;
+                    throw new CriticalTaskException(ex);
                 }
-
-                if (taskException == null)
+                catch (LoggerException)
                 {
-                    taskReturned = true;
-
-                    // Set the property "MSBuildLastTaskResult" to reflect whether the task succeeded or not.
-                    // The main use of this is if ContinueOnError is true -- so that the next task can consult the result.
-                    // So we want it to be "false" even if ContinueOnError is true.
-                    // The constants "true" and "false" should NOT be localized. They become property values.
-                    bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, taskResult ? "true" : "false", true/* may be reserved */, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
+                    // if a logger has failed, abort immediately
+                    // Polite logger failure
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    throw; // Preserves stack trace without wrapping
                 }
-                else
+                catch (InternalLoggerException)
                 {
-                    var type = taskException.GetType();
-
-                    if (type == typeof(LoggerException))
-                    {
-                        // if a logger has failed, abort immediately
-                        // Polite logger failure
-                        _continueOnError = ContinueOnError.ErrorAndStop;
-
-                        // Rethrow wrapped in order to avoid losing the callstack
-                        throw new LoggerException(taskException.Message, taskException);
-                    }
-                    else if (type == typeof(InternalLoggerException))
-                    {
-                        // Logger threw arbitrary exception
-                        _continueOnError = ContinueOnError.ErrorAndStop;
-                        InternalLoggerException ex = taskException as InternalLoggerException;
-
-                        // Rethrow wrapped in order to avoid losing the callstack
-                        throw new InternalLoggerException(taskException.Message, taskException, ex.BuildEventArgs, ex.ErrorCode, ex.HelpKeyword, ex.InitializationException);
-                    }
-                    else if (type == typeof(ThreadAbortException))
-                    {
+                    // Logger threw arbitrary exception
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    throw; // Preserves stack trace without wrapping
+                }
+                catch (ThreadAbortException)
+                {
 #if !NET
-                        Thread.ResetAbort();
+                    Thread.ResetAbort();
 #endif
-                        _continueOnError = ContinueOnError.ErrorAndStop;
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    throw; // Cannot wrap ThreadAbortException anyway, direct throw preserves what we can
+                }
+                catch (BuildAbortedException)
+                {
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    throw; // Preserves stack trace without wrapping
+                }
+                catch (CircularDependencyException)
+                {
+                    _continueOnError = ContinueOnError.ErrorAndStop;
+                    ProjectErrorUtilities.ThrowInvalidProject(taskLoggingContext.Task.Location, "CircularDependency", taskLoggingContext.TargetLoggingContext.Target.Name);
+                }
+                catch (InvalidProjectFileException ex)
+                {
+                    // Just in case this came out of a task, make sure it's not
+                    // marked as having been logged.
+                    ex.HasBeenLogged = false;
 
-                        // Cannot rethrow wrapped as ThreadAbortException is sealed and has no appropriate constructor
-                        // Stack will be lost
-                        throw taskException;
-                    }
-                    else if (type == typeof(BuildAbortedException))
+                    if (_continueOnError != ContinueOnError.ErrorAndStop)
                     {
-                        _continueOnError = ContinueOnError.ErrorAndStop;
-
-                        // Rethrow wrapped in order to avoid losing the callstack
-                        throw new BuildAbortedException(taskException.Message, (BuildAbortedException)taskException);
-                    }
-                    else if (type == typeof(CircularDependencyException))
-                    {
-                        _continueOnError = ContinueOnError.ErrorAndStop;
-                        ProjectErrorUtilities.ThrowInvalidProject(taskLoggingContext.Task.Location, "CircularDependency", taskLoggingContext.TargetLoggingContext.Target.Name);
-                    }
-                    else if (type == typeof(InvalidProjectFileException))
-                    {
-                        // Just in case this came out of a task, make sure it's not
-                        // marked as having been logged.
-                        InvalidProjectFileException ipex = (InvalidProjectFileException)taskException;
-                        ipex.HasBeenLogged = false;
-
-                        if (_continueOnError != ContinueOnError.ErrorAndStop)
-                        {
-                            taskLoggingContext.LogInvalidProjectFileError(ipex);
-                            taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
-                        }
-                        else
-                        {
-                            // Rethrow wrapped in order to avoid losing the callstack
-                            throw new InvalidProjectFileException(ipex.Message, ipex);
-                        }
-                    }
-                    else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
-                    {
-                        // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
-                        // a debugger attached to break on 2nd chance exceptions.
-                        // That requires that there needs to be a way to not catch here, by setting an environment variable.
-                        if (ExceptionHandling.IsCriticalException(taskException) || (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1"))
-                        {
-                            // Wrapping in an Exception will unfortunately mean that this exception would fly through any IsCriticalException above.
-                            // However, we should not have any, also we should not have stashed such an exception anyway.
-                            throw new Exception(taskException.Message, taskException);
-                        }
-
-                        Exception exceptionToLog = taskException;
-
-                        if (exceptionToLog is TargetInvocationException)
-                        {
-                            exceptionToLog = exceptionToLog.InnerException;
-                        }
-
-                        // handle any exception thrown by the task during execution
-                        // NOTE: We catch ALL exceptions here, to attempt to completely isolate the Engine
-                        // from failures in the task.
-                        if (_continueOnError == ContinueOnError.WarnAndContinue)
-                        {
-                            taskLoggingContext.LogTaskWarningFromException(
-                                exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
-                                _taskNode.Name);
-
-                            // Log a message explaining why we converted the previous error into a warning.
-                            taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
-                        }
-                        else
-                        {
-                            taskLoggingContext.LogFatalTaskError(
-                                exceptionToLog,
-                                new BuildEventFileInfo(_targetChildInstance.Location),
-                                _taskNode.Name);
-                        }
+                        taskLoggingContext.LogInvalidProjectFileError(ex);
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                        throw; // Preserves stack trace without wrapping
                     }
                 }
+                catch (Exception ex)
+                {
+                    // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
+                    // a debugger attached to break on 2nd chance exceptions.
+                    // That requires that there needs to be a way to not catch here, by setting an environment variable.
+                    if (ExceptionHandling.IsCriticalException(ex) || (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1"))
+                    {
+                        // Wrapping in an Exception will unfortunately mean that this exception would fly through any IsCriticalException above.
+                        // However, we should not have any, also we should not have stashed such an exception anyway.
+                        throw new Exception(ex.Message, ex);
+                    }
+
+                    Exception exceptionToLog = ex;
+
+                    if (exceptionToLog is TargetInvocationException)
+                    {
+                        exceptionToLog = exceptionToLog.InnerException;
+                    }
+
+                    // handle any exception thrown by the task during execution
+                    // NOTE: We catch ALL exceptions here, to attempt to completely isolate the Engine
+                    // from failures in the task.
+                    if (_continueOnError == ContinueOnError.WarnAndContinue)
+                    {
+                        taskLoggingContext.LogTaskWarningFromException(
+                            exceptionToLog,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _taskNode.Name);
+
+                        // Log a message explaining why we converted the previous error into a warning.
+                        taskLoggingContext.LogComment(MessageImportance.Normal, "ErrorConvertedIntoWarning");
+                    }
+                    else
+                    {
+                        taskLoggingContext.LogFatalTaskError(
+                            exceptionToLog,
+                            new BuildEventFileInfo(_targetChildInstance.Location),
+                            _taskNode.Name);
+                    }
+                }
+
+                // If we reach here, the task executed successfully without throwing an exception
+                taskReturned = true;
+
+                // Set the property "MSBuildLastTaskResult" to reflect whether the task succeeded or not.
+                // The main use of this is if ContinueOnError is true -- so that the next task can consult the result.
+                // So we want it to be "false" even if ContinueOnError is true.
+                // The constants "true" and "false" should NOT be localized. They become property values.
+                bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(ReservedPropertyNames.lastTaskResult, taskResult ? "true" : "false", true/* may be reserved */, _buildRequestEntry.RequestConfiguration.Project.IsImmutable));
 
                 // When a task fails it must log an error. If a task fails to do so,
                 // that is logged as an error. MSBuild tasks are an exception because
