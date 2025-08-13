@@ -107,8 +107,8 @@ namespace Microsoft.Build.Shared
             }
 #else
             // For v3.5 fallback to old full type approach, as oppose to reflection only
-            HasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
-            HasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
+            HasLoadInSeparateAppDomainAttribute = this.Type.IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
+            HasSTAThreadAttribute = this.Type.IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
             IsMarshalByRef = this.Type.IsMarshalByRef;
 #endif
         }
@@ -140,7 +140,7 @@ namespace Microsoft.Build.Shared
             // we changed to running all tasks in MTA.
             if (String.Equals("Microsoft.Build.Tasks.Xaml.PartialClassGenerationTask", Type.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                AssemblyName assemblyName = Type.GetTypeInfo().Assembly.GetName();
+                AssemblyName assemblyName = Type.Assembly.GetName();
                 Version lastVersionToForce = new Version(3, 5);
                 if (assemblyName.Version?.CompareTo(lastVersionToForce) > 0)
                 {

@@ -89,7 +89,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Stores the path to the directory that this assembly is located in.
         /// </summary>
-        private static readonly Lazy<string> ThisAssemblyDirectoryLazy = new Lazy<string>(() => Path.GetDirectoryName(typeof(RoslynCodeTaskFactory).GetTypeInfo().Assembly.ManifestModule.FullyQualifiedName));
+        private static readonly Lazy<string> ThisAssemblyDirectoryLazy = new Lazy<string>(() => Path.GetDirectoryName(typeof(RoslynCodeTaskFactory).Assembly.ManifestModule.FullyQualifiedName));
 
         /// <summary>
         /// Stores an instance of a <see cref="TaskLoggingHelper"/> for logging messages.
