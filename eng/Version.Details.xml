@@ -33,7 +33,7 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="9.0.0">
+    <Dependency Name="System.Formats.Asn1" Version="9.0.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
