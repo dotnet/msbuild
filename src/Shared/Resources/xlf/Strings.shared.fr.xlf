@@ -42,11 +42,6 @@
         <target state="translated">{0} ({1},{2})</target>
         <note>A file location to be embedded in a string.</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
         <target state="translated">MSB6005: La tâche a tenté d'ouvrir une session avant d'être initialisée. Le message était le suivant : {0}</target>

@@ -2251,6 +2251,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheck_BC0301_MessageFmt" xml:space="preserve">
     <value>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</value>
   </data>
+  <data name="GlobExpansionFailed" xml:space="preserve">
+    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
+  </data>
   <data name="UnknownLoggingType" xml:space="preserve">
     <value>Logging type {0} is not understood by {1}.</value>
   </data>
