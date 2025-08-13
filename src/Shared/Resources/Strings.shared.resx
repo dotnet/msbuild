@@ -364,4 +364,7 @@
   <data name="CollectionCopyToFailureProvidedArrayIsTooSmall" xml:space="preserve">
     <value>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</value>
   </data>
+  <data name="GlobExpansionFailed" xml:space="preserve">
+    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
+  </data>
 </root>
