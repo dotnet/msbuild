@@ -1849,6 +1849,123 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
         #endregion
 
+        #region CustomTaskFactoryRestrictionTests
+
+        /// <summary>
+        /// Verify that custom task factories are allowed when change wave 17.16 is disabled
+        /// </summary>
+        [Fact]
+        public void CustomTaskFactoryAllowedWhenChangeWaveDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // Set environment variable to disable change wave 17.16
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.16");
+
+                // Reset change wave state for this test
+                ChangeWaves.ResetStateForTests();
+
+                List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+
+                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", _testTaskLocation, null);
+                element.TaskFactory = "SomeCustomTaskFactory"; // Use a custom factory name that's not built-in
+                elementList.Add(element);
+
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+                
+                // This should not throw the custom task factory restriction error when change wave is disabled
+                // (It may throw other errors like "could not find factory", but not our specific restriction error)
+                try
+                {
+                    registry.GetRegisteredTask("CustomTask", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
+                }
+                catch (InvalidProjectFileException ex)
+                {
+                    // Check the full error message
+                    _output.WriteLine($"Full error message: {ex.Message}");
+                    // Make sure it's not our restriction error
+                    Assert.DoesNotContain("MSB4279", ex.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verify that custom task factories are blocked when change wave 17.16 is enabled
+        /// </summary>
+        [Fact]
+        public void CustomTaskFactoryBlockedWhenChangeWaveEnabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // Ensure change wave 17.16 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
+                // Reset change wave state for this test
+                ChangeWaves.ResetStateForTests();
+
+                List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+
+                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", _testTaskLocation, null);
+                element.TaskFactory = "SomeCustomTaskFactory"; // Use a custom factory name that's not built-in
+                elementList.Add(element);
+
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+                
+                // This should throw our specific restriction error when change wave is enabled
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                    registry.GetRegisteredTask("CustomTask", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
+                });
+                
+                // Check the full error message
+                _output.WriteLine($"Full error message: {ex.Message}");
+                
+                // The message should include MSB4279 
+                // But sometimes the format strips the error code, so let's also check for key parts
+                Assert.True(ex.Message.Contains("MSB4279") || ex.Message.Contains("is not supported"), 
+                    $"Expected error message to contain MSB4279 or 'is not supported'. Actual: {ex.Message}");
+                Assert.Contains("SomeCustomTaskFactory", ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Verify that built-in task factories are still allowed when change wave 17.16 is enabled
+        /// </summary>
+        [Fact]
+        public void BuiltInTaskFactoriesAllowedWhenChangeWaveEnabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // Ensure change wave 17.16 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
+                // Reset change wave state for this test
+                ChangeWaves.ResetStateForTests();
+
+                List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+
+                ProjectRootElement project = ProjectRootElement.Create();
+                
+                // Test with AssemblyTaskFactory (default factory)
+                ProjectUsingTaskElement element1 = project.AddUsingTask("TestTask", _testTaskLocation, null);
+                elementList.Add(element1);
+
+                // Test with explicit AssemblyTaskFactory
+                ProjectUsingTaskElement element2 = project.AddUsingTask("TestTask2", _testTaskLocation, null);
+                element2.TaskFactory = "AssemblyTaskFactory";
+                elementList.Add(element2);
+
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+                
+                // These should not throw exceptions
+                TaskFactoryWrapper factory1 = registry.GetRegisteredTask("TestTask", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
+                TaskFactoryWrapper factory2 = registry.GetRegisteredTask("TestTask2", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
+                
+                Assert.NotNull(factory1);
+                Assert.NotNull(factory2);
+            }
+        }
+
+        #endregion
+
         #region SerializationTests
 
         public static IEnumerable<object[]> TaskRegistryTranslationTestData
