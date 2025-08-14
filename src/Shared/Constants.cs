@@ -154,6 +154,11 @@ namespace Microsoft.Build.Shared
         internal const string TargetFrameworks = nameof(TargetFrameworks);
         internal const string TargetFramework = nameof(TargetFramework);
         internal const string UsingMicrosoftNETSdk = nameof(UsingMicrosoftNETSdk);
+
+        /// <summary>
+        /// When true, `SkipNonexistentProjects=Build` becomes the default setting of MSBuild tasks.
+        /// </summary>
+        internal const string BuildNonexistentProjectsByDefault = "_" + nameof(BuildNonexistentProjectsByDefault);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.
