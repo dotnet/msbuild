@@ -67,24 +67,6 @@ namespace Microsoft.Build.Instance
         public void Clear() => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public bool Contains(T projectItem)
-        {
-            if (projectItem == null)
-            {
-                return false;
-            }
-
-            string? itemType = _getItemType(projectItem);
-            if (itemType == null)
-            {
-                return false;
-            }
-
-            ICollection<T> items = GetItems(itemType);
-            return items.Contains(projectItem);
-        }
-
-        /// <inheritdoc />
         public void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
         {
             foreach (var kvp in _itemsByType)
@@ -159,7 +141,7 @@ namespace Microsoft.Build.Instance
         public bool Remove(T projectItem) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public void RemoveItems(IEnumerable<T> other) => throw new NotSupportedException();
+        public void RemoveItemsOfType(string itemType, IEnumerable<T> other) => throw new NotSupportedException();
 
         private sealed class ListConverter : ICollection<T>
         {
