@@ -585,8 +585,8 @@
         <note />
       </trans-unit>
       <trans-unit id="NETHostVersion_Failed">
-        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100 or later.</source>
-        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100 or later.</target>
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
+        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -845,8 +845,8 @@
         <note />
       </trans-unit>
       <trans-unit id="SDKPathResolution_Failed">
-        <source>SDK path cannot be null or empty.</source>
-        <target state="new">SDK path cannot be null or empty.</target>
+        <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
+        <target state="new">UsingTask with Runtime="NET" was specified in a non-SDK project.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">

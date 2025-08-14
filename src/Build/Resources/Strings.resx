@@ -2415,10 +2415,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
   </data>
   <data name="NETHostVersion_Failed" xml:space="preserve">
-    <value>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100 or later.</value>
+    <value>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</value>
   </data>
   <data name="SDKPathResolution_Failed" xml:space="preserve">
-    <value>SDK path cannot be null or empty.</value>
+    <value>UsingTask with Runtime="NET" was specified in a non-SDK project.</value>
   </data>
   <data name="SDKPathCheck_Failed" xml:space="preserve">
     <value>The directory does not exist: {0}.</value>
