@@ -21,7 +21,6 @@ namespace Microsoft.Build.Instance
         private readonly IDictionary<string, ICollection<TCached>> _itemsByType;
         private readonly ICollection<TCached> _allCachedItems;
         private readonly Func<TCached, T?> _getInstance;
-        private readonly Func<T, string?> _getItemType;
 
         public ImmutableItemDictionary(
             ICollection<TCached> allItems,
@@ -37,7 +36,6 @@ namespace Microsoft.Build.Instance
             _allCachedItems = allItems;
             _itemsByType = itemsByType ?? throw new ArgumentNullException(nameof(itemsByType));
             _getInstance = getInstance;
-            _getItemType = getItemType;
         }
 
         /// <inheritdoc />
