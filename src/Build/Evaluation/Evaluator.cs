@@ -1888,25 +1888,30 @@ namespace Microsoft.Build.Evaluation
 
                 if (sdkResult?.EnvironmentVariablesToAdd is IDictionary<string, string> sdkEnvironmentVariablesToAdd && sdkEnvironmentVariablesToAdd.Count > 0)
                 {
-                    foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                     {
-                        _data.AddSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                        foreach (var environmentVariable in sdkEnvironmentVariablesToAdd)
+                        {
+                            _data.AddSdkResolvedEnvironmentVariable(environmentVariable.Key, environmentVariable.Value);
+                        }
                     }
                 }
 
                 // TEMPORARY COMPAT SHIM: .NET SDK 10.0.100-preview.6 shipped with a resolver that didn't
                 // return environment variables. Take the _property_ it does set and promote it.
                 // REMOVE BY net10 RC.
-                if (sdkResult.PropertiesToAdd?.ContainsKey("DOTNET_EXPERIMENTAL_HOST_PATH") == true)
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                 {
-                    // "S:\sdk\.dotnet\sdk\10.0.100-preview.6.25315.102\Sdks\Microsoft.NET.Sdk\Sdk"
-                    //                  ^5              ^4               ^3          ^2        ^1
-                    string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5),
-                        "dotnet.exe");
-                    if (File.Exists(dotnetExe))
+                    if (sdkResult.PropertiesToAdd?.ContainsKey("DOTNET_EXPERIMENTAL_HOST_PATH") == true)
                     {
-
-                        _data.AddSdkResolvedEnvironmentVariable("DOTNET_HOST_PATH", dotnetExe);
+                        // "S:\sdk\.dotnet\sdk\10.0.100-preview.6.25315.102\Sdks\Microsoft.NET.Sdk\Sdk"
+                        //                  ^5              ^4               ^3          ^2        ^1
+                        string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5),
+                            "dotnet.exe");
+                        if (File.Exists(dotnetExe))
+                        {
+                            _data.AddSdkResolvedEnvironmentVariable("DOTNET_HOST_PATH", dotnetExe);
+                        }
                     }
                 }
 
