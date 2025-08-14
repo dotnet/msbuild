@@ -1509,6 +1509,10 @@ Errors: {3}</value>
   <data name="InitializingTaskHostFactory" xml:space="preserve">
     <value>Initializing task host factory for task "{0}" from assembly "{1}"</value>
   </data>
+  <data name="CodeTaskFactoryDeprecated" xml:space="preserve">
+    <value>The CodeTaskFactory has been deprecated and is being transparently replaced with RoslynCodeTaskFactory for improved compatibility and performance. To maintain existing behavior or opt out of this change, set the environment variable MSBUILDDISABLEFEATURESFROMVERSION=17.16.</value>
+    <comment>This message is shown when CodeTaskFactory is automatically substituted with RoslynCodeTaskFactory due to change wave 17.16.</comment>
+  </data>
   <data name="CantWriteBuildPlan" xml:space="preserve">
     <value>The build plan could not be written.  Check that the build process has permissions to write to {0}.</value>
   </data>

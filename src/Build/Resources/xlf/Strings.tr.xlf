@@ -411,6 +411,11 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CodeTaskFactoryDeprecated">
+        <source>The CodeTaskFactory has been deprecated and is being transparently replaced with RoslynCodeTaskFactory for improved compatibility and performance. To maintain existing behavior or opt out of this change, set the environment variable MSBUILDDISABLEFEATURESFROMVERSION=17.16.</source>
+        <target state="new">The CodeTaskFactory has been deprecated and is being transparently replaced with RoslynCodeTaskFactory for improved compatibility and performance. To maintain existing behavior or opt out of this change, set the environment variable MSBUILDDISABLEFEATURESFROMVERSION=17.16.</target>
+        <note>This message is shown when CodeTaskFactory is automatically substituted with RoslynCodeTaskFactory due to change wave 17.16.</note>
+      </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
         <target state="translated">Belirtilen özel denetim derlemesi bulunamadı: '{0}'. Lütfen var olup olmadığını kontrol edin.</target>

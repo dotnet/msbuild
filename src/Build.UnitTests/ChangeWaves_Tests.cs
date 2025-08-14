@@ -231,5 +231,80 @@ namespace Microsoft.Build.Engine.UnitTests
                 }
             }
         }
+
+        [Fact]
+        public void CodeTaskFactoryDeprecationWithChangeWave()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Enable the change wave that includes CodeTaskFactory deprecation
+                SetChangeWave(string.Empty, env); // No wave set means all features enabled
+
+                string projectFile = @"
+<Project>
+  <UsingTask TaskName='TestTask' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        Log.LogMessage(""Hello from inline task!"");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='TestTarget'>
+    <TestTask />
+  </Target>
+</Project>";
+
+                TransientTestFile file = env.CreateFile("test.proj", projectFile);
+
+                using ProjectCollection collection = new ProjectCollection();
+                MockLogger log = new MockLogger(_output);
+                collection.RegisterLogger(log);
+
+                Project p = collection.LoadProject(file.Path);
+                
+                // The project should build successfully with the substitution
+                p.Build().ShouldBeTrue();
+                
+                // Check that the deprecation message was logged
+                log.FullLog.ShouldContain("CodeTaskFactory");
+                log.FullLog.ShouldContain("RoslynCodeTaskFactory");
+            }
+        }
+
+        [Fact]
+        public void CodeTaskFactoryNotDeprecatedWhenChangeWaveDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Disable the change wave that includes CodeTaskFactory deprecation
+                SetChangeWave("17.16", env); // This will disable the 17.16 wave
+
+                string projectFile = @"
+<Project>
+  <UsingTask TaskName='TestTask' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+    <Task>
+      <Code><![CDATA[
+        Log.LogMessage(""Hello from inline task!"");
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <Target Name='TestTarget'>
+    <TestTask />
+  </Target>
+</Project>";
+
+                TransientTestFile file = env.CreateFile("test.proj", projectFile);
+
+                using ProjectCollection collection = new ProjectCollection();
+                MockLogger log = new MockLogger(_output);
+                collection.RegisterLogger(log);
+
+                Project p = collection.LoadProject(file.Path);
+                
+                // The deprecation message should NOT be logged when the change wave is disabled
+                log.FullLog.ShouldNotContain("CodeTaskFactory");
+                log.FullLog.ShouldNotContain("RoslynCodeTaskFactory");
+            }
+        }
     }
 }

@@ -326,6 +326,14 @@ namespace Microsoft.Build.Execution
 
             string taskFactory = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.TaskFactory, expanderOptions, projectUsingTaskXml.TaskFactoryLocation);
 
+            // ChangeWave 17.16: Deprecate CodeTaskFactory in favor of RoslynCodeTaskFactory
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_16) &&
+                String.Equals(taskFactory, RegisteredTaskRecord.CodeTaskFactory, StringComparison.OrdinalIgnoreCase))
+            {
+                taskFactory = RegisteredTaskRecord.RoslynCodeTaskFactory;
+                loggingContext.LogComment(MessageImportance.Low, "CodeTaskFactoryDeprecated");
+            }
+
             if (String.IsNullOrEmpty(taskFactory) || taskFactory.Equals(RegisteredTaskRecord.AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase) || taskFactory.Equals(RegisteredTaskRecord.TaskHostFactory, StringComparison.OrdinalIgnoreCase))
             {
                 ProjectXmlUtilities.VerifyThrowProjectNoChildElements(projectUsingTaskXml.XmlElement);
@@ -1095,6 +1103,11 @@ namespace Microsoft.Build.Execution
             /// supported task factories in Microsoft.Build.Tasks.vX.Y.dll to deal with versioning issue.
             /// </summary>
             internal const string XamlTaskFactory = "XamlTaskFactory";
+
+            /// <summary>
+            /// Task factory used to create Roslyn-based inline tasks.  The modern replacement for CodeTaskFactory.
+            /// </summary>
+            internal const string RoslynCodeTaskFactory = "RoslynCodeTaskFactory";
 
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
