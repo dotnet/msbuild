@@ -227,7 +227,7 @@ Log.LogError(Class1.ToPrint());
         }
 
         [Fact]
-        public void InlineTaskWithoutCS1702Warning()
+        public void RoslynCodeTaskFactoryWithoutCS1702Warning()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
