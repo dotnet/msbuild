@@ -267,10 +267,6 @@ Log.LogError(Class1.ToPrint());
                   <PropertyGroup>
                     <NuGetDir>{folder.Path}</NuGetDir>
                     <TargetFramework>netstandard2.0</TargetFramework>
-                    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-                    <NoWarnCodes>CS1702</NoWarnCodes>
-                    <WarningLevel>4</WarningLevel>
-                    <OutputPath>$(MSBuildProjectDirectory)\output</OutputPath>
                   </PropertyGroup>
 
                   <ItemGroup>
