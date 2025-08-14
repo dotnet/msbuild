@@ -24,6 +24,9 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 17.16
+- [Deprecate CodeTaskFactory in favor of RoslynCodeTaskFactory](https://github.com/dotnet/msbuild/issues/12349) - When enabled, any usage of `CodeTaskFactory` will be transparently replaced with `RoslynCodeTaskFactory` to improve compatibility and performance.
+
 ### 17.14
 - ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
 - ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details
