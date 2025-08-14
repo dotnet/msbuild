@@ -227,6 +227,81 @@ Log.LogError(Class1.ToPrint());
         }
 
         [Fact]
+        public void InlineTaskWithoutCS1702Warning()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile taskFile = env.CreateFile(folder, "SampleTask.cs", @"
+                using System;
+                using Microsoft.Build.Framework;
+                using Microsoft.Build.Utilities;
+
+                namespace NoCS1702
+                {
+                    public class SampleTask : Task
+                    {
+                        [Required]
+                        public string InputFileName { get; set; }
+
+                        public override bool Execute()
+                        {
+                            Log.LogMessage(MessageImportance.High, $""Processing {InputFileName}"");
+                            return true;
+                        }
+                    }
+                }
+                ");
+                TransientTestFile inputFile = env.CreateFile(folder, "Test.json", "{}");
+
+                string memoryLibPath = Path.Combine("system.memory", "4.6.3", "lib", "netstandard2.0");
+                string jsonLibPath = Path.Combine("system.text.json", "9.0.7", "lib", "netstandard2.0");
+                env.CreateFolder(Path.Combine(folder.Path, memoryLibPath), createFolder: true);
+                env.CreateFolder(Path.Combine(folder.Path, jsonLibPath), createFolder: true);
+
+                env.CreateFile(folder, Path.Combine(memoryLibPath, "System.Memory.dll"), "");
+                env.CreateFile(folder, Path.Combine(jsonLibPath, "System.Text.Json.dll"), "");
+
+                TransientTestFile projectFile = env.CreateFile(folder, "NoCS1702.proj", @$"
+                <Project DefaultTargets=""Build"" ToolsVersion=""Current"">
+                  <PropertyGroup>
+                    <NuGetDir>{folder.Path}</NuGetDir>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+                    <NoWarnCodes>CS1702</NoWarnCodes>
+                    <WarningLevel>4</WarningLevel>
+                    <OutputPath>$(MSBuildProjectDirectory)\output</OutputPath>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <PackageReference Include=""System.Memory"" Version=""4.6.3"" />
+                    <PackageReference Include=""System.Text.Json"" Version=""9.0.7"" />
+                  </ItemGroup>
+
+                  <UsingTask TaskName=""SampleTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+                    <ParameterGroup>
+                      <InputFileName ParameterType=""System.String"" Required=""true"" />
+                    </ParameterGroup>
+                    <Task>
+                      <Reference Include=""$(NuGetDir)\system.memory\4.6.3\lib\netstandard2.0\System.Memory.dll"" />
+                      <Reference Include=""$(NuGetDir)\system.text.json\9.0.7\lib\netstandard2.0\System.Text.Json.dll"" />
+                      <Using Namespace=""System"" />
+                      <Code Type=""Class"" Language=""cs"" Source=""{taskFile.Path}"" />
+                    </Task>
+                  </UsingTask>
+
+                  <Target Name=""Build"" Inputs=""Test.json"" Outputs=""$(OutputPath)\TestTask.output"">
+                    <SampleTask InputFileName=""Test.json"" />
+                  </Target>
+                </Project>
+                ");
+
+                string output = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:d", out bool success);
+                output.ShouldNotContain("warning CS1702");
+            }
+        }
+
+        [Fact]
         public void VisualBasicFragmentWithProperties()
         {
             ICollection<TaskPropertyInfo> parameters = new List<TaskPropertyInfo>
