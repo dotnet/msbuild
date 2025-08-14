@@ -87,6 +87,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Remove the set of items specified from this dictionary
         /// </summary>
+        /// <param name="itemType">The item type for all removes.</param>
         /// <param name="other">An enumerator over the items to remove.</param>
         void RemoveItemsOfType(string itemType, IEnumerable<T> other);
     }
