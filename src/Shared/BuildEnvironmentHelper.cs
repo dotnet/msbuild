@@ -376,7 +376,7 @@ namespace Microsoft.Build.Shared
         }
 
         private static bool? _runningTests;
-        private static readonly object _runningTestsLock = new object();
+        private static readonly LockType _runningTestsLock = new LockType();
 
         private static bool CheckIfRunningTests()
         {

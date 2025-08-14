@@ -44,8 +44,25 @@ Set the environment variable `MSBUILDDEBUGONSTART` to `2`, then attach a debugge
 
 ## Using the repository binaries to perform builds
 
-To build projects using the MSBuild binaries from the repository, you first need to execute the build command (`build.cmd`). This generates a bootstrap directory that emulates either a Visual Studio environment (full framework version) in the `net472` folder or a .NET Core environment in the `core` folder.
+## Run tests from the command line
 
-Next, navigate to the `core` folder and run the dotnet executable from this location using the following syntax: `artifacts/bin/bootstrap/core/dotnet.exe <Command> <Project File>`. Replace `<Command>` with any valid dotnet command (such as `build`, `restore`, `test`, etc.) and `<Project File>` with the path to your project file.
+```shell
+build.cmd # to have a full build first
+.\artifacts\msbuild-build-env.bat
+cd test\YOURTEST.Tests # cd to the test folder that contains the test csproj file
+dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
+```
+
+## Run tests in Visual Studio
+
+Use developer command prompt for Visual Studio or put devenv on you PATH
+
+```shell
+build.cmd # to have a full build first
+.\artifacts\msbuild-build-env.bat
+devenv MSBuild.sln
+```
+
+Note again that in Visual studio "Use previews of the .NET SDK (requires restart)" must be checked. See the above comment for how to enable this.
 
 See other debugging options [here](./Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md#Debugging-MSBuild).
