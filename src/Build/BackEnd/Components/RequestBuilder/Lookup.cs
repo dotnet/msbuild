@@ -387,7 +387,7 @@ namespace Microsoft.Build.BackEnd
             {
                 foreach (KeyValuePair<string, List<ProjectItemInstance>> kvp in PrimaryRemoveTable)
                 {
-                    _baseItems.RemoveItems(kvp.Value);
+                    _baseItems.RemoveItemsOfType(kvp.Key, kvp.Value);
                 }
             }
 
@@ -974,14 +974,11 @@ namespace Microsoft.Build.BackEnd
             ICollection<ProjectItemInstance> existing = table[itemType];
             if (existing != null)
             {
-                foreach (var kvPair in modify)
+                foreach (ProjectItemInstance item in existing)
                 {
-                    if (table.Contains(kvPair.Key))
+                    if (modify.TryGetValue(item, out MetadataModifications modificationsToApply))
                     {
-                        var itemToModify = kvPair.Key;
-                        var modificationsToApply = kvPair.Value;
-
-                        ApplyMetadataModificationsToItem(modificationsToApply, itemToModify);
+                        ApplyMetadataModificationsToItem(modificationsToApply, item);
                     }
                 }
             }
