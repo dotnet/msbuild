@@ -108,20 +108,16 @@ namespace Microsoft.Build.UnitTests
 
             var mockLogFromBuild = new MockLogger();
 
-            var serialFromBuildText = new StringBuilder();
-            var serialFromBuild = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromBuildText.Append(t), colorSet: null, colorReset: null);
-            serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
-
             var parallelFromBuildText = new StringBuilder();
             var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
-            // build and log into binary logger, mock logger, serial and parallel console loggers
+            // build and log into binary logger, mock logger and parallel console loggers
             // no logging on evaluation
             using (ProjectCollection collection = new())
             {
                 Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
-                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, serialFromBuild, parallelFromBuild }).ShouldBeTrue();
+                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, parallelFromBuild }).ShouldBeTrue();
             }
 
             string fileToReplay;
@@ -156,34 +152,25 @@ namespace Microsoft.Build.UnitTests
 
             var mockLogFromPlayback = new MockLogger();
 
-            var serialFromPlaybackText = new StringBuilder();
-            var serialFromPlayback = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromPlaybackText.Append(t), colorSet: null, colorReset: null);
-            serialFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
-
             var parallelFromPlaybackText = new StringBuilder();
             var parallelFromPlayback = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null);
             parallelFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
 
             var binaryLogReader = new BinaryLogReplayEventSource();
             mockLogFromPlayback.Initialize(binaryLogReader);
-            serialFromPlayback.Initialize(binaryLogReader);
             parallelFromPlayback.Initialize(binaryLogReader);
 
             // read the binary log and replay into mockLogger2
             binaryLogReader.Replay(fileToReplay);
             mockLogFromPlayback.Shutdown();
-            serialFromPlayback.Shutdown();
             parallelFromPlayback.Shutdown();
 
             // the binlog will have more information than recorded by the text log
             mockLogFromPlayback.FullLog.ShouldContainWithoutWhitespace(mockLogFromBuild.FullLog);
 
-            var serialExpected = serialFromBuildText.ToString();
-            var serialActual = serialFromPlaybackText.ToString();
             var parallelExpected = parallelFromBuildText.ToString();
             var parallelActual = parallelFromPlaybackText.ToString();
 
-            serialActual.ShouldContainWithoutWhitespace(serialExpected);
             parallelActual.ShouldContainWithoutWhitespace(parallelExpected);
         }
 

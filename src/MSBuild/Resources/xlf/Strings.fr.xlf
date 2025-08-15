@@ -837,9 +837,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -853,7 +850,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;paramètres&gt;
+        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;paramètres&gt;
          Paramètres du journaliseur de la console. (Forme abrégée : -clp)
          Paramètres disponibles :
             PerformanceSummary--Affiche la durée des tâches, des cibles

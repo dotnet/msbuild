@@ -9,7 +9,6 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using BaseConsoleLogger = Microsoft.Build.BackEnd.Logging.BaseConsoleLogger;
 using ParallelConsoleLogger = Microsoft.Build.BackEnd.Logging.ParallelConsoleLogger;
-using SerialConsoleLogger = Microsoft.Build.BackEnd.Logging.SerialConsoleLogger;
 
 #nullable disable
 
@@ -40,14 +39,12 @@ namespace Microsoft.Build.Logging
     /// <summary>
     /// This class implements the default logger that outputs event data
     /// to the console (stdout).
-    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger,
-    /// either SerialConsoleLogger or ParallelConsoleLogger.
+    /// It is a facade: it creates, wraps and delegates to a kind of BaseConsoleLogger: ParallelConsoleLogger.
     /// </summary>
     /// <remarks>This class is not thread safe.</remarks>
     public class ConsoleLogger : INodeLogger
     {
         private BaseConsoleLogger _consoleLogger;
-        private int _numberOfProcessors = 1;
         private LoggerVerbosity _verbosity;
         private WriteHandler _write;
         private ColorSetter _colorSet;
@@ -108,7 +105,6 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            bool useMPLogger = false;
             bool disableConsoleColor = false;
             bool forceConsoleColor = false;
             bool preferConsoleColor = false;
@@ -122,14 +118,6 @@ namespace Microsoft.Build.Logging
                         continue;
                     }
 
-                    if (string.Equals(param, "ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
-                    {
-                        useMPLogger = true;
-                    }
-                    if (string.Equals(param, "DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase))
-                    {
-                        useMPLogger = false;
-                    }
                     if (string.Equals(param, "DISABLECONSOLECOLOR", StringComparison.OrdinalIgnoreCase))
                     {
                         disableConsoleColor = true;
@@ -157,30 +145,7 @@ namespace Microsoft.Build.Logging
                 _colorReset = BaseConsoleLogger.DontResetColor;
             }
 
-            if (_numberOfProcessors == 1 && !useMPLogger)
-            {
-                _consoleLogger = new SerialConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
-                if (this is FileLogger)
-                {
-                    KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "serial";
-                }
-                else
-                {
-                    KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerType = "serial";
-                }
-            }
-            else
-            {
-                _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
-                if (this is FileLogger)
-                {
-                    KnownTelemetry.LoggingConfigurationTelemetry.FileLoggerType = "parallel";
-                }
-                else
-                {
-                    KnownTelemetry.LoggingConfigurationTelemetry.ConsoleLoggerType = "parallel";
-                }
-            }
+            _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
 
             if (_showSummary != null)
             {
@@ -354,7 +319,6 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public virtual void Initialize(IEventSource eventSource, int nodeCount)
         {
-            _numberOfProcessors = nodeCount;
             InitializeBaseConsoleLogger();
             _consoleLogger.Initialize(eventSource, nodeCount);
 
