@@ -477,6 +477,7 @@ namespace Microsoft.Build.Shared
             // Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
             s_runningTests = runningTests ?? CheckIfRunningTests;
 
+            _runningTests = null;
             BuildEnvironmentHelperSingleton.s_instance = Initialize();
         }
 
@@ -486,6 +487,7 @@ namespace Microsoft.Build.Shared
         internal static void ResetInstance_ForUnitTestsOnly(BuildEnvironment buildEnvironment)
         {
             BuildEnvironmentHelperSingleton.s_instance = buildEnvironment;
+            _runningTests = buildEnvironment.RunningTests;
         }
 
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
