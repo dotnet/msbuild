@@ -2309,6 +2309,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       's' should reflect the localized abbreviation for seconds
     </comment>
   </data>
+  <data name="ProjectFinished_WithTFAndRID" xml:space="preserve">
+    <value>{0}{1} {2} {3} {4} ({5}s)</value>
+    <comment>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
   <data name="BuildResult_FailedWithErrors" xml:space="preserve">
     <value>failed with {0} error(s)</value>
     <comment>
@@ -2365,6 +2378,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
+  <data name="TestProjectFinished_WithTFAndRID" xml:space="preserve">
+    <value>{0}{1} test {2} {3} {4} ({5}s)</value>
+    <comment>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </comment>
   </data>
