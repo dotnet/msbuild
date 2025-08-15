@@ -281,7 +281,7 @@ namespace Microsoft.Build.BackEnd
                         child.Location);
                 }
 
-                bucket.Lookup.RemoveItems(itemsToRemove);
+                bucket.Lookup.RemoveItems(child.ItemType, itemsToRemove);
             }
         }
 

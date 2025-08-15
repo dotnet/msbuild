@@ -6,7 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Evaluation;
+#if DEBUG
 using Microsoft.Build.Shared;
+#endif
 
 #nullable disable
 
@@ -34,18 +36,9 @@ namespace Microsoft.Build.Collections
     {
         /// <summary>
         /// Dictionary of item lists used as a backing store.
-        /// An empty list should never be stored in here unless it is an empty marker.
-        /// See <see cref="AddEmptyMarker">AddEmptyMarker</see>.
         /// This collection provides quick access to the ordered set of items of a particular type.
         /// </summary>
-        private readonly Dictionary<string, LinkedList<T>> _itemLists;
-
-        /// <summary>
-        /// Dictionary of items in the collection, to speed up Contains,
-        /// Remove, and Replace. For those operations, we look up here,
-        /// then modify the other dictionary to match.
-        /// </summary>
-        private readonly Dictionary<T, LinkedListNode<T>> _nodes;
+        private readonly Dictionary<string, List<T>> _itemLists;
 
         /// <summary>
         /// Constructor for an empty collection.
@@ -53,8 +46,7 @@ namespace Microsoft.Build.Collections
         public ItemDictionary()
         {
             // Tracing.Record("new item dictionary");
-            _itemLists = new Dictionary<string, LinkedList<T>>(MSBuildNameIgnoreCaseComparer.Default);
-            _nodes = new Dictionary<T, LinkedListNode<T>>();
+            _itemLists = new Dictionary<string, List<T>>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -64,8 +56,7 @@ namespace Microsoft.Build.Collections
         public ItemDictionary(int initialItemTypesCapacity, int initialItemsCapacity = 0)
         {
             // Tracing.Record("new item dictionary");
-            _itemLists = new Dictionary<string, LinkedList<T>>(initialItemTypesCapacity, MSBuildNameIgnoreCaseComparer.Default);
-            _nodes = new Dictionary<T, LinkedListNode<T>>(initialItemsCapacity);
+            _itemLists = new Dictionary<string, List<T>>(initialItemTypesCapacity, MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -74,15 +65,29 @@ namespace Microsoft.Build.Collections
         public ItemDictionary(IEnumerable<T> items)
         {
             // Tracing.Record("new item dictionary");
-            _itemLists = new Dictionary<string, LinkedList<T>>(MSBuildNameIgnoreCaseComparer.Default);
-            _nodes = new Dictionary<T, LinkedListNode<T>>();
+            _itemLists = new Dictionary<string, List<T>>(MSBuildNameIgnoreCaseComparer.Default);
             ImportItems(items);
         }
 
         /// <summary>
         /// Number of items in total, for debugging purposes.
         /// </summary>
-        public int Count => _nodes.Count;
+        public int Count
+        {
+            get
+            {
+                int count = 0;
+                lock (_itemLists)
+                {
+                    foreach (List<T> list in _itemLists.Values)
+                    {
+                        count += list.Count;
+                    }
+                }
+
+                return count;
+            }
+        }
 
         /// <summary>
         /// Get the item types that have at least one item in this collection
@@ -115,7 +120,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                LinkedList<T> list;
+                List<T> list;
                 lock (_itemLists)
                 {
                     if (!_itemLists.TryGetValue(itemtype, out list))
@@ -135,13 +140,12 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                foreach (ICollection<T> list in _itemLists.Values)
+                foreach (List<T> list in _itemLists.Values)
                 {
                     list.Clear();
                 }
 
                 _itemLists.Clear();
-                _nodes.Clear();
             }
         }
 
@@ -223,17 +227,6 @@ namespace Microsoft.Build.Collections
         #endregion
 
         /// <summary>
-        /// Whether the provided item is in this table or not.
-        /// </summary>
-        public bool Contains(T projectItem)
-        {
-            lock (_itemLists)
-            {
-                return _nodes.ContainsKey(projectItem);
-            }
-        }
-
-        /// <summary>
         /// Add a new item to the collection, at the
         /// end of the list of other items with its key.
         /// </summary>
@@ -242,17 +235,6 @@ namespace Microsoft.Build.Collections
             lock (_itemLists)
             {
                 AddProjectItem(projectItem);
-            }
-        }
-
-        public void AddRange(IEnumerable<T> projectItems)
-        {
-            lock (_itemLists)
-            {
-                foreach (var projectItem in projectItems)
-                {
-                    AddProjectItem(projectItem);
-                }
             }
         }
 
@@ -268,44 +250,29 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                if (!_nodes.TryGetValue(projectItem, out LinkedListNode<T> node))
+                if (!_itemLists.TryGetValue(projectItem.Key, out List<T> list))
                 {
                     return false;
                 }
 
-                LinkedList<T> list = node.List;
-                list.Remove(node);
-                _nodes.Remove(projectItem);
-
-                // Save memory
-                if (list.Count == 0)
+                for (int i = 0; i < list.Count; i++)
                 {
-                    _itemLists.Remove(projectItem.Key);
-                }
+                    T candidateItem = list[i];
+                    if (ReferenceEquals(candidateItem, projectItem))
+                    {
+                        list.RemoveAt(i);
 
-                return true;
-            }
-        }
+                        if (list.Count == 0)
+                        {
+                            _itemLists.Remove(projectItem.Key);
+                        }
 
-        /// <summary>
-        /// Replaces an exsting item with a new item.  This is necessary to preserve the original ordering semantics of Lookup.GetItems
-        /// when items with metadata modifications are being returned.  See Dev10 bug 480737.
-        /// If the item is not found, does nothing.
-        /// </summary>
-        /// <param name="existingItem">The item to be replaced.</param>
-        /// <param name="newItem">The replacement item.</param>
-        public void Replace(T existingItem, T newItem)
-        {
-            ErrorUtilities.VerifyThrow(existingItem.Key == newItem.Key, "Cannot replace an item {0} with an item {1} with a different name.", existingItem.Key, newItem.Key);
-            lock (_itemLists)
-            {
-                if (_nodes.TryGetValue(existingItem, out LinkedListNode<T> node))
-                {
-                    node.Value = newItem;
-                    _nodes.Remove(existingItem);
-                    _nodes.Add(newItem, node);
+                        return true;
+                    }
                 }
             }
+
+            return false;
         }
 
         /// <summary>
@@ -314,7 +281,13 @@ namespace Microsoft.Build.Collections
         /// <param name="other">An enumerator over the items to remove.</param>
         public void ImportItems(IEnumerable<T> other)
         {
-            AddRange(other);
+            lock (_itemLists)
+            {
+                foreach (var projectItem in other)
+                {
+                    AddProjectItem(projectItem);
+                }
+            }
         }
 
         /// <summary>
@@ -327,20 +300,21 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                if (!_itemLists.TryGetValue(itemType, out LinkedList<T> list))
+                if (!_itemLists.TryGetValue(itemType, out List<T> list))
                 {
-                    list = new LinkedList<T>();
+                    list = new List<T>();
                     _itemLists[itemType] = list;
                 }
 
-                foreach (T item in items)
+                int count = list.Count;
+                list.AddRange(items);
+
+                for (int i = count; i < list.Count; i++)
                 {
 #if DEBUG
                     // Debug only: hot code path
-                    ErrorUtilities.VerifyThrow(String.Equals(itemType, item.Key, StringComparison.OrdinalIgnoreCase), "Item type mismatch");
+                    ErrorUtilities.VerifyThrow(String.Equals(itemType, list[i].Key, StringComparison.OrdinalIgnoreCase), "Item type mismatch");
 #endif
-                    LinkedListNode<T> node = list.AddLast(item);
-                    _nodes.Add(item, node);
                 }
             }
         }
@@ -348,59 +322,45 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Remove the set of items specified from this dictionary
         /// </summary>
+        /// <param name="itemType">The item type for all removes.</param>
         /// <param name="other">An enumerator over the items to remove.</param>
-        public void RemoveItems(IEnumerable<T> other)
+        public void RemoveItemsOfType(string itemType, IEnumerable<T> other)
         {
-            foreach (T item in other)
+            if (!_itemLists.TryGetValue(itemType, out List<T> list))
             {
-                Remove(item);
+                return;
             }
-        }
 
-        /// <summary>
-        /// Special method used for batching buckets.
-        /// Adds an explicit marker indicating there are no items for the specified item type.
-        /// In the general case, this is redundant, but batching buckets use this to indicate that they are
-        /// batching over the item type, but their bucket does not contain items of that type.
-        /// See <see cref="HasEmptyMarker">HasEmptyMarker</see>.
-        /// </summary>
-        public void AddEmptyMarker(string itemType)
-        {
-            lock (_itemLists)
+            List<T> listWithRemoves = new(list.Count);
+            HashSet<T> itemsToRemove = new(other);
+            foreach (T item in list)
             {
-                ErrorUtilities.VerifyThrow(!_itemLists.ContainsKey(itemType), "Should be none");
-                _itemLists.Add(itemType, new LinkedList<T>());
-            }
-        }
-
-        /// <summary>
-        /// Special method used for batching buckets.
-        /// Lookup can call this to see whether there was an explicit marker placed indicating that
-        /// there are no items of this type. See comment on <see cref="AddEmptyMarker">AddEmptyMarker</see>.
-        /// </summary>
-        public bool HasEmptyMarker(string itemType)
-        {
-            lock (_itemLists)
-            {
-                if (_itemLists.TryGetValue(itemType, out LinkedList<T> list) && list.Count == 0)
+                if (!itemsToRemove.Contains(item))
                 {
-                    return true;
+                    listWithRemoves.Add(item);
                 }
+            }
 
-                return false;
+            if (listWithRemoves.Count > 0)
+            {
+                _itemLists[itemType] = listWithRemoves;
+            }
+            else
+            {
+                // If the clone is empty, remove the item type from the dictionary
+                _itemLists.Remove(itemType);
             }
         }
 
         private void AddProjectItem(T projectItem)
         {
-            if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
+            if (!_itemLists.TryGetValue(projectItem.Key, out List<T> list))
             {
-                list = new LinkedList<T>();
+                list = new List<T>();
                 _itemLists[projectItem.Key] = list;
             }
 
-            LinkedListNode<T> node = list.AddLast(projectItem);
-            _nodes.Add(projectItem, node);
+            list.Add(projectItem);
         }
 
         /// <summary>

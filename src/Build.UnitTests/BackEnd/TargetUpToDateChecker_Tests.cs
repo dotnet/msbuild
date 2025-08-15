@@ -291,7 +291,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Even though they were all up to date, we still expect to see an empty marker
             // so that lookups can correctly *not* find items of that type
-            Assert.True(changedTargetInputs.HasEmptyMarker("MoreItems"));
+            Assert.True(changedTargetInputs.ItemTypes.Contains("MoreItems"));
+            Assert.Empty(changedTargetInputs["MoreItems"]);
         }
 
         [Fact]
