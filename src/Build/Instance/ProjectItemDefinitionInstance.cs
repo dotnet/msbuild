@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -11,7 +10,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -34,7 +32,7 @@ namespace Microsoft.Build.Execution
         /// Collection of metadata that link the XML metadata and instance metadata
         /// Since evaluation has occurred, this is an unordered collection.
         /// </summary>
-        private ImmutableDictionary<string, string> _metadata;
+        private IDictionary<string, ProjectMetadataInstance> _metadata;
 
         /// <summary>
         /// Constructs an empty project item definition instance.
@@ -59,10 +57,11 @@ namespace Microsoft.Build.Execution
         {
             if (itemDefinition.MetadataCount > 0)
             {
-                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata
-                        => new KeyValuePair<string, string>(originalMetadata.Name, originalMetadata.EvaluatedValueEscaped));
-                _metadata = ImmutableDictionaryExtensions.EmptyMetadata
-                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
+                var copyOnWriteMetadataDictionary = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = itemDefinition.Metadata.Select(originalMetadata => new ProjectMetadataInstance(originalMetadata));
+                copyOnWriteMetadataDictionary.ImportProperties(projectMetadataInstances);
+
+                _metadata = copyOnWriteMetadataDictionary;
             }
         }
 
@@ -71,7 +70,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="itemType">The type of item this definition object represents.</param>
         /// <param name="metadata">A (possibly null) collection of the metadata associated with this item definition.</param>
-        internal ProjectItemDefinitionInstance(string itemType, ImmutableDictionary<string, string> metadata)
+        internal ProjectItemDefinitionInstance(string itemType, IDictionary<string, ProjectMetadataInstance> metadata)
             : this(itemType)
         {
             _metadata = metadata;
@@ -107,8 +106,7 @@ namespace Microsoft.Build.Execution
                     return ReadOnlyEmptyCollection<ProjectMetadataInstance>.Instance;
                 }
 
-                IEnumerable<ProjectMetadataInstance> metadata = _metadata.Select(kvp => new ProjectMetadataInstance(kvp.Key, kvp.Value, allowItemSpecModifiers: true));
-                return new ReadOnlyCollection<ProjectMetadataInstance>(metadata);
+                return new ReadOnlyCollection<ProjectMetadataInstance>(_metadata.Values);
             }
         }
 
@@ -136,20 +134,13 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// The backing metadata dictionary for copy-on-write cloning.
-        /// </summary>
-        internal ImmutableDictionary<string, string> BackingMetadata => _metadata ?? ImmutableDictionaryExtensions.EmptyMetadata;
-
-        /// <summary>
         /// Get any metadata in the item that has the specified name,
         /// otherwise returns null
         /// </summary>
         [DebuggerStepThrough]
         public ProjectMetadataInstance GetMetadata(string name)
         {
-            return _metadata?.TryGetValue(name, out string value) ?? false
-                ? new ProjectMetadataInstance(name, value, allowItemSpecModifiers: true)
-                : null;
+            return _metadata?[name];
         }
 
         #region IMetadataTable Members
@@ -204,10 +195,10 @@ namespace Microsoft.Build.Execution
         ProjectMetadataInstance IItemDefinition<ProjectMetadataInstance>.SetMetadata(ProjectMetadataElement xml, string evaluatedValue, ProjectMetadataInstance predecessor)
         {
             // No mutability check as this is used during creation (evaluation)
-            _metadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
+            _metadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
 
             ProjectMetadataInstance metadatum = new ProjectMetadataInstance(xml.Name, evaluatedValue);
-            _metadata = _metadata.SetItem(xml.Name, metadatum.EvaluatedValueEscaped);
+            _metadata[xml.Name] = metadatum;
 
             return metadatum;
         }
@@ -221,7 +212,8 @@ namespace Microsoft.Build.Execution
             parent.AppendChild(element);
             foreach (var kvp in _metadata)
             {
-                element.AddMetadata(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                ProjectMetadataInstance metadataInstance = kvp.Value;
+                element.AddMetadata(metadataInstance.Name, metadataInstance.EvaluatedValue);
             }
 
             return element;
@@ -230,7 +222,7 @@ namespace Microsoft.Build.Execution
         void ITranslatable.Translate(ITranslator translator)
         {
             translator.Translate(ref _itemType);
-            translator.TranslateDictionary(ref _metadata, MSBuildNameIgnoreCaseComparer.Default);
+            translator.TranslateDictionary(ref _metadata, ProjectMetadataInstance.FactoryForDeserialization, CreateMetadataCollection);
         }
 
         internal static ProjectItemDefinitionInstance FactoryForDeserialization(ITranslator translator)
@@ -242,5 +234,10 @@ namespace Microsoft.Build.Execution
         }
 
         string IItemTypeDefinition.ItemType => _itemType;
+
+        private static IDictionary<string, ProjectMetadataInstance> CreateMetadataCollection(int capacity)
+        {
+            return new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+        }
     }
 }

@@ -105,9 +105,7 @@ namespace Microsoft.Build.Collections
 
         public CopyOnWriteDictionary(IDictionary<string, V> dictionary)
         {
-            _backing = dictionary.GetType() == typeof(ImmutableDictionary<string, V>)
-                ? (ImmutableDictionary<string, V>)dictionary
-                : dictionary.ToImmutableDictionary();
+            _backing = dictionary.ToImmutableDictionary();
         }
 
         /// <summary>
@@ -173,11 +171,6 @@ namespace Microsoft.Build.Collections
             get => _backing.KeyComparer;
             private set => _backing = _backing.WithComparers(keyComparer: value);
         }
-
-        /// <summary>
-        /// The backing copy-on-write dictionary, safe to reuse.
-        /// </summary>
-        internal ImmutableDictionary<string, V> BackingDictionary => _backing;
 
         /// <summary>
         /// Accesses the value for the specified key.
