@@ -28,7 +28,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         private readonly string eventSourceName = "Microsoft-Build";
         private readonly List<EventWrittenEventArgs> emittedEvents;
-        private object _eventListLock = new object();
+        private LockType _eventListLock = new LockType();
         private EventSource? _eventSources = null;
 
         public EventSourceTestHelper()

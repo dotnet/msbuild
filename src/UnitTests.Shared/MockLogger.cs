@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
     {
         #region Properties
 
-        private readonly object _lockObj = new object();  // Protects _fullLog, _testOutputHelper, lists, counts
+        private readonly LockType _lockObj = new LockType();  // Protects _fullLog, _testOutputHelper, lists, counts
         private StringBuilder _fullLog = new StringBuilder();
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly bool _profileEvaluation;

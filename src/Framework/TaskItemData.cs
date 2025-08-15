@@ -47,6 +47,10 @@ namespace Microsoft.Build.Framework
             Metadata = dictionary;
         }
 
+        SerializableMetadata IMetadataContainer.BackingMetadata => default;
+
+        bool IMetadataContainer.HasCustomMetadata => Metadata.Count > 0;
+
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => Metadata;
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)

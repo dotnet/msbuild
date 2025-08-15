@@ -119,6 +119,8 @@ jobs:
         if ($files.Count -gt 0) {
           echo "##vso[task.setvariable variable=publishverify]Yes"
         }
+    continueOnError: true
+    condition: always()
     displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -136,6 +138,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
+    continueOnError: true
     displayName: 'Copy Verify *.received.* files to Artifact Staging'
     inputs:
       contents: '**\*.received.*'
@@ -146,6 +149,7 @@ jobs:
     displayName: 'Publish Verify *.received.* files as Artifacts'
     name: 'verifypublish'
     condition: eq(variables['publishverify'], 'Yes')
+    continueOnError: true
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\Verify'
       ArtifactName: 'Windows-on-full Verify $(System.JobAttempt)'
@@ -321,6 +325,8 @@ jobs:
         if ($files.Count -gt 0) {
           echo "##vso[task.setvariable variable=publishverify]Yes"
         }
+    continueOnError: true
+    condition: always()
     displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -338,6 +344,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
+    continueOnError: true
     displayName: 'Copy Verify *.received.* files to Artifact Staging'
     inputs:
       contents: '**/*.received.*'
@@ -348,6 +355,7 @@ jobs:
     displayName: 'Publish Verify *.received.* files as Artifacts'
     name: 'verifypublish'
     condition: eq(variables['publishverify'], 'Yes')
+    continueOnError: true
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
       ArtifactName: 'Linux Verify $(System.JobAttempt)'
@@ -392,6 +400,8 @@ jobs:
         if ($files.Count -gt 0) {
           echo "##vso[task.setvariable variable=publishverify]Yes"
         }
+    continueOnError: true
+    condition: always()
     displayName: 'Set flag to publish *.received.* files when Verify test fails'
   - task: PublishBuildArtifacts@1
     displayName: 'Publish Artifact: logs'
@@ -409,6 +419,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
+    continueOnError: true
     displayName: 'Copy Verify *.received.* files to Artifact Staging'
     inputs:
       contents: '**/*.received.*'
@@ -419,6 +430,7 @@ jobs:
     displayName: 'Publish Verify *.received.* files as Artifacts'
     name: 'verifypublish'
     condition: eq(variables['publishverify'], 'Yes')
+    continueOnError: true
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
       ArtifactName: 'macOS Verify $(System.JobAttempt)'

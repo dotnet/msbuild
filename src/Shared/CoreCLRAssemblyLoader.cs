@@ -22,7 +22,7 @@ namespace Microsoft.Build.Shared
         private readonly Dictionary<string, Assembly> _pathsToAssemblies = new Dictionary<string, Assembly>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, Assembly> _namesToAssemblies = new Dictionary<string, Assembly>();
         private readonly HashSet<string> _dependencyPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        private readonly object _guard = new object();
+        private readonly LockType _guard = new LockType();
 
         private bool _resolvingHandlerHookedUp = false;
 
