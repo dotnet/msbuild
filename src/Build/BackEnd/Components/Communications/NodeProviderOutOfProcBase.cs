@@ -381,7 +381,7 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, hostHandshake.HandshakeOptions);
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -568,6 +568,11 @@ namespace Microsoft.Build.BackEnd
             private readonly byte[] _headerByte;
 
             /// <summary>
+            /// Handshake options used to connect to the node.
+            /// </summary>
+            private HandshakeOptions _handshakeOptions;
+
+            /// <summary>
             /// A buffer typically big enough to handle a packet body.
             /// We use this as a convenient way to manage and cache a byte[] that's resized
             /// automatically to fit our payload.
@@ -627,9 +632,13 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, Process process,
+            public NodeContext(
+                int nodeId,
+                Process process,
                 Stream nodePipe,
-                INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
+                INodePacketFactory factory,
+                NodeContextTerminateDelegate terminateDelegate,
+                HandshakeOptions handshakeOptions = HandshakeOptions.None)
             {
                 _nodeId = nodeId;
                 _process = process;
@@ -641,6 +650,7 @@ namespace Microsoft.Build.BackEnd
                 _readTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
+                _handshakeOptions = handshakeOptions;
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
                 _bodyReadCompleteCallback = BodyReadComplete;
@@ -786,10 +796,23 @@ namespace Microsoft.Build.BackEnd
                         ITranslator writeTranslator = context._writeTranslator;
                         try
                         {
-                            writeStream.WriteByte((byte)packet.Type);
+                            NodePacketType packetType = packet.Type;
+
+                            // Write packet type with extended header.
+                            // On the receiving side we will check if the extended header is present before making an attempt to read the packet version.
+                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType);
+                            writeStream.WriteByte(rawPacketType);
 
                             // Pad for the packet length
                             WriteInt32(writeStream, 0);
+
+                            if (extendedHeaderCreated)
+                            {
+                                // Write extended header with version BEFORE writing packet data
+                                NodePacketTypeExtensions.WriteVersion(writeStream, NodePacketTypeExtensions.PacketVersion);
+                                writeTranslator.PacketVersion = NodePacketTypeExtensions.PacketVersion;
+                            }
+
                             packet.Translate(writeTranslator);
 
                             int writeStreamLength = (int)writeStream.Position;
