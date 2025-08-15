@@ -35,7 +35,7 @@ namespace Microsoft.Build.Internal
 
         protected override PipeStream NodeStream => _pipeClient;
 
-        internal void ConnectToServer(int timeout)
+        internal bool ConnectToServer(int timeout)
         {
             CommunicationsUtilities.Trace("Attempting connect to pipe {0} with timeout {1} ms", PipeName, timeout);
             _pipeClient.Connect(timeout);
@@ -48,8 +48,12 @@ namespace Microsoft.Build.Internal
             // this would be a security flaw upstream of us.
             ValidateRemotePipeOwner();
 #endif
-            PerformHandshake(s_useHandhakeTimeout ? timeout : 0);
-            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", PipeName);
+            if (PerformHandshake(s_useHandhakeTimeout ? timeout : 0))
+            {
+                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", PipeName);
+                return true;
+            }
+            return false;
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
@@ -72,7 +76,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
-        private void PerformHandshake(int timeout)
+        private bool PerformHandshake(int timeout)
         {
             foreach (var component in HandshakeComponents.EnumerateComponents())
             {
@@ -84,11 +88,12 @@ namespace Microsoft.Build.Internal
             _pipeClient.WriteEndOfHandshakeSignal();
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", PipeName);
+
+            return _pipeClient.TryReadEndOfHandshakeSignal(true,
 #if NET
-            _pipeClient.ReadEndOfHandshakeSignal(true, timeout);
-#else
-            _pipeClient.ReadEndOfHandshakeSignal(true);
+            timeout,
 #endif
+            out HandshakeResult _);
         }
     }
 }

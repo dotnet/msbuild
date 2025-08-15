@@ -24,6 +24,7 @@ using Microsoft.Build.Shared.Debugging;
 using System.Collections;
 using System.Collections.Frozen;
 using Microsoft.NET.StringTools;
+
 #endif
 #if !FEATURE_APM
 using System.Threading.Tasks;
@@ -80,7 +81,55 @@ namespace Microsoft.Build.Internal
         /// ARM64 process.
         /// </summary>
         Arm64 = 128,
+
+        /// <summary>
+        /// Using a long-running sidecar TaskHost process to reduce startup overhead and reuse in-memory caches.
+        /// </summary>
+        SidecarTaskHost = 256,
     }
+
+    /// <summary>
+    /// Status codes for the handshake process.
+    /// It aggregates return values across several functions so we use an aggregate instead of a separate class for each method.
+    /// </summary>
+    internal enum HandshakeStatus
+    {
+        Success = 0,
+        // Other node resurned different value than we expected.
+        // This can happen either by attempting to connect to a wrong node type. (e.g. transient TaskHost trying to connect to a long-running TaskHost)
+        // Or by trying to connect to a node that has a different MSBuild version.
+        VersionMismatch = 1,
+        // TryReadInt -> Abort due to old MSBuild version
+        OldMSBuild = 2,
+        Timeout = 3,
+        UnexpectedEndOfStream = 4,
+        EndiannessMismatch = 5,
+    }
+
+    /// <summary>
+    /// An aggregate class for passing around results of a handshake and adjacent information.
+    /// There used to be a several functions around TryReadIntForHandshake and node communication in general that used
+    /// to throw exceptions to indicate failure. This class is here to replace the exceptions and allow for a different way of signallign the result.
+    /// Value is here to return data from the handshake
+    /// ErrorMessage is to propagate error messages where necessary
+    /// </summary> 
+    internal class HandshakeResult
+    {
+        public HandshakeStatus Status { get; }
+        public int Value { get; }
+        public string ErrorMessage { get; }
+
+        private HandshakeResult(HandshakeStatus status, int value, string errorMessage)
+        {
+            Status = status;
+            Value = value;
+            ErrorMessage = errorMessage;
+        }
+
+        public static HandshakeResult Success(int value = 0) => new(HandshakeStatus.Success, value, null);
+        public static HandshakeResult Failure(HandshakeStatus status, string errorMessage) => new(status, 0, errorMessage);
+    }
+
 
     internal class Handshake
     {
@@ -602,38 +651,46 @@ namespace Microsoft.Build.Internal
             stream.Write(bytes, 0, bytes.Length);
         }
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-        internal static void ReadEndOfHandshakeSignal(
+        internal static bool TryReadEndOfHandshakeSignal(
             this PipeStream stream,
-            bool isProvider
+            bool isProvider,
 #if NETCOREAPP2_1_OR_GREATER
-            , int timeout
+            int timeout,
 #endif
-            )
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            out HandshakeResult result)
         {
             // Accept only the first byte of the EndOfHandshakeSignal
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-            int valueRead = stream.ReadIntForHandshake(
-                byteToAccept: null
+            if (stream.TryReadIntForHandshake(
+                byteToAccept: null,
 #if NETCOREAPP2_1_OR_GREATER
-            , timeout
+                timeout,
 #endif
-                );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-
-            if (valueRead != EndOfHandshakeSignal)
+                out HandshakeResult innerResult))
             {
-                if (isProvider)
+                if (innerResult.Value != EndOfHandshakeSignal)
                 {
-                    CommunicationsUtilities.Trace("Handshake failed on part {0}. Probably the client is a different MSBuild build.", valueRead);
+                    if (isProvider)
+                    {
+                        var errorMessage = $"Handshake failed on part {innerResult.Value}. Probably the client is a different MSBuild build.";
+                        Trace(errorMessage);
+                        result = HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+                        return false;
+                    }
+                    else
+                    {
+                        var errorMessage = $"Expected end of handshake signal but received {innerResult.Value}. Probably the host is a different MSBuild build.";
+                        Trace(errorMessage);
+                        result = HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+                        return false;
+                    }
                 }
-                else
-                {
-                    CommunicationsUtilities.Trace("Expected end of handshake signal but received {0}. Probably the host is a different MSBuild build.", valueRead);
-                }
-
-                throw new InvalidOperationException();
+                result = HandshakeResult.Success(0);
+                return true;
+            }
+            else
+            {
+                result = innerResult;
+                return false;
             }
         }
 
@@ -642,10 +699,11 @@ namespace Microsoft.Build.Internal
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static int ReadIntForHandshake(this PipeStream stream, byte? byteToAccept
+        internal static bool TryReadIntForHandshake(this PipeStream stream, byte? byteToAccept,
 #if NETCOREAPP2_1_OR_GREATER
-            , int timeout
+            int timeout,
 #endif
+            out HandshakeResult result
             )
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
@@ -669,9 +727,9 @@ namespace Microsoft.Build.Internal
                 // https://github.com/dotnet/corefx/issues/28791
                 if (!readTask.Wait(timeout))
                 {
-                    throw new IOException(string.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", timeout));
+                    result = HandshakeResult.Failure(HandshakeStatus.Timeout, String.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", timeout));
+                    return false;
                 }
-
                 readTask.GetAwaiter().GetResult();
             }
             else
@@ -684,18 +742,19 @@ namespace Microsoft.Build.Internal
                 {
                     stream.WriteIntForHandshake(0x0F0F0F0F);
                     stream.WriteIntForHandshake(0x0F0F0F0F);
-                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                    result = HandshakeResult.Failure(HandshakeStatus.OldMSBuild, String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                    return false;
                 }
 
                 if (bytesRead != bytes.Length)
                 {
                     // We've unexpectly reached end of stream.
                     // We are now in a bad state, disconnect on our end
-                    throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
+                    result = HandshakeResult.Failure(HandshakeStatus.UnexpectedEndOfStream, String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
+
+                    return false;
                 }
             }
-
-            int result;
 
             try
             {
@@ -706,14 +765,15 @@ namespace Microsoft.Build.Internal
                     Array.Reverse(bytes);
                 }
 
-                result = BitConverter.ToInt32(bytes, 0 /* start index */);
+                result = HandshakeResult.Success(BitConverter.ToInt32(bytes, 0 /* start index */));
             }
             catch (ArgumentException ex)
             {
-                throw new IOException(String.Format(CultureInfo.InvariantCulture, "Failed to convert the handshake to big-endian. {0}", ex.Message));
+                result = HandshakeResult.Failure(HandshakeStatus.EndiannessMismatch, String.Format(CultureInfo.InvariantCulture, "Failed to convert the handshake to big-endian. {0}", ex.Message));
+                return false;
             }
 
-            return result;
+            return true;
         }
 #nullable disable
 
