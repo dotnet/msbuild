@@ -24,6 +24,9 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 17.16
+- [Restrict custom task factories](https://github.com/dotnet/msbuild/issues/[Issue Number]): Custom task factory implementations that do not ship with MSBuild are no longer supported. Only built-in task factories (AssemblyTaskFactory, CodeTaskFactory, RoslynCodeTaskFactory, XamlTaskFactory) are allowed. This change improves compatibility with future multithreaded MSBuild improvements.
+
 ### 17.14
 - ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
 - ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details

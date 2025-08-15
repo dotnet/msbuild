@@ -1097,6 +1097,25 @@ namespace Microsoft.Build.Execution
             internal const string XamlTaskFactory = "XamlTaskFactory";
 
             /// <summary>
+            /// Task factory used to create Roslyn-compiled inline tasks.
+            /// </summary>
+            internal const string RoslynCodeTaskFactory = "RoslynCodeTaskFactory";
+
+            /// <summary>
+            /// Check if a task factory name corresponds to a built-in MSBuild task factory.
+            /// </summary>
+            /// <param name="taskFactoryName">The name of the task factory to check</param>
+            /// <returns>True if the factory is built-in to MSBuild, false otherwise</returns>
+            private static bool IsBuiltInTaskFactory(string taskFactoryName)
+            {
+                return String.Equals(taskFactoryName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase) ||
+                       String.Equals(taskFactoryName, TaskHostFactory, StringComparison.OrdinalIgnoreCase) ||
+                       String.Equals(taskFactoryName, CodeTaskFactory, StringComparison.OrdinalIgnoreCase) ||
+                       String.Equals(taskFactoryName, XamlTaskFactory, StringComparison.OrdinalIgnoreCase) ||
+                       String.Equals(taskFactoryName, RoslynCodeTaskFactory, StringComparison.OrdinalIgnoreCase);
+            }
+
+            /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
             private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
@@ -1483,6 +1502,18 @@ namespace Microsoft.Build.Execution
                     }
                     else
                     {
+                        // Check if custom task factories are restricted by change wave
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_16))
+                        {
+                            if (!IsBuiltInTaskFactory(TaskFactoryAttributeName))
+                            {
+                                ProjectErrorUtilities.ThrowInvalidProject(
+                                    elementLocation, 
+                                    "CustomTaskFactoryNotSupported", 
+                                    TaskFactoryAttributeName);
+                            }
+                        }
+
                         // We are not one of the default factories.
                         TaskEngineAssemblyResolver resolver = null;
 
