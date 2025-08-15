@@ -24,7 +24,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
-### 17.16
+### 18.0
 - [Deprecate CodeTaskFactory in favor of RoslynCodeTaskFactory](https://github.com/dotnet/msbuild/issues/12349) - When enabled, any usage of `CodeTaskFactory` will be transparently replaced with `RoslynCodeTaskFactory` to improve compatibility and performance.
 
 ### 17.14

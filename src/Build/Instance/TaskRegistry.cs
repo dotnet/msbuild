@@ -326,8 +326,8 @@ namespace Microsoft.Build.Execution
 
             string taskFactory = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.TaskFactory, expanderOptions, projectUsingTaskXml.TaskFactoryLocation);
 
-            // ChangeWave 17.16: Deprecate CodeTaskFactory in favor of RoslynCodeTaskFactory
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_16) &&
+            // ChangeWave 18.0: Deprecate CodeTaskFactory in favor of RoslynCodeTaskFactory
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0) &&
                 String.Equals(taskFactory, RegisteredTaskRecord.CodeTaskFactory, StringComparison.OrdinalIgnoreCase))
             {
                 taskFactory = RegisteredTaskRecord.RoslynCodeTaskFactory;

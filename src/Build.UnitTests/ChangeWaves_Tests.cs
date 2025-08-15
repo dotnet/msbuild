@@ -277,7 +277,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 // Disable the change wave that includes CodeTaskFactory deprecation
-                SetChangeWave("17.16", env); // This will disable the 17.16 wave
+                SetChangeWave("18.0", env); // This will disable the 18.0 wave
 
                 string projectFile = @"
 <Project>
