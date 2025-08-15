@@ -440,7 +440,7 @@ namespace Microsoft.Build.Tasks
         public bool EnableCustomCulture
         {
             get { return _enableCustomCulture; }
-            set { _enableCustomCulture = value; }
+            set { _enableCustomCulture = value; }     
         }
 
         /// <summary>
@@ -941,8 +941,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedFiles
         {
-            get => _resolvedFiles;
-            internal set => _resolvedFiles = value;
+            get { return _resolvedFiles; }
         }
 
         /// <summary>
@@ -961,8 +960,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedDependencyFiles
         {
-            get => _resolvedDependencyFiles;
-            internal set => _resolvedDependencyFiles = value;
+            get { return _resolvedDependencyFiles; }
         }
 
         /// <summary>
@@ -974,8 +972,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] RelatedFiles
         {
-            get => _relatedFiles;
-            internal set => _relatedFiles = value;
+            get { return _relatedFiles; }
         }
 
         /// <summary>
@@ -988,8 +985,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SatelliteFiles
         {
-            get => _satelliteFiles;
-            internal set => _satelliteFiles = value;
+            get { return _satelliteFiles; }
         }
 
         /// <summary>
@@ -1000,8 +996,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SerializationAssemblyFiles
         {
-            get => _serializationAssemblyFiles;
-            internal set => _serializationAssemblyFiles = value;
+            get { return _serializationAssemblyFiles; }
         }
 
         /// <summary>
@@ -1011,8 +1006,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ScatterFiles
         {
-            get => _scatterFiles;
-            internal set => _scatterFiles = value;
+            get { return _scatterFiles; }
         }
 
         /// <summary>
@@ -1023,8 +1017,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] CopyLocalFiles
         {
-            get => _copyLocalFiles;
-            internal set => _copyLocalFiles = value;
+            get { return _copyLocalFiles; }
         }
 
         /// <summary>
@@ -1039,8 +1032,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SuggestedRedirects
         {
-            get => _suggestedRedirects;
-            internal set => _suggestedRedirects = value;
+            get { return _suggestedRedirects; }
         }
 
         /// <summary>
@@ -1065,7 +1057,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnSystemRuntime
         {
             get;
-            internal set;
+            private set;
         }
 
         /// <summary>
@@ -1075,7 +1067,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnNETStandard
         {
             get;
-            internal set;
+            private set;
         }
 
         /// <summary>
@@ -1083,11 +1075,7 @@ namespace Microsoft.Build.Tasks
         /// been outputted in MSB3277. Otherwise empty.
         /// </summary>
         [Output]
-        public ITaskItem[] UnresolvedAssemblyConflicts
-        {
-            get => [.. _unresolvedConflicts];
-            internal set => _unresolvedConflicts = [.. value];
-        }
+        public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
 
         #endregion
         #region Logging
@@ -3268,19 +3256,9 @@ namespace Microsoft.Build.Tasks
                 try
                 {
 #pragma warning disable CA2000 // The OutOfProcRarClient is disposable but its disposal is handled by RegisterTaskObject.
-                    OutOfProcRarClient rarClient = OutOfProcRarClient.GetInstance(buildEngine10);
-                    bool success = rarClient.Execute(this);
-
-                    // FilesWritten already defines a public setter which no-ops. Changing its visiblity is a breaking
-                    // change, so we can't set it outside of RAR when we check for properties with OutputAttribute.
-                    // It only has two possible states, so we can just compute it here.
-                    if (_stateFile != null && FileUtilities.FileExistsNoThrow(_stateFile))
-                    {
-                        _filesWritten.Add(new TaskItem(_stateFile));
-                    }
-
-                    return success;
+                    _ = OutOfProcRarClient.GetInstance(buildEngine10).Execute(this);
 #pragma warning restore CA2000 // Dispose objects before losing scope
+                    CommunicationsUtilities.Trace("RAR out-of-proc test connection completed. Executing task in-proc.");
                 }
                 catch (Exception ex)
                 {
