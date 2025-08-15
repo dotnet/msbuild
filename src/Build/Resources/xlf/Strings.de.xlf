@@ -840,8 +840,8 @@
     </note>
       </trans-unit>
       <trans-unit id="SDKPathCheck_Failed">
-        <source>The directory does not exist: {0}.</source>
-        <target state="new">The directory does not exist: {0}.</target>
+        <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="new">The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKPathResolution_Failed">

@@ -11,10 +11,17 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
 using System.IO;
+#endif
+
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -313,11 +320,16 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Create an instance of the wrapped ITask for a batch run of the task.
         /// </summary>
-        internal ITask CreateTaskInstance(ElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskIdentityParameters,
+        internal ITask CreateTaskInstance(
+            ElementLocation taskLocation,
+            TaskLoggingContext taskLoggingContext,
+            IBuildComponentHost buildComponentHost,
+            IDictionary<string, string> taskIdentityParameters,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            bool isOutOfProc)
+            bool isOutOfProc,
+            Func<string, ProjectPropertyInstance> getProperty)
         {
             bool useTaskFactory = false;
             Dictionary<string, string> mergedParameters = null;
@@ -356,6 +368,11 @@ namespace Microsoft.Build.BackEnd
                 if (!mergedParameters.ContainsKey(XMakeAttributes.architecture))
                 {
                     mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                }
+
+                if (mergedParameters[XMakeAttributes.runtime].Equals(XMakeAttributes.MSBuildRuntimeValues.net))
+                {
+                    AddNetHostParams(ref mergedParameters, getProperty);
                 }
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -603,19 +620,21 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // Add rest of the entries from taskIdentityParameters
-            if (taskIdentityParameters != null && mergedParameters != null)
-            {
-                foreach (KeyValuePair<string, string> kvp in taskIdentityParameters)
-                {
-                    if (!mergedParameters.ContainsKey(kvp.Key))
-                    {
-                        mergedParameters[kvp.Key] = kvp.Value;
-                    }
-                }
-            }
-
             return mergedParameters;
+        }
+
+        /// <summary>
+        /// Adds the properties necessary for NET task host instantiation.
+        /// </summary>
+        private static void AddNetHostParams(ref Dictionary<string, string> taskParams, Func<string, ProjectPropertyInstance> getProperty)
+        {
+            string hostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
+            string msBuildAssemblyDirectoryPath = Path.GetDirectoryName(getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue) ?? string.Empty;
+            if (!string.IsNullOrEmpty(hostPath) && !string.IsNullOrEmpty(msBuildAssemblyDirectoryPath))
+            {
+                taskParams.Add(Constants.DotnetHostPath, hostPath);
+                taskParams.Add(Constants.MSBuildAssemblyPath, msBuildAssemblyDirectoryPath);
+            }
         }
 
         /// <summary>

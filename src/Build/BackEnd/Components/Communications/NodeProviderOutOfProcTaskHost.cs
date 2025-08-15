@@ -514,6 +514,26 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Extracts the major version number from an SDK directory path by parsing the last directory name.
+        /// </summary>
+        /// <param name="path">
+        /// The full path to an SDK directory. 
+        /// Example: "C:\Program Files\dotnet\sdk\10.0.100-preview.7.25322.101".
+        /// </param>
+        /// <returns>
+        /// The major version number if successfully parsed from the directory name, otherwise null.
+        /// For the example path above, this would return 10.
+        /// </returns>
+        /// <remarks>
+        /// The method works by:
+        /// 1. Extracting the last directory name from the path (e.g., "10.0.100-preview.7.25322.101")
+        /// 2. Finding the first dot in that directory name
+        /// 3. Parsing the substring before the first dot as an integer (the major version)
+        /// 
+        /// Returns null if the path is invalid, the last directory name is empty, 
+        /// there's no dot in the directory name, or the major version cannot be parsed as an integer.
+        /// </remarks>
         private static int? ExtractSdkVersionFromPath(string path)
         {
             string lastDirectoryName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
@@ -529,7 +549,9 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            return int.TryParse(lastDirectoryName.Substring(0, dotIndex), out int majorVersion) ? majorVersion : 0;
+            return int.TryParse(lastDirectoryName.Substring(0, dotIndex), out int majorVersion)
+                ? majorVersion
+                : null;
         }
 
         private static string GetOrInitializeX64Clr2Path(string toolName)
