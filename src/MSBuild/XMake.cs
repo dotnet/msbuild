@@ -1546,7 +1546,7 @@ namespace Microsoft.Build.CommandLine
 #else
                             string.Join(" ", commandLine);
 #endif
-                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString));
+                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString, projectFile));
 
                         // Log a message for every response file and include it in log
                         foreach (var responseFilePath in s_includedResponseFiles)
@@ -1740,7 +1740,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
+        private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString, string projectFile)
         {
             List<BuildManager.DeferredBuildMessage> messages = new(s_globalMessagesToLogInBuildLoggers)
             {
@@ -1792,6 +1792,18 @@ namespace Microsoft.Build.CommandLine
                             "SAC",
                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                 $"SAC_{SAC_State}")),
+                        MessageImportance.Low));
+            }
+
+            NativeMethodsShared.FileSystemStatus fileSystemStatus = NativeMethodsShared.GetFileSystemStatus(projectFile);
+            if (fileSystemStatus != NativeMethodsShared.FileSystemStatus.NotApplicable)
+            {
+                messages.Add(
+                    new BuildManager.DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "FileSystem",
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                $"FileSystem_{fileSystemStatus}")),
                         MessageImportance.Low));
             }
 
