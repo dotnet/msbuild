@@ -45,6 +45,11 @@ namespace Microsoft.Build.BackEnd
         internal const Int32 CREATE_NEW_CONSOLE = 0x00000010;
 
         /// <summary>
+        /// Create a process that is not a child of the calling process.
+        /// </summary>
+        internal const uint DETACHED_PROCESS = 0x00000008;
+
+        /// <summary>
         /// Create a new process
         /// </summary>
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
