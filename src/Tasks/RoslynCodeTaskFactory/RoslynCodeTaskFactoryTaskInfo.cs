@@ -40,6 +40,16 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string SourceCode { get; set; }
 
+        /// <summary>
+        /// Gets or sets the file path where the source code is defined.
+        /// </summary>
+        public string SourceFilePath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the line number where the source code starts.
+        /// </summary>
+        public int SourceLineNumber { get; set; }
+
         /// <inheritdoc cref="IEquatable{T}.Equals(T)"/>
         public bool Equals(RoslynCodeTaskFactoryTaskInfo other)
         {
