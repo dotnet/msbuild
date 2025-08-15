@@ -51,5 +51,11 @@ namespace Microsoft.Build.Framework
         /// to be unique and values are assumed to be escaped.
         /// </param>
         void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata);
+
+        /// <summary>
+        /// Removes any metadata matching the given names.
+        /// </summary>
+        /// <param name="metadataNames">The metadata names to remove.</param>
+        void RemoveMetadataRange(IEnumerable<string> metadataNames);
     }
 }
