@@ -323,6 +323,11 @@
         <target state="translated">El parámetro "{0}" con el valor asignado "{1}" no puede tener una ruta de acceso no válida o caracteres de archivo no válidos.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Se produjo una excepción al expandir fileSpec con globs: fileSpec: "{0}", suponiendo que es un nombre de archivo. Excepción: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: el valor "{0}" del atributo "{1}" en el elemento &lt;{2}&gt; en el archivo "{3}" es un carácter comodín que da como resultado enumerar todos los archivos de la unidad, lo que probablemente no estaba previsto. Compruebe que las propiedades a las que se hace referencia siempre están definidas y que el proyecto y el directorio de trabajo actual no están en la raíz de la unidad.</target>

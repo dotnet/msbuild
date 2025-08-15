@@ -500,11 +500,6 @@
         <target state="translated">MSB3094: "{2}" は {0} 項目を参照し、"{3}" は {1} 項目を参照します。これらは同じ項目数を持たなければなりません。</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">glob を使用して fileSpec を展開中に例外が発生しました: fileSpec: "{0}"、これはファイル名であると仮定します。例外: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: 条件 "{0}" の位置 "{1}" に予期しないスペースがあります。スペースを削除したか確認してください。</target>

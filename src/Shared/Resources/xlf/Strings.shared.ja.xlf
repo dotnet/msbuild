@@ -323,6 +323,11 @@
         <target state="translated">値 "{1}" が割り当てられたパラメーター "{0}" には、無効なパスまたは無効なファイル内の文字を指定することはできません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">globs: fileSpec: "{0}" の fileSpec を展開中に例外が発生しました。ファイル名と見なされます。例外: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: ファイル "{3}" の要素 &lt;{2}&gt; の "{1}" 属性の値 "{0}" は、ドライブ上のすべてのファイルを列挙するワイルドカードであり、意図されていない可能性があります。参照されるプロパティが常に定義されていること、およびプロジェクトと現在の作業ディレクトリがドライブ ルートにないことを確認します。</target>
