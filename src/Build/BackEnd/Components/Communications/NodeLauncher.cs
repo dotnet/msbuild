@@ -70,12 +70,6 @@ namespace Microsoft.Build.BackEnd
                 creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
             }
 
-            // On Windows, add DETACHED_PROCESS flag to ensure the child process is not a child of the calling process
-            if (NativeMethodsShared.IsWindows)
-            {
-                creationFlags |= BackendNativeMethods.DETACHED_PROCESS;
-            }
-
             if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
             {
                 if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
@@ -87,7 +81,12 @@ namespace Microsoft.Build.BackEnd
                     startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
                     startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
+
                     creationFlags |= BackendNativeMethods.CREATENOWINDOW;
+
+                    // Avoid spawning a conhost.exe process, since this node won't do console output
+                    // even though Windows thinks of us as a "console process"
+                    creationFlags |= BackendNativeMethods.DETACHED_PROCESS;
                 }
             }
             else

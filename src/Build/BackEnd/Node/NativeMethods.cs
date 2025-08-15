@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd
         internal const Int32 CREATE_NEW_CONSOLE = 0x00000010;
 
         /// <summary>
-        /// Create a process that is not a child of the calling process.
+        /// For console processes, the new process does not inherit its parent's console (the default).
         /// </summary>
         internal const uint DETACHED_PROCESS = 0x00000008;
 

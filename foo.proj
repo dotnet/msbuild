@@ -1,7 +1,0 @@
-<Project>
- <UsingTask TaskName="Message" TaskFactory="TaskHostFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" Architecture="x86" />
-
- <Target Name="Go">
-  <Message Text="Hi" />
- </Target>
-</Project>
