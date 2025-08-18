@@ -65,11 +65,11 @@ namespace Microsoft.Build.Execution
 
             if (allowItemSpecModifiers)
             {
-                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
+                VerifyThrowReservedNameAllowItemSpecModifiers(name);
             }
             else
             {
-                ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name) && !FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "OM_ReservedName", name);
+                VerifyThrowReservedName(name);
             }
 
             _name = name;
@@ -227,6 +227,44 @@ namespace Microsoft.Build.Execution
         internal static ProjectMetadataInstance FactoryForDeserialization(ITranslator translator)
         {
             return new ProjectMetadataInstance(translator);
+        }
+
+        /// <summary>
+        /// Verifies that the name is not a reserved name.
+        /// </summary>
+        /// <remarks>
+        /// Exposed so project items can validate metadata names without allocating ProjectMetadataInstance.
+        /// </remarks>
+        internal static void VerifyThrowReservedName(string name)
+        {
+            // PERF: This sequence of checks is faster than a full HashSet lookup since finding a match is an error case.
+            // Otherwise, many keys would still match to a bucket and begin a string comparison.
+            VerifyThrowReservedNameAllowItemSpecModifiers(name);
+            foreach (string itemSpecModifier in FileUtilities.ItemSpecModifiers.All)
+            {
+                if (itemSpecModifier.Length == name.Length && itemSpecModifier[0] == char.ToUpperInvariant(name[0]))
+                {
+                    ErrorUtilities.VerifyThrowArgument(!MSBuildNameIgnoreCaseComparer.Default.Equals(itemSpecModifier, name), "OM_ReservedName", name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the name is not a reserved name, while allowing item spec modifiers.
+        /// </summary>
+        /// <remarks>
+        /// Exposed so project items can validate metadata names without allocating ProjectMetadataInstance.
+        /// </remarks>
+        internal static void VerifyThrowReservedNameAllowItemSpecModifiers(string name)
+        {
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            foreach (string reservedName in XMakeElements.ReservedItemNames)
+            {
+                if (reservedName.Length == name.Length && reservedName[0] == name[0])
+                {
+                    ErrorUtilities.VerifyThrowArgument(!StringComparer.Ordinal.Equals(reservedName, name), "OM_ReservedName", name);
+                }
+            }
         }
     }
 }

@@ -104,6 +104,41 @@ extends:
               $branch = $branchSegments[-1]
               Write-Host "Setting drops branch to '$branch'"
               Write-Host "##vso[task.setvariable variable=SourceBranchName]$branch"
+
+        - task: Powershell@2
+          name: DetermineTargetBranch
+          displayName: Determine target branch
+          inputs:
+            targetType: inline
+            script: |
+              # Extract VS version from branch name if it follows exp/vsXX.Y-somename pattern
+              $fullBranch = "$(resources.pipeline.MSBuild.sourceBranch)"
+              $parameterTargetBranch = "${{ parameters.TargetBranch }}"
+              $detectedTarget = "main" # Default target branch
+
+              # Try to match the pattern with regex
+              if ($fullBranch -match "exp/vs(\d+)\.(\d+).*") {
+                $major = $matches[1]
+                $minor = $matches[2]
+                $targetBranch = "rel/d$major.$minor"
+                Write-Host "Detected version pattern in branch: $major.$minor"
+                Write-Host "Setting target branch to $targetBranch"
+                $detectedTarget = $targetBranch
+              } else {
+                Write-Host "No version pattern detected in branch, using default target: main"
+              }
+
+              # Determine which target branch to use based on build reason
+              $finalTargetBranch = $parameterTargetBranch
+              if ("$(Build.Reason)" -eq "ResourceTrigger" -or "$(Build.Reason)" -eq "PipelineCompletedTrigger") {
+                Write-Host "Build was triggered automatically, using detected target branch: $detectedTarget"
+                $finalTargetBranch = $detectedTarget
+              } else {
+                Write-Host "Build was triggered manually, using parameter target branch: $parameterTargetBranch"
+              }
+
+              Write-Host "##vso[task.setvariable variable=FinalTargetBranch]$finalTargetBranch"
+
         - task: Powershell@2
           name: PwshMungeExternalAPIsPkgVersion
           displayName: Munge ExternalAPIs package version
@@ -135,7 +170,7 @@ extends:
             LinkWorkItemsToPR: true
             TeamName: $(TeamName)
             TeamEmail: $(TeamEmail)
-            TargetBranch: ${{ parameters.TargetBranch }}
+            TargetBranch: $(FinalTargetBranch)
             InsertionPayloadName: $(InsertPayloadName)
             PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
             InsertionDescription: $(InsertDescription)

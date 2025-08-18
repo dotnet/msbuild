@@ -305,7 +305,6 @@ namespace Microsoft.Build.BackEnd
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
-            ErrorUtilities.VerifyThrowArgumentNull(batchBucket);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
@@ -337,11 +336,11 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            string realTaskAssemblyLoaction = TaskInstance.GetType().Assembly.Location;
-            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLoaction) &&
-                realTaskAssemblyLoaction != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+            string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
+            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) &&
+                realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
             {
-                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLoaction, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
             }
 
             TaskInstance.BuildEngine = _buildEngine;
@@ -949,7 +948,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                         AppDomainSetup,
 #endif
-                        IsOutOfProc);
+                        IsOutOfProc,
+                        ProjectInstance.GetProperty);
                 }
                 else
                 {
@@ -1226,8 +1226,9 @@ namespace Microsoft.Build.BackEnd
 
             parameter.Initialized = true;
 
-            string taskAndParameterName = _taskName + "_" + parameter.Name;
-            string key = "DisableLogTaskParameter_" + taskAndParameterName;
+            // PERF: Be careful to avoid unnecessary string allocations. Appending '_taskName + "_" + parameter.Name' happens in both paths,
+            // but we don't want to allocate the string if we don't need to.
+            string key = "DisableLogTaskParameter_" + _taskName + "_" + parameter.Name;
 
             if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
@@ -1235,7 +1236,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
+                string metadataKey = "DisableLogTaskParameterItemMetadata_" + _taskName + "_" + parameter.Name;
                 if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
                 {
                     parameter.LogItemMetadata = false;
@@ -1411,8 +1412,19 @@ namespace Microsoft.Build.BackEnd
                                     // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
 
-                                    // It would be nice to be copy-on-write here, but Utilities.TaskItem doesn't know about CopyOnWritePropertyDictionary.
-                                    newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                    // If found, directly pass the backing copy-on-write dictionary.
+                                    // Otherwise, retrieve a cloned dictionary from the task item.
+                                    IMetadataContainer outputAsMetadataContainer = output as IMetadataContainer;
+                                    SerializableMetadata backingMetadata = outputAsMetadataContainer?.BackingMetadata ?? default;
+
+                                    if (backingMetadata.HasValue)
+                                    {
+                                        newItem.SetMetadataOnTaskOutput(backingMetadata.Dictionary);
+                                    }
+                                    else
+                                    {
+                                        newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                    }
                                 }
                                 else
                                 {

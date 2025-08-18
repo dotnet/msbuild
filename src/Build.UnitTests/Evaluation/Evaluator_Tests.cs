@@ -3850,8 +3850,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         /// <summary>
         /// Verify that when we don't specify the sub-toolset version, we get the correct sub-toolset properties
-        /// based on the default sub-toolset version -- base toolset if Dev10 is installed, or lowest (numerically
-        /// sorted) toolset if it's not.
+        /// based on the default sub-toolset version -- highest numerically sorted sub-toolset.
         /// </summary>
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4363")]
         public void VerifyDefaultSubToolsetPropertiesAreEvaluated()
@@ -3891,23 +3890,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 bool result = project.Build(logger);
                 Assert.True(result);
 
-                if (Toolset.Dev10IsInstalled)
-                {
-                    // if Dev10 is installed, the default sub-toolset is nothing == base toolset.
-                    logger.AssertLogContains(".[a1].");
-                    logger.AssertLogContains(".[[b1]].");
-                    logger.AssertLogContains(".[[[]]].");
-                    logger.AssertLogContains(".[[[[10.0]]]].");
-                }
-                else
-                {
-                    // if Dev10 is not installed, the default sub-toolset is the numerical least -- in our case, "11.0" --
-                    // so the toolset properties are a combination of that + the base toolset.
-                    logger.AssertLogContains(".[a1].");
-                    logger.AssertLogContains(".[[b2]].");
-                    logger.AssertLogContains(".[[[c2]]].");
-                    logger.AssertLogContains(".[[[[11.0]]]].");
-                }
+                // After removing dev10 detection, the default sub-toolset is always the highest numerically -- in our case, "11.0" --
+                // so the toolset properties are a combination of that + the base toolset.
+                logger.AssertLogContains(".[a1].");
+                logger.AssertLogContains(".[[b2]].");
+                logger.AssertLogContains(".[[[c2]]].");
+                logger.AssertLogContains(".[[[[11.0]]]].");
 
                 // whatever the initial value of VisualStudioVersion, we should be able to change it, but it doesn't affect
                 // the value of any of the sub-toolset properties.

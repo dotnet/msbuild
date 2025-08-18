@@ -1,16 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The original process environment.
         /// </summary>
-        private Dictionary<string, string> _buildProcessEnvironment;
+        private FrozenDictionary<string, string> _buildProcessEnvironment;
 
         /// <summary>
         /// The environment properties for the build.
@@ -175,6 +175,8 @@ namespace Microsoft.Build.Execution
         /// Flag indicating if we should only log critical events.
         /// </summary>
         private bool _onlyLogCriticalEvents;
+
+        private bool _enableTargetOutputLogging;
 
         /// <summary>
         /// The UI culture.
@@ -253,6 +255,7 @@ namespace Microsoft.Build.Execution
 
             _maxNodeCount = projectCollection.MaxNodeCount;
             _onlyLogCriticalEvents = projectCollection.OnlyLogCriticalEvents;
+            _enableTargetOutputLogging = projectCollection.EnableTargetOutputLogging;
             ToolsetDefinitionLocations = projectCollection.ToolsetLocations;
             _defaultToolsVersion = projectCollection.DefaultToolsVersion;
 
@@ -282,9 +285,7 @@ namespace Microsoft.Build.Execution
             _enableRarNode = other._enableRarNode;
             _buildProcessEnvironment = resetEnvironment
                 ? CommunicationsUtilities.GetEnvironmentVariables()
-                : other._buildProcessEnvironment != null
-                    ? new Dictionary<string, string>(other._buildProcessEnvironment)
-                    : null;
+                : other._buildProcessEnvironment;
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
             _globalProperties = other._globalProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._globalProperties) : null;
@@ -292,6 +293,7 @@ namespace Microsoft.Build.Execution
             HostServices = other.HostServices;
             _loggers = other._loggers != null ? new List<ILogger>(other._loggers) : null;
             _maxNodeCount = other._maxNodeCount;
+            MultiThreaded = other.MultiThreaded;
             _memoryUseLimit = other._memoryUseLimit;
             _nodeExeLocation = other._nodeExeLocation;
             NodeId = other.NodeId;
@@ -326,6 +328,7 @@ namespace Microsoft.Build.Execution
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
+            _enableTargetOutputLogging = other.EnableTargetOutputLogging;
         }
 
         /// <summary>
@@ -356,8 +359,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the environment variables which were set when this build was created.
         /// </summary>
-        public IDictionary<string, string> BuildProcessEnvironment => new ReadOnlyDictionary<string, string>(
-            _buildProcessEnvironment ?? new Dictionary<string, string>(0));
+        public IDictionary<string, string> BuildProcessEnvironment => BuildProcessEnvironmentInternal;
 
         /// <summary>
         /// The name of the culture to use during the build.
@@ -548,6 +550,11 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Enables running build in multiple in-proc nodes.
+        /// </summary>
+        public bool MultiThreaded { get; set; }
+
+        /// <summary>
         /// The amount of memory the build should limit itself to using, in megabytes.
         /// </summary>
         public int MemoryUseLimit
@@ -572,6 +579,15 @@ namespace Microsoft.Build.Execution
         {
             get => _onlyLogCriticalEvents;
             set => _onlyLogCriticalEvents = value;
+        }
+
+        /// <summary>
+        /// When true, target outputs (and returns) are logged as well.
+        /// </summary>
+        public bool EnableTargetOutputLogging
+        {
+            get => _enableTargetOutputLogging;
+            set => _enableTargetOutputLogging = value;
         }
 
         /// <summary>
@@ -719,6 +735,8 @@ namespace Microsoft.Build.Execution
             get => _buildId;
             set => _buildId = value;
         }
+
+        internal FrozenDictionary<string, string> BuildProcessEnvironmentInternal => _buildProcessEnvironment ?? FrozenDictionary<string, string>.Empty;
 
         /// <summary>
         /// Gets or sets the environment properties.
@@ -887,6 +905,9 @@ namespace Microsoft.Build.Execution
         /// Gets or sets the project cache description to use for all <see cref="BuildSubmission"/> or <see cref="GraphBuildSubmission"/>
         /// in addition to any potential project caches described in each project.
         /// </summary>
+        /// <remarks>
+        /// This property had the type "Experimental.ProjectCache.ProjectCacheDescriptor" until 17.14 (inclusive).
+        /// </remarks>
         public ProjectCacheDescriptor ProjectCacheDescriptor { get; set; }
 
         /// <summary>
@@ -952,6 +973,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _isTelemetryEnabled);
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
+            translator.Translate(ref _enableTargetOutputLogging);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

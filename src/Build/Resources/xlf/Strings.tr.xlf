@@ -510,11 +510,6 @@
         <target state="translated">MSB3094: "{2}", {0} öğeye; "{3}", {1} öğeye başvuruyor. Aynı sayıda öğeye sahip olmaları gerekir.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">bir fileSpec globs ile genişletilirken özel durum oluştu: fileSpec: "{0}", dosya adı olduğu varsayılıyor. Özel durum: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: "{0}" koşulunun "{1}" konumunda beklenmeyen boşluk var. Boşluğu kaldırmayı unutmuş olabilirsiniz.</target>
@@ -575,6 +570,18 @@
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">"{0}" meta projesi oluşturuldu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostTaskLoad_Failed">
+        <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">MSBuild .NET Çalışma Zamanı Görev Ana Bilgisayarı gerektirdiği ancak .NET Çalışma Zamanı Görev Ana Bilgisayarı belirtilen sürüm için bulunamadığından görev yüklenemedi.
+    Bu hatayı çözmeyle ilgili ayrıntılar için https://aka.ms/nettaskhost adresini inceleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostVersion_Failed">
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
+        <target state="translated">SDK sürümü {0}, gerekli minimum sürüm olan {1} sürümünün altında. .NET Çalışma Zamanı Görev Ana Bilgisayarı yalnızca .NET SDK 10.0.100-rc1 veya üzeri kullanılırken desteklenir.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -827,6 +834,16 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="SDKPathCheck_Failed">
+        <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">Dizin mevcut değil: {0}. .NET Çalışma Zamanı Görev Ana Bilgisayarı başlatılamadı. Bu hatayı çözmeyle ilgili ayrıntılar için https://aka.ms/nettaskhost adresini inceleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKPathResolution_Failed">
+        <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
+        <target state="translated">Runtime="NET" barındıran UsingTask, SDK olmayan bir projede belirtildi.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
@@ -860,6 +877,21 @@ Hatalar: {3}</target>
         <target state="translated">SDK çözümleyici "{0}" null döndürdü.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten bir ortam değişkeni olarak ayarlanmıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten başka bir SDK tarafından ayarlanmıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">Bir SDK, "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">SDK '{0}', SDK çözümleyici '{1}' tarafından çözümlenemedi. {2}</target>
@@ -887,6 +919,11 @@ Hatalar: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Statik graf {0} saniye içinde yüklendi: {1} düğüm, {2} uç</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">Statik grafik oluşturma işlemi başlatıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

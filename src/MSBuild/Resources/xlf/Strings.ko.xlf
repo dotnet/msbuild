@@ -235,6 +235,30 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -multithreaded
+                     MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
+                     즉, MSBuild는 여러 스레드를 사용하여
+                     프로젝트를 병렬로 빌드합니다.
+                     여러 프로세스 대신에 말이죠.
+                     이 옵션은 지원되지 않습니다.
+                     사용되는 최대 스레드 수는 
+에 의해 결정됩니다.
+                     -maxCpuCount 스위치에 의해 결정됩니다.
+                     (약식: -mt)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
@@ -1784,6 +1808,11 @@
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: 대상을 출력할 수 없습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">자동화된 환경에서 빌드가 실행 중임을 감지하여 터미널 로거를 사용하지 않았습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
