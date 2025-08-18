@@ -2624,28 +2624,28 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                List<ItemSpecFragment> includeGobFragmentsList = null;
+                List<ItemSpecFragment> includeGlobFragmentsList = null;
                 foreach (ItemSpecFragment fragment in includeItemspec.Fragments)
                 {
                     if (fragment is GlobFragment && fragment.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0)
                     {
-                        includeGobFragmentsList ??= new List<ItemSpecFragment>(includeItemspec.Fragments.Count);
-                        includeGobFragmentsList.Add(fragment);
+                        includeGlobFragmentsList ??= new List<ItemSpecFragment>(includeItemspec.Fragments.Count);
+                        includeGlobFragmentsList.Add(fragment);
                     }
                 }
 
-                if (includeGobFragmentsList == null || includeGobFragmentsList.Count == 0)
+                if (includeGlobFragmentsList == null || includeGlobFragmentsList.Count == 0)
                 {
                     return null;
                 }
 
-                string[] includeGlobStrings = new string[includeGobFragmentsList.Count];
+                string[] includeGlobStrings = new string[includeGlobFragmentsList.Count];
                 for (int i = 0; i < includeGlobStrings.Length; ++i)
                 {
-                    includeGlobStrings[i] = includeGobFragmentsList[i].TextFragment;
+                    includeGlobStrings[i] = includeGlobFragmentsList[i].TextFragment;
                 }
 
-                var includeGlob = CompositeGlob.Create(includeGobFragmentsList.Select(f => f.ToMSBuildGlob()));
+                var includeGlob = CompositeGlob.Create(includeGlobFragmentsList.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = [];
                 IMSBuildGlob excludeGlob = null;
