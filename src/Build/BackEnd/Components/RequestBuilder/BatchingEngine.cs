@@ -361,7 +361,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            matchingBucket.Lookup.InitializeCapacity(items.Count);
+                            matchingBucket.Lookup.EnsureCapacity(items.Count);
                         }
 
                         // We already have a bucket for this type of item, so add this item to

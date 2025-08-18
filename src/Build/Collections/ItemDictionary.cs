@@ -139,6 +139,16 @@ namespace Microsoft.Build.Collections
             }
         }
 
+#if NET
+        public void EnsureCapacity(int desiredCapacity)
+        {
+            lock (_itemLists)
+            {
+                _itemLists.EnsureCapacity(desiredCapacity);
+            }
+        }
+#endif
+
         /// <summary>
         /// Empty the collection
         /// </summary>

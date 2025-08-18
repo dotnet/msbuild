@@ -710,7 +710,19 @@ namespace Microsoft.Build.BackEnd
         /// Attempts to set the initial capacity of the primary add table.
         /// </summary>
         /// <param name="capacity"></param>
-        internal void InitializeCapacity(int capacity) => PrimaryAddTable ??= new ItemDictionary<ProjectItemInstance>(capacity);
+        internal void EnsureCapacity(int capacity)
+        {
+            if (PrimaryAddTable is null)
+            {
+                PrimaryAddTable = new ItemDictionary<ProjectItemInstance>(capacity);
+            }
+#if NET
+            else
+            {
+                PrimaryAddTable.EnsureCapacity(capacity);
+            }
+#endif
+        }
 
         /// <summary>
         /// Implements a true add, an item that has been created in a batch.
@@ -818,7 +830,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        #endregion
+#endregion
 
         #region Private Methods
 
