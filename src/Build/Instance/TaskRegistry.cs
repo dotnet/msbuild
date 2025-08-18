@@ -1357,12 +1357,12 @@ namespace Microsoft.Build.Execution
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
             {
-                RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
-
-                // LAZY INITIALIZATION: Initialize the cache dictionary only when first needed.
+                // Initialize the cache dictionary only when first needed.
                 // This approach ensures the dictionary is available regardless of how the RegisteredTaskRecord
                 // instance was created (constructor, deserialization, factory methods, etc.).
                 _taskNamesCreatableByFactory ??= new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+
+                RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
 
                 // See if the task name as already been checked against the factory, return the value if it has
                 object creatableByFactory = null;
