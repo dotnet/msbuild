@@ -948,7 +948,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                         AppDomainSetup,
 #endif
-                        IsOutOfProc);
+                        IsOutOfProc,
+                        ProjectInstance.GetProperty);
                 }
                 else
                 {

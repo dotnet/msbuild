@@ -1099,7 +1099,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
-            private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
+            private static readonly LockType s_taskFactoryTypeLoaderLock = new();
 
 #if DEBUG
             /// <summary>
@@ -1112,6 +1112,11 @@ namespace Microsoft.Build.Execution
             /// Type filter to make sure we only look for taskFactoryClasses
             /// </summary>
             private static readonly Func<Type, object, bool> s_taskFactoryTypeFilter = IsTaskFactoryClass;
+
+            /// <summary>
+            /// Lock object to ensure that only one thread can access the task factory type loader at a time.
+            /// </summary>
+            private readonly LockType _lockObject = new();
 
             /// <summary>
             /// Identity of this task.
@@ -1151,7 +1156,7 @@ namespace Microsoft.Build.Execution
             /// for performance reasons, since a concurrent dictionary is much larger than a regular dictionary. The usage
             /// scope is limited, so we can just lock on a regular dictionary.
             /// </summary>
-            private readonly Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
+            private Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.
@@ -1360,6 +1365,21 @@ namespace Microsoft.Build.Execution
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
             {
+                // First check (fast path - no locking)
+                if (_taskNamesCreatableByFactory == null)
+                {
+                    lock (_lockObject)
+                    {
+                        // Second check (inside lock - ensure only one thread initializes)
+
+                        // Initialize the cache dictionary only when first needed.
+                        // This approach ensures the dictionary is available regardless of how the RegisteredTaskRecord
+                        // instance was created (constructor, deserialization, factory methods, etc.).
+                        _taskNamesCreatableByFactory ??= new Dictionary<RegisteredTaskIdentity, object>(
+                                RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                    }
+                }
+
                 RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
 
                 // See if the task name as already been checked against the factory, return the value if it has
