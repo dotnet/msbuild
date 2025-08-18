@@ -1807,10 +1807,17 @@ namespace Microsoft.Build.Evaluation
                 {
                     using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.SdkResolution, _sdkResolverService.GetType());
 
-                    sdkResult = _sdkResolverService.ResolveSdk(_submissionId, sdkReference, _evaluationLoggingContext, importElement.Location, solutionPath, projectPath, _interactive, _isRunningInVisualStudio,
+                    sdkResult = _sdkResolverService.ResolveSdk(
+                        _submissionId,
+                        sdkReference,
+                        _evaluationLoggingContext,
+                        importElement.Location,
+                        solutionPath, projectPath,
+                        _interactive,
+                        _isRunningInVisualStudio,
                         failOnUnresolvedSdk: !_loadSettings.HasFlag(ProjectLoadSettings.IgnoreMissingImports) || _loadSettings.HasFlag(ProjectLoadSettings.FailOnUnresolvedSdk));
                 }
-                catch (SdkResolverException e)
+                catch (Exception e) when (e is SdkResolverException or SdkResolverServiceException)
                 {
                     // We throw using e.Message because e.Message already contains the stack trace
                     // https://github.com/dotnet/msbuild/pull/6763
@@ -1894,12 +1901,10 @@ namespace Microsoft.Build.Evaluation
                 {
                     // "S:\sdk\.dotnet\sdk\10.0.100-preview.6.25315.102\Sdks\Microsoft.NET.Sdk\Sdk"
                     //                  ^5              ^4               ^3          ^2        ^1
-                    string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5),
-                        "dotnet.exe");
+                    string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5), Constants.DotnetProcessName);
                     if (File.Exists(dotnetExe))
                     {
-
-                        _data.AddSdkResolvedEnvironmentVariable("DOTNET_HOST_PATH", dotnetExe);
+                        _data.AddSdkResolvedEnvironmentVariable(Constants.DotnetHostPathEnvVarName, dotnetExe);
                     }
                 }
 
