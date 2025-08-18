@@ -106,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Lock object to serialize access to the task host.
         /// </summary>
-        private Object _taskHostLock;
+        private LockType _taskHostLock;
 
         /// <summary>
         /// Keeps track of whether the wrapped task has had cancel called against it.
@@ -160,7 +160,7 @@ namespace Microsoft.Build.BackEnd
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
-            _taskHostLock = new Object();
+            _taskHostLock = new();
 
             _setParameters = new Dictionary<string, object>();
         }
