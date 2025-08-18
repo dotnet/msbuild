@@ -12,9 +12,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
+using Microsoft.Build.Internal;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.UnitTests;
@@ -29,6 +30,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 {
     public class ProjectCacheTests : IDisposable
     {
+        private static string s_currentTargetNETFramework = $"net{RunnerUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
+
         public ProjectCacheTests(ITestOutputHelper output)
         {
             _output = output;
@@ -56,7 +59,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         private static string GetCurrentFramework() =>
 #if RUNTIME_TYPE_NETCORE
-            $"net{RunnerUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
+            s_currentTargetNETFramework;
 #else
             "net472";
 #endif
@@ -1681,10 +1684,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         {
             var directory = _env.CreateFolder();
             string content = ObjectModelHelpers.CleanupFileContents(
-            """
+            $"""
             <Project Sdk="Microsoft.NET.Sdk">
                 <PropertyGroup>
-                    <TargetFramework>net8.0</TargetFramework>
+                    <TargetFramework>{s_currentTargetNETFramework}</TargetFramework>
                     <OutputType>Exe</OutputType>
                     <OutputPath>bin/</OutputPath>
                 </PropertyGroup>
@@ -1694,7 +1697,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             </Project>
             """);
             var projectPath = directory.CreateFile("app.csproj", content).Path;
-            directory.CreateFile("Program.cs",
+            directory.CreateFile(
+                "Program.cs",
             """
             using System;
             using System.IO;
@@ -1728,7 +1732,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             // Build and run the project
             string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
             success.ShouldBeTrue(output);
-            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
+
+            // Use dotnet exec instead of running the exe directly to ensure using the bootstrap's runtime (which may be newer than the installed one)
+            string appDllPath = Path.Combine(directory.Path, $"bin/{s_currentTargetNETFramework}/app.dll");
+            output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
             output.ShouldContain("A=1");
             output.ShouldContain("B=1");
 
@@ -1736,10 +1744,10 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             FileUtilities.DeleteNoThrow(file1.Path);
             output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
             success.ShouldBeTrue(output);
-            output = RunnerUtilities.RunProcessAndGetOutput(Path.Combine(directory.Path, "bin/net8.0/app"), "", out success, false, _output);
+
+            output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
             output.ShouldNotContain("A=1");
             output.ShouldContain("B=1");
         }
     }
 }
-

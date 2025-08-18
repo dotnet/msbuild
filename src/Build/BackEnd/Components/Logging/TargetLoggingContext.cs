@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
@@ -17,10 +16,6 @@ namespace Microsoft.Build.BackEnd.Logging
     /// </summary>
     internal class TargetLoggingContext : BuildLoggingContext
     {
-        /// <summary>
-        /// Should target outputs be logged also.
-        /// </summary>
-        private static bool s_enableTargetOutputLogging = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING"));
 
         /// <summary>
         /// The project to which this target is attached.
@@ -40,7 +35,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             _projectLoggingContext = projectLoggingContext;
             _target = target;
-
             this.IsValid = true;
         }
 
@@ -62,15 +56,6 @@ namespace Microsoft.Build.BackEnd.Logging
             : base(loggingService, outOfProcContext, true)
         {
             this.IsValid = true;
-        }
-
-        /// <summary>
-        /// Should target outputs be logged also.
-        /// </summary>
-        internal static bool EnableTargetOutputLogging
-        {
-            get { return s_enableTargetOutputLogging; }
-            set { s_enableTargetOutputLogging = value; }
         }
 
         /// <summary>
@@ -105,7 +90,9 @@ namespace Microsoft.Build.BackEnd.Logging
             TargetOutputItemsInstanceEnumeratorProxy targetOutputWrapper = null;
 
             // Only log target outputs if we are going to log a target finished event and the environment variable is set and the target outputs are not null
-            if (!LoggingService.OnlyLogCriticalEvents && s_enableTargetOutputLogging && targetOutputs != null)
+            if (!LoggingService.OnlyLogCriticalEvents
+                && (LoggingService.EnableTargetOutputLogging || Traits.Instance.EnableTargetOutputLogging)
+                && targetOutputs != null)
             {
                 targetOutputWrapper = new TargetOutputItemsInstanceEnumeratorProxy(targetOutputs);
             }

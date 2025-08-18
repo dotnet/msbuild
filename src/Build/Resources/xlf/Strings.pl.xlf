@@ -510,11 +510,6 @@
         <target state="translated">MSB3094: „{2}” odwołuje się do następującej liczby elementów: {0}, a „{3}” odwołuje się do następującej liczby elementów: {1}. Liczba tych elementów musi być taka sama.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Wystąpił wyjątek podczas rozwijania elementu fileSpec o wartości globs: fileSpec: "{0}", zakładając, że jest to nazwa pliku. Wyjątek: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Nieoczekiwana spacja na pozycji „{1}” warunku „{0}”. Czy zapomniano o usunięciu spacji?</target>
@@ -575,6 +570,18 @@
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Wygenerowano metaprojekt „{0}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostTaskLoad_Failed">
+        <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="new">The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostVersion_Failed">
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
+        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -826,6 +833,16 @@
       {1}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
+      </trans-unit>
+      <trans-unit id="SDKPathCheck_Failed">
+        <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="new">The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKPathResolution_Failed">
+        <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
+        <target state="new">UsingTask with Runtime="NET" was specified in a non-SDK project.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
