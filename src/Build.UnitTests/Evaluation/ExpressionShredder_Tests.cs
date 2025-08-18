@@ -598,41 +598,39 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
                 MatchCollection matches = s_itemVectorPattern.Matches(expression);
+                int expressionCount = 0;
 
-                if (expressions.MoveNext())
+                while (expressions.MoveNext())
                 {
-                    int expressionCount = 1;
+                    Match match = matches[expressionCount];
+                    ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
 
-                    do
+                    Assert.Equal(match.Value, capture.Value);
+
+                    Group transformGroup = match.Groups["TRANSFORM"];
+
+                    if (capture.Captures != null)
                     {
-                        Match match = matches[expressionCount - 1];
-                        ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
-
-                        Assert.Equal(match.Value, capture.Value);
-
-                        Group transformGroup = match.Groups["TRANSFORM"];
-
-                        if (capture.Captures != null)
+                        for (int i = 0; i < transformGroup.Captures.Count; i++)
                         {
-                            for (int i = 0; i < transformGroup.Captures.Count; i++)
-                            {
-                                Assert.Equal(transformGroup.Captures[i].Value, capture.Captures[i].Value);
-                            }
+                            Assert.Equal(transformGroup.Captures[i].Value, capture.Captures[i].Value);
                         }
-                        else
-                        {
-                            Assert.Equal(0, transformGroup.Length);
-                        }
-
-                        ++expressionCount;
                     }
-                    while (expressions.MoveNext());
+                    else
+                    {
+                        Assert.Equal(0, transformGroup.Length);
+                    }
 
-                    Assert.Equal(matches.Count, expressionCount);
+                    ++expressionCount;
+                }
+
+                if (expressionCount == 0)
+                {
+                    Assert.Empty(matches);
                 }
                 else
                 {
-                    Assert.Empty(matches);
+                    Assert.Equal(matches.Count, expressionCount);
                 }
             }
         }
@@ -657,7 +655,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            expressions.MoveNext();
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Null(capture.Separator);
@@ -675,7 +673,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo, ';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            expressions.MoveNext();
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Null(capture.Captures);
@@ -693,6 +691,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
@@ -711,6 +710,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)',';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
@@ -729,6 +729,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Bar(a,b))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
@@ -749,6 +750,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Bar(a,b),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
@@ -769,6 +771,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Metadata('Meta0')->Directory())";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -791,6 +794,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Metadata('Meta0')->Directory(),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -813,6 +817,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)'->Directory(), '|')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -835,6 +840,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)'->Directory(),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -857,6 +863,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'$(SOMEPROP)%(Fullpath)')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Single(capture.Captures);
@@ -876,6 +883,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring($(Val), $(Boo)))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -898,6 +906,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(\"AA\", 'BB', `cc`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -920,6 +929,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring('()', $(Boo), ')('))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -942,6 +952,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(`()`, $(Boo), \"AA\"))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -964,6 +975,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(`()`, $(Boo), \")(\"))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
@@ -986,6 +998,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
             capture = expressions.Current;
             Assert.False(expressions.MoveNext());
             Assert.Equal(2, capture.Captures.Count);
