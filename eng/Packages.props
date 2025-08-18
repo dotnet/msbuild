@@ -18,6 +18,7 @@
     <PackageVersion Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
     <PackageVersion Include="NuGet.Build.Tasks.Console" Version="$(NuGetBuildTasksVersion)" />
     <PackageVersion Include="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="System.CodeDom" Version="$(SystemCodeDomVersion)" />
     <PackageVersion Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
     <PackageVersion Include="System.Diagnostics.DiagnosticSource" Version="$(SystemDiagnosticsDiagnosticSourceVersion)" />
@@ -29,7 +30,9 @@
     <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
     <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" />
     <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
+    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="$(SystemSecurityCryptographyPkcsVersion)" />
     <PackageVersion Include="System.Security.Cryptography.ProtectedData" Version="$(SystemSecurityCryptographyProtectedDataVersion)" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="$(SystemSecurityCryptographyXmlVersion)" />
     <PackageVersion Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
     <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />
     <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
@@ -40,13 +43,6 @@
     <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
     <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
 
-    <!-- maintained in eng/dependabot/Packages.props -->
-    <!--
-      System.CodeDom
-      System.Security.Cryptography.Pkcs
-      System.Security.Cryptography.Xml
-      Microsoft.Bcl.Cryptography
-      Microsoft.VisualStudio.SolutionPersistence
-    -->
+    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </ItemGroup>
 </Project>
