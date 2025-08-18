@@ -44,17 +44,18 @@ namespace Microsoft.Build.Shared
             //  <ProjectConfiguration Project="{4A727FF8-65F2-401E-95AD-7C8BBFBE3167}" AbsolutePath="c:foo\Project3\C.csproj" BuildProjectInSolution="True">Debug|AnyCPU</ProjectConfiguration>
             // </SolutionConfiguration>
             //
+
             XmlNodeList? projectConfigurationElements = GetProjectConfigurations(xmlString);
+            int projectConfigurationCount = projectConfigurationElements?.Count ?? 0;
+
+            _cachedProjectElements = new Dictionary<string, XmlElement>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+            _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+            _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+            _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+            _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
+
             if (projectConfigurationElements != null)
             {
-                int projectConfigurationCount = projectConfigurationElements.Count;
-
-                _cachedProjectElements = new Dictionary<string, XmlElement>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
-                _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
-                _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
-                _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
-                _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(projectConfigurationCount, StringComparer.OrdinalIgnoreCase);
-
                 foreach (XmlElement xmlElement in projectConfigurationElements)
                 {
                     string projectGuid = xmlElement.GetAttribute(ProjectAttribute);
@@ -109,14 +110,6 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            else
-            {
-                _cachedProjectElements = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
-                _cachedProjectElementsByAbsolutePath = new Dictionary<string, XmlElement>(StringComparer.OrdinalIgnoreCase);
-                _cachedProjectAbsolutePathsByGuid = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                _cachedProjectGuidsByAbsolutePath = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                _cachedDependencyProjectGuidsByDependingProjectGuid = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-    }
         }
 
         public static SolutionConfiguration Empty { get; } = new SolutionConfiguration(string.Empty);
