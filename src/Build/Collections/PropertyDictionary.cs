@@ -457,7 +457,11 @@ namespace Microsoft.Build.Collections
         void ICollection<T>.Add(T item) => Set(item);
 
         /// <inheritdoc/>
-        bool ICollection<T>.Contains(T item) => Contains(item.Key);
+        bool ICollection<T>.Contains(T item)
+        {
+            return ((IDictionary<string, T>)this).TryGetValue(item.Key, out T existingItem) &&
+                EqualityComparer<T>.Default.Equals(existingItem, item);
+        }
 
         /// <inheritdoc/>
         void ICollection<T>.CopyTo(T[] array, int arrayIndex) => ErrorUtilities.ThrowInternalError("CopyTo is not supported on PropertyDictionary.");
