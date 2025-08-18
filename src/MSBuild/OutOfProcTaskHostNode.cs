@@ -123,7 +123,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Object used to synchronize access to taskCompletePacket
         /// </summary>
-        private Object _taskCompleteLock = new Object();
+        private LockType _taskCompleteLock = new();
 
         /// <summary>
         /// The event which is set when a task is cancelled

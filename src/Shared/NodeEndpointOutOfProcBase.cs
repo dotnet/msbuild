@@ -608,6 +608,7 @@ namespace Microsoft.Build.BackEnd
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
+            ITranslator writeTranslator = null;
 #if NET451_OR_GREATER
             Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
@@ -684,11 +685,22 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
-                            NodePacketType packetType = (NodePacketType)headerByte[0];
+                            // Check if this packet has an extended header that includes a version part.
+                            byte rawType = headerByte[0];
+                            bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
+                            NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
+
+                            byte version = 0;
+                            if (hasExtendedHeader)
+                            {
+                                version = NodePacketTypeExtensions.ReadVersion(localReadPipe);
+                            }
 
                             try
                             {
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer));
+                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
+                                readTranslator.PacketVersion = version;
+                                _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
                             }
                             catch (Exception e)
                             {
@@ -728,7 +740,9 @@ namespace Microsoft.Build.BackEnd
                                 var packetStream = _packetStream;
                                 packetStream.SetLength(0);
 
-                                ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(packetStream);
+                                // Re-use writeTranslator; we clear _packetStream but never replace it.
+                                // If _packetStream is ever reassigned, set writeTranslator = null first.
+                                writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
 
                                 packetStream.WriteByte((byte)packet.Type);
 
