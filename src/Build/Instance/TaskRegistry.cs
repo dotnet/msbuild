@@ -1099,7 +1099,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
-            private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
+            private static readonly LockType s_taskFactoryTypeLoaderLock = new();
 
 #if DEBUG
             /// <summary>

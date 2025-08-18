@@ -142,7 +142,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the object used to lock for synchronization of long-running operations.
         /// </summary>
-        public Object GlobalLock { get; }
+        public LockType GlobalLock { get; }
 
         /// <summary>
         /// Returns the root directory for the project being built by this request.
