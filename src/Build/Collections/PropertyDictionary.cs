@@ -464,7 +464,13 @@ namespace Microsoft.Build.Collections
         }
 
         /// <inheritdoc/>
-        void ICollection<T>.CopyTo(T[] array, int arrayIndex) => ErrorUtilities.ThrowInternalError("CopyTo is not supported on PropertyDictionary.");
+        void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+        {
+            using (_lock.EnterDisposableWriteLock())
+            {
+                _properties.CopyTo(array, arrayIndex);
+            }
+        }
 
         /// <inheritdoc/>
         bool ICollection<T>.Remove(T item) => Remove(item.Key);
