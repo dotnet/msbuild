@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// For console processes, the new process does not inherit its parent's console (the default).
         /// </summary>
-        internal const uint DETACHED_PROCESS = 0x00000008;
+        internal const Int32 DETACHED_PROCESS = 0x00000008;
 
         /// <summary>
         /// Create a new process
