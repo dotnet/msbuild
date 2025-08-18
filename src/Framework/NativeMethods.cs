@@ -581,7 +581,7 @@ internal static class NativeMethods
 
     private static bool IsMaxPathSet { get; set; }
 
-    private static readonly object MaxPathLock = new object();
+    private static readonly LockType MaxPathLock = new LockType();
 
     private static void SetMaxPath()
     {
@@ -945,7 +945,7 @@ internal static class NativeMethods
 
     private static SystemInformationData _systemInformation;
     private static bool _systemInformationInitialized;
-    private static readonly object SystemInformationLock = new object();
+    private static readonly LockType SystemInformationLock = new LockType();
 
     /// <summary>
     /// Architecture getter

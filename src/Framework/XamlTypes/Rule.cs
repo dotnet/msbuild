@@ -390,7 +390,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// <summary>
         /// Thread synchronization.
         /// </summary>
-        private object _syncObject = new object();
+        private LockType _syncObject = new LockType();
 
         /// <summary>
         /// See the <see cref="EvaluatedCategories"/> property.

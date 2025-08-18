@@ -27,7 +27,7 @@ namespace Microsoft.Build.FileAccesses
         private IScheduler? _scheduler;
         private IConfigCache? _configCache;
 
-        private object _handlersWriteLock = new object();
+        private LockType _handlersWriteLock = new LockType();
         private Handlers[] _handlers = Array.Empty<Handlers>();
         private string? _tempDirectory;
 

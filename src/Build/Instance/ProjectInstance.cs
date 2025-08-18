@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
@@ -407,11 +408,7 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>(project.Items.Count);
-            foreach (var item in project.Items)
-            {
-                this.EvaluatedItemElements.Add(item.Xml);
-            }
+            this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = project.ToolsVersion;
@@ -483,11 +480,7 @@ namespace Microsoft.Build.Execution
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
-            EvaluatedItemElements = new List<ProjectItemElement>(linkedProject.Items.Count);
-            foreach (var item in linkedProject.Items)
-            {
-                EvaluatedItemElements.Add(item.Xml);
-            }
+            EvaluatedItemElements = new List<ProjectItemElement>();
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = linkedProject.ToolsVersion;
@@ -1004,33 +997,18 @@ namespace Microsoft.Build.Execution
                 result = instanceProvider.ImmutableInstance;
                 if (result == null)
                 {
-                    IDictionary<string, ProjectMetadataInstance> metadata = null;
+                    ImmutableDictionary<string, string> metadata = null;
                     if (projectItemDefinition.Metadata is IDictionary<string, ProjectMetadata> linkedMetadataDict)
                     {
-                        metadata = new ImmutableElementCollectionConverter<ProjectMetadata, ProjectMetadataInstance>(
-                                        linkedMetadataDict,
-                                        constrainedProjectElements: null,
-                                        ConvertCachedProjectMetadataToInstance);
+                        IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = linkedMetadataDict.Select(directMetadatum
+                            => new KeyValuePair<string, string>(directMetadatum.Key, directMetadatum.Value.EvaluatedValueEscaped));
+
+                        metadata = ImmutableDictionaryExtensions.EmptyMetadata
+                            .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
                     }
 
                     result = instanceProvider.GetOrSetImmutableInstance(
                         new ProjectItemDefinitionInstance(projectItemDefinition.ItemType, metadata));
-                }
-            }
-
-            return result;
-        }
-
-        private static ProjectMetadataInstance ConvertCachedProjectMetadataToInstance(ProjectMetadata projectMetadata)
-        {
-            ProjectMetadataInstance result = null;
-
-            if (projectMetadata is IImmutableInstanceProvider<ProjectMetadataInstance> instanceProvider)
-            {
-                result = instanceProvider.ImmutableInstance;
-                if (result == null)
-                {
-                    result = instanceProvider.GetOrSetImmutableInstance(new ProjectMetadataInstance(projectMetadata));
                 }
             }
 
@@ -2792,6 +2770,11 @@ namespace Microsoft.Build.Execution
                     parameters.LogTaskInputs ||
                     loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
                     loggingService?.IncludeTaskInputs == true;
+
+                parameters.EnableTargetOutputLogging =
+                    parameters.EnableTargetOutputLogging ||
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggingService?.EnableTargetOutputLogging == true;
             }
 
             if (remoteLoggers != null)
@@ -3424,13 +3407,14 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+            ImmutableDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata != null)
             {
-                directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
+                    => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
 
-                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                directMetadata.ImportProperties(projectMetadataInstances);
+                directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
             }
 
             GetEvaluatedIncludesFromProjectItem(
@@ -3476,20 +3460,14 @@ namespace Microsoft.Build.Execution
                     itemTypeDefinition,
                     ConvertCachedItemDefinitionToInstance);
 
-            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+            ImmutableDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata is not null)
             {
-                if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
-                {
-                    directMetadata = new ImmutablePropertyCollectionConverter<ProjectMetadata, ProjectMetadataInstance>(metadataDict, ConvertCachedProjectMetadataToInstance);
-                }
-                else
-                {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
+                    => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
 
-                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                    directMetadata.ImportProperties(projectMetadataInstances);
-                }
+                directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
             }
 
             GetEvaluatedIncludesFromProjectItem(

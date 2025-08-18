@@ -20,7 +20,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Lock for process wide ToolsetConfigurationSection section cache
         /// </summary>
-        private static readonly object s_syncLock = new();
+        private static readonly LockType s_syncLock = new LockType();
 
         /// <summary>
         /// Process wide ToolsetConfigurationSection section cache

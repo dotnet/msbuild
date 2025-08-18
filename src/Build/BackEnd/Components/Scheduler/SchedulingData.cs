@@ -222,19 +222,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Enumerates the unscheduled requests which don't have other instances scheduled already.
         /// </summary>
-        public IEnumerable<SchedulableRequest> UnscheduledRequestsWhichCanBeScheduled
-        {
-            get
-            {
-                foreach (SchedulableRequest request in _unscheduledRequests)
-                {
-                    if (!IsRequestScheduled(request))
-                    {
-                        yield return request;
-                    }
-                }
-            }
-        }
+        public UnscheduledRequestsWhichCanBeScheduledEnumerator UnscheduledRequestsWhichCanBeScheduled => new UnscheduledRequestsWhichCanBeScheduledEnumerator(this);
 
         /// <summary>
         /// Gets all of the configurations for this build.
@@ -742,6 +730,37 @@ namespace Microsoft.Build.BackEnd
             else
             {
                 request.VerifyState(state);
+            }
+        }
+
+        internal struct UnscheduledRequestsWhichCanBeScheduledEnumerator
+        {
+            private readonly SchedulingData _schedulingData;
+            private LinkedList<SchedulableRequest>.Enumerator _enumerator;
+
+            public UnscheduledRequestsWhichCanBeScheduledEnumerator(SchedulingData schedulingData)
+            {
+                _schedulingData = schedulingData;
+                _enumerator = _schedulingData._unscheduledRequests.GetEnumerator();
+                Current = default;
+            }
+
+            public UnscheduledRequestsWhichCanBeScheduledEnumerator GetEnumerator() => this;
+
+            public SchedulableRequest Current { get; private set; }
+
+            public bool MoveNext()
+            {
+                while (_enumerator.MoveNext())
+                {
+                    Current = _enumerator.Current;
+                    if (!_schedulingData.IsRequestScheduled(Current))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
         }
 

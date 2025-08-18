@@ -254,7 +254,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Lock trace to ensure we are logging in serial fashion.
         /// </summary>
-        private static readonly object s_traceLock = new();
+        private static readonly LockType s_traceLock = new LockType();
 
         /// <summary>
         /// Place to dump trace

@@ -446,7 +446,7 @@ namespace Microsoft.Build.Experimental
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
-            private readonly object _lock = new();
+            private readonly LockType _lock = new LockType();
             private readonly StringWriter _internalWriter;
 
             public RedirectConsoleWriter(Action<string> writeCallback)

@@ -218,7 +218,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Lock object to synchronize chainedReferenceAssemblyPath dictionary
         /// </summary>
-        private static readonly object s_locker = new object();
+        private static readonly LockType s_locker = new LockType();
 
         /// <summary>
         /// Cache the results of calling the GetPathToReferenceAssemblies so that we do not recalculate it every time we call the method

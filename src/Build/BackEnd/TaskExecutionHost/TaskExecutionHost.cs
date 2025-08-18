@@ -1411,8 +1411,19 @@ namespace Microsoft.Build.BackEnd
                                     // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
 
-                                    // It would be nice to be copy-on-write here, but Utilities.TaskItem doesn't know about CopyOnWritePropertyDictionary.
-                                    newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                    // If found, directly pass the backing copy-on-write dictionary.
+                                    // Otherwise, retrieve a cloned dictionary from the task item.
+                                    IMetadataContainer outputAsMetadataContainer = output as IMetadataContainer;
+                                    SerializableMetadata backingMetadata = outputAsMetadataContainer?.BackingMetadata ?? default;
+
+                                    if (backingMetadata.HasValue)
+                                    {
+                                        newItem.SetMetadataOnTaskOutput(backingMetadata.Dictionary);
+                                    }
+                                    else
+                                    {
+                                        newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                    }
                                 }
                                 else
                                 {

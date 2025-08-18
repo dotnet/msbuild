@@ -151,10 +151,6 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal const string SubToolsetVersionPropertyName = VisualStudioVersionPropertyName;
 
-        /// <summary>
-        /// Value we should be setting VisualStudioVersion as the ultimate fallback when Dev10 is installed.
-        /// </summary>
-        internal const string Dev10SubToolsetValue = "10.0";
 
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the
