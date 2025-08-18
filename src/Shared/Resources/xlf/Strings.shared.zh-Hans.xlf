@@ -325,9 +325,9 @@
       </trans-unit>
       <trans-unit id="Shared.GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">展开 glob 为 fileSpec： fileSpec： "{0}" 的 fileSpec 时发生异常，假定它是文件名。异常： {1}</target>
+        <target state="translated">使用 glob 展开 fileSpec 时发生异常: fileSpec:“{0}”，系统假定它是文件名。异常: {1}</target>
         <note />
-      </trans-unit>      
+      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: 文件“{3}”中元素 &lt;{2}&gt; 中“{1}”属性的值“{0}”是通配符，可导致枚举驱动器上的所有文件，这可能不是预期的行为。确认始终定义了引用的属性，并且项目和当前工作目录不在驱动器根目录下。</target>
