@@ -848,9 +848,8 @@ namespace Microsoft.Build.Execution
 
                     _overallBuildSuccess = false;
 
-                    foreach (KeyValuePair<int, BuildSubmissionBase> kvp in _buildSubmissions)
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
-                        BuildSubmissionBase submission = kvp.Value;
                         if (submission.IsStarted)
                         {
                             BuildResultBase buildResult = submission.CompleteResultsWithException(new BuildAbortedException());
@@ -2647,13 +2646,7 @@ namespace Microsoft.Build.Execution
 
             if (_activeNodes.Count == 0)
             {
-                var submissions = new List<BuildSubmissionBase>(_buildSubmissions.Count);
-                foreach (KeyValuePair<int, BuildSubmissionBase> kvp in _buildSubmissions)
-                {
-                    submissions.Add(kvp.Value);
-                }
-
-                foreach (BuildSubmissionBase submission in submissions)
+                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                 {
                     // The submission has not started do not add it to the results cache
                     if (!submission.IsStarted)
@@ -2892,13 +2885,8 @@ namespace Microsoft.Build.Execution
                     }
 
                     _threadException = ExceptionDispatchInfo.Capture(e);
-                    var submissions = new List<BuildSubmissionBase>(_buildSubmissions.Count);
-                    foreach (KeyValuePair<int, BuildSubmissionBase> kvp in _buildSubmissions)
-                    {
-                        submissions.Add(kvp.Value);
-                    }
 
-                    foreach (BuildSubmissionBase submission in submissions)
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         // Submission has not started
                         if (!submission.IsStarted)
