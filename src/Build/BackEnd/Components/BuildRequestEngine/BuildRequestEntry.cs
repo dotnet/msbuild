@@ -126,7 +126,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(requestConfiguration);
             ErrorUtilities.VerifyThrow(requestConfiguration.ConfigurationId == request.ConfigurationId, "Configuration id mismatch");
 
-            GlobalLock = new Object();
+            GlobalLock = new LockType();
             Request = request;
             RequestConfiguration = requestConfiguration;
             _blockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;

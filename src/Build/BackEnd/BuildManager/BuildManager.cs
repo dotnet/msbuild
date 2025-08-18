@@ -62,7 +62,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The object used for thread-safe synchronization of BuildManager shared data and the Scheduler.
         /// </summary>
-        private readonly LockType _syncLock = new();
+        private readonly Object _syncLock = new();
 
         /// <summary>
         /// The singleton instance for the BuildManager.
