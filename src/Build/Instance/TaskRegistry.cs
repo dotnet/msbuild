@@ -1149,7 +1149,7 @@ namespace Microsoft.Build.Execution
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
             /// make possibly expensive calls over and over again.
             /// </summary>
-            private readonly ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
+            private ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.
@@ -1235,7 +1235,6 @@ namespace Microsoft.Build.Execution
                 _taskIdentity = new RegisteredTaskIdentity(registeredName, taskFactoryParameters);
                 _parameterGroupAndTaskBody = inlineTask;
                 _registrationOrderId = registrationOrderId;
-                _taskNamesCreatableByFactory = new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
 
                 if (String.IsNullOrEmpty(taskFactory))
                 {
@@ -1359,6 +1358,11 @@ namespace Microsoft.Build.Execution
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
             {
                 RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
+
+                // LAZY INITIALIZATION: Initialize the cache dictionary only when first needed.
+                // This approach ensures the dictionary is available regardless of how the RegisteredTaskRecord
+                // instance was created (constructor, deserialization, factory methods, etc.).
+                _taskNamesCreatableByFactory ??= new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
 
                 // See if the task name as already been checked against the factory, return the value if it has
                 object creatableByFactory = null;
