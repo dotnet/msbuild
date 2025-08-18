@@ -330,6 +330,12 @@ namespace Microsoft.Build.BackEnd
                     {
                         skipNonExistProjects = behavior;
                     }
+                    else if (BuildEngine is IBuildEngine6 buildEngine6 && buildEngine6.GetGlobalProperties()
+                        .TryGetValue(PropertyNames.BuildNonexistentProjectsByDefault, out var buildNonexistentProjectsByDefault) &&
+                        ConversionUtilities.ConvertStringToBool(buildNonexistentProjectsByDefault))
+                    {
+                        skipNonExistProjects = SkipNonExistentProjectsBehavior.Build;
+                    }
                     else
                     {
                         skipNonExistProjects = SkipNonExistentProjectsBehavior.Error;
