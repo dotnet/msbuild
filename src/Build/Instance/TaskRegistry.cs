@@ -1099,7 +1099,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
-            private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
+            private static readonly LockType s_taskFactoryTypeLoaderLock = new ();
 
 #if DEBUG
             /// <summary>
@@ -1154,7 +1154,7 @@ namespace Microsoft.Build.Execution
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
             /// make possibly expensive calls over and over again.
             /// </summary>
-            private volatile ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
+            private ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.
