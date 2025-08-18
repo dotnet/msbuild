@@ -572,7 +572,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             string expression = "@(i->'%(Meta0)'->'%(Filename)'->Substring($(Val)))";
             ExpressionShredder.ReferencedItemExpressionsEnumerator expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            expressions.MoveNext();
+            Assert.True(expressions.MoveNext());
 
             ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
 
