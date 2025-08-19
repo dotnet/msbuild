@@ -120,3 +120,41 @@ The above explanations are only half the truth, though.
 * The `Directory.*.props`, `Directory.*.targets` et. al. also offer ways to extend your build. They are fairly well-known and documented:
   * [`Directory.Build.props` and `Directory.Build.targets`](https://learn.microsoft.com/visualstudio/msbuild/customize-by-directory)
   * [`Directory.Solution.props` and `Directory.Solution.targets`](https://learn.microsoft.com/visualstudio/msbuild/customize-solution-build) as well as `before.{solutionname}.sln.targets` and `after.{solutionname}.sln.targets` can be used to inject properties, item definitions, items and targets into your build
+
+
+## Using quotes in MSBuild properties
+There are times when MSBuild needs to be invoked with property arguments using the `/p:propertyName=propertyValue` syntax. However, the way of achieving the proper result can vary depending on the shell used to run the MSBuild (PowerShell, PowerShell Core, Command Prompt, etc.). 
+
+When the property value contains quotes (`"`), it may be handled differently depending on the interpreting shell.
+
+Let's explore the ways to pass property values that contain special symbols like `"`:
+
+Example project: 
+```
+<Project>
+  <Target Name="PrintPropertyValue">
+      <Message Text="Property value = ($(propertyValue))" Importance="high" />
+  </Target>
+</Project>
+```
+
+- CMD:
+  ```
+  msbuild.exe filename.proj /p:propertyValue="Hello, \"World!\""
+  ```
+
+  For more details about parsing in CMD and usage of special characters, please visit [this page](https://learn.microsoft.com/windows-server/administration/windows-commands/cmd)
+
+- Windows PowerShell:
+  ```
+  msbuild.exe filename.proj /p:propertyValue="Hello, \`"World!\`""
+  ```
+
+  For more details about parsing in Windows PowerShell 5.1 and usage of special characters, please visit [this page](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-5.1)
+
+- PowerShell Core:
+  ```
+  msbuild.exe filename.proj /p:propertyValue="Hello, `"World!`""
+  ```
+
+  For more details about parsing in PowerShell (7.4 and higher) and usage of special characters, please visit [this page](https://learn.microsoft.com/powershell/module/microsoft.powershell.core/about/about_parsing?view=powershell-7.4)
