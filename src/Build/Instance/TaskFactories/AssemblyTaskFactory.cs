@@ -75,6 +75,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
 
+        /// <summary>
+        /// If yes, then this is a task that will for any reason be run in a task host.
+        /// This might be due to the task not supporting the new single threaded interface
+        /// or due to the project requesting it to be run out of process.
+        /// </summary>
         private bool _isTaskHostFactory;
 
         #endregion

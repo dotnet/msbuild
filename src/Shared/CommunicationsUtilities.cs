@@ -108,17 +108,32 @@ namespace Microsoft.Build.Internal
 
     /// <summary>
     /// An aggregate class for passing around results of a handshake and adjacent information.
-    /// There used to be a several functions around TryReadIntForHandshake and node communication in general that used
-    /// to throw exceptions to indicate failure. This class is here to replace the exceptions and allow for a different way of signallign the result.
-    /// Value is here to return data from the handshake
     /// ErrorMessage is to propagate error messages where necessary
     /// </summary> 
     internal class HandshakeResult
     {
+        /// <summary>
+        /// Gets the status code indicating the result of the handshake operation.
+        /// </summary>
         public HandshakeStatus Status { get; }
+
+        /// <summary>
+        /// Handshake in MSBuild is performed as passing integers back and forth.
+        /// This field holds the value returned from a successful handshake step.
+        /// </summary>
         public int Value { get; }
+
+        /// <summary>
+        /// Gets the error message when a handshake operation fails.
+        /// </summary>
         public string ErrorMessage { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HandshakeResult"/> class.
+        /// </summary>
+        /// <param name="status">The status of the handshake operation.</param>
+        /// <param name="value">The value returned from the handshake.</param>
+        /// <param name="errorMessage">The error message if the handshake failed.</param>
         private HandshakeResult(HandshakeStatus status, int value, string errorMessage)
         {
             Status = status;
@@ -126,7 +141,19 @@ namespace Microsoft.Build.Internal
             ErrorMessage = errorMessage;
         }
 
+        /// <summary>
+        /// Creates a successful handshake result with the specified value.
+        /// </summary>
+        /// <param name="value">The value returned from the handshake operation.</param>
+        /// <returns>A new <see cref="HandshakeResult"/> instance representing a successful operation.</returns>
         public static HandshakeResult Success(int value = 0) => new(HandshakeStatus.Success, value, null);
+
+        /// <summary>
+        /// Creates a failed handshake result with the specified status and error message.
+        /// </summary>
+        /// <param name="status">The error status code for the failure.</param>
+        /// <param name="errorMessage">A description of the error that occurred.</param>
+        /// <returns>A new <see cref="HandshakeResult"/> instance representing a failed operation.</returns>
         public static HandshakeResult Failure(HandshakeStatus status, string errorMessage) => new(status, 0, errorMessage);
     }
 
@@ -730,9 +757,10 @@ namespace Microsoft.Build.Internal
 #if NETCOREAPP2_1_OR_GREATER
             if (!NativeMethodsShared.IsWindows)
             {
-                // Enforce a minimum timeout because the Windows code can pass
-                // a timeout of 0 for the connection, but that doesn't work for
-                // the actual timeout here.
+                // Enforce a minimum timeout because the timeout passed to Connect() just before
+                // calling this method does not apply on UNIX domain socket-based
+                // implementations of PipeStream.
+                // https://github.com/dotnet/corefx/issues/28791
                 timeout = Math.Max(timeout, 50);
 
                 // A legacy MSBuild.exe won't try to connect to MSBuild running
