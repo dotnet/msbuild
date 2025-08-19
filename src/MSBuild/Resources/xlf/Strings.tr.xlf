@@ -234,6 +234,29 @@
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -çok iş parçacıklı 
+                     MSBuild'de DENEME amaçlı çok iş parçacıklı modu etkinleştirir.
+                     Bu, MSBuild'in
+                     projeleri işlemek için birden çok iş parçacığı kullanacağı,
+                     birden çok işlem kullanmayacağı anlamına gelir.
+                     Bu seçenek desteklenmemektedir.
+                     Kullanılan maksimum iş parçacığı sayısı
+                     -maxCpuCount anahtarı ile belirlenir.
+                     (Kısa form: -mt)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.

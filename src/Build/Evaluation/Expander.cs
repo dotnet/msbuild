@@ -666,6 +666,27 @@ namespace Microsoft.Build.Evaluation
             return ItemExpander.ExpandExpressionCapture(this, expressionCapture, _items, elementLocation, options, includeNullEntries, out isTransformExpression, out itemsFromCapture);
         }
 
+        private static string TruncateString(string metadataValue)
+        {
+#if NET
+            metadataValue = string.Concat(metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3), "...");
+#else
+            // PERF: We need the formatted, truncated string. Using something like a StringBuilder avoids
+            // needing to use an unsafe block, but this is more efficient.
+            string truncatedMetadataValue = metadataValue.Substring(0, CharacterLimitPerExpansion);
+            unsafe
+            {
+                fixed (char* truncatedMetadataPointer = truncatedMetadataValue)
+                {
+                    Span<char> destination = new Span<char>(truncatedMetadataPointer, truncatedMetadataValue.Length);
+                    "...".AsSpan().CopyTo(destination.Slice(CharacterLimitPerExpansion - 3));
+                    metadataValue = truncatedMetadataValue;
+                }
+            }
+#endif
+            return metadataValue;
+        }
+
         /// <summary>
         /// Returns true if the supplied string contains a valid property name.
         /// </summary>
@@ -774,10 +795,9 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Add the argument in the StringBuilder to the arguments list, handling nulls
-        /// appropriately.
+        /// Extract the argument from the StringBuilder, handling nulls appropriately.
         /// </summary>
-        private static void AddArgument(List<string> arguments, SpanBasedStringBuilder argumentBuilder)
+        private static string ExtractArgument(SpanBasedStringBuilder argumentBuilder)
         {
             // we reached the end of an argument, add the builder's final result
             // to our arguments.
@@ -786,7 +806,7 @@ namespace Microsoft.Build.Evaluation
             // We support passing of null through the argument constant value null
             if (argumentBuilder.Equals("null", StringComparison.OrdinalIgnoreCase))
             {
-                arguments.Add(null);
+                return null;
             }
             else
             {
@@ -805,11 +825,11 @@ namespace Microsoft.Build.Evaluation
                         argumentBuilder.Trim('"');
                     }
 
-                    arguments.Add(argumentBuilder.ToString());
+                    return argumentBuilder.ToString();
                 }
                 else
                 {
-                    arguments.Add(string.Empty);
+                    return string.Empty;
                 }
             }
         }
@@ -824,8 +844,6 @@ namespace Microsoft.Build.Evaluation
         {
             int argumentsContentLength = argumentsMemory.Length;
             ReadOnlySpan<char> argumentsSpan = argumentsMemory.Span;
-
-            List<string> arguments = new List<string>();
 
             using SpanBasedStringBuilder argumentBuilder = Strings.GetSpanBasedStringBuilder();
             int? argumentStartIndex = null;
@@ -844,6 +862,7 @@ namespace Microsoft.Build.Evaluation
 
             // Iterate over the contents of the arguments extracting the
             // the individual arguments as we go
+            List<string> arguments = null;
             for (int n = 0; n < argumentsContentLength; n++)
             {
                 // We found a property expression.. skip over all of it.
@@ -884,7 +903,22 @@ namespace Microsoft.Build.Evaluation
 
                     // We have reached the end of the current argument, go ahead and add it
                     // to our list
-                    AddArgument(arguments, argumentBuilder);
+                    if (arguments is null)
+                    {
+                        // get an upper limit for the size of the arguments list.
+                        int argumentCount = 2;
+                        for (int i = n + 1; i < argumentsContentLength; ++i)
+                        {
+                            if (argumentsSpan[i] == ',')
+                            {
+                                argumentCount++;
+                            }
+                        }
+
+                        arguments = new List<string>(argumentCount);
+                    }
+
+                    arguments.Add(ExtractArgument(argumentBuilder));
 
                     // Clear out the argument builder ready for the next argument
                     argumentBuilder.Clear();
@@ -900,9 +934,17 @@ namespace Microsoft.Build.Evaluation
 
             // This will either be the one and only argument, or the last one
             // so add it to our list
-            AddArgument(arguments, argumentBuilder);
+            string finalArgument = ExtractArgument(argumentBuilder);
+            if (arguments is null)
+            {
+                return [finalArgument];
+            }
+            else
+            {
+                arguments.Add(finalArgument);
 
-            return arguments.ToArray();
+                return arguments.ToArray();
+            }
         }
 
         /// <summary>
@@ -1125,12 +1167,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (IsTruncationEnabled(evaluator._options) && metadataValue.Length > CharacterLimitPerExpansion)
                     {
-                        metadataValue =
-#if NET
-                            $"{metadataValue.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
-#else
-                            $"{metadataValue.Substring(0, CharacterLimitPerExpansion - 3)}...";
-#endif
+                        metadataValue = TruncateString(metadataValue);
                     }
                 }
                 else
@@ -1337,12 +1374,7 @@ namespace Microsoft.Build.Evaluation
                                 var value = propertyValue.ToString();
                                 if (value.Length > CharacterLimitPerExpansion)
                                 {
-                                    propertyValue =
-#if NET
-                                        $"{value.AsSpan(0, CharacterLimitPerExpansion - 3)}...";
-#else
-                                        $"{value.Substring(0, CharacterLimitPerExpansion - 3)}...";
-#endif
+                                    propertyValue = TruncateString(value);
                                 }
                             }
 
