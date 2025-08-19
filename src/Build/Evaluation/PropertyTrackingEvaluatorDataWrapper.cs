@@ -153,7 +153,9 @@ namespace Microsoft.Build.Evaluation
         public PropertyDictionary<P> Properties => _wrapped.Properties;
         public IEnumerable<D> ItemDefinitionsEnumerable => _wrapped.ItemDefinitionsEnumerable;
         public IItemDictionary<I> Items => _wrapped.Items;
+#pragma warning disable CS0618 // Type or member is obsolete
         public List<ProjectItemElement> EvaluatedItemElements => _wrapped.EvaluatedItemElements;
+#pragma warning restore CS0618 // Type or member is obsolete
         public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrapped.EnvironmentVariablePropertiesDictionary;
         public PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary => _wrapped.SdkResolvedEnvironmentVariablePropertiesDictionary;
 

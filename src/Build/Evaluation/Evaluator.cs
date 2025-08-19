@@ -2512,7 +2512,9 @@ namespace Microsoft.Build.Evaluation
         {
             if ((_loadSettings & ProjectLoadSettings.RecordEvaluatedItemElements) == ProjectLoadSettings.RecordEvaluatedItemElements)
             {
+#pragma warning disable CS0618 // Type or member is obsolete
                 _data.EvaluatedItemElements.Add(itemElement);
+#pragma warning restore CS0618 // Type or member is obsolete
             }
         }
 
