@@ -121,7 +121,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The object used to synchronize access to the task execution host.
         /// </summary>
-        private Object _taskExecutionHostSync = new Object();
+        private LockType _taskExecutionHostSync = new();
 
         /// <summary>
         /// Constructor
