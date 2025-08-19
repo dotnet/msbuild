@@ -11,7 +11,7 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
-    internal class FakeProjectItemElementLink : ProjectItemElementLink
+    internal sealed class FakeProjectItemElementLink : ProjectItemElementLink
     {
         private readonly string _filePath;
 

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
-    internal class FakeProjectLinkWithPropertyValues : FakeProjectLink
+    internal sealed class FakeProjectLinkWithPropertyValues : FakeProjectLink
     {
         private readonly Dictionary<string, string> _propertyValues;
 

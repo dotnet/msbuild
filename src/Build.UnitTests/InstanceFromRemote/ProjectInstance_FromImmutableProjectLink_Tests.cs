@@ -88,7 +88,35 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
             Assert.Equal("Compile", item2.ItemType);
         }
 
-        private class EmptyItemTypeDefinitionDictionary : FakeCachedEntityDictionary<ProjectItemDefinition>
+        [Fact]
+        public void ProjectInstanceAccessProjectItemThroughLookup()
+        {
+            var items = new Dictionary<string, ProjectItemLink[]>(StringComparer.OrdinalIgnoreCase);
+            var projectLink = new FakeProjectLinkWithQuickItemLookUp(
+                @"File1.cs",
+                items,
+                itemDefinitions: new EmptyItemTypeDefinitionDictionary());
+            var project = new Project(ProjectCollection.GlobalProjectCollection, projectLink);
+            ProjectInstance instance = ProjectInstance.FromImmutableProjectSource(project, ProjectInstanceSettings.ImmutableWithFastItemLookup);
+            Assert.NotNull(instance);
+
+            items.Add("File1.cs", new[]
+            {
+                new FakeProjectItemLink(project, "Compile", "File1.cs", @"Q:\FakeFolder\Project\Project.proj", new Dictionary<string, string> { { "Metadata1", "Value1" } }),
+            });
+
+            var compileItems = instance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "File1.cs").ToList();
+            Assert.Equal(1, compileItems.Count);
+
+            var item1 = compileItems[0];
+
+            Assert.Equal("File1.cs", item1.EvaluatedInclude);
+            Assert.Equal("Value1", item1.GetMetadataValue("Metadata1"));
+            Assert.Equal(string.Empty, item1.GetMetadataValue("Metadata2"));
+            Assert.Equal("Compile", item1.ItemType);
+        }
+
+        private sealed class EmptyItemTypeDefinitionDictionary : FakeCachedEntityDictionary<ProjectItemDefinition>
         {
             public override bool TryGetValue(string key, out ProjectItemDefinition value)
             {

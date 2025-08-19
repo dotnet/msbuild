@@ -12,7 +12,7 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
-    internal class FakeProjectItemLink : ProjectItemLink
+    internal sealed class FakeProjectItemLink : ProjectItemLink
     {
         private readonly IDictionary<string, string> _metadataValues;
         private readonly ProjectItemElementLink _xmlLink;
