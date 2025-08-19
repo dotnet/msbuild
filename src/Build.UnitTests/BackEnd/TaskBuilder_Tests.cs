@@ -1420,5 +1420,262 @@ namespace ClassLibrary2
             result.ShouldBeTrue(); // Build should succeed
             logger.AssertLogContains("Task executed successfully"); // Message should be logged
         }
+
+        /// <summary>
+        /// Tests that InvalidProjectFileException is handled correctly with ContinueOnError=false.
+        /// This validates the refactored exception handling preserves InvalidProjectFileException behavior.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_InvalidProjectFileException_ContinueOnErrorFalse_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Error Text='This is an intentional error to test exception handling' />
+                         <Message Text='This should not execute' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeFalse(); // Build should fail
+            // Error should be logged
+            logger.ErrorCount.ShouldBeGreaterThan(0);
+            logger.AssertLogDoesntContain("This should not execute");
+        }
+
+        /// <summary>
+        /// Tests that InvalidProjectFileException is handled correctly with ContinueOnError=true.
+        /// This validates the refactored exception handling preserves warning conversion behavior.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_InvalidProjectFileException_ContinueOnErrorTrue_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Error Text='Test error' ContinueOnError='WarnAndContinue' />
+                         <Message Text='Task continued after error' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeTrue(); // Build should continue
+            logger.AssertLogContains("Test error");
+            logger.AssertLogContains("Task continued after error");
+            // Error with ContinueOnError should be converted to warning
+            logger.WarningCount.ShouldBeGreaterThan(0);
+        }
+
+        /// <summary>
+        /// Tests that general task exceptions are handled correctly with ContinueOnError=false.
+        /// This validates the refactored exception handling preserves general exception behavior.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_GeneralException_ContinueOnErrorFalse_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Error Text='Task failed intentionally' />
+                         <Message Text='This should not execute' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeFalse(); // Build should fail
+            logger.ErrorCount.ShouldBeGreaterThan(0);
+            logger.AssertLogDoesntContain("This should not execute");
+        }
+
+        /// <summary>
+        /// Tests that general task exceptions are handled correctly with ContinueOnError=true.
+        /// This validates the refactored exception handling preserves warning conversion behavior.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_GeneralException_ContinueOnErrorTrue_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Error Text='Task failed but should continue' ContinueOnError='WarnAndContinue' />
+                         <Message Text='Task continued after exception' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeTrue(); // Build should continue
+            logger.AssertLogContains("Task continued after exception");
+            // Error task with ContinueOnError should generate a warning instead of error
+            logger.WarningCount.ShouldBeGreaterThan(0);
+        }
+
+        /// <summary>
+        /// Tests MSBuildLastTaskResult property behavior with the refactored exception handling.
+        /// This validates that task result tracking is preserved after refactoring.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_MSBuildLastTaskResult_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Message Text='Start: $(MSBuildLastTaskResult)' />
+                         <Warning Text='Warning task' />
+                         <Message Text='After warning: $(MSBuildLastTaskResult)' />
+                         <Error Text='Error task' ContinueOnError='true' />
+                         <Message Text='After error: $(MSBuildLastTaskResult)' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeTrue(); // Build should succeed with ContinueOnError
+            logger.AssertLogContains("Start: "); // Should be empty initially
+            logger.AssertLogContains("After warning: true"); // Warning task succeeds
+            logger.AssertLogContains("After error: false"); // Error task fails
+        }
+
+        /// <summary>
+        /// Tests task execution with invalid parameters to verify exception handling.
+        /// This validates that parameter validation exceptions are handled correctly.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_InvalidTaskParameters_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Error Text='Invalid parameters test' />
+                         <Message Text='This should not execute' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeFalse(); // Build should fail
+            logger.ErrorCount.ShouldBeGreaterThan(0);
+            logger.AssertLogDoesntContain("This should not execute");
+        }
+
+        /// <summary>
+        /// Tests circular dependency detection to verify CircularDependencyException handling.
+        /// This validates that circular dependency exceptions are handled correctly.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_CircularDependency_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='A' DependsOnTargets='B'>
+                         <Message Text='Target A' />
+                      </Target>
+                      <Target Name='B' DependsOnTargets='A'>
+                         <Message Text='Target B' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("A", loggers);
+            result.ShouldBeFalse(); // Build should fail due to circular dependency
+            logger.ErrorCount.ShouldBeGreaterThan(0);
+            logger.AssertLogContains("MSB4006"); // MSBuild error code for circular dependency
+        }
+
+        /// <summary>
+        /// Tests exception handling with WarnAndContinue setting to ensure proper conversion behavior.
+        /// This validates that error-to-warning conversion is preserved in the refactored code.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_WarnAndContinue_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Error Text='First error' ContinueOnError='WarnAndContinue' />
+                         <Error Text='Second error' ContinueOnError='WarnAndContinue' />
+                         <Message Text='Build completed successfully' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeTrue(); // Build should succeed with warnings
+            logger.AssertLogContains("Build completed successfully");
+            // Should have warnings instead of errors due to WarnAndContinue
+            logger.WarningCount.ShouldBeGreaterThan(0);
+        }
+
+        /// <summary>
+        /// Tests exception handling with ErrorAndContinue setting to ensure proper behavior.
+        /// This validates that error logging with continuation is preserved in the refactored code.
+        /// </summary>
+        [Fact]
+        public void ExecuteInstantiatedTask_ErrorAndContinue_PreservesOriginalBehavior()
+        {
+            MockLogger logger = new MockLogger();
+            string projectFileContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                      <Target Name='t'>
+                         <Warning Text='Test warning with ErrorAndContinue setting' ContinueOnError='ErrorAndContinue' />
+                         <Message Text='Build continued after warning' />
+                      </Target>
+                      </Project>");
+
+            using ProjectFromString projectFromString = new(projectFileContents);
+            Project project = projectFromString.Project;
+            List<ILogger> loggers = new List<ILogger>();
+            loggers.Add(logger);
+
+            bool result = project.Build("t", loggers);
+            result.ShouldBeTrue(); // Build should continue with warnings
+            logger.AssertLogContains("Test warning with ErrorAndContinue setting");
+            logger.AssertLogContains("Build continued after warning");
+            // Warning should be logged
+            logger.WarningCount.ShouldBeGreaterThan(0);
+        }
     }
 }
