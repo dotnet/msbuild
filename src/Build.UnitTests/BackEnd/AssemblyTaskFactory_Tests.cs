@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -249,7 +250,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 createdTask.ShouldNotBeNull();
                 createdTask.ShouldNotBeOfType<TaskHostTask>();
             }
@@ -280,7 +282,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -311,7 +314,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -344,7 +348,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -377,7 +382,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -412,7 +418,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
             }
@@ -445,7 +452,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -476,7 +484,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -511,7 +520,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -540,7 +550,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -573,7 +584,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -606,7 +618,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }
@@ -640,7 +653,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsNotType<TaskHostTask>(createdTask);
             }
@@ -663,7 +677,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
-                    false);
+                    false,
+                    (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
             }

@@ -72,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of parameters used to decide which host to launch.
         /// </summary>
-        private IDictionary<string, string> _taskHostParameters;
+        private Dictionary<string, string> _taskHostParameters;
 
         /// <summary>
         /// The type of the task that we are wrapping.
@@ -106,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Lock object to serialize access to the task host.
         /// </summary>
-        private Object _taskHostLock;
+        private LockType _taskHostLock;
 
         /// <summary>
         /// Keeps track of whether the wrapped task has had cancel called against it.
@@ -140,7 +140,7 @@ namespace Microsoft.Build.BackEnd
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
-            IDictionary<string, string> taskHostParameters,
+            Dictionary<string, string> taskHostParameters,
             LoadedType taskType,
             bool taskHostFactoryExplicitlyRequested
 #if FEATURE_APPDOMAIN
@@ -169,7 +169,7 @@ namespace Microsoft.Build.BackEnd
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
-            _taskHostLock = new Object();
+            _taskHostLock = new();
 
             _setParameters = new Dictionary<string, object>();
         }
@@ -276,7 +276,6 @@ namespace Microsoft.Build.BackEnd
 
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
-                        runtime,
                         _buildComponentHost.BuildParameters.NodeId,
                         NativeMethodsShared.GetCurrentDirectory(),
                         CommunicationsUtilities.GetEnvironmentVariables(),
@@ -302,8 +301,13 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
+/*
+TODO: fixme after merge
                     _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: !_taskHostFactoryExplicitlyRequested, taskHostParameters: _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
+*/
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
+                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
                 }
 
                 if (_connectedToTaskHost)
@@ -596,7 +600,7 @@ namespace Microsoft.Build.BackEnd
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters).MSBuildAssemblyPath;
             }
 #endif
             string msbuildLocation = taskHostLocation ??
