@@ -325,7 +325,7 @@
       </trans-unit>
       <trans-unit id="Shared.GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Exceção ao expandir um fileSpec com globs: fileSpec: "{0}", presumindo que seja um nome de arquivo. Exceção: {1}</target>
+        <target state="translated">Ocorreu uma exceção ao expandir um fileSpec com globs: fileSpec: "{0}", assumindo que se trata de um nome de arquivo. Exceção: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">

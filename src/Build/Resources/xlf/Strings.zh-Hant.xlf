@@ -575,13 +575,13 @@
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="new">The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
-    See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
+        <target state="translated">無法載入工作，因為它需要 MSBuild .NET 執行階段工作主機，但找不到指定版本的 .NET 執行階段工作主機。
+    如需如何解決此錯誤的詳細資料，請參閱 https://aka.ms/nettaskhost。</target>
         <note />
       </trans-unit>
       <trans-unit id="NETHostVersion_Failed">
         <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
-        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</target>
+        <target state="translated">SDK 版本 {0} 低於 {1} 的最低必要版本。只有在使用 .NET SDK 10.0.100-rc1 或更新版本時，才支援 .NET 執行階段工作主機。</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -836,12 +836,12 @@
       </trans-unit>
       <trans-unit id="SDKPathCheck_Failed">
         <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="new">The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
+        <target state="translated">目錄不存在: {0}。無法執行個體化 .NET 執行階段工作主機。如需如何解決此錯誤的詳細資料，請參閱 https://aka.ms/nettaskhost。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKPathResolution_Failed">
         <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
-        <target state="new">UsingTask with Runtime="NET" was specified in a non-SDK project.</target>
+        <target state="translated">在非 SDK 專案中指定了 Runtime="NET" 的 UsingTask。</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">

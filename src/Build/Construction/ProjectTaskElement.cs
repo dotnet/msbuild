@@ -38,7 +38,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Protection for the parameters cache
         /// </summary>
-        private readonly Object _locker = new Object();
+        private readonly LockType _locker = new();
 
         /// <summary>
         /// Initialize a parented ProjectTaskElement
