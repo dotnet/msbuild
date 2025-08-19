@@ -17,11 +17,18 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
-    internal sealed class FakeProjectLink : ProjectLink
+    internal class FakeProjectLink : ProjectLink
     {
-        public FakeProjectLink(string path)
+        public FakeProjectLink(
+            string path,
+            ICollection<ProjectProperty>? properties = null,
+            IDictionary<string, ProjectItemDefinition>? itemDefinitions = null,
+            ICollection<ProjectItem>? items = null)
         {
             Xml = new ProjectRootElement(new FakeProjectRootElementLink(path));
+            Properties = properties ?? new FakeCachedEntityDictionary<ProjectProperty>();
+            ItemDefinitions = itemDefinitions ?? new FakeCachedEntityDictionary<ProjectItemDefinition>();
+            Items = items ?? new FakeProjectItemDictionary();
         }
 
         public override ProjectRootElement Xml { get; }
@@ -34,13 +41,12 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         public override ICollection<string> ItemTypes => throw new NotImplementedException();
 
-        public override ICollection<ProjectProperty> Properties { get; } = new FakeCachedEntityDictionary<ProjectProperty>();
-
+        public override ICollection<ProjectProperty> Properties { get; }
         public override IDictionary<string, List<string>> ConditionedProperties => throw new NotImplementedException();
 
-        public override IDictionary<string, ProjectItemDefinition> ItemDefinitions { get; } = new FakeCachedEntityDictionary<ProjectItemDefinition>();
+        public override IDictionary<string, ProjectItemDefinition> ItemDefinitions { get; }
 
-        public override ICollection<ProjectItem> Items { get; } = new FakeProjectItemDictionary();
+        public override ICollection<ProjectItem> Items { get; }
 
         public override ICollection<ProjectItem> ItemsIgnoringCondition => throw new NotImplementedException();
 
