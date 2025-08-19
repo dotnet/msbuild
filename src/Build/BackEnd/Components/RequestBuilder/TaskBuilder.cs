@@ -876,7 +876,7 @@ namespace Microsoft.Build.BackEnd
                     // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
                     // a debugger attached to break on 2nd chance exceptions.
                     // That requires that there needs to be a way to not catch here, by setting an environment variable.
-                    if (ExceptionHandling.IsCriticalException(ex) || (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1"))
+                    if (Environment.GetEnvironmentVariable("MSBUILDDONOTCATCHTASKEXCEPTIONS") == "1")
                     {
                         // Wrapping in an Exception will unfortunately mean that this exception would fly through any IsCriticalException above.
                         // However, we should not have any, also we should not have stashed such an exception anyway.
