@@ -474,9 +474,9 @@ namespace Microsoft.Build.Execution
             _importPathsIncludingDuplicates = importsListConverter;
             ImportPathsIncludingDuplicates = importsListConverter;
 
-            Toolset = linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
+            Toolset = string.IsNullOrEmpty(linkedProject.ToolsVersion) ? null : linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
             SubToolsetVersion = linkedProject.SubToolsetVersion;
-            TaskRegistry = new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
+            TaskRegistry = Toolset is null ? new TaskRegistry(linkedProject.ProjectCollection.ProjectRootElementCache) : new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
