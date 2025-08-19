@@ -26,7 +26,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _output = testOutputHelper;
         }
 
-        [Theory /* (Skip ="Environment variable issue") */]
+        [Theory]
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(true, true)]
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact /*(Skip = "Environment variable issue")*/]
+        [Fact]
         public void TransientandSidecarNodeCanCoexist()
         {
             using (TestEnvironment env = TestEnvironment.Create())

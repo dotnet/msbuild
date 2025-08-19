@@ -88,12 +88,11 @@ namespace Microsoft.Build.Internal
             _pipeClient.WriteEndOfHandshakeSignal();
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", PipeName);
-
-            return _pipeClient.TryReadEndOfHandshakeSignal(true,
 #if NET
-            timeout,
+            return _pipeClient.TryReadEndOfHandshakeSignal(true, timeout, out HandshakeResult _);
+#else
+            return _pipeClient.TryReadEndOfHandshakeSignal(true, out HandshakeResult _);
 #endif
-            out HandshakeResult _);
         }
     }
 }
