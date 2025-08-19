@@ -20,7 +20,7 @@
                         <EnableStaticNativeInstrumentation>True</EnableStaticNativeInstrumentation>
                         <EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
                         <EnableStaticManagedInstrumentation>False</EnableStaticManagedInstrumentation>
-                        <EnableDynamicManagedInstrumentation>True</EnableDynamicManagedInstrumentation>
+                        <EnableDynamicManagedInstrumentation>False</EnableDynamicManagedInstrumentation>
                     </CodeCoverage>
                 </Configuration>
             </DataCollector>
