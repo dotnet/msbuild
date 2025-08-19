@@ -8,11 +8,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
     internal sealed class FakeProjectItemDictionary : ICollection<ProjectItem>, IDictionary<string, ICollection<ProjectItem>>
     {
+        private readonly IDictionary<string, ProjectItemLink[]>? _items;
+
+        public FakeProjectItemDictionary(IDictionary<string, ProjectItemLink[]>? items = null)
+        {
+            _items = items;
+        }
+
         ICollection<ProjectItem> IDictionary<string, ICollection<ProjectItem>>.this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         int ICollection<ProjectItem>.Count => throw new NotImplementedException();
@@ -59,6 +67,25 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         bool ICollection<KeyValuePair<string, ICollection<ProjectItem>>>.Remove(KeyValuePair<string, ICollection<ProjectItem>> item) => throw new NotImplementedException();
 
-        bool IDictionary<string, ICollection<ProjectItem>>.TryGetValue(string key, out ICollection<ProjectItem> value) => throw new NotImplementedException();
+        public bool TryGetValue(string key, out ICollection<ProjectItem> value)
+        {
+            if (_items is null)
+            {
+                throw new NotSupportedException(); 
+            }
+
+            var factory = LinkedObjectsFactory.Get(ProjectCollection.GlobalProjectCollection);
+
+            if (_items.TryGetValue(key, out ProjectItemLink[]? links))
+            {
+                value = links.Select(link => factory.Create(link, null, null)).ToList();
+                return true;
+            }
+            else
+            {
+                value = Array.Empty<ProjectItem>();
+                return false;
+            }
+        }
     }
 }

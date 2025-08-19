@@ -11,17 +11,22 @@ using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
-    internal sealed class FakeCachedEntityDictionary<T> :
+    internal class FakeCachedEntityDictionary<T> :
         ICollection<T>,
         IDictionary<string, T>,
         IDictionary<(string, int, int), T>
         where T : class
     {
+        public FakeCachedEntityDictionary(int count = 10)
+        {
+            Count = count;
+        }
+
         public T this[string key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public T this[(string, int, int) key] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public int Count => throw new NotImplementedException();
+        public int Count { get; }
 
         public bool IsReadOnly => throw new NotImplementedException();
 
@@ -33,7 +38,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         ICollection<T> IDictionary<(string, int, int), T>.Values => throw new NotImplementedException();
 
-        int ICollection<KeyValuePair<string, T>>.Count => throw new NotImplementedException();
+        int ICollection<KeyValuePair<string, T>>.Count => Count;
 
         int ICollection<KeyValuePair<(string, int, int), T>>.Count => throw new NotImplementedException();
 
@@ -91,7 +96,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 
         bool ICollection<KeyValuePair<(string, int, int), T>>.Remove(KeyValuePair<(string, int, int), T> item) => throw new NotImplementedException();
 
-        bool IDictionary<string, T>.TryGetValue(string key, out T value) => throw new NotImplementedException();
+        public virtual bool TryGetValue(string key, out T value) => throw new NotImplementedException();
 
         bool IDictionary<(string, int, int), T>.TryGetValue((string, int, int) key, out T value) => throw new NotImplementedException();
     }

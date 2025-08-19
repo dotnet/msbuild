@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.ObjectModelRemoting;
 using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
@@ -49,6 +50,50 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
                 string value = instance.GetPropertyValue(kvp.Key);
                 Assert.True(value == kvp.Value,
                     $"Property '{kvp.Key}' with value '{kvp.Value}' was not found in the ProjectInstance.");
+            }
+        }
+
+        [Fact]
+        public void ProjectInstanceAccessProjectItems()
+        {
+            var items = new Dictionary<string, ProjectItemLink[]>(StringComparer.OrdinalIgnoreCase);
+            var projectLink = new FakeProjectLink(
+                @"Q:\FakeFolder\Project\Project.proj",
+                itemDefinitions: new EmptyItemTypeDefinitionDictionary(),
+                items: new FakeProjectItemDictionary(items));
+            var project = new Project(ProjectCollection.GlobalProjectCollection, projectLink);
+            ProjectInstance instance = ProjectInstance.FromImmutableProjectSource(project, ProjectInstanceSettings.ImmutableWithFastItemLookup);
+            Assert.NotNull(instance);
+
+            items.Add("Compile", new[]
+            {
+                new FakeProjectItemLink(project, "Compile", "File1.cs", @"Q:\FakeFolder\Project\Project.proj", new Dictionary<string, string> { { "Metadata1", "Value1" } }),
+                new FakeProjectItemLink(project, "Compile", "File2.cs", @"Q:\FakeFolder\Project\a.props", new Dictionary<string, string> { { "Metadata2", "Value2" } })
+            });
+
+            var compileItems = instance.GetItems("Compile").ToList();
+            Assert.Equal(2, compileItems.Count);
+
+            var item1 = compileItems[0];
+
+            Assert.Equal("File1.cs", item1.EvaluatedInclude);
+            Assert.Equal("Value1", item1.GetMetadataValue("Metadata1"));
+            Assert.Equal(string.Empty, item1.GetMetadataValue("Metadata2"));
+            Assert.Equal("Compile", item1.ItemType);
+
+            var item2 = compileItems[1];
+            Assert.Equal("File2.cs", item2.EvaluatedInclude);
+            Assert.Equal("Value2", item2.GetMetadataValue("Metadata2"));
+            Assert.Equal(string.Empty, item2.GetMetadataValue("Metadata1"));
+            Assert.Equal("Compile", item2.ItemType);
+        }
+
+        private class EmptyItemTypeDefinitionDictionary : FakeCachedEntityDictionary<ProjectItemDefinition>
+        {
+            public override bool TryGetValue(string key, out ProjectItemDefinition value)
+            {
+                value = null!;
+                return false;
             }
         }
     }
