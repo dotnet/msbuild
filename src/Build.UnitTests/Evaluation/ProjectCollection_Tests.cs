@@ -14,7 +14,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ProjectRootElementCache_IsDeterminedByEnvironmentVariable()
         {
-            var collectionWithDefaultCache = new ProjectCollection();
+            using var collectionWithDefaultCache = new ProjectCollection();
             collectionWithDefaultCache.ProjectRootElementCache.ShouldBeOfType<ProjectRootElementCache>();
 
             const string envKey = "MsBuildUseSimpleProjectRootElementCacheConcurrency";
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable(envKey, "true");
-                var collectionWithSimpleCache = new ProjectCollection();
+                using var collectionWithSimpleCache = new ProjectCollection();
                 collectionWithSimpleCache.ProjectRootElementCache.ShouldBeOfType<SimpleProjectRootElementCache>();
             }
         }

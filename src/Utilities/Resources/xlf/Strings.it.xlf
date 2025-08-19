@@ -27,6 +27,11 @@
         <target state="translated">Uscita dal comando con codice {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Il file è bloccato da: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: il file manifesto della piattaforma non è stato trovato in "{0}".</target>

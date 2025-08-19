@@ -475,7 +475,7 @@ multi-line comment here
                 act(projectElement, project);
 
                 // Write the project to a UTF8 string writer to compare against
-                var writer = new EncodingStringWriter();
+                using var writer = new EncodingStringWriter();
                 project.Save(writer);
                 actual = writer.ToString();
             }

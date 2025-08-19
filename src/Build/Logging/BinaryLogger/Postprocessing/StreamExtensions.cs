@@ -5,6 +5,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
@@ -60,7 +61,8 @@ namespace Microsoft.Build.Logging
         {
             if (stream.TryGetLength(out long length))
             {
-                BinaryReader reader = new(stream);
+                using BinaryReader reader = new(stream, Encoding.UTF8, leaveOpen: true);
+
                 return reader.ReadBytes((int)length);
             }
 
