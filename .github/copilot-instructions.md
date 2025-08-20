@@ -7,6 +7,7 @@ Performance is very important--minimize allocations, avoid LINQ, and use the mos
 The code is written in C# and should follow the .NET coding conventions. Use the latest C# features where appropriate, including C# 13 features and especially collection expressions--prefer `[]` to `new Type[]`.
 
 You should generally match the style of surrounding code when making edits, but if making a substantial change, you can modernize more aggressively.
+New files should use nullable types but don't refactor aggressively existing code.
 
 Generate tests for new codepaths, and add tests for any bugs you fix. Use the existing test framework, which is xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
 
@@ -15,6 +16,7 @@ Always reference these instructions first and fallback to search or bash command
 ## Working Effectively
 
 ### Bootstrap and Build the Repository
+NEVER build the repository with just `dotnet build MSBuild.sln` or `dotnet build src/.../Project.csproj`.
 Run these commands in sequence to set up a complete development environment:
 
 **Windows:**
@@ -69,7 +71,7 @@ artifacts\msbuild-build-env.bat
 
 # Verify environment is working
 dotnet --version
-# Should show: 10.0.100-preview.7.25372.107
+# Should show something like: 10.0.100-preview.7.25372.107
 
 # Build a project using the built MSBuild
 dotnet build src/Samples/Dependency/Dependency.csproj
@@ -167,7 +169,7 @@ documentation/
 
 **Build fails with "Could not resolve SDK":**
 - Ensure you run `source artifacts/sdk-build-env.sh` after building
-- Verify `dotnet --version` shows the preview version (10.0.100-preview.7.25372.107)
+- Verify `dotnet --version` shows the preview/RC/internal version (e.g. 10.0.100-preview.7.25372.107)
 
 **Tests fail:**
 - Run individual test projects instead: `dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj`
@@ -181,18 +183,3 @@ documentation/
 - `NuGet.config` - Package source configuration
 - `artifacts/` directory contents - Generated during build
 - `.dotnet/` directory contents - Local SDK location used to build
-
-### Key Files to Understand
-- `build.sh` / `build.cmd` - Main build entry points
-- `MSBuild.sln` - Main solution file (large, contains all projects)
-- `Directory.Build.props` - Common MSBuild properties
-- `src/Directory.Build.targets` - Common build targets
-
-## Quick Reference
-
-### Repository Information
-- **Main branch**: `main`
-- **Language**: C# (.NET 10 preview)
-- **Build system**: MSBuild (self-hosting)
-- **Test framework**: xUnit
-- **License**: MIT
