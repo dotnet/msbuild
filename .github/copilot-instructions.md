@@ -8,6 +8,7 @@ The code is written in C# and should follow the .NET coding conventions. Use the
 
 You should generally match the style of surrounding code when making edits, but if making a substantial change, you can modernize more aggressively.
 New files should use nullable types but don't refactor aggressively existing code.
+New files should use nullable types but don't refactor aggressively existing code.
 
 Generate tests for new codepaths, and add tests for any bugs you fix. Use the existing test framework, which is xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
 
@@ -15,7 +16,7 @@ Always reference these instructions first and fallback to search or bash command
 
 ## Working Effectively
 
-### Bootstrap and Build the Repository
+#### Bootstrap and Build the Repository
 NEVER build the repository with just `dotnet build MSBuild.sln` or `dotnet build src/.../Project.csproj`.
 Run these commands in sequence to set up a complete development environment:
 
@@ -87,7 +88,7 @@ source artifacts/sdk-build-env.sh
 
 # Verify environment is working
 dotnet --version
-# Should show: 10.0.100-preview.7.25372.107
+# Should show something like: 10.0.100-preview.7.25372.107
 
 # Build a project using the built MSBuild
 dotnet build src/Samples/Dependency/Dependency.csproj
