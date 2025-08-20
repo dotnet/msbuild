@@ -45,11 +45,6 @@ namespace Microsoft.Build.BackEnd
         internal const Int32 CREATE_NEW_CONSOLE = 0x00000010;
 
         /// <summary>
-        /// For console processes, the new process does not inherit its parent's console (the default).
-        /// </summary>
-        internal const Int32 DETACHED_PROCESS = 0x00000008;
-
-        /// <summary>
         /// Create a new process
         /// </summary>
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
