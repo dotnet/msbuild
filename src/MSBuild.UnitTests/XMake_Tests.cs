@@ -2856,6 +2856,9 @@ EndGlobal
         {
             using var testEnvironment = TestEnvironment.Create();
 
+            // NOTE for this test: out of proc nodes _always_ log every message, so we rewrite the expected minimum message importance to accept every message.
+            expectedMinimumMessageImportance = MessageImportance.Low;
+
             string projectContents = GenerateMessageImportanceProjectFile(expectedMinimumMessageImportance);
 
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
