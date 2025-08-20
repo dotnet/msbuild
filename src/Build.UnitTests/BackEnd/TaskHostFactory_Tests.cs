@@ -77,21 +77,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     try
                     {
                         Process taskHostNode = Process.GetProcessById(pid);
-                        using var taskhost = processTracker.AttachToProcess(pid, "TaskHost", _output);
-                        bool processExited = taskHostNode.WaitForExit(3000);
-                        if (!processExited)
-                        {
-                            // Only print summary when the assertion would fail
-                            processTracker.PrintSummary(_output);
-                        }
-
-                        processExited.ShouldBeTrue("The process with taskHostNode is still running.");
+                        taskHostNode.WaitForExit(3000).ShouldBeTrue("The process with taskHostNode is still running.");
                     }
 
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
                     catch (ArgumentException e)
                     {
-                        processTracker.PrintSummary(_output);
                         e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
                     }
                 }
