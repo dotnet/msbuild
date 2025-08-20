@@ -1826,12 +1826,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </remarks>
         private void UpdateMinimumMessageImportance(ILogger logger)
         {
-            var innerLogger = (logger is Build.Logging.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
+            var innerLogger = (logger is ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
             MessageImportance? minimumImportance = innerLogger switch
             {
-                Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
-                Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
+                ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
+                ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
 
                 // The BuildCheck connector logger consumes only high priority messages.
                 BuildCheckForwardingLogger => MessageImportance.High,
@@ -1848,10 +1848,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                Build.Logging.TerminalLogger terminalLogger => terminalLogger.GetMinimumMessageImportance(),
+                TerminalLogger terminalLogger => terminalLogger.GetMinimumMessageImportance(),
                 _ =>
-                    // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
-                    MessageImportance.Low,
+                    innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger"
+                        ? MessageImportance.High
+                        // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
+                        : MessageImportance.Low,
             };
 
             if (minimumImportance != null)

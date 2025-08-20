@@ -2803,11 +2803,11 @@ EndGlobal
         [InlineData("/v:minimal /check", MessageImportance.High)]
         [InlineData("/v:quiet /check", MessageImportance.High)]
 
-        [InlineData("/v:diagnostic /tl", MessageImportance.High)]
-        [InlineData("/v:detailed /tl", MessageImportance.High)]
-        [InlineData("/v:normal /tl", MessageImportance.High)]
-        [InlineData("/v:minimal /tl", MessageImportance.High)]
-        [InlineData("/v:quiet /tl", MessageImportance.High - 1)]
+        [InlineData("/v:diagnostic /tl:on", MessageImportance.High)]
+        [InlineData("/v:detailed /tl:on", MessageImportance.High)]
+        [InlineData("/v:normal /tl:on", MessageImportance.High)]
+        [InlineData("/v:minimal /tl:on", MessageImportance.High)]
+        [InlineData("/v:quiet /tl:on", MessageImportance.High - 1)]
         public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
