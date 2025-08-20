@@ -346,7 +346,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Helper class for tracking external processes during tests.
         /// Monitors process lifecycle and provides diagnostic information for debugging.
         /// </summary>
-        internal class ProcessTracker : IDisposable
+        internal sealed class ProcessTracker : IDisposable
         {
             private readonly List<TrackedProcess> _trackedProcesses = new();
 
@@ -415,7 +415,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <summary>
         /// Represents a tracked process with lifecycle monitoring capabilities.
         /// </summary>
-        internal class TrackedProcess : IDisposable
+        internal sealed class TrackedProcess : IDisposable
         {
             /// <summary>
             /// The underlying Process object being tracked.
