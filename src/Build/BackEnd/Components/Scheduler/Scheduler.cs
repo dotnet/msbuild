@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -57,6 +58,14 @@ namespace Microsoft.Build.BackEnd
         private const double DefaultCustomSchedulerForSQLConfigurationLimitMultiplier = 1.1;
 
         #region Scheduler Data
+
+        /// <summary>
+        /// Often we will need to copy requests into a buffer to avoid modifying the target collection while we
+        /// enumerate due to semi-recursive calls in the Scheduler.
+        /// Avoid ArrayPool.Shared here as its backed by a different implementation which will evict our arrays (likely
+        /// due to exceeding the threshold from these recursive calls).
+        /// </summary>
+        private ArrayPool<SchedulableRequest> _requestBufferPool = ArrayPool<SchedulableRequest>.Create();
 
         /// <summary>
         /// Content of the environment variable  MSBUILDSCHEDULINGUNLIMITED
@@ -184,6 +193,13 @@ namespace Microsoft.Build.BackEnd
         /// Information about the missed submission.
         /// </summary>
         private string _noLoggingCompletedSubmissionDetails;
+
+        /// <summary>
+        /// Static variable to track whether this is the first write to the debug dump file.
+        /// If true, indicates that a header should be written to the file.
+        /// After the first write, this is set to false to prevent writing the header in subsequent writes.
+        /// </summary>
+        private static bool _debugDumpIsFirstWrite = true;
 
 #pragma warning restore IDE0052 // Remove unread private members
 #pragma warning restore CS0414 // The field is assigned but its value is never used
@@ -445,8 +461,9 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // This result may apply to a number of other unscheduled requests which are blocking active requests.  Report to them as well.
-                List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequests);
-                foreach (SchedulableRequest unscheduledRequest in unscheduledRequests)
+                SchedulableRequest[] unscheduledRequests = RentPooledBuffer(
+                    _schedulingData.UnscheduledRequests, _schedulingData.UnscheduledRequestsCount, out int numRead);
+                foreach (SchedulableRequest unscheduledRequest in new ReadOnlySpan<SchedulableRequest>(unscheduledRequests, 0, numRead))
                 {
                     if (unscheduledRequest.BuildRequest.GlobalRequestId == result.GlobalRequestId)
                     {
@@ -495,6 +512,8 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
                 }
+
+                ReturnPooledBuffer(unscheduledRequests, numRead);
             }
 
             // This node may now be free, so run the scheduler.
@@ -565,6 +584,7 @@ namespace Microsoft.Build.BackEnd
             _schedulingData = new SchedulingData();
             _availableNodes = new Dictionary<int, NodeInfo>(8);
             _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
+            _requestBufferPool = ArrayPool<SchedulableRequest>.Create();
             _currentInProcNodeCount = 0;
             _currentOutOfProcNodeCount = 0;
 
@@ -1016,7 +1036,9 @@ namespace Microsoft.Build.BackEnd
         {
             if (idleNodes.Contains(InProcNodeId))
             {
-                foreach (SchedulableRequest request in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
+                SchedulableRequest[] unscheduledRequests = RentPooledBuffer(
+                    _schedulingData.UnscheduledRequestsWhichCanBeScheduled, _schedulingData.UnscheduledRequestsCount, out int numRead);
+                foreach (SchedulableRequest request in new ReadOnlySpan<SchedulableRequest>(unscheduledRequests, 0, numRead))
                 {
                     if (CanScheduleRequestToNode(request, InProcNodeId) && shouldBeScheduled(request))
                     {
@@ -1025,6 +1047,8 @@ namespace Microsoft.Build.BackEnd
                         break;
                     }
                 }
+
+                ReturnPooledBuffer(unscheduledRequests, numRead);
             }
         }
 
@@ -1493,8 +1517,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool CreateNewNodeIfPossible(List<ScheduleResponse> responses, IEnumerable<SchedulableRequest> requests)
         {
-            int availableNodesWithInProcAffinity = 1 - _currentInProcNodeCount;
-            int availableNodesWithOutOfProcAffinity = _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;
+            // We allow up to MaxNodeCount in-proc nodes when running multi-threaded.
+            // TODO: Take VS scenarios into account _componentHost.BuildParameters.DisableInProcNode https://github.com/dotnet/msbuild/issues/11939
+            int maxInProcNodeCount = _componentHost.BuildParameters.MultiThreaded ? _componentHost.BuildParameters.MaxNodeCount : 1;
+            int availableNodesWithInProcAffinity = maxInProcNodeCount - _currentInProcNodeCount;
+
+            int availableNodesWithOutOfProcAffinity = _componentHost.BuildParameters.MultiThreaded ? 0 : _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;
+
             int requestsWithOutOfProcAffinity = 0;
             int requestsWithAnyAffinityOnInProcNodes = 0;
 
@@ -1523,7 +1552,7 @@ namespace Microsoft.Build.BackEnd
                         // If we've previously seen "Any"-affinitized requests, now that there are some
                         // genuine inproc requests, they get to play with the inproc node first, so
                         // push the "Any" requests to the out-of-proc nodes.
-                        if (requestsWithAnyAffinityOnInProcNodes > 0)
+                        if (requestsWithAnyAffinityOnInProcNodes > 0 && !_componentHost.BuildParameters.MultiThreaded)
                         {
                             requestsWithAnyAffinityOnInProcNodes--;
                             outOfProcNodesToCreate++;
@@ -1575,9 +1604,13 @@ namespace Microsoft.Build.BackEnd
                 // If we still want to create one, go ahead
                 if (inProcNodesToCreate > 0)
                 {
-                    ErrorUtilities.VerifyThrow(inProcNodesToCreate == 1, "We should never be trying to create more than one inproc node");
+                    if (!_componentHost.BuildParameters.MultiThreaded)
+                    {
+                        ErrorUtilities.VerifyThrow(inProcNodesToCreate == 1, "We should not be trying to create more than one inproc node");
+                    }
+
                     TraceScheduler("Requesting creation of new node satisfying affinity {0}", NodeAffinity.InProc);
-                    responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, 1));
+                    responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, inProcNodesToCreate));
 
                     // We only want to submit one node creation request at a time -- as part of node creation we recursively re-request the scheduler
                     // to do more scheduling, so the other request will be dealt with soon enough.
@@ -1713,7 +1746,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 int nodeForResults = (parentRequest == null) ? InvalidNodeId : parentRequest.AssignedNode;
-                TraceScheduler("Received request {0} (node request {1}) with parent {2} from node {3}", request.GlobalRequestId, request.NodeRequestId, request.ParentGlobalRequestId, nodeForResults);
+                TraceScheduler("Received request {0} (node request {1}) with parent {2} from node {3} for project {4} with targets {5}", request.GlobalRequestId, request.NodeRequestId, request.ParentGlobalRequestId, nodeForResults, _configCache![request.ConfigurationId].ProjectFullPath, request.Targets.Count == 0 ? "default" : string.Join(";", request.Targets));
 
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
@@ -1952,11 +1985,14 @@ namespace Microsoft.Build.BackEnd
 
             // Now determine which unscheduled requests have results.  Reporting these may cause an blocked request to become ready
             // and potentially allow us to continue it.
-            List<SchedulableRequest> unscheduledRequests = new List<SchedulableRequest>(_schedulingData.UnscheduledRequests);
-            foreach (SchedulableRequest request in unscheduledRequests)
+            SchedulableRequest[] unscheduledRequests = RentPooledBuffer(
+                _schedulingData.UnscheduledRequests, _schedulingData.UnscheduledRequestsCount, out int numRead);
+            foreach (SchedulableRequest request in new ReadOnlySpan<SchedulableRequest>(unscheduledRequests, 0, numRead))
             {
                 ResolveRequestFromCacheAndResumeIfPossible(request, responses);
             }
+
+            ReturnPooledBuffer(unscheduledRequests, numRead);
         }
 
         /// <summary>
@@ -2320,6 +2356,36 @@ namespace Microsoft.Build.BackEnd
             return true;
         }
 
+        private SchedulableRequest[] RentPooledBuffer(IEnumerable<SchedulableRequest> requests, int count, out int numRead)
+        {
+            SchedulableRequest[] buffer = _requestBufferPool.Rent(count);
+            IEnumerator<SchedulableRequest> requestsToRead = requests.GetEnumerator();
+
+            // Given that we're only exposed IEnumerable by SchedulingData, the actual number of elements read may be
+            // less than the max count we requested - so we track the actual number of read requests.
+            numRead = 0;
+            while (numRead < buffer.Length && requestsToRead.MoveNext())
+            {
+                buffer[numRead] = requestsToRead.Current;
+                numRead++;
+            }
+
+            return buffer;
+        }
+
+        private void ReturnPooledBuffer(SchedulableRequest[] buffer, int numRead)
+        {
+            // Clear out the buffer for GC purposes.
+            // We could pass clearArray to ArrayPool, but we already know the number of elements we read so we can
+            // save on some instructions.
+            for (int i = 0; i < numRead; i++)
+            {
+                buffer[i] = null;
+            }
+
+            _requestBufferPool.Return(buffer, clearArray: false);
+        }
+
         /// <summary>
         /// Writes the graph representation of how the nodes were utilized.
         /// </summary>
@@ -2625,7 +2691,24 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
+                        bool shouldWriteHeader = _debugDumpIsFirstWrite;
+                        if (shouldWriteHeader)
+                        {
+                            shouldWriteHeader = !File.Exists(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId));
+                            _debugDumpIsFirstWrite = false;
+                        }
                         using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
+
+
+                        if (shouldWriteHeader)
+                        {
+                            file.WriteLine("SchedulerState Log Symbols:");
+                            file.WriteLine("! - Blocked request: A build request waiting for dependencies or resources.");
+                            file.WriteLine("> - Executing request: A build request currently being processed by a node.");
+                            file.WriteLine("------------------------------------------------");
+                            file.WriteLine();
+                        }
 
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------");
