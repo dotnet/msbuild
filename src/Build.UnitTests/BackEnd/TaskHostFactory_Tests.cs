@@ -46,6 +46,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                using ProcessTracker processTracker = new();
                 string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
                 string pidTaskProject = $@"
 <Project>
@@ -76,21 +77,44 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     try
                     {
                         Process taskHostNode = Process.GetProcessById(pid);
-                        taskHostNode.WaitForExit(3000).ShouldBeTrue($"The executed MSBuild Version: {projectInstance.GetProperty("MSBuildVersion")}");
+                        using var taskhost = processTracker.AttachToProcess(pid, "TaskHost", _output);
+                        bool processExited = taskHostNode.WaitForExit(3000);
+                        if (!processExited)
+                        {
+                            // Only print summary when the assertion would fail
+                            processTracker.PrintSummary(_output);
+                        }
+
+                        processExited.ShouldBeTrue("The process with taskHostNode is still running.");
                     }
 
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
                     catch (ArgumentException e)
                     {
+                        processTracker.PrintSummary(_output);
                         e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
                     }
                 }
                 else
                 {
-                    // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
-                    Process taskHostNode = Process.GetProcessById(pid);
-                    taskHostNode.WaitForExit(3000).ShouldBeFalse($"The executed MSBuild Version: {projectInstance.GetProperty("MSBuildVersion")}");
-                    taskHostNode.Kill();
+                    try
+                    {
+                        // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
+                        Process taskHostNode = Process.GetProcessById(pid);
+                        using var taskHostNodeTracker = processTracker.AttachToProcess(pid, "Sidecar", _output);
+                        bool processExited = taskHostNode.WaitForExit(3000);
+                        if (processExited)
+                        {
+                            processTracker.PrintSummary(_output);
+                        }
+
+                        processExited.ShouldBeFalse();
+                        taskHostNode.Kill();
+                    }
+                    catch
+                    {
+                        processTracker.PrintSummary(_output);
+                    }
                 }
             }
         }
