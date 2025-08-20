@@ -1,6 +1,6 @@
 # Create an experimental VS insertion auto-triggered from exp/* branches to validate changes before merging to main
 trigger: none
-name: $(Date:yyyyMMdd).$(Rev:r)
+name: $(Date:yyyyMMdd).$(Rev:r).$(resources.pipeline.MSBuild.sourceCommit)
 
 resources:
   pipelines:

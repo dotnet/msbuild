@@ -10,7 +10,7 @@
 # 3. manual insertion - select manually the TargetBranch and inserted CI run.
 trigger: none
 pr: none
-name: $(Date:yyyyMMdd).$(Rev:r)
+name: $(Date:yyyyMMdd).$(Rev:r).$(resources.pipeline.MSBuild.sourceCommit)
 
 schedules:
   - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
