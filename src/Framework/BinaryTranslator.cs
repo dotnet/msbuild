@@ -119,6 +119,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Gets or sets the packet version associated with the stream.
+            /// This can be used to exclude various fields from translation for backwards compatibility.
+            /// </summary>
+            public byte PacketVersion { get; set; }
+
+            /// <summary>
             /// Translates a boolean.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -941,6 +947,12 @@ namespace Microsoft.Build.BackEnd
                 get
                 { return TranslationDirection.WriteToStream; }
             }
+
+            /// <summary>
+            /// Gets or sets the packet version associated with the stream.
+            /// This can be used to exclude various fields from translation for backwards compatibility.
+            /// </summary>
+            public byte PacketVersion { get; set; }
 
             /// <summary>
             /// Translates a boolean.

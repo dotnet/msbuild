@@ -510,11 +510,6 @@
         <target state="translated">MSB3094: "{2}"은(는) 항목을 {0}개 참조하고 "{3}"은(는) 항목을 {1}개 참조합니다. 참조하는 항목 수는 같아야 합니다.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">globs: fileSpec: "{0}" fileSpec을 파일 이름으로 가정하여 fileSpec을 확장하는 동안 예외가 발생했습니다. 예외: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: "{0}" 조건의 "{1}" 위치에 예기치 않은 공백이 있습니다. 공백을 제거했는지 확인하세요.</target>
@@ -575,6 +570,18 @@
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">메타프로젝트 "{0}"이(가) 생성되었습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostTaskLoad_Failed">
+        <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">작업을 로드하지 못했습니다. MSBuild .NET 런타임 태스크 호스트가 필요하지만 지정한 버전에 대한 .NET 런타임 태스크 호스트를 찾을 수 없습니다.
+    이 오류를 해결하는 방법에 대한 자세한 내용은 https://aka.ms/nettaskhost를 참조하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostVersion_Failed">
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
+        <target state="translated">SDK 버전 {0} 이 필요한 최소 버전 {1}보다 낮습니다. .NET 런타임 태스크 호스트는 .NET SDK 10.0.100-rc1 이상을 사용하는 경우에만 지원됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -826,6 +833,16 @@
       {1}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
+      </trans-unit>
+      <trans-unit id="SDKPathCheck_Failed">
+        <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">디렉터리가 존재하지 않습니다. {0}. .NET 런타임 태스크 호스트를 인스턴스화할 수 없습니다. 이 오류를 해결하는 방법에 대한 자세한 내용은 https://aka.ms/nettaskhost를 참조하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKPathResolution_Failed">
+        <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
+        <target state="translated">Runtime="NET"인 UsingTask가 SDK가 아닌 프로젝트에 지정되었습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".

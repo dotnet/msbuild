@@ -24,6 +24,7 @@ namespace Microsoft.Build.BackEnd
             BuildExceptionSerializationHelper.InitializeSerializationContract(
                 new(typeof(GenericBuildTransferredException), (msg, inner) => new GenericBuildTransferredException(msg, inner)),
                 new(typeof(SdkResolverException), (msg, inner) => new SdkResolverException(msg, inner)),
+                new(typeof(SdkResolverServiceException), (msg, inner) => new SdkResolverServiceException(msg, inner)),
                 new(typeof(BuildAbortedException), BuildAbortedException.CreateFromRemote),
                 new(typeof(CircularDependencyException), (msg, inner) => new CircularDependencyException(msg, inner)),
                 new(typeof(InternalLoggerException), (msg, inner) => new InternalLoggerException(msg, inner)),

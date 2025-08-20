@@ -11,10 +11,17 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
 using System.IO;
+#endif
+
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 
 #nullable disable
 
@@ -313,14 +320,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Create an instance of the wrapped ITask for a batch run of the task.
         /// </summary>
-        internal ITask CreateTaskInstance(ElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskIdentityParameters,
+        internal ITask CreateTaskInstance(
+            ElementLocation taskLocation,
+            TaskLoggingContext taskLoggingContext,
+            IBuildComponentHost buildComponentHost,
+            IDictionary<string, string> taskIdentityParameters,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            bool isOutOfProc)
+            bool isOutOfProc,
+            Func<string, ProjectPropertyInstance> getProperty)
         {
             bool useTaskFactory = false;
-            IDictionary<string, string> mergedParameters = null;
+            Dictionary<string, string> mergedParameters = null;
             _taskLoggingContext = taskLoggingContext;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
@@ -356,6 +368,11 @@ namespace Microsoft.Build.BackEnd
                 if (!mergedParameters.ContainsKey(XMakeAttributes.architecture))
                 {
                     mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                }
+
+                if (mergedParameters[XMakeAttributes.runtime].Equals(XMakeAttributes.MSBuildRuntimeValues.net))
+                {
+                    AddNetHostParams(ref mergedParameters, getProperty);
                 }
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -550,9 +567,11 @@ namespace Microsoft.Build.BackEnd
         /// Given a set of task parameters from the UsingTask and from the task invocation, generate a dictionary that combines the two, or throws if the merge
         /// is impossible (we shouldn't ever get to this point if it is ...)
         /// </summary>
-        private static IDictionary<string, string> MergeTaskFactoryParameterSets(IDictionary<string, string> factoryIdentityParameters, IDictionary<string, string> taskIdentityParameters)
+        private static Dictionary<string, string> MergeTaskFactoryParameterSets(
+            IDictionary<string, string> factoryIdentityParameters,
+            IDictionary<string, string> taskIdentityParameters)
         {
-            IDictionary<string, string> mergedParameters = null;
+            Dictionary<string, string> mergedParameters = null;
             if (factoryIdentityParameters == null || factoryIdentityParameters.Count == 0)
             {
                 mergedParameters = new Dictionary<string, string>(taskIdentityParameters, StringComparer.OrdinalIgnoreCase);
@@ -602,6 +621,20 @@ namespace Microsoft.Build.BackEnd
             }
 
             return mergedParameters;
+        }
+
+        /// <summary>
+        /// Adds the properties necessary for NET task host instantiation.
+        /// </summary>
+        private static void AddNetHostParams(ref Dictionary<string, string> taskParams, Func<string, ProjectPropertyInstance> getProperty)
+        {
+            string hostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
+            string msBuildAssemblyDirectoryPath = Path.GetDirectoryName(getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue) ?? string.Empty;
+            if (!string.IsNullOrEmpty(hostPath) && !string.IsNullOrEmpty(msBuildAssemblyDirectoryPath))
+            {
+                taskParams.Add(Constants.DotnetHostPath, hostPath);
+                taskParams.Add(Constants.MSBuildAssemblyPath, msBuildAssemblyDirectoryPath);
+            }
         }
 
         /// <summary>
