@@ -57,12 +57,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The object used for thread-safe synchronization of static members.
         /// </summary>
-        private static readonly Object s_staticSyncLock = new Object();
+        private static readonly LockType s_staticSyncLock = new();
 
         /// <summary>
         /// The object used for thread-safe synchronization of BuildManager shared data and the Scheduler.
         /// </summary>
-        private readonly Object _syncLock = new Object();
+        private readonly Object _syncLock = new();
 
         /// <summary>
         /// The singleton instance for the BuildManager.

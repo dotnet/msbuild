@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Creates new MSBuild or dotnet process.
         /// </summary>
         private Process StartInternal(string msbuildLocation, string commandLineArgs)
         {
@@ -81,7 +81,12 @@ namespace Microsoft.Build.BackEnd
                     startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
                     startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
+
                     creationFlags |= BackendNativeMethods.CREATENOWINDOW;
+
+                    // Avoid spawning a conhost.exe process, since this node won't do console output
+                    // even though Windows thinks of us as a "console process"
+                    creationFlags |= BackendNativeMethods.DETACHED_PROCESS;
                 }
             }
             else

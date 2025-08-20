@@ -19,7 +19,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Synchronizes access to the staScheduler field.
         /// </summary>
-        private static readonly Object s_staSchedulerSync = new Object();
+        private static readonly LockType s_staSchedulerSync = new();
 
         /// <summary>
         /// The singleton STA scheduler object.
