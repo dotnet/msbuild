@@ -8,7 +8,6 @@ The code is written in C# and should follow the .NET coding conventions. Use the
 
 You should generally match the style of surrounding code when making edits, but if making a substantial change, you can modernize more aggressively.
 New files should use nullable types but don't refactor aggressively existing code.
-New files should use nullable types but don't refactor aggressively existing code.
 
 Generate tests for new codepaths, and add tests for any bugs you fix. Use the existing test framework, which is xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
 
