@@ -69,7 +69,7 @@
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.100-preview.7.25322.101</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.100-preview.7.25380.108</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

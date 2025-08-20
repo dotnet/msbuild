@@ -16,6 +16,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
@@ -59,14 +60,6 @@ namespace Microsoft.Build.Execution
         /// The fallback task registry
         /// </summary>
         private Toolset _toolset;
-
-        /// <summary>
-        /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
-        /// a small well-known set of tasks that are known to depend on IBuildEngine
-        /// callbacks; as forcing those out of proc would be just setting them up for
-        /// known failure.
-        /// </summary>
-        private static readonly bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v4), used for shimming in loading
@@ -1099,7 +1092,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
-            private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
+            private static readonly LockType s_taskFactoryTypeLoaderLock = new();
 
 #if DEBUG
             /// <summary>
@@ -1112,6 +1105,11 @@ namespace Microsoft.Build.Execution
             /// Type filter to make sure we only look for taskFactoryClasses
             /// </summary>
             private static readonly Func<Type, object, bool> s_taskFactoryTypeFilter = IsTaskFactoryClass;
+
+            /// <summary>
+            /// Lock object to ensure that only one thread can access the task factory type loader at a time.
+            /// </summary>
+            private readonly LockType _lockObject = new();
 
             /// <summary>
             /// Identity of this task.
@@ -1149,7 +1147,7 @@ namespace Microsoft.Build.Execution
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
             /// make possibly expensive calls over and over again.
             /// </summary>
-            private readonly ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
+            private ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.
@@ -1235,7 +1233,6 @@ namespace Microsoft.Build.Execution
                 _taskIdentity = new RegisteredTaskIdentity(registeredName, taskFactoryParameters);
                 _parameterGroupAndTaskBody = inlineTask;
                 _registrationOrderId = registrationOrderId;
-                _taskNamesCreatableByFactory = new ConcurrentDictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
 
                 if (String.IsNullOrEmpty(taskFactory))
                 {
@@ -1358,6 +1355,21 @@ namespace Microsoft.Build.Execution
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
             {
+                // First check (fast path - no locking)
+                if (_taskNamesCreatableByFactory == null)
+                {
+                    lock (_lockObject)
+                    {
+                        // Second check (inside lock - ensure only one thread initializes)
+
+                        // Initialize the cache dictionary only when first needed.
+                        // This approach ensures the dictionary is available regardless of how the RegisteredTaskRecord
+                        // instance was created (constructor, deserialization, factory methods, etc.).
+                        _taskNamesCreatableByFactory ??= new ConcurrentDictionary<RegisteredTaskIdentity, object>(
+                                RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                    }
+                }
+
                 RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
 
                 // See if the task name as already been checked against the factory, return the value if it has
@@ -1466,19 +1478,25 @@ namespace Microsoft.Build.Execution
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
+                    _taskFactoryParameters ??= new();
+                    TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
-                        bool explicitlyLaunchTaskHost =
+                        // If ForceAllTasksOutOfProc is true, we will force all tasks to run in the MSBuild task host
+                        // "EXCEPT a small well-known set of tasks that are known to depend on IBuildEngine callbacks
+                        // as forcing those out of proc would be just setting them up for known failure"
+
+                        bool launchTaskHost =
                             isTaskHostFactory ||
                             (
-                                s_forceTaskHostLaunch &&
+                                Traits.Instance.ForceAllTasksOutOfProcToTaskHost &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
                     else
@@ -1563,7 +1581,11 @@ namespace Microsoft.Build.Execution
                                         initialized = factory.Initialize(RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
-                                        if (initialized && TaskFactoryParameters != null)
+                                        // In case TaskHostFactory is explicitly requested, we will now have a parameter for that.
+                                        bool containsArchOrRuntimeParam = TaskFactoryParameters?.TryGetValue(XMakeAttributes.runtime, out _) == true
+                                                                          || TaskFactoryParameters?.TryGetValue(XMakeAttributes.architecture, out _) == true;
+
+                                        if (initialized && containsArchOrRuntimeParam)
                                         {
                                             targetLoggingContext.LogWarning(
                                                 null,

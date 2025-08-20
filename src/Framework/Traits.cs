@@ -37,6 +37,9 @@ namespace Microsoft.Build.Framework
 
         internal readonly string? MSBuildDisableFeaturesFromVersion = Environment.GetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION");
 
+        // This will affect all tasks except for MSBuild and CallTarget. Those two have to run in-proc, as they depend on IBuildEngine callbacks.
+        public readonly bool ForceAllTasksOutOfProcToTaskHost = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1";
+
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
@@ -149,6 +152,8 @@ namespace Microsoft.Build.Framework
         public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
         public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
         public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
+
+        public bool EnableTargetOutputLogging = IsEnvVarOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
         // for VS17.14
         public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
