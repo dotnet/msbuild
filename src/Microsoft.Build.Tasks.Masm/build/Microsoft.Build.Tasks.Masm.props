@@ -1,0 +1,5 @@
+﻿<Project>
+  <UsingTask TaskName="MASM"
+             AssemblyFile="$(MSBuildThisFileDirectory)..\tasks\net472\$(MSBuildThisFileName).dll"
+             Override="true"/>
+</Project>
