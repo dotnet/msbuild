@@ -80,11 +80,11 @@
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                    在计算后写出一个或多个指定属性的值，
-                    但不执行生成，或者如果使用的是
-                    -targets 选项或 -getTargetResult 选项，
-                    则在生成后写出这些值。
-   </target>
+                     在计算后写出一个或多个指定属性的值，
+                     但不执行生成，或者如果使用的是
+                     -targets 选项或 -getTargetResult 选项，
+                     则在生成后写出这些值。
+    </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -99,12 +99,12 @@
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                    在计算后写出一个或多个指定项的值及其
-                    关联的元数据，但不
-                    执行生成，或者如果使用的是 -targets 选项
-                    或 -getTargetResult 选项，则在生成后写出
-                    这些值。
-   </target>
+                     在计算后写出一个或多个指定项的值及其
+                     关联的元数据，但不
+                     执行生成，或者如果使用的是 -targets 选项
+                     或 -getTargetResult 选项，则在生成后写出
+                     这些值。
+    </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -116,9 +116,9 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                    写出一个或多个目标的输出值，
-                    并且将执行指定的目标。
-   </target>
+                     写出一个或多个目标的输出值，
+                     并且将执行指定的目标。
+    </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -141,20 +141,20 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                    检查功能可用性。结果是以下字符串之一:
-                    "Undefined"、"Available"、"NotAvailable" 和
-                    "Preview"。
-                    - Undefined - 未定义功能的可用性
-                    (功能可用性检查器不知道
-                    该功能名称)
-                    - NotAvailable - 功能不可用(不同于
-                    Undefined，功能可用性检查器知道
-                    该功能名称，并且还知道该功能不
-                    受当前 MSBuild 引擎支持)
-                    - Available - 功能可用
-                    - Preview - 功能处于预览状态(不稳定)
-                    (缩写: -fa)
-   </target>
+                     检查功能可用性。结果是以下字符串之一:
+                     "Undefined"、"Available"、"NotAvailable" 和
+                     "Preview"。
+                     - Undefined - 未定义功能的可用性
+                     (功能可用性检查器不知道
+                     该功能名称)
+                     - NotAvailable - 功能不可用(不同于
+                     Undefined，功能可用性检查器知道
+                     该功能名称，并且还知道该功能不
+                     受当前 MSBuild 引擎支持)
+                     - Available - 功能可用
+                     - Preview - 功能处于预览状态(不稳定)
+                     (缩写: -fa)
+    </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -174,17 +174,17 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                    启用或禁用终端记录器。终端记录器
-                    在控制台上实时提供增强的生成输出，
-                    这些输出在逻辑上按项目进行整理，旨在突出显示
-                    可操作信息。指定 auto (或使用
-                    不带参数的选项)，仅在标准输出未重定向的情况下
-                    使用终端记录器。不要分析输出，
-                    也不要依赖于它在将来的版本中保持
-                    不变。此选项在 MSBuild 17.8 和
-                    更高版本中提供。
-                    (缩写: -tl)
-   </target>
+                     启用或禁用终端记录器。终端记录器
+                     在控制台上实时提供增强的生成输出，
+                     这些输出在逻辑上按项目进行整理，旨在突出显示
+                     可操作信息。指定 auto (或使用
+                     不带参数的选项)，仅在标准输出未重定向的情况下
+                     使用终端记录器。不要分析输出，
+                     也不要依赖于它在将来的版本中保持
+                     不变。此选项在 MSBuild 17.8 和
+                     更高版本中提供。
+                     (缩写: -tl)
+    </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -211,24 +211,24 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    终端记录器的参数。(缩写: -tlp)
-                    可用参数。
-                       default - 指定终端
-                       记录器的默认行为。它需要以下值之一:
-                          - `on`、`true` 可强制使用 TerminalLogger，
-                           即使它已禁用也是如此。
-                          - `off`、`false` 可强制不使用 TerminalLogger，
-                           即使它已启用也是如此。
-                          - `auto` 可在终端支持 TerminalLogger
-                           且会话没有重定向的 stdout/stderr 时
-                           启用 TerminalLogger
-                       verbosity - 替代此记录器的 -verbosity
-                       设置
-                       showCommandLine - 显示 TaskCommandLineEvent 消息
+                     终端记录器的参数。(缩写: -tlp)
+                     可用参数。
+                        default - 指定终端
+                        记录器的默认行为。它需要以下值之一:
+                           - `on`、`true` 可强制使用 TerminalLogger，
+                            即使它已禁用也是如此。
+                           - `off`、`false` 可强制不使用 TerminalLogger，
+                            即使它已启用也是如此。
+                           - `auto` 可在终端支持 TerminalLogger
+                            且会话没有重定向的 stdout/stderr 时
+                            启用 TerminalLogger
+                        verbosity - 替代此记录器的 -verbosity
+                        设置
+                        showCommandLine - 显示 TaskCommandLineEvent 消息
 
-                     示例:
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
-   </target>
+                      示例:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -245,15 +245,15 @@
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
-                     在 MSBuild 中启用实验性多线程模式。
-                     这意味着 MSBuild 将使用多个线程
-                     并行构建项目，
-                     而不是使用多个进程。
-                     不支持此选项。
-                     使用的最大线程数
-                     由 -maxCpuCount 开关决定。
-                     (缩写: -mt)
+        <target state="new">  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     (Short form: -mt)
     </target>
         <note />
       </trans-unit>
@@ -266,12 +266,12 @@
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                    将 get* 的输出重定向到文件中。
+                     将 get* 的输出重定向到文件中。
 
-                    示例:
-                    -getProperty:Bar -getResultOutputFile:Biz.txt
-                    这会将属性 Bar 的值写入 Biz.txt。
-   </target>
+                     示例:
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     这会将属性 Bar 的值写入 Biz.txt。
+    </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -284,8 +284,8 @@
                      of the build. For more info see aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
-                     在生成中启用 BuildChecks。
-                     BuildCheck 允许评估规则以确保生成的
+                     在生成期间启用 BuildChecks。
+                     BuildCheck 支持评估规则以确保生成的
                      属性。有关详细信息，请参阅 aka.ms/buildcheck
 	</target>
         <note>
@@ -1809,7 +1809,7 @@
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
-        <target state="translated">未使用终端记录器，因为检测到生成正在自动化环境中运行。</target>
+        <target state="new">Terminal Logger was not used because it was detected that the build is running in an automated environment.</target>
         <note />
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
@@ -2061,53 +2061,50 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     将所有生成事件序列化为压缩的二进制文件。
-                     默认情况下，该文件位于当前目录中，名为
-                     "msbuild.binlog"。二进制日志是生成过程的详细描述
-，
-                     稍后可用于重新构造
-                     文本日志并供其他分析工具使用。二进制日志
-                     大小通常为最详细的文本诊断级别日志的 1/10 至 1/20，
-                     但它包含更多信息。
-                     (缩写: -bl)
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     可选的 LogFile 指定保存二进制日志
-                     的路径。要为每个生成产生不同的日志文件
-，
-                     可以将令牌 "{}" 添加到
-                     路径中，例如: LogFile=output-{}-log.binlog。日志路径中的每个
-                     "{}" 都使用时间戳、正在运行的进程 ID 和
-                     随机字符串戳
-                     替换为唯一字符串。
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
 
-                     二进制记录器默认收集
-                     项目文件的源文本，包括生成期间遇到的
-                     所有导入项目和目标文件。可选
-                     ProjectImports 开关控制此行为:
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                      ProjectImports=None     - 不收集项目
-                                                导入。
-                      ProjectImports=Embed    - 将项目导入嵌入到
-                                                日志文件中。
-                      ProjectImports=ZipFile - 将项目文件保存到
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
                                                 output.projectimports.zip
-，
-                                                其中输出的名称与
-                                                二进制日志文件名相同。
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     ProjectImports 的默认设置为 Embed。
-                     注意: 记录器不会收集非 MSBuild 源文件，
-                     例如 .cs、.cpp 等。
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
 
-                     可以通过将 .binlog 文件(而不是项目/解决方案)作为自变量传递给
-                     msbuild.exe 来“回放”该文件。
-                     其他记录器将收到日志文件中包含的信息，
-                     就像原始生成正在发生一样。
-                     有关二进制日志及其用法的详细信息，请参阅:
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     示例:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
@@ -2224,7 +2221,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
-        <target state="translated">MSBUILD : error MSB1021: 无法创建记录器 {0} 的实例。{1}</target>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

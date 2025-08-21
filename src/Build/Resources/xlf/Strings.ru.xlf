@@ -213,22 +213,22 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">В {0} проекта указано свойство "TargetFramework(s)", '{1}', который не использует пакет SDK для .NET. Эти свойства не распознаются проектами, которые импортют целевые объекты C# напрямую.</target>
+        <target state="translated">Проект {0} указывает свойство "TargetFramework(s)" "{1}", которое не использует пакет SDK для .NET. Эти свойства непонятны проектам, которые импортируют целевые объекты C# напрямую.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Свойства TargetFramework и TargetFrameworks не учитываются и не должны указываться в проектах, не использующих пакет SDK для .NET.</target>
+        <target state="translated">Свойства "TargetFramework" и "TargetFrameworks" не учитываются и не должны указываться в проектах, которые не используют пакет SDK для .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="translated">Задача {0} из проекта {1} создает проект с помощью CLI {2}. Вместо этого следует использовать задачу MSBuild.</target>
+        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="translated">Задачу "Exec" не следует использовать для создания проекта.</target>
+        <target state="new">The 'Exec' task should not be used to build a project.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Расположение: '{0}' быть полностью доверенным. Поместите проекты за пределы этой папки (проект: {1}).</target>
+        <target state="translated">Расположение "{0}" не может быть полностью доверенным, разместите свои проекты за пределами этой папки (проект: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">Папка "Загрузки" недоверена для сборки проектов.</target>
+        <target state="translated">Папка "Загрузки" не является доверенной для создания проектов.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -458,7 +458,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="translated">({0:F1}с)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -575,13 +575,13 @@
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="translated">Не удалось загрузить задачу, так как для нее требуется узел задач среды выполнения .NET MSBuild, но для указанной версии не удалось найти узел задач среды выполнения .NET.
-    Подробности об устранении этой ошибки см. на странице https://aka.ms/nettaskhost.</target>
+        <target state="new">The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
         <note />
       </trans-unit>
       <trans-unit id="NETHostVersion_Failed">
         <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
-        <target state="translated">Версия пакета SDK {0} ниже минимально требуемой версии {1}. Узел задач среды выполнения .NET поддерживается только при использовании пакета SDK для .NET 10.0.100-rc1 или более поздней версии.</target>
+        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -639,7 +639,7 @@
       </trans-unit>
       <trans-unit id="OpenTelemetryLoadFailed">
         <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Не удалось загрузить библиотеки телеметрии с исключением: {0}.</target>
+        <target state="new">Loading telemetry libraries failed with exception: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -836,12 +836,12 @@
       </trans-unit>
       <trans-unit id="SDKPathCheck_Failed">
         <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="translated">Каталог не существует: {0}. Не удалось создать экземпляр узла задач среды выполнения .NET. Подробности об устранении этой ошибки см. на странице https://aka.ms/nettaskhost.</target>
+        <target state="new">The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKPathResolution_Failed">
         <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
-        <target state="translated">Параметр UsingTask со значением Runtime="NET" указан в проекте, не относящемся к пакету SDK.</target>
+        <target state="new">UsingTask with Runtime="NET" was specified in a non-SDK project.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
@@ -879,22 +879,22 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но она уже была настроена в качестве переменной среды.</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но она уже была настроена другим пакетом SDK.</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}".</target>
+        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="translated">Не удалось разрешить SDK "{0}" с помощью сопоставителя SDK "{1}". {2}</target>
+        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -923,7 +923,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionStarted">
         <source>Static graph construction started.</source>
-        <target state="translated">Начато построение статического графа.</target>
+        <target state="new">Static graph construction started.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -1052,7 +1052,7 @@ Errors: {3}</source>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Это необработанное исключение в MSBuild. Проголосуйте за существующую проблему или сообщите о новой по адресу https://aka.ms/msbuild/unhandled
+        <target state="translated">Это необработанное исключение в MSBuild. ПРОГОЛОСУЙТЕ ЗА СУЩЕСТВУЮЩУЮ ПРОБЛЕМУ ИЛИ СООБЩИТЕ О НОВУЙ НА https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>
@@ -1063,7 +1063,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">Тип {0} не распознан {1}.</target>
+        <target state="translated">Тип ведения журнала {0} не понятен для {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

@@ -213,22 +213,22 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Project {0} 指定未使用 .NET SDK 的 'TargetFramework(s)' 属性 '{1}'。直接匯入 C# 目標的項目無法瞭解這些屬性。</target>
+        <target state="translated">專案 {0} 指定 'TargetFramework(s)' 屬性 '{1}'，該屬性未使用 .NET SDK。這些屬性無法被直接匯入 C# 目標的專案理解。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">未遵守 『TargetFramework』 和 『TargetFrameworks』 屬性，且不應在未使用 .NET SDK 的專案中指定。</target>
+        <target state="translated">未遵守 'TargetFramework' 和 'TargetFrameworks' 屬性，且不應在未使用 .NET SDK 的專案中指定。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="translated">來自專案 {1} 的工作 {0} 使用 {2} CLI 建置專案。建議改用 MSBuild 工作。</target>
+        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="translated">不應該使用 'Exec' 工作來建置專案。</target>
+        <target state="new">The 'Exec' task should not be used to build a project.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -263,12 +263,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">位置： '{0}' 無法完全信任，請將您的專案放在該資料夾之外 (Project： {1})。</target>
+        <target state="translated">位置: '{0}' 無法完全信任，請將您的專案放在該資料夾之外 (專案: {1})。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">專案建置不受信任的下載資料夾。</target>
+        <target state="translated">下載資料夾對於建置專案來說不受信任。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -499,7 +499,7 @@
       <trans-unit id="FatalErrorWhileLoggingWithInnerException">
         <source>MSB4017: The build stopped unexpectedly because of an unexpected logger failure.
     {0}</source>
-        <target state="translated">MSB4017: 因為未預期的記錄器失敗，建置未預期停止。
+        <target state="translated">MSB4017: 由於發生未預期的記錄器失敗，因此已中止組建。
    {0}</target>
         <note>{StrBegin="MSB4017: "}UE: This message is used for a special exception that is thrown when a logger fails while logging an event (most
     likely because of a programming error in the logger). When a logger dies, we cannot proceed with the build, and we throw a
@@ -575,13 +575,13 @@
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="translated">無法載入工作，因為它需要 MSBuild .NET 執行階段工作主機，但找不到指定版本的 .NET 執行階段工作主機。
-    如需如何解決此錯誤的詳細資料，請參閱 https://aka.ms/nettaskhost。</target>
+        <target state="new">The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
         <note />
       </trans-unit>
       <trans-unit id="NETHostVersion_Failed">
         <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
-        <target state="translated">SDK 版本 {0} 低於 {1} 的最低必要版本。只有在使用 .NET SDK 10.0.100-rc1 或更新版本時，才支援 .NET 執行階段工作主機。</target>
+        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -639,7 +639,7 @@
       </trans-unit>
       <trans-unit id="OpenTelemetryLoadFailed">
         <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">載入遙測程式庫時發生例外狀況: {0}。</target>
+        <target state="new">Loading telemetry libraries failed with exception: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -836,12 +836,12 @@
       </trans-unit>
       <trans-unit id="SDKPathCheck_Failed">
         <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="translated">目錄不存在: {0}。無法執行個體化 .NET 執行階段工作主機。如需如何解決此錯誤的詳細資料，請參閱 https://aka.ms/nettaskhost。</target>
+        <target state="new">The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKPathResolution_Failed">
         <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
-        <target state="translated">在非 SDK 專案中指定了 Runtime="NET" 的 UsingTask。</target>
+        <target state="new">UsingTask with Runtime="NET" was specified in a non-SDK project.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">
@@ -879,22 +879,22 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"，但該變數已設定為環境變數。</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"，但該變數已由另一個 SDK 設定。</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"。</target>
+        <target state="new">An SDK attempted set the environment variable "{0}" to "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
-        <target state="translated">SDK 解析程式 '{1}' 無法解析 SDK '{0}'。{2}</target>
+        <target state="new">SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -923,7 +923,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="StaticGraphConstructionStarted">
         <source>Static graph construction started.</source>
-        <target state="translated">靜態圖表建構已開始。</target>
+        <target state="new">Static graph construction started.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -1063,7 +1063,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">{1} 無法了解記錄類型 {0}。</target>
+        <target state="translated">{1} 無法理解記錄類型 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
