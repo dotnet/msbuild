@@ -245,6 +245,33 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        /// <summary>
+        /// Determines if a task should be executed out-of-process based on multi-threaded execution routing.
+        /// </summary>
+        /// <param name="taskName">The name of the task to evaluate.</param>
+        /// <returns>True if the task should be executed out-of-process, false otherwise.</returns>
+        internal bool ShouldTaskExecuteOutOfProc(string taskName)
+        {
+            // First, check if we're already in an out-of-process node
+            if (_host.BuildParameters.IsOutOfProc)
+            {
+                return true;
+            }
+
+            // If multi-threaded execution mode is enabled, route tasks based on thread safety
+            if (_host.BuildParameters.EnableMultiThreadedExecution)
+            {
+                if (!string.IsNullOrEmpty(taskName))
+                {
+                    // If task is NOT thread-safe, route to sidecar taskhost (out-of-process)
+                    return !ThreadSafeTaskRegistry.IsTaskThreadSafe(taskName);
+                }
+            }
+
+            // Default behavior - use the build parameters setting
+            return _host.BuildParameters.IsOutOfProc;
+        }
+
         public bool BuildRequestsSucceeded { get; private set; } = true;
 
         #region IBuildEngine2 Members
