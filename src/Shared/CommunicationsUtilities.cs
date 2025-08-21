@@ -157,7 +157,6 @@ namespace Microsoft.Build.Internal
         public static HandshakeResult Failure(HandshakeStatus status, string errorMessage) => new(status, 0, errorMessage);
     }
 
-
     internal class Handshake
     {
         // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
@@ -925,16 +924,24 @@ namespace Microsoft.Build.Internal
             {
                 context |= HandshakeOptions.NodeReuse;
             }
+
             if (lowPriority)
             {
                 context |= HandshakeOptions.LowPriority;
             }
+
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS
-            // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
-            // Both the client and the host will calculate this separately, and the idea is that if they come out the same
-            // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
-            // to the username check which is also done on connection.
-            if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+            // Skip elevation check for .NET task host scenarios
+            // since WindowsPrincipal/WindowsIdentity are not available in modern .NET.
+            // This prevents mismatched handshakes where MSBuild.exe (Framework) sets 
+            // HandshakeOptions.Administrator but dotnet.exe cannot.
+            if (!Handshake.IsHandshakeOptionEnabled(context, Handshake.NetTaskHostFlags)
+
+                // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
+                // Both the client and the host will calculate this separately, and the idea is that if they come out the same
+                // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
+                // to the username check which is also done on connection.
+                && new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
             {
                 context |= HandshakeOptions.Administrator;
             }
