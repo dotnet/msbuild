@@ -1893,7 +1893,7 @@ elementFormDefault="qualified">
     <xs:element name="LinkIncremental" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestCertificateThumbprint" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
     <xs:element name="ManifestKeyFile" type="msb:StringPropertyType" substitutionGroup="msb:Property"/>
-    <xs:element name="EnableCustomCulture" type="msb:boolean" substitutionGroup="msb:EnableCustomCulture"/>
+    <xs:element name="EnableCustomCulture" type="msb:boolean" substitutionGroup="msb:Property"/>
     <xs:element name="MapFileExtensions" type="msb:boolean" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MapFileExtensions" _locComment="" -->boolean</xs:documentation>
@@ -2470,11 +2470,6 @@ elementFormDefault="qualified">
     <xs:element name="Title" type="msb:StringPropertyType" substitutionGroup="msb:Property">
       <xs:annotation>
         <xs:documentation><!-- _locID_textTitle _locComment="" -->A human-friendly title of the package, typically used in UI displays as on nuget.org and the Package Manager in Visual Studio. If not specified, the package ID is used instead.</xs:documentation>
-      </xs:annotation>
-    </xs:element>
-    <xs:element name="PackageLicenseUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">
-      <xs:annotation>
-        <xs:documentation><!-- _locID_text="PackageLicenseUrl" _locComment="" -->The URL for the NuGet package's license, often shown in UI displays as well as nuget.org</xs:documentation>
       </xs:annotation>
     </xs:element>
     <xs:element name="PackageProjectUrl" type="msb:StringPropertyType" substitutionGroup="msb:Property">

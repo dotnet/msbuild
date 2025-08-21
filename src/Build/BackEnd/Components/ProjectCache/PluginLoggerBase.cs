@@ -3,7 +3,7 @@
 
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     /// <summary>
     ///     Events logged with this logger will get pushed into MSBuild's logging infrastructure.

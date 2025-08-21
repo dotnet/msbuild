@@ -67,6 +67,13 @@ namespace Microsoft.Build.BackEnd
     internal interface ITranslator : IDisposable
     {
         /// <summary>
+        /// Gets or sets the packet version associated with the stream.
+        /// This can be used to exclude various fields from translation for backwards compatibility,
+        /// e.g. when Writer introduces information that should be skipped in the Reader stream.
+        /// </summary>
+        byte PacketVersion { get; set; }
+
+        /// <summary>
         /// Returns the current serialization mode.
         /// </summary>
         TranslationDirection Mode
@@ -318,7 +325,7 @@ namespace Microsoft.Build.BackEnd
         /// This overload is needed for a workaround concerning serializing BuildResult with a version.
         /// It serializes/deserializes additional entries together with the main dictionary.
         /// </remarks>
-        void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
+        void TranslateDictionary(ref IDictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
 
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
 

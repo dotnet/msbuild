@@ -119,6 +119,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
+            /// Gets or sets the packet version associated with the stream.
+            /// This can be used to exclude various fields from translation for backwards compatibility.
+            /// </summary>
+            public byte PacketVersion { get; set; }
+
+            /// <summary>
             /// Translates a boolean.
             /// </summary>
             /// <param name="value">The value to be translated.</param>
@@ -600,7 +606,7 @@ namespace Microsoft.Build.BackEnd
             /// This overload is needed for a workaround concerning serializing BuildResult with a version.
             /// It deserializes additional entries together with the main dictionary.
             /// </remarks>
-            public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
                 if (!TranslateNullable(dictionary))
                 {
@@ -941,6 +947,12 @@ namespace Microsoft.Build.BackEnd
                 get
                 { return TranslationDirection.WriteToStream; }
             }
+
+            /// <summary>
+            /// Gets or sets the packet version associated with the stream.
+            /// This can be used to exclude various fields from translation for backwards compatibility.
+            /// </summary>
+            public byte PacketVersion { get; set; }
 
             /// <summary>
             /// Translates a boolean.
@@ -1383,7 +1395,7 @@ namespace Microsoft.Build.BackEnd
             /// This overload is needed for a workaround concerning serializing BuildResult with a version.
             /// It serializes additional entries together with the main dictionary.
             /// </remarks>
-            public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
+            public void TranslateDictionary(ref IDictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
             {
                 // Translate whether object is null
                 if ((dictionary is null) && ((additionalEntries is null) || (additionalEntries.Count == 0)))

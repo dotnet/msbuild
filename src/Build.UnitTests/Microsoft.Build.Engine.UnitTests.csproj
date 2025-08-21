@@ -22,7 +22,6 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="FakeItEasy" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Build.Tasks" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="NuGet.Frameworks">
@@ -81,12 +80,16 @@
     <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full'">
       <Link>Collections\ImmutableDictionary_Tests.cs</Link>
     </Compile>
+    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
     </None>
     <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestAssets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -122,6 +125,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemDefinitionGroup>
+
+  <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTask\global.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />

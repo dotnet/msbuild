@@ -92,9 +92,18 @@ namespace Microsoft.Build.BackEnd
         private IConfigCache _configCache;
 
         /// <summary>
-        /// The list of unresolved configurations
+        /// The list of unresolved configurations by ID.
         /// </summary>
-        private IConfigCache _unresolvedConfigurations;
+        /// <remarks>
+        /// We intentionally don't use another IConfigCache to track unresolved configs. These are local to BuildRequestEngine,
+        /// and we are guaranteed to run in a single-threaded context due to the ActionBlock.
+        /// </remarks>
+        private Dictionary<int, BuildRequestConfiguration> _unresolvedConfigurationsById;
+
+        /// <summary>
+        /// The list of unresolved configurations by metadata.
+        /// </summary>
+        private Dictionary<ConfigurationMetadata, BuildRequestConfiguration> _unresolvedConfigurationsByMetadata;
 
         /// <summary>
         /// The logging context for the node
@@ -314,7 +323,8 @@ namespace Microsoft.Build.BackEnd
                 _requests.Clear();
                 _requestsByGlobalRequestId.Clear();
                 _unsubmittedRequests.Clear();
-                _unresolvedConfigurations.ClearConfigurations();
+                _unresolvedConfigurationsById.Clear();
+                _unresolvedConfigurationsByMetadata.Clear();
                 Strings.ClearCachedStrings();
 
                 ChangeStatus(BuildRequestEngineStatus.Uninitialized);
@@ -333,7 +343,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
                     TraceEngine("Request {0}({1}) (nr {2}) received and activated.", request.GlobalRequestId, request.ConfigurationId, request.NodeRequestId);
 
                     ErrorUtilities.VerifyThrow(!_requestsByGlobalRequestId.ContainsKey(request.GlobalRequestId), "Request {0} is already known to the engine.", request.GlobalRequestId);
@@ -353,7 +363,7 @@ namespace Microsoft.Build.BackEnd
                         config.RetrieveFromCache();
                         ((IBuildResults)resultToReport).SavedCurrentDirectory = config.SavedCurrentDirectory;
                         ((IBuildResults)resultToReport).SavedEnvironmentVariables = config.SavedEnvironmentVariables;
-                        if (!request.BuildRequestDataFlags.HasFlag(BuildRequestDataFlags.IgnoreExistingProjectState))
+                        if ((request.BuildRequestDataFlags & BuildRequestDataFlags.IgnoreExistingProjectState) != BuildRequestDataFlags.IgnoreExistingProjectState)
                         {
                             resultToReport.ProjectStateAfterBuild = config.Project;
                         }
@@ -367,7 +377,8 @@ namespace Microsoft.Build.BackEnd
                         // On the other hand, if this is not the inproc node, we want to make sure that our copy of this configuration
                         // knows that its results are no longer on this node.  Since we don't know enough here to know where the
                         // results are going, we satisfy ourselves with marking that they are simply "not here".
-                        if (_componentHost.BuildParameters.NodeId != Scheduler.InProcNodeId)
+                        // TODO: Only checking multi-threaded might not work for VS scenarios https://github.com/dotnet/msbuild/issues/11939
+                        if (!_componentHost.BuildParameters.MultiThreaded && _componentHost.BuildParameters.NodeId != Scheduler.InProcNodeId)
                         {
                             config.ResultsNodeId = Scheduler.ResultsTransferredId;
                         }
@@ -403,7 +414,7 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
                     ErrorUtilities.VerifyThrow(_requestsByGlobalRequestId.ContainsKey(unblocker.BlockedRequestId), "Request {0} is not known to the engine.", unblocker.BlockedRequestId);
                     BuildRequestEntry entry = _requestsByGlobalRequestId[unblocker.BlockedRequestId];
 
@@ -456,7 +467,11 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            TraceEngine("Request {0}({1}) (nr {2}) is no longer waiting on nr {3} (UBR).  Results are {4}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, result.NodeRequestId, result.OverallResult);
+                            // PERF: Explicitly check the debug flag here so that we don't pay the cost for getting OverallResult
+                            if (_debugDumpState)
+                            {
+                                TraceEngine("Request {0}({1}) (nr {2}) is no longer waiting on nr {3} (UBR).  Results are {4}.", entry.Request.GlobalRequestId, entry.Request.ConfigurationId, entry.Request.NodeRequestId, result.NodeRequestId, result.OverallResult);
+                            }
 
                             // Update the configuration with targets information, if we received any and didn't already have it.
                             if (result.DefaultTargets != null)
@@ -504,14 +519,15 @@ namespace Microsoft.Build.BackEnd
             QueueAction(
                 () =>
                 {
-                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status);
+                    ErrorUtilities.VerifyThrow(_status != BuildRequestEngineStatus.Shutdown && _status != BuildRequestEngineStatus.Uninitialized, "Engine loop not yet started, status is {0}.", _status.Box());
 
                     TraceEngine("Received configuration response for node config {0}, now global config {1}.", response.NodeConfigurationId, response.GlobalConfigurationId);
                     ErrorUtilities.VerifyThrow(_componentHost != null, "No host object set");
 
                     // Remove the unresolved configuration entry from the unresolved cache.
-                    BuildRequestConfiguration config = _unresolvedConfigurations[response.NodeConfigurationId];
-                    _unresolvedConfigurations.RemoveConfiguration(response.NodeConfigurationId);
+                    BuildRequestConfiguration config = _unresolvedConfigurationsById[response.NodeConfigurationId];
+                    _ = _unresolvedConfigurationsById.Remove(response.NodeConfigurationId);
+                    _ = _unresolvedConfigurationsByMetadata.Remove(new ConfigurationMetadata(config));
 
                     // Add the configuration to the resolved cache unless it already exists there.  This will be
                     // the case in single-proc mode as we share the global cache with the Build Manager.
@@ -605,9 +621,8 @@ namespace Microsoft.Build.BackEnd
             // proper IDs yet.  We don't get this from the global config cache because that singleton shouldn't be polluted
             // with our temporaries.
             // NOTE: Because we don't get this from the component host, we cannot override it.
-            ConfigCache unresolvedConfigCache = new ConfigCache();
-            unresolvedConfigCache.InitializeComponent(host);
-            _unresolvedConfigurations = unresolvedConfigCache;
+            _unresolvedConfigurationsById = new Dictionary<int, BuildRequestConfiguration>();
+            _unresolvedConfigurationsByMetadata = new Dictionary<ConfigurationMetadata, BuildRequestConfiguration>();
         }
 
         /// <summary>
@@ -1154,12 +1169,13 @@ namespace Microsoft.Build.BackEnd
                     if (matchingConfig == null)
                     {
                         // No configuration locally, are we already waiting for it?
-                        matchingConfig = _unresolvedConfigurations.GetMatchingConfiguration(request.Config);
-                        if (matchingConfig == null)
+                        ConfigurationMetadata configMetadata = new(request.Config);
+                        if (!_unresolvedConfigurationsByMetadata.TryGetValue(configMetadata, out matchingConfig))
                         {
                             // Not waiting for it
                             request.Config.ConfigurationId = GetNextUnresolvedConfigurationId();
-                            _unresolvedConfigurations.AddConfiguration(request.Config);
+                            _unresolvedConfigurationsById.Add(request.Config.ConfigurationId, request.Config);
+                            _unresolvedConfigurationsByMetadata.Add(configMetadata, request.Config);
                             unresolvedConfigurationsAdded ??= new HashSet<int>();
                             unresolvedConfigurationsAdded.Add(request.Config.ConfigurationId);
                         }
@@ -1280,7 +1296,11 @@ namespace Microsoft.Build.BackEnd
                 {
                     foreach (int unresolvedConfigurationId in unresolvedConfigurationsAdded)
                     {
-                        _unresolvedConfigurations.RemoveConfiguration(unresolvedConfigurationId);
+                        if (_unresolvedConfigurationsById.TryGetValue(unresolvedConfigurationId, out BuildRequestConfiguration configToRemove))
+                        {
+                            _ = _unresolvedConfigurationsById.Remove(unresolvedConfigurationId);
+                            _ = _unresolvedConfigurationsByMetadata.Remove(new ConfigurationMetadata(configToRemove));
+                        }
                     }
                 }
 
@@ -1316,7 +1336,7 @@ namespace Microsoft.Build.BackEnd
                         _nextUnresolvedConfigurationId = StartingUnresolvedConfigId;
                     }
                 }
-                while (_unresolvedConfigurations.HasConfiguration(_nextUnresolvedConfigurationId));
+                while (_unresolvedConfigurationsById.ContainsKey(_nextUnresolvedConfigurationId));
             }
 
             return _nextUnresolvedConfigurationId;
@@ -1349,7 +1369,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(config.WasGeneratedByNode, "InvalidConfigurationId");
             ErrorUtilities.VerifyThrowArgumentNull(config);
-            ErrorUtilities.VerifyThrow(_unresolvedConfigurations.HasConfiguration(config.ConfigurationId), "NoUnresolvedConfiguration");
+            ErrorUtilities.VerifyThrow(_unresolvedConfigurationsById.ContainsKey(config.ConfigurationId), "NoUnresolvedConfiguration");
             TraceEngine("Issuing configuration request for node config {0}", config.ConfigurationId);
             RaiseNewConfigurationRequest(config);
         }
@@ -1433,9 +1453,94 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        /// <summary>
-        /// Method used for debugging purposes.
-        /// </summary>
+        private void TraceEngine(string format, ulong arg)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, BuildRequestEngineStatus arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2.Box()]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2]);
+            }
+        }
+
+        private void TraceEngine(string format, ulong arg1, ulong arg2)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, string arg3)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, string arg4)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, BuildRequestEntryState arg4)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, int arg5)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
+            }
+        }
+
+        private void TraceEngine(string format, int arg1, int arg2, int arg3, int arg4, BuildResultCode arg5)
+        {
+            if (_debugDumpState)
+            {
+                TraceEngine(format, [arg1, arg2, arg3, arg4, arg5]);
+            }
+        }
+
         private void TraceEngine(string format, params object[] stuff)
         {
             if (_debugDumpState)

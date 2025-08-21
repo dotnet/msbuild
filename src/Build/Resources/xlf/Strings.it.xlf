@@ -510,11 +510,6 @@
         <target state="translated">MSB3094: "{2}" fa riferimento a {0} elemento/i, mentre "{3}" fa riferimento a {1} elemento/i. Devono avere lo stesso numero di elementi.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Si è verificata un'eccezione durante l'espansione di un fileSpec con GLOBS: fileSpec: "{0}", presupponendo che si tratti di un nome di file. Eccezione: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: spazio imprevisto alla posizione "{1}" della condizione "{0}". Si è dimenticato di rimuovere uno spazio?</target>
@@ -575,6 +570,18 @@
       <trans-unit id="MetaprojectGenerated">
         <source>Metaproject "{0}" generated.</source>
         <target state="translated">Il metaprogetto "{0}" è stato generato.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostTaskLoad_Failed">
+        <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">Non è possibile caricare l'attività perché richiede l'host attività di runtime .NET di MSBuild, ma non è possibile trovare l'host attività di runtime .NET per la versione specificata.
+    Per informazioni dettagliate su come risolvere l'errore, vedere https://aka.ms/nettaskhost.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostVersion_Failed">
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
+        <target state="translated">La versione SDK {0} è inferiore alla versione minima richiesta di {1}. L'host attività di runtime .NET è supportato solo quando si utilizza .NET SDK 10.0.100-rc1 o versioni successive.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -827,6 +834,16 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="SDKPathCheck_Failed">
+        <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">La directory non esiste: {0}. Non è possibile creare un'istanza dell'host attività di runtime .NET. Per informazioni dettagliate su come risolvere l'errore, vedere https://aka.ms/nettaskhost.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKPathResolution_Failed">
+        <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
+        <target state="translated">UsingTask con Runtime="NET" è stato specificato in un progetto non SDK.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
@@ -860,6 +877,21 @@ Errori: {3}</target>
         <target state="translated">Il resolver SDK "{0}" ha restituito null.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata come variabile di ambiente.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata da un altro SDK.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">Il resolver SDK '{0}' non è riuscito a risolvere l'SDK '{1}'. {2}</target>
@@ -887,6 +919,11 @@ Errori: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Il grafo statico è stato caricato in {0} secondi: {1} nodi, {2} vertici</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">Costruzione del grafo statico avviata.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">

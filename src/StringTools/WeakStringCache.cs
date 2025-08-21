@@ -33,17 +33,12 @@ namespace Microsoft.NET.StringTools
             /// <summary>
             /// Weak GC handle to the last string of the given hashcode we've seen.
             /// </summary>
-            public GCHandle WeakHandle;
-
-            /// <summary>
-            /// Reference used for smaller strings retained by the cache.
-            /// </summary>
-            private string? referencedString;
+            private GCHandle weakHandle;
 
             /// <summary>
             /// Returns true if the string referenced by the handle is still alive.
             /// </summary>
-            public bool IsUsed => referencedString is not null || WeakHandle.Target != null;
+            public bool IsUsed => weakHandle.IsAllocated && weakHandle.Target != null;
 
             /// <summary>
             /// Returns the string referenced by this handle if it is equal to the given internable.
@@ -52,17 +47,12 @@ namespace Microsoft.NET.StringTools
             /// <returns>The string matching the internable or null if the handle is referencing a collected string or the string is different.</returns>
             public string? GetString(ref InternableString internable)
             {
-                if (referencedString is not null && internable.Equals(referencedString))
-                {
-                    return referencedString;
-                }
-
-                if (!WeakHandle.IsAllocated)
+                if (!weakHandle.IsAllocated)
                 {
                     return null;
                 }
 
-                if (WeakHandle.Target is not string str)
+                if (weakHandle.Target is not string str)
                 {
                     return null;
                 }
@@ -81,28 +71,13 @@ namespace Microsoft.NET.StringTools
             /// <param name="str">The string to set.</param>
             public void SetString(string str)
             {
-                const int stringLengthLimit = 500;
-                if (str.Length > stringLengthLimit)
+                if (weakHandle.IsAllocated)
                 {
-                    if (WeakHandle.IsAllocated)
-                    {
-                        WeakHandle.Target = str;
-                    }
-                    else
-                    {
-                        WeakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
-                    }
-
-                    referencedString = null;
+                    weakHandle.Target = str;
                 }
                 else
                 {
-                    if (WeakHandle.IsAllocated)
-                    {
-                        WeakHandle.Target = null;
-                    }
-
-                    referencedString = str;
+                    weakHandle = GCHandle.Alloc(str, GCHandleType.Weak);
                 }
             }
 
@@ -111,9 +86,9 @@ namespace Microsoft.NET.StringTools
             /// </summary>
             public void Free()
             {
-                if (WeakHandle.IsAllocated)
+                if (weakHandle.IsAllocated)
                 {
-                    WeakHandle.Free();
+                    weakHandle.Free();
                 }
             }
         }
@@ -133,11 +108,13 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private void DisposeImpl()
         {
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 entry.Value.Free();
             }
+
             _stringsByHashCode.Clear();
+            _weakHandlesByHashCode.Clear();
         }
 
         public void Dispose()
@@ -150,9 +127,9 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         private DebugInfo GetDebugInfoImpl()
         {
-            DebugInfo debugInfo = new DebugInfo();
+            DebugInfo debugInfo = new() { LiveStringCount = _stringsByHashCode.Count };
 
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 if (entry.Value.IsUsed)
                 {

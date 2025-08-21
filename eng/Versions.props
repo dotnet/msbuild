@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
+  <Import Project="Version.Details.props" Condition="Exists('Version.Details.props')" />
   <PropertyGroup>
     <VersionPrefix>17.15.0</VersionPrefix>
-    <PackageValidationBaselineVersion>17.14.0-preview-25161-14</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <!--
@@ -11,7 +12,7 @@
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
       is built crosses a UTC date boundary.
     -->
-    <DotNetUseShippingVersions Condition="'$(DotNetBuildOrchestrator)' != 'true'">true</DotNetUseShippingVersions>
+    <DotNetUseShippingVersions Condition="'$(DotNetBuildFromVMR)' != 'true'">true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
@@ -47,45 +48,28 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
-    <SystemCollectionsImmutableVersion>9.0.0</SystemCollectionsImmutableVersion>
-    <SystemConfigurationConfigurationManagerVersion>9.0.0</SystemConfigurationConfigurationManagerVersion>
-    <SystemDiagnosticsDiagnosticSourceVersion>9.0.0</SystemDiagnosticsDiagnosticSourceVersion>
-    <SystemDiagnosticsEventLogVersion>9.0.0</SystemDiagnosticsEventLogVersion>
-    <SystemFormatsAsn1Version>9.0.0</SystemFormatsAsn1Version>
-    <SystemFormatsNrbfVersion>9.0.0</SystemFormatsNrbfVersion>
-    <SystemReflectionMetadataVersion>9.0.0</SystemReflectionMetadataVersion>
-    <SystemReflectionMetadataLoadContextVersion>9.0.0</SystemReflectionMetadataLoadContextVersion>
-    <SystemResourcesExtensionsVersion>9.0.0</SystemResourcesExtensionsVersion>
-    <SystemSecurityCryptographyProtectedDataVersion>9.0.0</SystemSecurityCryptographyProtectedDataVersion>
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
-    <SystemTextEncodingCodePagesVersion>9.0.0</SystemTextEncodingCodePagesVersion>
-    <SystemTextJsonVersion>9.0.0</SystemTextJsonVersion>
-    <SystemThreadingChannelsVersion>9.0.0</SystemThreadingChannelsVersion>
-    <SystemThreadingTasksDataflowVersion>9.0.0</SystemThreadingTasksDataflowVersion>
   </PropertyGroup>
   <PropertyGroup>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
-    <!-- maintained in eng/dependabot/Packages.props -->
-    <!--
-    <SystemCodeDomVersion></SystemCodeDomVersion>
-    <SystemSecurityCryptographyPkcsVersion></SystemSecurityCryptographyPkcsVersion>
-    <SystemSecurityCryptographyXmlVersion></SystemSecurityCryptographyXmlVersion>
-    <MicrosoftBclCryptographyVersion></MicrosoftBclCryptographyVersion>
-    <MicrosoftVisualStudioSolutionPersistenceVersion></MicrosoftVisualStudioSolutionPersistenceVersion>
-    -->
+    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </PropertyGroup>
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
-    <MicrosoftCodeAnalysisCollectionsVersion>4.2.0-1.22102.8</MicrosoftCodeAnalysisCollectionsVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>9.0.0-beta.25302.2</MicrosoftDotNetXUnitExtensionsVersion>
-    <NuGetBuildTasksVersion>6.15.0-preview.1.82</NuGetBuildTasksVersion>
-    <MicrosoftNetCompilersToolsetVersion>4.14.0-3.25262.10</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <BootstrapSdkVersion>9.0.301</BootstrapSdkVersion>
+  <PropertyGroup>
+    <!-- These are manually updated since they are text-only source packages and can't be
+       overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
+       When updating the version make sure to add the new version to source-build-reference-packages first. -->
+    <MicrosoftCodeAnalysisCollectionsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisCollectionsVersion>
+    <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
+    <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <BootstrapSdkVersion>10.0.100-preview.7.25380.108</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
