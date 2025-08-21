@@ -176,7 +176,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     catch (Exception e)
                     {
                         processTracker.PrintSummary(_output);
-                        e.Message.ShouldNotBe($"Process with an Id of {pid} is not running");
+                        e.Message.ShouldNotBe($"Process with an Id of {pidSidecar} is not running");
                     }
                 }
             }
