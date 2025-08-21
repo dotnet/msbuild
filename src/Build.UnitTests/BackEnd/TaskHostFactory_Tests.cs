@@ -188,7 +188,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Tests include primitive types, arrays, strings, dates, enums, and custom structures.
         /// </summary>
         [Fact]
-        private void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
+        public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
