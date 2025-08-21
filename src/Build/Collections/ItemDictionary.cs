@@ -82,7 +82,16 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Number of items in total, for debugging purposes.
         /// </summary>
-        public int Count => _nodes.Count;
+        public int Count
+        {
+            get
+            {
+                lock (_itemLists)
+                {
+                    return _nodes.Count;
+                }
+            }
+        }
 
         public int ItemTypesCount
         {
