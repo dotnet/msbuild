@@ -1726,7 +1726,7 @@ namespace Microsoft.Build.BackEnd
                 typeof(ITaskItem));
 
             // Default task host parameters for out-of-process execution for inline tasks
-            IDictionary<string, string> taskHostParameters = new Dictionary<string, string>
+            Dictionary<string, string> taskHostParameters = new Dictionary<string, string>
             {
                 [XMakeAttributes.runtime] = XMakeAttributes.GetCurrentMSBuildRuntime(),
                 [XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture()
@@ -1750,7 +1750,9 @@ namespace Microsoft.Build.BackEnd
                 _taskLoggingContext,
                 _buildComponentHost,
                 taskHostParameters,
-                taskLoadedType
+                taskLoadedType,
+                // TODO ask Jan about if this is the only case or if we need the falsey path as well.
+                true
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup
 #endif
