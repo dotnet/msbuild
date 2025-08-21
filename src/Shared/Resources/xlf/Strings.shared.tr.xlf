@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Tüm özel '{0}' türleri kullanım dışı bırakıldığinden özel olay türü türü desteklenmiyor. Lütfen bunun yerine Extended*EventArgs kullanın. Daha fazla bilgi: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">'{0}' özel olay türü, tüm özel olay türleri kullanım dışı olduğundan desteklenmiyor. Lütfen bunun yerine Extended*EventArgs kullanın. Daha fazla bilgi için bkz. https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
@@ -325,7 +325,7 @@
       </trans-unit>
       <trans-unit id="Shared.GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">globs: fileSpec: "{0}" ile bir fileSpec genişletilirken özel bir durum oluştu, bunun bir dosya adı olduğu varsayıldı. Özel Durum: {1}</target>
+        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
