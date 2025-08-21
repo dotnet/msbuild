@@ -935,10 +935,12 @@ namespace Microsoft.Build.Internal
             // Both the client and the host will calculate this separately, and the idea is that if they come out the same
             // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
             // to the username check which is also done on connection.
-            if (System.OperatingSystem.IsOSPlatform() && new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+#pragma warning disable CA1416 // Validate platform compatibility - it validated in #ifdef above
+            if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
             {
                 context |= HandshakeOptions.Administrator;
             }
+#pragma warning restore CA1416 // Validate platform compatibility
 #endif
             return context;
         }
