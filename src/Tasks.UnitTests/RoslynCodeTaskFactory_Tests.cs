@@ -33,6 +33,8 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         private readonly VerifySettings _verifySettings;
 
+        private static string TestResourcesRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(RoslynCodeTaskFactory_Tests).Assembly.Location) ?? AppContext.BaseDirectory), "TestResources");
+
         public RoslynCodeTaskFactory_Tests()
         {
             UseProjectRelativeDirectory("TaskFactorySource");
@@ -233,34 +235,52 @@ Log.LogError(Class1.ToPrint());
             {
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 TransientTestFile taskFile = env.CreateFile(folder, "SampleTask.cs", @"
-                using System;
                 using Microsoft.Build.Framework;
                 using Microsoft.Build.Utilities;
+                using System;
+                using System.Collections.Generic;
+                using System.Diagnostics;
+                using System.IO;
+                using System.Text.Json;
 
-                namespace NoCS1702
+                namespace VisionAid.Build;
+
+                public sealed class License
                 {
-                    public class SampleTask : Task
+                    public enum LicenseType
                     {
-                        [Required]
-                        public string InputFileName { get; set; }
+                        File,
+                        URL
+                    }
 
-                        public override bool Execute()
-                        {
-                            Log.LogMessage(MessageImportance.High, $""Processing {InputFileName}"");
-                            return true;
-                        }
+                    public string ProjectName { get; set; }
+                    public LicenseType Type { get; set; }
+                    public string LicensePath { get; set; }
+                }
+
+                /// <summary>
+                /// Creates an HTML document for the 3rd-party libraries used by the project
+                /// </summary>
+                public sealed class SampleTask : Microsoft.Build.Utilities.Task
+                {
+
+                    [Required]
+                    public string InputFileName { get; set; }
+
+                    public override bool Execute()
+                    {
+                        using FileStream stream = File.OpenRead(InputFileName);
+                        var stuff = JsonSerializer.Deserialize<IList<License>>(stream);
+                        return true;
                     }
                 }
+
                 ");
                 TransientTestFile inputFile = env.CreateFile(folder, "Test.json", "{}");
 
-                string memoryLibPath = Path.Combine("system.memory", "4.6.3", "lib", "netstandard2.0");
-                string jsonLibPath = Path.Combine("system.text.json", "9.0.7", "lib", "netstandard2.0");
-                env.CreateFolder(Path.Combine(folder.Path, memoryLibPath), createFolder: true);
-                env.CreateFolder(Path.Combine(folder.Path, jsonLibPath), createFolder: true);
-
-                env.CreateFile(folder, Path.Combine(memoryLibPath, "System.Memory.dll"), "");
-                env.CreateFile(folder, Path.Combine(jsonLibPath, "System.Text.Json.dll"), "");
+                string testResourcesNugetPath = Path.Combine(TestResourcesRootPath, "Nuget");
+                string memoryLibPath = Path.Combine(testResourcesNugetPath, "system.memory", "4.6.3", "lib", "netstandard2.0", "System.Memory.dll");
+                string jsonLibPath = Path.Combine(testResourcesNugetPath, "system.text.json", "9.0.7", "lib", "netstandard2.0", "System.Text.Json.dll");
 
                 TransientTestFile projectFile = env.CreateFile(folder, "NoCS1702.proj", @$"
                 <Project DefaultTargets=""Build"" ToolsVersion=""Current"">
@@ -279,8 +299,8 @@ Log.LogError(Class1.ToPrint());
                       <InputFileName ParameterType=""System.String"" Required=""true"" />
                     </ParameterGroup>
                     <Task>
-                      <Reference Include=""$(NuGetDir)\system.memory\4.6.3\lib\netstandard2.0\System.Memory.dll"" />
-                      <Reference Include=""$(NuGetDir)\system.text.json\9.0.7\lib\netstandard2.0\System.Text.Json.dll"" />
+                      <Reference Include=""{memoryLibPath}"" />
+                      <Reference Include=""{jsonLibPath}"" />
                       <Using Namespace=""System"" />
                       <Code Type=""Class"" Language=""cs"" Source=""{taskFile.Path}"" />
                     </Task>
