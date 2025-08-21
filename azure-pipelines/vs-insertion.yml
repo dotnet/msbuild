@@ -85,6 +85,8 @@ variables:
       value: 'rel/d17.0'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'main') }}:
       value: 'main'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.15') }}:
+      value: 'main'
     ${{ else }}:
       value: ''
   - name: InsertTargetBranch
