@@ -205,11 +205,6 @@ namespace Microsoft.Build.Execution
         private bool _disableInProcNode;
 
         /// <summary>
-        /// When true, enables multi-threaded execution mode with task routing.
-        /// </summary>
-        private bool _enableMultiThreadedExecution;
-
-        /// <summary>
         /// When true, the build should log task inputs to the loggers.
         /// </summary>
         private bool _logTaskInputs;
@@ -396,17 +391,6 @@ namespace Microsoft.Build.Execution
         {
             get => _disableInProcNode;
             set => _disableInProcNode = value;
-        }
-
-        /// <summary>
-        /// When true, enables multi-threaded execution mode with task routing.
-        /// Thread-safe tasks will run within thread nodes, while others will
-        /// be routed to sidecar taskhost processes.
-        /// </summary>
-        public bool EnableMultiThreadedExecution
-        {
-            get => _enableMultiThreadedExecution;
-            set => _enableMultiThreadedExecution = value;
         }
 
         /// <summary>
@@ -963,7 +947,6 @@ namespace Microsoft.Build.Execution
             translator.TranslateCulture(ref _culture);
             translator.Translate(ref _defaultToolsVersion);
             translator.Translate(ref _disableInProcNode);
-            translator.Translate(ref _enableMultiThreadedExecution);
             translator.Translate(ref _enableNodeReuse);
             translator.Translate(ref _enableRarNode);
             translator.TranslateProjectPropertyInstanceDictionary(ref _environmentProperties);

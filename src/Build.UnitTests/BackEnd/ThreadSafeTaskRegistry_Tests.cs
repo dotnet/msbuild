@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void RoutingUsesDefaultBehaviorWhenMultiThreadedExecutionDisabled()
         {
             var buildParameters = new BuildParameters();
-            buildParameters.EnableMultiThreadedExecution = false;
+            buildParameters.MultiThreaded = false;
             buildParameters.IsOutOfProc = false;
 
             var componentHost = new MockHost(buildParameters);
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TasksExecuteOutOfProcessWhenAlreadyOutOfProcess()
         {
             var buildParameters = new BuildParameters();
-            buildParameters.EnableMultiThreadedExecution = true;
+            buildParameters.MultiThreaded = true;
             buildParameters.IsOutOfProc = true;
 
             var componentHost = new MockHost(buildParameters);
@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ThreadSafeTasksExecuteInProcessWhenMultiThreadedExecutionEnabled()
         {
             var buildParameters = new BuildParameters();
-            buildParameters.EnableMultiThreadedExecution = true;
+            buildParameters.MultiThreaded = true;
             buildParameters.IsOutOfProc = false;
 
             var componentHost = new MockHost(buildParameters);
@@ -222,7 +222,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void NonThreadSafeTasksExecuteOutOfProcessWhenMultiThreadedExecutionEnabled()
         {
             var buildParameters = new BuildParameters();
-            buildParameters.EnableMultiThreadedExecution = true;
+            buildParameters.MultiThreaded = true;
             buildParameters.IsOutOfProc = false;
 
             var componentHost = new MockHost(buildParameters);

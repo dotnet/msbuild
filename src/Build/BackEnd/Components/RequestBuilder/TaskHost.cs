@@ -259,7 +259,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // If multi-threaded execution mode is enabled, route tasks based on thread safety
-            if (_host.BuildParameters.EnableMultiThreadedExecution)
+            if (_host.BuildParameters.MultiThreaded)
             {
                 if (!string.IsNullOrEmpty(taskName))
                 {
