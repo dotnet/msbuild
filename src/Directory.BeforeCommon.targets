@@ -73,8 +73,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Useful for tests that need OS information as a constant -->
-    <DefineConstants Condition="$([MSBuild]::IsOSPlatform('windows'))">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
+    <!-- Useful for out of proc node communication -->
+    <DefineConstants Condition="$([MSBuild]::IsOSPlatform('windows'))">$(DefineConstants);ISWINDOWS</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp' or $([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">

@@ -21,7 +21,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [Theory]
         [InlineData("")]
         [InlineData("a")]
-#if TEST_ISWINDOWS
+#if ISWINDOWS
         [InlineData(@"c:\a")]
 #else
         [InlineData("/a")]
