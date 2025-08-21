@@ -343,7 +343,6 @@ namespace Microsoft.Build.BackEnd
                         if (matchingBucketIndex >= 0)
                         {
                             matchingBucket = buckets[matchingBucketIndex];
-                            matchingBucket.Lookup.EnsureCapacity(items.Count);
                         }
                         else
                         {
@@ -360,6 +359,8 @@ namespace Microsoft.Build.BackEnd
                             // from the List.BinarySearch() method
                             buckets.Insert(~matchingBucketIndex, matchingBucket);
                         }
+
+                        matchingBucket.Lookup.EnsureCapacity(items.Count);
 
                         // We already have a bucket for this type of item, so add this item to
                         // the bucket.
