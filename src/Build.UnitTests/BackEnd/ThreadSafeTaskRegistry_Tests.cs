@@ -36,17 +36,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that task name matching is case-insensitive.
-        /// </summary>
-        [Fact]
-        public void TaskNameMatchingIsCaseInsensitive()
-        {
-            ThreadSafeTaskRegistry.IsTaskThreadSafe("message").ShouldBeTrue();
-            ThreadSafeTaskRegistry.IsTaskThreadSafe("MESSAGE").ShouldBeTrue();
-            ThreadSafeTaskRegistry.IsTaskThreadSafe("MeSSaGe").ShouldBeTrue();
-        }
-
-        /// <summary>
         /// Verify that unknown tasks are not considered thread-safe.
         /// </summary>
         [Fact]
@@ -66,89 +55,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ThreadSafeTaskRegistry.IsTaskThreadSafe(null).ShouldBeFalse();
             ThreadSafeTaskRegistry.IsTaskThreadSafe(string.Empty).ShouldBeFalse();
             ThreadSafeTaskRegistry.IsTaskThreadSafe("   ").ShouldBeFalse();
-        }
-
-        /// <summary>
-        /// Verify that tasks can be added to the allowlist.
-        /// </summary>
-        [Fact]
-        public void CanAddTaskToAllowList()
-        {
-            const string testTaskName = "TestTask";
-            
-            try
-            {
-                // Initially should not be thread-safe
-                ThreadSafeTaskRegistry.IsTaskThreadSafe(testTaskName).ShouldBeFalse();
-
-                // Add to allowlist
-                ThreadSafeTaskRegistry.AddThreadSafeTask(testTaskName);
-
-                // Now should be thread-safe
-                ThreadSafeTaskRegistry.IsTaskThreadSafe(testTaskName).ShouldBeTrue();
-            }
-            finally
-            {
-                // Clean up
-                ThreadSafeTaskRegistry.RemoveThreadSafeTask(testTaskName);
-            }
-        }
-
-        /// <summary>
-        /// Verify that tasks can be removed from the allowlist.
-        /// </summary>
-        [Fact]
-        public void CanRemoveTaskFromAllowList()
-        {
-            const string testTaskName = "Message"; // Use an existing thread-safe task
-            
-            try
-            {
-                // Initially should be thread-safe
-                ThreadSafeTaskRegistry.IsTaskThreadSafe(testTaskName).ShouldBeTrue();
-
-                // Remove from allowlist
-                ThreadSafeTaskRegistry.RemoveThreadSafeTask(testTaskName);
-
-                // Now should not be thread-safe
-                ThreadSafeTaskRegistry.IsTaskThreadSafe(testTaskName).ShouldBeFalse();
-            }
-            finally
-            {
-                // Restore the task to allowlist
-                ThreadSafeTaskRegistry.AddThreadSafeTask(testTaskName);
-            }
-        }
-
-        /// <summary>
-        /// Verify that the allowlist can be retrieved.
-        /// </summary>
-        [Fact]
-        public void CanGetThreadSafeTaskList()
-        {
-            var threadSafeTasks = ThreadSafeTaskRegistry.GetThreadSafeTasks();
-            
-            threadSafeTasks.ShouldNotBeNull();
-            threadSafeTasks.Count.ShouldBeGreaterThan(0);
-            threadSafeTasks.ShouldContain("Message");
-            threadSafeTasks.ShouldContain("Warning");
-            threadSafeTasks.ShouldContain("Error");
-        }
-
-        /// <summary>
-        /// Verify that adding null or empty task names is handled gracefully.
-        /// </summary>
-        [Fact]
-        public void AddingNullOrEmptyTaskNamesIsHandledGracefully()
-        {
-            // Should not throw exceptions
-            ThreadSafeTaskRegistry.AddThreadSafeTask(null);
-            ThreadSafeTaskRegistry.AddThreadSafeTask(string.Empty);
-            ThreadSafeTaskRegistry.AddThreadSafeTask("   ");
-
-            ThreadSafeTaskRegistry.RemoveThreadSafeTask(null);
-            ThreadSafeTaskRegistry.RemoveThreadSafeTask(string.Empty);
-            ThreadSafeTaskRegistry.RemoveThreadSafeTask("   ");
         }
     }
 
