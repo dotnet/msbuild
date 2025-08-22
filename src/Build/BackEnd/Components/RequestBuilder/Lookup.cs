@@ -376,7 +376,7 @@ namespace Microsoft.Build.BackEnd
             // adds to the world
             if (PrimaryAddTable != null)
             {
-                SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
+                SecondaryTable ??= new ItemDictionary<ProjectItemInstance>(PrimaryAddTable.ItemTypesCount);
                 SecondaryTable.ImportItems(PrimaryAddTable);
             }
 
@@ -707,6 +707,24 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Attempts to set the initial capacity of the primary add table.
+        /// </summary>
+        /// <param name="capacity"></param>
+        internal void EnsureCapacity(int capacity)
+        {
+            if (PrimaryAddTable is null)
+            {
+                PrimaryAddTable = new ItemDictionary<ProjectItemInstance>(capacity);
+            }
+#if NET
+            else
+            {
+                PrimaryAddTable.EnsureCapacity(capacity);
+            }
+#endif
+        }
+
+        /// <summary>
         /// Implements a true add, an item that has been created in a batch.
         /// </summary>
         internal void AddNewItem(ProjectItemInstance item)
@@ -812,7 +830,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        #endregion
+#endregion
 
         #region Private Methods
 
