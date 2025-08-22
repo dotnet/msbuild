@@ -3304,6 +3304,40 @@ namespace Microsoft.Build.UnitTests.Evaluation
             AssertSuccess(expander, expectedVersion, $"$([MSBuild]::GetTargetPlatformVersion('{tfm}', {versionPartCount}))");
         }
 
+        [Fact]
+        public void GetFileVersion_WorksInExpression()
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            string path = @"C:\Windows\System32\notepad.exe";
+            string expression = $@"$([MSBuild]::GetFileVersion('{path}'))";
+
+            var result = expander.ExpandPropertiesLeaveTypedAndEscaped(
+                expression,
+                ExpanderOptions.ExpandProperties,
+                MockElementLocation.Instance);
+
+            Assert.False(string.IsNullOrEmpty((string)result));
+        }
+
+        [Fact]
+        public void GetFileVersion_InvalidPath_ReturnsEmpty()
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            string badPath = @"C:\this\does\not\exist.exe";
+            string expression = $@"$([MSBuild]::GetFileVersion('{badPath}'))";
+
+            var result = expander.ExpandPropertiesLeaveTypedAndEscaped(
+                expression,
+                ExpanderOptions.ExpandProperties,
+                MockElementLocation.Instance);
+
+            Assert.True(string.IsNullOrEmpty((string)result));
+        }
+
         [Theory]
         [InlineData("net5.0-ios12.0", "ios", "12.0")]
         [InlineData("net5.1-android1.1", "android", "1.1")]

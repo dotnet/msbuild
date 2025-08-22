@@ -123,6 +123,33 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
         }
 
         [Fact]
+        public void GetFileVersion_ValidFile_ReturnsVersion()
+        {
+            // Use the current assembly file to get a valid path
+            string assemblyPath = typeof(IntrinsicFunctionOverload_Tests).Assembly.Location;
+
+            string version = IntrinsicFunctions.GetFileVersion(assemblyPath);
+
+            // Assert the version string is not null or empty (should return something)
+            Assert.False(string.IsNullOrEmpty(version));
+        }
+
+        [Fact]
+        public void GetFileVersion_InvalidFile_ReturnsEmpty()
+        {
+            string version = IntrinsicFunctions.GetFileVersion("nonexistentfile.xyz");
+
+            Assert.Equal(string.Empty, version);
+        }
+
+        [Fact]
+        public void GetFileVersion_NullOrEmptyInput_ReturnsEmpty()
+        {
+            Assert.Equal(string.Empty, IntrinsicFunctions.GetFileVersion(null));
+            Assert.Equal(string.Empty, IntrinsicFunctions.GetFileVersion(string.Empty));
+        }
+
+        [Fact]
         public void FileExists_WhenFileExists_ReturnsTrue()
         {          
             using TestEnvironment env = TestEnvironment.Create();

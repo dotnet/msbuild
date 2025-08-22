@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 #if NETFRAMEWORK
 using System.Linq;
@@ -749,6 +750,25 @@ namespace Microsoft.Build.Evaluation
             loggingContext.LogComment(MessageImportance.Low, "CustomCheckAssemblyNotExist", pathToAssembly);
 
             return false;
+        }
+
+        public static string GetFileVersion(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                var versionInfo = FileVersionInfo.GetVersionInfo(filePath);
+                return versionInfo.FileVersion ?? string.Empty;
+            }
+            catch (Exception)
+            {
+                // Do not throw exceptions in intrinsic functions.
+                return string.Empty;
+            }
         }
 
         #region Debug only intrinsics
