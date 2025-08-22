@@ -84,6 +84,5 @@ extends:
       - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
         parameters:
           isExperimental: true
-          enableLocalization: false
           enableComponentGovernance: false
           enableSigningValidation: false

@@ -3,9 +3,6 @@ parameters:
 - name: isExperimental
   type: boolean
   default: false
-- name: enableLocalization
-  type: boolean
-  default: false
 - name: enableComponentGovernance
   type: boolean
   default: false
@@ -14,30 +11,6 @@ parameters:
   default: false
 
 jobs:
-# The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
-# Used for vs17.2, vs17.4, vs17.6 etc. branches only.
-# When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
-#  set 'EnableReleaseOneLocBuild' to true.
-- ${{ if and(parameters.enableLocalization, startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
-  - template: /eng/common/templates-official/job/onelocbuild.yml@self
-    parameters:
-      MirrorRepo: 'msbuild'
-      LclSource: lclFilesfromPackage
-      LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
-      MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
-      JobNameSuffix: '_release'
-      condition: ${{ variables.EnableReleaseOneLocBuild }}
-# The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
-- ${{ if and(parameters.enableLocalization, eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
-  - template: /eng/common/templates-official/job/onelocbuild.yml@self
-    parameters:
-      MirrorRepo: 'msbuild'
-      LclSource: lclFilesfromPackage
-      LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
-      MirrorBranch: 'main'
-      JobNameSuffix: '_main'
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-
 - job: Windows_NT
   pool:
     name: VSEngSS-MicroBuild2022-1ES
