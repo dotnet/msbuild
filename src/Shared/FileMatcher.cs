@@ -2602,7 +2602,7 @@ namespace Microsoft.Build.Shared
                         CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
                         trackSearchAction,
                         trackExcludeFileSpec,
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GlobExpansionFailed", filespecUnescaped, ex.ToString()));
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Shared.GlobExpansionFailed", filespecUnescaped, ex.ToString()));
                 }
 
                 throw;
@@ -2614,7 +2614,7 @@ namespace Microsoft.Build.Shared
                     CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped),
                     trackSearchAction,
                     trackExcludeFileSpec,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GlobExpansionFailed", filespecUnescaped, ex.ToString()));
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("Shared.GlobExpansionFailed", filespecUnescaped, ex.ToString()));
             }
 
             /*

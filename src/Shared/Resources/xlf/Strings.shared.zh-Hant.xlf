@@ -323,6 +323,11 @@
         <target state="translated">指派值為 "{1}" 的參數 "{0}" 不得具有無效的路徑或檔案字元。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">展開具有 glob 的 fileSpec 時發生例外狀況: fileSpec: "{0}"，假設它是檔案名稱。例外狀況: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: 檔案「{3}」元素 &lt;{2}&gt; 中屬性「{1}」的值「{0}」是萬用字元，導致列舉磁碟機上的所有檔案，這很可能不是預期的結果。檢查參考的屬性是否一直定義，以及專案與目前的工作目錄是否不在磁碟機根目錄中。</target>
