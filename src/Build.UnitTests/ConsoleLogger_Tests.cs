@@ -452,27 +452,25 @@ namespace Microsoft.Build.UnitTests
         {
             EventSourceSink es = new EventSourceSink();
             SimulatedConsole sc = new SimulatedConsole();
-            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Diagnostic,
-                                                sc.Write, sc.SetColor,
-                                                sc.ResetColor);
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Diagnostic,  sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es);
 
             // Not all parameters are null here, but that's fine, we assume the engine will never
             // fire a ProjectStarted without a project name, etc.
             es.Consume(new BuildStartedEventArgs(null, null));
-            es.Consume(new ProjectStartedEventArgs(null, null, "p", null, null, null));
-            es.Consume(new TargetStartedEventArgs(null, null, "t", null, null));
-            es.Consume(new TaskStartedEventArgs(null, null, null, null, "task"));
-            es.Consume(new BuildMessageEventArgs(null, null, null, MessageImportance.High));
-            es.Consume(new BuildWarningEventArgs(null, null, null, 0, 0, 0, 0, null, null, null));
-            es.Consume(new BuildErrorEventArgs(null, null, null, 0, 0, 0, 0, null, null, null));
-            es.Consume(new TaskFinishedEventArgs(null, null, null, null, "task", true));
-            es.Consume(new TargetFinishedEventArgs(null, null, "t", null, null, true));
-            es.Consume(new ProjectFinishedEventArgs(null, null, "p", true));
-            es.Consume(new BuildFinishedEventArgs(null, null, true));
-            es.Consume(new BuildFinishedEventArgs(null, null, true));
-            es.Consume(new BuildFinishedEventArgs(null, null, true));
-            es.Consume(new MyCustomBuildEventArgs2());
+            es.Consume(new ProjectStartedEventArgs(1, null, null, "p", null, null, null, parentBuildEventContext: new BuildEventContext(1, 1, 1, 1)) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new TargetStartedEventArgs(null, null, "t", null, null) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new TaskStartedEventArgs(null, null, null, null, "task") { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new BuildMessageEventArgs(null, null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new BuildWarningEventArgs(null, null, null, 0, 0, 0, 0, null, null, null) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new BuildErrorEventArgs(null, null, null, 0, 0, 0, 0, null, null, null) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new TaskFinishedEventArgs(null, null, null, null, "task", true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new TargetFinishedEventArgs(null, null, "t", null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new ProjectFinishedEventArgs(null, null, "p", true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new BuildFinishedEventArgs(null, null, true) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+            es.Consume(new MyCustomBuildEventArgs2() { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
             // No exception raised
         }
 
@@ -564,7 +562,6 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         public void TestVerbosityLessThan(LoggerVerbosity loggerVerbosity, LoggerVerbosity checkVerbosity, bool expectedResult)
         {
-            new SerialConsoleLogger(loggerVerbosity).IsVerbosityAtLeast(checkVerbosity).ShouldBe(expectedResult);
             new ParallelConsoleLogger(loggerVerbosity).IsVerbosityAtLeast(checkVerbosity).ShouldBe(expectedResult);
         }
 
@@ -594,56 +591,40 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         public void SingleMessageTest(LoggerVerbosity loggerVerbosity, MessageImportance messageImportance, bool shouldPrint)
         {
-            for (int i = 1; i <= 2; i++)
+            string message = "my 1337 message";
+
+            SimulatedConsole console = new SimulatedConsole();
+            EventSourceSink eventSourceSink = new EventSourceSink();
+            ConsoleLogger logger = new ConsoleLogger(loggerVerbosity, console.Write, null, null);
+            logger.Initialize(eventSourceSink);
+
+            BuildMessageEventArgs be = new BuildMessageEventArgs(message, "help", "sender", messageImportance)
             {
-                string message = "my 1337 message";
+                BuildEventContext = new BuildEventContext(1, 2, 3, 4)
+            };
 
-                SimulatedConsole console = new SimulatedConsole();
-                EventSourceSink eventSourceSink = new EventSourceSink();
-                ConsoleLogger logger = new ConsoleLogger(loggerVerbosity, console.Write, null, null);
-                logger.Initialize(eventSourceSink, i);
+            eventSourceSink.Consume(be);
 
-                BuildMessageEventArgs be = new BuildMessageEventArgs(message, "help", "sender", messageImportance)
-                {
-                    BuildEventContext = new BuildEventContext(1, 2, 3, 4)
-                };
+            if (loggerVerbosity == LoggerVerbosity.Diagnostic)
+            {
+                message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskMessageWithId", "my 1337 message", be.BuildEventContext.TaskId);
+            }
 
-                eventSourceSink.Consume(be);
-
-                if (i == 2 && loggerVerbosity == LoggerVerbosity.Diagnostic)
-                {
-                    string context = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", LogFormatter.FormatLogTimeStamp(be.Timestamp), 0) + ">";
-                    message = context + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskMessageWithId", "my 1337 message", be.BuildEventContext.TaskId);
-                }
-                else if (i == 2 && loggerVerbosity == LoggerVerbosity.Detailed)
-                {
-                    string context = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("BuildEventContext", string.Empty, 0) + ">";
-                    message = context + "my 1337 message";
-                }
-                else if (i == 2)
-                {
-                    message = "  " + message;
-                }
-
-                if (shouldPrint)
-                {
-                    console.ToString().ShouldBe(message + Environment.NewLine);
-                }
-                else
-                {
-                    console.ToString().ShouldBeEmpty();
-                }
+            if (shouldPrint)
+            {
+                console.ToString().ShouldContain(message + Environment.NewLine);
+            }
+            else
+            {
+                console.ToString().ShouldBeEmpty();
             }
         }
 
-        [InlineData("error", "red", false)]
-        [InlineData("error", "red", true)]
-        [InlineData("warning", "yellow", false)]
-        [InlineData("warning", "yellow", true)]
-        [InlineData("message", "darkgray", false)]
-        [InlineData("message", "darkgray", true)]
+        [InlineData("error", "red")]
+        [InlineData("warning", "yellow")]
+        [InlineData("message", "darkgray")]
         [Theory]
-        public void ColorTest(string expectedMessageType, string expectedColor, bool parallel)
+        public void ColorTest(string expectedMessageType, string expectedColor)
         {
             const string subcategory = "VBC";
             const string code = "31415";
@@ -681,153 +662,125 @@ namespace Microsoft.Build.UnitTests
             SimulatedConsole console = new SimulatedConsole();
             ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Diagnostic, console.Write, console.SetColor, console.ResetColor);
 
-            if (parallel)
-            {
-                logger.Initialize(eventSourceSink, 4);
-                eventSourceSink.Consume(buildEventArgs, 2);
+            logger.Initialize(eventSourceSink, 4);
+            eventSourceSink.Consume(buildEventArgs, 2);
 
-                if (expectedMessageType.Equals("message"))
-                {
-                    console.ToString().ShouldMatch($@"<{expectedColor}><cyan>\d\d:\d\d:\d\d\.\d\d\d\s+\d+><reset color>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message} \(TaskId:\d+\){Environment.NewLine}<reset color>");
-                }
-                else
-                {
-                    console.ToString().ShouldMatch($@"<cyan>\d\d:\d\d:\d\d\.\d\d\d\s+\d+><reset color><{expectedColor}>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message}{Environment.NewLine}<reset color>");
-                }
+            if (expectedMessageType.Equals("message"))
+            {
+                console.ToString().ShouldMatch($@"<{expectedColor}><cyan>\d\d:\d\d:\d\d\.\d\d\d\s+\d+><reset color>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message} \(TaskId:\d+\){Environment.NewLine}<reset color>");
             }
             else
             {
-                logger.Initialize(eventSourceSink);
-                eventSourceSink.Consume(buildEventArgs);
-                console.ToString().ShouldMatch($@"<{expectedColor}>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message}{Environment.NewLine}<reset color>");
+                console.ToString().ShouldMatch($@"<cyan>\d\d:\d\d:\d\d\.\d\d\d\s+\d+><reset color><{expectedColor}>{Regex.Escape(file)}\({lineNumber}\): {subcategory} {expectedMessageType} {code}: {message}{Environment.NewLine}<reset color>");
             }
         }
-
 
         [Fact]
         public void TestQuietWithHighMessage()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
-                                                    sc.Write, sc.SetColor,
-                                                    sc.ResetColor);
-                L.Initialize(es, i);
+            EventSourceSink es = new EventSourceSink();
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
+                                                sc.Write, sc.SetColor,
+                                                sc.ResetColor);
+            L.Initialize(es);
 
-                BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
 
-                BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
-                bse.BuildEventContext = buildEventContext;
-                es.Consume(bse);
+            BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
+            bse.BuildEventContext = buildEventContext;
+            es.Consume(bse);
 
-                ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 1, 1, 1));
-                pse.BuildEventContext = buildEventContext;
-                es.Consume(pse);
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 1, 1, 1));
+            pse.BuildEventContext = buildEventContext;
+            es.Consume(pse);
 
-                TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
-                trse.BuildEventContext = buildEventContext;
-                es.Consume(trse);
+            TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
+            trse.BuildEventContext = buildEventContext;
+            es.Consume(trse);
 
-                TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
-                tase.BuildEventContext = buildEventContext;
-                es.Consume(tase);
+            TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
+            tase.BuildEventContext = buildEventContext;
+            es.Consume(tase);
 
-                BuildMessageEventArgs bmea = new BuildMessageEventArgs("foo!", null, "sender", MessageImportance.High);
-                bmea.BuildEventContext = buildEventContext;
-                es.Consume(bmea);
+            BuildMessageEventArgs bmea = new BuildMessageEventArgs("foo!", null, "sender", MessageImportance.High);
+            bmea.BuildEventContext = buildEventContext;
+            es.Consume(bmea);
 
-                TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
-                tafea.BuildEventContext = buildEventContext;
-                es.Consume(tafea);
+            TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
+            tafea.BuildEventContext = buildEventContext;
+            es.Consume(tafea);
 
-                TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
-                trfea.BuildEventContext = buildEventContext;
-                es.Consume(trfea);
+            TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
+            trfea.BuildEventContext = buildEventContext;
+            es.Consume(trfea);
 
-                ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
-                pfea.BuildEventContext = buildEventContext;
-                es.Consume(pfea);
+            ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
+            pfea.BuildEventContext = buildEventContext;
+            es.Consume(pfea);
 
-                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
-                bfea.BuildEventContext = buildEventContext;
-                es.Consume(bfea);
+            BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+            bfea.BuildEventContext = buildEventContext;
+            es.Consume(bfea);
 
-                sc.ToString().ShouldBeEmpty();
-            }
+            sc.ToString().ShouldBeEmpty();
         }
 
         [Fact]
         public void TestQuietWithError()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
-                                                    sc.Write, sc.SetColor, sc.ResetColor);
-                L.Initialize(es, i);
+            EventSourceSink es = new EventSourceSink();
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
+                                                sc.Write, sc.SetColor, sc.ResetColor);
+            L.Initialize(es);
 
-                BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
 
-                BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
-                bse.BuildEventContext = buildEventContext;
-                es.Consume(bse);
+            BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
+            bse.BuildEventContext = buildEventContext;
+            es.Consume(bse);
 
-                ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
-                pse.BuildEventContext = buildEventContext;
-                es.Consume(pse);
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            pse.BuildEventContext = buildEventContext;
+            es.Consume(pse);
 
-                TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
-                trse.BuildEventContext = buildEventContext;
-                es.Consume(trse);
+            TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
+            trse.BuildEventContext = buildEventContext;
+            es.Consume(trse);
 
-                TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
-                tase.BuildEventContext = buildEventContext;
-                es.Consume(tase);
+            TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
+            tase.BuildEventContext = buildEventContext;
+            es.Consume(tase);
 
-                BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
-                                "31415", "file.vb", 42, 0, 0, 0,
-                                "Some long message", "help", "sender");
+            BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
+                            "31415", "file.vb", 42, 0, 0, 0,
+                            "Some long message", "help", "sender");
 
-                beea.BuildEventContext = buildEventContext;
-                es.Consume(beea);
+            beea.BuildEventContext = buildEventContext;
+            es.Consume(beea);
 
-                TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
-                tafea.BuildEventContext = buildEventContext;
-                es.Consume(tafea);
+            TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
+            tafea.BuildEventContext = buildEventContext;
+            es.Consume(tafea);
 
-                TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
-                trfea.BuildEventContext = buildEventContext;
-                es.Consume(trfea);
+            TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
+            trfea.BuildEventContext = buildEventContext;
+            es.Consume(trfea);
 
-                ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
-                pfea.BuildEventContext = buildEventContext;
-                es.Consume(pfea);
+            ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
+            pfea.BuildEventContext = buildEventContext;
+            es.Consume(pfea);
 
-                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
-                bfea.BuildEventContext = buildEventContext;
-                es.Consume(bfea);
+            BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+            bfea.BuildEventContext = buildEventContext;
+            es.Consume(bfea);
 
-                _output.WriteLine("==");
-                _output.WriteLine(sc.ToString());
-                _output.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
-                if (i == 1)
-                {
-                    sc.ToString().ShouldBe(
-                            "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
-                            "<reset color><red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine +
-                            "<reset color><cyan>pf" + Environment.NewLine +
-                            "<reset color>");
-                }
-                else
-                {
-                    sc.ToString().ShouldBe("<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>");
-                }
-            }
+            sc.ToString().ShouldBe("<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>");
         }
 
         /// <summary>
@@ -837,74 +790,59 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestQuietWithWarning()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
-                                                    sc.Write, sc.SetColor, sc.ResetColor);
-                L.Initialize(es, i);
+            EventSourceSink es = new EventSourceSink();
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
+                                                sc.Write, sc.SetColor, sc.ResetColor);
+            L.Initialize(es);
 
-                BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
 
-                BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
-                bse.BuildEventContext = buildEventContext;
-                es.Consume(bse);
+            BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
+            bse.BuildEventContext = buildEventContext;
+            es.Consume(bse);
 
-                ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
-                pse.BuildEventContext = buildEventContext;
-                es.Consume(pse);
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            pse.BuildEventContext = buildEventContext;
+            es.Consume(pse);
 
-                TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
-                trse.BuildEventContext = buildEventContext;
-                es.Consume(trse);
+            TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
+            trse.BuildEventContext = buildEventContext;
+            es.Consume(trse);
 
-                TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
-                tase.BuildEventContext = buildEventContext;
-                es.Consume(tase);
+            TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
+            tase.BuildEventContext = buildEventContext;
+            es.Consume(tase);
 
-                BuildWarningEventArgs beea = new BuildWarningEventArgs("VBC",
-                                "31415", "file.vb", 42, 0, 0, 0,
-                                "Some long message", "help", "sender");
+            BuildWarningEventArgs beea = new BuildWarningEventArgs("VBC",
+                            "31415", "file.vb", 42, 0, 0, 0,
+                            "Some long message", "help", "sender");
 
 
-                beea.BuildEventContext = buildEventContext;
-                es.Consume(beea);
+            beea.BuildEventContext = buildEventContext;
+            es.Consume(beea);
 
-                TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
-                tafea.BuildEventContext = buildEventContext;
-                es.Consume(tafea);
+            TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
+            tafea.BuildEventContext = buildEventContext;
+            es.Consume(tafea);
 
-                TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
-                trfea.BuildEventContext = buildEventContext;
-                es.Consume(trfea);
+            TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
+            trfea.BuildEventContext = buildEventContext;
+            es.Consume(trfea);
 
-                ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
-                pfea.BuildEventContext = buildEventContext;
-                es.Consume(pfea);
+            ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
+            pfea.BuildEventContext = buildEventContext;
+            es.Consume(pfea);
 
-                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
-                bfea.BuildEventContext = buildEventContext;
-                es.Consume(bfea);
+            BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+            bfea.BuildEventContext = buildEventContext;
+            es.Consume(bfea);
 
-                _output.WriteLine("==");
-                _output.WriteLine(sc.ToString());
-                _output.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
-                if (i == 1)
-                {
-                    sc.ToString().ShouldBe(
-                            "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
-                            "<reset color><yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine +
-                            "<reset color><cyan>pf" + Environment.NewLine +
-                            "<reset color>");
-                }
-                else
-                {
-                    sc.ToString().ShouldBe("<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>");
-                }
-            }
+            sc.ToString().ShouldBe("<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>");
         }
 
         /// <summary>
@@ -913,55 +851,52 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestMinimalWithNormalMessage()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Minimal,
-                                                    sc.Write, sc.SetColor,
-                                                    sc.ResetColor);
-                L.Initialize(es, i);
+            EventSourceSink es = new EventSourceSink();
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Minimal,
+                                                sc.Write, sc.SetColor,
+                                                sc.ResetColor);
+            L.Initialize(es);
 
-                BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
 
-                BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
-                bse.BuildEventContext = buildEventContext;
-                es.Consume(bse);
+            BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
+            bse.BuildEventContext = buildEventContext;
+            es.Consume(bse);
 
-                ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 1, 1, 1));
-                pse.BuildEventContext = buildEventContext;
-                es.Consume(pse);
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 1, 1, 1));
+            pse.BuildEventContext = buildEventContext;
+            es.Consume(pse);
 
-                TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
-                trse.BuildEventContext = buildEventContext;
-                es.Consume(trse);
+            TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
+            trse.BuildEventContext = buildEventContext;
+            es.Consume(trse);
 
-                TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
-                tase.BuildEventContext = buildEventContext;
-                es.Consume(tase);
+            TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
+            tase.BuildEventContext = buildEventContext;
+            es.Consume(tase);
 
-                BuildMessageEventArgs bmea = new BuildMessageEventArgs("foo!", null, "sender", MessageImportance.Normal);
-                bmea.BuildEventContext = buildEventContext;
-                es.Consume(bmea);
+            BuildMessageEventArgs bmea = new BuildMessageEventArgs("foo!", null, "sender", MessageImportance.Normal);
+            bmea.BuildEventContext = buildEventContext;
+            es.Consume(bmea);
 
-                TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
-                tafea.BuildEventContext = buildEventContext;
-                es.Consume(tafea);
+            TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
+            tafea.BuildEventContext = buildEventContext;
+            es.Consume(tafea);
 
-                TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
-                trfea.BuildEventContext = buildEventContext;
-                es.Consume(trfea);
+            TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
+            trfea.BuildEventContext = buildEventContext;
+            es.Consume(trfea);
 
-                ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
-                pfea.BuildEventContext = buildEventContext;
-                es.Consume(pfea);
+            ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
+            pfea.BuildEventContext = buildEventContext;
+            es.Consume(pfea);
 
-                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
-                bfea.BuildEventContext = buildEventContext;
-                es.Consume(bfea);
+            BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+            bfea.BuildEventContext = buildEventContext;
+            es.Consume(bfea);
 
-                sc.ToString().ShouldBeEmpty();
-            }
+            sc.ToString().ShouldBeEmpty();
         }
 
         /// <summary>
@@ -970,73 +905,58 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestMinimalWithError()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Minimal,
-                                                    sc.Write, sc.SetColor, sc.ResetColor);
-                L.Initialize(es, i);
+            EventSourceSink es = new EventSourceSink();
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Minimal,
+                                                sc.Write, sc.SetColor, sc.ResetColor);
+            L.Initialize(es);
 
-                BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
 
-                BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
-                bse.BuildEventContext = buildEventContext;
-                es.Consume(bse);
+            BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
+            bse.BuildEventContext = buildEventContext;
+            es.Consume(bse);
 
-                ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
-                pse.BuildEventContext = buildEventContext;
-                es.Consume(pse);
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            pse.BuildEventContext = buildEventContext;
+            es.Consume(pse);
 
-                TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
-                trse.BuildEventContext = buildEventContext;
-                es.Consume(trse);
+            TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
+            trse.BuildEventContext = buildEventContext;
+            es.Consume(trse);
 
-                TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
-                tase.BuildEventContext = buildEventContext;
-                es.Consume(tase);
+            TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
+            tase.BuildEventContext = buildEventContext;
+            es.Consume(tase);
 
-                BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
-                                "31415", "file.vb", 42, 0, 0, 0,
-                                "Some long message", "help", "sender");
+            BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
+                            "31415", "file.vb", 42, 0, 0, 0,
+                            "Some long message", "help", "sender");
 
-                beea.BuildEventContext = buildEventContext;
-                es.Consume(beea);
+            beea.BuildEventContext = buildEventContext;
+            es.Consume(beea);
 
-                TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
-                tafea.BuildEventContext = buildEventContext;
-                es.Consume(tafea);
+            TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
+            tafea.BuildEventContext = buildEventContext;
+            es.Consume(tafea);
 
-                TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
-                trfea.BuildEventContext = buildEventContext;
-                es.Consume(trfea);
+            TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
+            trfea.BuildEventContext = buildEventContext;
+            es.Consume(trfea);
 
-                ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
-                pfea.BuildEventContext = buildEventContext;
-                es.Consume(pfea);
+            ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
+            pfea.BuildEventContext = buildEventContext;
+            es.Consume(pfea);
 
-                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
-                bfea.BuildEventContext = buildEventContext;
-                es.Consume(bfea);
+            BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+            bfea.BuildEventContext = buildEventContext;
+            es.Consume(bfea);
 
-                _output.WriteLine("==");
-                _output.WriteLine(sc.ToString());
-                _output.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
-                if (i == 1)
-                {
-                    sc.ToString().ShouldBe(
-                            "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
-                            "<reset color><red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine +
-                            "<reset color><cyan>pf" + Environment.NewLine +
-                            "<reset color>");
-                }
-                else
-                {
-                    sc.ToString().ShouldBe("<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>");
-                }
-            }
+            sc.ToString().ShouldBe("<red>file.vb(42): VBC error 31415: Some long message" + Environment.NewLine + "<reset color>");
         }
 
         /// <summary>
@@ -1045,74 +965,59 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestMinimalWithWarning()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
-                                                    sc.Write, sc.SetColor, sc.ResetColor);
-                L.Initialize(es, i);
+            EventSourceSink es = new EventSourceSink();
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
+                                                sc.Write, sc.SetColor, sc.ResetColor);
+            L.Initialize(es);
 
-                BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
 
-                BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
-                bse.BuildEventContext = buildEventContext;
-                es.Consume(bse);
+            BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
+            bse.BuildEventContext = buildEventContext;
+            es.Consume(bse);
 
-                ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
-                pse.BuildEventContext = buildEventContext;
-                es.Consume(pse);
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            pse.BuildEventContext = buildEventContext;
+            es.Consume(pse);
 
-                TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
-                trse.BuildEventContext = buildEventContext;
-                es.Consume(trse);
+            TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
+            trse.BuildEventContext = buildEventContext;
+            es.Consume(trse);
 
-                TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
-                tase.BuildEventContext = buildEventContext;
-                es.Consume(tase);
+            TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
+            tase.BuildEventContext = buildEventContext;
+            es.Consume(tase);
 
-                BuildWarningEventArgs beea = new BuildWarningEventArgs("VBC",
-                                "31415", "file.vb", 42, 0, 0, 0,
-                                "Some long message", "help", "sender");
+            BuildWarningEventArgs beea = new BuildWarningEventArgs("VBC",
+                            "31415", "file.vb", 42, 0, 0, 0,
+                            "Some long message", "help", "sender");
 
 
-                beea.BuildEventContext = buildEventContext;
-                es.Consume(beea);
+            beea.BuildEventContext = buildEventContext;
+            es.Consume(beea);
 
-                TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
-                tafea.BuildEventContext = buildEventContext;
-                es.Consume(tafea);
+            TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
+            tafea.BuildEventContext = buildEventContext;
+            es.Consume(tafea);
 
-                TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
-                trfea.BuildEventContext = buildEventContext;
-                es.Consume(trfea);
+            TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
+            trfea.BuildEventContext = buildEventContext;
+            es.Consume(trfea);
 
-                ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
-                pfea.BuildEventContext = buildEventContext;
-                es.Consume(pfea);
+            ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
+            pfea.BuildEventContext = buildEventContext;
+            es.Consume(pfea);
 
-                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
-                bfea.BuildEventContext = buildEventContext;
-                es.Consume(bfea);
+            BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+            bfea.BuildEventContext = buildEventContext;
+            es.Consume(bfea);
 
-                _output.WriteLine("==");
-                _output.WriteLine(sc.ToString());
-                _output.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
-                if (i == 1)
-                {
-                    sc.ToString().ShouldBe(
-                            "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
-                            "<reset color><yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine +
-                            "<reset color><cyan>pf" + Environment.NewLine +
-                            "<reset color>");
-                }
-                else
-                {
-                    sc.ToString().ShouldBe("<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>");
-                }
-            }
+            sc.ToString().ShouldBe("<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>");
         }
 
         /// <summary>
@@ -1121,256 +1026,72 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestDirectEventHandlers()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
-                                                    sc.Write, sc.SetColor, sc.ResetColor);
-                L.Initialize(es, i);
-
-                BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
-
-                BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
-                bse.BuildEventContext = buildEventContext;
-                L.BuildStartedHandler(null, bse);
-
-                ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
-                pse.BuildEventContext = buildEventContext;
-                L.ProjectStartedHandler(null, pse);
-
-                TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
-                trse.BuildEventContext = buildEventContext;
-                L.TargetStartedHandler(null, trse);
-
-                TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
-                tase.BuildEventContext = buildEventContext;
-                L.TaskStartedHandler(null, tase);
-
-                BuildWarningEventArgs beea = new BuildWarningEventArgs("VBC",
-                                "31415", "file.vb", 42, 0, 0, 0,
-                                "Some long message", "help", "sender");
-
-
-                beea.BuildEventContext = buildEventContext;
-                L.WarningHandler(null, beea);
-
-                TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
-                tafea.BuildEventContext = buildEventContext;
-                L.TaskFinishedHandler(null, tafea);
-
-                TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
-                trfea.BuildEventContext = buildEventContext;
-                L.TargetFinishedHandler(null, trfea);
-
-                ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
-                pfea.BuildEventContext = buildEventContext;
-                L.ProjectFinishedHandler(null, pfea);
-
-                BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
-                bfea.BuildEventContext = buildEventContext;
-                L.BuildFinishedHandler(null, bfea);
-
-                _output.WriteLine("==");
-                _output.WriteLine(sc.ToString());
-                _output.WriteLine("==");
-
-                if (i == 1)
-                {
-                    sc.ToString().ShouldBe(
-                            "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname") + Environment.NewLine + Environment.NewLine +
-                            "<reset color><yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine +
-                            "<reset color><cyan>pf" + Environment.NewLine +
-                            "<reset color>");
-                }
-                else
-                {
-                    sc.ToString().ShouldBe("<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>");
-                }
-            }
-        }
-
-        [Fact]
-        public void SingleLineFormatNoop()
-        {
-            string s = "foo";
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 0);
-
-            // should be a no-op
-            ss.ShouldBe($"foo{Environment.NewLine}");
-        }
-
-        [Fact]
-        public void MultilineFormatWindowsLineEndings()
-        {
-            string newline = "\r\n";
-            string s = "foo" + newline + "bar" +
-                       newline + "baz" + newline;
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 4);
-
-            // should convert lines to system format
-            ss.ShouldBe($"    foo{Environment.NewLine}    bar{Environment.NewLine}    baz{Environment.NewLine}    {Environment.NewLine}");
-        }
-
-        [Fact]
-        public void MultilineFormatUnixLineEndings()
-        {
-            string s = "foo\nbar\nbaz\n";
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 0);
-
-            // should convert lines to system format
-            ss.ShouldBe($"foo{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}");
-        }
-
-        [Fact]
-        public void MultilineFormatMixedLineEndings()
-        {
-            string s = "\n" + "foo" + "\r\n\r\n" + "bar" + "\n" + "baz" + "\n\r\n\n" +
-                "jazz" + "\r\n" + "razz" + "\n\n" + "matazz" + "\n" + "end";
-
-            SerialConsoleLogger cl = new SerialConsoleLogger();
-
-            string ss = cl.IndentString(s, 0);
-
-            // should convert lines to system format
-            ss.ShouldBe($"{Environment.NewLine}foo{Environment.NewLine}{Environment.NewLine}bar{Environment.NewLine}baz{Environment.NewLine}{Environment.NewLine}{Environment.NewLine}jazz{Environment.NewLine}razz{Environment.NewLine}{Environment.NewLine}matazz{Environment.NewLine}end{Environment.NewLine}");
-        }
-
-        [Fact]
-        public void NestedProjectMinimal()
-        {
             EventSourceSink es = new EventSourceSink();
             SimulatedConsole sc = new SimulatedConsole();
-            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Minimal,
-                                                sc.Write, sc.SetColor, sc.ResetColor);
-            L.Initialize(es, 1);
-
-            es.Consume(new BuildStartedEventArgs("bs", null));
-
-            // Clear time dependent build started message
-            sc.Clear();
-
-            es.Consume(new ProjectStartedEventArgs("ps1", null, "fname1", "", null, null));
-
-            es.Consume(new TargetStartedEventArgs("ts", null,
-                                                     "trname", "fname", "tfile"));
-
-            es.Consume(new ProjectStartedEventArgs("ps2", null, "fname2", "", null, null));
-
-            sc.ToString().ShouldBeEmpty();
-
-            BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
-                        "31415", "file.vb", 42, 0, 0, 0,
-                        "Some long message", "help", "sender");
-
-            es.Consume(beea);
-
-            sc.ToString().ShouldBe(
-                "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname1") + Environment.NewLine +
-                                        Environment.NewLine + "<reset color>" +
-                "<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForNestedProjectWithDefaultTargets", "fname1", "fname2") + Environment.NewLine +
-                                                      Environment.NewLine + "<reset color>" +
-                "<red>" + "file.vb(42): VBC error 31415: Some long message" +
-                                                      Environment.NewLine + "<reset color>");
-        }
-
-        [Fact]
-        public void NestedProjectNormal()
-        {
-            EventSourceSink es = new EventSourceSink();
-            SimulatedConsole sc = new SimulatedConsole();
-            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal,
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Quiet,
                                                 sc.Write, sc.SetColor, sc.ResetColor);
             L.Initialize(es);
 
-            es.Consume(new BuildStartedEventArgs("bs", null));
+            BuildEventContext buildEventContext = new BuildEventContext(1, 2, 3, 4);
+
+            BuildStartedEventArgs bse = new BuildStartedEventArgs("bs", null);
+            bse.BuildEventContext = buildEventContext;
+            L.BuildStartedHandler(null, bse);
+
+            ProjectStartedEventArgs pse = new ProjectStartedEventArgs(-1, "ps", null, "fname", "", null, null, new BuildEventContext(1, 2, 3, 4));
+            pse.BuildEventContext = buildEventContext;
+            L.ProjectStartedHandler(null, pse);
+
+            TargetStartedEventArgs trse = new TargetStartedEventArgs("ts", null, "trname", "pfile", "tfile");
+            trse.BuildEventContext = buildEventContext;
+            L.TargetStartedHandler(null, trse);
+
+            TaskStartedEventArgs tase = new TaskStartedEventArgs("tks", null, "tname", "tfname", "tsname");
+            tase.BuildEventContext = buildEventContext;
+            L.TaskStartedHandler(null, tase);
+
+            BuildWarningEventArgs beea = new BuildWarningEventArgs("VBC",
+                            "31415", "file.vb", 42, 0, 0, 0,
+                            "Some long message", "help", "sender");
 
 
-            // Clear time dependent build started message
-            sc.Clear();
+            beea.BuildEventContext = buildEventContext;
+            L.WarningHandler(null, beea);
 
-            es.Consume(new ProjectStartedEventArgs("ps1", null, "fname1", "", null, null));
+            TaskFinishedEventArgs tafea = new TaskFinishedEventArgs("tkf", null, "fname", "tsname", "tfname", true);
+            tafea.BuildEventContext = buildEventContext;
+            L.TaskFinishedHandler(null, tafea);
 
-            sc.ToString().ShouldBe("<cyan>" + BaseConsoleLogger.projectSeparatorLine + Environment.NewLine +
-                                   ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForTopLevelProjectWithDefaultTargets", "fname1") + Environment.NewLine +
-                                   Environment.NewLine + "<reset color>");
+            TargetFinishedEventArgs trfea = new TargetFinishedEventArgs("tf", null, "trname", "fname", "tfile", true);
+            trfea.BuildEventContext = buildEventContext;
+            L.TargetFinishedHandler(null, trfea);
 
-            sc.Clear();
+            ProjectFinishedEventArgs pfea = new ProjectFinishedEventArgs("pf", null, "fname", true);
+            pfea.BuildEventContext = buildEventContext;
+            L.ProjectFinishedHandler(null, pfea);
 
-            es.Consume(new TargetStartedEventArgs("ts", null,
-                                                     "tarname", "fname", "tfile"));
-            sc.ToString().ShouldBeEmpty();
+            BuildFinishedEventArgs bfea = new BuildFinishedEventArgs("bf", null, true);
+            bfea.BuildEventContext = buildEventContext;
+            L.BuildFinishedHandler(null, bfea);
 
-            sc.Clear();
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
-            es.Consume(new TaskStartedEventArgs("", "", "", "", "Exec"));
-            es.Consume(new ProjectStartedEventArgs("ps2", null, "fname2", "", null, null));
-
-            sc.ToString().ShouldBe(
-                "<cyan>" + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetStartedPrefix", "tarname") + Environment.NewLine + "<reset color>"
-                + "<cyan>" + "    " + BaseConsoleLogger.projectSeparatorLine
-                                          + Environment.NewLine +
-                "    " + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStartedPrefixForNestedProjectWithDefaultTargets", "fname1", "fname2") + Environment.NewLine +
-                Environment.NewLine + "<reset color>");
-
-            sc.Clear();
-
-            es.Consume(new ProjectFinishedEventArgs("pf2", null, "fname2", true));
-            es.Consume(new TaskFinishedEventArgs("", "", "", "", "Exec", true));
-
-            sc.ToString().ShouldBeEmpty();
-
-            sc.Clear();
-
-            es.Consume(new TargetFinishedEventArgs("tf", null, "tarname", "fname", "tfile", true));
-
-            sc.ToString().ShouldBeEmpty();
-
-            sc.Clear();
-
-            es.Consume(new ProjectFinishedEventArgs("pf1", null, "fname1", true));
-
-            sc.ToString().ShouldBeEmpty();
-
-            sc.Clear();
-
-            es.Consume(new BuildFinishedEventArgs("bf", null, true));
-
-            sc.ToString().ShouldStartWith("<green>" + Environment.NewLine + "bf" +
-                        Environment.NewLine + "<reset color>" +
-                "    " + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("WarningCount", 0) +
-                        Environment.NewLine + "<reset color>" +
-                "    " + ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ErrorCount", 0) +
-                        Environment.NewLine + "<reset color>" +
-                        Environment.NewLine);
-
-            // Would like to add...
-            //    + ResourceUtilities.FormatResourceString("TimeElapsed", String.Empty);
-            // ...but this assumes that the time goes on the far right in every locale.
-
-            sc.Clear();
+            sc.ToString().ShouldBe("<yellow>file.vb(42): VBC warning 31415: Some long message" + Environment.NewLine + "<reset color>");
         }
+
 
         [Fact]
         public void CustomDisplayedAtDetailed()
         {
             EventSourceSink es = new EventSourceSink();
             SimulatedConsole sc = new SimulatedConsole();
-            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Detailed,
-                                                sc.Write, null, null);
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
             L.Initialize(es);
 
-            MyCustomBuildEventArgs c =
-                    new MyCustomBuildEventArgs("msg");
+            MyCustomBuildEventArgs c = new MyCustomBuildEventArgs("msg");
+            c.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
 
             es.Consume(c);
 
@@ -1399,12 +1120,11 @@ namespace Microsoft.Build.UnitTests
         {
             EventSourceSink es = new EventSourceSink();
             SimulatedConsole sc = new SimulatedConsole();
-            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal,
-                                                sc.Write, null, null);
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
             L.Initialize(es);
 
-            MyCustomBuildEventArgs c =
-                    new MyCustomBuildEventArgs("msg");
+            MyCustomBuildEventArgs c = new MyCustomBuildEventArgs("msg");
+            c.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
 
             es.Consume(c);
 
@@ -1425,23 +1145,13 @@ namespace Microsoft.Build.UnitTests
             string prop1;
             string prop2;
             string prop3;
-            if (cl is SerialConsoleLogger scl)
-            {
-                var propertyList = scl.ExtractPropertyList(properties);
-                scl.WriteProperties(propertyList);
-                prop1 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop1", "val1");
-                prop2 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "prop2", "val2");
-                prop3 = String.Format(CultureInfo.CurrentCulture, "{0,-30} = {1}", "pro(p3)", "va;%3b;l3");
-            }
-            else
-            {
-                BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                ((ParallelConsoleLogger)cl).WriteProperties(buildEvent, properties);
-                prop1 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop1", "val1");
-                prop2 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop2", "val2");
-                prop3 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "pro(p3)", "va;%3b;l3");
-            }
+
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            ((ParallelConsoleLogger)cl).WriteProperties(buildEvent, properties);
+            prop1 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop1", "val1");
+            prop2 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "prop2", "val2");
+            prop3 = String.Format(CultureInfo.CurrentCulture, "{0} = {1}", "pro(p3)", "va;%3b;l3");
             string log = sc.ToString();
 
             _output.WriteLine("[" + log + "]");
@@ -1468,11 +1178,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayPropertiesList()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-
-            WriteAndValidateProperties(cl, sc, true);
-
-            sc = new SimulatedConsole();
+           
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1487,9 +1193,6 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayPropertiesListInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
-
-            WriteAndValidateProperties(cl, sc, false);
 
             sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
@@ -1505,17 +1208,11 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayEnvironmentInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
-            WriteEnvironment(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
             WriteEnvironment(cl2, sc, false);
         }
-
-
 
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
@@ -1524,12 +1221,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayEnvironmentInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
-            cl.Parameters = "ShowEnvironment";
-            cl.ParseParameters();
-            WriteEnvironment(cl, sc, true);
 
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1546,10 +1238,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayEnvironmentInDiagnostic()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-            WriteEnvironment(cl, sc, true);
 
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1563,17 +1252,11 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayEnvironmentInMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
 
-            WriteEnvironment(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
 
             WriteEnvironment(cl2, sc, false);
         }
-
-
 
         /// <summary>
         /// Basic test of environment list not being displayed except in Diagnostic or if the showenvironment flag is set
@@ -1582,12 +1265,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayEnvironmentInMinimal()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
-            cl.Parameters = "ShowEnvironment";
-            cl.ParseParameters();
-            WriteEnvironment(cl, sc, true);
-
-            sc = new SimulatedConsole();
+           
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Minimal, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1604,20 +1282,13 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayPropertiesListIfDisabled()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-            cl.Parameters = "noitemandpropertylist";
-            cl.ParseParameters();
 
-            WriteAndValidateProperties(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             cl2.Parameters = "noitemandpropertylist";
             cl2.ParseParameters();
 
-            WriteAndValidateProperties(cl, sc, false);
+            WriteAndValidateProperties(cl2, sc, false);
         }
-
 
         /// <summary>
         /// Create some items and log them
@@ -1680,24 +1351,12 @@ namespace Microsoft.Build.UnitTests
             string item3spec;
             string item3metadatum = string.Empty;
 
-            if (cl is SerialConsoleLogger scl)
-            {
-                SortedList itemList = scl.ExtractItemList(items);
-                scl.WriteItems(itemList);
-                item1spec = "spec" + Environment.NewLine;
-                item2spec = "spec2" + Environment.NewLine;
-                item3spec = "(spec;3" + Environment.NewLine;
-                item3metadatum = "f)oo = !@#" + Environment.NewLine;
-            }
-            else
-            {
-                BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
-                item1spec = Environment.NewLine + "    spec" + Environment.NewLine;
-                item2spec = Environment.NewLine + "    spec2" + Environment.NewLine;
-                item3spec = Environment.NewLine + "    (spec;3" + Environment.NewLine;
-            }
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
+            item1spec = Environment.NewLine + "    spec" + Environment.NewLine;
+            item2spec = Environment.NewLine + "    spec2" + Environment.NewLine;
+            item3spec = Environment.NewLine + "    (spec;3" + Environment.NewLine;
 
             item1type = "type" + Environment.NewLine;
             item2type = "type2" + Environment.NewLine;
@@ -1706,8 +1365,6 @@ namespace Microsoft.Build.UnitTests
             string log = sc.ToString();
 
             _output.WriteLine("[" + log + "]");
-
-
 
             // Being careful not to make locale assumptions here, eg about sorting
             if (expectToSeeLogging)
@@ -1749,37 +1406,15 @@ namespace Microsoft.Build.UnitTests
         {
             Hashtable items = new Hashtable();
 
-            for (int i = 0; i < 2; i++)
-            {
-                BaseConsoleLogger cl = null;
-                SimulatedConsole sc = new SimulatedConsole();
-                if (i == 0)
-                {
-                    cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                }
-                else
-                {
-                    cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                }
+            SimulatedConsole sc = new SimulatedConsole();
+            BaseConsoleLogger cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
+            string log = sc.ToString();
 
-                if (cl is SerialConsoleLogger scl)
-                {
-                    SortedList itemList = scl.ExtractItemList(items);
-                    scl.WriteItems(itemList);
-                }
-                else
-                {
-                    BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                    buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                    ((ParallelConsoleLogger)cl).WriteItems(buildEvent, items);
-                }
-
-                string log = sc.ToString();
-
-                // There should be nothing in the log
-                log.Length.ShouldBe(0);
-                _output.WriteLine("Iteration of i: " + i + "[" + log + "]");
-            }
+            // There should be nothing in the log
+            log.Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -1791,29 +1426,16 @@ namespace Microsoft.Build.UnitTests
         {
             Hashtable properties = new Hashtable();
 
-            for (int i = 0; i < 2; i++)
-            {
-                SimulatedConsole sc = new SimulatedConsole();
-                if (i == 0)
-                {
-                    var cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                    var propertyList = cl.ExtractPropertyList(properties);
-                    cl.WriteProperties(propertyList);
-                }
-                else
-                {
-                    var cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-                    BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
-                    buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
-                    cl.WriteProperties(buildEvent, properties);
-                }
+            SimulatedConsole sc = new SimulatedConsole();
+            var cl = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
+            BuildEventArgs buildEvent = new BuildErrorEventArgs("", "", "", 0, 0, 0, 0, "", "", "");
+            buildEvent.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
+            cl.WriteProperties(buildEvent, properties);
 
-                string log = sc.ToString();
+            string log = sc.ToString();
 
-                // There should be nothing in the log
-                log.Length.ShouldBe(0);
-                _output.WriteLine("Iteration of i: " + i + "[" + log + "]");
-            }
+            // There should be nothing in the log
+            log.Length.ShouldBe(0);
         }
 
         /// <summary>
@@ -1823,11 +1445,7 @@ namespace Microsoft.Build.UnitTests
         public void DisplayItemsList()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
 
-            WriteAndValidateItems(cl, sc, true);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             EventSourceSink es = new EventSourceSink();
             cl2.Initialize(es);
@@ -1842,11 +1460,7 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayItemListInDetailed()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
-            WriteAndValidateItems(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Detailed, sc.Write, null, null);
 
             WriteAndValidateItems(cl2, sc, false);
@@ -1859,13 +1473,7 @@ namespace Microsoft.Build.UnitTests
         public void DoNotDisplayItemListIfDisabled()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger cl = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
-            cl.Parameters = "noitemandpropertylist";
-            cl.ParseParameters();
 
-            WriteAndValidateItems(cl, sc, false);
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             cl2.Parameters = "noitemandpropertylist";
             cl2.ParseParameters();
@@ -1877,17 +1485,7 @@ namespace Microsoft.Build.UnitTests
         public void ParametersEmptyTests()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger L = new SerialConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
 
-            L.Parameters = "";
-            L.ParseParameters();
-            L.ShowSummary.ShouldBeNull();
-
-            L.Parameters = null;
-            L.ParseParameters();
-            L.ShowSummary.ShouldBeNull();
-
-            sc = new SimulatedConsole();
             ParallelConsoleLogger cl2 = new ParallelConsoleLogger(LoggerVerbosity.Diagnostic, sc.Write, null, null);
             cl2.Parameters = "noitemandpropertylist";
             cl2.ParseParameters();
@@ -1899,29 +1497,13 @@ namespace Microsoft.Build.UnitTests
         public void ParametersParsingTests()
         {
             SimulatedConsole sc = new SimulatedConsole();
-            SerialConsoleLogger L = new SerialConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
 
-            L.Parameters = "NoSuMmaRy";
-            L.ParseParameters();
-            L.ShowSummary.ShouldNotBeNull();
-            ((bool)L.ShowSummary).ShouldBeFalse();
+            ParallelConsoleLogger L = new ParallelConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
 
             L.Parameters = ";;NoSuMmaRy;";
             L.ParseParameters();
             L.ShowSummary.ShouldNotBeNull();
-            ((bool)L.ShowSummary).ShouldBeFalse();
 
-            sc = new SimulatedConsole();
-            ParallelConsoleLogger L2 = new ParallelConsoleLogger(LoggerVerbosity.Normal, sc.Write, null, null);
-
-            L2.Parameters = "NoSuMmaRy";
-            L2.ParseParameters();
-            L.ShowSummary.ShouldNotBeNull();
-            ((bool)L.ShowSummary).ShouldBeFalse();
-
-            L2.Parameters = ";;NoSuMmaRy;";
-            L2.ParseParameters();
-            L.ShowSummary.ShouldNotBeNull();
             ((bool)L.ShowSummary).ShouldBeFalse();
         }
 
@@ -1952,16 +1534,14 @@ namespace Microsoft.Build.UnitTests
             es.Consume(new BuildStartedEventArgs("bs", null));
 
             // Introduce a warning
-            BuildWarningEventArgs bwea = new BuildWarningEventArgs("VBC",
-                            "31415", "file.vb", 42, 0, 0, 0,
-                            "Some long message", "help", "sender");
+            BuildWarningEventArgs bwea = new BuildWarningEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
+            bwea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
 
             es.Consume(bwea);
 
             // Introduce an error
-            BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
-                        "31415", "file.vb", 42, 0, 0, 0,
-                        "Some long message", "help", "sender");
+            BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
+            beea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
 
             es.Consume(beea);
 
@@ -2033,8 +1613,7 @@ namespace Microsoft.Build.UnitTests
             string warningString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("WarningCount", 1);
 
             // Create a ConsoleLogger with Normal verbosity
-            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal,
-                                                sc.Write, sc.SetColor, sc.ResetColor);
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
             // Initialize ConsoleLogger
             L.Initialize(es);
 
@@ -2042,16 +1621,14 @@ namespace Microsoft.Build.UnitTests
             es.Consume(new BuildStartedEventArgs("bs", null));
 
             // Introduce a warning
-            BuildWarningEventArgs bwea = new BuildWarningEventArgs("VBC",
-                            "31415", "file.vb", 42, 0, 0, 0,
-                            "Some long message", "help", "sender");
+            BuildWarningEventArgs bwea = new BuildWarningEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
+            bwea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
 
             es.Consume(bwea);
 
             // Introduce an error
-            BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
-                        "31415", "file.vb", 42, 0, 0, 0,
-                        "Some long message", "help", "sender");
+            BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC", "31415", "file.vb", 42, 0, 0, 0, "Some long message", "help", "sender");
+            beea.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
 
             es.Consume(beea);
 
@@ -2080,8 +1657,7 @@ namespace Microsoft.Build.UnitTests
             es.Consume(new BuildStartedEventArgs("bs", null));
 
             // BuildFinished
-            es.Consume(new BuildFinishedEventArgs("bf",
-                                                     null, true));
+            es.Consume(new BuildFinishedEventArgs("bf", null, true));
             // Log so far
             actualLog = sc.ToString();
 
@@ -2110,127 +1686,124 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResetConsoleLoggerState_PerformanceCounters()
         {
-            for (int i = 1; i <= 2; i++)
-            {
-                EventSourceSink es = new EventSourceSink();
-                // Create a simulated console
-                SimulatedConsole sc = new SimulatedConsole();
-                // Create a ConsoleLogger with Normal verbosity
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
-                // Initialize ConsoleLogger
-                L.Parameters = "Performancesummary";
-                L.Initialize(es, i);
-                // prjPerfString = Project Performance Summary:
-                string prjPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectPerformanceSummary", null);
-                // targetPerfString = Target Performance Summary:
-                string targetPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetPerformanceSummary", null);
-                // taskPerfString = Task Performance Summary:
-                string taskPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskPerformanceSummary", null);
+            EventSourceSink es = new EventSourceSink();
+            // Create a simulated console
+            SimulatedConsole sc = new SimulatedConsole();
+            // Create a ConsoleLogger with Normal verbosity
+            ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
+            // Initialize ConsoleLogger
+            L.Parameters = "Performancesummary";
+            L.Initialize(es);
+            // prjPerfString = Project Performance Summary:
+            string prjPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectPerformanceSummary", null);
+            // targetPerfString = Target Performance Summary:
+            string targetPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TargetPerformanceSummary", null);
+            // taskPerfString = Task Performance Summary:
+            string taskPerfString = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskPerformanceSummary", null);
 
-                // BuildStarted Event
-                es.Consume(new BuildStartedEventArgs("bs", null));
-                // Project Started Event
-                ProjectStartedEventArgs project1Started = new ProjectStartedEventArgs(1, null, null, "p", "t", null, null, new BuildEventContext(BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId));
-                project1Started.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
-                es.Consume(project1Started);
-                TargetStartedEventArgs targetStarted1 = new TargetStartedEventArgs(null, null, "t", null, null);
-                targetStarted1.BuildEventContext = project1Started.BuildEventContext;
-                // TargetStarted Event
-                es.Consume(targetStarted1);
+            // BuildStarted Event
+            es.Consume(new BuildStartedEventArgs("bs", null));
+            // Project Started Event
+            ProjectStartedEventArgs project1Started = new ProjectStartedEventArgs(1, null, null, "p", "t", null, null, new BuildEventContext(BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId));
+            project1Started.BuildEventContext = new BuildEventContext(1, 1, 1, 1);
+            es.Consume(project1Started);
+            TargetStartedEventArgs targetStarted1 = new TargetStartedEventArgs(null, null, "t", null, null);
+            targetStarted1.BuildEventContext = project1Started.BuildEventContext;
+            // TargetStarted Event
+            es.Consume(targetStarted1);
 
-                TaskStartedEventArgs taskStarted1 = new TaskStartedEventArgs(null, null, null, null, "task");
-                taskStarted1.BuildEventContext = project1Started.BuildEventContext;
-                // TaskStarted Event
-                es.Consume(taskStarted1);
+            TaskStartedEventArgs taskStarted1 = new TaskStartedEventArgs(null, null, null, null, "task");
+            taskStarted1.BuildEventContext = project1Started.BuildEventContext;
+            // TaskStarted Event
+            es.Consume(taskStarted1);
 
-                BuildMessageEventArgs messsage1 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
-                messsage1.BuildEventContext = project1Started.BuildEventContext;
-                // Message Event
-                es.Consume(messsage1);
-                TaskFinishedEventArgs taskFinished1 = new TaskFinishedEventArgs(null, null, null, null, "task", true);
-                taskFinished1.BuildEventContext = project1Started.BuildEventContext;
-                // TaskFinished Event
-                es.Consume(taskFinished1);
+            BuildMessageEventArgs messsage1 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
+            messsage1.BuildEventContext = project1Started.BuildEventContext;
+            // Message Event
+            es.Consume(messsage1);
+            TaskFinishedEventArgs taskFinished1 = new TaskFinishedEventArgs(null, null, null, null, "task", true);
+            taskFinished1.BuildEventContext = project1Started.BuildEventContext;
+            // TaskFinished Event
+            es.Consume(taskFinished1);
 
-                TargetFinishedEventArgs targetFinished1 = new TargetFinishedEventArgs(null, null, "t", null, null, true);
-                targetFinished1.BuildEventContext = project1Started.BuildEventContext;
-                // TargetFinished Event
-                es.Consume(targetFinished1);
+            TargetFinishedEventArgs targetFinished1 = new TargetFinishedEventArgs(null, null, "t", null, null, true);
+            targetFinished1.BuildEventContext = project1Started.BuildEventContext;
+            // TargetFinished Event
+            es.Consume(targetFinished1);
 
-                ProjectStartedEventArgs project2Started = new ProjectStartedEventArgs(2, null, null, "p2", "t2", null, null, project1Started.BuildEventContext);
-                // Project Started Event
-                project2Started.BuildEventContext = new BuildEventContext(2, 2, 2, 2);
-                es.Consume(project2Started);
-                TargetStartedEventArgs targetStarted2 = new TargetStartedEventArgs(null, null, "t2", null, null);
-                targetStarted2.BuildEventContext = project2Started.BuildEventContext;
-                // TargetStarted Event
-                es.Consume(targetStarted2);
+            ProjectStartedEventArgs project2Started = new ProjectStartedEventArgs(2, null, null, "p2", "t2", null, null, project1Started.BuildEventContext);
+            // Project Started Event
+            project2Started.BuildEventContext = new BuildEventContext(2, 2, 2, 2);
+            es.Consume(project2Started);
+            TargetStartedEventArgs targetStarted2 = new TargetStartedEventArgs(null, null, "t2", null, null);
+            targetStarted2.BuildEventContext = project2Started.BuildEventContext;
+            // TargetStarted Event
+            es.Consume(targetStarted2);
 
-                TaskStartedEventArgs taskStarted2 = new TaskStartedEventArgs(null, null, null, null, "task2");
-                taskStarted2.BuildEventContext = project2Started.BuildEventContext;
-                // TaskStarted Event
-                es.Consume(taskStarted2);
+            TaskStartedEventArgs taskStarted2 = new TaskStartedEventArgs(null, null, null, null, "task2");
+            taskStarted2.BuildEventContext = project2Started.BuildEventContext;
+            // TaskStarted Event
+            es.Consume(taskStarted2);
 
-                BuildMessageEventArgs messsage2 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
-                messsage2.BuildEventContext = project2Started.BuildEventContext;
-                // Message Event
-                es.Consume(messsage2);
-                TaskFinishedEventArgs taskFinished2 = new TaskFinishedEventArgs(null, null, null, null, "task2", true);
-                taskFinished2.BuildEventContext = project2Started.BuildEventContext;
-                // TaskFinished Event
-                es.Consume(taskFinished2);
+            BuildMessageEventArgs messsage2 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
+            messsage2.BuildEventContext = project2Started.BuildEventContext;
+            // Message Event
+            es.Consume(messsage2);
+            TaskFinishedEventArgs taskFinished2 = new TaskFinishedEventArgs(null, null, null, null, "task2", true);
+            taskFinished2.BuildEventContext = project2Started.BuildEventContext;
+            // TaskFinished Event
+            es.Consume(taskFinished2);
 
-                TargetFinishedEventArgs targetFinished2 = new TargetFinishedEventArgs(null, null, "t2", null, null, true);
-                targetFinished2.BuildEventContext = project2Started.BuildEventContext;
-                // TargetFinished Event
-                es.Consume(targetFinished2);
+            TargetFinishedEventArgs targetFinished2 = new TargetFinishedEventArgs(null, null, "t2", null, null, true);
+            targetFinished2.BuildEventContext = project2Started.BuildEventContext;
+            // TargetFinished Event
+            es.Consume(targetFinished2);
 
-                ProjectFinishedEventArgs finished2 = new ProjectFinishedEventArgs(null, null, "p2", true);
-                finished2.BuildEventContext = project2Started.BuildEventContext;
-                // ProjectFinished Event
-                es.Consume(finished2);            // BuildFinished Event
+            ProjectFinishedEventArgs finished2 = new ProjectFinishedEventArgs(null, null, "p2", true);
+            finished2.BuildEventContext = project2Started.BuildEventContext;
+            // ProjectFinished Event
+            es.Consume(finished2);            // BuildFinished Event
 
-                ProjectFinishedEventArgs finished1 = new ProjectFinishedEventArgs(null, null, "p", true);
-                finished1.BuildEventContext = project1Started.BuildEventContext;
-                // ProjectFinished Event
-                es.Consume(finished1);            // BuildFinished Event
-                es.Consume(new BuildFinishedEventArgs("bf",
-                                                         null, true));
-                // Log so far
-                string actualLog = sc.ToString();
+            ProjectFinishedEventArgs finished1 = new ProjectFinishedEventArgs(null, null, "p", true);
+            finished1.BuildEventContext = project1Started.BuildEventContext;
+            // ProjectFinished Event
+            es.Consume(finished1);            // BuildFinished Event
+            es.Consume(new BuildFinishedEventArgs("bf",
+                                                     null, true));
+            // Log so far
+            string actualLog = sc.ToString();
 
-                _output.WriteLine("==");
-                _output.WriteLine(sc.ToString());
-                _output.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
-                // Verify that the log has perf summary
-                // Project perf summary
-                actualLog.ShouldContain(prjPerfString);
-                // Target perf summary
-                actualLog.ShouldContain(targetPerfString);
-                // Task Perf summary
-                actualLog.ShouldContain(taskPerfString);
+            // Verify that the log has perf summary
+            // Project perf summary
+            actualLog.ShouldContain(prjPerfString);
+            // Target perf summary
+            actualLog.ShouldContain(targetPerfString);
+            // Task Perf summary
+            actualLog.ShouldContain(taskPerfString);
 
-                // Clear the log obtained so far
-                sc.Clear();
+            // Clear the log obtained so far
+            sc.Clear();
 
-                // BuildStarted event
-                es.Consume(new BuildStartedEventArgs("bs", null));
-                // BuildFinished
-                es.Consume(new BuildFinishedEventArgs("bf",
-                                                         null, true));
-                // Log so far
-                actualLog = sc.ToString();
+            // BuildStarted event
+            es.Consume(new BuildStartedEventArgs("bs", null));
+            // BuildFinished
+            es.Consume(new BuildFinishedEventArgs("bf",
+                                                     null, true));
+            // Log so far
+            actualLog = sc.ToString();
 
-                _output.WriteLine("==");
-                _output.WriteLine(sc.ToString());
-                _output.WriteLine("==");
+            _output.WriteLine("==");
+            _output.WriteLine(sc.ToString());
+            _output.WriteLine("==");
 
-                // Verify that the log doesn't have perf summary
-                actualLog.ShouldNotContain(prjPerfString);
-                actualLog.ShouldNotContain(targetPerfString);
-                actualLog.ShouldNotContain(taskPerfString);
-            }
+            // Verify that the log doesn't have perf summary
+            actualLog.ShouldNotContain(prjPerfString);
+            actualLog.ShouldNotContain(targetPerfString);
+            actualLog.ShouldNotContain(taskPerfString);
         }
 
 
@@ -2365,88 +1938,6 @@ namespace Microsoft.Build.UnitTests
             es.Consume(messsage3);
             string actualLog = sc.ToString();
             actualLog.ShouldContain("t:");
-        }
-
-        /// <summary>
-        /// Verify that in the MP case and the older serial logger that there is no extra newline after the project done event.
-        /// We cannot verify there is a newline after the project done event for the MP single proc log because
-        /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a
-        /// text file.
-        /// </summary>
-        [Fact]
-        public void TestNewLineAfterProjectFinished()
-        {
-            bool runningWithCharDevice = NativeMethodsShared.IsWindows ? IsRunningWithCharacterFileType() : false;
-            for (int i = 0; i < 3; i++)
-            {
-                _output.WriteLine("Iteration of I is {" + i + "}");
-
-
-                EventSourceSink es = new EventSourceSink();
-                // Create a simulated console
-                SimulatedConsole sc = new SimulatedConsole();
-                ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
-
-                if (i < 2)
-                {
-                    // On the second pass through use the MP single proc logger
-                    if (i == 1)
-                    {
-                        L.Parameters = "EnableMPLogging";
-                    }
-                    // Use the old single proc logger
-                    L.Initialize(es, 1);
-                }
-                else
-                {
-                    // Use the parallel logger
-                    L.Initialize(es, 2);
-                }
-
-                es.Consume(new BuildStartedEventArgs("bs", null));
-                BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
-
-                ProjectStartedEventArgs project = new ProjectStartedEventArgs(1, "Hello,", "HI", "None", "Build", null, null, context);
-                project.BuildEventContext = context;
-                es.Consume(project);
-
-                TargetStartedEventArgs targetStarted1 = new TargetStartedEventArgs(null, null, "t", null, null);
-                targetStarted1.BuildEventContext = context;
-                es.Consume(targetStarted1);
-
-                BuildMessageEventArgs messsage1 = new BuildMessageEventArgs("Message", null, null, MessageImportance.High);
-                messsage1.BuildEventContext = context;
-                es.Consume(messsage1);
-
-                ProjectFinishedEventArgs projectFinished = new ProjectFinishedEventArgs("Finished,", "HI", "projectFile", true);
-                projectFinished.BuildEventContext = context;
-                es.Consume(projectFinished);
-
-                string actualLog = sc.ToString();
-
-                switch (i)
-                {
-                    case 0:
-                        // There is no project finished event printed in normal verbosity
-                        actualLog.ShouldNotContain(projectFinished.Message);
-                        break;
-                    // We are in single proc but logging with multiproc logging add an extra new line to make the log more readable.
-                    case 1:
-                        actualLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine);
-                        if (runningWithCharDevice)
-                        {
-                            actualLog.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine);
-                        }
-                        else
-                        {
-                            actualLog.ShouldNotContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine);
-                        }
-                        break;
-                    case 2:
-                        actualLog.ShouldNotContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectFinishedPrefixWithTargetNamesMultiProc", "None", "Build") + Environment.NewLine + Environment.NewLine);
-                        break;
-                }
-            }
         }
 
         /// <summary>
