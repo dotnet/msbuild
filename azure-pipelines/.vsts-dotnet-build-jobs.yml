@@ -9,6 +9,9 @@ parameters:
 - name: enableComponentGovernance
   type: boolean
   default: false
+- name: enableSigningValidation
+  type: boolean
+  default: false
 
 jobs:
 # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
@@ -258,3 +261,12 @@ jobs:
       name: $(DncEngInternalBuildPool)
       image: $(WindowsImage)
       os: windows
+
+- template: /eng/common/templates-official/post-build/post-build.yml@self
+  parameters:
+    publishingInfraVersion: 3
+    enableSymbolValidation: true
+    enableSourceLinkValidation: false
+    enableNugetValidation: false
+    requireDefaultChannels: ${{ variables.requireDefaultChannels }}
+    enableSigningValidation: ${{ variables.enableSigningValidation }}
