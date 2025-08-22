@@ -10,8 +10,13 @@ using System.Collections.Generic;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Registry that maintains an allowlist of tasks that are known to be thread-safe
+    /// Temporary registry that maintains an allowlist of tasks that are known to be thread-safe
     /// and can be executed within thread nodes in multi-threaded execution mode.
+    /// 
+    /// This is an interim solution until we adopt a proper thread-safe task interface.
+    /// Tasks listed here have been manually verified to be thread-safe in their current
+    /// implementation. Once a formal thread-safe task interface is established, this
+    /// allowlist approach will be replaced with interface-based detection.
     /// </summary>
     internal static class ThreadSafeTaskRegistry
     {

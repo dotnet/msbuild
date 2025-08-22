@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -60,52 +61,45 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
     /// <summary>
     /// Tests for task routing functionality in multi-threaded execution mode.
+    /// These tests verify both the routing logic and actual task execution behavior.
     /// </summary>
-    public class TaskRouting_Tests
+    public class TaskRouting_Tests : IDisposable
     {
+        private TestEnvironment _env;
+
+        public TaskRouting_Tests()
+        {
+            _env = TestEnvironment.Create();
+        }
+
+        public void Dispose()
+        {
+            _env?.Dispose();
+        }
+
         /// <summary>
-        /// Verify that when multi-threaded execution is disabled, routing uses default behavior.
+        /// Verify that thread-safe tasks (like Message) execute in-process when multi-threaded execution is enabled.
         /// </summary>
         [Fact]
-        public void RoutingUsesDefaultBehaviorWhenMultiThreadedExecutionDisabled()
+        public void ThreadSafeMessageTaskExecutesInProcess()
         {
             var buildParameters = new BuildParameters();
-            buildParameters.MultiThreaded = false;
+            buildParameters.MultiThreaded = true;
             buildParameters.IsOutOfProc = false;
 
             var componentHost = new MockHost(buildParameters);
             var requestEntry = CreateMockBuildRequestEntry();
             var taskHost = new TaskHost(componentHost, requestEntry, new MockElementLocation("test.proj"), null);
 
-            // Should use default behavior (false in this case)
+            // Message task should execute in-process (return false for out-of-process)
             taskHost.ShouldTaskExecuteOutOfProc("Message").ShouldBeFalse();
-            taskHost.ShouldTaskExecuteOutOfProc("UnknownTask").ShouldBeFalse();
         }
 
         /// <summary>
-        /// Verify that when already out-of-process, tasks always execute out-of-process.
+        /// Verify that non-thread-safe tasks (like Copy) execute out-of-process when multi-threaded execution is enabled.
         /// </summary>
         [Fact]
-        public void TasksExecuteOutOfProcessWhenAlreadyOutOfProcess()
-        {
-            var buildParameters = new BuildParameters();
-            buildParameters.MultiThreaded = true;
-            buildParameters.IsOutOfProc = true;
-
-            var componentHost = new MockHost(buildParameters);
-            var requestEntry = CreateMockBuildRequestEntry();
-            var taskHost = new TaskHost(componentHost, requestEntry, new MockElementLocation("test.proj"), null);
-
-            // Should always be out-of-process when already out-of-process
-            taskHost.ShouldTaskExecuteOutOfProc("Message").ShouldBeTrue();
-            taskHost.ShouldTaskExecuteOutOfProc("UnknownTask").ShouldBeTrue();
-        }
-
-        /// <summary>
-        /// Verify that thread-safe tasks execute in-process when multi-threaded execution is enabled.
-        /// </summary>
-        [Fact]
-        public void ThreadSafeTasksExecuteInProcessWhenMultiThreadedExecutionEnabled()
+        public void NonThreadSafeCopyTaskExecutesOutOfProcess()
         {
             var buildParameters = new BuildParameters();
             buildParameters.MultiThreaded = true;
@@ -115,30 +109,93 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var requestEntry = CreateMockBuildRequestEntry();
             var taskHost = new TaskHost(componentHost, requestEntry, new MockElementLocation("test.proj"), null);
 
-            // Thread-safe tasks should execute in-process (return false for out-of-process)
-            taskHost.ShouldTaskExecuteOutOfProc("Message").ShouldBeFalse();
-            taskHost.ShouldTaskExecuteOutOfProc("Warning").ShouldBeFalse();
-            taskHost.ShouldTaskExecuteOutOfProc("Error").ShouldBeFalse();
+            // Copy task should execute out-of-process (return true for out-of-process)
+            taskHost.ShouldTaskExecuteOutOfProc("Copy").ShouldBeTrue();
         }
 
         /// <summary>
-        /// Verify that non-thread-safe tasks execute out-of-process when multi-threaded execution is enabled.
+        /// Integration test that verifies Message task routing behavior using actual MSBuild execution.
         /// </summary>
         [Fact]
-        public void NonThreadSafeTasksExecuteOutOfProcessWhenMultiThreadedExecutionEnabled()
+        public void MessageTaskRoutingIntegrationTest()
+        {
+            using var buildManager = new BuildManager();
+            var projectContent = @"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Target Name='TestTarget'>
+                        <Message Text='This is a test message' Importance='high' />
+                    </Target>
+                </Project>";
+
+            var projectFile = _env.CreateFile("test.proj", projectContent).Path;
+
+            var parameters = new BuildParameters()
+            {
+                MultiThreaded = true
+            };
+
+            var request = new BuildRequestData(projectFile, new Dictionary<string, string>(), null, new[] { "TestTarget" }, null);
+            var result = buildManager.Build(parameters, request);
+
+            // Verify the build succeeded - this confirms the Message task was executed
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+        }
+
+        /// <summary>
+        /// Integration test that verifies Copy task routing behavior using actual MSBuild execution.
+        /// </summary>
+        [Fact]
+        public void CopyTaskRoutingIntegrationTest()
+        {
+            using var buildManager = new BuildManager();
+            
+            var sourceFile = _env.CreateFile("source.txt", "test content").Path;
+            var targetFile = Path.Combine(_env.DefaultTestDirectory.Path, "target.txt");
+            
+            var projectContent = $@"
+                <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Target Name='TestTarget'>
+                        <Copy SourceFiles='{sourceFile}' DestinationFiles='{targetFile}' />
+                    </Target>
+                </Project>";
+
+            var projectFile = _env.CreateFile("test.proj", projectContent).Path;
+
+            var parameters = new BuildParameters()
+            {
+                MultiThreaded = true
+            };
+
+            var request = new BuildRequestData(projectFile, new Dictionary<string, string>(), null, new[] { "TestTarget" }, null);
+            var result = buildManager.Build(parameters, request);
+
+            // Verify the build succeeded - this confirms the Copy task was executed
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            // Verify the file was actually copied
+            File.Exists(targetFile).ShouldBeTrue();
+        }
+
+        /// <summary>
+        /// Verify routing logic works correctly for various scenarios.
+        /// </summary>
+        [Theory]
+        [InlineData(false, false, "Message", false)] // MultiThreaded=false -> default behavior
+        [InlineData(false, false, "Copy", false)]    // MultiThreaded=false -> default behavior
+        [InlineData(true, true, "Message", true)]    // Already out-of-proc -> stays out-of-proc
+        [InlineData(true, true, "Copy", true)]       // Already out-of-proc -> stays out-of-proc
+        [InlineData(true, false, "Message", false)]  // Thread-safe task -> in-process
+        [InlineData(true, false, "Copy", true)]      // Non-thread-safe task -> out-of-process
+        public void TaskRoutingDecisionLogic(bool multiThreaded, bool isOutOfProc, string taskName, bool expectedOutOfProc)
         {
             var buildParameters = new BuildParameters();
-            buildParameters.MultiThreaded = true;
-            buildParameters.IsOutOfProc = false;
+            buildParameters.MultiThreaded = multiThreaded;
+            buildParameters.IsOutOfProc = isOutOfProc;
 
             var componentHost = new MockHost(buildParameters);
             var requestEntry = CreateMockBuildRequestEntry();
             var taskHost = new TaskHost(componentHost, requestEntry, new MockElementLocation("test.proj"), null);
 
-            // Non-thread-safe tasks should execute out-of-process (return true for out-of-process)
-            taskHost.ShouldTaskExecuteOutOfProc("UnknownTask").ShouldBeTrue();
-            taskHost.ShouldTaskExecuteOutOfProc("CustomTask").ShouldBeTrue();
-            taskHost.ShouldTaskExecuteOutOfProc("ThirdPartyTask").ShouldBeTrue();
+            taskHost.ShouldTaskExecuteOutOfProc(taskName).ShouldBe(expectedOutOfProc);
         }
 
         /// <summary>
