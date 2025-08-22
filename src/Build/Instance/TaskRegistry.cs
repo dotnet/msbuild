@@ -1235,7 +1235,6 @@ namespace Microsoft.Build.Execution
                 _taskIdentity = new RegisteredTaskIdentity(registeredName, taskFactoryParameters);
                 _parameterGroupAndTaskBody = inlineTask;
                 _registrationOrderId = registrationOrderId;
-                _taskNamesCreatableByFactory = new Dictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
 
                 if (String.IsNullOrEmpty(taskFactory))
                 {
@@ -1377,7 +1376,7 @@ namespace Microsoft.Build.Execution
 
                 // See if the task name as already been checked against the factory, return the value if it has
                 object creatableByFactory = null;
-                lock (_taskNamesCreatableByFactory)
+                lock (_lockObject)
                 {
                     // If we already have a value for this task identity, return it
                     if (_taskNamesCreatableByFactory.TryGetValue(taskIdentity, out creatableByFactory))
@@ -1451,7 +1450,7 @@ namespace Microsoft.Build.Execution
                 }
                 finally
                 {
-                    lock (_taskNamesCreatableByFactory)
+                    lock (_lockObject)
                     {
                         _taskNamesCreatableByFactory[taskIdentity] = creatableByFactory;
                     }
