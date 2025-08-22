@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare two BuildEventArgs 
+        /// Compare two BuildEventArgs
         /// </summary>
         private static void VerifyBuildErrorEventArgs(BuildErrorEventArgs genericEvent, BuildErrorEventArgs newGenericEvent)
         {
@@ -614,7 +614,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare the BuildProperties in propertyList with the Name Value pairs in the entryList. 
+        /// Compare the BuildProperties in propertyList with the Name Value pairs in the entryList.
         /// We need to make sure that each of the BuildProperties passed into the serializer come out correctly
         /// </summary>
         /// <param name="entryList">List of DictionaryEntries which were deserialized</param>
@@ -701,7 +701,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare two project started events 
+        /// Compare two project started events
         /// </summary>
         private static void VerifyProjectStartedEvent(ProjectStartedEventArgs genericEvent, ProjectStartedEventArgs newGenericEvent)
         {

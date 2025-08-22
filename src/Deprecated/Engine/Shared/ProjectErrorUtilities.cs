@@ -8,14 +8,14 @@
 using System.Xml;
 
 /******************************************************************************
- * 
+ *
  *                              !! WARNING !!
- * 
+ *
  * This class depends on the build engine assembly! Do not share this class
  * into any assembly that is not supposed to take a dependency on the build
  * engine assembly!
- * 
- * 
+ *
+ *
  ******************************************************************************/
 
 namespace Microsoft.Build.BuildEngine.Shared
@@ -321,7 +321,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// Throws an InvalidProjectFileException using the given data.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios

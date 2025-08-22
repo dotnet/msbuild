@@ -22,7 +22,7 @@ namespace Microsoft.Build.BuildEngine
         internal static string FormatLogTimeStamp(DateTime timeStamp)
         {
             // From http://msdn2.microsoft.com/en-us/library/8kb3ddd4.aspx
-            // Custom DateTime Format Strings  
+            // Custom DateTime Format Strings
             //
             // HH Represents the hour as a number from 00 through 23, that is,
             //    the hour as represented by a zero-based 24-hour clock that counts the hours since midnight.

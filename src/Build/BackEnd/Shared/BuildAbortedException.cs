@@ -88,7 +88,7 @@ namespace Microsoft.Build.Exceptions
         }
 
         /// <summary>
-        /// Protected constructor used for (de)serialization. 
+        /// Protected constructor used for (de)serialization.
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
 #if NET8_0_OR_GREATER

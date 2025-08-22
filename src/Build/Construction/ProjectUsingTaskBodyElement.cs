@@ -46,7 +46,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Condition should never be set, but the getter returns null instead of throwing 
+        /// Condition should never be set, but the getter returns null instead of throwing
         /// because a nonexistent condition is implicitly true
         /// </summary>
         public override string Condition
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the unevaluated value of the contents of the task xml 
+        /// Gets or sets the unevaluated value of the contents of the task xml
         /// Returns empty string if it is not present.
         /// </summary>
         public string TaskBody
@@ -159,7 +159,7 @@ namespace Microsoft.Build.Construction
             var parentUsingTask = parent as ProjectUsingTaskElement;
             ErrorUtilities.VerifyThrowInvalidOperation(parentUsingTask != null, "OM_CannotAcceptParent");
 
-            // Since there is not going to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and 
+            // Since there is not going to be a TaskElement on the using task we need to validate and make sure there is a TaskFactory attribute on the parent element and
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {

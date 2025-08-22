@@ -383,7 +383,7 @@ namespace Microsoft.Build.Tasks
 
         private bool BuildResolvedSettings(ApplicationManifest manifest)
         {
-            // Note: if changing the logic in this function, please update the logic in 
+            // Note: if changing the logic in this function, please update the logic in
             //  GenerateDeploymentManifest.BuildResolvedSettings as well.
             if (Product != null)
             {

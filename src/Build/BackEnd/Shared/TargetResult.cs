@@ -185,7 +185,7 @@ namespace Microsoft.Build.Execution
             {
                 lock (_result)
                 {
-                    // Should we have cached these items but now want to send them to another node, we need to 
+                    // Should we have cached these items but now want to send them to another node, we need to
                     // ensure they are loaded before doing so.
                     RetrieveItemsFromCache();
                     InternalTranslate(translator);
@@ -305,7 +305,7 @@ namespace Microsoft.Build.Execution
                 // When creating the interner, we use the number of items as the initial size of the collections since the
                 // number of strings will be of the order of the number of items in the collection.  This assumes basically
                 // one unique string per item (frequently a path related to the item) with most of the rest of the metadata
-                // being the same (and thus interning.)  This is a hueristic meant to get us in the ballpark to avoid 
+                // being the same (and thus interning.)  This is a hueristic meant to get us in the ballpark to avoid
                 // too many reallocations when growing the collections.
                 var interner = new LookasideStringInterner(StringComparer.Ordinal, _items.Length);
                 foreach (TaskItem t in _items)

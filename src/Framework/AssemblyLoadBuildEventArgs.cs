@@ -39,7 +39,8 @@ namespace Microsoft.Build.Framework
         public string? AssemblyName { get; private set; }
         public string? AssemblyPath { get; private set; }
         public Guid MVID { get; private set; }
-        // Null string indicates that load occurred on Default AppDomain (for both Core and Framework).
+        // Null string indicates that load occurred on Default AppDomain (for Framework).
+        // For Core, string won't be null.
         public string? AppDomainDescriptor { get; private set; }
 
         internal override void WriteToStream(BinaryWriter writer)
@@ -77,7 +78,12 @@ namespace Microsoft.Build.Framework
                 if (RawMessage == null)
                 {
                     string? loadingInitiator = LoadingInitiator == null ? null : $" ({LoadingInitiator})";
-                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskAssemblyLoaded", LoadingContext.ToString(), loadingInitiator, AssemblyName, AssemblyPath, MVID.ToString(), AppDomainDescriptor ?? DefaultAppDomainDescriptor);
+#if FEATURE_ASSEMBLYLOADCONTEXT
+                    string resourceName = "TaskAssemblyLoadedWithAssemblyLoadContext";
+#else
+                    string resourceName = "TaskAssemblyLoaded";
+#endif
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword(resourceName, LoadingContext.ToString(), loadingInitiator, AssemblyName, AssemblyPath, MVID.ToString(), AppDomainDescriptor ?? DefaultAppDomainDescriptor);
                 }
 
                 return RawMessage;

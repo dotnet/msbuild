@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests
             Assertion.AssertEquals("First item WarningLevel should be 4", "4", compileItems[0].GetMetadata("WarningLevel"));
             Assertion.AssertEquals("First item should be b.cs", "b.cs", compileItems[1].FinalItemSpecEscaped);
             Assertion.AssertEquals("First item WarningLevel should be 3", "3", compileItems[1].GetMetadata("WarningLevel"));
-        }      
+        }
 
         /// <summary>
         /// Attempt to itemize an expression that is an @(...) item list concatenated with another string.
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable itemGroupsByType = this.GenerateTestItems();
 
             BuildItemGroup compileItems = ItemExpander.ItemizeItemVector("foobar", null, LookupHelpers.CreateLookup(itemGroupsByType).ReadOnlyLookup);
-            
+
             // If the specified expression does not contain any item lists, then we expect ItemizeItemVector
             // to give us back null, but not throw an exception.
             Assertion.AssertNull(compileItems);
@@ -278,17 +278,17 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("zz=[]");
         }
 
-        // Valid names. The goal here is that an item name is recognized iff it is valid 
+        // Valid names. The goal here is that an item name is recognized iff it is valid
         // in a project. (That is, iff it matches "[A-Za-z_][A-Za-z_0-9\-]*")
         private string[] validItemVectors = new string[]
         {
-            "@(   a1234567890_-AXZaxz   )", 
-            "@(z1234567890_-AZaz)", 
-            "@(A1234567890_-AZaz)", 
-            "@(Z1234567890_-AZaz)", 
-            "@(x1234567890_-AZaz)", 
-            "@(_X)", 
-            "@(a)", 
+            "@(   a1234567890_-AXZaxz   )",
+            "@(z1234567890_-AZaz)",
+            "@(A1234567890_-AZaz)",
+            "@(Z1234567890_-AZaz)",
+            "@(x1234567890_-AZaz)",
+            "@(_X)",
+            "@(a)",
             "@(_)"
         };
 
@@ -310,21 +310,21 @@ namespace Microsoft.Build.UnitTests
 
         private string[] validMetadataExpressions = new string[]
         {
-            "%(   a1234567890_-AXZaxz.a1234567890_-AXZaxz   )", 
-            "%(z1234567890_-AZaz.z1234567890_-AZaz)", 
-            "%(A1234567890_-AZaz.A1234567890_-AZaz)", 
-            "%(Z1234567890_-AZaz.Z1234567890_-AZaz)", 
-            "%(x1234567890_-AZaz.x1234567890_-AZaz)", 
-            "%(abc._X)", 
-            "%(a12.a)", 
+            "%(   a1234567890_-AXZaxz.a1234567890_-AXZaxz   )",
+            "%(z1234567890_-AZaz.z1234567890_-AZaz)",
+            "%(A1234567890_-AZaz.A1234567890_-AZaz)",
+            "%(Z1234567890_-AZaz.Z1234567890_-AZaz)",
+            "%(x1234567890_-AZaz.x1234567890_-AZaz)",
+            "%(abc._X)",
+            "%(a12.a)",
             "%(x._)",
-            "%(a1234567890_-AXZaxz)", 
-            "%(z1234567890_-AZaz)", 
-            "%(A1234567890_-AZaz)", 
-            "%(Z1234567890_-AZaz)", 
-            "%(x1234567890_-AZaz)", 
-            "%(_X)", 
-            "%(a)", 
+            "%(a1234567890_-AXZaxz)",
+            "%(z1234567890_-AZaz)",
+            "%(A1234567890_-AZaz)",
+            "%(Z1234567890_-AZaz)",
+            "%(x1234567890_-AZaz)",
+            "%(_X)",
+            "%(a)",
             "%(_)"
         };
 
@@ -355,45 +355,45 @@ namespace Microsoft.Build.UnitTests
 
         private string[] validItemVectorsWithTransforms = new string[]
         {
-            "@(z1234567890_-AXZaxz  -> '%(a1234567890_-AXZaxz).%(adfas)'   )", 
-            "@(a1234567890_-AZaz->'z1234567890_-AZaz')", 
-            "@(A1234567890_-AZaz ->'A1234567890_-AZaz')", 
-            "@(Z1234567890_-AZaz -> 'Z1234567890_-AZaz')", 
-            "@(x1234567890_-AZaz->'x1234567890_-AZaz')", 
-            "@(_X->'_X')", 
-            "@(a->'a')", 
+            "@(z1234567890_-AXZaxz  -> '%(a1234567890_-AXZaxz).%(adfas)'   )",
+            "@(a1234567890_-AZaz->'z1234567890_-AZaz')",
+            "@(A1234567890_-AZaz ->'A1234567890_-AZaz')",
+            "@(Z1234567890_-AZaz -> 'Z1234567890_-AZaz')",
+            "@(x1234567890_-AZaz->'x1234567890_-AZaz')",
+            "@(_X->'_X')",
+            "@(a->'a')",
             "@(_->'@#$%$%^&*&*)')"
         };
 
         private string[] validItemVectorsWithSeparators = new string[]
         {
-            "@(a1234567890_-AXZaxz  , 'z123%%4567890_-AXZaxz'   )", 
-            "@(z1234567890_-AZaz,'a1234567890_-AZaz')", 
-            "@(A1234567890_-AZaz,'!@#$%^&*)(_+'))", 
-            "@(_X,'X')", 
-            "@(a  ,  'a')", 
+            "@(a1234567890_-AXZaxz  , 'z123%%4567890_-AXZaxz'   )",
+            "@(z1234567890_-AZaz,'a1234567890_-AZaz')",
+            "@(A1234567890_-AZaz,'!@#$%^&*)(_+'))",
+            "@(_X,'X')",
+            "@(a  ,  'a')",
             "@(_,'@#$%$%^&*&*)')"
         };
 
         private string[] validItemVectorsWithTransformsAndSeparators = new string[]
         {
-            "@(a1234567890_-AXZaxz  -> 'a1234567890_-AXZaxz'   ,  'z1234567890_-AXZaxz'   )", 
-            "@(z1234567890_-AZaz->'z1234567890_-AZaz','a1234567890_-AZaz')", 
-            "@(A1234567890_-AZaz ->'A1234567890_-AZaz' , '!@#$%^&*)(_+'))", 
-            "@(_X->'_X','X')", 
-            "@(a->'a'  ,  'a')", 
+            "@(a1234567890_-AXZaxz  -> 'a1234567890_-AXZaxz'   ,  'z1234567890_-AXZaxz'   )",
+            "@(z1234567890_-AZaz->'z1234567890_-AZaz','a1234567890_-AZaz')",
+            "@(A1234567890_-AZaz ->'A1234567890_-AZaz' , '!@#$%^&*)(_+'))",
+            "@(_X->'_X','X')",
+            "@(a->'a'  ,  'a')",
             "@(_->'@#$%$%^&*&*)','@#$%$%^&*&*)')"
         };
 
         private string[] invalidItemVectorsWithTransforms = new string[]
         {
-            "@(z123456.7890_-AXZaxz  -> '%(a1234567890_-AXZaxz).%(adfas)'  )", 
-            "@(a1234:567890_-AZaz->'z1234567890_-AZaz')", 
-            "@(.A1234567890_-AZaz ->'A1234567890_-AZaz')", 
-            "@(:Z1234567890_-AZaz -> 'Z1234567890_-AZaz')", 
-            "@(x123 4567890_-AZaz->'x1234567890_-AZaz')", 
-            "@(-x->'_X')", 
-            "@(1->'a')", 
+            "@(z123456.7890_-AXZaxz  -> '%(a1234567890_-AXZaxz).%(adfas)'  )",
+            "@(a1234:567890_-AZaz->'z1234567890_-AZaz')",
+            "@(.A1234567890_-AZaz ->'A1234567890_-AZaz')",
+            "@(:Z1234567890_-AZaz -> 'Z1234567890_-AZaz')",
+            "@(x123 4567890_-AZaz->'x1234567890_-AZaz')",
+            "@(-x->'_X')",
+            "@(1->'a')",
             "@(1x->'@#$%$%^&*&*)')"
         };
 
@@ -419,14 +419,14 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Ensure that leading sand trailing pace is ignored for the item name
-        /// This tests "itemVectorPattern". 
+        /// This tests "itemVectorPattern".
         /// </summary>
         /// <owner>danmose</owner>
         [Test]
         public void ItemizeItemVectorsWithLeadingAndTrailingSpaces()
         {
             Hashtable itemGroupsByType = this.GenerateTestItems();
-            
+
             // Spaces around are fine, but it's ignored for the item name
             BuildItemGroup items = ItemExpander.ItemizeItemVector("@(  Compile    )", null, LookupHelpers.CreateLookup(itemGroupsByType).ReadOnlyLookup);
             Assertion.AssertEquals("Resulting item group should have 2 items", 2, items.Count);
@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Ensure that invalid item list expressions are not matched.
-        /// This tests "itemVectorPattern". 
+        /// This tests "itemVectorPattern".
         /// </summary>
         /// <owner>danmose</owner>
         [Test]
@@ -442,7 +442,7 @@ namespace Microsoft.Build.UnitTests
         {
             Hashtable itemGroupsByType = this.GenerateTestItems();
 
-            // First, verify that a valid but simply non-existent item list returns an empty BuildItemGroup, 
+            // First, verify that a valid but simply non-existent item list returns an empty BuildItemGroup,
             // not just null.
             BuildItemGroup control = ItemExpander.ItemizeItemVector("@(nonexistent)", null, LookupHelpers.CreateLookup(itemGroupsByType).ReadOnlyLookup);
             Assertion.AssertEquals(0, control.Count);

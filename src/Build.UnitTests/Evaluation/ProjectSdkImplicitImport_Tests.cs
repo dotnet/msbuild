@@ -624,6 +624,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             _env.SetEnvironmentVariable("MSBuildSDKsPath", _testSdkRoot);
             _env.SetEnvironmentVariable("MSBUILD_SDKREFERENCE_PROPERTY_EXPANSION_MODE", data.Mode.ToString());
+            _env.SetEnvironmentVariable("MSBUILDINCLUDEDEFAULTSDKRESOLVER", "false");
+
+            Build.BackEnd.SdkResolution.CachingSdkResolverLoader.ResetStateForTests();
 
             File.WriteAllText(_sdkPropsPath, _sdkPropsContent);
             File.WriteAllText(_sdkTargetsPath, _sdkTargetsContent);
@@ -804,6 +807,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void Dispose()
         {
             _env.Dispose();
+            Build.BackEnd.SdkResolution.CachingSdkResolverLoader.ResetStateForTests();
         }
 
         private void VerifyPropertyFromImplicitImport(Project project, string propertyName, string expectedContainingProjectPath, string expectedValue)

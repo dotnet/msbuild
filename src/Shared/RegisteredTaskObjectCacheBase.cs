@@ -44,7 +44,7 @@ namespace Microsoft.Build.Shared
 
         #region IRegisteredTaskObjectCache
 
-        /// <summary> 
+        /// <summary>
         /// Disposes of all of the cached objects registered with the specified lifetime.
         /// </summary>
         public void DisposeCacheObjects(RegisteredTaskObjectLifetime lifetime)

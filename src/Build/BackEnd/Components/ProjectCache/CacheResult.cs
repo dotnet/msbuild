@@ -47,8 +47,11 @@ namespace Microsoft.Build.Experimental.ProjectCache
     public class CacheResult
     {
         public CacheResultType ResultType { get; }
+
         public BuildResult? BuildResult { get; }
+
         public ProxyTargets? ProxyTargets { get; }
+
         internal Exception? Exception { get; }
 
         private CacheResult(
