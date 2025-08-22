@@ -150,7 +150,7 @@ namespace Microsoft.Build.Tasks
             int i = 0;
             foreach (string item in peekValues)
             {
-                Result[i++] = new TaskItem(item);
+                Result[i++] = new TaskItem(EscapingUtilities.Escape(item));
 
                 // This can be logged a lot, so low importance
                 Log.LogMessageFromResources(MessageImportance.Low, "XmlPeek.Found", item);

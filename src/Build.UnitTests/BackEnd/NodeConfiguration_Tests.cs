@@ -24,7 +24,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Theory]
         [InlineData(new byte[] { 1, 2, 3 })]
         [InlineData(null)]
-        public void TestTranslationWithAppDomainSetup(byte[] configBytes)
+        public void TestTranslationWithAppDomainSetup(byte[]? configBytes)
         {
             AppDomainSetup setup = new AppDomainSetup();
 
