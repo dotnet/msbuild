@@ -89,6 +89,17 @@ namespace Microsoft.Build.Evaluation
                     return false;
                 }
             }
+            else if (String.Equals(_functionName, "PropertyExists", StringComparison.OrdinalIgnoreCase))
+            {
+                // Check we only have one argument
+                VerifyArgumentCount(1, state);
+
+                // Get the property name from the argument without expanding it (we want the literal property name)
+                string propertyName = ExpandArgumentForScalarParameter("PropertyExists", _arguments[0], state, isFilePath: false);
+
+                // Check if the property exists
+                return state.PropertyExists(propertyName);
+            }
             // We haven't implemented any other "functions"
             else
             {
