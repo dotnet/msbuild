@@ -257,6 +257,7 @@ namespace Microsoft.Build.Collections
                     return false;
                 }
 
+                // Searching for a single object - just compare the reference pointer.
                 for (int i = 0; i < list.Count; i++)
                 {
                     T candidateItem = list[i];
@@ -264,6 +265,7 @@ namespace Microsoft.Build.Collections
                     {
                         list.RemoveAt(i);
 
+                        // Save memory if the item type is now empty.
                         if (list.Count == 0)
                         {
                             _itemLists.Remove(projectItem.Key);
@@ -328,29 +330,35 @@ namespace Microsoft.Build.Collections
         /// <param name="other">An enumerator over the items to remove.</param>
         public void RemoveItemsOfType(string itemType, IEnumerable<T> other)
         {
-            if (!_itemLists.TryGetValue(itemType, out List<T> list))
+            lock (_itemLists)
             {
-                return;
-            }
-
-            List<T> listWithRemoves = new(list.Count);
-            HashSet<T> itemsToRemove = new(other);
-            foreach (T item in list)
-            {
-                if (!itemsToRemove.Contains(item))
+                if (!_itemLists.TryGetValue(itemType, out List<T> list))
                 {
-                    listWithRemoves.Add(item);
+                    return;
                 }
-            }
 
-            if (listWithRemoves.Count > 0)
-            {
-                _itemLists[itemType] = listWithRemoves;
-            }
-            else
-            {
-                // If the clone is empty, remove the item type from the dictionary
-                _itemLists.Remove(itemType);
+                // Since we'll need to search and remove an unknown number of items, we'll build up a new list of items to
+                // keep, using the incoming enumerable as a set, and swap out the result at the end.
+                // This minimizes the upper bound of ops and allocations here.
+                List<T> listWithRemoves = new(list.Count);
+                HashSet<T> itemsToRemove = new(other);
+                foreach (T item in list)
+                {
+                    if (!itemsToRemove.Contains(item))
+                    {
+                        listWithRemoves.Add(item);
+                    }
+                }
+
+                if (listWithRemoves.Count > 0)
+                {
+                    _itemLists[itemType] = listWithRemoves;
+                }
+                else
+                {
+                    // If the clone is empty, remove the item type from the dictionary
+                    _itemLists.Remove(itemType);
+                }
             }
         }
 
