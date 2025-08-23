@@ -89,6 +89,17 @@ namespace Microsoft.Build.Collections
             }
         }
 
+        public int ItemTypesCount
+        {
+            get
+            {
+                lock (_itemLists)
+                {
+                    return _itemLists.Count;
+                }
+            }
+        }
+
         /// <summary>
         /// Get the item types that have at least one item in this collection
         /// </summary>
@@ -132,6 +143,16 @@ namespace Microsoft.Build.Collections
                 return new ReadOnlyCollection<T>(list);
             }
         }
+
+#if NET
+        public void EnsureCapacity(int desiredCapacity)
+        {
+            lock (_itemLists)
+            {
+                _itemLists.EnsureCapacity(desiredCapacity);
+            }
+        }
+#endif
 
         /// <summary>
         /// Empty the collection

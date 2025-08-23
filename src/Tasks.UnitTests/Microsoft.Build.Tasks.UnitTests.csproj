@@ -133,6 +133,10 @@
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkAttribute.cs" />
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
     <Compile Remove="AssemblyDependency\WinMDTests.cs" />
+    <Compile Remove="AssemblyDependency\Node\OutOfProcRarClient.cs" />
+    <Compile Remove="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Remove="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
+    <Compile Remove="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
     <Compile Remove="ResolveComReference_Tests.cs" />
     <Compile Remove="SdkToolsPathUtility_Tests.cs" />
     <Compile Remove="TlbImp_Tests.cs" />

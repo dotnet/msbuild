@@ -255,7 +255,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private AutoResetEvent _dequeueEvent;
 
         /// <summary>
-        /// Event set when queue become empty. 
+        /// Event set when queue become empty.
         /// </summary>
         private ManualResetEvent _emptyQueueEvent;
 
@@ -463,6 +463,15 @@ namespace Microsoft.Build.BackEnd.Logging
             get => _onlyLogCriticalEvents;
 
             set => _onlyLogCriticalEvents = value;
+        }
+
+        /// <summary>
+        /// When true, target outputs (and returns) are logged as well.
+        /// </summary>
+        public bool EnableTargetOutputLogging
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -874,6 +883,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
+                EnableTargetOutputLogging = buildComponentHost.BuildParameters.EnableTargetOutputLogging;
 
                 _serviceState = LoggingServiceState.Initialized;
 

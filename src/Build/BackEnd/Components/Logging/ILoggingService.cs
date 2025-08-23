@@ -88,6 +88,15 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// When true, target outputs (and returns) are logged as well.
+        /// </summary>
+        bool EnableTargetOutputLogging
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Number of nodes in the system when it was initially started
         /// </summary>
         int MaxCPUCount

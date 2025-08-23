@@ -803,6 +803,10 @@ namespace Microsoft.Build.Execution
                     configuration.LoggingNodeConfiguration
                         .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             }
+            if (configuration.LoggingNodeConfiguration.IncludeTargetOutputs)
+            {
+                _loggingService.EnableTargetOutputLogging = true;
+            }
 
             try
             {

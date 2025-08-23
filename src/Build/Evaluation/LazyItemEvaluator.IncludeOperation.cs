@@ -52,7 +52,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ISet<string>? excludePatternsForGlobs = null;
-                Func<string, bool>? excludeTester = excludePatterns.Count > 0 ? EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory) : null;
+                FileSpecMatcherTester?[]? matchers = null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -70,11 +70,13 @@ namespace Microsoft.Build.Evaluation
 
                         itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
 
-                        if (excludeTester is not null)
+                        if (excludePatterns.Count > 0)
                         {
+                            matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
+
                             foreach (var item in itemsFromExpression)
                             {
-                                if (!excludeTester(item.EvaluatedInclude))
+                                if (!ExcludeTester(_rootDirectory, excludePatterns, matchers, item.EvaluatedInclude))
                                 {
                                     itemsToAdd.Add(item);
                                 }
@@ -88,8 +90,9 @@ namespace Microsoft.Build.Evaluation
                     else if (fragment is ValueFragment valueFragment)
                     {
                         string value = valueFragment.TextFragment;
+                        matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
 
-                        if (excludeTester is null || !excludeTester(EscapingUtilities.UnescapeAll(value)))
+                        if (excludePatterns.Count == 0 || !ExcludeTester(_rootDirectory, excludePatterns, matchers, EscapingUtilities.UnescapeAll(value)))
                         {
                             itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                             itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
@@ -146,6 +149,33 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
+
+                static bool ExcludeTester(string? directory, ImmutableList<string>.Builder excludePatterns, FileSpecMatcherTester?[] matchers, string item)
+                {
+                    if (excludePatterns.Count == 0)
+                    {
+                        return false;
+                    }
+
+                    bool found = false;
+                    for (int i = 0; i < matchers.Length; ++i)
+                    {
+                        FileSpecMatcherTester? matcher = matchers[i];
+                        if (!matcher.HasValue)
+                        {
+                            matcher = FileSpecMatcherTester.Parse(directory, excludePatterns[i]);
+                            matchers[i] = matcher;
+                        }
+
+                        if (matcher.Value.IsMatch(item))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    return found;
+                }
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)

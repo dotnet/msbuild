@@ -31,7 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
-    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
@@ -572,7 +572,6 @@
     <Compile Include="Logging\ParallelLogger\ConsoleOutputAligner.cs" />
     <Compile Include="Logging\FileLogger.cs" />
     <Compile Include="Logging\LogFormatter.cs" />
-    <Compile Include="Logging\SerialConsoleLogger.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectPropertyLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectElementContainerLink.cs" />

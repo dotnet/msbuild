@@ -408,11 +408,7 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>(project.Items.Count);
-            foreach (var item in project.Items)
-            {
-                this.EvaluatedItemElements.Add(item.Xml);
-            }
+            this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = project.ToolsVersion;
@@ -484,11 +480,7 @@ namespace Microsoft.Build.Execution
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
-            EvaluatedItemElements = new List<ProjectItemElement>(linkedProject.Items.Count);
-            foreach (var item in linkedProject.Items)
-            {
-                EvaluatedItemElements.Add(item.Xml);
-            }
+            EvaluatedItemElements = new List<ProjectItemElement>();
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = linkedProject.ToolsVersion;
@@ -2778,6 +2770,11 @@ namespace Microsoft.Build.Execution
                     parameters.LogTaskInputs ||
                     loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
                     loggingService?.IncludeTaskInputs == true;
+
+                parameters.EnableTargetOutputLogging =
+                    parameters.EnableTargetOutputLogging ||
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggingService?.EnableTargetOutputLogging == true;
             }
 
             if (remoteLoggers != null)

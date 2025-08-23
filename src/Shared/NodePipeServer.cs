@@ -12,6 +12,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 #if !TASKHOST
+using System.Threading;
 using System.Threading.Tasks;
 #endif
 
@@ -79,7 +80,11 @@ namespace Microsoft.Build.Internal
 
         protected override PipeStream NodeStream => _pipeServer;
 
+#if TASKHOST
         internal LinkStatus WaitForConnection()
+#else
+        internal async Task<LinkStatus> WaitForConnectionAsync(CancellationToken cancellationToken)
+#endif
         {
             DateTime originalWaitStartTime = DateTime.UtcNow;
             bool gotValidConnection = false;
@@ -103,9 +108,19 @@ namespace Microsoft.Build.Internal
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
                     _pipeServer.EndWaitForConnection(resultForConnection);
 #else
-                    Task connectionTask = _pipeServer.WaitForConnectionAsync();
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
-                    bool connected = connectionTask.Wait(waitTimeRemaining);
+                    using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    cts.CancelAfter(waitTimeRemaining);
+                    bool connected = false;
+                    try
+                    {
+                        CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
+                        await _pipeServer.WaitForConnectionAsync(cts.Token).ConfigureAwait(false);
+                        connected = true;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        connected = false;
+                    }
 #endif
                     if (!connected)
                     {
@@ -189,16 +204,24 @@ namespace Microsoft.Build.Internal
             foreach (var component in HandshakeComponents.EnumerateComponents())
             {
                 // This will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard.
-#if NET
-                int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null, s_handshakeTimeout);
-#else
-                int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null);
-#endif
 
-                if (handshakePart != component.Value)
+                if (
+
+                    _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null,
+#if NET
+                     s_handshakeTimeout,
+#endif
+                     out HandshakeResult handshakePart))
                 {
-                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, component.Value);
-                    _pipeServer.WriteIntForHandshake(index + 1);
+                    if (handshakePart.Value != component.Value)
+                    {
+                        CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, component.Value);
+                        _pipeServer.WriteIntForHandshake(index + 1);
+                        return false;
+                    }
+                }
+                else
+                {
                     return false;
                 }
 
@@ -206,16 +229,22 @@ namespace Microsoft.Build.Internal
             }
 
             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+
+            if (_pipeServer.TryReadEndOfHandshakeSignal(false,
 #if NET
-            _pipeServer.ReadEndOfHandshakeSignal(false, s_handshakeTimeout);
-#else
-            _pipeServer.ReadEndOfHandshakeSignal(false);
+            s_handshakeTimeout,
 #endif
+            out HandshakeResult _))
+            {
+                CommunicationsUtilities.Trace("Successfully connected to parent.");
+                _pipeServer.WriteEndOfHandshakeSignal();
 
-            CommunicationsUtilities.Trace("Successfully connected to parent.");
-            _pipeServer.WriteEndOfHandshakeSignal();
-
-            return true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY

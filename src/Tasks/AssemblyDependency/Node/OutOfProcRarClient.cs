@@ -15,6 +15,9 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     /// </summary>
     internal sealed class OutOfProcRarClient : IDisposable
     {
+        // Create a single cached instance for this build.
+        internal const string TaskObjectCacheKey = "OutOfProcRarClient";
+
         private readonly NodePipeClient _pipeClient;
 
         private OutOfProcRarClient()
@@ -23,7 +26,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             _pipeClient = new NodePipeClient(NamedPipeUtil.GetRarNodeEndpointPipeName(handshake), handshake);
 
             NodePacketFactory packetFactory = new();
-            packetFactory.RegisterPacketHandler(NodePacketType.RarNodeExecuteResponse, RarNodeExecuteResponse.FactoryForDeserialization, null);
+            packetFactory.RegisterPacketHandler(NodePacketType.RarNodeExecuteResponse, static t => new RarNodeExecuteResponse(t), null);
             _pipeClient.RegisterPacketFactory(packetFactory);
         }
 
@@ -31,18 +34,15 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         internal static OutOfProcRarClient GetInstance(IBuildEngine10 buildEngine)
         {
-            // Create a single cached instance for this build.
-            const string OutOfProcRarClientKey = "OutOfProcRarClient";
-
             // We want to reuse the pipe client across all RAR invocations within a build, but release the connection once
             // the MSBuild node is idle. Using RegisteredTaskObjectLifetime.Build ensures that the RAR client is disposed between
             // builds, freeing the server to run other requests.
-            OutOfProcRarClient rarClient = (OutOfProcRarClient)buildEngine.GetRegisteredTaskObject(OutOfProcRarClientKey, RegisteredTaskObjectLifetime.Build);
+            OutOfProcRarClient rarClient = (OutOfProcRarClient)buildEngine.GetRegisteredTaskObject(TaskObjectCacheKey, RegisteredTaskObjectLifetime.Build);
 
             if (rarClient == null)
             {
                 rarClient = new OutOfProcRarClient();
-                buildEngine.RegisterTaskObject(OutOfProcRarClientKey, rarClient, RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
+                buildEngine.RegisterTaskObject(TaskObjectCacheKey, rarClient, RegisteredTaskObjectLifetime.Build, allowEarlyCollection: false);
                 CommunicationsUtilities.Trace("Initialized new RAR client.");
             }
 
@@ -55,16 +55,34 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             if (!_pipeClient.IsConnected)
             {
                 // Don't set a timeout since the build manager already blocks until the server is running.
-                _pipeClient.ConnectToServer(0);
+                if (!_pipeClient.ConnectToServer(0))
+                {
+                    return false;
+                }
             }
 
-            // TODO: Use RAR task to create the request packet.
-            _pipeClient.WritePacket(new RarNodeExecuteRequest());
+            _pipeClient.WritePacket(new RarNodeExecuteRequest(rarTask));
 
-            // TODO: Use response packet to set RAR task outputs.
-            _ = (RarNodeExecuteResponse)_pipeClient.ReadPacket();
+            INodePacket packet = _pipeClient.ReadPacket();
 
-            return true;
+            while (packet.Type != NodePacketType.RarNodeExecuteResponse)
+            {
+                if (packet.Type == NodePacketType.RarNodeBufferedLogEvents)
+                {
+                    // TODO: Stub for replaying logs to the real build engine.
+                }
+                else
+                {
+                    ErrorUtilities.ThrowInternalError($"Received unexpected packet type {packet.Type}");
+                }
+
+                packet = _pipeClient.ReadPacket();
+            }
+
+            RarNodeExecuteResponse response = (RarNodeExecuteResponse)packet;
+            response.SetTaskOutputs(rarTask);
+
+            return response.Success;
         }
     }
 }

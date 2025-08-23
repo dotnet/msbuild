@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -126,7 +125,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(requestConfiguration);
             ErrorUtilities.VerifyThrow(requestConfiguration.ConfigurationId == request.ConfigurationId, "Configuration id mismatch");
 
-            GlobalLock = new Object();
+            GlobalLock = new LockType();
             Request = request;
             RequestConfiguration = requestConfiguration;
             _blockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
@@ -142,7 +141,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the object used to lock for synchronization of long-running operations.
         /// </summary>
-        public Object GlobalLock { get; }
+        public LockType GlobalLock { get; }
 
         /// <summary>
         /// Returns the root directory for the project being built by this request.

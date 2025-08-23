@@ -88,7 +88,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Object to make this class thread-safe.
         /// </summary>
-        private readonly Object _locker = new Object();
+        private readonly LockType _locker = new();
 #endif // FEATURE_APPDOMAIN
 
         /// <summary>

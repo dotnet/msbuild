@@ -906,7 +906,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             ParseParameters();
 
-            showTargetOutputs = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING"));
+            showTargetOutputs = Traits.Instance.EnableTargetOutputLogging;
 
             if (showOnlyWarnings || showOnlyErrors)
             {

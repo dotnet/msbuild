@@ -76,7 +76,7 @@ namespace Microsoft.Build.BackEnd
         /// same time, causing a race condition.  This class is not made 100% threadsafe by the presence
         /// and current usage of this lock.
         /// </summary>
-        private readonly Object _syncLock = new Object();
+        private readonly LockType _syncLock = new();
 
         #endregion
 

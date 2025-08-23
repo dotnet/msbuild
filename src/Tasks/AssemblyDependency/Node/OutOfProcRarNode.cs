@@ -17,16 +17,15 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
     /// </summary>
     public sealed class OutOfProcRarNode
     {
-        private readonly ServerNodeHandshake _handshake = new(HandshakeOptions.None);
-
-        private readonly int _maxNumberOfConcurrentTasks;
+        private readonly OutOfProcRarNodeEndpoint.SharedConfig _config;
 
         public OutOfProcRarNode()
             : this(Environment.ProcessorCount)
         {
         }
 
-        public OutOfProcRarNode(int maxNumberOfConcurrentTasks) => _maxNumberOfConcurrentTasks = maxNumberOfConcurrentTasks;
+        public OutOfProcRarNode(int maxNumberOfConcurrentTasks)
+            => _config = OutOfProcRarNodeEndpoint.CreateConfig(maxNumberOfConcurrentTasks);
 
         /// <summary>
         /// Starts the node and begins processing RAR execution requests until cancelled.
@@ -80,7 +79,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             // Because multi-instance pipes can live across multiple processes, we can't rely on the instance cap to preven
             // multiple nodes from running in the event of a race condition.
             // This also simplifies tearing down all active pipe servers when shutdown is requested.
-            using NodePipeServer pipeServer = new(NamedPipeUtil.GetRarNodePipeName(_handshake), _handshake);
+            using NodePipeServer pipeServer = new(NamedPipeUtil.GetRarNodePipeName(_config.Handshake), _config.Handshake);
 
             NodePacketFactory packetFactory = new();
             packetFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, null);
@@ -91,11 +90,11 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             Task nodeEndpointTasks = Task.Run(() => RunNodeEndpointsAsync(linkedCts.Token), linkedCts.Token);
 
             // Run any static initializers which will add latency to the first task run.
-            _ = new ResolveAssemblyReference();
+            RarTaskParameters.Init();
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                LinkStatus linkStatus = await WaitForConnection(pipeServer, cancellationToken);
+                LinkStatus linkStatus = await pipeServer.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
                 if (linkStatus == LinkStatus.Active)
                 {
@@ -123,36 +122,17 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             }
 
             return RarNodeShutdownReason.Complete;
-
-            // WaitForConnection does not currently accept cancellation, so use Wait to watch for cancellation.
-            // Cancellation is only expected when MSBuild is gracefully shutting down the node or running in unit tests.
-            static async Task<LinkStatus> WaitForConnection(NodePipeServer pipeServer, CancellationToken cancellationToken)
-            {
-                Task<LinkStatus> linkStatusTask = Task.Run(pipeServer.WaitForConnection);
-                linkStatusTask.Wait(cancellationToken);
-                return await linkStatusTask;
-            }
         }
 
         private async Task RunNodeEndpointsAsync(CancellationToken cancellationToken)
         {
-            // Setup data shared between all endpoints.
-            string pipeName = NamedPipeUtil.GetRarNodeEndpointPipeName(_handshake);
-            NodePacketFactory packetFactory = new();
-            packetFactory.RegisterPacketHandler(NodePacketType.RarNodeExecuteRequest, RarNodeExecuteRequest.FactoryForDeserialization, null);
-
-            OutOfProcRarNodeEndpoint[] endpoints = new OutOfProcRarNodeEndpoint[_maxNumberOfConcurrentTasks];
+            OutOfProcRarNodeEndpoint[] endpoints = new OutOfProcRarNodeEndpoint[_config.MaxNumberOfServerInstances];
 
             // Validate all endpoint pipe handles successfully initialize before running any read loops.
             // This allows us to bail out in the event where we can't control every pipe instance.
             for (int i = 0; i < endpoints.Length; i++)
             {
-                endpoints[i] = new OutOfProcRarNodeEndpoint(
-                        endpointId: i + 1,
-                        pipeName,
-                        _handshake,
-                        _maxNumberOfConcurrentTasks,
-                        packetFactory);
+                endpoints[i] = new OutOfProcRarNodeEndpoint(endpointId: i + 1, _config);
             }
 
             Task[] endpointTasks = new Task[endpoints.Length];
@@ -164,7 +144,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                 endpointTasks[i] = Task.Run(() => endpoint.RunAsync(cancellationToken), cancellationToken);
             }
 
-            CommunicationsUtilities.Trace("{0} RAR endpoints started.", _maxNumberOfConcurrentTasks);
+            CommunicationsUtilities.Trace("{0} RAR endpoints started.", endpoints.Length);
 
             await Task.WhenAll(endpointTasks);
 

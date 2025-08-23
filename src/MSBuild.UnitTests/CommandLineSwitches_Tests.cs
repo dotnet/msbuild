@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that the Target property is unquoted and parsed properly.
-        /// This will remove the possibility to have the ';' in the target name. 
+        /// This will remove the possibility to have the ';' in the target name.
         /// </summary>
         [Theory]
         [InlineData("/t:Clean;Build", "\"Clean;Build\"")]
@@ -1206,6 +1206,7 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         question: false,
+                                        isTaskAndTargetItemLoggingRequired: false,
                                         isBuildCheckEnabled: false,
                                         inputResultsCaches: null,
                                         outputResultsCache: null,

@@ -331,8 +331,7 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile) ||
-                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) ||
-                    IsInteractiveBuild(commandLineSwitches))
+                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]))
                 {
                     canRunServer = false;
                     if (KnownTelemetry.PartialBuildTelemetry != null)
@@ -352,36 +351,6 @@ namespace Microsoft.Build.CommandLine
             }
 
             return canRunServer;
-        }
-
-        private static bool IsInteractiveBuild(CommandLineSwitches commandLineSwitches)
-        {
-            // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
-            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Interactive) &&
-                ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Interactive], true, "InvalidInteractiveValue"))
-            {
-                return true;
-            }
-
-            // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
-            foreach (string parameter in commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property])
-            {
-                // split each <prop>=<value> string into 2 pieces, breaking on the first = that is found
-                string[] parameterSections = parameter.Split(s_propertyValueSeparator, 2);
-
-                if (parameterSections.Length == 2 &&
-                    parameterSections[0].Length > 0 &&
-                    string.Equals("NuGetInteractive", parameterSections[0], StringComparison.OrdinalIgnoreCase))
-                {
-                    string nuGetInteractiveValue = parameterSections[1].Trim('"', ' ');
-                    if (!string.Equals("false", nuGetInteractiveValue, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
 #if !FEATURE_GET_COMMANDLINE
@@ -735,6 +704,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                bool isTaskInputLoggingRequired = false;
                 bool isBuildCheckEnabled = false;
                 string[] getProperty = [];
                 string[] getItem = [];
@@ -784,6 +754,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
+                                            ref isTaskInputLoggingRequired,
                                             ref isBuildCheckEnabled,
                                             ref getProperty,
                                             ref getItem,
@@ -901,6 +872,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    isTaskInputLoggingRequired,
                                     isBuildCheckEnabled,
                                     inputResultsCaches,
                                     outputResultsCache,
@@ -1314,6 +1286,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            bool isTaskAndTargetItemLoggingRequired,
             bool isBuildCheckEnabled,
             string[] inputResultsCaches,
             string outputResultsCache,
@@ -1348,8 +1321,6 @@ namespace Microsoft.Build.CommandLine
 
                 // Targeted perf optimization for the case where we only have our own parallel console logger, and verbosity is quiet. In such a case
                 // we know we won't emit any messages except for errors and warnings, so the engine should not bother even logging them.
-                // If we're using the original serial console logger we can't do this, as it shows project started/finished context
-                // around errors and warnings.
                 // Telling the engine to not bother logging non-critical messages means that typically it can avoid loading any resources in the successful
                 // build case.
                 if (loggers.Length == 1 &&
@@ -1357,7 +1328,6 @@ namespace Microsoft.Build.CommandLine
                     verbosity == LoggerVerbosity.Quiet &&
                     loggers[0].Parameters != null &&
                     loggers[0].Parameters.IndexOf("ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) != -1 &&
-                    loggers[0].Parameters.IndexOf("DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) == -1 &&
                     loggers[0].Parameters.IndexOf("V=", StringComparison.OrdinalIgnoreCase) == -1 &&                // Console logger could have had a verbosity
                     loggers[0].Parameters.IndexOf("VERBOSITY=", StringComparison.OrdinalIgnoreCase) == -1)          // override with the /clp switch
                 {
@@ -1374,7 +1344,7 @@ namespace Microsoft.Build.CommandLine
                 // This is a hack for now to make sure the perf hit only happens
                 // on diagnostic. This should be changed to pipe it through properly,
                 // perhaps as part of a fuller tracing feature.
-                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic || isBuildCheckEnabled;
+                bool logTaskInputs = verbosity == LoggerVerbosity.Diagnostic || isTaskAndTargetItemLoggingRequired;
 
                 if (!logTaskInputs)
                 {
@@ -1416,6 +1386,7 @@ namespace Microsoft.Build.CommandLine
                     toolsetDefinitionLocations,
                     cpuCount,
                     onlyLogCriticalEvents,
+                    enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
@@ -1524,6 +1495,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
 #endif
+                    parameters.EnableTargetOutputLogging = isTaskAndTargetItemLoggingRequired;
 
                     // Propagate the profiler flag into the project load settings so the evaluator
                     // can pick it up
@@ -2545,6 +2517,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
+            ref bool isTaskInputLoggingRequired,
             ref bool isBuildCheckEnabled,
             ref string[] getProperty,
             ref string[] getItem,
@@ -2576,8 +2549,8 @@ namespace Microsoft.Build.CommandLine
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
             // This is temporary until we can remove the need for the environment variable.
-            // DO NOT use this environment variable for any new features as it will be removed without further notice.
-            Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
+                // DO NOT use this environment variable for any new features as it will be removed without further notice.
+                Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
 
             DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
 
@@ -2685,6 +2658,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref isTaskInputLoggingRequired,
                                                            ref isBuildCheckEnabled,
                                                            ref getProperty,
                                                            ref getItem,
@@ -2792,6 +2766,10 @@ namespace Microsoft.Build.CommandLine
                         out profilerLogger,
                         out enableProfiler,
                         ref detailedSummary);
+
+                    var isLoggerThatRequiresTaskInputsConfigured = loggers.Any(l => l is TerminalLogger || l is BinaryLogger);
+                    isTaskInputLoggingRequired = isTaskInputLoggingRequired || isLoggerThatRequiresTaskInputsConfigured || isBuildCheckEnabled;
+
 
                     // We're finished with defining individual loggers' verbosity at this point, so we don't need to worry about messing them up.
                     if (Traits.Instance.DebugEngine)
@@ -3485,11 +3463,10 @@ namespace Microsoft.Build.CommandLine
                 }
                 else if (nodeModeNumber == 2)
                 {
-                    // TaskHost nodes don't need to worry about node reuse or low priority. Node reuse is always off, and TaskHosts
-                    // receive a connection immediately after being launched and shut down as soon as their work is over, so
-                    // whatever our priority is is correct.
+                    // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
+                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                    shutdownReason = node.Run(out nodeException);
+                    shutdownReason = node.Run(out nodeException, nodeReuse);
                 }
                 else if (nodeModeNumber == 3)
                 {
@@ -4134,25 +4111,24 @@ namespace Microsoft.Build.CommandLine
                     /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
                     /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
                     /// so changing this list may impact the minimum message importance logging optimization.
-                    string[] configurableForwardingLoggerParameters =
-                    [
-                        "BUILDSTARTEDEVENT",
-                        "BUILDFINISHEDEVENT",
-                        "PROJECTSTARTEDEVENT",
-                        "PROJECTFINISHEDEVENT",
-                        "TARGETSTARTEDEVENT",
-                        "TARGETFINISHEDEVENT",
-                        "TASKSTARTEDEVENT",
-                        "HIGHMESSAGEEVENT",
-                        "WARNINGEVENT",
-                        "ERROREVENT"
-                    ];
-
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", configurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
-                    distributedLoggerRecords.Add(forwardingLoggerRecord);
+                    distributedLoggerRecords.Add(CreateTerminalLoggerForwardingLoggerRecord(logger, aggregatedLoggerParameters, verbosity));
                 }
             }
+        }
+
+        private static DistributedLoggerRecord CreateTerminalLoggerForwardingLoggerRecord(TerminalLogger centralLogger, string loggerParameters, LoggerVerbosity inputVerbosity)
+        {
+            string verbosityParameter = ExtractAnyLoggerParameter(loggerParameters, "verbosity", "v");
+            string verbosityValue = ExtractAnyParameterValue(verbosityParameter);
+            LoggerVerbosity effectiveVerbosity = inputVerbosity;
+            if (!string.IsNullOrEmpty(verbosityValue))
+            {
+                effectiveVerbosity = ProcessVerbositySwitch(verbosityValue);
+            }
+            var tlForwardingType = typeof(ForwardingTerminalLogger);
+            LoggerDescription forwardingLoggerDescription = new LoggerDescription(tlForwardingType.FullName, tlForwardingType.Assembly.FullName, null, loggerParameters, effectiveVerbosity);
+            return new DistributedLoggerRecord(centralLogger, forwardingLoggerDescription);
         }
 
         /// <summary>

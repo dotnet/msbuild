@@ -2251,9 +2251,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheck_BC0301_MessageFmt" xml:space="preserve">
     <value>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</value>
   </data>
-  <data name="GlobExpansionFailed" xml:space="preserve">
-    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
-  </data>
   <data name="UnknownLoggingType" xml:space="preserve">
     <value>Logging type {0} is not understood by {1}.</value>
   </data>
@@ -2409,6 +2406,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="OpenTelemetryLoadFailed" xml:space="preserve">
     <value>Loading telemetry libraries failed with exception: {0}.</value>
+  </data>
+  <data name="NETHostTaskLoad_Failed" xml:space="preserve">
+    <value>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
+  </data>
+  <data name="NETHostVersion_Failed" xml:space="preserve">
+    <value>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</value>
+  </data>
+  <data name="SDKPathResolution_Failed" xml:space="preserve">
+    <value>UsingTask with Runtime="NET" was specified in a non-SDK project.</value>
+  </data>
+  <data name="SDKPathCheck_Failed" xml:space="preserve">
+    <value>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
   </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999

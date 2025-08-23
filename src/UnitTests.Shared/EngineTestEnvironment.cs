@@ -159,7 +159,6 @@ namespace Microsoft.Build.UnitTests
             result.Add(GetMockLogger());
 
 #if MICROSOFT_BUILD_ENGINE_UNITTESTS
-            result.Add(GetSerialLogger());
             result.Add(GetParallelLogger());
 #endif
 
@@ -173,14 +172,6 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if MICROSOFT_BUILD_ENGINE_UNITTESTS
-
-        private (ILogger, Func<string>) GetSerialLogger()
-        {
-            var sb = new StringBuilder();
-            var serialFromBuild = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null);
-            serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
-            return (serialFromBuild, () => sb.ToString());
-        }
 
         private (ILogger, Func<string>) GetParallelLogger()
         {
