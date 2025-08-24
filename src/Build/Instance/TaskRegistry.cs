@@ -1145,9 +1145,11 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Cache of task names which can be created by the factory.
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
-            /// make possibly expensive calls over and over again.
+            /// make possibly expensive calls over and over again. We intentionally do not use a ConcurrentDictionary here
+            /// for performance reasons, since a concurrent dictionary is much larger than a regular dictionary. The usage
+            /// scope is limited, so we can just lock on a regular dictionary.
             /// </summary>
-            private ConcurrentDictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
+            private Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
             /// Set of parameters that can be used by the task factory specifically.
@@ -1365,7 +1367,7 @@ namespace Microsoft.Build.Execution
                         // Initialize the cache dictionary only when first needed.
                         // This approach ensures the dictionary is available regardless of how the RegisteredTaskRecord
                         // instance was created (constructor, deserialization, factory methods, etc.).
-                        _taskNamesCreatableByFactory ??= new ConcurrentDictionary<RegisteredTaskIdentity, object>(
+                        _taskNamesCreatableByFactory ??= new Dictionary<RegisteredTaskIdentity, object>(
                                 RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
                     }
                 }
@@ -1374,72 +1376,81 @@ namespace Microsoft.Build.Execution
 
                 // See if the task name as already been checked against the factory, return the value if it has
                 object creatableByFactory = null;
-                if (!_taskNamesCreatableByFactory.TryGetValue(taskIdentity, out creatableByFactory))
+                lock (_lockObject)
                 {
-                    try
+                    // If we already have a value for this task identity, return it
+                    if (_taskNamesCreatableByFactory.TryGetValue(taskIdentity, out creatableByFactory))
                     {
-                        bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile);
+                        return creatableByFactory != null;
+                    }
+                }
 
-                        // Create task Factory will only actually create a factory once.
-                        if (haveTaskFactory)
+                try
+                {
+                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile);
+
+                    // Create task Factory will only actually create a factory once.
+                    if (haveTaskFactory)
+                    {
+                        // If we are an AssemblyTaskFactory we can use the fact we are internal to the engine assembly to do some logging / exception throwing that regular factories cannot do,
+                        // this is requried to remain compatible with orcas in terms of exceptions thrown / messages logged when a task cannot be found in an assembly.
+                        if (TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
                         {
-                            // If we are an AssemblyTaskFactory we can use the fact we are internal to the engine assembly to do some logging / exception throwing that regular factories cannot do,
-                            // this is requried to remain compatible with orcas in terms of exceptions thrown / messages logged when a task cannot be found in an assembly.
-                            if (TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
+                            // Also we only need to check to see if the task name can be created by the factory if the taskName does not equal the Registered name
+                            // and the identity parameters don't match the factory's declared parameters.
+                            // This is because when the task factory is instantiated we try and load the Registered name from the task factory and fail it it cannot be loaded
+                            // therefore the fact that we have a factory means the Registered type and parameters can be created by the factory.
+                            if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Fuzzy.Equals(this.TaskIdentity, taskIdentity))
                             {
-                                // Also we only need to check to see if the task name can be created by the factory if the taskName does not equal the Registered name
-                                // and the identity parameters don't match the factory's declared parameters.
-                                // This is because when the task factory is instantiated we try and load the Registered name from the task factory and fail it it cannot be loaded
-                                // therefore the fact that we have a factory means the Registered type and parameters can be created by the factory.
-                                if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Fuzzy.Equals(this.TaskIdentity, taskIdentity))
+                                creatableByFactory = this;
+                            }
+                            else
+                            {
+                                // The method will handle exceptions related to asking if a task can be created and will throw an Invalid project file exception if there is a problem
+                                bool createable = ((AssemblyTaskFactory)_taskFactoryWrapperInstance.TaskFactory).TaskNameCreatableByFactory(taskName, taskIdentityParameters, taskProjectFile, targetLoggingContext, elementLocation);
+
+                                if (createable)
                                 {
                                     creatableByFactory = this;
                                 }
                                 else
                                 {
-                                    // The method will handle exceptions related to asking if a task can be created and will throw an Invalid project file exception if there is a problem
-                                    bool createable = ((AssemblyTaskFactory)_taskFactoryWrapperInstance.TaskFactory).TaskNameCreatableByFactory(taskName, taskIdentityParameters, taskProjectFile, targetLoggingContext, elementLocation);
-
-                                    if (createable)
-                                    {
-                                        creatableByFactory = this;
-                                    }
-                                    else
-                                    {
-                                        creatableByFactory = null;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                // Wrap arbitrary task factory calls because we do not know what kind of error handling they are doing.
-                                try
-                                {
-                                    bool createable = _taskFactoryWrapperInstance.IsCreatableByFactory(taskName);
-
-                                    if (createable)
-                                    {
-                                        creatableByFactory = this;
-                                    }
-                                    else
-                                    {
-                                        creatableByFactory = null;
-                                    }
-                                }
-                                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-                                {
-                                    // Log e.ToString to give as much information about the failure of a "third party" call as possible.
-                                    string message =
-#if DEBUG
-                                    UnhandledFactoryError +
-#endif
-                                    e.ToString();
-                                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _taskFactoryWrapperInstance.Name, message);
+                                    creatableByFactory = null;
                                 }
                             }
                         }
+                        else
+                        {
+                            // Wrap arbitrary task factory calls because we do not know what kind of error handling they are doing.
+                            try
+                            {
+                                bool createable = _taskFactoryWrapperInstance.IsCreatableByFactory(taskName);
+
+                                if (createable)
+                                {
+                                    creatableByFactory = this;
+                                }
+                                else
+                                {
+                                    creatableByFactory = null;
+                                }
+                            }
+                            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                            {
+                                // Log e.ToString to give as much information about the failure of a "third party" call as possible.
+                                string message =
+#if DEBUG
+                                UnhandledFactoryError +
+#endif
+                                e.ToString();
+                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _taskFactoryWrapperInstance.Name, message);
+                            }
+                        }
                     }
-                    finally
+                }
+                finally
+                {
+                    lock (_lockObject)
                     {
                         _taskNamesCreatableByFactory[taskIdentity] = creatableByFactory;
                     }
