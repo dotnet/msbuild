@@ -1183,7 +1183,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Provides an enumeration of the explicit metadata modifications.
             /// </summary>
-            public IEnumerable<KeyValuePair<string, MetadataModification>> ExplicitModifications
+            public Dictionary<string, MetadataModification> ExplicitModifications
             {
                 get { return _modifications; }
             }
