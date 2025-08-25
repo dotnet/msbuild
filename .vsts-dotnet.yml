@@ -22,6 +22,10 @@ parameters:
   displayName: Require Default Channels
   type: boolean
   default: true
+- name: enableSigningValidation
+  displayName: Enable Signing Validation
+  type: boolean
+  default: true
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -45,9 +49,8 @@ variables:
   - ${{ if eq(parameters.EnableOptProf, false) }}:
     - name: SkipApplyOptimizationData
       value: true
-  - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
-    - name: requireDefaultChannels
-      value: ${{ parameters.requireDefaultChannelsEnabled }}
+  - name: requireDefaultChannels
+    value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
@@ -127,4 +130,12 @@ extends:
         parameters:
           isExperimental: false
           enableComponentGovernance: true
-          enableSigningValidation: true
+
+    - template: /eng/common/templates-official/post-build/post-build.yml@self
+      parameters:
+        publishingInfraVersion: 3
+        enableSymbolValidation: true
+        enableSourceLinkValidation: false
+        enableNugetValidation: false
+        requireDefaultChannels: ${{ parameters.requireDefaultChannelsEnabled }}
+        enableSigningValidation: ${{ parameters.enableSigningValidation }}
