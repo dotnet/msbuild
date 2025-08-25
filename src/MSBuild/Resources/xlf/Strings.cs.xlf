@@ -857,41 +857,38 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleloggerparameters:&lt;parameters&gt;
-                     Parametry do protokolovacího nástroje konzoly. (Krátký tvar: -clp)
-                     Dostupné parametry jsou:
+        <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
+                     Parametry protokolovacího nástroje konzoly. (Krátký tvar: -clp)
+                     Dostupné parametry:
                         PerformanceSummary – zobrazí dobu zpracování úloh, cílů
                             a projektů.
-                        Summary – zobrazí souhrn chyb a upozornění na konci.
-                        NoSummary – nezobrazí souhrny chyb a upozornění na
-                            konci.
+                        Summary – na konci zobrazí souhrn chyb a upozornění.
+                        NoSummary – na konci nezobrazí souhrny chyb
+                            a upozornění.
                         ErrorsOnly – zobrazí jenom chyby.
                         WarningsOnly – zobrazí jenom upozornění.
                         NoItemAndPropertyList – nezobrazí na začátku sestavení každého
                             projektu seznamy položek a vlastností.
-                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.
+                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent
                         ShowTimestamp – před každou zprávou zobrazí
                             časové razítko.
                         ShowEventId – zobrazí ID události pro spuštěné a dokončené
-                            události a zprávy.
-                        ForceNoAlign – nenastav9 text podle velikosti vyrovnávací
-                            paměti konzoly.
+                            události a zprávy
+                        ForceNoAlign – nenastavuje text podle velikosti vyrovnávací
+                            paměti konzoly
                         DisableConsoleColor – použije výchozí barvy konzoly
                             pro všechny zprávy protokolování.
-                        DisableMPLogging – zakáže víceprocesorový styl výstupu
-                            protokolování při práci v jiném než víceprocesorovém
-                            režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
                             protokolování i při práci v jiném
-                            režimu. Tento styl protokolování je výchozí. 
+                            režimu. Tento styl protokolování je výchozí.
                         ForceConsoleColor – použije barvy konzoly ANSI,
-                            i když to konzola nepodporuje.
-                        PreferConsoleColor– použije barvy konzoly ANSI, pouze pokud
-                            to cílová konzola podporuje.
-                        Verbosity – potlačí nastavení -verbosity
+                            i když to konzola nepodporuje
+                        PreferConsoleColor--Barvy konzoly ANSI použít pouze v případě, že
+                            je cílová konzole podporuje
+                     Verbosity – potlačí nastavení -verbosity
                             pro tento protokolovací nástroj.
                      Příklad:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                        -consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
