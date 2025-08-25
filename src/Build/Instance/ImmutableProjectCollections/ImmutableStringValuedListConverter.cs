@@ -5,28 +5,36 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Instance
 {
-    internal class ImmutableStringValuedListConverter<T> : IList<string>, IReadOnlyList<string>
+    /// <summary>
+    /// Implements a lazy-initialized, immutable list of strings that can be used to represent project imports in the ProjectInstance
+    ///  when it is created from an immutable project link.
+    /// It is to reduce memory usage to create and hold the list until a consumer actually accesses it.
+    /// </summary>
+    internal class ImmutableStringValuedListConverter : IList<string>, IReadOnlyList<string>
     {
-        private readonly IList<T> _itemList;
-        private readonly Func<T, string> _getStringValue;
+        private readonly object _syncObject = new();
+        private readonly ProjectLink _immutableProject;
+        private readonly Func<ProjectLink, List<string>> _getStringValues;
+        private List<string>? _items;
 
-        public ImmutableStringValuedListConverter(IList<T> itemList, Func<T, string> getStringValue)
+        public ImmutableStringValuedListConverter(ProjectLink immutableProject, Func<ProjectLink, List<string>> getStringValues)
         {
-            _itemList = itemList;
-            _getStringValue = getStringValue;
+            _immutableProject = immutableProject;
+            _getStringValues = getStringValues;
         }
 
         public string this[int index]
         {
             set => throw new NotSupportedException();
-            get => _getStringValue(_itemList[index]);
+            get => EnsureListInitialized()[index];
         }
 
-        public int Count => _itemList.Count;
+        public int Count => EnsureListInitialized().Count;
 
         public bool IsReadOnly => true;
 
@@ -40,41 +48,24 @@ namespace Microsoft.Build.Instance
 
         public void RemoveAt(int index) => throw new NotSupportedException();
 
-        public bool Contains(string item)
-        {
-            return IndexOf(item) >= 0;
-        }
+        public bool Contains(string item) => IndexOf(item) >= 0;
 
         public void CopyTo(string[] array, int arrayIndex)
         {
-            ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), _itemList.Count);
+            var items = EnsureListInitialized();
+            ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), items.Count);
 
-            int currentIndex = arrayIndex;
-            foreach (var item in _itemList)
-            {
-                array[currentIndex] = _getStringValue(item);
-                ++currentIndex;
-            }
+            items.CopyTo(array, arrayIndex);
         }
 
-        public IEnumerator<string> GetEnumerator()
-        {
-            foreach (var item in _itemList)
-            {
-                string? stringValue = _getStringValue(item);
-                if (stringValue != null)
-                {
-                    yield return stringValue;
-                }
-            }
-        }
+        public IEnumerator<string> GetEnumerator() => EnsureListInitialized().GetEnumerator();
 
         public int IndexOf(string item)
         {
-            for (int i = 0; i < _itemList.Count; ++i)
+            List<string> itemList = EnsureListInitialized();
+            for (int i = 0; i < itemList.Count; ++i)
             {
-                T cachedItem = _itemList[i];
-                string stringValue = _getStringValue(cachedItem);
+                string stringValue = itemList[i];
                 if (MSBuildNameIgnoreCaseComparer.Default.Equals(stringValue, item))
                 {
                     return i;
@@ -84,16 +75,22 @@ namespace Microsoft.Build.Instance
             return -1;
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator() => EnsureListInitialized().GetEnumerator();
+
+        private List<string> EnsureListInitialized()
         {
-            foreach (var item in _itemList)
+            if (_items == null)
             {
-                string? instance = _getStringValue(item);
-                if (instance != null)
+                lock (_syncObject)
                 {
-                    yield return instance;
+                    if (_items == null)
+                    {
+                        _items = _getStringValues(_immutableProject);
+                    }
                 }
             }
+
+            return _items;
         }
     }
 }

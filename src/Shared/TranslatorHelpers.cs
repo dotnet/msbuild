@@ -193,11 +193,11 @@ namespace Microsoft.Build.BackEnd
 
         public static void TranslateDictionary(
             this ITranslator translator,
-            ref ImmutableDictionary<string, string> dictionary,
+            ref IReadOnlyDictionary<string, string> dictionary,
             IEqualityComparer<string> comparer)
         {
             // Defensive copy since immutable dictionaries are expected to be overwritten.
-            ImmutableDictionary<string, string> localDict = dictionary;
+            IReadOnlyDictionary<string, string> localDict = dictionary;
 
             if (!translator.TranslateNullable(localDict))
             {
@@ -237,6 +237,22 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 dictionary = builder.ToImmutable();
+            }
+        }
+
+        public static void TranslateDictionary(
+            this ITranslator translator,
+            ref ImmutableDictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            // Defensive copy since immutable dictionaries are expected to be overwritten.
+            IReadOnlyDictionary<string, string> localDict = dictionary;
+
+            TranslateDictionary(translator, ref localDict, comparer);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                dictionary = (ImmutableDictionary<string, string>)localDict;
             }
         }
 #endif
