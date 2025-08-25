@@ -360,8 +360,6 @@ namespace Microsoft.Build.BackEnd
                             buckets.Insert(~matchingBucketIndex, matchingBucket);
                         }
 
-                        matchingBucket.Lookup.EnsureCapacity(items.Count);
-
                         // We already have a bucket for this type of item, so add this item to
                         // the bucket.
                         matchingBucket.AddItem(item);
