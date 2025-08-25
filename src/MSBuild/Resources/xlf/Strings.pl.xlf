@@ -33,6 +33,21 @@
         <target state="translated">MSBUILD : error MSB1027: przełącznika -noAutoResponse nie można określić w pliku autoodpowiedzi MSBuild.rsp ani w żadnym pliku odpowiedzi, do którego odwołuje się plik autoodpowiedzi.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="FileSystem">
+        <source>Based on the project file system, file system is {0}.</source>
+        <target state="new">Based on the project file system, file system is {0}.</target>
+        <note>File system detection for Windows, {0} will be "NTFS"/"ReFS"</note>
+      </trans-unit>
+      <trans-unit id="FileSystem_NTFS">
+        <source>NTFS</source>
+        <target state="new">NTFS</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FileSystem_ReFS">
+        <source>ReFS</source>
+        <target state="new">ReFS</target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
