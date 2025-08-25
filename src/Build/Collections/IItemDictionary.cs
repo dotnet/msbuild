@@ -55,21 +55,10 @@ namespace Microsoft.Build.Collections
         void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback);
 
         /// <summary>
-        /// Whether the provided item is in this table or not.
-        /// </summary>
-        bool Contains(T projectItem);
-
-        /// <summary>
         /// Add a new item to the collection, at the
         /// end of the list of other items with its key.
         /// </summary>
         void Add(T projectItem);
-
-        /// <summary>
-        /// Adds each new item to the collection, at the
-        /// end of the list of other items with the same key.
-        /// </summary>
-        void AddRange(IEnumerable<T> projectItems);
 
         /// <summary>
         /// Removes an item, if it is in the collection.
@@ -78,17 +67,8 @@ namespace Microsoft.Build.Collections
         /// <remarks>
         /// If a list is emptied, removes the list from the enclosing collection
         /// so it can be garbage collected.
-        /// </remarks>        
+        /// </remarks>
         bool Remove(T projectItem);
-
-        /// <summary>
-        /// Replaces an existing item with a new item.  This is necessary to preserve the original ordering semantics of Lookup.GetItems
-        /// when items with metadata modifications are being returned.  See Dev10 bug 480737.
-        /// If the item is not found, does nothing.
-        /// </summary>
-        /// <param name="existingItem">The item to be replaced.</param>
-        /// <param name="newItem">The replacement item.</param>
-        void Replace(T existingItem, T newItem);
 
         /// <summary>
         /// Add the set of items specified to this dictionary.
@@ -107,23 +87,8 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Remove the set of items specified from this dictionary
         /// </summary>
+        /// <param name="itemType">The item type for all removes.</param>
         /// <param name="other">An enumerator over the items to remove.</param>
-        void RemoveItems(IEnumerable<T> other);
-
-        /// <summary>
-        /// Special method used for batching buckets.
-        /// Adds an explicit marker indicating there are no items for the specified item type.
-        /// In the general case, this is redundant, but batching buckets use this to indicate that they are
-        /// batching over the item type, but their bucket does not contain items of that type.
-        /// See <see cref="HasEmptyMarker">HasEmptyMarker</see>.
-        /// </summary>
-        void AddEmptyMarker(string itemType);
-
-        /// <summary>
-        /// Special method used for batching buckets.
-        /// Lookup can call this to see whether there was an explicit marker placed indicating that
-        /// there are no items of this type. See comment on <see cref="AddEmptyMarker">AddEmptyMarker</see>.
-        /// </summary>
-        bool HasEmptyMarker(string itemType);
+        void RemoveItemsOfType(string itemType, IEnumerable<T> other);
     }
 }
