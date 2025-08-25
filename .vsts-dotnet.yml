@@ -14,10 +14,6 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-- name: EnableOptProf
-  displayName: Enable OptProf data collection for this build
-  type: boolean
-  default: true
 - name: requireDefaultChannelsEnabled
   displayName: Require Default Channels
   type: boolean
@@ -41,15 +37,11 @@ variables:
       value: ${{ parameters.OptProfDropName }}
     - name: SourceBranch
       value: ''
-  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
-  - ${{ if eq(parameters.EnableOptProf, false) }}:
-    - name: SkipApplyOptimizationData
-      value: true
   - ${{ if and(not(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/')), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/'))) }}:
     - name: requireDefaultChannels
       value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.14
+    value: true # Enable loc for vs16.11
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
@@ -96,11 +88,21 @@ extends:
       - stage: localization
         displayName: Localization
         jobs:
+        # The localization setup for vs16.11 branch
+        - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/vs16.11') }}:
+          - template: /eng/common/templates-official/job/onelocbuild.yml@self
+            parameters:
+              MirrorRepo: 'msbuild'
+              LclSource: lclFilesfromPackage
+              LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
+              MirrorBranch: 'vs16.11'
+              JobNameSuffix: '_vs16.11'
+              condition: ${{ variables.EnableReleaseOneLocBuild }}
         # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
         # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
         # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
         #  set 'EnableReleaseOneLocBuild' to true.
-        - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
+        - ${{ if and(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), not(eq(variables['Build.SourceBranch'], 'refs/heads/vs16.11'))) }}:
           - template: /eng/common/templates-official/job/onelocbuild.yml@self
             parameters:
               MirrorRepo: 'msbuild'
@@ -128,3 +130,12 @@ extends:
           isExperimental: false
           enableComponentGovernance: true
           enableSigningValidation: true
+
+    - template: eng\common\templates-official\post-build\post-build.yml@self
+      parameters:
+        publishingInfraVersion: 3
+        enableSymbolValidation: true
+        enableSourceLinkValidation: false
+        enableNugetValidation: false
+        requireDefaultChannels: ${{ variables.requireDefaultChannels }}
+        enableSigningValidation: true
