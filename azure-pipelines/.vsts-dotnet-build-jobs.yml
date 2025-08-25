@@ -1,4 +1,4 @@
-# Template for the main Windows_NT build job
+# Template for the main Windows_NT build job for vs16.11 branch
 parameters:
 - name: isExperimental
   type: boolean
@@ -20,13 +20,15 @@ jobs:
   timeoutInMinutes: 180
 
   variables:
+  - group: DotNet-Blob-Feed
+  - group: DotNet-Symbol-Publish
   - group: Publish-Build-Assets
   - name: TeamName
     value: MSBuild
   - name: VisualStudio.MajorVersion
-    value: 18
+    value: 16
   - name: VisualStudio.ChannelName
-    value: 'int.main'
+    value: 'int.d16.11'
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -51,7 +53,7 @@ jobs:
       command: restore
       feedsToUse: config
       restoreSolution: 'eng\common\internal\Tools.csproj'
-      nugetConfigPath: 'eng\common\internal\NuGet.config'
+      nugetConfigPath: '.\NuGet.config'
       restoreDirectory: '$(Build.SourcesDirectory)\.packages'
   
   - task: MicroBuildSigningPlugin@4
@@ -88,6 +90,12 @@ jobs:
               /p:VisualStudioDropAccessToken=$(System.AccessToken)
               /p:VisualStudioDropName=$(VisualStudio.DropName)
               /p:DotNetSignType=$(SignType)
+              /p:DotNetPublishToBlobFeed=true
+              /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
+              /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
+              /p:PublishToSymbolServer=true
+              /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
+              /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
               /p:TeamName=MSBuild
               /p:DotNetPublishUsingPipelines=true
               /p:VisualStudioIbcDrop=$(OptProfDrop)
@@ -97,7 +105,7 @@ jobs:
     condition: succeeded()
 
   # Required by Microsoft policy
-  - template: /eng/common/templates-official/steps/generate-sbom.yml@self
+  - template: eng\common\templates-official\steps\generate-sbom.yml@self
 
   # Publish OptProf configuration files
   - task: 1ES.PublishArtifactsDrop@1
@@ -180,6 +188,32 @@ jobs:
       ArtifactName: PackageArtifacts
     condition: succeeded()
 
+  - task: 1ES.PublishPipelineArtifact@1
+    displayName: 'Publish Artifact: bin'
+    inputs:
+      path: 'artifacts\bin'
+      artifactName: bin
+    condition: succeededOrFailed()
+
+  # Publish Asset Manifests for Build Asset Registry job
+  - task: 1ES.PublishBuildArtifacts@1
+    displayName: Publish Asset Manifests
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
+      ArtifactName: AssetManifests
+    condition: succeeded()
+
+  # Tag the build at the very end when we know it's been successful.
+  - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
+    displayName: Tag build as ready for optimization training
+    inputs:
+      tags: 'ready-for-training'
+    condition: succeeded()
+
+  - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+    displayName: Execute cleanup tasks
+    condition: succeededOrFailed()
+
   # Publish "IntelliSense" XSD files to their own artifact
   # so it can be consumed by the insertion-to-VS job
   - task: 1ES.PublishPipelineArtifact@1
@@ -231,8 +265,8 @@ jobs:
       - Windows_NT
       - Source_Build_Managed
     pool:
-      name: $(DncEngInternalBuildPool)
-      image: $(WindowsImage)
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
       os: windows
 
 - template: /eng/common/templates-official/post-build/post-build.yml@self
