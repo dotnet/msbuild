@@ -3200,6 +3200,26 @@ namespace Microsoft.Build.UnitTests.Evaluation
             expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expectedExpansion);
         }
 
+        [Theory]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('World'))", "True")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('world'))", "False")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('WORLD', 'StringComparison.Ordinal'))", "False")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('WORLD', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('world', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('Hello', 'StringComparison.Ordinal'))", "False")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('', 'StringComparison.Ordinal'))", "True")]
+        [InlineData("AString", "C:\\Path\\File.txt", "$(AString.EndsWith('.TXT', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "C:\\Path\\File.txt", "$(AString.EndsWith('.TXT', 'StringComparison.Ordinal'))", "False")]
+        public void StringEndsWithTests(string propertyName, string propertyValue, string propertyFunction, string expectedExpansion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>
+            { [propertyName] = ProjectPropertyInstance.Create(propertyName, propertyValue) };
+
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expectedExpansion);
+        }
+
         [Fact]
         public void IsOsPlatformShouldBeCaseInsensitiveToParameter()
         {
