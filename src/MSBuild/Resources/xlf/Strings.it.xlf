@@ -857,37 +857,37 @@ Nota: livello di dettaglio dei logger di file
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parameters to console logger. (Short form: -clp)
-                     The available parameters are:
-                        PerformanceSummary--Show time spent in tasks, targets
-                            and projects.
-                        Summary--Show error and warning summary at the end.
-                        NoSummary--Don't show error and warning summary at the
-                            end.
-                        ErrorsOnly--Show only errors.
-                        WarningsOnly--Show only warnings.
-                        NoItemAndPropertyList--Don't show list of items and
-                            properties at the start of each project build.
-                        ShowCommandLine--Show TaskCommandLineEvent messages
-                        ShowTimestamp--Display the Timestamp as a prefix to any
-                            message.
-                        ShowEventId--Show eventId for started events, finished
-                            events, and messages
-                        ForceNoAlign--Does not align the text to the size of
-                            the console buffer
-                        DisableConsoleColor--Use the default console colors
-                            for all logging messages.
-                        EnableMPLogging--Enable the multiprocessor logging
-                            style even when running in non-multiprocessor
-                            mode. This logging style is on by default.
-                        ForceConsoleColor--Use ANSI console colors even if
-                            console does not support it
-                        PreferConsoleColor--Use ANSI console colors only if
-                            target console does support it
-                     Verbosity--overrides the -verbosity setting for this
+        <target state="translated">  -consoleLoggerParameters:&lt;parametri&gt;
+                     Parametri per il logger di console. (Forma breve: -clp)
+                     I parametri disponibili sono:
+                        PerformanceSummary: indica il tempo impiegato per le attività, le destinazioni 
+                            e i progetti.
+                        Summary: visualizza un riepilogo degli errori e degli avvisi alla fine.
+                        NoSummary: non visualizza un riepilogo degli errori alla
+                            fine.
+                        ErrorsOnly: visualizza solo gli errori.
+                        WarningsOnly: visualizza solo gli avvisi.
+                        NoItemAndPropertyList: non visualizza l'elenco di elementi e
+                            proprietà all'inizio di ogni compilazione del progetto.
+                        ShowCommandLine: visualizza i messaggi TaskCommandLineEvent
+                        ShowTimestamp: visualizza il timestamp sotto forma di prefisso per ogni
+                            messaggio.
+                        ShowEventId: mostra l'ID evento per gli eventi iniziati,
+                            gli eventi finiti e i messaggi
+                        ForceNoAlign: non allinea il testo alle dimensioni del
+                            buffer della console
+                        DisableConsoleColor: usa i colori predefiniti della console
+                            per tutti i messaggi di registrazione.
+                        EnableMPLogging: abilita lo stile di registrazione multiprocessore
+                            anche quando è in esecuzione in modalità
+                            non- multiprocessore. Si tratta dello stile di registrazione predefinito.
+                        ForceConsoleColor: usa i colori della console ANSI anche se
+                            non sono supportati dalla console
+                        PreferConsoleColor- Usa i colori della console ANSI solo se
+                            la console di destinazione lo supporta
+                     Verbosity: esegue l'override dell'impostazione -verbosity per questo
                             logger.
-                     Example:
+                     Esempio:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
