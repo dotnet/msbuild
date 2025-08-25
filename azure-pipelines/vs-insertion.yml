@@ -10,7 +10,7 @@
 # 3. manual insertion - select manually the TargetBranch and inserted CI run.
 trigger: none
 pr: none
-name: $(Date:yyyyMMdd).$(Rev:r).$(resources.pipeline.MSBuild.sourceCommit)
+name: $(Date:yyyyMMdd).$(Rev:r)
 
 schedules:
   - cron: '0 3 * * 1-5' # Runs every weekday at 3AM UTC
@@ -148,6 +148,9 @@ extends:
               $branch = $branchSegments[-1]
               Write-Host "Setting source branch to '$branch'"
               Write-Host "##vso[task.setvariable variable=SourceBranchName;isoutput=true]$branch"
+        - script: |
+            echo "##vso[build.updatebuildnumber]$(Build.BuildNumber) - $(MSBuild_CI_SourceVersion)"
+          displayName: 'Append source version to build name'
         - task: MicroBuildRetainVstsDrops@1
           name: MicroBuildRetainVstsDrops_2
           displayName: Retain VSTS Drops

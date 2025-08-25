@@ -1,6 +1,6 @@
 # Create an experimental VS insertion auto-triggered from exp/* branches to validate changes before merging to main
 trigger: none
-name: $(Date:yyyyMMdd).$(Rev:r).$(resources.pipeline.MSBuild.sourceCommit)
+name: $(Date:yyyyMMdd).$(Rev:r)
 
 resources:
   pipelines:
@@ -92,6 +92,10 @@ extends:
               **
               !**/Microsoft.SourceBuild.Intermediate*.nupkg
         steps:
+        - script: |
+            echo "##vso[build.updatebuildnumber]$(Build.BuildNumber) - $(MSBuild_CI_SourceVersion)"
+          displayName: 'Append source version to build name'
+
         - task: Powershell@2
           name: SetSourceBranch
           displayName: Set source branch name
