@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.CommandLine.UnitTests;
@@ -34,6 +35,8 @@ namespace Microsoft.Build.UnitTests
         private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
         private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
         private readonly string _projectFileWithNonAnsiSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/㐇𠁠𪨰𫠊𫦠𮚮⿕.proj" : @"C:\src\проектТерминал\㐇𠁠𪨰𫠊𫦠𮚮⿕.proj";
+
+        private readonly string _exeSuffix = NativeMethods.IsUnixLike ? "" : ".exe";
 
         private StringWriter _outputWriter = new();
 
@@ -167,117 +170,204 @@ namespace Microsoft.Build.UnitTests
 
         #region Event args helpers
 
-        private BuildEventContext MakeBuildEventContext()
+        /// <summary>
+        /// Helper function to create a BuildEventContext keyed to specific scenarios.
+        /// When you want to refer to the same eval properties, use the same evalId.
+        /// When you want to refer to the same project, use the same projectContextId.
+        /// By default, nodeId, evalId, projectContextId, and targetId are all set to 1.
+        /// </summary>
+        private BuildEventContext MakeBuildEventContext(int evalId = 1, int projectContextId = 1)
         {
-            return new BuildEventContext(1, 1, 1, 1);
+            return new BuildEventContext(
+            submissionId: -1,
+            nodeId: 1,
+            evaluationId: evalId,
+            projectInstanceId: -1,
+            projectContextId: projectContextId,
+            targetId: 1,
+            taskId: 1);
+        }
+        private BuildEventContext MakeBuildEventContext(BuildEventContext baseCtx, int? targetId = null, int? taskId = null)
+        {
+            return new BuildEventContext(
+                submissionId: baseCtx.SubmissionId,
+                nodeId: baseCtx.NodeId,
+                evaluationId: baseCtx.EvaluationId,
+                projectInstanceId: baseCtx.ProjectInstanceId,
+                projectContextId: baseCtx.ProjectContextId,
+                targetId: targetId ?? baseCtx.TargetId,
+                taskId: taskId ?? baseCtx.TaskId);
         }
 
-        private BuildStartedEventArgs MakeBuildStartedEventArgs()
+        private BuildStartedEventArgs MakeBuildStartedEventArgs(BuildEventContext? buildEventContext = null)
         {
-            return new BuildStartedEventArgs(null, null, _buildStartTime);
-        }
-
-        private BuildFinishedEventArgs MakeBuildFinishedEventArgs(bool succeeded)
-        {
-            return new BuildFinishedEventArgs(null, null, succeeded, _buildFinishTime);
-        }
-
-        private ProjectStartedEventArgs MakeProjectStartedEventArgs(string projectFile, string targetNames = "Build")
-        {
-            return new ProjectStartedEventArgs("", "", projectFile, targetNames, new Dictionary<string, string>(), new List<DictionaryEntry>())
+            return new BuildStartedEventArgs(null, null, _buildStartTime)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private ProjectFinishedEventArgs MakeProjectFinishedEventArgs(string projectFile, bool succeeded)
+        private BuildFinishedEventArgs MakeBuildFinishedEventArgs(bool succeeded, BuildEventContext? buildEventContext = null)
+        {
+            return new BuildFinishedEventArgs(null, null, succeeded, _buildFinishTime)
+            {
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
+            };
+        }
+
+        private ProjectStartedEventArgs MakeProjectStartedEventArgs(string projectFile, string[]? targetNames = null, BuildEventContext? buildEventContext = null)
+        {
+            return new ProjectStartedEventArgs("", "", projectFile, string.Join(";", targetNames ?? ["Build"]), new Dictionary<string, string>(), new List<DictionaryEntry>())
+            {
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
+            };
+        }
+
+        private ProjectFinishedEventArgs MakeProjectFinishedEventArgs(string projectFile, bool succeeded, BuildEventContext? buildEventContext = null)
         {
             return new ProjectFinishedEventArgs(null, null, projectFile, succeeded)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private TargetStartedEventArgs MakeTargetStartedEventArgs(string projectFile, string targetName)
+        private TargetStartedEventArgs MakeTargetStartedEventArgs(string projectFile, string targetName, BuildEventContext? buildEventContext = null)
         {
             return new TargetStartedEventArgs("", "", targetName, projectFile, targetFile: projectFile, String.Empty, TargetBuiltReason.None, _targetStartTime)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private TargetFinishedEventArgs MakeTargetFinishedEventArgs(string projectFile, string targetName, bool succeeded)
+        private TargetFinishedEventArgs MakeTargetFinishedEventArgs(string projectFile, string targetName, bool succeeded, IEnumerable<string>? targetOutputs = null, BuildEventContext? buildEventContext = null)
         {
             return new TargetFinishedEventArgs("", "", targetName, projectFile, targetFile: projectFile, succeeded)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
+                TargetOutputs = targetOutputs
             };
         }
 
-        private TaskStartedEventArgs MakeTaskStartedEventArgs(string projectFile, string taskName)
+        private TaskStartedEventArgs MakeTaskStartedEventArgs(string projectFile, string taskName, BuildEventContext? buildEventContext = null)
         {
             return new TaskStartedEventArgs("", "", projectFile, taskFile: projectFile, taskName)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private TaskFinishedEventArgs MakeTaskFinishedEventArgs(string projectFile, string taskName, bool succeeded)
+        private TaskFinishedEventArgs MakeTaskFinishedEventArgs(string projectFile, string taskName, bool succeeded, BuildEventContext? buildEventContext = null)
         {
             return new TaskFinishedEventArgs("", "", projectFile, taskFile: projectFile, taskName, succeeded)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private BuildWarningEventArgs MakeCopyRetryWarning(int retryCount)
+        private BuildWarningEventArgs MakeCopyRetryWarning(int retryCount, BuildEventContext? buildEventContext = null)
         {
             return new BuildWarningEventArgs("", "MSB3026", "directory/file", 1, 2, 3, 4,
                 $"MSB3026: Could not copy \"sourcePath\" to \"destinationPath\". Beginning retry {retryCount} in x ms.",
                 null, null)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private BuildMessageEventArgs MakeMessageEventArgs(string message, MessageImportance importance, string? code = null, string? keyword = "keyword")
+        private BuildMessageEventArgs MakeMessageEventArgs(string message, MessageImportance importance, string? code = null, string? keyword = "keyword", BuildEventContext? buildEventContext = null)
         {
             return new BuildMessageEventArgs(message: message, helpKeyword: keyword, senderName: null, importance: importance, eventTimestamp: DateTime.UtcNow, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, code: code, subcategory: null, file: null)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private BuildMessageEventArgs MakeTaskCommandLineEventArgs(string message, MessageImportance importance)
+        /// <summary>
+        /// This creates the expected pattern of messages for a project with an output type of library. It's on you to make sure
+        /// that the project you pass in is _recognized_ as a library.
+        /// </summary>
+        private void SynthesizeBuildOutputForLibraryProject(string projectFilePath, BuildEventContext? buildEventContext = null)
+        {
+            /// need to 
+            /// * start the CopyFilesToOutputDirectory Target with a given target id
+            /// * start the Copy task with that same target id
+            /// * send a TaskParameterEventArgs of kind TaskOutput with the ItemType set to MainAssembly
+            var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+            var outputPath = Path.ChangeExtension(projectFilePath, "dll");
+            var baseBEC = buildEventContext ?? MakeBuildEventContext();
+
+            var targetContext = MakeBuildEventContext(baseBEC, targetId: 10);
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFilePath, "CopyFilesToOutputDirectory", targetContext));
+
+            var taskContext = MakeBuildEventContext(targetContext, taskId: 10);
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFilePath, "Copy", taskContext));
+
+            var taskOutputArgs = MakeTaskOutputItemArgs("MainAssembly", [outputPath], taskContext);
+            MessageRaised?.Invoke(_eventSender, taskOutputArgs);
+        }
+
+        /// <summary>
+        /// This creates the expected pattern of messages for a project with an output type of library. It's on you to make sure
+        /// that the project you pass in is _recognized_ as a library.
+        /// </summary>
+        private void SynthesizeBuildOutputForExecutableProject(string projectFilePath, BuildEventContext? buildEventContext = null)
+        {
+            /// need to 
+            /// * start the CopyFilesToOutputDirectory Target with a given target id
+            /// * start the Copy task with that same target id
+            /// * send a TaskParameterEventArgs of kind TaskOutput with the ItemType set to MainAssembly
+            var projectName = Path.GetFileNameWithoutExtension(projectFilePath);
+            var outputPath = Path.ChangeExtension(projectFilePath, _exeSuffix);
+            var baseBEC = buildEventContext ?? MakeBuildEventContext();
+
+            var targetContext = MakeBuildEventContext(baseBEC, targetId: 10);
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFilePath, "CopyFilesToOutputDirectory", targetContext));
+
+            var taskContext = MakeBuildEventContext(targetContext, taskId: 10);
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFilePath, "Copy", taskContext));
+
+            var taskOutputArgs = MakeTaskOutputItemArgs("MainAssembly", [outputPath], taskContext);
+            MessageRaised?.Invoke(_eventSender, taskOutputArgs);
+        }
+
+        private TaskParameterEventArgs MakeTaskOutputItemArgs(string itemType, List<string> items, BuildEventContext? buildEventContext = null)
+        {
+            return new TaskParameterEventArgs(TaskParameterMessageKind.TaskOutput, itemType, items, logItemMetadata: false, DateTime.UtcNow)
+            {
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext()
+            };
+        }
+
+        private BuildMessageEventArgs MakeTaskCommandLineEventArgs(string message, MessageImportance importance, BuildEventContext? buildEventContext = null)
         {
             return new TaskCommandLineEventArgs(message, "Task", importance)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private BuildMessageEventArgs MakeExtendedMessageEventArgs(string message, MessageImportance importance, string extendedType, Dictionary<string, string?>? extendedMetadata)
+        private BuildMessageEventArgs MakeExtendedMessageEventArgs(string message, MessageImportance importance, string extendedType, Dictionary<string, string?>? extendedMetadata, BuildEventContext? buildEventContext = null)
         {
             return new ExtendedBuildMessageEventArgs(extendedType, message, "keyword", null, importance, _messageTime)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
                 ExtendedMetadata = extendedMetadata
             };
         }
 
-        private BuildErrorEventArgs MakeErrorEventArgs(string error, string? link = null, string? keyword = null)
+        private BuildErrorEventArgs MakeErrorEventArgs(string error, string? link = null, string? keyword = null, BuildEventContext? buildEventContext = null)
         {
             return new BuildErrorEventArgs(subcategory: null, code: "AA0000", file: "directory/file", lineNumber: 1, columnNumber: 2, endLineNumber: 3, endColumnNumber: 4, message: error, helpKeyword: keyword, helpLink: link, senderName: null, eventTimestamp: DateTime.UtcNow)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
-        private BuildWarningEventArgs MakeWarningEventArgs(string warning, string? link = null, string? keyword = null)
+        private BuildWarningEventArgs MakeWarningEventArgs(string warning, string? link = null, string? keyword = null, BuildEventContext? buildEventContext = null)
         {
             return new BuildWarningEventArgs(subcategory: null, code: "AA0000", file: "directory/file", lineNumber: 1, columnNumber: 2, endLineNumber: 3, endColumnNumber: 4, message: warning, helpKeyword: keyword, helpLink: link, senderName: null, eventTimestamp: DateTime.UtcNow)
             {
-                BuildEventContext = MakeBuildEventContext(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
             };
         }
 
@@ -285,17 +375,19 @@ namespace Microsoft.Build.UnitTests
 
         #region Build summary tests
 
-        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action additionalCallbacks, string? projectFile = null)
+        private void InvokeLoggerCallbacksForSimpleProject(bool succeeded, Action? additionalCallbacks = null, string? projectFile = null, List<(string, string)>? properties = null)
         {
             projectFile ??= _projectFile;
 
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile, properties: properties));
+
             ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile));
 
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFile, "Build"));
             TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFile, "Task"));
 
-            additionalCallbacks();
+            additionalCallbacks?.Invoke();
 
             TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(projectFile, "Task", succeeded));
             TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "Build", succeeded));
@@ -304,9 +396,21 @@ namespace Microsoft.Build.UnitTests
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
 
+        private ProjectEvaluationFinishedEventArgs MakeProjectEvalFinishedArgs(string projectFile, List<(string, string)>? properties = null, List<(string, string)>? items = null, BuildEventContext? buildEventContext = null)
+        {
+            return new ProjectEvaluationFinishedEventArgs
+            {
+                ProjectFile = projectFile,
+                Properties = properties?.ToDictionary(k => k.Item1, v => v.Item2) ?? new Dictionary<string, string>(),
+                Items = items?.Select(kvp => new DictionaryEntry(kvp.Item1, kvp.Item2)).ToList() ?? new List<DictionaryEntry>(),
+                BuildEventContext = buildEventContext ?? MakeBuildEventContext(),
+            };
+        }
+
         private void InvokeLoggerCallbacksForTestProject(bool succeeded, Action additionalCallbacks)
         {
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile));
             ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
 
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "_TestRunStart"));
@@ -325,26 +429,29 @@ namespace Microsoft.Build.UnitTests
         private void InvokeLoggerCallbacksForTwoProjects(bool succeeded, Action additionalCallbacks, Action additionalCallbacks2)
         {
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
-
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build1"));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task1"));
+            var p1BuildContext = MakeBuildEventContext(evalId: 1, projectContextId: 1);
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: p1BuildContext));
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, buildEventContext: p1BuildContext));
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build1", buildEventContext: p1BuildContext));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task1", buildEventContext: p1BuildContext));
 
             additionalCallbacks();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task1", succeeded));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build1", succeeded));
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task1", succeeded, buildEventContext: p1BuildContext));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build1", succeeded, buildEventContext: p1BuildContext));
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded, buildEventContext: p1BuildContext));
 
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile2));
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile2, "Build2"));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile2, "Task2"));
+            var p2BuildContext = MakeBuildEventContext(evalId: 2, projectContextId: 2);
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile2, buildEventContext: p2BuildContext));
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile2, buildEventContext: p2BuildContext));
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile2, "Build2", buildEventContext: p2BuildContext));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile2, "Task2", buildEventContext: p2BuildContext));
 
             additionalCallbacks2();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile2, "Task2", succeeded));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile2, "Build2", succeeded));
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile2, succeeded));
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile2, "Task2", succeeded, buildEventContext: p2BuildContext));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile2, "Build2", succeeded, buildEventContext: p2BuildContext));
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile2, succeeded, buildEventContext: p2BuildContext));
 
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
@@ -507,17 +614,19 @@ namespace Microsoft.Build.UnitTests
                 succeeded: false,
                 () =>
                 {
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning1!"));
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning2!"));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error1!"));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error2!"));
+                    var p1Context = MakeBuildEventContext(evalId: 1, projectContextId: 1);
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning1!", buildEventContext: p1Context));
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning2!", buildEventContext: p1Context));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error1!", buildEventContext: p1Context));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error2!", buildEventContext: p1Context));
                 },
                 () =>
                 {
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning3!"));
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning4!"));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error3!"));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error4!"));
+                    var p2Context = MakeBuildEventContext(evalId: 2, projectContextId: 2);
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning3!", buildEventContext: p2Context));
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning4!", buildEventContext: p2Context));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error3!", buildEventContext: p2Context));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error4!", buildEventContext: p2Context));
                 });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -526,16 +635,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintProjectOutputDirectoryLink()
         {
-            // Send message in order to set project output path
-            BuildMessageEventArgs e = MakeMessageEventArgs(
-                    $"㐇𠁠𪨰𫠊𫦠𮚮⿕ -> {_projectFileWithNonAnsiSymbols.Replace("proj", "dll")}",
-                    MessageImportance.High);
-            e.ProjectFile = _projectFileWithNonAnsiSymbols;
-
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
-            {
-                MessageRaised?.Invoke(_eventSender, e);
-            }, _projectFileWithNonAnsiSymbols);
+            InvokeLoggerCallbacksForSimpleProject(
+                succeeded: true,
+                properties: [("OutputType", "Library")],
+                projectFile: _projectFileWithNonAnsiSymbols,
+                additionalCallbacks: () =>
+                {
+                    SynthesizeBuildOutputForLibraryProject(_projectFileWithNonAnsiSymbols);
+                });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -732,25 +839,22 @@ namespace Microsoft.Build.UnitTests
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
         {
             BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tfName")]));
 
-            ProjectStartedEventArgs pse = MakeProjectStartedEventArgs(_projectFile, "Build");
-            pse.GlobalProperties = new Dictionary<string, string>() { ["TargetFramework"] = "tfName" };
-
-            ProjectStarted?.Invoke(_eventSender, pse);
-
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
             TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
             TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
 
             _terminallogger.DisplayNodes();
 
-            // This is a bit fast and loose with the events that would be fired
-            // in a real "stop building that TF for the project and start building
-            // a new TF of the same project" situation, but it's enough now.
-            ProjectStartedEventArgs pse2 = MakeProjectStartedEventArgs(_projectFile, "Build");
-            pse2.GlobalProperties = new Dictionary<string, string>() { ["TargetFramework"] = "tf2" };
+            // force the current node to stop building and 'yield'
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "MSBuild"));
 
-            ProjectStarted?.Invoke(_eventSender, pse2);
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
+            // now create a new project with a different target framework that runs on the same node
+            var buildContext2 = MakeBuildEventContext(evalId: 2, projectContextId: 2);
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tf2")], buildEventContext: buildContext2));
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, buildEventContext: buildContext2));
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
 
             _terminallogger.DisplayNodes();
 
@@ -845,7 +949,7 @@ namespace Microsoft.Build.UnitTests
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
-        
+
         [Fact]
         public async Task PrintErrorLinks()
         {
@@ -858,6 +962,108 @@ namespace Microsoft.Build.UnitTests
             });
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectFinishedReportsRuntimeIdentifier()
+        {
+            // this project will report a RID and so will show a RID in the build output
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("RuntimeIdentifier", "win-x64"), ("OutputType", "Library")], additionalCallbacks: () =>
+            {
+                SynthesizeBuildOutputForLibraryProject(_projectFile);
+            });
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectFinishedReportsTargetFrameworkAndRuntimeIdentifier()
+        {
+            // this project will report a TFM and a RID and so will show a both in the output
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64"), ("OutputType", "Library")], additionalCallbacks: () =>
+            {
+                SynthesizeBuildOutputForLibraryProject(_projectFile);
+            });
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectFinishedReportsTargetFrameworkAndRuntimeIdentifierForExe()
+        {
+            // this project will report a TFM and a RID and so will show a both in the output
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64"), ("OutputType", "Exe")], additionalCallbacks: () =>
+            {
+                SynthesizeBuildOutputForExecutableProject(_projectFile);
+            });
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectThatPackagesEmitsSinglePackageOutput()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPackagingProject(succeeded: true, numberOfPackages: 1);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ProjectThatPackagesNPackagesEmitsMultiplePackageOutputs()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPackagingProject(succeeded: true, numberOfPackages: 10);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task ExecutableProjectThatHasPublishOutputEmitsPublishExe()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPublishingProject(succeeded: true, isExecutable: true, properties: [("OutputType", "Exe")]);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public async Task LibraryProjectThatHasPublishOutputEmitsPublishDll()
+        {
+            // this test will set up a single project that publishes a single package
+            InvokeLoggerCallbacksForPublishingProject(succeeded: true, isExecutable: false, properties: [("OutputType", "Library")]);
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        private void InvokeLoggerCallbacksForPackagingProject(bool succeeded, int numberOfPackages = 1, string? projectFile = null, List<(string, string)>? properties = null)
+        {
+            projectFile ??= _projectFile;
+
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile, properties: properties));
+
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile, targetNames: ["Pack"]));
+
+            var packageRootDir = Path.Combine(Path.GetDirectoryName(projectFile)!, "bin", "Release");
+            List<string> packageOutputPaths =
+                numberOfPackages == 1
+                 ? [Path.Combine(packageRootDir, Path.GetFileNameWithoutExtension(projectFile) + ".nupkg")]
+                 : [.. Enumerable.Range(0, numberOfPackages).Select(i => Path.Combine(packageRootDir, $"{Path.GetFileNameWithoutExtension(projectFile)}{i}.nupkg"))];
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "GenerateNuspec", succeeded: true, targetOutputs: packageOutputPaths));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+        }
+        
+        private void InvokeLoggerCallbacksForPublishingProject(bool succeeded, string? projectFile = null, bool isExecutable = false, List<(string, string)>? properties = null)
+        {
+            projectFile ??= _projectFile;
+
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile, properties: properties));
+
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile, targetNames: ["Publish"]));
+
+            var projectOutputRoot = Path.Combine(Path.GetDirectoryName(projectFile)!, "bin", "Release");
+            var publishOutputPath = Path.Combine(projectOutputRoot, Path.GetFileNameWithoutExtension(projectFile) + (isExecutable ? _exeSuffix : ".dll"));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "PublishItemsOutputGroup", succeeded: true, targetOutputs: [publishOutputPath]));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
     }
 }
