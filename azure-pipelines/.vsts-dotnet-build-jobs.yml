@@ -195,25 +195,6 @@ jobs:
       artifactName: bin
     condition: succeededOrFailed()
 
-  # Publish Asset Manifests for Build Asset Registry job
-  - task: 1ES.PublishBuildArtifacts@1
-    displayName: Publish Asset Manifests
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
-      ArtifactName: AssetManifests
-    condition: succeeded()
-
-  # Tag the build at the very end when we know it's been successful.
-  - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
-    displayName: Tag build as ready for optimization training
-    inputs:
-      tags: 'ready-for-training'
-    condition: succeeded()
-
-  - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
-    displayName: Execute cleanup tasks
-    condition: succeededOrFailed()
-
   # Publish "IntelliSense" XSD files to their own artifact
   # so it can be consumed by the insertion-to-VS job
   - task: 1ES.PublishPipelineArtifact@1
@@ -248,32 +229,3 @@ jobs:
       parameters:
         disableComponentGovernance: false
 
-- template: /eng/common/templates-official/jobs/source-build.yml@self
-  parameters:
-    platforms:
-      - name: Managed
-        pool:
-          name: AzurePipelines-EO
-          image: 1ESPT-Ubuntu22.04
-          os: linux
-
-- template: /eng/common/templates-official/job/publish-build-assets.yml@self
-  parameters:
-    enablePublishBuildArtifacts: true
-    publishUsingPipelines: true
-    dependsOn:
-      - Windows_NT
-      - Source_Build_Managed
-    pool:
-      name: AzurePipelines-EO
-      image: 1ESPT-Windows2022
-      os: windows
-
-- template: /eng/common/templates-official/post-build/post-build.yml@self
-  parameters:
-    publishingInfraVersion: 3
-    enableSymbolValidation: true
-    enableSourceLinkValidation: false
-    enableNugetValidation: false
-    requireDefaultChannels: ${{ variables.requireDefaultChannels }}
-    enableSigningValidation: ${{ variables.enableSigningValidation }}

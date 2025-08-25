@@ -131,6 +131,27 @@ extends:
           enableComponentGovernance: true
           enableSigningValidation: true
 
+      - template: /eng/common/templates-official/jobs/source-build.yml@self
+        parameters:
+          platforms:
+            - name: Managed
+              pool:
+                name: AzurePipelines-EO
+                image: 1ESPT-Ubuntu22.04
+                os: linux
+
+      - template: /eng/common/templates-official/job/publish-build-assets.yml@self
+        parameters:
+          enablePublishBuildArtifacts: true
+          publishUsingPipelines: true
+          dependsOn:
+            - Windows_NT
+            - Source_Build_Managed
+          pool:
+            name: AzurePipelines-EO
+            image: 1ESPT-Windows2022
+            os: windows
+
     - template: eng\common\templates-official\post-build\post-build.yml@self
       parameters:
         publishingInfraVersion: 3
