@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Threading;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -12,6 +14,9 @@ namespace Microsoft.Build.Framework.Telemetry
     /// </summary>
     internal class BuildTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     {
+        // used as a flag to indicate whether the project entry point has been set.
+        private int _projectEntryPointSet;
+
         public override string EventName => "build";
 
         /// <summary>
@@ -45,7 +50,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Build Target.
         /// </summary>
-        public string? BuildTarget { get; set; }
+        public string? BuildTarget { get; private set; }
 
         /// <summary>
         /// MSBuild server fallback reason.
@@ -66,7 +71,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Path to project file.
         /// </summary>
-        public string? ProjectPath { get; set; }
+        public string? ProjectPath { get; private set; }
 
         /// <summary>
         /// Host in which MSBuild build was executed.
@@ -217,6 +222,24 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             return telemetryItems;
+        }
+
+        /// <summary>
+        /// Sets the <see cref="ProjectPath"/> and <see cref="BuildTarget"/> for the build telemetry as an atomic operation.
+        /// </summary>
+        /// <param name="entryProjectsFullPath">The collection of entry points.</param>
+        /// <param name="targetNames">The collection of target names.</param>
+        public void SetProjectEntryPoint(IEnumerable<string> entryProjectsFullPath, IEnumerable<string> targetNames)
+        {
+            // this check is to ensure that we only set the entry point once. The entryPointSet field is set to 0
+            // until the first call to this method, and then it is set to 1 atomically. The return value of CompareExchange
+            // will be 0 if this is the first call, and 1 if it has already been set.
+            int entryPointSet = Interlocked.CompareExchange(ref _projectEntryPointSet, 1, 0);
+            if (entryPointSet == 0)
+            {
+                ProjectPath = entryProjectsFullPath.FirstOrDefault();
+                BuildTarget = string.Join(",", targetNames);
+            }
         }
     }
 }
