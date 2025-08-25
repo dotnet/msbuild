@@ -16,6 +16,7 @@ using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
+using Xunit.Abstractions;
 using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.UnitTests
@@ -49,9 +50,11 @@ namespace Microsoft.Build.UnitTests
         private VerifySettings _settings = new();
 
         private readonly CultureInfo _originalCulture = Thread.CurrentThread.CurrentCulture;
+        private readonly ITestOutputHelper _outputHelper;
 
-        public TerminalLogger_Tests()
+        public TerminalLogger_Tests(ITestOutputHelper outputHelper)
         {
+            _outputHelper = outputHelper;
             _mockTerminal = new Terminal(_outputWriter);
             _terminallogger = new TerminalLogger(_mockTerminal);
 
@@ -593,6 +596,23 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public Task LogEvaluationErrorFromEngine()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Normal;
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                ErrorRaised?.Invoke(_eventSender, new BuildErrorEventArgs(
+                    "MSB0001", "EvaluationError", "MSBUILD", 0, 0, 0, 0,
+                    "An error occurred during evaluation.", null, null)
+                {
+                    BuildEventContext = new BuildEventContext(1, -1, -1, -1) // context that belongs to no project
+                });
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
         public Task PrintBuildSummaryNormalVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
@@ -782,11 +802,11 @@ namespace Microsoft.Build.UnitTests
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
 
                 // Execute MSBuild with binary, file and terminal loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Execute MSBuild with binary and file loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Read the binary log and replay into mockLogger

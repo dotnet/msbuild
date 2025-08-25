@@ -268,6 +268,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         private Encoding _encoding = new UTF8Encoding(false);
 #endif
+
         /// <summary>
         /// File logger parameters delimiters.
         /// </summary>
