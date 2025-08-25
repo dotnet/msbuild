@@ -361,8 +361,11 @@ namespace Microsoft.Build.Evaluation
                 _loggerMode = useAsynchronousLogging ? LoggerMode.Asynchronous : LoggerMode.Synchronous;
                 CreateLoggingService(maxNodeCount, onlyLogCriticalEvents, enableTargetOutputLogging);
 
-                RegisterLoggers(loggers);
-                RegisterForwardingLoggers(remoteLoggers);
+                if (loadProjectsReadOnly)
+                {
+                    RegisterLoggers(loggers);
+                    RegisterForwardingLoggers(remoteLoggers);
+                }
 
                 if (globalProperties != null)
                 {
