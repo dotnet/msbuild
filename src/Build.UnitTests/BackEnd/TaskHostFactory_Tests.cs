@@ -115,7 +115,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// can coexist in the same build and operate independently.
         /// </summary>
         [Fact]
-        public void TransientandSidecarNodeCanCoexist()
+        public void TransientAndSidecarNodeCanCoexist()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
@@ -179,6 +179,82 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                         e.Message.ShouldNotBe($"Process with an Id of {pidSidecar} is not running");
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Verifies that node reuse is disabled when using CLR2 runtime.
+        /// </summary>
+        [Fact]
+        public void NodeReuseDisabledForCLR2Runtime()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                using ProcessTracker processTracker = new();
+                {
+                    string clr2TaskProject = $@"
+<Project>
+<UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""TaskHostFactory"" 
+           Runtime=""CLR2"" Architecture=""MSBuildArchitecture"" />
+<Target Name='TestCLR2NodeReuse'>
+    <!-- First task execution -->
+    <ProcessIdTask>
+        <Output PropertyName=""PID1"" TaskParameter=""Pid"" />
+    </ProcessIdTask>
+    <!-- Second task execution - should get new process due to CLR2 -->
+    <ProcessIdTask>
+        <Output PropertyName=""PID2"" TaskParameter=""Pid"" />
+    </ProcessIdTask>
+</Target>
+</Project>";
+
+                    TransientTestFile project = env.CreateFile("clr2Project.csproj", clr2TaskProject);
+
+                    // Enable node reuse globally and force out-of-proc execution
+                    env.SetEnvironmentVariable("MSBUILDENABLENODEREUSE", "1");
+                    env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+
+                    ProjectInstance projectInstance = new(project.Path);
+                    projectInstance.Build().ShouldBeTrue();
+
+                    string firstPid = projectInstance.GetPropertyValue("PID1");
+                    string secondPid = projectInstance.GetPropertyValue("PID2");
+
+                    // Verify both PIDs are valid
+                    string.IsNullOrEmpty(firstPid).ShouldBeFalse("First task should have executed in out-of-proc node");
+                    string.IsNullOrEmpty(secondPid).ShouldBeFalse("Second task should have executed in out-of-proc node");
+
+                    Int32.TryParse(firstPid, out int pid1).ShouldBeTrue();
+                    Int32.TryParse(secondPid, out int pid2).ShouldBeTrue();
+
+                    // CLR2 should prevent node reuse - each task gets its own process
+                    pid1.ShouldNotBe(pid2, "CLR2 runtime should prevent node reuse, creating separate processes for each task");
+
+                    // Both processes should be different from the main MSBuild process
+                    Process.GetCurrentProcess().Id.ShouldNotBe(pid1);
+                    Process.GetCurrentProcess().Id.ShouldNotBe(pid2);
+
+                    // Verify that both task host processes exit quickly (transient behavior)
+                    VerifyTransientTaskHostExit(pid1, "First CLR2 task host");
+                    VerifyTransientTaskHostExit(pid2, "Second CLR2 task host");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Helper method to verify that a task host process exits quickly (transient behavior).
+        /// </summary>
+        private void VerifyTransientTaskHostExit(int pid, string processDescription)
+        {
+            try
+            {
+                Process taskHostProcess = Process.GetProcessById(pid);
+                taskHostProcess.WaitForExit(3000).ShouldBeTrue($"{processDescription} should exit quickly due to no node reuse");
+            }
+            catch (ArgumentException e)
+            {
+                // Expected behavior - process may exit before we can attach to it
+                e.Message.ShouldBe($"Process with an Id of {pid} is not running.");
             }
         }
 

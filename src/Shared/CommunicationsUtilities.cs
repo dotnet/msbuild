@@ -186,7 +186,7 @@ namespace Microsoft.Build.Internal
         {
         }
 
-        // Helper method to validate handshake option presense.
+        // Helper method to validate handshake option presence
         internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
 
         // Source options of the handshake.
