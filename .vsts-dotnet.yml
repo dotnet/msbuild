@@ -22,6 +22,10 @@ parameters:
   displayName: Require Default Channels
   type: boolean
   default: true
+- name: enableSigningValidation
+  displayName: Enable Signing Validation
+  type: boolean
+  default: true
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -134,4 +138,4 @@ extends:
         enableSourceLinkValidation: false
         enableNugetValidation: false
         requireDefaultChannels: ${{ parameters.requireDefaultChannelsEnabled }}
-        enableSigningValidation: true
+        enableSigningValidation: ${{ parameters.enableSigningValidation }}
