@@ -29,7 +29,7 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Item class type to store</typeparam>
     [DebuggerDisplay("#Item types={ItemTypes.Count} #Items={Count}")]
-    internal sealed class ItemDictionary<T> : IItemDictionary<T>
+    internal sealed class ItemDictionary<T> : ICollection<T>, IItemDictionary<T>
         where T : class, IKeyed, IItem
     {
         /// <summary>
@@ -121,6 +121,8 @@ namespace Microsoft.Build.Collections
                 }
             }
         }
+
+        public bool IsReadOnly => false;
 
         /// <summary>
         /// Returns the item list for a particular item type,
@@ -431,6 +433,20 @@ namespace Microsoft.Build.Collections
 
             LinkedListNode<T> node = list.AddLast(projectItem);
             _nodes.Add(projectItem, node);
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            if (Count > array.Length - arrayIndex)
+            {
+                throw new ArgumentException(nameof(array));
+            }
+
+            foreach (T item in this)
+            {
+                array[arrayIndex] = item;
+                ++arrayIndex;
+            }
         }
 
         /// <summary>
