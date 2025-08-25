@@ -33,6 +33,8 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         private readonly VerifySettings _verifySettings;
 
+        private static string TestResourcesRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(RoslynCodeTaskFactory_Tests).Assembly.Location) ?? AppContext.BaseDirectory), "TestResources");
+
         public RoslynCodeTaskFactory_Tests()
         {
             UseProjectRelativeDirectory("TaskFactorySource");
@@ -224,6 +226,95 @@ Log.LogError(Class1.ToPrint());
                 expectedCodeLanguage: "VB",
                 verifySource: true,
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Fragment);
+        }
+
+        [Fact]
+        public void RoslynCodeTaskFactoryWithoutCS1702Warning()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile taskFile = env.CreateFile(folder, "SampleTask.cs", @"
+                using Microsoft.Build.Framework;
+                using Microsoft.Build.Utilities;
+                using System;
+                using System.Collections.Generic;
+                using System.Diagnostics;
+                using System.IO;
+                using System.Text.Json;
+
+                namespace VisionAid.Build;
+
+                public sealed class License
+                {
+                    public enum LicenseType
+                    {
+                        File,
+                        URL
+                    }
+
+                    public string ProjectName { get; set; }
+                    public LicenseType Type { get; set; }
+                    public string LicensePath { get; set; }
+                }
+
+                /// <summary>
+                /// Creates an HTML document for the 3rd-party libraries used by the project
+                /// </summary>
+                public sealed class SampleTask : Microsoft.Build.Utilities.Task
+                {
+
+                    [Required]
+                    public string InputFileName { get; set; }
+
+                    public override bool Execute()
+                    {
+                        using FileStream stream = File.OpenRead(InputFileName);
+                        var stuff = JsonSerializer.Deserialize<IList<License>>(stream);
+                        return true;
+                    }
+                }
+
+                ");
+                TransientTestFile inputFile = env.CreateFile(folder, "Test.json", "{}");
+
+                string testResourcesNugetPath = Path.Combine(TestResourcesRootPath, "Nuget");
+                string memoryLibPath = Path.Combine(testResourcesNugetPath, "system.memory", "4.6.3", "lib", "netstandard2.0", "System.Memory.dll");
+                string jsonLibPath = Path.Combine(testResourcesNugetPath, "system.text.json", "9.0.7", "lib", "netstandard2.0", "System.Text.Json.dll");
+
+                TransientTestFile projectFile = env.CreateFile(folder, "NoCS1702.proj", @$"
+                <Project DefaultTargets=""Build"" ToolsVersion=""Current"">
+                  <PropertyGroup>
+                    <NuGetDir>{folder.Path}</NuGetDir>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <PackageReference Include=""System.Memory"" Version=""4.6.3"" />
+                    <PackageReference Include=""System.Text.Json"" Version=""9.0.7"" />
+                  </ItemGroup>
+
+                  <UsingTask TaskName=""SampleTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+                    <ParameterGroup>
+                      <InputFileName ParameterType=""System.String"" Required=""true"" />
+                    </ParameterGroup>
+                    <Task>
+                      <Reference Include=""{memoryLibPath}"" />
+                      <Reference Include=""{jsonLibPath}"" />
+                      <Using Namespace=""System"" />
+                      <Code Type=""Class"" Language=""cs"" Source=""{taskFile.Path}"" />
+                    </Task>
+                  </UsingTask>
+
+                  <Target Name=""Build"" Inputs=""Test.json"" Outputs=""$(OutputPath)\TestTask.output"">
+                    <SampleTask InputFileName=""Test.json"" />
+                  </Target>
+                </Project>
+                ");
+
+                string output = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:d", out bool success);
+                output.ShouldNotContain("warning CS1702");
+            }
         }
 
         [Fact]
