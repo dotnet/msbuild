@@ -17,7 +17,7 @@ parameters:
 - name: requireDefaultChannelsEnabled
   displayName: Require Default Channels
   type: boolean
-  default: true
+  default: false
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
