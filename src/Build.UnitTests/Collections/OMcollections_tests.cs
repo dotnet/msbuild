@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             Assert.Empty(list);
 
             // Cause an empty list for type 'x' to be added
-            ICollection<ProjectItemInstance> itemList = items["x"];
+            IReadOnlyCollection<ProjectItemInstance> itemList = items["x"];
 
             // Enumerate empty collection, with an empty list in it
             foreach (ProjectItemInstance item in items)
