@@ -279,7 +279,7 @@ namespace Microsoft.Build.Evaluation
 
             isItemListExpression = true;
 
-            return new ItemExpressionFragment(capture, expression, this, projectDirectory);
+            return new ItemExpressionFragment(capture.Value, expression, this, projectDirectory);
         }
 
         /// <summary>
