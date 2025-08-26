@@ -14,7 +14,7 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a collection of persisted &lt;PropertyGroup&gt;'s.  Each
     /// MSBuild project has exactly one BuildPropertyGroupCollection, which includes
     /// all the imported PropertyGroups as well as the ones in the main project file.
-    /// 
+    ///
     /// The implementation of this class is that it's basically a Facade.  It just
     /// calls into the GroupingCollection within the Project to do it's work.  It
     /// doesn't maintain any BuildPropertyGroup state on its own.
@@ -113,8 +113,8 @@ namespace Microsoft.Build.BuildEngine
                 {
                     if (propertyGroup.IsImported)
                     {
-                        // As soon as we hit an imported BuildPropertyGroup, we want to 
-                        // completely bail out.  The goal of this function is 
+                        // As soon as we hit an imported BuildPropertyGroup, we want to
+                        // completely bail out.  The goal of this function is
                         // to return the last BuildPropertyGroup that is *before* any
                         // imported PropertyGroups.
                         break;
@@ -134,7 +134,7 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// This ICollection method copies the contents of this collection to an 
+        /// This ICollection method copies the contents of this collection to an
         /// array.
         /// </summary>
         /// <owner>RGoel</owner>

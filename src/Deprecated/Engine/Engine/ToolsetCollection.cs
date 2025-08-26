@@ -21,14 +21,14 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     public class ToolsetCollection : ICollection<Toolset>
     {
-        // the parent engine 
+        // the parent engine
         private Engine parentEngine = null;
 
         // underlying map keyed off toolsVersion
         private Dictionary<string, Toolset> toolsetMap = null;
 
         /// <summary>
-        /// Private default Ctor. Other classes should not be constructing 
+        /// Private default Ctor. Other classes should not be constructing
         /// instances of this class without providing an Engine object.
         /// </summary>
         private ToolsetCollection()

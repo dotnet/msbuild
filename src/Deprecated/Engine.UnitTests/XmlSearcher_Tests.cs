@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests
             // Correct answer is:
             //      Line Number 9
             //      Column Number 5
-            GetLineColumnFromProjectFileContentsHelper(projectFileContents, 
+            GetLineColumnFromProjectFileContentsHelper(projectFileContents,
                 7, 0, out foundLineNumber, out foundColumnNumber);
             Assertion.AssertEquals(9, foundLineNumber);
             Assertion.AssertEquals(5, foundColumnNumber);
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests
             //      Line Number 6
             //      Column Number 19
             // This is because the text node actually begins immediately after the closing ">" in "<WarningLevel>".
-            GetLineColumnFromProjectFileContentsHelper(projectFileContents, 
+            GetLineColumnFromProjectFileContentsHelper(projectFileContents,
                 6, 0, out foundLineNumber, out foundColumnNumber);
             Assertion.AssertEquals(6, foundLineNumber);
             Assertion.AssertEquals(19, foundColumnNumber);
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests
             // Correct answer is:
             //      Line Number 4
             //      Column Number 18
-            GetLineColumnFromProjectFileContentsHelper(projectFileContents, 
+            GetLineColumnFromProjectFileContentsHelper(projectFileContents,
                 2, 2, out foundLineNumber, out foundColumnNumber);
             Assertion.AssertEquals(4, foundLineNumber);
             Assertion.AssertEquals(18, foundColumnNumber);
@@ -177,19 +177,19 @@ namespace Microsoft.Build.UnitTests
             // Correct answer is:
             //      Line Number 9
             //      Column Number 17
-            GetLineColumnFromProjectFileContentsHelper(projectFileContents, 
+            GetLineColumnFromProjectFileContentsHelper(projectFileContents,
                 8, 0, out foundLineNumber, out foundColumnNumber);
             Assertion.AssertEquals(9, foundLineNumber);
             Assertion.AssertEquals(17, foundColumnNumber);
 
             // Let's try passing in a bogus element number.
-            GetLineColumnFromProjectFileContentsHelper(projectFileContents, 
+            GetLineColumnFromProjectFileContentsHelper(projectFileContents,
                 25, 0, out foundLineNumber, out foundColumnNumber);
             Assertion.AssertEquals(0, foundLineNumber);
             Assertion.AssertEquals(0, foundColumnNumber);
 
             // And let's try passing in a bogus attribute number.
-            GetLineColumnFromProjectFileContentsHelper(projectFileContents, 
+            GetLineColumnFromProjectFileContentsHelper(projectFileContents,
                 7, 4, out foundLineNumber, out foundColumnNumber);
             Assertion.AssertEquals(0, foundLineNumber);
             Assertion.AssertEquals(0, foundColumnNumber);
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Given a string representing the contents of the project file, create a project file
-        /// on disk with those contents.  Then call the method to find the line/column number of 
+        /// on disk with those contents.  Then call the method to find the line/column number of
         /// a particular node in the project file, based on the element/attribute number of that node.
         /// </summary>
         /// <param name="projectFileContents"></param>
@@ -214,8 +214,8 @@ namespace Microsoft.Build.UnitTests
         {
             string projectFile = ObjectModelHelpers.CreateTempFileOnDisk(projectFileContents);
 
-            XmlSearcher.GetLineColumnByNodeNumber(projectFile, 
-                xmlElementNumberToSearchFor, xmlAttributeNumberToSearchFor, 
+            XmlSearcher.GetLineColumnByNodeNumber(projectFile,
+                xmlElementNumberToSearchFor, xmlAttributeNumberToSearchFor,
                 out foundLineNumber, out foundColumnNumber);
 
             // Delete the temp file.

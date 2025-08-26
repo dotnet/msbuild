@@ -26,10 +26,10 @@ namespace Microsoft.Build.UnitTests
         /***********************************************************************
          * Test:            SetGetHostObjectInProject
          * Owner:           RGoel
-         * 
-         * Slightly more advanced unit test that loads a real project, finds the 
+         *
+         * Slightly more advanced unit test that loads a real project, finds the
          * appropriate task, and sets the host object for it.
-         * 
+         *
          **********************************************************************/
         [Test]
         public void SetGetHostObjectInProject()
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
                         <MakeDir Directories=`c:\rajeev` />
                         <Csc Sources=`foo.cs` />
                     </Target>
-                
+
                 </Project>
                 ";
 

@@ -29,10 +29,10 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void SerializeDeserialize()
         {
-            InternalLoggerException e = new InternalLoggerException("message", 
-                new Exception("innerException"), 
-                new BuildStartedEventArgs("evMessage", "evHelpKeyword"), 
-                "errorCode", 
+            InternalLoggerException e = new InternalLoggerException("message",
+                new Exception("innerException"),
+                new BuildStartedEventArgs("evMessage", "evHelpKeyword"),
+                "errorCode",
                 "helpKeyword",
                 false);
 

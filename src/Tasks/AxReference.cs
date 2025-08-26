@@ -13,7 +13,7 @@ namespace Microsoft.Build.Tasks
 {
     /*
      * Class:   AxReference
-     * 
+     *
      * COM reference wrapper class for the ActiveX controls.
      *
      */

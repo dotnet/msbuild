@@ -23,12 +23,10 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
     private readonly TestEnvironment _env;
 
     private readonly string _cmd;
-    private readonly ITestOutputHelper _output;
 
     public TerminalLoggerConfiguration_Tests(ITestOutputHelper output)
     {
         _env = TestEnvironment.Create(output);
-        _output = output;
 
         // Ignore environment variables that may have been set by the environment where the tests are running.
         _env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
@@ -72,8 +70,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -103,8 +100,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -112,7 +108,6 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         // Test if there is ANSI clear screen sequence, which shall only occur when the terminal logger was enabled.
         ShouldNotBeTerminalLog(output);
     }
-
 
     [Fact]
     public void TerminalLoggerDefaultByEnv()
@@ -132,8 +127,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -162,8 +156,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -191,8 +184,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -218,12 +210,11 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             TerminalLoggerUserIntentSource = null,
             ConsoleLogger = true,
             ConsoleLoggerVerbosity = "minimal",
-            ConsoleLoggerType = "parallel", 
+            ConsoleLoggerType = "parallel",
             FileLogger = false,
         };
 
-        expectedTelemetry.UpdateEventProperties();
-        foreach (KeyValuePair<string, string> pair in expectedTelemetry.Properties)
+        foreach (KeyValuePair<string, string> pair in expectedTelemetry.GetProperties())
         {
             output.ShouldContain($"{expectedTelemetry.EventName}:{pair.Key}={pair.Value}");
         }
@@ -232,6 +223,23 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
         ShouldNotBeTerminalLog(output);
     }
 
+    [Theory]
+    [InlineData("1")]
+    [InlineData("0")]
+    public void TerminalLoggerOnInvalidProjectBuild(string msbuildinprocnodeState)
+    {
+        _ = _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", msbuildinprocnodeState);
+
+        string output = RunnerUtilities.ExecMSBuild(
+            $"{_cmd} -tl:true",
+            out bool success);
+
+        success.ShouldBeTrue();
+        ShouldBeTerminalLog(output);
+        output.ShouldContain("Build succeeded.");
+    }
+
     private static void ShouldBeTerminalLog(string output) => output.ShouldContain("\x1b[?25l");
+
     private static void ShouldNotBeTerminalLog(string output) => output.ShouldNotContain("\x1b[?25l");
 }

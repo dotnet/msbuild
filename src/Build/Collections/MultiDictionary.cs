@@ -26,12 +26,12 @@ namespace Microsoft.Build.Collections
         where K : class
         where V : class
     {
-        // The simplest implementation of MultiDictionary would use a Dictionary<K, List<V>>. 
+        // The simplest implementation of MultiDictionary would use a Dictionary<K, List<V>>.
         // However, a List<T> with one element is 44 bytes (empty, 24 bytes)
         // even though a single Object takes up only 12 bytes.
         // If most values are only one element, we can save space by storing Object
         // and using its implicit type field to discriminate.
-        // 
+        //
         // Experiments, using a large number of keys:
         //
         // Dictionary<string,List<object>>, each key with one item, 127 bytes/key
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Collections
         // MultiDictionary<string, object>, each key with 2 items, 139 bytes/key
         //
         // Savings for 10,000 objects with 1.01 per entry is 420Kb out of 1.2Mb
-        // If keys and values are already allocated (e.g., strings in use elsewhere) then this is 
+        // If keys and values are already allocated (e.g., strings in use elsewhere) then this is
         // the complete cost of the collection.
 
         /// <summary>

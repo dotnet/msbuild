@@ -116,12 +116,12 @@ namespace Microsoft.Build.Framework
         public string TaskName => taskName;
 
         /// <summary>
-        /// Project file associated with event.   
+        /// Project file associated with event.
         /// </summary>
         public string ProjectFile => projectFile;
 
         /// <summary>
-        /// MSBuild file where this task was defined.   
+        /// MSBuild file where this task was defined.
         /// </summary>
         public string TaskFile => taskFile;
 

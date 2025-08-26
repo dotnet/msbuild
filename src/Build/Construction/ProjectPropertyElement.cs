@@ -14,7 +14,7 @@ namespace Microsoft.Build.Construction
     /// ProjectPropertyElement class represents the Property element in the MSBuild project.
     /// </summary>
     /// <remarks>
-    /// We do not need to use or set the PropertyType enumeration in the CM. 
+    /// We do not need to use or set the PropertyType enumeration in the CM.
     /// The CM does not know about Environment or Global properties, and does not create Output properties.
     /// We can just verify that we haven't read a PropertyType.Reserved property ourselves.
     /// So the CM only represents Normal properties.
@@ -59,7 +59,7 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Gets or sets the unevaluated value. 
+        /// Gets or sets the unevaluated value.
         /// Returns empty string if it is not present.
         /// </summary>
         public string Value
