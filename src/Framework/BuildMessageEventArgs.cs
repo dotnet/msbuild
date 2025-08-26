@@ -14,28 +14,6 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This enumeration provides three levels of importance for messages.
-    /// </summary>
-    [Serializable]
-    public enum MessageImportance
-    {
-        /// <summary>
-        /// High importance, appears in less verbose logs
-        /// </summary>
-        High,
-
-        /// <summary>
-        /// Normal importance
-        /// </summary>
-        Normal,
-
-        /// <summary>
-        /// Low importance, appears in more verbose logs
-        /// </summary>
-        Low
-    }
-
-    /// <summary>
     /// Arguments for message events
     /// </summary>
     // WARNING: marking a type [Serializable] without implementing

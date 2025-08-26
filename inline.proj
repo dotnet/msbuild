@@ -1,0 +1,56 @@
+<Project DefaultTargets="Build" ToolsVersion="Current">
+  <PropertyGroup>
+    <NugetPackageRoot>Q:\.tools\.nuget\packages\</NugetPackageRoot>
+    <NoWarn></NoWarn> 
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
+  <UsingTask TaskName="CustomRoslynTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <!-- <Reference Include="$(NugetPackageRoot)\microsoft.bcl.asyncinterfaces\9.0.4\lib\netstandard2.0\Microsoft.Bcl.AsyncInterfaces.dll" /> -->
+      <Reference Include="$(NugetPackageRoot)\system.memory\4.6.3\lib\netstandard2.0\System.Memory.dll" />
+      <Reference Include="$(NugetPackageRoot)\system.text.encodings.web\9.0.4\lib\netstandard2.0\System.Text.Encodings.Web.dll" />
+      <Reference Include="$(NugetPackageRoot)\system.text.json\9.0.4\lib\netstandard2.0\System.Text.Json.dll" />
+      <Code Type="Class" Language="cs"><![CDATA[
+        using System;
+        using System.Text.Json;
+        using System.Buffers;
+        using Microsoft.Build.Framework;
+        using Microsoft.Build.Utilities;
+
+        public class CustomRoslynTask : Task
+        {
+            public override bool Execute()
+            {
+                try
+                {
+                    // Use System.Text.Json to trigger binding
+                    var json = JsonSerializer.Serialize(new { Name = "Test" });
+                    Log.LogMessage(MessageImportance.High, "JSON: {0}", json);
+
+                    // Use Memory<T> from System.Memory.dll to ensure reference
+                    Memory<byte> memory = new byte[10];
+                    Log.LogMessage(MessageImportance.High, "Memory Length: {0}", memory.Length);
+
+                    // Use Span<T> for additional binding check
+                    Span<byte> span = memory.Span;
+                    Log.LogMessage(MessageImportance.High, "Span Length: {0}", span.Length);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Log.LogError("Task failed: {0}", ex.Message);
+                    return false;
+                }
+            }
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="Build">
+    <CustomRoslynTask />
+  </Target>
+</Project>

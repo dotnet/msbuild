@@ -367,7 +367,7 @@ namespace Microsoft.Build.BackEnd
                     projectLoggingContext.BuildEventContext);
                 _state = TargetEntryState.Completed;
 
-                if (projectLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&
+                if (projectLoggingContext.LoggingService.MinimumRequiredMessageImportance.IsAtLeast(MessageImportance.Low) &&
                     !projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
