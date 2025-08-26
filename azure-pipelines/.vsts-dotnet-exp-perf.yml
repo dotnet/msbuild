@@ -1,12 +1,12 @@
 trigger:
-- main
-- vs*
+- exp/*
+- perf/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
-#   SignType: real
+#   SignType: test
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -14,14 +14,10 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-- name: EnableOptProf
-  displayName: Enable OptProf data collection for this build
-  type: boolean
-  default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
-  default: true
+  default: false
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -31,24 +27,18 @@ variables:
     value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  # If we're not on a vs* branch, use main as our optprof collection branch
+  # Use main as our optprof collection branch by default in exp branches.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
-      value: ${{ parameters.OptProfDropName }}
+      value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
-  - ${{ if eq(parameters.EnableOptProf, false) }}:
-    - name: SkipApplyOptimizationData
-      value: true
-  - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
-    value: true
+    value: false
   - group: DotNet-MSBuild-SDLValidation-Params
   - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
@@ -82,48 +72,19 @@ extends:
       sbom:
         enabled: false
       codeSignValidation:
-        enabled: true
-        break: true
+        enabled: false
         additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
       credscan:
         suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
-    - ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
-      - stage: localization
-        displayName: Localization
-        jobs:
-        # The localization setup for release/ branches. Note difference in LclPackageId. main branch is handled separately below.
-        # Used for vs17.2, vs17.4, vs17.6 etc. branches only.
-        # When the branch is setup for localization (the localization ticket needs to be created - https://aka.ms/ceChangeLocConfig, requesting change from one release branch to another),
-        #  set 'EnableReleaseOneLocBuild' to true.
-        - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs') }}:
-          - template: /eng/common/templates-official/job/onelocbuild.yml@self
-            parameters:
-              MirrorRepo: 'msbuild'
-              LclSource: lclFilesfromPackage
-              LclPackageId: 'LCL-JUNO-PROD-MSBUILDREL'
-              MirrorBranch: ${{ replace(variables['Build.SourceBranch'], 'refs/heads/', '') }}
-              JobNameSuffix: '_release'
-              condition: ${{ variables.EnableReleaseOneLocBuild }}
-        # The localization setup for main branch. Note difference in package ID. Should not be used with release/ branches.
-        - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-          - template: /eng/common/templates-official/job/onelocbuild.yml@self
-            parameters:
-              MirrorRepo: 'msbuild'
-              LclSource: lclFilesfromPackage
-              LclPackageId: 'LCL-JUNO-PROD-MSBUILD'
-              MirrorBranch: 'main'
-              JobNameSuffix: '_main'
-              condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
-
     - stage: build
       displayName: Build
       jobs:
       - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
         parameters:
-          isExperimental: false
-          enableComponentGovernance: true
+          isExperimental: true
+          enableComponentGovernance: false
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
