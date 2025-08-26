@@ -1344,7 +1344,11 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
+#if NET9_0_OR_GREATER
+                    value = GxHash.GxHash.Hash64(System.Runtime.InteropServices.MemoryMarshal.Cast<char, byte>(text.AsSpan()));
+#else
                     value = FowlerNollVo1aHash.ComputeHash64Fast(text);
+#endif
                 }
             }
 
