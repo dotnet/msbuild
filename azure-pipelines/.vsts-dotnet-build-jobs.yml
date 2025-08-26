@@ -224,6 +224,7 @@ jobs:
       - Windows_NT
       - Source_Build_Managed
     pool:
-      name: $(DncEngInternalBuildPool)
-      image: $(WindowsImage)
+      name: AzurePipelines-EO
+      image: 1ESPT-Windows2022
       os: windows
+
