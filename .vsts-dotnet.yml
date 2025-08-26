@@ -24,6 +24,8 @@ parameters:
   default: true
 
 variables:
+  - group: DotNet-Blob-Feed
+  - group: DotNet-Symbol-Publish
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''

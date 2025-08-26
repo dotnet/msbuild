@@ -17,8 +17,6 @@ jobs:
   timeoutInMinutes: 180
 
   variables:
-  - group: DotNet-Blob-Feed
-  - group: DotNet-Symbol-Publish
   - group: Publish-Build-Assets
   - name: TeamName
     value: MSBuild
