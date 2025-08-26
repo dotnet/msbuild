@@ -699,18 +699,14 @@ namespace Microsoft.Build.BackEnd
 
             // Determines whether node reuse should be enabled for the given host context.
             // Node reuse allows MSBuild to reuse existing task host processes for better performance,
-            // but is disabled for certain legacy runtime and architecture combinations.
+            // but is disabled for CLR2.
             bool EnableNodeReuse(HandshakeOptions hostContext)
             {
-                // Node reuse is not supported for x86 or CLR2 task hosts.
-                bool isX86 = !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64)
-                    && !Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
                 bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
 
                 return ComponentHost.BuildParameters.EnableNodeReuse
                     && Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse)
-                    && !isCLR2
-                    && !isX86;
+                    && !isCLR2;
             }
         }
 

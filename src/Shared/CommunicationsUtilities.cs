@@ -921,11 +921,7 @@ namespace Microsoft.Build.Internal
                     break;
             }
 
-            if (nodeReuse
-
-                // Don't set node reuse for legacy runtime and architecture combinations.
-                && clrVersion != 2
-                && !architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x86))
+            if (nodeReuse && clrVersion != 2)
             {
                 context |= HandshakeOptions.NodeReuse;
             }
