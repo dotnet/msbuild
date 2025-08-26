@@ -850,7 +850,7 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parameters&gt;
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      コンソール ロガーへのパラメーターです。(短縮形: -clp)
                      利用可能なパラメーター: 
                         PerformanceSummary--タスク、ターゲット、プロジェクトにかかった時間を
@@ -871,9 +871,6 @@
                             サイズに合わせません
                         DisableConsoleColor--すべてのログ メッセージに対して
                             既定のコンソール カラーを使用します。
-                        DisableMPLogging-- 非マルチプロセッサ モードで
-                            実行する際、マルチプロセッサの
-                            出力ログ形式を無効にします。
                         EnableMPLogging--非マルチプロセッサ モードで
                             実行する場合も、マルチプロセッサのログ形式を有効にします。
                             このログ形式は、既定で有効です。
@@ -883,7 +880,7 @@
                             ANSI コンソール カラーを使用します
                      Verbosity--このロガーの -verbosity 設定を
                             上書きします。
-                     例::
+                     例:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>

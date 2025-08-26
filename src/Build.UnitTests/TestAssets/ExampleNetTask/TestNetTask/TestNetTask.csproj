@@ -12,6 +12,7 @@
   <UsingTask
 	    TaskName="ExampleTask"
       AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
 	    Runtime="NET"/>
 	
   <Target Name="TestTask" BeforeTargets="Build">

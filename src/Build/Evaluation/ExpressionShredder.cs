@@ -95,83 +95,86 @@ namespace Microsoft.Build.Evaluation
         /// itemName and separator will be null if they are not found
         /// return value will be null if no transform expressions are found
         /// </summary>
-        internal static List<ItemExpressionCapture> GetReferencedItemExpressions(string expression)
+        internal static ReferencedItemExpressionsEnumerator GetReferencedItemExpressions(string expression)
         {
             return GetReferencedItemExpressions(expression, 0, expression.Length);
         }
 
-        /// <summary>
-        /// Given a subexpression, finds referenced sub transform expressions
-        /// itemName and separator will be null if they are not found
-        /// return value will be null if no transform expressions are found
-        /// </summary>
-        internal static List<ItemExpressionCapture> GetReferencedItemExpressions(string expression, int start, int end)
+        internal struct ReferencedItemExpressionsEnumerator
         {
-            List<ItemExpressionCapture> subExpressions = null;
+            private readonly string expression;
+            private readonly int end;
+            private int currentIndex;
 
-            int startIndex = expression.IndexOf('@', start, end - start);
-
-            if (startIndex < 0)
+            public ReferencedItemExpressionsEnumerator(string expression, int start, int end)
             {
-                return null;
+                this.expression = expression;
+                this.end = end;
+
+                currentIndex = expression.IndexOf('@', start, end - start);
+                if (currentIndex < 0)
+                {
+                    currentIndex = int.MaxValue;
+                }
             }
 
-            for (int i = startIndex; i < end; i++)
-            {
-                int restartPoint;
-                int startPoint;
+            public ItemExpressionCapture Current { get; private set; }
 
-                if (Sink(expression, ref i, end, '@', '('))
+            public bool MoveNext()
+            {
+                for (; currentIndex < end; currentIndex++)
                 {
-                    List<ItemExpressionCapture> transformExpressions = null;
-                    string separator = null;
-                    int separatorStart = -1;
+                    if (!Sink(expression, ref currentIndex, end, '@', '('))
+                    {
+                        continue;
+                    }
 
                     // Start of a possible item list expression
 
                     // Store the index to backtrack to if this doesn't turn out to be a well
                     // formed expression. (Subtract one for the increment when we loop around.)
-                    restartPoint = i - 1;
+                    int restartPoint = currentIndex - 1;
 
                     // Store the expression's start point
-                    startPoint = i - 2;
+                    int startPoint = currentIndex - 2;
 
-                    SinkWhitespace(expression, ref i);
+                    SinkWhitespace(expression, ref currentIndex);
 
-                    int startOfName = i;
+                    int startOfName = currentIndex;
 
-                    if (!SinkValidName(expression, ref i, end))
+                    if (!SinkValidName(expression, ref currentIndex, end))
                     {
-                        i = restartPoint;
+                        currentIndex = restartPoint;
                         continue;
                     }
 
                     // '-' is a legitimate char in an item name, but we should match '->' as an arrow
                     // in '@(foo->'x')' rather than as the last char of the item name.
                     // The old regex accomplished this by being "greedy"
-                    if (end > i && expression[i - 1] == '-' && expression[i] == '>')
+                    if (end > currentIndex && expression[currentIndex - 1] == '-' && expression[currentIndex] == '>')
                     {
-                        i--;
+                        currentIndex--;
                     }
 
                     // Grab the name, but continue to verify it's a well-formed expression
                     // before we store it.
-                    string itemName = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startOfName, i - startOfName));
+                    string itemName = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startOfName, currentIndex - startOfName));
 
-                    SinkWhitespace(expression, ref i);
+                    SinkWhitespace(expression, ref currentIndex);
                     bool transformOrFunctionFound = true;
+                    List<ItemExpressionCapture> transformExpressions = null;
 
                     // If there's an '->' eat it and the subsequent quoted expression or transform function
-                    while (Sink(expression, ref i, end, '-', '>') && transformOrFunctionFound)
+                    while (Sink(expression, ref currentIndex, end, '-', '>') && transformOrFunctionFound)
                     {
-                        SinkWhitespace(expression, ref i);
-                        int startTransform = i;
+                        SinkWhitespace(expression, ref currentIndex);
+                        int startTransform = currentIndex;
 
-                        bool isQuotedTransform = SinkSingleQuotedExpression(expression, ref i, end);
+                        bool isQuotedTransform = SinkSingleQuotedExpression(expression, ref currentIndex, end);
                         if (isQuotedTransform)
                         {
                             int startQuoted = startTransform + 1;
-                            int endQuoted = i - 1;
+                            int endQuoted = currentIndex - 1;
                             if (transformExpressions == null)
                             {
                                 transformExpressions = new List<ItemExpressionCapture>();
@@ -181,8 +184,8 @@ namespace Microsoft.Build.Evaluation
                             continue;
                         }
 
-                        startTransform = i;
-                        ItemExpressionCapture functionCapture = SinkItemFunctionExpression(expression, startTransform, ref i, end);
+                        startTransform = currentIndex;
+                        ItemExpressionCapture? functionCapture = SinkItemFunctionExpression(expression, startTransform, ref currentIndex, end);
                         if (functionCapture != null)
                         {
                             if (transformExpressions == null)
@@ -190,13 +193,13 @@ namespace Microsoft.Build.Evaluation
                                 transformExpressions = new List<ItemExpressionCapture>();
                             }
 
-                            transformExpressions.Add(functionCapture);
+                            transformExpressions.Add(functionCapture.Value);
                             continue;
                         }
 
                         if (!isQuotedTransform && functionCapture == null)
                         {
-                            i = restartPoint;
+                            currentIndex = restartPoint;
                             transformOrFunctionFound = false;
                         }
                     }
@@ -206,59 +209,71 @@ namespace Microsoft.Build.Evaluation
                         continue;
                     }
 
-                    SinkWhitespace(expression, ref i);
+                    SinkWhitespace(expression, ref currentIndex);
+
+                    string separator = null;
+                    int separatorStart = -1;
 
                     // If there's a ',', eat it and the subsequent quoted expression
-                    if (Sink(expression, ref i, ','))
+                    if (Sink(expression, ref currentIndex, ','))
                     {
-                        SinkWhitespace(expression, ref i);
+                        SinkWhitespace(expression, ref currentIndex);
 
-                        if (!Sink(expression, ref i, '\''))
+                        if (!Sink(expression, ref currentIndex, '\''))
                         {
-                            i = restartPoint;
+                            currentIndex = restartPoint;
                             continue;
                         }
 
-                        int closingQuote = expression.IndexOf('\'', i);
+                        int closingQuote = expression.IndexOf('\'', currentIndex);
                         if (closingQuote == -1)
                         {
-                            i = restartPoint;
+                            currentIndex = restartPoint;
                             continue;
                         }
 
-                        separatorStart = i - startPoint;
-                        separator = expression.Substring(i, closingQuote - i);
+                        separatorStart = currentIndex - startPoint;
+                        separator = expression.Substring(currentIndex, closingQuote - currentIndex);
 
-                        i = closingQuote + 1;
+                        currentIndex = closingQuote + 1;
                     }
 
-                    SinkWhitespace(expression, ref i);
+                    SinkWhitespace(expression, ref currentIndex);
 
-                    if (!Sink(expression, ref i, ')'))
+                    if (!Sink(expression, ref currentIndex, ')'))
                     {
-                        i = restartPoint;
+                        currentIndex = restartPoint;
                         continue;
                     }
 
-                    int endPoint = i;
-                    i--;
-
-                    if (subExpressions == null)
-                    {
-                        subExpressions = new List<ItemExpressionCapture>();
-                    }
+                    int endPoint = currentIndex;
+                    currentIndex--;
 
                     // Create an expression capture that encompasses the entire expression between the @( and the )
                     // with the item name and any separator contained within it
                     // and each transform expression contained within it (i.e. each ->XYZ)
                     ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startPoint, endPoint - startPoint)), itemName, separator, separatorStart, transformExpressions);
-                    subExpressions.Add(expressionCapture);
 
-                    continue;
+                    Current = expressionCapture;
+                    ++currentIndex;
+
+                    return true;
                 }
-            }
 
-            return subExpressions;
+                Current = default;
+
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Given a subexpression, finds referenced sub transform expressions
+        /// itemName and separator will be null if they are not found
+        /// return value will be null if no transform expressions are found
+        /// </summary>
+        internal static ReferencedItemExpressionsEnumerator GetReferencedItemExpressions(string expression, int start, int end)
+        {
+            return new ReferencedItemExpressionsEnumerator(expression, start, end);
         }
 
         /// <summary>
@@ -320,7 +335,7 @@ namespace Microsoft.Build.Evaluation
                             continue;
                         }
 
-                        ItemExpressionCapture functionCapture = SinkItemFunctionExpression(expression, startTransform, ref i, end);
+                        ItemExpressionCapture? functionCapture = SinkItemFunctionExpression(expression, startTransform, ref i, end);
                         if (functionCapture != null)
                         {
                             continue;
@@ -579,7 +594,7 @@ namespace Microsoft.Build.Evaluation
         /// and ends before the specified end index.
         /// Leaves index one past the end of the closing paren.
         /// </summary>
-        private static ItemExpressionCapture SinkItemFunctionExpression(string expression, int startTransform, ref int i, int end)
+        private static ItemExpressionCapture? SinkItemFunctionExpression(string expression, int startTransform, ref int i, int end)
         {
             if (SinkValidName(expression, ref i, end))
             {
@@ -593,13 +608,14 @@ namespace Microsoft.Build.Evaluation
                 {
                     int endFunctionArguments = i - 1;
 
-                    ItemExpressionCapture capture = new ItemExpressionCapture(startTransform, i - startTransform, expression.Substring(startTransform, i - startTransform));
-                    capture.FunctionName = expression.Substring(startTransform, endFunctionName - startTransform);
-
+                    string functionName = expression.Substring(startTransform, endFunctionName - startTransform);
+                    string functionArguments = null;
                     if (endFunctionArguments > startFunctionArguments)
                     {
-                        capture.FunctionArguments = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
+                        functionArguments = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
                     }
+
+                    ItemExpressionCapture capture = new ItemExpressionCapture(startTransform, i - startTransform, expression.Substring(startTransform, i - startTransform), null, null, -1, null, functionName, functionArguments);
 
                     return capture;
                 }
@@ -686,158 +702,91 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Represents one substring for a single successful capture.
         /// </summary>
-        internal class ItemExpressionCapture
+        internal struct ItemExpressionCapture
         {
             /// <summary>
-            /// Captures within this capture
-            /// </summary>
-            private readonly List<ItemExpressionCapture> _captures;
-
-            /// <summary>
-            /// The position in the original string where the first character of the captured
-            /// substring was found.
-            /// </summary>
-            private readonly int _index;
-
-            /// <summary>
-            /// The length of the captured substring.
-            /// </summary>
-            private readonly int _length;
-
-            /// <summary>
-            /// The captured substring from the input string.
-            /// </summary>
-            private readonly string _value;
-
-            /// <summary>
-            /// The type of the item within this expression
-            /// </summary>
-            private readonly string _itemType;
-
-            /// <summary>
-            /// The separator, if any, within this expression
-            /// </summary>
-            private readonly string _separator;
-
-            /// <summary>
-            /// The starting character of the separator within the expression
-            /// </summary>
-            private readonly int _separatorStart;
-
-            /// <summary>
-            /// The function name, if any, within this expression
-            /// </summary>
-            private string _functionName;
-
-            /// <summary>
-            /// The function arguments, if any, within this expression
-            /// </summary>
-            private string _functionArguments;
-
-            /// <summary>
             /// Create an Expression Capture instance
             /// Represents a sub expression, shredded from a larger expression
             /// </summary>
-            public ItemExpressionCapture(int index, int length, string subExpression) : this(index, length, subExpression, null, null, -1, null)
+            public ItemExpressionCapture(int index, int length, string subExpression)
+                : this(index, length, subExpression, null, null, -1, null, null, null)
             {
             }
 
-            /// <summary>
-            /// Create an Expression Capture instance
-            /// Represents a sub expression, shredded from a larger expression
-            /// </summary>
             public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, List<ItemExpressionCapture> captures)
+                : this(index, length, subExpression, itemType, separator, separatorStart, captures, null, null)
             {
-                _index = index;
-                _length = length;
-                _value = subExpression;
-                _itemType = itemType;
-                _separator = separator;
-                _separatorStart = separatorStart;
-                _captures = captures;
+            }
+
+            /// <summary>
+            /// Create an Expression Capture instance
+            /// Represents a sub expression, shredded from a larger expression
+            /// </summary>
+            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, List<ItemExpressionCapture> captures, string functionName, string functionArguments)
+            {
+                Index = index;
+                Length = length;
+                Value = subExpression;
+                ItemType = itemType;
+                Separator = separator;
+                SeparatorStart = separatorStart;
+                Captures = captures;
+                FunctionName = functionName;
+                FunctionArguments = functionArguments;
             }
 
             /// <summary>
             /// Captures within this capture
             /// </summary>
-            public List<ItemExpressionCapture> Captures
-            {
-                get { return _captures; }
-            }
+            public List<ItemExpressionCapture> Captures { get; }
 
             /// <summary>
             /// The position in the original string where the first character of the captured
             /// substring was found.
             /// </summary>
-            public int Index
-            {
-                get { return _index; }
-            }
+            public int Index { get; }
 
             /// <summary>
             /// The length of the captured substring.
             /// </summary>
-            public int Length
-            {
-                get { return _length; }
-            }
+            public int Length { get; }
 
             /// <summary>
             /// Gets the captured substring from the input string.
             /// </summary>
-            public string Value
-            {
-                get { return _value; }
-            }
+            public string Value { get; }
 
             /// <summary>
             /// Gets the captured itemtype.
             /// </summary>
-            public string ItemType
-            {
-                get { return _itemType; }
-            }
+            public string ItemType { get; }
 
             /// <summary>
             /// Gets the captured itemtype.
             /// </summary>
-            public string Separator
-            {
-                get { return _separator; }
-            }
+            public string Separator { get; }
 
             /// <summary>
             /// The starting character of the separator.
             /// </summary>
-            public int SeparatorStart
-            {
-                get { return _separatorStart; }
-            }
+            public int SeparatorStart { get; }
 
             /// <summary>
             /// The function name, if any, within this expression
             /// </summary>
-            public string FunctionName
-            {
-                get { return _functionName; }
-                set { _functionName = value; }
-            }
+            public string FunctionName { get; }
 
             /// <summary>
             /// The function arguments, if any, within this expression
             /// </summary>
-            public string FunctionArguments
-            {
-                get { return _functionArguments; }
-                set { _functionArguments = value; }
-            }
+            public string FunctionArguments { get; }
 
             /// <summary>
             /// Gets the captured substring from the input string.
             /// </summary>
             public override string ToString()
             {
-                return _value;
+                return Value;
             }
         }
     }
