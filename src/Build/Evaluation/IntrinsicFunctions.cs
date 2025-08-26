@@ -508,6 +508,7 @@ namespace Microsoft.Build.Evaluation
                 { XMakeAttributes.architecture, architecture },
             };
 
+            CommunicationsUtilities.Trace($"in Intrinsic Functions.");
             HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
 
             string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(desiredContext);

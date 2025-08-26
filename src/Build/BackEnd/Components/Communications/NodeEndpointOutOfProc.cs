@@ -33,6 +33,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected override Handshake GetHandshake()
         {
+            CommunicationsUtilities.Trace($"in NodeEndpointOutOfProc.");
             HandshakeOptions handshakeOptions = CommunicationsUtilities.GetHandshakeOptions(
                 taskHost: false,
                 architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(),

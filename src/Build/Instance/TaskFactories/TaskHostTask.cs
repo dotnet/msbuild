@@ -124,7 +124,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _taskExecutionSucceeded = false;
 
-
         /// <summary>
         /// This separates the cause where we force all tasks to run in a task host via environment variables and TaskHostFactory
         /// The difference is that TaskHostFactory requires the TaskHost to be transient i.e. to expire after build.
@@ -132,9 +131,8 @@ namespace Microsoft.Build.BackEnd
         private bool _taskHostFactoryExplicitlyRequested = false;
 
         /// <summary>
-        /// Constructor
+        /// Constructor.
         /// </summary>
-        ///
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         public TaskHostTask(
             IElementLocation taskLocation,
@@ -301,6 +299,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
+                    CommunicationsUtilities.Trace($"in TaskHostTask.");
                     _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: !_taskHostFactoryExplicitlyRequested, taskHostParameters: _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
                 }

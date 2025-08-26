@@ -33,6 +33,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         protected override Handshake GetHandshake()
         {
+            CommunicationsUtilities.Trace($"in NodeEndpointOutOfProcTaskHost. NodeReuse {_nodeReuse}");
             return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: _nodeReuse));
         }
     }

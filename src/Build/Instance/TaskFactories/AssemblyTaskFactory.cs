@@ -281,9 +281,12 @@ namespace Microsoft.Build.BackEnd
 
             _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
 
-            _isTaskHostFactory = (taskFactoryIdentityParameters != null
+            _isTaskHostFactory = taskFactoryIdentityParameters != null
                  && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
-                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase));
+                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase);
+            CommunicationsUtilities.Trace($"in AssemblyTaskFactory. " +
+                $"taskFactoryIdentityParameters: {taskFactoryIdentityParameters != null}." +
+                $"isTaskHostFactory: {_isTaskHostFactory}");
 
             try
             {
@@ -393,7 +396,7 @@ namespace Microsoft.Build.BackEnd
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    _isTaskHostFactory
+                    taskHostFactoryExplicitlyRequested: _isTaskHostFactory
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif

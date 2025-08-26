@@ -536,6 +536,7 @@ namespace Microsoft.Build.Experimental
 
         private ServerNodeHandshake GetHandshake()
         {
+            CommunicationsUtilities.Trace($"in MSBuildClient.");
             return new ServerNodeHandshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
         }
 
