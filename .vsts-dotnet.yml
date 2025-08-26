@@ -14,9 +14,6 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-- name: EnableOptProf
-  displayName: Enable OptProf data collection for this build
-  type: boolean
   default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation

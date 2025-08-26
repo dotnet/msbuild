@@ -22,8 +22,6 @@ variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
-  - name: requireDefaultChannels
-    value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # Use main as our optprof collection branch by default in exp branches.
