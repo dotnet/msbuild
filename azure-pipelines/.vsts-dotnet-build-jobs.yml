@@ -207,12 +207,6 @@ jobs:
     displayName: Execute cleanup tasks
     condition: succeededOrFailed()
 
-  # Conditional component governance
-  - ${{ if parameters.enableComponentGovernance }}:
-    - template: /eng/common/templates-official/steps/component-governance.yml@self
-      parameters:
-        disableComponentGovernance: false
-
 - template: /eng/common/templates-official/jobs/source-build.yml@self
   parameters:
     platforms:
