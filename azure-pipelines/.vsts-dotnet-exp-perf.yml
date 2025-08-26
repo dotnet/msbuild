@@ -14,10 +14,6 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-- name: requireDefaultChannelsEnabled
-  displayName: Require Default Channels
-  type: boolean
-  default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
@@ -96,5 +92,4 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        requireDefaultChannels: ${{ parameters.requireDefaultChannelsEnabled }}
         enableSigningValidation: ${{ parameters.enableSigningValidation }}
