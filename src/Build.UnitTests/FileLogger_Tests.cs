@@ -58,8 +58,11 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 log = FileUtilities.GetTemporaryFileName();
-                SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
+
+                byte[] content = ReadRawBytes(log);
+                Assert.Equal((byte)109, content[0]); // 'm'
             }
             finally
             {
@@ -71,7 +74,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Invalid file should error nicely.
+        /// Invalid file should error nicely
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -84,7 +87,7 @@ namespace Microsoft.Build.UnitTests
 
                 try
                 {
-                    SetUpFileLoggerAndLogMessage("logfile=||invalid||", new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                    SetUpFileLoggerAndLogMessage("logfile=||invalid||", new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 }
                 finally
                 {
@@ -111,7 +114,7 @@ namespace Microsoft.Build.UnitTests
                 fl.Parameters = "verbosity=diagnostic;logfile=" + log;  // diagnostic specific setting
                 fl.Verbosity = LoggerVerbosity.Quiet; // quiet global setting
                 fl.Initialize(es);
-                fl.MessageHandler(null, new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                fl.MessageHandler(null, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 fl.Shutdown();
 
                 // expect message to appear because diagnostic not quiet verbosity was used
@@ -213,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 log = FileUtilities.GetTemporaryFileName();
-                SetUpFileLoggerAndLogMessage("encoding=utf-16;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                SetUpFileLoggerAndLogMessage("encoding=utf-16;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 byte[] content = ReadRawBytes(log);
 
                 // FF FE is the BOM for UTF16
@@ -240,7 +243,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 log = FileUtilities.GetTemporaryFileName();
-                SetUpFileLoggerAndLogMessage("encoding=utf-8;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                SetUpFileLoggerAndLogMessage("encoding=utf-8;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 byte[] content = ReadRawBytes(log);
 
                 // EF BB BF is the BOM for UTF8
@@ -290,7 +293,7 @@ namespace Microsoft.Build.UnitTests
             {
                 log = FileUtilities.GetTemporaryFileName();
                 WriteContentToFile(log);
-                SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
             }
             finally
@@ -314,7 +317,7 @@ namespace Microsoft.Build.UnitTests
             {
                 log = FileUtilities.GetTemporaryFileName();
                 WriteContentToFile(log);
-                SetUpFileLoggerAndLogMessage("append;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                SetUpFileLoggerAndLogMessage("append;logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "existing content\nmessage here");
             }
             finally
@@ -339,7 +342,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High) { BuildEventContext = new BuildEventContext(1, 1, 1, 1) });
+                SetUpFileLoggerAndLogMessage("logfile=" + log, new BuildMessageEventArgs("message here", null, null, MessageImportance.High));
                 VerifyFileContent(log, "message here");
             }
             finally
@@ -471,7 +474,7 @@ namespace Microsoft.Build.UnitTests
 
             for (int i = 0; i < expectedLines.Length; i++)
             {
-                Assert.Contains(expectedLines[i].Trim(), actualLines[i].Trim());
+                Assert.Equal(expectedLines[i].Trim(), actualLines[i].Trim());
             }
         }
 

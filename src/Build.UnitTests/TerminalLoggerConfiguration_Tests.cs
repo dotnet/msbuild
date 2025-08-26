@@ -91,6 +91,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             TerminalLoggerUserIntent = tlValue,
             TerminalLoggerUserIntentSource = "arg",
             ConsoleLogger = true,
+            ConsoleLoggerType = "parallel",
             ConsoleLoggerVerbosity = "normal",
             FileLogger = false,
         };
@@ -205,6 +206,7 @@ public class TerminalLoggerConfiguration_Tests : IDisposable
             TerminalLoggerUserIntentSource = null,
             ConsoleLogger = true,
             ConsoleLoggerVerbosity = "minimal",
+            ConsoleLoggerType = "parallel",
             FileLogger = false,
         };
 
