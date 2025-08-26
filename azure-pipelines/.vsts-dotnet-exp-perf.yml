@@ -62,19 +62,9 @@ extends:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
     sdl:
-      policheck:
-        enabled: true
-        exclusionsFile: $(Build.SourcesDirectory)\eng\policheck_exclusions.xml
-      tsa:
-        enabled: true
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
-      codeSignValidation:
-        enabled: false
-        additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
-      credscan:
-        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
     - stage: build
