@@ -3310,8 +3310,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             var pg = new PropertyDictionary<ProjectPropertyInstance>();
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string path = @"C:\Windows\System32\notepad.exe";
-            string expression = $@"$([MSBuild]::GetFileVersion('{path}'))";
+          
+            string assemblyPath = typeof(Expander_Tests).Assembly.Location;
+
+            string expression = $@"$([MSBuild]::GetFileVersion('{assemblyPath}'))";
 
             var result = expander.ExpandPropertiesLeaveTypedAndEscaped(
                 expression,
