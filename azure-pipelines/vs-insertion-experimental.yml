@@ -14,9 +14,9 @@ schedules:
     
 resources:
   pipelines:
-  - pipeline: 'MSBuild'
+  - pipeline: 'MSBuildExpPerf'
     project: 'DevDiv'
-    source: 'MSBuild'
+    source: 'MSBuild/MSBuild-ExpPerf'
     trigger:
       branches:
         include:
@@ -51,9 +51,9 @@ variables:
   - name: TeamEmail
     value: msbtm@microsoft.com
   - name: MSBuild_CI_BuildNumber
-    value: $(resources.pipeline.MSBuild.runName)
+    value: $(resources.pipeline.MSBuildExpPerf.runName)
   - name: MSBuild_CI_SourceVersion
-    value: $(resources.pipeline.MSBuild.sourceCommit)
+    value: $(resources.pipeline.MSBuildExpPerf.sourceCommit)
   - name: ArtifactPackagesPath
     value: $(Build.ArtifactStagingDirectory)/PackageArtifacts
 
@@ -90,11 +90,11 @@ extends:
         templateContext:
           inputs:
           - input: pipelineArtifact
-            pipeline: 'MSBuild'
+            pipeline: 'MSBuildExpPerf'
             artifactName: 'xsd'
             targetPath: '$(Pipeline.Workspace)/xsd'
           - input: pipelineArtifact
-            pipeline: 'MSBuild'
+            pipeline: 'MSBuildExpPerf'
             artifactName: 'PackageArtifacts'
             targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
             # the CI build creates a sourcebuild intermediate package that is not signed, remove it to avoid warning from Guardian
@@ -109,7 +109,7 @@ extends:
             targetType: inline
             script: |
               # Extract the last section after the last '/'
-              $fullBranch = "$(resources.pipeline.MSBuild.sourceBranch)"
+              $fullBranch = "$(resources.pipeline.MSBuildExpPerf.sourceBranch)"
               $branchSegments = $fullBranch -split '/'
               $branch = $branchSegments[-1]
               Write-Host "Setting drops branch to '$branch'"
@@ -154,3 +154,4 @@ extends:
             InsertionReviewers: MSBuild
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
             InsertionBuildPolicy: Request Perf DDRITs
+
