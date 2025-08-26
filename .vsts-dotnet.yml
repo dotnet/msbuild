@@ -18,10 +18,6 @@ parameters:
   displayName: Enable OptProf data collection for this build
   type: boolean
   default: true
-- name: requireDefaultChannelsEnabled
-  displayName: Require Default Channels
-  type: boolean
-  default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
@@ -49,8 +45,6 @@ variables:
   - ${{ if eq(parameters.EnableOptProf, false) }}:
     - name: SkipApplyOptimizationData
       value: true
-  - name: requireDefaultChannels
-    value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
@@ -137,5 +131,4 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        requireDefaultChannels: ${{ parameters.requireDefaultChannelsEnabled }}
         enableSigningValidation: ${{ parameters.enableSigningValidation }}
