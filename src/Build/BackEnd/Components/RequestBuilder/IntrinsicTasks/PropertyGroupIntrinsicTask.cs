@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -90,6 +91,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             bucket.Lookup.SetProperty(ProjectPropertyInstance.Create(property.Name, evaluatedValue, property.Location, Project.IsImmutable));
+                            LoggingContext.ProcessPropertyWrite(new PropertyWriteInfo(property.Name, string.IsNullOrEmpty(evaluatedValue), property.Location));
                         }
                     }
                 }
