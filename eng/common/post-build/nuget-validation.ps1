@@ -13,7 +13,7 @@ try {
 
   New-Item -ItemType 'directory' -Path ${ToolDestinationPath} -Force
 
-  Invoke-WebRequest $url -OutFile ${ToolDestinationPath}\verify.ps1 
+  Invoke-WebRequest $url -OutFile ${ToolDestinationPath}\verify.ps1
 
   & ${ToolDestinationPath}\verify.ps1 ${PackagesPath}\*.nupkg
 } 
