@@ -14,7 +14,6 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-  default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
