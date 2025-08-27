@@ -19,7 +19,7 @@ An alternative approach to the ExecutionContext API would be to use API hooking 
 **Cons of API Hooking:**
 - Windows-only solution (Detours is platform-specific)
 - More complex implementation
-- Possible performance overhead from API hooking
+- Potential performance overhead from API hooking
 
 ## Thread-Safe Capability Indicators
 
@@ -28,7 +28,7 @@ Task authors can declare thread-safe capabilities through various approaches. Th
 1. **ExecutionContext-enabled approaches** - Provide access to thread-safe APIs through `ExecutionContext`
 2. **Compatibility bridge approaches** - Allow existing tasks to run in multithreaded mode without code changes
 
-Tasks that use ExecutionContext-enabled approaches cannot load in older MSBuild versions that do not support multithreading mode feature. So they are dropping support for older MSBuild/IDE versions. To address this challenge, MSBuild provides a **compatibility bridge approaches** that allows legacy tasks to participate in multithreaded builds under specific conditions:
+Tasks that use ExecutionContext-enabled approaches cannot load in older MSBuild versions that do not support the multithreading mode feature, so they are dropping support for older MSBuild versions. To address this challenge, MSBuild provides **compatibility bridge approaches** that allow legacy tasks to participate in multithreaded builds under specific conditions:
 - The task must not modify global process state (environment variables, working directory)
 - The task must not depend on process-wide state, including relative path resolution
 - The task will not have access to `ExecutionContext` APIs
@@ -38,7 +38,7 @@ This bridge enables existing tasks to benefit from multithreaded execution witho
 So, task authors who need to support older MSBuild versions will have three choices:
 1. **Maintain separate implementations** - Create and support both thread-safe and legacy versions of the same task, using options 1 or 3 below
 2. **Use compatibility bridge approaches** - Rely on MSBuild's ability to run legacy tasks in multithreaded mode without ExecutionContext access, using options 2 or 4 below
-3. **Accept reduced performance** - Tasks will execute slower than their thread-safe version because they must run in a separate TaskHost process
+3. **Accept reduced performance** - Tasks will execute more slowly than their thread-safe versions because they must run in a separate TaskHost process
 
 ### Interface-Based Thread-Safe Declaration (Option 1)
 
@@ -83,7 +83,7 @@ public interface IThreadSafeTask
 **Cons:**
 - Less extensible for future features like async support, would require multiple overloads if additional features are added
 
-**Question:** For this parameter-based approach, we need to decide whether MSBuild should support async task execution (using `ExecuteAsync` methods) to avoid creating multiple overloads of the execute method in the `IThreadSafeTask` interface.
+**Question:** For this parameter-based approach, we need to decide whether MSBuild should support async task execution (using `ExecuteAsync` methods) to avoid creating multiple overloads of the Execute method in the `IThreadSafeTask` interface.
 
 **Note:** Both approaches can either extend `ITask` or be independent. It seems more aligned with SOLID principles to extend `ITask` in the property-based approach and have an independent interface in the parameter-based approach.
 
@@ -141,10 +141,10 @@ public class MyTask : Task
 - Access to ExecutionContext APIs in newer MSBuild versions
 
 **Cons:**
-- Execute method structure not formalized in any API. It is very confusing
+- Execute method structure is not formalized in any API, making it very confusing.
 - Limited IntelliSense support for legacy implementation when targeting newer MSBuild APIs
 - Unclear which overload will be called in different scenarios
-- Unclear how to scale this approach in case we add more features
+- Unclear how to scale this approach if we add more features
 
 **Note:** If an older MSBuild version cannot load the `Execute(ITaskExecutionContext context)` method due to missing types, it may automatically fall back to the `Execute()` method if it is available.
 
@@ -172,33 +172,38 @@ Task authors or task users declare thread-safety capabilities using an attribute
 
 #### Implementation Considerations
 
-**Option A:** Service older MSBuild versions to ignore the `ThreadSafe` attribute and prevent errors. This is necessary because older MSBuild versions throw errors for unknown attributes even in conditional task declarations.
+**Option A:** Service older MSBuild versions to ignore the `ThreadSafe` attribute and prevent errors. This is necessary because older MSBuild versions throw errors for unknown attributes, even in conditional task declarations.
 
 **Option B:** Use new assembly factory types (e.g., `AssemblyThreadCompatibleTaskFactory`) to avoid servicing older versions. Task declarations must still be conditional based on MSBuild version since these factories don't exist in older versions.
 
 ## ExecutionContext API
 
-The `ExecutionContext` provides thread-safe alternatives to APIs that use global process state, enabling tasks to execute safely in multithreaded environment.
+The `ExecutionContext` provides thread-safe alternatives to APIs that use global process state, enabling tasks to execute safely in a multithreaded environment.
 
 ```csharp
-public interface ITaskExecutionContext
+public interface IThreadSafeTask : ITask
 {
-    AbsolutePath CurrentDirectory { get; set; }
+    TaskExecutionContext ExecutionContext { get; set; }
+}
 
-    AbsolutePath GetAbsolutePath(string path);
+public abstract class TaskExecutionContext
+{ 
+    public abstract AbsolutePath CurrentDirectory { get; set; }
+
+    public abstract AbsolutePath GetAbsolutePath(string path);
     
-    string? GetEnvironmentVariable(string name);
-    IReadOnlyDictionary<string, string> GetEnvironmentVariables();
-    void SetEnvironmentVariable(string name, string? value);
+    public abstract string? GetEnvironmentVariable(string name);
+    public abstract IReadOnlyDictionary<string, string> GetEnvironmentVariables();
+    public abstract void SetEnvironmentVariable(string name, string? value);
 
-    ProcessStartInfo GetProcessStartInfo();
-    Process StartProcess(ProcessStartInfo startInfo);
-    Process StartProcess(string fileName);
-    Process StartProcess(string fileName, IEnumerable<string> arguments);
+    public abstract ProcessStartInfo GetProcessStartInfo();
+    public abstract Process StartProcess(ProcessStartInfo startInfo);
+    public abstract Process StartProcess(string fileName);
+    public abstract Process StartProcess(string fileName, IEnumerable<string> arguments);
 }
 ```
 
-The `ITaskExecutionContext` is not thread-safe. Task authors who spawn multiple threads within their task implementation must provide their own synchronization when accessing the execution context from multiple threads. However, each task receives its own isolated context object, so synchronization with other concurrent tasks is not required.
+The `ExecutionContext` that MSBuild provides is not thread-safe. Task authors who spawn multiple threads within their task implementation must provide their own synchronization when accessing the execution context from multiple threads. However, each task receives its own isolated context object, so synchronization with other concurrent tasks is not required.
 
 ### Path Handling Types
 
@@ -248,7 +253,15 @@ public bool Execute(...)
 }
 ```
 
-## Interface Evolution Strategy
+### Alternative: Interfaces
+Alternatively, ExecutionContext could be an implementation of the `ITaskExecutionContext` interface.
+
+```csharp
+public interface ITaskExecutionContext
+{
+    // Same methods as in abstract class TaskExecutionContext
+}
+```
 
 To handle future updates without breaking existing implementations, we will create versioned interfaces:
 
@@ -259,24 +272,9 @@ public interface ITaskExecutionContext2 : ITaskExecutionContext
 }
 ```
 
-### Alternative: Abstract Classes
+**Cons:**
+- Not backward compatible for customers who extend the class, while an abstract class can have a default implementation.
+- Worse performance compared to abstract classes.
 
-Alternatively, we can use abstract classes:
-
-```csharp
-public interface IThreadSafeTask : ITask
-{
-    TaskExecutionContext ExecutionContext { get; set; }
-}
-
-public abstract class TaskExecutionContext
-{ 
-    // Same methods as the interface, with default implementations
-}
-```
-
-**Note:**
-- Default implementations allow backward compatibility for customers who extend the class.
-
-**Question:** What are pros and cons of those two approaches? Which option is better?
+**Question:** What are the other pros and cons of these two approaches? Which option is better?
 
