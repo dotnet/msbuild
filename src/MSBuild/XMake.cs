@@ -716,6 +716,7 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
+                CommunicationsUtilities.Trace($"in XMake. Command line: {commandLine}");
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,
@@ -3468,6 +3469,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException, nodeReuse);
                 }
