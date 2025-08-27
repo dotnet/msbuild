@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Der benutzerdefinierte Ereignistyp '{0}' wird nicht unterstützt, weil alle benutzerdefinierten Ereignistypen veraltet waren. Verwenden Sie stattdessen Extended*EventArgs. Weitere Informationen: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">Der benutzerdefinierte Ereignistyp „{0}“ wird nicht unterstützt, da alle benutzerdefinierten Ereignistypen veraltet sind. Bitte verwenden Sie stattdessen Extended*EventArgs. Weitere Informationen finden Sie unter: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
@@ -325,7 +325,7 @@
       </trans-unit>
       <trans-unit id="Shared.GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Eine Ausnahme ist beim Erweitern einer fileSpec mit Globs aufgetreten: fileSpec: „{0}“, angenommen, es handelt sich um einen Dateinamen. Ausnahme: {1}</target>
+        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
