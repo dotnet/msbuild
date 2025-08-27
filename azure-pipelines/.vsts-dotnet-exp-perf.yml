@@ -1,12 +1,11 @@
 trigger:
-- main
-- vs*
+- exp/*
 
 # If defined here, these values are not overrideable
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
-#   SignType: real
+#   SignType: test
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -14,34 +13,37 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-  default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
-  default: true
+  default: false
 
 variables:
-  - group: DotNet-Blob-Feed
-  - group: DotNet-Symbol-Publish
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
   - name: SourceBranch
     value: $(IbcSourceBranchName)
-  # If we're not on a vs* branch, use main as our optprof collection branch
+  # Use main as our optprof collection branch by default in exp branches.
   - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
     - name: SourceBranch
       value: main
   # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
   - ${{ if ne(parameters.OptProfDropName, 'default') }}:
     - name: OptProfDrop
-      value: ${{ parameters.OptProfDropName }}
+      value: ${{parameters.OptProfDropName}}
     - name: SourceBranch
       value: ''
-  - name: _DotNetArtifactsCategory
-    value: .NETCore
-  - name: _DotNetValidationArtifactsCategory
-    value: .NETCoreValidation
+  - name: Codeql.Enabled
+    value: false
+  - group: DotNet-MSBuild-SDLValidation-Params
+  - group: AzureDevOps-Artifact-Feeds-Pats
+  - name: cfsNugetWarnLevel
+    value: warn
+  - name: nugetMultiFeedWarnLevel
+    value: none
+  - name: NugetSecurityAnalysisWarningLevel
+    value: none
 
 resources:
   repositories:
@@ -68,10 +70,10 @@ extends:
       jobs:
       - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
         parameters:
-          isExperimental: false
-          enableComponentGovernance: true
+          isExperimental: true
+          enableComponentGovernance: false
 
-    - template: /eng/common/templates-official/post-build/post-build.yml@self
+    - template: /eng/common/templates/post-build/post-build.yml@self
       parameters:
         publishingInfraVersion: 3
         enableSymbolValidation: true
