@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 // CR: We could move MSBuildApp.ExitType out of MSBuildApp
 using Microsoft.Build.Execution;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -19,7 +20,7 @@ namespace Microsoft.Build.CommandLine
     /// It will be responsible for:
     /// - Task execution
     /// - Communicating with the MSBuildApp process, specifically the TaskHostFactory
-    ///   (Logging messages, receiving Tasks from TaskHostFactory, sending results and other messages)
+    ///   (Logging messages, receiving Tasks from TaskHostFactory, sending results and other messages).
     /// </remarks>
     public static class OutOfProcTaskHost
     {
@@ -101,6 +102,7 @@ namespace Microsoft.Build.CommandLine
             {
                 OutOfProcTaskHostNode oopTaskHostNode = new OutOfProcTaskHostNode();
                 Exception taskHostShutDownException = null;
+                CommunicationsUtilities.Trace($"in OutOfProcTaskHost.");
                 NodeEngineShutdownReason taskHostShutDownReason = oopTaskHostNode.Run(out taskHostShutDownException);
 
                 if (taskHostShutDownException != null)

@@ -837,6 +837,9 @@ arquivo de resposta.
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -850,7 +853,7 @@ arquivo de resposta.
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parameters&gt;
                      Parâmetros para o registrador de console. (Forma abreviada: -clp)
                      Os parâmetros disponíveis são:
                         PerformanceSummary–Mostrar tempo gasto em tarefas, destinos
