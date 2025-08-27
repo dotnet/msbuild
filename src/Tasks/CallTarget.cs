@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <value>Array of target names.</value>
         /// <remarks>
-        /// This is a required parameter. If you want to build the 
+        /// This is a required parameter. If you want to build the
         /// default targets, use the &lt;MSBuild&gt; task and pass in Projects=$(MSBuildProjectFile).
         /// </remarks>
         public string[] Targets { get; set; }
@@ -68,8 +68,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // This is a list of string[].  That is, each element in the list is a string[].  Each
-            // string[] represents a set of target names to build.  Depending on the value 
-            // of the RunEachTargetSeparately parameter, we each just call the engine to run all 
+            // string[] represents a set of target names to build.  Depending on the value
+            // of the RunEachTargetSeparately parameter, we each just call the engine to run all
             // the targets together, or we call the engine separately for each target.
             List<string[]> targetLists = MSBuild.CreateTargetLists(Targets, RunEachTargetSeparately);
 

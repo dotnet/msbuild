@@ -574,7 +574,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
@@ -626,7 +626,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
@@ -680,7 +680,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Tests that any escaped xml in config file, is treated well
-        /// Note that this comes for free with the current implementation using the 
+        /// Note that this comes for free with the current implementation using the
         /// framework api to access section in the config file
         /// </summary>
         [Test]
@@ -819,7 +819,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
@@ -868,7 +868,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.None
                                                        );
@@ -920,7 +920,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
@@ -950,7 +950,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
@@ -973,7 +973,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.Registry
                                                        );
@@ -1019,7 +1019,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.ConfigurationFile
                                                        );
@@ -1068,7 +1068,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            new ToolsetRegistryReader(new MockRegistryKey(testRegistryPath)),
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Registry
                                                        );
@@ -1089,10 +1089,10 @@ namespace Microsoft.Build.UnitTests
             currentVersionRegistryKey.SetValue("DefaultToolsVersion", "2.0");
             RegistryKey key1 = toolsVersionsRegistryKey.CreateSubKey("2.0");
             key1.SetValue("MSBuildBinPath", @"D:\some\foo|bar\path\");
-            
+
             ToolsetCollection values = new ToolsetCollection(new Engine(ToolsetDefinitionLocations.None));
 
-            // should throw... 
+            // should throw...
             string defaultToolsVersion = ToolsetReader.ReadAllToolsets
                                                        (
                                                            values,
@@ -1130,7 +1130,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            null,
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.ConfigurationFile
                                                        );
@@ -1162,7 +1162,7 @@ namespace Microsoft.Build.UnitTests
                                                            values,
                                                            null,
                                                            new ToolsetConfigurationReader(new ReadApplicationConfiguration(ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest)),
-                                                           new BuildPropertyGroup(), 
+                                                           new BuildPropertyGroup(),
                                                            new BuildPropertyGroup(),
                                                            ToolsetDefinitionLocations.ConfigurationFile
                                                        );
@@ -1243,7 +1243,7 @@ namespace Microsoft.Build.UnitTests
                                                            ToolsetDefinitionLocations.ConfigurationFile
                                                        );
         }
-        
+
         [Test]
         [ExpectedException(typeof(InvalidToolsetDefinitionException))]
         public void CannotSetReservedPropertyInConfigFile()
@@ -1295,7 +1295,7 @@ namespace Microsoft.Build.UnitTests
                                                            ToolsetDefinitionLocations.Registry
                                                        );
         }
-        
+
         /// <summary>
         /// Properties defined in previously processed toolset definitions should
         /// not affect the evaluation of subsequent toolset definitions.
@@ -1335,7 +1335,7 @@ namespace Microsoft.Build.UnitTests
                                                        );
 
             Assertion.AssertEquals(2, values.Count);
-            
+
             Assertion.AssertEquals(@"D:\20\some\folder\on\disk", values["2.0"].ToolsPath);
             Assertion.AssertEquals(2, values["2.0"].BuildProperties.Count);
             Assertion.AssertEquals(@"another", values["2.0"].BuildProperties["p1"].Value);
@@ -1463,7 +1463,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Property pointing to itself - should not hang :-)
             RegistryValidRegistryExpressionHelper
-                (@"$(Registry:HKEY_CURRENT_USER\" + testRegistryPath + @"\ToolsVersions\2.0@p)", 
+                (@"$(Registry:HKEY_CURRENT_USER\" + testRegistryPath + @"\ToolsVersions\2.0@p)",
                  @"$(Registry:HKEY_CURRENT_USER\" + testRegistryPath + @"\ToolsVersions\2.0@p)");
         }
 
@@ -1707,8 +1707,8 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Test the case where nothing is specified in the config file
-        /// Note that config file not present is same as config file 
-        /// with no MSBuildToolsets Section 
+        /// Note that config file not present is same as config file
+        /// with no MSBuildToolsets Section
         /// </summary>
         [Test]
         public void GetToolsetData_ConfigFileNotPresent()
@@ -2097,7 +2097,7 @@ namespace Microsoft.Build.UnitTests
                        <property name=""gp1"" value=""v2""/>
                        <property name=""p2"" value=""$(gp1)""/>
                      </toolset>
-                   </msbuildToolsets> 
+                   </msbuildToolsets>
                  </configuration>");
 
             Engine e = new Engine(ToolsetDefinitionLocations.None);
@@ -2105,7 +2105,7 @@ namespace Microsoft.Build.UnitTests
 
             BuildPropertyGroup globalProperties = e.GlobalProperties;
             globalProperties.SetProperty("gp1", "gv1");
-            
+
             BuildPropertyGroup initialProperties = new BuildPropertyGroup();
             initialProperties.ImportProperties(e.EnvironmentProperties);
             initialProperties.ImportProperties(globalProperties);
@@ -2150,7 +2150,7 @@ namespace Microsoft.Build.UnitTests
         protected MockRegistryKey(RegistryKey wrappedKey, RegistryKey registryHive)
             : base(wrappedKey, registryHive)
         { }
-        
+
         /// <summary>
         /// Construct the mock key with a wrapper
         /// </summary>

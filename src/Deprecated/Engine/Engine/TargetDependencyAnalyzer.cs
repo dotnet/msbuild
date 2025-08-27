@@ -208,14 +208,14 @@ namespace Microsoft.Build.BuildEngine
                          * At this point, we know the following:
                          * 1) the target has outputs
                          * 2) the target has NO discrete outputs
-                         * 
+                         *
                          * This implies:
                          * 1) the target only references vectors (incl. transforms) in its outputs
                          * 2) all vectors referenced in the outputs are also referenced in the inputs
                          * 3) the referenced vectors are not empty
-                         * 
+                         *
                          * We can thus conclude: the target MUST have (non-discrete) inputs
-                         * 
+                         *
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
                         Debug.Assert(GetItemSpecsFromItemVectors(itemVectorsInTargetInputs).Count > 0, "The target must have inputs.");
@@ -755,8 +755,8 @@ namespace Microsoft.Build.BuildEngine
         /// each "partition" Hashtable is indexed by the item vector itself.
         /// </remarks>
         /// <owner>SumedhK</owner>
-        /// <param name="attributeContainingItems">The XML attribute which we're operating on here.  
-        /// The sole purpose of passing in this parameter is to be able to provide line/column number 
+        /// <param name="attributeContainingItems">The XML attribute which we're operating on here.
+        /// The sole purpose of passing in this parameter is to be able to provide line/column number
         /// information in the event there's an error.</param>
         /// <param name="items"></param>
         /// <param name="bucket"></param>
@@ -918,7 +918,7 @@ namespace Microsoft.Build.BuildEngine
             // Algorithm: walk through all the outputs to find the oldest output
             //            walk through the inputs as far as we need to until we find one that's newer (if any)
 
-            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely): 
+            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely):
             //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
             //         in the cases I've seen, and adding this optimization would make the code hard to read.
 
@@ -1200,7 +1200,7 @@ namespace Microsoft.Build.BuildEngine
 
         #endregion
 
-        // the project directory, all relative paths are 
+        // the project directory, all relative paths are
         // relative to here
         private string projectDirectory;
         // the target to analyze

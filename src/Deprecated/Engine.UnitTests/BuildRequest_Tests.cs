@@ -60,8 +60,8 @@ namespace Microsoft.Build.UnitTests
             Assert.IsTrue(string.Compare(buildProperty, "Value", StringComparison.OrdinalIgnoreCase) == 0, "Expected hashtable to contain a property group with a value of value");
             Assert.IsTrue((firstConstructorRequest.TargetNames.Length == 1) && (string.Compare("Build", firstConstructorRequest.TargetNames[0], StringComparison.OrdinalIgnoreCase) == 0), "Expected to have one target with a value of Build");
             Assert.IsTrue(string.Compare("ProjectFileName", firstConstructorRequest.ProjectFileName, StringComparison.OrdinalIgnoreCase) == 0, "Expected project file to be called ProjecFileName");
-      
-        
+
+
         }
 
         /// <summary>
@@ -158,8 +158,8 @@ namespace Microsoft.Build.UnitTests
         {
             int nodeProxyId = 1;
             string projectFileName = "ProjectFileName";
-            string[] targetNames = null; 
-            
+            string[] targetNames = null;
+
             Dictionary<string, string> dictionary = null;
             int requestId = 1;
 
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
             targetNames = new string[] { "Build" };
             buildRequest = new BuildRequest(nodeProxyId, projectFileName, targetNames, (IDictionary)dictionary, null, requestId, false, false);
             Assert.IsTrue(string.Compare("Build", buildRequest.GetTargetNamesList(),StringComparison.OrdinalIgnoreCase)==0, "Expected to see Build as the targetNamesList");
-           
+
             //Test the case where we pass in multiple targets
             targetNames = new string[] {"Build","Build2"};
             buildRequest = new BuildRequest(nodeProxyId, projectFileName, targetNames, (IDictionary)dictionary, null, requestId, false, false);

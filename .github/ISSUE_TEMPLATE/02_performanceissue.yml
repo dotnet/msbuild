@@ -1,7 +1,7 @@
 name: 📉 Performance Issue
 description: Report a performance issue or regression.
 title: "[Performance]: "
-labels: ["performance", "needs-triage"]
+labels: ["performance"]
 body:
   - type: textarea
     attributes:

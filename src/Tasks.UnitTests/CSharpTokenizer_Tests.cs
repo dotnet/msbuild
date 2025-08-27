@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
             Special whitespace handling.
                 Horizontal tab character (U+0009)
                 Vertical tab character (U+000B)
-                Form feed character (U+000C)  
+                Form feed character (U+000C)
         */
         [Fact]
         public void SpecialWhitespace() { AssertTokenize("\x09\x0b\x0c\x0d", ".Whitespace"); }
@@ -75,15 +75,15 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LeftHalfOfUnbalanceMultilineCommentWithStuff() { AssertTokenize("/* unbalanced\x0d", ".EndOfFileInsideComment"); }
 
-        // If the last character of the source file is a Control-Z character (U+001A), this character is deleted. 
+        // If the last character of the source file is a Control-Z character (U+001A), this character is deleted.
         [Fact]
         public void NothingPlustControlZatEOF() { AssertTokenize("\x1A", "", "", 0); }
         [Fact]
         public void SomethingPlusControlZatEOF() { AssertTokenize("// My comment\x1A", "// My comment\x0d", ".Comment.Whitespace"); }
 
-        // A carriage-return character (U+000D) is added to the end of the source file if that source file is non-empty and if the last character 
-        // of the source file is not a carriage return (U+000D), a line feed (U+000A), a line separator (U+2028), or a paragraph separator 
-        // (U+2029). 
+        // A carriage-return character (U+000D) is added to the end of the source file if that source file is non-empty and if the last character
+        // of the source file is not a carriage return (U+000D), a line feed (U+000A), a line separator (U+2028), or a paragraph separator
+        // (U+2029).
         [Fact]
         public void NoEOLatEOF() { AssertTokenize("// My comment", "// My comment\x0d", ".Comment.Whitespace"); }
         [Fact]
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
              ".Keyword.Whitespace.Identifier.Whitespace.OpenScope.Whitespace.Keyword.Whitespace.Identifier.Whitespace.OpenScope.CloseScope.Whitespace.CloseScope.Whitespace");
         }
 
-        // If a keyword has '@' in front, then its treated as an identifier. 
+        // If a keyword has '@' in front, then its treated as an identifier.
         [Fact]
         public void EscapedKeywordMakesIdentifier()
         {
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidHexIntegerWithNoneValid() { AssertTokenize("0xG\x0d", ".ExpectedValidHexDigit"); }
 
-        // Hex literal long suffix: U u L l UL Ul uL ul LU Lu lU lu 
+        // Hex literal long suffix: U u L l UL Ul uL ul LU Lu lU lu
         [Fact]
         public void HexIntegerLiteralUpperU() { AssertTokenize("0x123FU\x0d", ".HexIntegerLiteral.Whitespace"); }
         [Fact]
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void HexIntegerLiteralLowerLLowerU() { AssertTokenize("0x123Flu\x0d", ".HexIntegerLiteral.Whitespace"); }
 
-        // Decimal literal long suffix: U u L l UL Ul uL ul LU Lu lU lu 
+        // Decimal literal long suffix: U u L l UL Ul uL ul LU Lu lU lu
         [Fact]
         public void DecimalIntegerLiteralUpperU() { AssertTokenize("1234U\x0d", ".DecimalIntegerLiteral.Whitespace"); }
         [Fact]
@@ -241,9 +241,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenize
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
-        * Also, the source must be regenerated exactly when the tokens are concatenated 
+        * Also, the source must be regenerated exactly when the tokens are concatenated
         * back together,
         */
         private static void AssertTokenize(string source, string expectedTokenKey)
@@ -254,9 +254,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenizeUnicode
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
-        * Also, the source must be regenerated exactly when the tokens are concatenated 
+        * Also, the source must be regenerated exactly when the tokens are concatenated
         * back together,
         */
         private static void AssertTokenizeUnicode(string source, string expectedTokenKey)
@@ -267,9 +267,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenize
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
-        * Also, the source must be regenerated exactly when the tokens are concatenated 
+        * Also, the source must be regenerated exactly when the tokens are concatenated
         * back together,
         */
         private static void AssertTokenize(
@@ -283,9 +283,9 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenizeUnicode
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
-        * Also, the source must be regenerated exactly when the tokens are concatenated 
+        * Also, the source must be regenerated exactly when the tokens are concatenated
         * back together,
         */
         private static void AssertTokenizeUnicode(
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenize
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
         * Also compare the source that is regenerated by concatenating all of the tokens
         * to 'expectedSource'.
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenizeUnicode
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
         * Also compare the source that is regenerated by concatenating all of the tokens
         * to 'expectedSource'.
@@ -331,7 +331,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenizeUnicode
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
         * Also compare the source that is regenerated by concatenating all of the tokens
         * to 'expectedSource'.
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
         * Method:  AssertTokenize
-        * 
+        *
         * Tokenize a string ('source') and compare it to the expected set of tokens.
         * Also compare the source that is regenerated by concatenating all of the tokens
         * to 'expectedSource'.
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests
            int expectedLastLineNumber)
         {
             // This version of AssertTokenize tests several different encodings.
-            // The reason is that we want to be sure each of these works in the 
+            // The reason is that we want to be sure each of these works in the
             // various encoding formats supported by C#
             AssertTokenizeStream(StreamHelpers.StringToStream(source), expectedSource, expectedTokenKey, expectedLastLineNumber);
             AssertTokenizeStream(StreamHelpers.StringToStream(source, System.Text.Encoding.Unicode), expectedSource, expectedTokenKey, expectedLastLineNumber);
@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests
 
         /*
          * Method:  AssertTokenizeStream
-         * 
+         *
          * Tokenize a string ('source') and compare it to the expected set of tokens.
          * Also compare the source that is regenerated by concatenating all of the tokens
          * to 'expectedSource'.

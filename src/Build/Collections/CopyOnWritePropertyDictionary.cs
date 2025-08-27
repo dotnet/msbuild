@@ -15,11 +15,11 @@ namespace Microsoft.Build.Collections
 {
     /// <summary>
     /// A dictionary of unordered property or metadata name/value pairs, with copy-on-write semantics.
-    /// 
+    ///
     /// The copy-on-write semantics are only possible if the contained type is immutable, which currently
     /// means it can only be used for ProjectMetadataInstance's.
     /// USE THIS DICTIONARY ONLY FOR IMMUTABLE TYPES. OTHERWISE USE PROPERTYDICTIONARY.
-    /// 
+    ///
     /// </summary>
     /// <remarks>
     /// The value that this adds over IDictionary&lt;string, T&gt; is:
@@ -27,9 +27,9 @@ namespace Microsoft.Build.Collections
     ///     - enforces that key = T.Name
     ///     - default enumerator is over values
     ///     - (marginal) enforces the correct key comparer
-    /// 
+    ///
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
-    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and 
+    /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
     ///
     /// This collection is safe for concurrent readers and a single writer.
@@ -149,7 +149,7 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            // Copy both backing collections to locals 
+            // Copy both backing collections to locals
             ImmutableDictionary<string, T> thisBacking = _backing;
             ImmutableDictionary<string, T> thatBacking = other._backing;
 
@@ -299,7 +299,7 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Clone. As we're copy on write, this 
+        /// Clone. As we're copy on write, this
         /// should be cheap.
         /// </summary>
         internal CopyOnWritePropertyDictionary<T> DeepClone()

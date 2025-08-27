@@ -576,6 +576,26 @@ namespace Microsoft.Build.UnitTests
             emptyParametersAllowed.ShouldBeFalse();
         }
 
+        [Theory]
+        [InlineData("featureavailability")]
+        [InlineData("fa")]
+        public void FeatureAvailibilitySwitchIdentificationTest(string switchName)
+        {
+            CommandLineSwitches.IsParameterizedSwitch(
+                switchName,
+                out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
+                out string duplicateSwitchErrorMessage,
+                out bool multipleParametersAllowed,
+                out string missingParametersErrorMessage,
+                out _,
+                out _);
+
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.FeatureAvailability);
+            duplicateSwitchErrorMessage.ShouldBeNull();
+            multipleParametersAllowed.ShouldBeTrue();
+            missingParametersErrorMessage.ShouldNotBeNullOrEmpty();
+        }
+
         [Fact]
         public void TargetsSwitchParameter()
         {
@@ -1053,6 +1073,44 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("Clean", parameters[0]);
             Assert.Equal("RESOURCES", parameters[1]);
             Assert.Equal("build", parameters[2]);
+        }
+
+        /// <summary>
+        /// Verifies that the Target property is unquoted and parsed properly.
+        /// This will remove the possibility to have the ';' in the target name. 
+        /// </summary>
+        [Theory]
+        [InlineData("/t:Clean;Build", "\"Clean;Build\"")]
+        [InlineData("/t:Clean;Build", "Clean;Build")]
+        public void ParameterizedSwitchTargetQuotedTest(string commandLineArg, string switchParameters)
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, commandLineArg, switchParameters, true, true, false);
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
+
+            switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(2);
+            switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean");
+            switches[CommandLineSwitches.ParameterizedSwitch.Target][1].ShouldBe("Build");
+            switches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBe(commandLineArg);
+        }
+
+        /// <summary>
+        /// Verifies that the parsing behavior of quoted target properties is not changed when ChangeWave configured.
+        /// </summary>
+        [Fact]
+        public void ParameterizedSwitchTargetQuotedChangeWaveTest()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.10");
+
+                CommandLineSwitches switches = new CommandLineSwitches();
+                switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:Clean;Build", "\"Clean;Build\"", true, true, false);
+                switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
+
+                switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(1);
+                switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean;Build");
+            }
         }
 
         [Fact]

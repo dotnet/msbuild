@@ -25,12 +25,12 @@
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\shared\unittests\FileUtilities_Tests.cs" />
     <Compile Include="..\shared\unittests\FileMatcher_Tests.cs" />
-    <Compile Include="..\shared\unittests\ObjectModelHelpers.cs" />
-    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
-    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
+    <Compile Include="..\UnitTests.Shared\ObjectModelHelpers.cs" />
+    <Compile Include="..\UnitTests.Shared\MockEngine.cs" />
+    <Compile Include="..\UnitTests.Shared\MockLogger.cs" />
     <Compile Include="..\shared\unittests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\SolutionParser_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\StreamHelpers.cs" />
+    <Compile Include="..\UnitTests.Shared\StreamHelpers.cs" />
     <Compile Include="..\shared\unittests\TypeLoader_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\XmakeAttributes_Tests.cs">
       <Link>XmakeAttributes_Tests.cs</Link>

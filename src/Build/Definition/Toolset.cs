@@ -902,7 +902,7 @@ namespace Microsoft.Build.Evaluation
 
             try
             {
-                
+
                 List<ProjectPropertyInstance> reservedProperties = new List<ProjectPropertyInstance>();
 
                 reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.binPath, EscapingUtilities.Escape(ToolsPath), mayBeReserved: true));
@@ -915,8 +915,6 @@ namespace Microsoft.Build.Evaluation
                 reservedProperties.Add(ProjectPropertyInstance.Create(ReservedPropertyNames.msbuildRuntimeType,
 #if RUNTIME_TYPE_NETCORE
                     Traits.Instance.ForceEvaluateAsFullFramework ? "Full" : "Core",
-#elif MONO
-                    NativeMethodsShared.IsMono ? "Mono" : "Full");
 #else
                     "Full",
 #endif

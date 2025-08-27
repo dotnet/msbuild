@@ -2683,17 +2683,8 @@ namespace Microsoft.Build.UnitTests
             string asmPath = CreateNewFrameworkAndGetAssembliesPath(env, frameworkName, frameworkVersionWithV, customFrameworkDir);
 
             var stdLibPaths = getPathToReferenceAssemblies(frameworkName, frameworkVersion, frameworkProfile, customFrameworkDir, fallbackSearchPaths);
-            if (NativeMethodsShared.IsMono)
-            {
-                stdLibPaths.Count.ShouldBe(2);
-                stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar, stdLibPaths[0]);
-                stdLibPaths[1].ShouldBe(asmPath + Path.DirectorySeparatorChar);
-            }
-            else
-            {
-                stdLibPaths.Count.ShouldBe(1);
-                stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar, stdLibPaths[0]);
-            }
+            stdLibPaths.Count.ShouldBe(1);
+            stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar, stdLibPaths[0]);
         }
 
         [Fact]
@@ -2726,22 +2717,11 @@ namespace Microsoft.Build.UnitTests
 
         private static string CreateNewFrameworkAndGetAssembliesPath(TestEnvironment env, string frameworkName, string frameworkVersion, string rootDir)
         {
-            string frameworkListXml;
-            if (NativeMethodsShared.IsMono)
-            {
-                // Mono uses an extra attribute to point to the location of the corresponding
-                // assemblies
-                frameworkListXml = @"<?xml version=""1.0"" encoding=""utf-8""?>
-                    <FileList  Name=""{0}"" TargetFrameworkDirectory=""..\assemblies"" />";
-            }
-            else
-            {
-                frameworkListXml = @"<?xml version=""1.0"" encoding=""utf-8""?>
-                    <FileList  Name=""{0}""/>";
-            }
+            string frameworkListXml = @"<?xml version=""1.0"" encoding=""utf-8""?>
+                <FileList  Name=""{0}""/>";
 
             string redistPath = Path.Combine(rootDir, frameworkName, frameworkVersion, "RedistList");
-            string asmPath = Path.Combine(rootDir, frameworkName, frameworkVersion, NativeMethodsShared.IsMono ? "assemblies" : string.Empty);
+            string asmPath = Path.Combine(rootDir, frameworkName, frameworkVersion);
 
             env.CreateFolder(redistPath);
             env.CreateFolder(asmPath);

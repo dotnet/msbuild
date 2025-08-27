@@ -2,6 +2,12 @@
 
 MSBuild recognizes a [few types of references](https://learn.microsoft.com/previous-versions/visualstudio/visual-studio-2015/msbuild/common-msbuild-project-items) (here we are mainly interested in `ProjectReference`, `PackageReference`, `Reference` aka assembly reference) and offers optional mechanisms to tailor some aspects of the references workings - transitive references resolution, multitargeted references resolution, copying references to output directory.
 
+## Access to transitive dependencies
+
+Following sections will describe details of transitive dependencies accessibility for `ProjectReference`, `PackageReference` and `Reference`. To summarize the content: Projects requiring access to particular dependency (project, package or assembly) should always explicitly declare the required dependency (via the appropriate item). 
+
+The possibility of the transitive access should however be acknowledged and wherever the strict separation of architectural layers is required - a dedicated metadata (`DisableTransitiveProjectReferences` or `PrivateAssets`) should be used.
+
 ## .NET SDK projects and access to transitive references
 
 [.NET SDK projects](https://learn.microsoft.com/dotnet/core/project-sdk/overview) by default make all transitive references accessible as if they were direct references.
@@ -100,6 +106,24 @@ public class PersonsAccessor
 
 **Notes:**
    `PrivateAssets` metadatum (and it's counterparts `IncludeAssets` and `ExcludeAssets`) is applicable to `PackageReference` and controls exposure of dependencies to the consuming projects, not the current project. It is currently not possible to prevent access to package references from within directly referencing project - this is purely decision of the package itself (as it can define it's dependencies as `PrivateAssets`).
+
+## Access to transitive assembly references
+
+`Reference` (AKA assembly reference) referenced by a project is not transitively accessible from projects referencing the said directly referencing project:
+
+```xml
+<ItemGroup>
+  <!-- This reference will only be accessible from the current project.
+       Projects referencing this project won't be able to access it. -->
+  <Reference Include="SomeAssemblyReference">
+    <HintPath>path\to\SomeAssemblyReference.dll</HintPath>
+  </Reference>
+</ItemGroup>
+```
+
+As described in [Access to transitive project references](#access-to-transitive-project-references) - access to transitive references can lead to breaking architectural layering and hence the lack of the transitive access is desired.
+
+All the projects requiring access to some particular assembly reference should explicitly declare such dependency via the `Reference` item.
 
 ## Not copying dependencies to output
 

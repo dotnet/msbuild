@@ -196,7 +196,7 @@ namespace Microsoft.Build.BuildEngine
         #region Data
         // The file logger which will do the actual logging of the node's build output
         private FileLogger nodeFileLogger;
-        // Reference for the central logger 
+        // Reference for the central logger
         private IEventRedirector buildEventRedirector;
 
         // The Id of the node the forwardingLogger is attached to

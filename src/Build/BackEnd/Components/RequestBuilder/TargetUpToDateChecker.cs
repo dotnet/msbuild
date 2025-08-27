@@ -22,12 +22,12 @@ namespace Microsoft.Build.BackEnd
     using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
     using ItemVectorPartition = System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>;
     // ItemVectorPartitionCollection is designed to contains a set of project items which have possibly undergone transforms.
-    // The outer dictionary it usually keyed by item type, so if items originally came from 
+    // The outer dictionary it usually keyed by item type, so if items originally came from
     // an expression like @(Foo), the outer dictionary would have a key of "Foo" in it.
     // Under that is a dictionary of expressions to items resulting from the expression.
     // For instance, if items were generated from an expression @(Foo->'%(Filename).obj'), then
-    // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be 
-    // contained a list of the items which were created/transformed using that pattern.    
+    // the inner dictionary would have a key of "@(Foo->'%(Filename).obj')", in which would be
+    // contained a list of the items which were created/transformed using that pattern.
     using ItemVectorPartitionCollection = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Collections.Generic.IList<Microsoft.Build.Execution.ProjectItemInstance>>>;
 
     /// <summary>
@@ -192,14 +192,14 @@ namespace Microsoft.Build.BackEnd
                          * At this point, we know the following:
                          * 1) the target has outputs
                          * 2) the target has NO discrete outputs
-                         * 
+                         *
                          * This implies:
                          * 1) the target only references vectors (incl. transforms) in its outputs
                          * 2) all vectors referenced in the outputs are also referenced in the inputs
                          * 3) the referenced vectors are not empty
-                         * 
+                         *
                          * We can thus conclude: the target MUST have (non-discrete) inputs
-                         * 
+                         *
                          */
                         ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
                         ErrorUtilities.VerifyThrow(!IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
@@ -970,7 +970,7 @@ namespace Microsoft.Build.BackEnd
             // Algorithm: walk through all the outputs to find the oldest output
             //            walk through the inputs as far as we need to until we find one that's newer (if any)
 
-            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely): 
+            // PERF -- we could change this to ensure that we walk the shortest list first (because we walk that one entirely):
             //         possibly the outputs list isn't actually the shortest list. However it always is the shortest
             //         in the cases I've seen, and adding this optimization would make the code hard to read.
 

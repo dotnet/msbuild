@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 namespace Microsoft.Build.Tasks.InteropUtilities
 {
     /// <summary>
-    /// Create an RCW for the current context/apartment. 
+    /// Create an RCW for the current context/apartment.
     /// This improves performance of cross apartment calls as the CLR will only
     /// cache marshalled pointers for an RCW created in the current context.
     /// </summary>
@@ -33,8 +33,8 @@ namespace Microsoft.Build.Tasks.InteropUtilities
         /// <param name="rcw">The RCW created in the original context.</param>
         public RCWForCurrentContext(T rcw)
         {
-            // To improve performance we create a new RCW for the current context so we get 
-            // the caching behaviour of the marshaled pointer. 
+            // To improve performance we create a new RCW for the current context so we get
+            // the caching behaviour of the marshaled pointer.
             // See RCW::GetComIPForMethodTableFromCache in ndp\clr\src\VM\RuntimeCallableWrapper.cpp
             IntPtr iunknownPtr = Marshal.GetIUnknownForObject(rcw);
             Object objInCurrentCtx;

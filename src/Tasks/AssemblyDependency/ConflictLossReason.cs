@@ -6,7 +6,7 @@
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// If this reference lost in a conflict with another reference, this reason explains 
+    /// If this reference lost in a conflict with another reference, this reason explains
     /// why.
     /// </summary>
     internal enum ConflictLossReason
@@ -27,8 +27,8 @@ namespace Microsoft.Build.Tasks
         InsolubleConflict,
 
         /// <summary>
-        /// In this case, this reference was a dependency and the other reference was 
-        /// primary (specified in the project file). 
+        /// In this case, this reference was a dependency and the other reference was
+        /// primary (specified in the project file).
         /// </summary>
         WasNotPrimary,
 

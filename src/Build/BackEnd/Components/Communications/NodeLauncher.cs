@@ -93,13 +93,9 @@ namespace Microsoft.Build.BackEnd
 
             string exeName = msbuildLocation;
 
-#if RUNTIME_TYPE_NETCORE || MONO
-            // Mono automagically uses the current mono, to execute a managed assembly
-            if (!NativeMethodsShared.IsMono)
-            {
-                // Run the child process with the same host as the currently-running process.
-                exeName = CurrentHost.GetCurrentHost();
-            }
+#if RUNTIME_TYPE_NETCORE
+            // Run the child process with the same host as the currently-running process.
+            exeName = CurrentHost.GetCurrentHost();
 #endif
 
             if (!NativeMethodsShared.IsWindows)

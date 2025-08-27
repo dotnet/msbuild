@@ -95,11 +95,7 @@ namespace Microsoft.Build.Engine.UnitTests
 <ItemGroup>
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
-#if MONO
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Theory]
-#endif
         public void VerifySimpleProfiledData(string elementName, string body)
         {
             string contents = $@"
@@ -131,11 +127,7 @@ namespace Microsoft.Build.Engine.UnitTests
 <ItemGroup>
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
-#if MONO
-        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Theory]
-#endif
         public void VerifySimpleProfiledDataWithoutProjectLoadSetting(string elementName, string body)
         {
             string contents = $@"
@@ -149,11 +141,7 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Contains(profiledElements, location => location.ElementName == elementName);
         }
 
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyProfiledData()
         {
             var result = BuildAndGetProfilerResult(SpecData);
@@ -186,11 +174,7 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Single(profiledElements.Where(location => location.ElementName == "Target"));
         }
 
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyProfiledGlobData()
         {
             string contents = @"
@@ -220,11 +204,7 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(2, totalGlobLocation.NumberOfHits);
         }
 
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyParentIdData()
         {
             string contents = @"
@@ -264,11 +244,7 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(target.Id, messageTarget.ParentId);
         }
 
-#if MONO
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
-#else
         [Fact]
-#endif
         public void VerifyIdsSanity()
         {
             var result = BuildAndGetProfilerResult(SpecData);

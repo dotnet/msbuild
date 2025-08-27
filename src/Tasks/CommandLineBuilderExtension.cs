@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Returns true if the parameter is empty in spirits, 
+        /// Returns true if the parameter is empty in spirits,
         /// even if it contains the separators and white space only
         /// Split on the characters provided.
         /// </summary>

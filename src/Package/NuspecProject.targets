@@ -1,7 +1,7 @@
 ﻿<Project>
 
   <!-- Common logic for projects which create a NuGet package from a .nuspec -->
-  
+
   <PropertyGroup>
     <BeforePack>$(BeforePack);SetNuspecProperties</BeforePack>
 

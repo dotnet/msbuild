@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd
     }
 
     /// <summary>
-    /// This interface represents an object which aids objects in serializing and 
+    /// This interface represents an object which aids objects in serializing and
     /// deserializing INodePackets.
     /// </summary>
     /// <remarks>
@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
         /// Returns the binary reader.
         /// </summary>
         /// <remarks>
-        /// This should ONLY be used when absolutely necessary for translation.  It is generally unnecessary for the 
+        /// This should ONLY be used when absolutely necessary for translation.  It is generally unnecessary for the
         /// translating object to know the direction of translation.  Use one of the Translate methods instead.
         /// </remarks>
         BinaryReader Reader
@@ -90,7 +90,7 @@ namespace Microsoft.Build.BackEnd
         /// Returns the binary writer.
         /// </summary>
         /// <remarks>
-        /// This should ONLY be used when absolutely necessary for translation.  It is generally unnecessary for the 
+        /// This should ONLY be used when absolutely necessary for translation.  It is generally unnecessary for the
         /// translating object to know the direction of translation.  Use one of the Translate methods instead.
         /// </remarks>
         BinaryWriter Writer
@@ -222,11 +222,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="value">The value to be translated.</param>
         void Translate(ref TimeSpan value);
 
-        // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext, 
-        // which is what current implementations of this method use.  However, it also does not ever need to translate 
+        // MSBuildTaskHost is based on CLR 3.5, which does not have the 6-parameter constructor for BuildEventContext,
+        // which is what current implementations of this method use.  However, it also does not ever need to translate
         // BuildEventContexts, so it should be perfectly safe to compile this method out of that assembly. I am compiling
         // the method out of the interface as well, instead of just making the method empty, so that if we ever do need
-        // to translate BuildEventContexts from the CLR 3.5 task host, it will become immediately obvious, rather than 
+        // to translate BuildEventContexts from the CLR 3.5 task host, it will become immediately obvious, rather than
         // failing or misbehaving silently.
 #if !CLR2COMPATIBILITY
 
@@ -326,7 +326,7 @@ namespace Microsoft.Build.BackEnd
         void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
 
         /// <summary>
-        /// Translates a dictionary of { string, T }.  
+        /// Translates a dictionary of { string, T }.
         /// </summary>
         /// <typeparam name="T">The reference type for the values, which implements INodePacketTranslatable.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>

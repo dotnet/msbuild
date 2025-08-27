@@ -156,7 +156,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (ContinueOnError)
             {
-                // Convert the error into a warning.  We do this because the whole point of 
+                // Convert the error into a warning.  We do this because the whole point of
                 // ContinueOnError is that a project author expects that the task might fail,
                 // but wants to ignore the failures.  This implies that we shouldn't be logging
                 // errors either, because you should never have a successful build with errors.
@@ -225,7 +225,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 // We'd like to add the project file to the message, but since this property
                 // is read-only on the BuildWarningEventArgs type, this requires creating a new
-                // instance.  However, if some task logged a custom warning type, we don't want 
+                // instance.  However, if some task logged a custom warning type, we don't want
                 // to impolitely throw the custom type data away.
 
                 string message = GetUpdatedMessage(e.File, e.Message, parentProjectFullFileName);
@@ -562,7 +562,7 @@ namespace Microsoft.Build.BuildEngine
             ILease lease = (ILease)base.InitializeLifetimeService();
 
             // Set how long a lease should be initially. Once a lease expires
-            // the remote object will be disconnected and it will be marked as being availiable 
+            // the remote object will be disconnected and it will be marked as being availiable
             // for garbage collection
             int initialLeaseTime = 1;
 
@@ -584,7 +584,7 @@ namespace Microsoft.Build.BuildEngine
             // increase the lease time allowing the object to stay in memory
             sponsor = new ClientSponsor();
 
-            // When a new lease is requested lets make it last 1 minutes longer. 
+            // When a new lease is requested lets make it last 1 minutes longer.
             int leaseExtensionTime = 1;
 
             string leaseExtensionTimeFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDENGINEPROXYLEASEEXTENSIONTIME");

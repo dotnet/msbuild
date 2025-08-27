@@ -35,14 +35,14 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// URI for the msbuild xml schema
         /// </summary>
         internal static readonly Uri SchemaUrlMSBuild = new Uri("http://schemas.microsoft.com/developer/msbuild/2003");
-        
+
         /// <summary>
         /// Path for the msbuild xml schema
         /// </summary>
         internal static readonly string SchemaPathMSBuild = Path.Combine(SuiteBinPath, @"Microsoft.Build.xsd");
 
         /// <summary>
-        /// Field for suitbinPath, reference SuiteBinPath instead. 
+        /// Field for suitbinPath, reference SuiteBinPath instead.
         /// </summary>
         private static string suiteBinPath = null;
 
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Overload for project file content. 
+        /// Overload for project file content.
         /// </summary>
         /// <returns>Project File Content</returns>
         internal static string CreateTempProjectFile(string projContent)
@@ -83,11 +83,11 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Generate a C:\ drive path that is over a certain minimum length
         /// </summary>
-        /// 
+        ///
         internal static string GenerateLongPath(int minLength)
         {
             string folderName = "directory";
-            string drive = @"C:" + Path.DirectorySeparatorChar; 
+            string drive = @"C:" + Path.DirectorySeparatorChar;
             string longPath = drive;
             while (longPath.Length < (minLength + folderName.Length)) // does not consider slashes
             {
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             {
                 if (import.ProjectPath == projPath)
                 {
-                    return import;           
+                    return import;
                 }
             }
 
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
             return nodes;
         }
-        
+
         /// <summary>
         /// Find and return a specified BuildProperty from a given project
         /// </summary>
@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 
             return null;
         }
-           
+
         /// <summary>
         /// Find and return a specified BuildPropertyGroup from a given BuildProperty in a project
         /// </summary>
@@ -312,13 +312,13 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// Construct a namespace manager 
+        /// Construct a namespace manager
         /// </summary>
         private static XmlNamespaceManager GetNsManager(XmlDocument xmlDoc)
         {
             XmlNamespaceManager namespaceManager = new XmlNamespaceManager(xmlDoc.NameTable);
             namespaceManager.AddNamespace("msb", CompatibilityTestHelpers.SchemaUrlMSBuild.ToString());
             return namespaceManager;
-        }      
+        }
     }
 }
