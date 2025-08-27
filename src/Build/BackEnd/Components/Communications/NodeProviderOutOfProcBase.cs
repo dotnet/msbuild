@@ -788,7 +788,10 @@ namespace Microsoft.Build.BackEnd
                     _exitPacketState = ExitPacketState.ExitPacketQueued;
                 }
 
+                Thread.MemoryBarrier();
                 _packetWriteQueue.Enqueue(packet);
+
+                Thread.MemoryBarrier();
                 _packetEnqueued.Release();
             }
 
