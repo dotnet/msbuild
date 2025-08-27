@@ -148,8 +148,8 @@ extends:
               $branch = $branchSegments[-1]
               Write-Host "Setting source branch to '$branch'"
               Write-Host "##vso[task.setvariable variable=SourceBranchName;isoutput=true]$branch"
-        - script: |
-            echo "##vso[build.updatebuildnumber]$(Build.BuildNumber) - $(MSBuild_CI_SourceVersion)"
+              Write-Host "updating build number with build commit"
+              Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber).$(MSBuild_CI_SourceVersion)"
           displayName: 'Append source version to build name'
         - task: MicroBuildRetainVstsDrops@1
           name: MicroBuildRetainVstsDrops_2
