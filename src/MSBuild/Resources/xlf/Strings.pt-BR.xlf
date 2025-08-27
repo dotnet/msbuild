@@ -837,9 +837,6 @@ arquivo de resposta.
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -854,41 +851,38 @@ arquivo de resposta.
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parâmetros para o logger do console. (forma abreviada: -clp)
+                     Parâmetros para o registrador de console. (Forma abreviada: -clp)
                      Os parâmetros disponíveis são:
-                        PerformanceSummary--Mostra o tempo gasto em tarefas, alvos
-                            e projetos.
-                        Resumo--Mostra o resumo do erro e do aviso no final.
-                        NoSummary--Não mostra o resumo de erros e avisos no
-                            fim.
-                        ErrorOnly--Mostrar apenas erros.
-                        WarningsOnly--Mostra apenas avisos.
-                        NoItemAndPropertyList--Não mostra a lista de itens e
-                            properties no início de cada compilação do projeto.
-                        ShowCommandLine--Mostra mensagens TaskCommandLineEvent
-                        ShowTimestamp--Exibe o timestamp como um prefixo para qualquer
+                        PerformanceSummary–Mostrar tempo gasto em tarefas, destinos
+                            e nos projetos.
+                        Summary--Mostrar resumo de erros e avisos no final.
+                        NoSummary – Não mostrar resumo de erros e avisos no
+                            final.
+                        ErrorsOnly – Mostrar somente os erros.
+                        WarningsOnly – mostrar somente os avisos.
+                        NoItemAndPropertyList--Não mostrar lista de itens e
+                            propriedades no início de cada compilação de projeto.
+                        ShowCommandLine--Mostrar mensagens do TaskCommandLineEvent
+                        ShowTimestamp--Exibir o Timestamp como prefixo de qualquer
                             mensagem.
-                        ShowEventId--Mostra eventId para eventos iniciados, concluídos
-                            eventos e mensagens
-                        ForceNoAlign--Não alinha o texto ao tamanho de
-                            o buffer do console
-                        DisableConsoleColor--Use as cores padrão do console
-                            para todas as mensagens de registro.
-                        DisableMPLogging-- Desativa o multiprocessador
-                            estilo de registro de saída ao executar em
-                            modo não multiprocessador.
-                        EnableMPLogging--Habilita o log do multiprocessador
-                            estilo mesmo quando executado em não multiprocessador
-                            modo. Esse estilo de criação de log está ativado por padrão.
-                        ForceConsoleColor--Use as cores do console ANSI mesmo se
-                            o console não suporta isso
-                        PreferConsoleColor--Use as cores do console ANSI somente se
-                            o console de destino suporta isso
+                        ShowEventId--Mostrar eventId para eventos iniciados,
+                            eventos concluídos e mensagens
+                        ForceNoAlign--Não alinha o texto ao tamanho do
+                            buffer do console
+                        DisableConsoleColor--Usar as cores padrão do console
+                            para todas as mensagens de log.
+                        EnableMPLogging--Habilitar o registro multiprocessador
+                            estilo mesmo ao executar em modo não multiprocessador
+                            modo. Este estilo de registro está habilitado por padrão.
+                        ForceConsoleColor--Usar cores ANSI do console mesmo se
+                            o console não for compatível com elas
+                        PreferConsoleColor--Usar cores ANSI do console somente se
+                            o console de destino suportar
                      Verbosity--substitui a configuração -verbosity para este
-                            registrador.
+                            agente.
                      Exemplo:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                                                 Verbosidade=mínimo
+                                                 Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:

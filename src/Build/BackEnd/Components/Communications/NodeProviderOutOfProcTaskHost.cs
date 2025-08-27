@@ -647,6 +647,8 @@ namespace Microsoft.Build.BackEnd
             // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
             string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
+            bool enableNodeReuse = ComponentHost.BuildParameters.EnableNodeReuse && Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse);
+
             IList<NodeContext> nodeContexts;
             int nodeId = (int)hostContext;
 
@@ -663,7 +665,7 @@ namespace Microsoft.Build.BackEnd
                 // There is always one task host per host context so we always create just 1 one task host node here.      
                 nodeContexts = GetNodes(
                     runtimeHostPath,
-                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
+                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), enableNodeReuse, ComponentHost.BuildParameters.LowPriority),
                     nodeId,
                     this,
                     handshake,
@@ -687,7 +689,7 @@ namespace Microsoft.Build.BackEnd
 
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
+                string.Format(commandLineArgsPlaceholder, string.Empty, enableNodeReuse, ComponentHost.BuildParameters.LowPriority),
                 nodeId,
                 this,
                 new Handshake(hostContext),

@@ -75,6 +75,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskLoggingContext _taskLoggingContext;
 
+        /// <summary>
+        /// If yes, then this is a task that will for any reason be run in a task host.
+        /// This might be due to the task not supporting the new single threaded interface
+        /// or due to the project requesting it to be run out of process.
+        /// </summary>
+        private bool _isTaskHostFactory;
+
         #endregion
 
         /// <summary>
@@ -259,7 +266,7 @@ namespace Microsoft.Build.BackEnd
                 IDictionary<string, TaskPropertyInfo> taskParameters,
                 string taskElementContents,
                 IDictionary<string, string> taskFactoryIdentityParameters,
-                bool taskHostFactoryExplicitlyRequested,
+                bool taskHostExplicitlyRequested,
                 TargetLoggingContext targetLoggingContext,
                 ElementLocation elementLocation,
                 string taskProjectFile)
@@ -272,7 +279,11 @@ namespace Microsoft.Build.BackEnd
                 _factoryIdentityParameters = new Dictionary<string, string>(taskFactoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
             }
 
-            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
+            _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
+
+            _isTaskHostFactory = (taskFactoryIdentityParameters != null
+                 && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
+                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase));
 
             try
             {
@@ -381,7 +392,8 @@ namespace Microsoft.Build.BackEnd
                     taskLoggingContext,
                     buildComponentHost,
                     mergedParameters,
-                    _loadedType
+                    _loadedType,
+                    _isTaskHostFactory
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif

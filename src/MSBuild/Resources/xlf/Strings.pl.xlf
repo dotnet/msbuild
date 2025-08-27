@@ -844,9 +844,6 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -861,39 +858,35 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Parametry rejestratora konsoli. (Krótka wersja: -clp)
-                     Dostępne parametry:
-                        PerformanceSummary--pokazuje czas spędzony na zadaniach, elementach docelowych
-                        i projektach.
-                        Summary--pokazuje na końcu podsumowanie błędów i ostrzeżeń.
-                        NoSummary--nie pokazuje na końcu podsumowania błędów
-                        i ostrzeżeń.
-                        ErrorsOnly--pokazuje tylko błędy.
-                        WarningsOnly--pokazuje tylko ostrzeżenia.
-                        NoItemAndPropertyList--nie pokazuje listy elementów i
-                        właściwości na początku każdej kompilacji projektu.
-                        ShowCommandLine--pokazuje komunikaty TaskCommandLineEvent
-                        ShowTimestamp--wyświetla sygnaturę czasową jako prefiks każdego
-                        komunikatu.
-                        ShowEventId--pokazuje identyfikator zdarzenia dla rozpoczętych zdarzeń, zakończonych
-                        zdarzeń i komunikatów.
-                        ForceNoAlign--nie dopasowuje tekstu do rozmiaru
-                        buforu konsoli.
-                        DisableConsoleColor--używa domyślnych kolorów konsoli
-                            dla wszystkich komunikatów dotyczących rejestrowania.
-                        DisableMPLogging--wyłącza styl rejestrowania
-                        wieloprocesorowego wyników podczas działania w
-                        trybie nie-wieloprocesorowym.
-                        EnableMPLogging--włącza styl rejestrowania wieloprocesorowego
-                        nawet podczas działania w trybie nie-wieloprocesorowym
-                        Ten styl rejestrowania jest włączony domyślnie.
-                        ForceConsoleColor--używa kolorów konsoli ANSI nawet wtedy
-,
-                            gdy konsola ich nie obsługuje
-                        PreferConsoleColor--używa kolorów konsoli ANSI tylko gdy
-                            konsola docelowa obsługuje tę funkcję
-                        Verbosity--zastępuje ustawienie -szczegółowość dla tego
-                        rejestratora.
+                     Parametry rejestratora konsoli. (Krótka forma: -clp)
+                     Dostępne parametry to:
+                        PerformanceSummary — pokaż czas poświęcony na zadania, cele
+                            i projekty.
+                        Summary — pokaż podsumowanie błędów i ostrzeżeń na końcu.
+                        NoSummary — nie pokazuj podsumowania błędów i ostrzeżeń na
+                            końcu.
+                        ErrorsOnly — pokaż tylko błędy.
+                        WarningsOnly — pokaż tylko ostrzeżenia.
+                        NoItemAndPropertyList — nie pokazuj listy elementów i
+                            właściwości na początku każdej kompilacji projektu.
+                        ShowCommandLine--Show TaskCommandLineEvent wiadomości
+                        ShowTimestamp — wyświetl sygnaturę czasową jako prefiks dowolnej
+                            wiadomości.
+                        ShowEventId — pokaż identyfikator zdarzenia dla rozpoczętych zdarzeń, zakończonych
+                            zdarzeń i komunikatów
+                        ForceNoAlign — nie powoduje wyrównania tekstu do rozmiaru
+                            bufora konsoli
+                        DisableConsoleColor — użyj domyślnych kolorów konsoli
+                            dla wszystkich komunikatów rejestrowania.
+                        EnableMPLogging — włącz styl rejestrowania wieloprocesorowego
+                            nawet w przypadku uruchamiania w środowisku innym niż wieloprocesorowe
+                            tryb. Ten styl rejestrowania jest domyślnie włączony.
+                        ForceConsoleColor — użyj kolorów konsoli ANSI, nawet jeśli
+                            konsola nie obsługuje tej funkcji
+                        PreferConsoleColor — użyj kolorów konsoli ANSI tylko wtedy, gdy
+                            konsola docelowa ją obsługuje
+                     Szczegółowość — nadpisuje ustawienie -verbosity dla tego
+                            rejestratora.
                      Przykład:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal

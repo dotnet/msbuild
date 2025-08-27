@@ -673,7 +673,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                ExpressionShredder.ItemExpressionCapture match = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
+                ExpressionShredder.ItemExpressionCapture? match = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
                     expression, ExpanderOptions.ExpandItems, elementLocation);
 
                 if (match == null)
@@ -681,7 +681,7 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
-                AddReferencedItemLists(operationBuilder, match);
+                AddReferencedItemLists(operationBuilder, match.Value);
             }
         }
 
