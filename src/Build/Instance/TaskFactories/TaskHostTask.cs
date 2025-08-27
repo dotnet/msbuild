@@ -299,7 +299,7 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    CommunicationsUtilities.Trace($"in TaskHostTask.");
+                    CommunicationsUtilities.Trace($"in TaskHostTask. RUNTIME {runtime}; Architecture: {architecture}; Task Name: {_taskType.Type.Name}. ");
                     _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: !_taskHostFactoryExplicitlyRequested, taskHostParameters: _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
                 }

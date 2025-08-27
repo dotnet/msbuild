@@ -22,6 +22,7 @@ using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContex
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
+using System.Runtime.InteropServices;
 
 #nullable disable
 
@@ -286,7 +287,8 @@ namespace Microsoft.Build.BackEnd
                  && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase);
             CommunicationsUtilities.Trace($"in AssemblyTaskFactory. " +
                 $"taskFactoryIdentityParameters: {taskFactoryIdentityParameters != null}." +
-                $"isTaskHostFactory: {_isTaskHostFactory}");
+                $"isTaskHostFactory: {_isTaskHostFactory}" +
+                $" RUNTIME {taskFactoryIdentityParameters[XMakeAttributes.runtime]}; Architecture: {taskFactoryIdentityParameters[XMakeAttributes.architecture]}; Name: {taskName}");
 
             try
             {

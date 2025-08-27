@@ -1489,7 +1489,7 @@ namespace Microsoft.Build.Execution
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
-                    CommunicationsUtilities.Trace($"in TaskRegistry. isTaskHostFactory: {isTaskHostFactory}");
+                    CommunicationsUtilities.Trace($"in TaskRegistry. isTaskHostFactory: {isTaskHostFactory}. NAME {RegisteredName}");
 
                     _taskFactoryParameters ??= new();
                     TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
