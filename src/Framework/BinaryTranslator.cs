@@ -22,6 +22,14 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class BinaryTranslator
     {
+        /// <summary>
+        /// Presence of this key in the dictionary indicates that it was null.
+        /// </summary>
+        /// <remarks>
+        /// This constant is needed for a workaround concerning serializing BuildResult with a version.
+        /// </remarks>
+        private const string SpecialKeyForDictionaryBeingNull = "=MSBUILDDICTIONARYWASNULL=";
+
 #nullable enable
         /// <summary>
         /// Returns a read-only serializer.
@@ -588,6 +596,53 @@ namespace Microsoft.Build.BackEnd
                     count => new Dictionary<string, string>(count, comparer));
 
                 dictionary = (Dictionary<string, string>)copy;
+            }
+
+            /// <summary>
+            /// Translates a dictionary of { string, string } with additional entries. The dictionary might be null despite being populated.
+            /// </summary>
+            /// <param name="dictionary">The dictionary to be translated.</param>
+            /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
+            /// <param name="additionalEntries">Additional entries to be translated</param>
+            /// <param name="additionalEntriesKeys">Additional entries keys</param>
+            /// <remarks>
+            /// This overload is needed for a workaround concerning serializing BuildResult with a version.
+            /// It deserializes additional entries together with the main dictionary.
+            /// </remarks>
+            public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                dictionary = new Dictionary<string, string>(count, comparer);
+                additionalEntries = new();
+
+                for (int i = 0; i < count; i++)
+                {
+                    string key = null;
+                    Translate(ref key);
+                    string value = null;
+                    Translate(ref value);
+                    if (additionalEntriesKeys.Contains(key))
+                    {
+                        additionalEntries[key] = value;
+                    }
+                    else if (comparer.Equals(key, SpecialKeyForDictionaryBeingNull))
+                    {
+                        // Presence of special key SpecialKeyForDictionaryBeingNull indicates that the dictionary was null.
+                        dictionary = null;
+
+                        // If the dictionary is null, we should have only two keys: SpecialKeyForDictionaryBeingNull, SpecialKeyForVersion
+                        Debug.Assert(count == 2);
+                    }
+                    else if (dictionary is not null)
+                    {
+                        dictionary[key] = value;
+                    }
+                }
             }
 
             public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)
@@ -1259,6 +1314,72 @@ namespace Microsoft.Build.BackEnd
             {
                 IDictionary<string, string> copy = dictionary;
                 TranslateDictionary(ref copy, (NodePacketCollectionCreator<IDictionary<string, string>>)null);
+            }
+
+            /// <summary>
+            /// Translates a dictionary of { string, string } adding additional entries.
+            /// </summary>
+            /// <param name="dictionary">The dictionary to be translated.</param>
+            /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
+            /// <param name="additionalEntries">Additional entries to be translated.</param>
+            /// <param name="additionalEntriesKeys">Additional entries keys.</param>
+            /// <remarks>
+            /// This overload is needed for a workaround concerning serializing BuildResult with a version.
+            /// It serializes additional entries together with the main dictionary.
+            /// </remarks>
+            public void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys)
+            {
+                // Translate whether object is null
+                if ((dictionary is null) && ((additionalEntries is null) || (additionalEntries.Count == 0)))
+                {
+                    _writer.Write(false);
+                    return;
+                }
+                else
+                {
+                    // Translate that object is not null
+                    _writer.Write(true);
+                }
+
+                // Writing a dictionary, additional entries and special key if dictionary was null. We need the special key for distinguishing whether the initial dictionary was null or empty.
+                int count = (dictionary is null ? 1 : 0) +
+                            (additionalEntries is null ? 0 : additionalEntries.Count) +
+                            (dictionary is null ? 0 : dictionary.Count);
+
+                _writer.Write(count);
+
+                // If the dictionary was null, serialize a special key SpecialKeyForDictionaryBeingNull.
+                if (dictionary is null)
+                {
+                    string key = SpecialKeyForDictionaryBeingNull;
+                    Translate(ref key);
+                    string value = string.Empty;
+                    Translate(ref value);
+                }
+
+                // Serialize additional entries
+                if (additionalEntries is not null)
+                {
+                    foreach (KeyValuePair<string, string> pair in additionalEntries)
+                    {
+                        string key = pair.Key;
+                        Translate(ref key);
+                        string value = pair.Value;
+                        Translate(ref value);
+                    }
+                }
+
+                // Serialize dictionary
+                if (dictionary is not null)
+                {
+                    foreach (KeyValuePair<string, string> pair in dictionary)
+                    {
+                        string key = pair.Key;
+                        Translate(ref key);
+                        string value = pair.Value;
+                        Translate(ref value);
+                    }
+                }
             }
 
             public void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> dictionaryCreator)

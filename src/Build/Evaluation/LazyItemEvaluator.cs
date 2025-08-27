@@ -46,14 +46,15 @@ namespace Microsoft.Build.Evaluation
         protected EvaluationContext EvaluationContext { get; }
 
         protected IFileSystem FileSystem => EvaluationContext.FileSystem;
+
         protected FileMatcher FileMatcher => EvaluationContext.FileMatcher;
 
         public LazyItemEvaluator(IEvaluatorData<P, I, M, D> data, IItemFactory<I, I> itemFactory, LoggingContext loggingContext, EvaluationProfiler evaluationProfiler, EvaluationContext evaluationContext)
         {
             _outerEvaluatorData = data;
-            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext);
+            _outerExpander = new Expander<P, I>(_outerEvaluatorData, _outerEvaluatorData, evaluationContext, loggingContext);
             _evaluatorData = new EvaluatorData(_outerEvaluatorData, _itemLists);
-            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext);
+            _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, evaluationContext, loggingContext);
             _itemFactory = itemFactory;
             _loggingContext = loggingContext;
             _evaluationProfiler = evaluationProfiler;
@@ -89,8 +90,6 @@ namespace Microsoft.Build.Evaluation
                     expanderOptions,
                     GetCurrentDirectoryForConditionEvaluation(element, lazyEvaluator),
                     element.ConditionLocation,
-                    lazyEvaluator._loggingContext.LoggingService,
-                    lazyEvaluator._loggingContext.BuildEventContext,
                     lazyEvaluator.FileSystem,
                     loggingContext: lazyEvaluator._loggingContext);
                 MSBuildEventSource.Log.EvaluateConditionStop(condition, result);
@@ -618,7 +617,7 @@ namespace Microsoft.Build.Evaluation
 
         private void ProcessItemSpec(string rootDirectory, string itemSpec, IElementLocation itemSpecLocation, OperationBuilder builder)
         {
-            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory, loggingContext: _loggingContext);
+            builder.ItemSpec = new ItemSpec<P, I>(itemSpec, _outerExpander, itemSpecLocation, rootDirectory);
 
             foreach (ItemSpecFragment fragment in builder.ItemSpec.Fragments)
             {
@@ -629,7 +628,7 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander, LoggingContext loggingContext = null)
+        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander)
         {
             // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
             // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
@@ -643,8 +642,7 @@ namespace Microsoft.Build.Evaluation
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Value,
                     expanderOptions,
-                    metadatumElement.Location,
-                    loggingContext);
+                    metadatumElement.Location);
 
                 yield return expander.ExpandIntoStringLeaveEscaped(
                     metadatumElement.Condition,
@@ -659,7 +657,7 @@ namespace Microsoft.Build.Evaluation
             {
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
-                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander, _loggingContext));
+                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander));
                 if (itemsAndMetadataFound.Items != null)
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)

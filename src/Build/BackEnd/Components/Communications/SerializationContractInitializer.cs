@@ -37,7 +37,8 @@ namespace Microsoft.Build.BackEnd
                 new(typeof(SchedulerCircularDependencyException), (msg, inner) => new SchedulerCircularDependencyException(msg, inner)),
                 new(typeof(RegistryException), (msg, inner) => new RegistryException(msg, inner)),
                 new(typeof(HostObjectException), (msg, inner) => new HostObjectException(msg, inner)),
-                new(typeof(UnbuildableProjectTypeException), (msg, inner) => new UnbuildableProjectTypeException(msg, inner)));
+                new(typeof(UnbuildableProjectTypeException), (msg, inner) => new UnbuildableProjectTypeException(msg, inner)),
+                new(typeof(CriticalTaskException), (msg, inner) => new CriticalTaskException(msg, inner)));
         }
     }
 }

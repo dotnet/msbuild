@@ -27,6 +27,11 @@
         <target state="translated">命令以返回碼 {0} 結束。</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">檔案鎖定者: "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: 在 "{0}" 找不到平台資訊清單檔案。</target>

@@ -38,7 +38,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
             bool isLeftNum = LeftChild.TryNumericEvaluate(state, out double leftNum);
             bool isLeftVersion = LeftChild.TryVersionEvaluate(state, out Version leftVersion);
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Evaluation
                     state.Condition,
                     /* helpfully display unexpanded token and expanded result in error message */
                     isLeftNum ? RightChild.GetUnexpandedValue(state) : LeftChild.GetUnexpandedValue(state),
-                    isLeftNum ? RightChild.GetExpandedValue(state, loggingContext) : LeftChild.GetExpandedValue(state, loggingContext));
+                    isLeftNum ? RightChild.GetExpandedValue(state) : LeftChild.GetExpandedValue(state));
             }
 
             return (isLeftNum, isLeftVersion, isRightNum, isRightVersion) switch

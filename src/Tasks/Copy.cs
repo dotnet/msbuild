@@ -970,7 +970,7 @@ namespace Microsoft.Build.Tasks
                         retries++;
                         Log.LogWarningWithCodeFromResources("Copy.Retrying", sourceFileState.Name,
                             destinationFileState.Name, retries, RetryDelayMilliseconds, e.Message,
-                            GetLockedFileMessage(destinationFileState.Name));
+                            LockCheck.GetLockedFileMessage(destinationFileState.Name));
 
                         // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
                         destinationFileState.Reset();
@@ -982,7 +982,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // Exception message is logged in caller
                         Log.LogErrorWithCodeFromResources("Copy.ExceededRetries", sourceFileState.Name,
-                            destinationFileState.Name, Retries, GetLockedFileMessage(destinationFileState.Name));
+                            destinationFileState.Name, Retries, LockCheck.GetLockedFileMessage(destinationFileState.Name));
                         throw;
                     }
                     else
@@ -996,7 +996,7 @@ namespace Microsoft.Build.Tasks
                     retries++;
                     Log.LogWarningWithCodeFromResources("Copy.Retrying", sourceFileState.Name,
                         destinationFileState.Name, retries, RetryDelayMilliseconds, String.Empty /* no details */,
-                        GetLockedFileMessage(destinationFileState.Name));
+                        LockCheck.GetLockedFileMessage(destinationFileState.Name));
 
                     // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
                     destinationFileState.Reset();
@@ -1006,7 +1006,7 @@ namespace Microsoft.Build.Tasks
                 else if (Retries > 0)
                 {
                     Log.LogErrorWithCodeFromResources("Copy.ExceededRetries", sourceFileState.Name,
-                        destinationFileState.Name, Retries, GetLockedFileMessage(destinationFileState.Name));
+                        destinationFileState.Name, Retries, LockCheck.GetLockedFileMessage(destinationFileState.Name));
                     return false;
                 }
                 else
@@ -1017,20 +1017,6 @@ namespace Microsoft.Build.Tasks
 
             // Canceling
             return false;
-        }
-
-        /// <summary>
-        /// Try to get a message to inform the user which processes have a lock on a given file.
-        /// </summary>
-        private static string GetLockedFileMessage(string file)
-        {
-            string message = string.Empty;
-            if (NativeMethodsShared.IsWindows)
-            {
-                message = LockCheck.GetLockedFileMessage(file);
-            }
-
-            return message;
         }
 
         /// <summary>

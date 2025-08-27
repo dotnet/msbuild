@@ -8,6 +8,7 @@ using System.IO;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -246,7 +247,8 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        Log.LogErrorWithCodeFromResources("Touch.CannotMakeFileWritable", file, e.Message);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
+                        Log.LogErrorWithCodeFromResources("Touch.CannotMakeFileWritable", file, e.Message, lockedFileMessage);
                         return false;
                     }
                 }
@@ -261,7 +263,8 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                Log.LogErrorWithCodeFromResources("Touch.CannotTouch", file, e.Message);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
+                Log.LogErrorWithCodeFromResources("Touch.CannotTouch", file, e.Message, lockedFileMessage);
                 return false;
             }
             finally

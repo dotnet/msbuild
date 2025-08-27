@@ -182,6 +182,10 @@ namespace Microsoft.Build.Logging
                     _forwardProjectContext = true;
                     isEventForwardingParameter = false;
                     break;
+                case RespectVerbosityDescription:
+                    _respectVerbosity = true;
+                    isEventForwardingParameter = false;
+                    break;
                 default:
                     isEventForwardingParameter = false;
                     break;
@@ -202,7 +206,7 @@ namespace Microsoft.Build.Logging
 
             ParseParameters(eventSource);
 
-            if (!_forwardingSetFromParameters)
+            if (_respectVerbosity || !_forwardingSetFromParameters)
             {
                 SetForwardingBasedOnVerbosity(eventSource);
             }
@@ -421,6 +425,7 @@ namespace Microsoft.Build.Logging
         private const string NoSummaryDescription = "NOSUMMARY";
         private const string ShowCommandLineDescription = "SHOWCOMMANDLINE";
         private const string ForwardProjectContextDescription = "FORWARDPROJECTCONTEXTEVENTS";
+        private const string RespectVerbosityDescription = "RESPECTVERBOSITY";
 
         #region Per-build Members
 
@@ -434,6 +439,12 @@ namespace Microsoft.Build.Logging
         /// if this is false the events to forward are based on verbosity else verbosity settings will be ignored
         /// </summary>
         private bool _forwardingSetFromParameters;
+
+        /// <summary>
+        /// Indicates if the parameters explicitly specified respecting of the verbosity (forwarding will
+        ///  be set based on verbosity, in addition to explicitly configured forwarding via parameters).
+        /// </summary>
+        private bool _respectVerbosity;
 
         /// <summary>
         /// Indicates if the events to forward should include project context events, if not

@@ -108,12 +108,15 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             project.AddItem("Compile", "Class1.cs");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
@@ -141,12 +144,15 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             project.AddItem("Compile", "Class2.cs");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
@@ -174,12 +180,14 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             project.AddItem("Compile", "Program.cs");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
@@ -192,7 +200,6 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 </Project>");
 
             string actual = writer.ToString();
-
             VerifyAssertLineByLine(expected, actual);
         }
 
@@ -204,12 +211,15 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   <ItemGroup>
   </ItemGroup>
 </Project>");
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
             project.AddItem("Compile", "Program.cs");
-            StringWriter writer = new EncodingStringWriter();
+            using StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -231,12 +241,14 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml);
             project.AddItem("Compile", "Program.cs");
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
@@ -263,15 +275,18 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
 
             var itemToRemove = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
             project.RemoveItem(itemToRemove);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
@@ -299,15 +314,18 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   </ItemGroup>
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
 
             var itemToEdit = project.GetItems("Compile").Single(item => item.EvaluatedInclude == "Class2.cs");
             itemToEdit.SetMetadataValue("ExcludeFromStyleCop", "true");
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-16""?>
@@ -339,11 +357,15 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
   />
 </Project>");
 
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)), ProjectCollection.GlobalProjectCollection,
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                content,
+                ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
 
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
 
             project.SaveLogicalProject(writer);
 
@@ -362,11 +384,14 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
         private void VerifyFormattingPreservedFromString(string projectContents)
         {
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectContents)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                projectContents,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: true);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
@@ -391,7 +416,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 ProjectRootElement xml = ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection,
                     preserveFormatting: true);
                 Project project = new Project(xml);
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
                 project.Save(writer);
 
                 string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
@@ -414,11 +439,14 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
         private void VerifyProjectReformattingFromString(string originalContents, string expectedContents)
         {
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(originalContents)),
+            using ProjectRootElementFromString projectRootElementFromString = new(
+                originalContents,
                 ProjectCollection.GlobalProjectCollection,
                 preserveFormatting: false);
+            ProjectRootElement xml = projectRootElementFromString.Project;
+
             Project project = new Project(xml);
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
@@ -443,7 +471,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
                 ProjectRootElement xml = ProjectRootElement.Open(file, ProjectCollection.GlobalProjectCollection,
                     preserveFormatting: false);
                 Project project = new Project(xml);
-                StringWriter writer = new StringWriter();
+                using StringWriter writer = new StringWriter();
                 project.Save(writer);
 
                 string expected = @"<?xml version=""1.0"" encoding=""utf-16""?>" +
@@ -508,7 +536,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             project.AddItem("ProjectReference", @"..\CLREXE\CLREXE.vcxproj",
                 new[] { new KeyValuePair<string, string>("metadata", "value") });
 
-            StringWriter writer = new EncodingStringWriter();
+            using StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
             string actual = writer.ToString();
@@ -533,7 +561,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             var item = project.AddItem("ProjectReference", @"..\CLREXE\CLREXE.vcxproj");
             item[0].SetMetadataValue("metadata", "value");
 
-            StringWriter writer = new EncodingStringWriter();
+            using StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
             string actual = writer.ToString();
@@ -554,7 +582,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             var item = project.AddItem("NotProjectReference", @"..\CLREXE\CLREXE.vcxproj");
             item[0].ItemType = "ProjectReference";
 
-            StringWriter writer = new EncodingStringWriter();
+            using StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
             string actual = writer.ToString();
@@ -577,7 +605,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
             item[0].ItemType = "ProjectReference";
 
             // StringWriter is UTF16 (will output xml declaration)
-            StringWriter writer = new StringWriter();
+            using StringWriter writer = new StringWriter();
             project.Save(writer);
 
             string actual = writer.ToString();
@@ -601,7 +629,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 
             // Should still output XML declaration even when using UTF8 (NewProjectFileOptions.IncludeXmlDeclaration
             // was specified)
-            StringWriter writer = new EncodingStringWriter();
+            using StringWriter writer = new EncodingStringWriter();
             project.Save(writer);
 
             string actual = writer.ToString();
@@ -616,7 +644,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests.Construction
 </Project>");
 
             Project project = new Project(NewProjectFileOptions.None);
-            StringWriter writer = new EncodingStringWriter(new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
+            using StringWriter writer = new EncodingStringWriter(new UTF8Encoding(encoderShouldEmitUTF8Identifier: true));
             project.Save(writer);
 
             string actual = writer.ToString();

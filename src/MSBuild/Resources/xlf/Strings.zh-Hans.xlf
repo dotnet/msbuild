@@ -160,6 +160,26 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="LongPaths">
+        <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
+        <target state="translated">基于 Windows 注册表项 LongPathsEnabled，LongPaths 功能为 {0}。</target>
+        <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
+      </trans-unit>
+      <trans-unit id="LongPaths_Disabled">
+        <source>disabled</source>
+        <target state="translated">已禁用</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Enabled">
+        <source>enabled</source>
+        <target state="translated">已启用</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Missing">
+        <source>not set</source>
+        <target state="translated">未设置</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">适用于 {1} MSBuild 版本 {0}</target>
@@ -1689,11 +1709,30 @@
       {4}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
-      <trans-unit id="TestSummary">
-        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="translated">测试运行 {0}。总计: {1} 失败: {2} 通过: {3} 跳过: {4}, 持续时间: {5} 秒</target>
-        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</note>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="translated">测试摘要: 总计: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="translated">持续时间: {0} 秒</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="translated">失败: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="translated">已跳过: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="translated">成功: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>

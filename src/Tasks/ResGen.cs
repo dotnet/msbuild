@@ -289,10 +289,11 @@ namespace Microsoft.Build.Tasks
                     // Default the filename if we need to - regardless of whether the STR was successfully generated
                     if (StronglyTypedFileName == null)
                     {
-                        CodeDomProvider provider;
+                        CodeDomProvider provider = null;
                         try
                         {
                             provider = CodeDomProvider.CreateProvider(StronglyTypedLanguage);
+                            StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(provider, outputFile.ItemSpec);
                         }
                         catch (System.Configuration.ConfigurationException)
                         {
@@ -306,8 +307,10 @@ namespace Microsoft.Build.Tasks
                             // logged an appropriate error.
                             return false;
                         }
-
-                        StronglyTypedFileName = ProcessResourceFiles.GenerateDefaultStronglyTypedFilename(provider, outputFile.ItemSpec);
+                        finally
+                        {
+                            provider?.Dispose();
+                        }
                     }
                 }
 
