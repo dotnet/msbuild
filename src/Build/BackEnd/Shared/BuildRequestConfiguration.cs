@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -122,7 +123,7 @@ namespace Microsoft.Build.BackEnd
         /// This is the set of targets which are currently building but which have not yet completed.
         /// { targetName -> globalRequestId }
         /// </summary>
-        private Dictionary<string, int> _activelyBuildingTargets;
+        private ConcurrentDictionary<string, int> _activelyBuildingTargets;
 
         /// <summary>
         /// The node where this configuration's master results are stored.
@@ -611,8 +612,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the set of targets currently building, mapped to the request id building them.
         /// </summary>
-        public Dictionary<string, int> ActivelyBuildingTargets => _activelyBuildingTargets ?? (_activelyBuildingTargets =
-                                                                      new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
+        public ConcurrentDictionary<string, int> ActivelyBuildingTargets => _activelyBuildingTargets ?? (_activelyBuildingTargets =
+                                                                      new ConcurrentDictionary<string, int>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.

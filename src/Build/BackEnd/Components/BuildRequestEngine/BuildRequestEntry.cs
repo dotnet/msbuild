@@ -180,8 +180,11 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrow(value == null || _requestBuilder == null, "Request Builder already set.");
-                _requestBuilder = value;
+                lock (GlobalLock)
+                {
+                    ErrorUtilities.VerifyThrow(value == null || _requestBuilder == null, "Request Builder already set.");
+                    _requestBuilder = value;
+                }
             }
         }
 
@@ -191,10 +194,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="configuration">The configuration to be resolved.</param>
         public void WaitForConfiguration(BuildRequestConfiguration configuration)
         {
-            ErrorUtilities.VerifyThrow(configuration.WasGeneratedByNode, "Configuration has already been resolved.");
+            lock (GlobalLock)
+            {
+                ErrorUtilities.VerifyThrow(configuration.WasGeneratedByNode, "Configuration has already been resolved.");
 
-            _unresolvedConfigurationsToIssue ??= new List<BuildRequestConfiguration>();
-            _unresolvedConfigurationsToIssue.Add(configuration);
+                _unresolvedConfigurationsToIssue ??= new List<BuildRequestConfiguration>();
+                _unresolvedConfigurationsToIssue.Add(configuration);
+            }
         }
 
         /// <summary>
@@ -277,11 +283,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public List<BuildRequestConfiguration> GetUnresolvedConfigurationsToIssue()
         {
-            if (_unresolvedConfigurationsToIssue != null)
+            lock (GlobalLock)
             {
-                List<BuildRequestConfiguration> configurationsToIssue = _unresolvedConfigurationsToIssue;
-                _unresolvedConfigurationsToIssue = null;
-                return configurationsToIssue;
+                if (_unresolvedConfigurationsToIssue != null)
+                {
+                    List<BuildRequestConfiguration> configurationsToIssue = _unresolvedConfigurationsToIssue;
+                    _unresolvedConfigurationsToIssue = null;
+                    return configurationsToIssue;
+                }
             }
 
             return null;
@@ -292,7 +301,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string[] GetActiveTargets()
         {
-            return RequestConfiguration.ActivelyBuildingTargets.Keys.ToArray();
+            lock (GlobalLock)
+            {
+                return RequestConfiguration.ActivelyBuildingTargets.Keys.ToArray();
+            }
         }
 
         /// <summary>
@@ -462,7 +474,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void WaitForCancelCompletion()
         {
-            _requestBuilder?.WaitForCancelCompletion();
+            IRequestBuilder builder;
+            lock (GlobalLock)
+            {
+                builder = _requestBuilder;
+            }
+
+            builder?.WaitForCancelCompletion();
         }
 
         /// <summary>
