@@ -293,6 +293,9 @@
   <data name="ToolTask.InvalidTerminationTimeout" xml:space="preserve">
     <value>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</value>
   </data>
+  <data name="LockCheck.FileLocked">
+    <value>The file is locked by: "{0}"</value>
+  </data>
   <!--
         The Utilities message bucket is: MSB6001 - MSB6200
 

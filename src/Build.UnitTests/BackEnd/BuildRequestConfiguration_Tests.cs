@@ -182,7 +182,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestData data1 = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(data1, "2.0");
             Assert.Null(config1.Project);
-            Project project = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace' />"))));
+            using ProjectFromString projectFromString = new(ObjectModelHelpers.CleanupFileContents(@"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace' />"));
+            Project project = projectFromString.Project;
 
             ProjectInstance projectInstance = project.CreateProjectInstance();
             config1.Project = projectInstance;
@@ -274,11 +275,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> globalProperties = new(StringComparer.OrdinalIgnoreCase);
             globalProperties["ThreeIn"] = "3";
 
-            Project project = new Project(
-                XmlReader.Create(new StringReader(projectBody)),
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(
+                projectBody,
                 globalProperties,
                 ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                new ProjectCollection());
+                collection);
+            Project project = projectFromString.Project;
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
 
@@ -350,11 +353,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             globalProperties["ThreeIn"] = "3";
             globalProperties["BazIn"] = "bazfile";
 
-            Project project = new Project(
-                XmlReader.Create(new StringReader(projectBody)),
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(projectBody,
                 globalProperties,
                 ObjectModelHelpers.MSBuildDefaultToolsVersion,
-                new ProjectCollection());
+                collection);
+            Project project = projectFromString.Project;
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
             BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, Array.Empty<string>(), null), "2.0");
@@ -454,7 +458,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             globalProperties["ThreeIn"] = "3";
             globalProperties["BazIn"] = "bazfile";
 
-            Project project = new Project(XmlReader.Create(new StringReader(projectBody)), globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, new ProjectCollection());
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(projectBody, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, collection);
+            Project project = projectFromString.Project;
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
             BuildRequestConfiguration configuration = new BuildRequestConfiguration(new BuildRequestData(instance, Array.Empty<string>(), null), "2.0");
@@ -549,8 +555,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 ".Cleanup();
 
             var projectCollection = _env.CreateProjectCollection().Collection;
+            using var xmlReader = XmlReader.Create(new StringReader(projectContents));
             var project = Project.FromXmlReader(
-                XmlReader.Create(new StringReader(projectContents)),
+                xmlReader,
                 new ProjectOptions
                 {
                     ProjectCollection = projectCollection

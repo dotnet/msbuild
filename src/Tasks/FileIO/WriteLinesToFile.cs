@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -148,7 +149,8 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(File.ItemSpec);
+                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message, lockedFileMessage);
                     success = false;
                 }
             }

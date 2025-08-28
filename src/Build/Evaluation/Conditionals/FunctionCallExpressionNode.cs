@@ -30,7 +30,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate node as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (String.Equals(_functionName, "exists", StringComparison.OrdinalIgnoreCase))
             {

@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -66,7 +67,8 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e)
                     {
-                        Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationFile.FullName);
+                        Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message, lockedFileMessage);
 
                         return false;
                     }
@@ -86,7 +88,7 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e)
                 {
-                    Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message);
+                    Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message, string.Empty);
                 }
             }
             finally

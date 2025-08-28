@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -19,12 +17,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets or sets the name of the event.
         /// </summary>
-        public string EventName { get; set; }
+        public string? EventName { get; set; }
 
         /// <summary>
         /// Gets or sets a list of properties associated with the event.
         /// </summary>
-        public IDictionary<string, string> Properties { get; set; } = new Dictionary<string, string>();
+        public IDictionary<string, string?> Properties { get; set; } = new Dictionary<string, string?>();
 
         internal override void WriteToStream(BinaryWriter writer)
         {
@@ -34,13 +32,17 @@ namespace Microsoft.Build.Framework
             int count = Properties?.Count ?? 0;
             writer.Write7BitEncodedInt(count);
 
+            if (Properties == null)
+            {
+                return;
+            }
+
             foreach (var kvp in Properties)
             {
                 writer.Write(kvp.Key);
-                writer.Write(kvp.Value);
+                writer.WriteOptionalString(kvp.Value);
             }
         }
-
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);
@@ -51,7 +53,7 @@ namespace Microsoft.Build.Framework
             for (int i = 0; i < count; i++)
             {
                 string key = reader.ReadString();
-                string value = reader.ReadString();
+                string? value = reader.ReadOptionalString();
                 Properties.Add(key, value);
             }
         }

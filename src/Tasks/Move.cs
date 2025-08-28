@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (ArgumentException e)
                     {
-                        Log.LogErrorWithCodeFromResources("Move.Error", SourceFiles[i].ItemSpec, DestinationFolder.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("Move.Error", SourceFiles[i].ItemSpec, DestinationFolder.ItemSpec, e.Message, string.Empty);
 
                         // Clear the outputs.
                         DestinationFiles = Array.Empty<ITaskItem>();
@@ -169,7 +169,8 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("Move.Error", sourceFile, destinationFile, e.Message);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(sourceFile);
+                    Log.LogErrorWithCodeFromResources("Move.Error", sourceFile, destinationFile, e.Message, lockedFileMessage);
                     success = false;
 
                     // Continue with the rest of the list
