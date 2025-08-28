@@ -180,7 +180,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     }
                 }
             }
-        } 
+        }
 
         /// <summary>
         /// Verifies that various parameter types can be correctly transmitted to and received from
