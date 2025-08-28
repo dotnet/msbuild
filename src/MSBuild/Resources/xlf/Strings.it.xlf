@@ -320,7 +320,7 @@
 	</source>
         <target state="translated">  -check
                      Abilita BuildChecks durante la compilazione.
-                     BuildCheck consente di valutare le regole per garantire le proprietà 
+                     BuildCheck consente di valutare le regole per garantire le proprietà
                      della compilazione. Per altre informazioni, vedere aka.ms/buildcheck
 	</target>
         <note>
@@ -711,7 +711,7 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      separatamente.
 
                      Qualsiasi file di risposta denominato "msbuild.rsp" viene usato
-                     automaticamente dai percorsi seguenti: 
+                     automaticamente dai percorsi seguenti:
                      (1) la directory di msbuild.exe
                      (2) la directory della prima compilazione di soluzione o progetto
 </target>
