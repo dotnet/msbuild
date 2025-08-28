@@ -44,7 +44,7 @@ variables:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
-    value: false # disable loc for vs17.11
+    value: true # Enable loc for vs17.12
   - name: Codeql.Enabled
     value: true
   # ensures we don't build and push experimental versions to official feeds as release versions
