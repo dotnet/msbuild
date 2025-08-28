@@ -19,7 +19,7 @@
                         <UseVerifiableInstrumentation>False</UseVerifiableInstrumentation>
                         <EnableStaticNativeInstrumentation>True</EnableStaticNativeInstrumentation>
                         <EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
-                        <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
+                        <EnableStaticManagedInstrumentation>False</EnableStaticManagedInstrumentation>
                         <EnableDynamicManagedInstrumentation>False</EnableDynamicManagedInstrumentation>
                     </CodeCoverage>
                 </Configuration>
