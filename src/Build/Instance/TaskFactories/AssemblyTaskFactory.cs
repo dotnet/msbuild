@@ -287,7 +287,9 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace($"in AssemblyTaskFactory. " +
                 $"taskFactoryIdentityParameters: {taskFactoryIdentityParameters != null}." +
                 $"isTaskHostFactory: {_isTaskHostFactory}" +
-                $" RUNTIME {taskFactoryIdentityParameters[XMakeAttributes.runtime]}; Architecture: {taskFactoryIdentityParameters[XMakeAttributes.architecture]}; Name: {taskName}");
+                $" RUNTIME {(taskFactoryIdentityParameters.ContainsKey(XMakeAttributes.runtime) ? taskFactoryIdentityParameters[XMakeAttributes.runtime] : string.Empty)};" +
+                $" Architecture: {(taskFactoryIdentityParameters.ContainsKey(XMakeAttributes.architecture) ? taskFactoryIdentityParameters[XMakeAttributes.architecture] : string.Empty) };" +
+                $" Name: {taskName}");
 
             try
             {
