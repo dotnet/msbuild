@@ -1,3 +1,5 @@
+name: $(Date:yyyyMMdd).$(Rev:r).exp
+
 trigger:
 - exp/*
 - perf/*
