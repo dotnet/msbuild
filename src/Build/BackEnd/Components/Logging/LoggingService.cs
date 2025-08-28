@@ -73,6 +73,11 @@ namespace Microsoft.Build.BackEnd.Logging
     internal partial class LoggingService : ILoggingService, INodePacketHandler
     {
         /// <summary>
+        /// Gets or sets a value if BuildCheck is enabled. The presence of this flag influences the logging logic.
+        /// </summary>
+        private bool _buildCheckEnabled;
+
+        /// <summary>
         /// The default maximum size for the logging event queue.
         /// </summary>
         private const uint DefaultQueueCapacity = 200000;
@@ -871,6 +876,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 _serviceState = LoggingServiceState.Initialized;
 
                 _buildEngineDataRouter = (buildComponentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)?.BuildEngineDataRouter;
+
+                _buildCheckEnabled = buildComponentHost.BuildParameters.IsBuildCheckEnabled;
             }
         }
 
@@ -1666,8 +1673,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            // If this is BuildCheck-ed build - add the warnings promotability/demotability to the service
-            if (buildEventArgs is ProjectStartedEventArgs projectStartedEvent && this._componentHost.BuildParameters.IsBuildCheckEnabled)
+            // Respect warning-promotion properties from the remote project
+            if (buildEventArgs is ProjectStartedEventArgs projectStartedEvent)
             {
                 AddWarningsAsErrors(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsErrors);
                 AddWarningsAsMessages(projectStartedEvent.BuildEventContext, projectStartedEvent.WarningsAsMessages);

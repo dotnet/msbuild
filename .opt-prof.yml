@@ -57,7 +57,6 @@ stages:
     cloudBuildResourceName: ComponentBuildUnderTest
     testLabPoolName: VS-Platform # The test lab pool to run your tests in
     testMachineCleanUpStrategy: ${{parameters.testMachineCleanUpStrategy}}
-    testMachineImageName: Windows-11-Enterprise-23H2
     visualStudioSigning: Test
     variables:
     - name: branchName # The branch in the VS repo the bootstrapper was based on

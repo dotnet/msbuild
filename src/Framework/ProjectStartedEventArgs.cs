@@ -335,7 +335,7 @@ namespace Microsoft.Build.Framework
         }
 
         // Following 3 properties are intended only for internal transfer - to properly communicate the warn as error/msg
-        //  from the worker node, to the main node - that may be producing the buildcheck diagnostics.
+        //  from the worker node, to the main node.
         // They are not going to be in a binlog (at least not as of now).
 
         internal ISet<string>? WarningsAsErrors { get; set; }

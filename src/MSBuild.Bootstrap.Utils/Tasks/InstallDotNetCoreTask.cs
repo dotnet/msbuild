@@ -81,6 +81,10 @@ namespace MSBuild.Bootstrap.Utils.Tasks
 
         protected override string GenerateFullPathToTool() => ToolName;
 
+        // Do not use the normal parse-for-canonical-errors mechanism since install-scripts can emit nonfatal curl errors that match that pattern.
+        // Instead, log everything as a message and rely on the final success/failure return.
+        protected override void LogEventsFromTextOutput(string singleLine, MessageImportance messageImportance) => Log.LogMessage(messageImportance, singleLine);
+
         /// <summary>
         /// Downloads the .NET Core installation script asynchronously from the specified URL.
         /// </summary>
