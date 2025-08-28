@@ -1515,6 +1515,9 @@ namespace Microsoft.Build.Execution
                         // We are not one of the default factories.
                         TaskEngineAssemblyResolver resolver = null;
 
+                        // in multithreaded mode this is disallowed, so throw
+                        // how to get BuildParameters.Multithreaded here?
+
                         try
                         {
                             // Add a resolver to allow us to resolve types from the assembly when loading into the current appdomain.
