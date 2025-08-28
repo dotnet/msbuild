@@ -26,7 +26,7 @@ jobs:
   - name: VisualStudio.MajorVersion
     value: 17
   - name: VisualStudio.ChannelName
-    value: 'int.d17.11' # MSBuild's vs17.11 branch corresponds to this VS channel
+    value: 'int.d17.12' # MSBuild's vs17.12 branch corresponds to this VS channel
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -44,7 +44,6 @@ jobs:
       arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
     env:
       Token: $(dn-bot-dnceng-artifact-feeds-rw)
-
 
   - task: NuGetCommand@2
     displayName: Restore internal tools
@@ -149,13 +148,6 @@ jobs:
     inputs:
       PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
       ArtifactName: logs
-    condition: succeededOrFailed()
-
-  - task: 1ES.PublishPipelineArtifact@1
-    displayName: 'Publish Artifact: bin'
-    inputs:
-      path: 'artifacts\bin'
-      artifactName: bin
     condition: succeededOrFailed()
 
   # Publishes setup VSIXes to a drop.
