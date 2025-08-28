@@ -3,8 +3,19 @@ trigger:
 - exp/*
 - vs*
 
+variables:
+- ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+  - group: AzureDevOps-Artifact-Feeds-Pats
+- name: cfsNugetWarnLevel
+  value: warn
+- name: nugetMultiFeedWarnLevel
+  value: none
+- name: NugetSecurityAnalysisWarningLevel
+  value: none
+
 jobs:
 - job: CheckVersionBumpOnReleaseBranches
+  condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
   displayName: "Check Version Bump On Release Branches"
   steps:
   - powershell: |
@@ -40,7 +51,6 @@ jobs:
     displayName: "Check if patch version is bumped up"
 
 - job: IfOnlyDocumentionChanged
-  dependsOn: CheckVersionBumpOnReleaseBranches
   displayName: "Check whether Test Results need to be executed"
   steps:
   - powershell: |
@@ -66,11 +76,21 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: -onlyDocChanged $(onlyDocChanged)
+    env:
+      ForceUseXCopyMSBuild: 1
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -137,6 +157,14 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd
     inputs:
@@ -192,6 +220,14 @@ jobs:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: PowerShell@2
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
     displayName: cibuild.cmd
     inputs:
@@ -266,6 +302,14 @@ jobs:
   pool:
     vmImage: 'ubuntu-latest'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
   - task: PublishTestResults@2
@@ -323,6 +367,14 @@ jobs:
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
   - task: PublishTestResults@2
