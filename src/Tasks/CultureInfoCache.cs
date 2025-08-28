@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks
         // These pseudo-locales are available in versions of Windows from Vista and later.
         // However, from Windows 10, version 1803, they are not returned when enumerating the
         // installed cultures, even if the registry keys are set. Therefore, add them to the list manually.
-        private static readonly string[] pseudoLocales = new[] { "qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh" };
+        private static readonly string[] pseudoLocales = ["qps-ploc", "qps-ploca", "qps-plocm", "qps-Latn-x-sh"];
 
         private static HashSet<string> InitializeValidCultureNames()
         {

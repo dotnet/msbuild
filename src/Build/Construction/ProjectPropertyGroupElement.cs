@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectPropertyGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -58,8 +58,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyElement AddProperty(string name, string unevaluatedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             ProjectPropertyElement newProperty = ContainingProject.CreatePropertyElement(name);
             newProperty.Value = unevaluatedValue;
@@ -75,8 +75,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectPropertyElement SetProperty(string name, string unevaluatedValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue, nameof(unevaluatedValue));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
 
             foreach (ProjectPropertyElement property in Properties)
             {

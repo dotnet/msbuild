@@ -28,7 +28,7 @@ public class BuildCheckManagerTests
     public BuildCheckManagerTests(ITestOutputHelper output)
     {
         _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
-        _logger = new MockLogger();
+        _logger = new MockLogger(output);
         _loggingService.RegisterLogger(_logger);
         _testedInstance = new BuildCheckManager();
     }

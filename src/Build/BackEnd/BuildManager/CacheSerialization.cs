@@ -19,7 +19,7 @@ namespace Microsoft.Build.Execution
             string outputCacheFile,
             ProjectIsolationMode projectIsolationMode)
         {
-            ErrorUtilities.VerifyThrowInternalNull(outputCacheFile, nameof(outputCacheFile));
+            ErrorUtilities.VerifyThrowInternalNull(outputCacheFile);
 
             try
             {
@@ -127,8 +127,8 @@ namespace Microsoft.Build.Execution
                     translator.Translate(ref resultsCache);
                 }
 
-                ErrorUtilities.VerifyThrowInternalNull(configCache, nameof(configCache));
-                ErrorUtilities.VerifyThrowInternalNull(resultsCache, nameof(resultsCache));
+                ErrorUtilities.VerifyThrowInternalNull(configCache);
+                ErrorUtilities.VerifyThrowInternalNull(resultsCache);
 
                 return (configCache, resultsCache, null);
             }

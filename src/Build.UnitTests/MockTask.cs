@@ -425,17 +425,7 @@ namespace Microsoft.Build.UnitTests
     {
         #region ITaskItem Members
 
-        public string ItemSpec
-        {
-            get
-            {
-                return "foo";
-            }
-            set
-            {
-                // do nothing
-            }
-        }
+        public string ItemSpec { get; set; }
 
         public ICollection MetadataNames
         {

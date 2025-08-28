@@ -26,7 +26,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
    * Launches debugger on build start. Works on Windows operating systems only.  
    * Setting the value of 2 allows for manually attaching a debugger to a process ID. This works on Windows and non-Windows operating systems.
 * `MSBUILDDEBUGSCHEDULER=1` & `MSBUILDDEBUGPATH=<DIRECTORY>`
-   * Dumps scheduler state at specified directory (`MSBUILDDEBUGSCHEDULER` is implied by `MSBuildDebugEngine`).
+   * Dumps scheduler state at specified directory.
 
 * `MsBuildSkipEagerWildCardEvaluationRegexes`
   *  If specified, overrides the default behavior of glob expansion. During glob expansion, if the path with wildcards that is being processed matches one of the regular expressions provided in the [environment variable](#msbuildskipeagerwildcardevaluationregexes), the path is not processed (expanded). 

@@ -73,6 +73,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private IDictionary<string, string> _factoryIdentityParameters;
 
+        /// <summary>
+        /// An execution statistics holder.
+        /// </summary>
+        internal TaskRegistry.RegisteredTaskRecord.Stats? Statistics { get; private init; }
+
         #endregion
 
         #region Constructors
@@ -80,15 +85,21 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
-        internal TaskFactoryWrapper(ITaskFactory taskFactory, LoadedType taskFactoryLoadInfo, string taskName, IDictionary<string, string> factoryIdentityParameters)
+        internal TaskFactoryWrapper(
+            ITaskFactory taskFactory,
+            LoadedType taskFactoryLoadInfo,
+            string taskName,
+            IDictionary<string, string> factoryIdentityParameters,
+            TaskRegistry.RegisteredTaskRecord.Stats? statistics = null)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskFactory, nameof(taskFactory));
-            ErrorUtilities.VerifyThrowArgumentLength(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentNull(taskFactory);
+            ErrorUtilities.VerifyThrowArgumentLength(taskName);
             _taskFactory = taskFactory;
             _taskName = taskName;
             TaskFactoryLoadedType = taskFactoryLoadInfo;
             _factoryIdentityParameters = factoryIdentityParameters;
             _propertyData = new Lazy<PropertyData>(PopulatePropertyInfo);
+            Statistics = statistics;
         }
 
         #endregion
@@ -197,8 +208,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void SetPropertyValue(ITask task, TaskPropertyInfo property, object value)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
-            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ErrorUtilities.VerifyThrowArgumentNull(property);
 
             IGeneratedTask? generatedTask = task as IGeneratedTask;
             if (generatedTask != null)
@@ -217,8 +228,8 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal object? GetPropertyValue(ITask task, TaskPropertyInfo property)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
-            ErrorUtilities.VerifyThrowArgumentNull(property, nameof(property));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
+            ErrorUtilities.VerifyThrowArgumentNull(property);
 
             IGeneratedTask? generatedTask = task as IGeneratedTask;
             if (generatedTask != null)

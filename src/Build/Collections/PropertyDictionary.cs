@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -459,7 +460,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             lock (_properties)
             {
@@ -475,7 +476,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
+            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
             lock (_properties)
             {
@@ -529,14 +530,22 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        internal void Enumerate(Action<string, string> keyValueCallback)
+        internal IEnumerable<PropertyData> Enumerate()
         {
             lock (_properties)
             {
                 foreach (var kvp in (ICollection<T>)_properties)
                 {
-                    keyValueCallback(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
+                    yield return new(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
                 }
+            }
+        }
+
+        internal void Enumerate(Action<string, string> keyValueCallback)
+        {
+            foreach (var property in Enumerate())
+            {
+                keyValueCallback(property.Name, property.Value);
             }
         }
 

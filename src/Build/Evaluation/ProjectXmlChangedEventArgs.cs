@@ -34,7 +34,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="formattingParameter">The formatting parameter to use with <paramref name="unformattedReason"/>.</param>
         internal ProjectXmlChangedEventArgs(ProjectRootElement projectXml, string unformattedReason, string formattingParameter)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectXml, nameof(projectXml));
+            ErrorUtilities.VerifyThrowArgumentNull(projectXml);
 
             this.ProjectXml = projectXml;
             _unformattedReason = unformattedReason;

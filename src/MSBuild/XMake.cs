@@ -41,7 +41,18 @@ using FileLogger = Microsoft.Build.Logging.FileLogger;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
-using TerminalLogger = Microsoft.Build.Logging.TerminalLogger.TerminalLogger;
+using TerminalLogger = Microsoft.Build.Logging.TerminalLogger;
+
+#if NETFRAMEWORK
+// Use I/O operations from Microsoft.IO.Redist which is generally higher perf
+// and also works around https://github.com/dotnet/msbuild/issues/10540.
+// Unnecessary on .NET 6+ because the perf improvements are in-box there.
+using Microsoft.IO;
+using Directory = Microsoft.IO.Directory;
+using File = Microsoft.IO.File;
+using FileInfo = Microsoft.IO.FileInfo;
+using Path = Microsoft.IO.Path;
+#endif
 
 #nullable disable
 
@@ -237,6 +248,8 @@ namespace Microsoft.Build.CommandLine
 
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
+            // Initialize OpenTelemetry infrastructure
+            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -284,6 +297,7 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
+            OpenTelemetryManager.Instance.Shutdown();
 
             return exitCode;
         }
@@ -420,7 +434,7 @@ namespace Microsoft.Build.CommandLine
         /// </comments>
         private static void DumpCounters(bool initializeOnly)
         {
-            Process currentProcess = Process.GetCurrentProcess();
+            using Process currentProcess = Process.GetCurrentProcess();
 
             if (!initializeOnly)
             {
@@ -450,7 +464,7 @@ namespace Microsoft.Build.CommandLine
                 using PerformanceCounter counter = new PerformanceCounter(".NET CLR Memory", "Process ID", instance, true);
                 try
                 {
-                    if ((int)counter.RawValue == currentProcess.Id)
+                    if ((int)counter.RawValue == EnvironmentUtilities.CurrentProcessId)
                     {
                         currentInstance = instance;
                         break;
@@ -616,9 +630,9 @@ namespace Microsoft.Build.CommandLine
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach ({currentProcess.MainModule.FileName} PID {currentProcess.Id}).  Press enter to continue...");
+                    Console.WriteLine($"Waiting for debugger to attach ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId}).  Press enter to continue...");
                     Console.ReadLine();
+
                     break;
             }
         }
@@ -652,7 +666,7 @@ namespace Microsoft.Build.CommandLine
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
 #if FEATURE_GET_COMMANDLINE
-            ErrorUtilities.VerifyThrowArgumentLength(commandLine, nameof(commandLine));
+            ErrorUtilities.VerifyThrowArgumentLength(commandLine);
 #endif
 
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
@@ -684,7 +698,7 @@ namespace Microsoft.Build.CommandLine
                 // process the detected command line switches -- gather build information, take action on non-build switches, and
                 // check for non-trivial errors
                 string projectFile = null;
-                string[] targets = Array.Empty<string>();
+                string[] targets = [];
                 string toolsVersion = null;
                 Dictionary<string, string> globalProperties = null;
                 Dictionary<string, string> restoreProperties = null;
@@ -717,9 +731,9 @@ namespace Microsoft.Build.CommandLine
                 string outputResultsCache = null;
                 bool question = false;
                 bool isBuildCheckEnabled = false;
-                string[] getProperty = Array.Empty<string>();
-                string[] getItem = Array.Empty<string>();
-                string[] getTargetResult = Array.Empty<string>();
+                string[] getProperty = [];
+                string[] getItem = [];
+                string[] getTargetResult = [];
                 string getResultOutputFile = string.Empty;
                 BuildResult result = null;
 #if FEATURE_REPORTFILEACCESSES
@@ -824,6 +838,9 @@ namespace Microsoft.Build.CommandLine
                         {
                             using (ProjectCollection collection = new(globalProperties, loggers, ToolsetDefinitionLocations.Default))
                             {
+                                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
+                                collection.PropertiesFromCommandLine = [.. globalProperties.Keys];
+
                                 Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                                 if (getResultOutputFile.Length == 0)
@@ -1146,7 +1163,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             s_buildCancellationSource.Cancel();
-            
+
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task
@@ -1292,7 +1309,7 @@ namespace Microsoft.Build.CommandLine
         {
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
-                InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectUpgradeNeededToVcxProj", projectFile), null);
+                InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
             }
 
             bool success = true;
@@ -1381,6 +1398,9 @@ namespace Microsoft.Build.CommandLine
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
+
+                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
+                projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
@@ -1569,7 +1589,7 @@ namespace Microsoft.Build.CommandLine
 
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData(new[] { new ProjectGraphEntryPoint(projectFile, globalProperties) }, targets, null, flags, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData([new ProjectGraphEntryPoint(projectFile, globalProperties)], targets, null, flags, graphBuildOptions);
                                 }
                                 else
                                 {
@@ -1725,7 +1745,7 @@ namespace Microsoft.Build.CommandLine
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "Process",
-                        Process.GetCurrentProcess().MainModule?.FileName ?? string.Empty),
+                        EnvironmentUtilities.ProcessPath ?? string.Empty),
                     MessageImportance.Low),
                 new BuildManager.DeferredBuildMessage(
                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -1854,7 +1874,7 @@ namespace Microsoft.Build.CommandLine
                 projectFile,
                 restoreGlobalProperties,
                 toolsVersion,
-                targetsToBuild: new[] { MSBuildConstants.RestoreTargetName },
+                targetsToBuild: [MSBuildConstants.RestoreTargetName],
                 hostServices: null,
                 flags: flags);
 
@@ -2516,8 +2536,7 @@ namespace Microsoft.Build.CommandLine
 
                 if (!Debugger.IsAttached)
                 {
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Console.WriteLine($"Waiting for debugger to attach... ({currentProcess.MainModule.FileName} PID {currentProcess.Id})");
+                    Console.WriteLine($"Waiting for debugger to attach... ({EnvironmentUtilities.ProcessPath} PID {EnvironmentUtilities.CurrentProcessId})");
                     while (!Debugger.IsAttached)
                     {
                         Thread.Sleep(100);
@@ -2544,9 +2563,13 @@ namespace Microsoft.Build.CommandLine
             }
             try
             {
-                if (lowPriority && Process.GetCurrentProcess().PriorityClass != ProcessPriorityClass.Idle)
+                if (lowPriority)
                 {
-                    Process.GetCurrentProcess().PriorityClass = ProcessPriorityClass.BelowNormal;
+                    using Process currentProcess = Process.GetCurrentProcess();
+                    if (currentProcess.PriorityClass != ProcessPriorityClass.Idle)
+                    {
+                        currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                    }
                 }
             }
             // We avoid increasing priority because that causes failures on mac/linux, but there is no good way to
@@ -2648,9 +2671,9 @@ namespace Microsoft.Build.CommandLine
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
 
                     // If we are looking for the value of a specific property or item post-evaluation or a target post-build, figure that out now
-                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? Array.Empty<string>();
-                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? Array.Empty<string>();
-                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? Array.Empty<string>();
+                    getProperty = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetProperty] ?? [];
+                    getItem = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetItem] ?? [];
+                    getTargetResult = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetTargetResult] ?? [];
                     getResultOutputFile = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.GetResultOutputFile].FirstOrDefault() ?? string.Empty;
 
                     bool minimizeStdOutOutput = getProperty.Length + getItem.Length + getTargetResult.Length > 0 && getResultOutputFile.Length == 0;
@@ -3251,7 +3274,7 @@ namespace Microsoft.Build.CommandLine
             ISet<string> warningSwitches = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (string code in parameters
-                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? new string[] { null }))
+                .SelectMany(parameter => parameter?.Split(s_commaSemicolon, StringSplitOptions.RemoveEmptyEntries) ?? [null]))
             {
                 if (code == null)
                 {
@@ -3526,7 +3549,7 @@ namespace Microsoft.Build.CommandLine
             if (projectFile == null)
             {
                 ValidateExtensions(projectsExtensionsToIgnore);
-                HashSet<string> extensionsToIgnore = new HashSet<string>(projectsExtensionsToIgnore ?? Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+                HashSet<string> extensionsToIgnore = new HashSet<string>(projectsExtensionsToIgnore ?? [], StringComparer.OrdinalIgnoreCase);
                 // Get all files in the current directory that have a proj-like extension
                 string[] potentialProjectFiles = getFiles(projectDirectory ?? ".", "*.*proj");
                 List<string> actualProjectFiles = new List<string>();
@@ -3541,8 +3564,8 @@ namespace Microsoft.Build.CommandLine
                     }
                 }
 
-                // Get all files in the current directory that have a sln extension
-                string[] potentialSolutionFiles = getFiles(projectDirectory ?? ".", "*.sln");
+                // Get all files in the current directory that have a sln-like extension
+                string[] potentialSolutionFiles = getFiles(projectDirectory ?? ".", "*.sln?");
                 List<string> actualSolutionFiles = new List<string>();
                 List<string> solutionFilterFiles = new List<string>();
                 if (potentialSolutionFiles != null)
@@ -4008,11 +4031,10 @@ namespace Microsoft.Build.CommandLine
         {
             if (!noConsoleLogger)
             {
-                // A central logger will be created for both single proc and multiproc.
-                TerminalLogger logger = new TerminalLogger(verbosity)
-                {
-                    Parameters = aggregatedLoggerParameters
-                };
+                // We can't use InternalsVisibleTo to access the internal TerminalLogger ctor from here, so we use reflection.
+                // This can be fixed when we remove shared files across projects.
+                var logger = (TerminalLogger)Activator.CreateInstance(typeof(TerminalLogger), BindingFlags.Instance | BindingFlags.NonPublic, null, [verbosity], null);
+                logger.Parameters = aggregatedLoggerParameters;
 
                 // Check to see if there is a possibility we will be logging from an out-of-proc node.
                 // If so (we're multi-proc or the in-proc node is disabled), we register a distributed logger.
@@ -4022,8 +4044,26 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
+                    /// If TerminalLogger runs as a distributed logger, MSBuild out-of-proc nodes might filter the events that will go to the main
+                    /// node using an instance of <see cref="ConfigurableForwardingLogger"/> with the following parameters.
+                    /// Important: Note that TerminalLogger is special-cased in <see cref="BackEnd.Logging.LoggingService.UpdateMinimumMessageImportance"/>
+                    /// so changing this list may impact the minimum message importance logging optimization.
+                    string[] configurableForwardingLoggerParameters =
+                    [
+                        "BUILDSTARTEDEVENT",
+                        "BUILDFINISHEDEVENT",
+                        "PROJECTSTARTEDEVENT",
+                        "PROJECTFINISHEDEVENT",
+                        "TARGETSTARTEDEVENT",
+                        "TARGETFINISHEDEVENT",
+                        "TASKSTARTEDEVENT",
+                        "HIGHMESSAGEEVENT",
+                        "WARNINGEVENT",
+                        "ERROREVENT"
+                    ];
+
                     // For performance, register this logger using the forwarding logger mechanism.
-                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", TerminalLogger.ConfigurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
+                    DistributedLoggerRecord forwardingLoggerRecord = CreateForwardingLoggerRecord(logger, string.Join(";", configurableForwardingLoggerParameters), LoggerVerbosity.Quiet);
                     distributedLoggerRecords.Add(forwardingLoggerRecord);
                 }
             }
@@ -4374,27 +4414,27 @@ namespace Microsoft.Build.CommandLine
             {
                 logger = loggerDescription.CreateLogger();
 
-                InitializationException.VerifyThrow(logger != null, "LoggerNotFoundError", unquotedParameter);
+                InitializationException.VerifyThrow(logger != null, "XMake.LoggerNotFoundError", unquotedParameter);
             }
             catch (IOException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (BadImageFormatException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (SecurityException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (ReflectionTypeLoadException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (MemberAccessException e) when (!loggerDescription.IsOptional)
             {
-                InitializationException.Throw("LoggerCreationError", unquotedParameter, e, false);
+                InitializationException.Throw("XMake.LoggerCreationError", unquotedParameter, e, false);
             }
             catch (TargetInvocationException e) when (!loggerDescription.IsOptional)
             {

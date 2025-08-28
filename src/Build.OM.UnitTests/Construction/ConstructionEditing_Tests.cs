@@ -3137,6 +3137,44 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.VerifyAssertProjectContent(expected, project);
         }
 
+        [Fact]
+        public void SetMetadataName()
+        {
+            var project = ProjectRootElement.Create();
+            var itemGroup = project.AddItemGroup();
+
+            var item = itemGroup.AddItem("i1", "i");
+            var attributeMetadata = item.AddMetadata("A", "value_a", expressAsAttribute: true);
+            var elementMetadata = item.AddMetadata("B", "value_b", expressAsAttribute: false);
+
+            string expected = """
+                <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                  <ItemGroup>
+                    <i1 Include="i" A="value_a">
+                      <B>value_b</B>
+                    </i1>
+                  </ItemGroup>
+                </Project>
+                """;
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+
+            attributeMetadata.Name = "A2";
+            elementMetadata.Name = "B2";
+
+            expected = """
+                <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                  <ItemGroup>
+                    <i1 Include="i" A2="value_a">
+                      <B2>value_b</B2>
+                    </i1>
+                  </ItemGroup>
+                </Project>
+                """;
+
+            Helpers.VerifyAssertProjectContent(expected, project);
+        }
+
         /// <summary>
         /// Legally modify a child whose parent is not parented (should not throw)
         /// </summary>

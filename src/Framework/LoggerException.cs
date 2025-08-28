@@ -127,7 +127,7 @@ namespace Microsoft.Build.Framework
             helpKeyword = state[nameof(helpKeyword)];
         }
 
-#endregion
+        #endregion
 
         #region Properties
 

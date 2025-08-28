@@ -6,6 +6,10 @@ on:
     paths:
       - 'eng/Versions.props'
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   Sync-version:
     runs-on: ubuntu-latest

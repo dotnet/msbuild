@@ -292,7 +292,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     XmlMode = XmlModes.Xml;
-                    _data = new[] { xml };
+                    _data = [xml];
                 }
             }
 
@@ -456,7 +456,7 @@ namespace Microsoft.Build.Tasks
                             using var xmlReader = XmlReader.Create(sr);
                             xslct.Load(xmlReader, settings, new XmlUrlResolver());
                             break;
-                        }         
+                        }
                     case XslModes.XsltFile:
                         if (useTrustedSettings)
                         {

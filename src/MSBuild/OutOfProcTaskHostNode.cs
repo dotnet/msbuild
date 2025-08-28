@@ -555,7 +555,7 @@ namespace Microsoft.Build.CommandLine
 
         public EngineServices EngineServices { get; }
 
-#endregion
+        #endregion
 
 #endif
 
@@ -644,7 +644,7 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
-            WaitHandle[] waitHandles = new WaitHandle[] { _shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent };
+            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent];
 
             while (true)
             {
@@ -811,8 +811,9 @@ namespace Microsoft.Build.CommandLine
             _taskRunnerThread?.Join();
 
             using StreamWriter debugWriter = _debugCommunications
-                ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id))
-                : null;
+                    ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
+                    : null;
+
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
 #if !CLR2COMPATIBILITY

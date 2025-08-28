@@ -108,7 +108,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public SDKManifest(string pathToSdk)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pathToSdk, nameof(pathToSdk));
+            ErrorUtilities.VerifyThrowArgumentLength(pathToSdk);
             _pathToSdk = pathToSdk;
             LoadManifestFile();
         }

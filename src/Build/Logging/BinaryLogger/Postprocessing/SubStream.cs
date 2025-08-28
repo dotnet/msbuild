@@ -3,6 +3,8 @@
 
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
@@ -40,7 +42,8 @@ namespace Microsoft.Build.Logging
 
         public override long Position { get => _position; set => throw new NotImplementedException(); }
 
-        public override void Flush() { }
+        public override void Flush() => _stream.Flush();
+        public override Task FlushAsync(CancellationToken cancellationToken) => _stream.FlushAsync(cancellationToken);
         public override int Read(byte[] buffer, int offset, int count)
         {
             count = Math.Min((int)Math.Max(Length - _position, 0), count);
@@ -48,6 +51,50 @@ namespace Microsoft.Build.Logging
             _position += read;
             return read;
         }
+
+        public override int ReadByte()
+        {
+            if (Length - _position > 0)
+            {
+                int value = _stream.ReadByte();
+                if (value >= 0)
+                {
+                    _position++;
+                    return value;
+                }
+            }
+
+            return -1;
+        }
+
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            count = Math.Min((int)Math.Max(Length - _position, 0), count);
+#pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+            int read = await _stream.ReadAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+#pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
+            _position += read;
+            return read;
+        }
+
+#if NET
+        public override int Read(Span<byte> buffer)
+        {
+            buffer = buffer.Slice(0, Math.Min((int)Math.Max(Length - _position, 0), buffer.Length));
+            int read = _stream.Read(buffer);
+            _position += read;
+            return read;
+        }
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            buffer = buffer.Slice(0, Math.Min((int)Math.Max(Length - _position, 0), buffer.Length));
+            int read = await _stream.ReadAsync(buffer, cancellationToken).ConfigureAwait(false);
+            _position += read;
+            return read;
+        }
+#endif
+
         public override long Seek(long offset, SeekOrigin origin) => throw new NotImplementedException();
         public override void SetLength(long value) => throw new NotImplementedException();
         public override void Write(byte[] buffer, int offset, int count) => throw new NotImplementedException();

@@ -107,14 +107,14 @@ namespace Microsoft.Build.BackEnd
                 FileAccessPolicy.AllowAll | FileAccessPolicy.ReportAccess);
 
             // Support shared compilation
-            info.FileAccessManifest.ChildProcessesToBreakawayFromSandbox = new BreakawayChildProcess[]
-            {
+            info.FileAccessManifest.ChildProcessesToBreakawayFromSandbox =
+            [
 #if RUNTIME_TYPE_NETCORE
                 new BreakawayChildProcess(NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet", "vbcscompiler.dll", CommandLineArgsSubstringContainmentIgnoreCase: true)
 #else
                 new BreakawayChildProcess(NativeMethodsShared.IsWindows ? "VBCSCompiler.exe" : "VBCSCompiler")
 #endif
-            };
+            ];
             info.FileAccessManifest.MonitorChildProcesses = true;
             info.FileAccessManifest.IgnoreReparsePoints = true;
             info.FileAccessManifest.UseExtraThreadToDrainNtClose = false;

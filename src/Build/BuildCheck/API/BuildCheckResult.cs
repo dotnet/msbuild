@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -18,6 +17,9 @@ public sealed class BuildCheckResult : IBuildCheckResult
 {
     public static BuildCheckResult Create(CheckRule rule, IMSBuildElementLocation location, params string[] messageArgs) => new BuildCheckResult(rule, location, messageArgs);
 
+    internal static BuildCheckResult CreateBuiltIn(CheckRule rule, IMSBuildElementLocation location,
+        params string[] messageArgs) => new BuildCheckResult(rule, location, messageArgs) { _isBuiltIn = true };
+
     public BuildCheckResult(CheckRule checkConfig, IMSBuildElementLocation location, string[] messageArgs)
     {
         CheckRule = checkConfig;
@@ -29,12 +31,14 @@ public sealed class BuildCheckResult : IBuildCheckResult
         => severity switch
         {
             CheckResultSeverity.Suggestion => new BuildCheckResultMessage(this),
-            CheckResultSeverity.Warning => new BuildCheckResultWarning(this, CheckRule.Id),
-            CheckResultSeverity.Error => new BuildCheckResultError(this, CheckRule.Id),
+            CheckResultSeverity.Warning => new BuildCheckResultWarning(this),
+            CheckResultSeverity.Error => new BuildCheckResultError(this),
             _ => throw new ArgumentOutOfRangeException(nameof(severity), severity, null),
         };
 
     public CheckRule CheckRule { get; }
+
+    public string Code => CheckRule.Id;
 
     /// <summary>
     /// Optional location of the finding (in near future we might need to support multiple locations).
@@ -47,9 +51,14 @@ public sealed class BuildCheckResult : IBuildCheckResult
 
     public string MessageFormat => CheckRule.MessageFormat;
 
-    // Here we will provide different link for built-in rules and custom rules - once we have the base classes differentiated.
     public string FormatMessage() =>
-        _message ??= $"https://aka.ms/buildcheck/codes#{CheckRule.Id} - {string.Format(CheckRule.MessageFormat, MessageArgs)}";
+        _message ??= _isBuiltIn
+            // Builtin rules get unified helplink.
+            ? $"https://aka.ms/buildcheck/codes#{CheckRule.Id} - {string.Format(CheckRule.MessageFormat, MessageArgs)}"
+            // Custom rules can provide their own helplink.
+            : (!string.IsNullOrEmpty(CheckRule.HelpLinkUri) ? $"{CheckRule.HelpLinkUri} - " : null) +
+              string.Format(CheckRule.MessageFormat, MessageArgs);
 
     private string? _message;
+    private bool _isBuiltIn;
 }

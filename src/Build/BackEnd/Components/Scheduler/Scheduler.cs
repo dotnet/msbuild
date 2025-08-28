@@ -175,6 +175,21 @@ namespace Microsoft.Build.BackEnd
         private int _loggedWarningsForProxyBuildsOnOutOfProcNodes = 0;
 
         /// <summary>
+        /// If we hit the path that prevents from completing build submission this flag is set. 
+        /// </summary>
+#pragma warning disable IDE0052 // Remove unread private members because we need them for traceability only
+#pragma warning disable CS0414 // The field is assigned but its value is never used
+        private bool _hitNoLoggingCompleted;
+
+        /// <summary>
+        /// Information about the missed submission.
+        /// </summary>
+        private string _noLoggingCompletedSubmissionDetails;
+
+#pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore CS0414 // The field is assigned but its value is never used
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public Scheduler()
@@ -445,30 +460,40 @@ namespace Microsoft.Build.BackEnd
                         // There are other requests which we can satisfy based on this result, lets pull the result out of the cache
                         // and satisfy those requests.  Normally a skipped result would lead to the cache refusing to satisfy the
                         // request, because the correct response in that case would be to attempt to rebuild the target in case there
-                        // are state changes that would cause it to now excute.  At this point, however, we already know that the parent
+                        // are state changes that would cause it to now execute.  At this point, however, we already know that the parent
                         // request has completed, and we already know that this request has the same global request ID, which means that
                         // its configuration and set of targets are identical -- from MSBuild's perspective, it's the same.  So since
                         // we're not going to attempt to re-execute it, if there are skipped targets in the result, that's fine. We just
                         // need to know what the target results are so that we can log them.
                         ScheduleResponse response = TrySatisfyRequestFromCache(parentNode, unscheduledRequest.BuildRequest, skippedResultsDoNotCauseCacheMiss: true);
 
-                        // If we have a response we need to tell the loggers that we satisified that request from the cache.
+                        // If we have a response we need to tell the loggers that we satisfied that request from the cache.
                         if (response != null)
                         {
                             LogRequestHandledFromCache(unscheduledRequest.BuildRequest, response.BuildResult);
+
+                            // Mark the request as complete (and the parent is no longer blocked by this request.)
+                            unscheduledRequest.Complete(newResult);
+                            responses.Add(response);
                         }
                         else
                         {
-                            // Response may be null if the result was never added to the cache. This can happen if the result has
-                            // an exception in it. If that is the case, we should report the result directly so that the
-                            // build manager knows that it needs to shut down logging manually.
-                            response = GetResponseForResult(parentNode, unscheduledRequest.BuildRequest, newResult.Clone());
+                            // This is a critical error case where a result should be in the cache but isn't.
+                            // The result might be missing from the cache if:
+                            // 1. The result contained an exception that prevented it from being cached properly
+                            // 2. The result was for a skipped target that couldn't satisfy all dependencies
+
+                            // Now scheduler will handle this situation automatically - the unscheduled request remains
+                            // in the unscheduled queue (_schedulingData.UnscheduledRequests) and will be picked up
+                            // in the next ScheduleUnassignedRequests execution to be properly rebuilt.
+
+                            // IMPORTANT: In earlier versions, we would hit this code path and did not handle it properly,
+                            // which caused deadlocks/hangs in Visual Studio. Without completing the request's
+                            // logging lifecycle, VS would never receive the completion callback and would wait
+                            // indefinitely, freezing the UI.
+                            _hitNoLoggingCompleted = true;
+                            _noLoggingCompletedSubmissionDetails = $"SubmissionId: {unscheduledRequest.BuildRequest.SubmissionId}; BuildRequestDataFlags: {unscheduledRequest.BuildRequest.BuildRequestDataFlags}";
                         }
-
-                        responses.Add(response);
-
-                        // Mark the request as complete (and the parent is no longer blocked by this request.)
-                        unscheduledRequest.Complete(newResult);
                     }
                 }
             }
@@ -1019,11 +1044,8 @@ namespace Microsoft.Build.BackEnd
         private void AssignUnscheduledRequestsWithConfigurationCountLevelling(List<ScheduleResponse> responses, HashSet<int> idleNodes)
         {
             // Assign requests but try to keep the same number of configurations on each node
-            List<int> nodesByConfigurationCountAscending = new List<int>(_availableNodes.Keys);
-            nodesByConfigurationCountAscending.Sort(delegate (int left, int right)
-            {
-                return Comparer<int>.Default.Compare(_schedulingData.GetConfigurationsCountByNode(left, true /* excludeTraversals */, _configCache), _schedulingData.GetConfigurationsCountByNode(right, true /* excludeTraversals */, _configCache));
-            });
+            // Use OrderBy to sort since it will cache the lookup in configCache which. This reduces the number of times we have to acquire the lock.
+            IEnumerable<int> nodesByConfigurationCountAscending = _availableNodes.Keys.OrderBy(x => _schedulingData.GetConfigurationsCountByNode(x, excludeTraversals: true, _configCache));
 
             // Assign projects to nodes, preferring to assign work to nodes with the fewest configurations first.
             foreach (int nodeId in nodesByConfigurationCountAscending)
@@ -1354,8 +1376,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void AssignUnscheduledRequestToNode(SchedulableRequest request, int nodeId, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(request, nameof(request));
-            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
+            ErrorUtilities.VerifyThrowArgumentNull(request);
+            ErrorUtilities.VerifyThrowArgumentNull(responses);
             ErrorUtilities.VerifyThrow(nodeId != InvalidNodeId, "Invalid node id specified.");
 
             request.VerifyState(SchedulableRequestState.Unscheduled);
@@ -1619,15 +1641,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedOnInProgressTarget(SchedulableRequest blockedRequest, BuildRequestBlocker blocker)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest, nameof(blockedRequest));
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
+            ErrorUtilities.VerifyThrowArgumentNull(blockedRequest);
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
 
             // We are blocked on an in-progress request building a target whose results we need.
             SchedulableRequest blockingRequest = _schedulingData.GetScheduledRequest(blocker.BlockingRequestId);
 
             // The request we blocked on couldn't have been executing (because we are) so it must either be yielding (which is ok because
             // it isn't modifying its own state, just running a background process), ready, or still blocked.
-            blockingRequest.VerifyOneOfStates(new SchedulableRequestState[] { SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked });
+            blockingRequest.VerifyOneOfStates([SchedulableRequestState.Yielding, SchedulableRequestState.Ready, SchedulableRequestState.Blocked]);
 
             // detect the case for https://github.com/dotnet/msbuild/issues/3047
             // if we have partial results AND blocked and blocking share the same configuration AND are blocked on each other
@@ -1651,7 +1673,7 @@ namespace Microsoft.Build.BackEnd
         private void HandleRequestBlockedOnResultsTransfer(SchedulableRequest parentRequest, List<ScheduleResponse> responses)
         {
             // Create the new request which will go to the configuration's results node.
-            BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, Array.Empty<string>(), null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
+            BuildRequest newRequest = new BuildRequest(parentRequest.BuildRequest.SubmissionId, BuildRequest.ResultsTransferNodeRequestId, parentRequest.BuildRequest.ConfigurationId, [], null, parentRequest.BuildRequest.BuildEventContext, parentRequest.BuildRequest, parentRequest.BuildRequest.BuildRequestDataFlags);
 
             // Assign a new global request id - always different from any other.
             newRequest.GlobalRequestId = _nextGlobalRequestId;
@@ -1678,8 +1700,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleRequestBlockedByNewRequests(SchedulableRequest parentRequest, BuildRequestBlocker blocker, List<ScheduleResponse> responses)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(blocker, nameof(blocker));
-            ErrorUtilities.VerifyThrowArgumentNull(responses, nameof(responses));
+            ErrorUtilities.VerifyThrowArgumentNull(blocker);
+            ErrorUtilities.VerifyThrowArgumentNull(responses);
 
             // The request is waiting on new requests.
             bool abortRequestBatch = false;
@@ -2033,7 +2055,7 @@ namespace Microsoft.Build.BackEnd
                 SchedulableRequest parentRequest = _schedulingData.BlockedRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId)
                     ?? _schedulingData.ExecutingRequests.FirstOrDefault(r => r.BuildRequest.GlobalRequestId == request.ParentGlobalRequestId);
 
-                ErrorUtilities.VerifyThrowInternalNull(parentRequest, nameof(parentRequest));
+                ErrorUtilities.VerifyThrowInternalNull(parentRequest);
                 ErrorUtilities.VerifyThrow(
                     configCache.HasConfiguration(parentRequest.BuildRequest.ConfigurationId),
                     "All non root requests should have a parent with a loaded configuration");
@@ -2569,7 +2591,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                    using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                    using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
                     file.Write("{0}({1})-{2}: ", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, _schedulingData.EventTime.Ticks);
                     file.WriteLine(format, stuff);
                     file.Flush();
@@ -2593,7 +2615,7 @@ namespace Microsoft.Build.BackEnd
                     try
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
                         file.WriteLine("Scheduler state at timestamp {0}:", _schedulingData.EventTime.Ticks);
                         file.WriteLine("------------------------------------------------");
@@ -2707,7 +2729,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
                         file.WriteLine("Configurations used during this build");
                         file.WriteLine("-------------------------------------");
@@ -2747,7 +2769,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        using StreamWriter file = FileUtilities.OpenWrite(String.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), Process.GetCurrentProcess().Id), append: true);
+                        using StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, "SchedulerState_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true);
 
                         file.WriteLine("Requests used during the build:");
                         file.WriteLine("-------------------------------");

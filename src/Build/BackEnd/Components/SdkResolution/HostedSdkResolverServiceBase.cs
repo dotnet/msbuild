@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -28,6 +29,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         /// <inheritdoc cref="ISdkResolverService.SendPacket"/>
         public Action<INodePacket> SendPacket { get; set; }
+
+        /// <inheritdoc cref="ISdkResolverService.IsNodeShutDown"/>
+        public bool IsNodeShutDown { get; set; }
 
         /// <inheritdoc cref="ISdkResolverService.ClearCache"/>
         public virtual void ClearCache(int submissionId)
@@ -55,6 +59,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         public virtual void ShutdownComponent()
         {
             ShutdownEvent.Set();
+            IsNodeShutDown = true;
+            MSBuildEventSource.Log.SdkResolverServiceNodeShutDownSet();
         }
     }
 }

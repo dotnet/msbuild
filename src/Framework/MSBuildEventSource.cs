@@ -362,10 +362,11 @@ namespace Microsoft.Build.Eventing
         }
 
         /// <param name="targetName">The name of the target being executed.</param>
-        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void TargetStop(string targetName)
+        /// <param name="result">Target stop result.</param>
+        [Event(44, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void TargetStop(string targetName, string result)
         {
-            WriteEvent(44, targetName);
+            WriteEvent(44, targetName, result);
         }
 
         /// <summary>
@@ -670,6 +671,30 @@ namespace Microsoft.Build.Eventing
         public void ProjectCacheHandleBuildResultStop(string pluginTypeName, string projectPath, string targets)
         {
             WriteEvent(92, pluginTypeName, projectPath, targets);
+        }
+
+        [Event(93, Keywords = Keywords.All)]
+        public void CancelSubmissionsStart()
+        {
+            WriteEvent(93);
+        }
+
+        [Event(94, Keywords = Keywords.All)]
+        public void SdkResolverServiceNodeShutDownSet()
+        {
+            WriteEvent(94);
+        }
+
+        [Event(95, Keywords = Keywords.All)]
+        public void OutOfProcNodeShutDownStart()
+        {
+            WriteEvent(95);
+        }
+
+        [Event(96, Keywords = Keywords.All)]
+        public void OutOfProcNodeShutDownStop(string shutdownReason)
+        {
+            WriteEvent(96, shutdownReason);
         }
         #endregion
     }

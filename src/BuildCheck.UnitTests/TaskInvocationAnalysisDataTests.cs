@@ -13,6 +13,7 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.BuildCheckManagerProvider;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
@@ -51,15 +52,19 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }
         }
 
+        private ITestOutputHelper _output;
+
         private static TestCheck? s_testCheck;
 
-        public TaskInvocationCheckDataTests()
+        public TaskInvocationCheckDataTests(ITestOutputHelper output)
         {
+            _output = output;
+
             BuildCheckManager.s_testFactoriesPerDataSource =
             [
                 // BuildCheckDataSource.EventArgs
                 [
-                    ([TestCheck.SupportedRule.Id], true, () => (s_testCheck = new TestCheck())),
+                    new ([TestCheck.SupportedRule.Id], true, () => s_testCheck = new TestCheck()),
                 ],
                 // BuildCheckDataSource.Execution
                 [],
@@ -75,7 +80,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
         private void BuildProject(string taskInvocation)
         {
-            using (var env = TestEnvironment.Create())
+            using (var env = TestEnvironment.Create(_output))
             {
                 var testProject = env.CreateTestProjectWithFiles($"<Project><Target Name=\"Build\">{taskInvocation}</Target></Project>");
 
@@ -84,6 +89,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                     var request = new BuildRequestData(testProject.ProjectFile, new Dictionary<string, string?>(), MSBuildConstants.CurrentToolsVersion, [], null, BuildRequestDataFlags.None);
                     var parameters = new BuildParameters
                     {
+                        Loggers = [new MockLogger(_output)],
                         LogTaskInputs = true,
                         IsBuildCheckEnabled = true,
                         ShutdownInProcNodeOnBuildFinish = true,
@@ -94,7 +100,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                     result.OverallResult.ShouldBe(BuildResultCode.Success);
                 }
 
-                foreach (var data in s_testCheck!.CheckData)
+                foreach (var data in s_testCheck.ShouldNotBeNull().CheckData)
                 {
                     data.ProjectFilePath.ShouldBe(testProject.ProjectFile);
                     data.TaskInvocationLocation.Line.ShouldBeGreaterThan(0);

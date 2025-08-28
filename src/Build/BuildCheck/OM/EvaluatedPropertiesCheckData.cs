@@ -13,11 +13,18 @@ public class EvaluatedPropertiesCheckData : CheckData
     internal EvaluatedPropertiesCheckData(
         string projectFilePath,
         int? projectConfigurationId,
-        IReadOnlyDictionary<string, string> evaluatedProperties)
-        : base(projectFilePath, projectConfigurationId) => EvaluatedProperties = evaluatedProperties;
+        IReadOnlyDictionary<string, string> evaluatedProperties,
+        IReadOnlyDictionary<string, string> globalProperties)
+        : base(projectFilePath, projectConfigurationId)
+        => (EvaluatedProperties, GlobalProperties) = (evaluatedProperties, globalProperties);
 
     /// <summary>
     /// Gets the evaluated properties of the project.
     /// </summary>
     public IReadOnlyDictionary<string, string> EvaluatedProperties { get; }
+
+    /// <summary>
+    /// Gets the global properties passed to the project.
+    /// </summary>
+    public IReadOnlyDictionary<string, string> GlobalProperties { get; }
 }

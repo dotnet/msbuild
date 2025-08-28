@@ -44,6 +44,7 @@ parameters:
     values:
       - auto
       - main
+      - rel/d17.14
       - rel/d17.13
       - rel/d17.12
       - rel/d17.11
@@ -64,7 +65,9 @@ parameters:
 variables:
   # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
   - name: AutoInsertTargetBranch
-    ${{ if eq(variables['Build.SourceBranchName'], 'vs17.13') }}:
+    ${{ if eq(variables['Build.SourceBranchName'], 'vs17.14') }}:
+      value: 'rel/d17.14'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.13') }}:
       value: 'rel/d17.13'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.12') }}:
       value: 'rel/d17.12'
@@ -224,7 +227,7 @@ extends:
               $propsValue = $props -join ";"
               Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
               Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
-              
+
               # autocomplete main
               $autocomplete = "false"
               if ("$(InsertTargetBranch)" -eq "main")
