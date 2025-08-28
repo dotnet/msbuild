@@ -920,6 +920,7 @@ namespace Microsoft.Build.Internal
                     break;
             }
 
+            // Node reuse is not supported in CLR2 because it's a legacy runtime.
             if (nodeReuse && clrVersion != 2)
             {
                 context |= HandshakeOptions.NodeReuse;

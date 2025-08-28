@@ -716,7 +716,9 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
-                CommunicationsUtilities.Trace($"in XMake. Command line: {commandLine}");
+
+                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
+
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,
@@ -1322,8 +1324,6 @@ namespace Microsoft.Build.CommandLine
 
                 // Targeted perf optimization for the case where we only have our own parallel console logger, and verbosity is quiet. In such a case
                 // we know we won't emit any messages except for errors and warnings, so the engine should not bother even logging them.
-                // If we're using the original serial console logger we can't do this, as it shows project started/finished context
-                // around errors and warnings.
                 // Telling the engine to not bother logging non-critical messages means that typically it can avoid loading any resources in the successful
                 // build case.
                 if (loggers.Length == 1 &&
@@ -1331,7 +1331,6 @@ namespace Microsoft.Build.CommandLine
                     verbosity == LoggerVerbosity.Quiet &&
                     loggers[0].Parameters != null &&
                     loggers[0].Parameters.IndexOf("ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) != -1 &&
-                    loggers[0].Parameters.IndexOf("DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) == -1 &&
                     loggers[0].Parameters.IndexOf("V=", StringComparison.OrdinalIgnoreCase) == -1 &&                // Console logger could have had a verbosity
                     loggers[0].Parameters.IndexOf("VERBOSITY=", StringComparison.OrdinalIgnoreCase) == -1)          // override with the /clp switch
                 {
@@ -3469,7 +3468,6 @@ namespace Microsoft.Build.CommandLine
                 {
                     // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException, nodeReuse);
                 }

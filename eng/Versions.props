@@ -7,6 +7,8 @@
     <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <!-- differentiate experimental insertions to avoid package id conflicts -->
+    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">experimental</PreReleaseVersionLabel>
     <!--
       Don't use shipping versions when building in the VMR unless the VMR directs the build to use shipping versions.
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild

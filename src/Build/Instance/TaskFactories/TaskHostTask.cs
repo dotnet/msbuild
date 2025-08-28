@@ -299,8 +299,13 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    CommunicationsUtilities.Trace($"in TaskHostTask. RUNTIME {runtime}; Architecture: {architecture}; Task Name: {_taskType.Type.Name}. ");
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: !_taskHostFactoryExplicitlyRequested, taskHostParameters: _taskHostParameters);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
+                        taskHost: true,
+
+                        // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
+                        // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
+                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
+                        taskHostParameters: _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
                 }
 

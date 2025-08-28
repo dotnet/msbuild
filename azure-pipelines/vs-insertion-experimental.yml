@@ -104,6 +104,8 @@ extends:
               $branch = $branchSegments[-1]
               Write-Host "Setting drops branch to '$branch'"
               Write-Host "##vso[task.setvariable variable=SourceBranchName]$branch"
+              Write-Host "updating build number with build commit"
+              Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber).$(MSBuild_CI_SourceVersion)"
 
         - task: Powershell@2
           name: DetermineTargetBranch
