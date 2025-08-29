@@ -18,6 +18,10 @@ parameters:
   displayName: Enable Signing Validation
   type: boolean
   default: false
+- name: enableOptProf
+  displayName: Enable OptProf data collection for this build
+  type: boolean
+  default: false
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -85,6 +89,7 @@ extends:
         parameters:
           isExperimental: true
           enableComponentGovernance: false
+          enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
