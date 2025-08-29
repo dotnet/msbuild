@@ -408,7 +408,9 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             this.EvaluatedItemElements = new List<ProjectItemElement>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = project.ToolsVersion;
@@ -480,7 +482,9 @@ namespace Microsoft.Build.Execution
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             EvaluatedItemElements = new List<ProjectItemElement>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = linkedProject.ToolsVersion;
@@ -554,7 +558,9 @@ namespace Microsoft.Build.Execution
             _importPathsIncludingDuplicates = projectToInheritFrom._importPathsIncludingDuplicates;
             ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             this.EvaluatedItemElements = new List<ProjectItemElement>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance> thisAsIEvaluatorData = this;
             thisAsIEvaluatorData.AfterTargets = new Dictionary<string, List<TargetSpecification>>();
@@ -672,7 +678,9 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = data.Project.ProjectCollection.ProjectRootElementCache;
 
+#pragma warning disable CS0618 // Type or member is obsolete
             this.EvaluatedItemElements = new List<ProjectItemElement>(data.EvaluatedItemElements);
+#pragma warning restore CS0618 // Type or member is obsolete
 
             _usingDifferentToolsVersionFromProjectFile = data.UsingDifferentToolsVersionFromProjectFile;
             _originalProjectToolsVersion = data.OriginalProjectToolsVersion;
@@ -779,7 +787,9 @@ namespace Microsoft.Build.Execution
                 _importPathsIncludingDuplicates = that._importPathsIncludingDuplicates;
                 ImportPathsIncludingDuplicates = new ObjectModel.ReadOnlyCollection<string>(_importPathsIncludingDuplicates);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 this.EvaluatedItemElements = that.EvaluatedItemElements;
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 this.ProjectRootElementCache = that.ProjectRootElementCache;
             }
@@ -1157,6 +1167,14 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets a <see cref="List{ProjectItemElement}"/> object containing evaluated items.
         /// </summary>
+        /// <remarks>
+        /// This property is obsolete because ProjectInstance is disconnected from source XML,
+        /// making this property unreliable for XML round-trip scenarios. To inspect item elements,
+        /// re-evaluate the project using the Project class instead.
+        /// </remarks>
+        [Obsolete("ProjectInstance.EvaluatedItemElements is deprecated because ProjectInstance is disconnected from source XML. " +
+                  "To inspect item elements, re-evaluate the project using the Project class instead. " +
+                  "This property will be removed in a future version.", false)]
         public List<ProjectItemElement> EvaluatedItemElements
         {
             get;
@@ -3171,7 +3189,9 @@ namespace Microsoft.Build.Execution
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
             _loggingContext = new GenericLoggingContext(loggingService, buildEventContext);
+#pragma warning disable CS0618 // Type or member is obsolete
             this.EvaluatedItemElements = new List<ProjectItemElement>();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
             ElementLocation toolsVersionLocation = xml.Location;
