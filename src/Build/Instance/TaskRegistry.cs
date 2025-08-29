@@ -1325,7 +1325,17 @@ namespace Microsoft.Build.Execution
             {
                 [DebuggerStepThrough]
                 get
-                { return _taskFactoryParameters; }
+                {
+                    if (_taskFactoryParameters == null)
+                    {
+                        return null;
+                    }
+                    
+                    lock (_lockObject)
+                    {
+                        return new Dictionary<string, string>(_taskFactoryParameters, StringComparer.OrdinalIgnoreCase);
+                    }
+                }
             }
 
             /// <summary>
@@ -1490,7 +1500,10 @@ namespace Microsoft.Build.Execution
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
                     _taskFactoryParameters ??= new();
-                    TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
+                    lock (_lockObject)
+                    {
+                        TaskFactoryParameters[Constants.TaskHostExplicitlyRequested] = isTaskHostFactory.ToString();
+                    }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
