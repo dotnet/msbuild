@@ -177,7 +177,7 @@ namespace Microsoft.Build.BackEnd
                 // If there are still targets left on the stack, they need to be removed from the 'active targets' list
                 foreach (TargetEntry target in _targetsToBuild)
                 {
-                    configuration.ActivelyBuildingTargets.Remove(target.Name);
+                    configuration.ActivelyBuildingTargets.TryRemove(target.Name, out _);
                 }
 
                 ((IBuildComponent)taskBuilder).ShutdownComponent();
@@ -508,7 +508,7 @@ namespace Microsoft.Build.BackEnd
                             }
                             catch
                             {
-                                _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
+                                _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryRemove(currentTargetEntry.Name, out _);
                                 throw;
                             }
                         }
@@ -530,7 +530,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // This target is no longer actively building.
-                        _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
+                        _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryRemove(currentTargetEntry.Name, out _);
 
                         _buildResult.AddResultsForTarget(currentTargetEntry.Name, targetResult);
 
@@ -627,7 +627,7 @@ namespace Microsoft.Build.BackEnd
                     entry.LeaveLegacyCallTargetScopes();
 
                     // This target is no longer actively building (if it was).
-                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(topEntry.Name);
+                    _requestEntry.RequestConfiguration.ActivelyBuildingTargets.TryRemove(topEntry.Name, out _);
 
                     // If we come across an entry which requires us to stop processing (for instance, an aftertarget of the original
                     // CallTarget target) then we need to use that flag, not the one from the top entry.
