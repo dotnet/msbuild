@@ -41,6 +41,11 @@ variables:
     value: .NETCore
   - name: _DotNetValidationArtifactsCategory
     value: .NETCoreValidation
+  # For now skipping apply optimization data for vs16.11, because the run with real signed bits requires being fully automated
+  # while there is no available optimization data for vs16.11.
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs16.11') }}:
+    - name: SkipApplyOptimizationData
+      value: true
 
 resources:
   repositories:
