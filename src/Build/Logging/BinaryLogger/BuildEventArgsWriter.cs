@@ -7,6 +7,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+#if NET10_0_OR_GREATER
+using ArmAes = System.Runtime.Intrinsics.Arm.Aes;
+using X86Aes = System.Runtime.Intrinsics.X86.Aes;
+#endif
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -1345,7 +1349,15 @@ namespace Microsoft.Build.Logging
                 else
                 {
 #if NET9_0_OR_GREATER
-                    value = GxHash.GxHash.Hash64(System.Runtime.InteropServices.MemoryMarshal.Cast<char, byte>(text.AsSpan()));
+                    // Perf: This should get jitted away in the case where neither is supported
+                    if (ArmAes.IsSupported || X86Aes.IsSupported)
+                    {
+                        value = GxHash.GxHash.Hash64(System.Runtime.InteropServices.MemoryMarshal.Cast<char, byte>(text.AsSpan()));
+                    }
+                    else
+                    {
+                        value = FowlerNollVo1aHash.ComputeHash64Fast(text);
+                    }
 #else
                     value = FowlerNollVo1aHash.ComputeHash64Fast(text);
 #endif
