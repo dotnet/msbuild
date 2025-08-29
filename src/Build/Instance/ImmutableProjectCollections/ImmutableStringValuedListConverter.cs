@@ -17,7 +17,7 @@ namespace Microsoft.Build.Instance
     /// </summary>
     internal class ImmutableStringValuedListConverter : IList<string>, IReadOnlyList<string>
     {
-        private readonly object _syncObject = new();
+        private readonly LockType _syncLock = new();
         private readonly ProjectLink _immutableProject;
         private readonly Func<ProjectLink, List<string>> _getStringValues;
         private List<string>? _items;
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Instance
         {
             if (_items == null)
             {
-                lock (_syncObject)
+                lock (_syncLock)
                 {
                     if (_items == null)
                     {

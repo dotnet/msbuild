@@ -29,7 +29,7 @@ namespace Microsoft.Build.Instance
         /// <summary>
         /// A cached immutable dictionary containing all direct properties.
         /// </summary>
-        private ImmutableDictionary<string, string>? _immutableDictionary;
+        private ImmutableDictionary<string, string>? _convertedPropertiesDictionary;
 
         public ImmutableProjectMetadataCollectionConverter(
             ProjectItem linkedProjectItem,
@@ -99,17 +99,17 @@ namespace Microsoft.Build.Instance
         /// <returns>An immutable dictionary containing all direct properties.</returns>
         public ImmutableDictionary<string, string> ToImmutableDictionary()
         {
-            if (_immutableDictionary is null)
+            if (_convertedPropertiesDictionary is null)
             {
                 var newDictionary = _properties.ToImmutableDictionary(
                     kvp => kvp.Key,
                     kvp => EscapingUtilities.Escape(_linkedProjectItem.GetMetadataValue(kvp.Key)),
                     MSBuildNameIgnoreCaseComparer.Default);
 
-                _ = Interlocked.CompareExchange(ref _immutableDictionary, newDictionary, null);
+                _ = Interlocked.CompareExchange(ref _convertedPropertiesDictionary, newDictionary, null);
             }
 
-            return _immutableDictionary;
+            return _convertedPropertiesDictionary;
         }
     }
 }
