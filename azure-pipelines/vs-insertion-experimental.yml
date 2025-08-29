@@ -4,9 +4,9 @@ name: $(Date:yyyyMMdd).$(Rev:r)
 
 resources:
   pipelines:
-  - pipeline: 'MSBuild'
+  - pipeline: 'MSBuildExpPerf'
     project: 'DevDiv'
-    source: 'MSBuild'
+    source: 'MSBuild/MSBuild-ExpPerf'
     trigger:
       branches:
         include:
@@ -33,16 +33,17 @@ parameters:
       - rel/d17.6
       - rel/d17.3
       - rel/d17.0
-
+      - rel/d16.11
+      
 variables:
   - name: TeamName
     value: msbuild
   - name: TeamEmail
     value: msbtm@microsoft.com
   - name: MSBuild_CI_BuildNumber
-    value: $(resources.pipeline.MSBuild.runName)
+    value: $(resources.pipeline.MSBuildExpPerf.runName)
   - name: MSBuild_CI_SourceVersion
-    value: $(resources.pipeline.MSBuild.sourceCommit)
+    value: $(resources.pipeline.MSBuildExpPerf.sourceCommit)
   - name: ArtifactPackagesPath
     value: $(Build.ArtifactStagingDirectory)/PackageArtifacts
 
@@ -80,11 +81,11 @@ extends:
         templateContext:
           inputs:
           - input: pipelineArtifact
-            pipeline: 'MSBuild'
+            pipeline: 'MSBuildExpPerf'
             artifactName: 'xsd'
             targetPath: '$(Pipeline.Workspace)/xsd'
           - input: pipelineArtifact
-            pipeline: 'MSBuild'
+            pipeline: 'MSBuildExpPerf'
             artifactName: 'PackageArtifacts'
             targetPath: '$(Build.ArtifactStagingDirectory)/PackageArtifacts'
             # the CI build creates a sourcebuild intermediate package that is not signed, remove it to avoid warning from Guardian
@@ -99,7 +100,7 @@ extends:
             targetType: inline
             script: |
               # Extract the last section after the last '/'
-              $fullBranch = "$(resources.pipeline.MSBuild.sourceBranch)"
+              $fullBranch = "$(resources.pipeline.MSBuildExpPerf.sourceBranch)"
               $branchSegments = $fullBranch -split '/'
               $branch = $branchSegments[-1]
               Write-Host "Setting drops branch to '$branch'"
@@ -112,7 +113,7 @@ extends:
             targetType: inline
             script: |
               # Extract VS version from branch name if it follows exp/vsXX.Y-somename pattern
-              $fullBranch = "$(resources.pipeline.MSBuild.sourceBranch)"
+              $fullBranch = "$(resources.pipeline.MSBuildExpPerf.sourceBranch)"
               $parameterTargetBranch = "${{ parameters.TargetBranch }}"
               $detectedTarget = "main" # Default target branch
 
