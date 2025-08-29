@@ -5,8 +5,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.Execution;
+#if NETFRAMEWORK
 using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.Framework;
+#endif
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph

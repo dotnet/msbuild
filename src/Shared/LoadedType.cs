@@ -7,7 +7,6 @@ using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -47,7 +46,7 @@ namespace Microsoft.Build.Shared
             // properties and reflect over them without needing them to be fully loaded, so it also isn't need for TaskHosts.
 
             // MetadataLoadContext-loaded Type objects don't support testing for inherited attributes, so we manually walk the BaseType chain.
-            Type t = type;
+            Type? t = type;
             while (t is not null)
             {
                 if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals(nameof(LoadInSeparateAppDomainAttribute))))
@@ -92,7 +91,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type pt = props[i].PropertyType;
+                Type? pt = props[i].PropertyType;
                 if (pt.IsArray)
                 {
                     pt = pt.GetElementType();
@@ -101,9 +100,9 @@ namespace Microsoft.Build.Shared
                 bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
 
                 Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
-                if (loadedViaMetadataLoadContext)
+                if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
-                    PropertyAssemblyQualifiedNames[i] = Properties[i].PropertyType.AssemblyQualifiedName;
+                    PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName?? string.Empty;
                 }
             }
 #else
@@ -143,7 +142,7 @@ namespace Microsoft.Build.Shared
             {
                 AssemblyName assemblyName = Type.GetTypeInfo().Assembly.GetName();
                 Version lastVersionToForce = new Version(3, 5);
-                if (assemblyName.Version.CompareTo(lastVersionToForce) > 0)
+                if (assemblyName.Version?.CompareTo(lastVersionToForce) > 0)
                 {
                     if (String.Equals(assemblyName.Name, "PresentationBuildTasks", StringComparison.OrdinalIgnoreCase))
                     {
@@ -180,7 +179,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Assembly-qualified names for properties. Only has a value if this type was loaded using MetadataLoadContext.
         /// </summary>
-        internal string[] PropertyAssemblyQualifiedNames { get; private set; }
+        internal string[]? PropertyAssemblyQualifiedNames { get; private set; }
 
         /// <summary>
         /// Gets the assembly the type was loaded from.

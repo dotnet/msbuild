@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     internal sealed class ProjectCacheDescriptorEqualityComparer : IEqualityComparer<ProjectCacheDescriptor>
     {

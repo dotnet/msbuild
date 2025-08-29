@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     /// <summary>
     ///     A cache hit can use this to instruct MSBuild to build the cheaper version of the targets that the plugin avoided
@@ -49,6 +49,12 @@ namespace Microsoft.Build.Experimental.ProjectCache
             ((ITranslatable)instance).Translate(translator);
 
             return instance;
+        }
+#pragma warning disable CS0618 // Type or member is obsolete
+
+        internal static ProxyTargets FromExperimental(Experimental.ProjectCache.ProxyTargets? experimentalProxyTargets)
+        {
+            return experimentalProxyTargets == null ? new ProxyTargets() : new ProxyTargets(experimentalProxyTargets.ProxyTargetToRealTargetMap);
         }
     }
 }

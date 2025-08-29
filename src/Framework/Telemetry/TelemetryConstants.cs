@@ -48,3 +48,12 @@ internal static class TelemetryConstants
     /// </summary>
     public const string InnerBuildDurationPropertyName = "InnerBuildDurationInMilliseconds";
 }
+
+internal static class NodeTelemetryTags
+{
+    // These properties can't use nameof since they're not tied to a specific class property
+    public const string Tasks = "Tasks";
+    public const string Targets = "Targets";
+    public const string TargetsSummary = "TargetsSummary";
+    public const string TasksSummary = "TasksSummary";
+}

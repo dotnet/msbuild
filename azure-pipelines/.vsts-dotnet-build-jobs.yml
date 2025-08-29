@@ -24,9 +24,9 @@ jobs:
   - name: TeamName
     value: MSBuild
   - name: VisualStudio.MajorVersion
-    value: 17
+    value: 18
   - name: VisualStudio.ChannelName
-    value: 'int.d17.14' # MSBuild's vs17.14 branch corresponds to this VS channel
+    value: 'int.main'
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -94,6 +94,7 @@ jobs:
               /p:VisualStudioIbcDrop=$(OptProfDrop)
               /p:GenerateSbom=true
               /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
+              /p:IsExperimental=${{ parameters.isExperimental }}
     displayName: Build
     condition: succeeded()
 
@@ -236,4 +237,3 @@ jobs:
       name: $(DncEngInternalBuildPool)
       image: $(WindowsImage)
       os: windows
-

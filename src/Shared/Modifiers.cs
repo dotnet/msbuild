@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if !CLR2COMPATIBILITY
+using System.Collections.Frozen;
+#else
 using System.Collections.Generic;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.Shared.FileSystem;
@@ -24,15 +28,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static class ItemSpecModifiers
         {
-#if DEBUG
-            /// <summary>
-            /// Whether to dump when a modifier is in the "wrong" (slow) casing
-            /// </summary>
-            private static readonly bool s_traceModifierCasing = (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDTRACEMODIFIERCASING")));
-#endif
-
-            // NOTE: If you add an item here that starts with a new letter, you need to update the case
-            // statements in IsItemSpecModifier and IsDerivableItemSpecModifier.
             internal const string FullPath = "FullPath";
             internal const string RootDir = "RootDir";
             internal const string Filename = "Filename";
@@ -69,12 +64,29 @@ namespace Microsoft.Build.Shared
                     DefiningProjectExtension
                 };
 
-            private static HashSet<string> s_tableOfItemSpecModifiers = new HashSet<string>(All, StringComparer.OrdinalIgnoreCase);
+#if CLR2COMPATIBILITY
+            private static readonly HashSet<string> s_tableOfItemSpecModifiers = new HashSet<string>(All, StringComparer.OrdinalIgnoreCase);
+            private static readonly HashSet<string> s_tableOfDefiningProjectModifiers = new HashSet<string>(
+                [
+                    DefiningProjectFullPath,
+                    DefiningProjectDirectory,
+                    DefiningProjectName,
+                    DefiningProjectExtension,
+                ], StringComparer.OrdinalIgnoreCase);
+#else
+            private static readonly FrozenSet<string> s_tableOfItemSpecModifiers = FrozenSet.Create(StringComparer.OrdinalIgnoreCase, All);
+            private static readonly FrozenSet<string> s_tableOfDefiningProjectModifiers = FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
+                [
+                    DefiningProjectFullPath,
+                    DefiningProjectDirectory,
+                    DefiningProjectName,
+                    DefiningProjectExtension,
+                ]);
+#endif
 
             /// <summary>
             /// Indicates if the given name is reserved for an item-spec modifier.
             /// </summary>
-            [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Performance")]
             internal static bool IsItemSpecModifier(string name)
             {
                 if (name == null)
@@ -82,164 +94,8 @@ namespace Microsoft.Build.Shared
                     return false;
                 }
 
-
-                /*
-                 * What follows requires some explanation.
-                 *
-                 * This function is called many times and slowness here will be amplified
-                 * in critical performance scenarios.
-                 *
-                 * The following switch statement attempts to identify item spec modifiers that
-                 * have the exact case that our constants in ItemSpecModifiers have. This is the
-                 * 99% case.
-                 *
-                 * Further, the switch statement can identify certain cases in which there is
-                 * definitely no chance that 'name' is an item spec modifier. For example, a
-                 * 7 letter 'name' that doesn't start with 'r' or 'R' can't be RootDir and
-                 * therefore is not an item spec modifier.
-                 *
-                 */
-                switch (name.Length)
-                {
-                    case 7: // RootDir
-                        switch (name[0])
-                        {
-                            default:
-                                return false;
-                            case 'R': // RootDir
-                                if (name == FileUtilities.ItemSpecModifiers.RootDir)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'r':
-                                break;
-                        }
-                        break;
-                    case 8: // FullPath, Filename, Identity
-
-                        switch (name[0])
-                        {
-                            default:
-                                return false;
-                            case 'F': // Filename, FullPath
-                                if (name == FileUtilities.ItemSpecModifiers.FullPath)
-                                {
-                                    return true;
-                                }
-                                if (name == FileUtilities.ItemSpecModifiers.Filename)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'f':
-                                break;
-                            case 'I': // Identity
-                                if (name == FileUtilities.ItemSpecModifiers.Identity)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'i':
-                                break;
-                        }
-                        break;
-                    case 9: // Extension, Directory
-                        switch (name[0])
-                        {
-                            default:
-                                return false;
-                            case 'D': // Directory
-                                if (name == FileUtilities.ItemSpecModifiers.Directory)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'd':
-                                break;
-                            case 'E': // Extension
-                                if (name == FileUtilities.ItemSpecModifiers.Extension)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'e':
-                                break;
-                        }
-                        break;
-                    case 11: // RelativeDir, CreatedTime
-                        switch (name[0])
-                        {
-                            default:
-                                return false;
-                            case 'C': // CreatedTime
-                                if (name == FileUtilities.ItemSpecModifiers.CreatedTime)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'c':
-                                break;
-                            case 'R': // RelativeDir
-                                if (name == FileUtilities.ItemSpecModifiers.RelativeDir)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'r':
-                                break;
-                        }
-                        break;
-                    case 12: // RecursiveDir, ModifiedTime, AccessedTime
-
-                        switch (name[0])
-                        {
-                            default:
-                                return false;
-                            case 'A': // AccessedTime
-                                if (name == FileUtilities.ItemSpecModifiers.AccessedTime)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'a':
-                                break;
-                            case 'M': // ModifiedTime
-                                if (name == FileUtilities.ItemSpecModifiers.ModifiedTime)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'm':
-                                break;
-                            case 'R': // RecursiveDir
-                                if (name == FileUtilities.ItemSpecModifiers.RecursiveDir)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'r':
-                                break;
-                        }
-                        break;
-                    case 19:
-                    case 23:
-                    case 24:
-                        return IsDefiningProjectModifier(name);
-                    default:
-                        // Not the right length for a match.
-                        return false;
-                }
-
                 // Could still be a case-insensitive match.
                 bool result = s_tableOfItemSpecModifiers.Contains(name);
-
-#if DEBUG
-                if (result && s_traceModifierCasing)
-                {
-                    Console.WriteLine("'{0}' is a non-standard casing. Replace the use with the standard casing like 'RecursiveDir' or 'FullPath' for a small performance improvement.", name);
-                }
-#endif
 
                 return result;
             }
@@ -248,62 +104,7 @@ namespace Microsoft.Build.Shared
             /// Indicates if the given name is reserved for one of the specific subset of itemspec
             /// modifiers to do with the defining project of the item.
             /// </summary>
-            internal static bool IsDefiningProjectModifier(string name)
-            {
-                switch (name.Length)
-                {
-                    case 19: // DefiningProjectName
-                        if (name == FileUtilities.ItemSpecModifiers.DefiningProjectName)
-                        {
-                            return true;
-                        }
-                        break;
-                    case 23: // DefiningProjectFullPath
-                        if (name == FileUtilities.ItemSpecModifiers.DefiningProjectFullPath)
-                        {
-                            return true;
-                        }
-                        break;
-                    case 24: // DefiningProjectDirectory, DefiningProjectExtension
-
-                        switch (name[15])
-                        {
-                            default:
-                                return false;
-                            case 'D': // DefiningProjectDirectory
-                                if (name == FileUtilities.ItemSpecModifiers.DefiningProjectDirectory)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'd':
-                                break;
-                            case 'E': // DefiningProjectExtension
-                                if (name == FileUtilities.ItemSpecModifiers.DefiningProjectExtension)
-                                {
-                                    return true;
-                                }
-                                break;
-                            case 'e':
-                                break;
-                        }
-                        break;
-                    default:
-                        return false;
-                }
-
-                // Could still be a case-insensitive match.
-                bool result = s_tableOfItemSpecModifiers.Contains(name);
-
-#if DEBUG
-                if (result && s_traceModifierCasing)
-                {
-                    Console.WriteLine("'{0}' is a non-standard casing. Replace the use with the standard casing like 'RecursiveDir' or 'FullPath' for a small performance improvement.", name);
-                }
-#endif
-
-                return result;
-            }
+            internal static bool IsDefiningProjectModifier(string name) => s_tableOfDefiningProjectModifiers.Contains(name);
 
             /// <summary>
             /// Indicates if the given name is reserved for a derivable item-spec modifier.

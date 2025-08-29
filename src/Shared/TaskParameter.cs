@@ -4,9 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
 using System.Security;
@@ -827,6 +825,10 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            public SerializableMetadata BackingMetadata => default;
+
+            public bool HasCustomMetadata => _customEscapedMetadata?.Count > 0;
+
             /// <summary>
             /// Allows the values of metadata on the item to be queried.
             /// </summary>
@@ -999,6 +1001,7 @@ namespace Microsoft.Build.BackEnd
                 return EnumerateMetadataLazy();
             }
 
+#if FEATURE_APPDOMAIN
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
             {
                 if (_customEscapedMetadata == null || _customEscapedMetadata.Count == 0)
@@ -1016,6 +1019,7 @@ namespace Microsoft.Build.BackEnd
 
                 return result;
             }
+#endif
 
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
             {

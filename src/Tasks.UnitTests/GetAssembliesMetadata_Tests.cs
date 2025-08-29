@@ -10,11 +10,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Sdk;
-using Microsoft.Build.UnitTests.Shared;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {

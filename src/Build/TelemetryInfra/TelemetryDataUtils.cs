@@ -5,10 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+
 namespace Microsoft.Build.Framework.Telemetry
 {
     internal static class TelemetryDataUtils
     {
+        /// <summary>
+        /// Transforms collected telemetry data to format recognized by the telemetry infrastructure.
+        /// </summary>
+        /// <param name="telemetryData">Data about tasks and target forwarded from nodes.</param>
+        /// <param name="includeTasksDetails">Controls whether Task details should attached to the telemetry.</param>
+        /// <param name="includeTargetDetails">Controls whether Target details should be attached to the telemetry.</param>
+        /// <returns>Node Telemetry data wrapped in <see cref="IActivityTelemetryDataHolder"/> a list of properties that can be attached as tags to a <see cref="System.Diagnostics.Activity"/>.</returns>
         public static IActivityTelemetryDataHolder? AsActivityDataHolder(this IWorkerNodeTelemetryData? telemetryData, bool includeTasksDetails, bool includeTargetDetails)
         {
             if (telemetryData == null)
@@ -20,24 +28,24 @@ namespace Microsoft.Build.Framework.Telemetry
 
             if (includeTasksDetails)
             {
-                telemetryItems.Add(new TelemetryItem("Tasks",
+                telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.Tasks,
                     JsonSerializer.Serialize(telemetryData.TasksExecutionData, _serializerOptions), false));
             }
 
             if (includeTargetDetails)
             {
-                telemetryItems.Add(new TelemetryItem("Targets",
+                telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.Targets,
                     JsonSerializer.Serialize(telemetryData.TargetsExecutionData, _serializerOptions), false));
             }
 
-            TargetsSummary targetsSummary = new();
-            targetsSummary.Initialize(telemetryData.TargetsExecutionData);
-            telemetryItems.Add(new TelemetryItem("TargetsSummary",
+            TargetsSummaryConverter targetsSummary = new();
+            targetsSummary.Process(telemetryData.TargetsExecutionData);
+            telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.TargetsSummary,
                 JsonSerializer.Serialize(targetsSummary, _serializerOptions), false));
 
-            TasksSummary tasksSummary = new();
-            tasksSummary.Initialize(telemetryData.TasksExecutionData);
-            telemetryItems.Add(new TelemetryItem("TasksSummary",
+            TasksSummaryConverter tasksSummary = new();
+            tasksSummary.Process(telemetryData.TasksExecutionData);
+            telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.TasksSummary,
                 JsonSerializer.Serialize(tasksSummary, _serializerOptions), false));
 
             return new NodeTelemetry(telemetryItems);
@@ -49,21 +57,19 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             var opt = new JsonSerializerOptions
             {
-                // Add following if user-friendly indentation would be needed
-                // WriteIndented = true,
                 Converters =
                 {
-                    new TargetDataConverter(),
-                    new TaskDataConverter(),
-                    new TargetsSummary(),
-                    new TasksSummary(),
+                    new TargetsDetailsConverter(),
+                    new TasksDetailsConverter(),
+                    new TargetsSummaryConverter(),
+                    new TasksSummaryConverter(),
                 },
             };
 
             return opt;
         }
 
-        private class TargetDataConverter : JsonConverter<Dictionary<TaskOrTargetTelemetryKey, bool>?>
+        private class TargetsDetailsConverter : JsonConverter<Dictionary<TaskOrTargetTelemetryKey, bool>?>
         {
             public override Dictionary<TaskOrTargetTelemetryKey, bool>? Read(
                 ref Utf8JsonReader reader,
@@ -83,24 +89,29 @@ namespace Microsoft.Build.Framework.Telemetry
                 }
 
                 // Following needed - as System.Text.Json doesn't support indexing dictionary by composite types
-
-                writer.WriteStartArray();
+                writer.WriteStartObject();
 
                 foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> valuePair in value)
                 {
-                    writer.WriteStartObject(valuePair.Key.IsCustom || valuePair.Key.IsFromMetaProject ? ActivityExtensions.GetHashed(valuePair.Key.Name) : valuePair.Key.Name);
+                    string keyName = ShouldHashKey(valuePair.Key) ?
+                        ActivityExtensions.GetHashed(valuePair.Key.Name) :
+                        valuePair.Key.Name;
+
+                    writer.WriteStartObject(keyName);
                     writer.WriteBoolean("WasExecuted", valuePair.Value);
-                    writer.WriteBoolean("IsCustom", valuePair.Key.IsCustom);
-                    writer.WriteBoolean("IsFromNuget", valuePair.Key.IsFromNugetCache);
-                    writer.WriteBoolean("IsMetaproj", valuePair.Key.IsFromMetaProject);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsCustom), valuePair.Key.IsCustom);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsNuget), valuePair.Key.IsNuget);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsMetaProj), valuePair.Key.IsMetaProj);
                     writer.WriteEndObject();
                 }
 
-                writer.WriteEndArray();
+                writer.WriteEndObject();
             }
+
+            private bool ShouldHashKey(TaskOrTargetTelemetryKey key) => key.IsCustom || key.IsMetaProj;
         }
 
-        private class TaskDataConverter : JsonConverter<Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>?>
+        private class TasksDetailsConverter : JsonConverter<Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>?>
         {
             public override Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>? Read(
                 ref Utf8JsonReader reader,
@@ -120,58 +131,67 @@ namespace Microsoft.Build.Framework.Telemetry
                 }
 
                 // Following needed - as System.Text.Json doesn't support indexing dictionary by composite types
-
-                writer.WriteStartArray();
+                writer.WriteStartObject();
 
                 foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> valuePair in value)
                 {
-                    writer.WriteStartObject(valuePair.Key.IsCustom ? ActivityExtensions.GetHashed(valuePair.Key.Name) : valuePair.Key.Name);
-                    // We do not want decimals
-                    writer.WriteNumber("ExecTimeMs", valuePair.Value.CumulativeExecutionTime.TotalMilliseconds / 1);
-                    writer.WriteNumber("ExecCnt", valuePair.Value.ExecutionsCount);
-                    // We do not want decimals
-                    writer.WriteNumber("MemKBs", valuePair.Value.TotalMemoryConsumption / 1024);
-                    writer.WriteBoolean("IsCustom", valuePair.Key.IsCustom);
-                    writer.WriteBoolean("IsFromNuget", valuePair.Key.IsFromNugetCache);
+                    string keyName = valuePair.Key.IsCustom ?
+                        ActivityExtensions.GetHashed(valuePair.Key.Name) :
+                        valuePair.Key.Name;
+                    writer.WriteStartObject(keyName);
+                    writer.WriteNumber(nameof(valuePair.Value.CumulativeExecutionTime.TotalMilliseconds), valuePair.Value.CumulativeExecutionTime.TotalMilliseconds);
+                    writer.WriteNumber(nameof(valuePair.Value.ExecutionsCount), valuePair.Value.ExecutionsCount);
+                    writer.WriteNumber(nameof(valuePair.Value.TotalMemoryBytes), valuePair.Value.TotalMemoryBytes);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsCustom), valuePair.Key.IsCustom);
+                    writer.WriteBoolean(nameof(valuePair.Key.IsNuget), valuePair.Key.IsNuget);
                     writer.WriteEndObject();
                 }
 
-                writer.WriteEndArray();
+                writer.WriteEndObject();
             }
         }
 
-        private class TargetsSummary : JsonConverter<TargetsSummary>
+        private class TargetsSummaryConverter : JsonConverter<TargetsSummaryConverter>
         {
-            public void Initialize(Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
+            /// <summary>
+            /// Processes target execution data to compile summary statistics for both built-in and custom targets.
+            /// </summary>
+            /// <param name="targetsExecutionData">Dictionary containing target execution data keyed by task identifiers.</param>
+            public void Process(Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
             {
-                foreach (var targetInfo in targetsExecutionData)
+                foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> targetPair in targetsExecutionData)
                 {
-                    UpdateStatistics(LoadedBuiltinTargetInfo, LoadedCustomTargetInfo, targetInfo.Key);
-                    if (targetInfo.Value)
+                    TaskOrTargetTelemetryKey key = targetPair.Key;
+                    bool wasExecuted = targetPair.Value;
+
+                    // Update loaded targets statistics (all targets are loaded)
+                    UpdateTargetStatistics(key, isExecuted: false);
+
+                    // Update executed targets statistics (only targets that were actually executed)
+                    if (wasExecuted)
                     {
-                        UpdateStatistics(ExecutedBuiltinTargetInfo, ExecutedCustomTargetInfo, targetInfo.Key);
+                        UpdateTargetStatistics(key, isExecuted: true);
                     }
                 }
+            }
 
-                void UpdateStatistics(
-                    TargetInfo builtinTargetInfo,
-                    TargetInfo customTargetInfo,
-                    TaskOrTargetTelemetryKey key)
+            private void UpdateTargetStatistics(TaskOrTargetTelemetryKey key, bool isExecuted)
+            {
+                // Select the appropriate target info collections based on execution state
+                TargetInfo builtinTargetInfo = isExecuted ? ExecutedBuiltinTargetInfo : LoadedBuiltinTargetInfo;
+                TargetInfo customTargetInfo = isExecuted ? ExecutedCustomTargetInfo : LoadedCustomTargetInfo;
+
+                // Update either custom or builtin target info based on target type
+                TargetInfo targetInfo = key.IsCustom ? customTargetInfo : builtinTargetInfo;
+
+                targetInfo.Total++;
+                if (key.IsNuget)
                 {
-                    UpdateSingleStatistics(key.IsCustom ? customTargetInfo : builtinTargetInfo, key);
-
-                    void UpdateSingleStatistics(TargetInfo targetInfo, TaskOrTargetTelemetryKey kkey)
-                    {
-                        targetInfo.Total++;
-                        if (kkey.IsFromNugetCache)
-                        {
-                            targetInfo.FromNuget++;
-                        }
-                        if (kkey.IsFromMetaProject)
-                        {
-                            targetInfo.FromMetaproj++;
-                        }
-                    }
+                    targetInfo.FromNuget++;
+                }
+                if (key.IsMetaProj)
+                {
+                    targetInfo.FromMetaproj++;
                 }
             }
 
@@ -187,7 +207,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 public int FromMetaproj { get; internal set; }
             }
 
-            public override TargetsSummary? Read(
+            public override TargetsSummaryConverter? Read(
                 ref Utf8JsonReader reader,
                 Type typeToConvert,
                 JsonSerializerOptions options) =>
@@ -195,7 +215,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             public override void Write(
                 Utf8JsonWriter writer,
-                TargetsSummary value,
+                TargetsSummaryConverter value,
                 JsonSerializerOptions options)
             {
                 writer.WriteStartObject();
@@ -207,10 +227,9 @@ namespace Microsoft.Build.Framework.Telemetry
                 writer.WriteEndObject();
                 writer.WriteEndObject();
 
-
-                void WriteStat(Utf8JsonWriter writer, TargetInfo customTargetsInfo, TargetInfo builtinTargetsInfo)
+                void WriteStat(Utf8JsonWriter writer, TargetInfo builtinTargetsInfo, TargetInfo customTargetsInfo)
                 {
-                    writer.WriteNumber("Total", builtinTargetsInfo.Total + customTargetsInfo.Total);
+                    writer.WriteNumber(nameof(builtinTargetsInfo.Total), builtinTargetsInfo.Total + customTargetsInfo.Total);
                     WriteSingleStat(writer, builtinTargetsInfo, "Microsoft");
                     WriteSingleStat(writer, customTargetsInfo, "Custom");
                 }
@@ -220,54 +239,56 @@ namespace Microsoft.Build.Framework.Telemetry
                     if (targetInfo.Total > 0)
                     {
                         writer.WriteStartObject(name);
-                        writer.WriteNumber("Total", targetInfo.Total);
-                        writer.WriteNumber("FromNuget", targetInfo.FromNuget);
-                        writer.WriteNumber("FromMetaproj", targetInfo.FromMetaproj);
+                        writer.WriteNumber(nameof(targetInfo.Total), targetInfo.Total);
+                        writer.WriteNumber(nameof(targetInfo.FromNuget), targetInfo.FromNuget);
+                        writer.WriteNumber(nameof(targetInfo.FromMetaproj), targetInfo.FromMetaproj);
                         writer.WriteEndObject();
                     }
                 }
             }
         }
 
-
-        private class TasksSummary : JsonConverter<TasksSummary>
+        private class TasksSummaryConverter : JsonConverter<TasksSummaryConverter>
         {
-            public void Initialize(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData)
+            /// <summary>
+            /// Processes task execution data to compile summary statistics for both built-in and custom tasks.
+            /// </summary>
+            /// <param name="tasksExecutionData">Dictionary containing task execution data keyed by task identifiers.</param>
+            public void Process(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData)
             {
-                foreach (var taskInfo in tasksExecutionData)
+                foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> taskInfo in tasksExecutionData)
                 {
-                    UpdateStatistics(BuiltinTasksInfo, CustomTasksInfo, taskInfo.Key, taskInfo.Value);
+                    UpdateTaskStatistics(BuiltinTasksInfo, CustomTasksInfo, taskInfo.Key, taskInfo.Value);
                 }
+            }
 
-                void UpdateStatistics(
-                    TasksInfo builtinTaskInfo,
-                    TasksInfo customTaskInfo,
-                    TaskOrTargetTelemetryKey key,
-                    TaskExecutionStats taskExecutionStats)
+            private void UpdateTaskStatistics(
+                TasksInfo builtinTaskInfo,
+                TasksInfo customTaskInfo,
+                TaskOrTargetTelemetryKey key,
+                TaskExecutionStats taskExecutionStats)
+            {
+                TasksInfo taskInfo = key.IsCustom ? customTaskInfo : builtinTaskInfo;
+                taskInfo.Total.Accumulate(taskExecutionStats);
+
+                if (key.IsNuget)
                 {
-                    UpdateSingleStatistics(key.IsCustom ? customTaskInfo : builtinTaskInfo, taskExecutionStats, key);
-
-                    void UpdateSingleStatistics(TasksInfo summarizedTaskInfo, TaskExecutionStats infoToAdd, TaskOrTargetTelemetryKey kkey)
-                    {
-                        summarizedTaskInfo.Total.AddAnother(infoToAdd);
-                        if (kkey.IsFromNugetCache)
-                        {
-                            summarizedTaskInfo.FromNuget.AddAnother(infoToAdd);
-                        }
-                    }
+                    taskInfo.FromNuget.Accumulate(taskExecutionStats);
                 }
             }
 
             private TasksInfo BuiltinTasksInfo { get; } = new TasksInfo();
+
             private TasksInfo CustomTasksInfo { get; } = new TasksInfo();
 
             private class TasksInfo
             {
                 public TaskExecutionStats Total { get; } = TaskExecutionStats.CreateEmpty();
+
                 public TaskExecutionStats FromNuget { get; } = TaskExecutionStats.CreateEmpty();
             }
 
-            public override TasksSummary? Read(
+            public override TasksSummaryConverter? Read(
                 ref Utf8JsonReader reader,
                 Type typeToConvert,
                 JsonSerializerOptions options) =>
@@ -275,7 +296,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             public override void Write(
                 Utf8JsonWriter writer,
-                TasksSummary value,
+                TasksSummaryConverter value,
                 JsonSerializerOptions options)
             {
                 writer.WriteStartObject();
@@ -286,21 +307,19 @@ namespace Microsoft.Build.Framework.Telemetry
                 void WriteStat(Utf8JsonWriter writer, TasksInfo tasksInfo, string name)
                 {
                     writer.WriteStartObject(name);
-                    WriteSingleStat(writer, tasksInfo.Total, "Total", true);
-                    WriteSingleStat(writer, tasksInfo.FromNuget, "FromNuget", false);
+                    WriteSingleStat(writer, tasksInfo.Total, nameof(tasksInfo.Total));
+                    WriteSingleStat(writer, tasksInfo.FromNuget, nameof(tasksInfo.FromNuget));
                     writer.WriteEndObject();
                 }
 
-                void WriteSingleStat(Utf8JsonWriter writer, TaskExecutionStats stats, string name, bool writeIfEmpty)
+                void WriteSingleStat(Utf8JsonWriter writer, TaskExecutionStats stats, string name)
                 {
                     if (stats.ExecutionsCount > 0)
                     {
                         writer.WriteStartObject(name);
-                        writer.WriteNumber("TotalExecutionsCount", stats.ExecutionsCount);
-                        // We do not want decimals
-                        writer.WriteNumber("CumulativeExecutionTimeMs", (long)stats.CumulativeExecutionTime.TotalMilliseconds);
-                        // We do not want decimals
-                        writer.WriteNumber("CumulativeConsumedMemoryKB", stats.TotalMemoryConsumption / 1024);
+                        writer.WriteNumber(nameof(stats.ExecutionsCount), stats.ExecutionsCount);
+                        writer.WriteNumber(nameof(stats.CumulativeExecutionTime.TotalMilliseconds), stats.CumulativeExecutionTime.TotalMilliseconds);
+                        writer.WriteNumber(nameof(stats.TotalMemoryBytes), stats.TotalMemoryBytes);
                         writer.WriteEndObject();
                     }
                 }

@@ -1,4 +1,4 @@
-﻿# editorconfig.org
+﻿﻿# editorconfig.org
 
 # top-most EditorConfig file
 root = true
@@ -216,7 +216,7 @@ dotnet_analyzer_diagnostic.category-Style.severity = warning
 dotnet_diagnostic.IDE0004.severity = suggestion
 
 # IDE0005: Remove unnecessary usings/imports
-dotnet_diagnostic.IDE0005.severity = none
+dotnet_diagnostic.IDE0005.severity = warning
 
 # Use explicit type instead of 'var'
 dotnet_diagnostic.IDE0008.severity = suggestion
@@ -276,9 +276,6 @@ dotnet_diagnostic.IDE0037.severity = suggestion
 # Use local function
 dotnet_diagnostic.IDE0039.severity = suggestion
 
-# Accessibility modifiers required
-dotnet_diagnostic.IDE0040.severity = none
-
 # Null check can be simplified
 dotnet_diagnostic.IDE0041.severity = suggestion
 
@@ -300,12 +297,6 @@ dotnet_diagnostic.IDE0048.severity = suggestion
 
 # Member name can be simplified
 dotnet_diagnostic.IDE0049.severity = suggestion
-
-# Private member is unused
-dotnet_diagnostic.IDE0051.severity = none
-
-# Remove unread private member
-dotnet_diagnostic.IDE0052.severity = none
 
 # Use compound assignment
 dotnet_diagnostic.IDE0054.severity = suggestion
@@ -424,9 +415,6 @@ dotnet_diagnostic.IDE0301.severity = suggestion
 dotnet_diagnostic.IDE0305.severity = suggestion
 dotnet_diagnostic.IDE0306.severity = suggestion
 
-# Use implicitly typed lambda
-dotnet_diagnostic.IDE0350.severity = none
-
 # Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
 dotnet_diagnostic.SA1010.severity = none
 
@@ -439,6 +427,9 @@ dotnet_diagnostic.IDE0073.severity = error
 
 # Use 'System.Threading.Lock'
 dotnet_diagnostic.IDE0330.severity = suggestion
+
+# Use implicitly typed lambda
+dotnet_diagnostic.IDE0350.severity = none
 
 # Value types are incompatible with null values. https://xunit.net/xunit.analyzers/rules/xUnit1012
 dotnet_diagnostic.xUnit1012.severity = warning
