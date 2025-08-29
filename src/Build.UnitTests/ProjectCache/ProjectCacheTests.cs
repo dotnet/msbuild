@@ -1725,6 +1725,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
             """);
 
+            directory.CreateFile("global.json", GetGlobalJsonContent());
+
             // Create EmbeddedResources file
             var file1 = directory.CreateFile("File1.txt", "A=1");
             var file2 = directory.CreateFile("File2.txt", "B=1");
@@ -1749,5 +1751,16 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             output.ShouldNotContain("A=1");
             output.ShouldContain("B=1");
         }
+
+        private static string GetGlobalJsonContent() =>
+            /*lang=json*/ @"{
+                // This global.json is needed to prevent builds running in tests using the bootstrap layout from walking
+                // up the repo tree and resolving our sdk.paths, instead of the bootstrap layout's SDK.
+                // See https://github.com/dotnet/runtime/issues/118488 for details.
+                ""sdk"": {
+                    ""allowPrerelease"": true,
+                    ""rollForward"": ""latestMajor""
+                }
+            }";
     }
 }
