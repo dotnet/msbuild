@@ -282,9 +282,9 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
+        <target state="needs-review-translation">  -check
                      Abilita BuildChecks durante la compilazione.
                      BuildCheck consente di valutare le regole per garantire le proprietà 
                      della compilazione. Per altre informazioni, vedere aka.ms/buildcheck
