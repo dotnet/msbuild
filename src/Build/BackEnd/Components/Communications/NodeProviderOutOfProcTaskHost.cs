@@ -708,8 +708,6 @@ namespace Microsoft.Build.BackEnd
             // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
             string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
-            bool enableNodeReuse = ComponentHost.BuildParameters.EnableNodeReuse && Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse);
-
             IList<NodeContext> nodeContexts;
             // allocate a unique node id for this created host
             int nodeIdToCreate = Interlocked.Increment(ref _nextTaskHostNodeId);
@@ -763,7 +761,7 @@ namespace Microsoft.Build.BackEnd
                 // There is always one task host per host context so we always create just 1 one task host node here.      
                 nodeContexts = GetNodes(
                     runtimeHostPath,
-                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), enableNodeReuse, ComponentHost.BuildParameters.LowPriority),
+                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
                     nodeIdToCreate,
                     this,
                     handshake,
@@ -787,7 +785,7 @@ namespace Microsoft.Build.BackEnd
 
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, enableNodeReuse, ComponentHost.BuildParameters.LowPriority),
+                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
                 nodeIdToCreate,
                 this,
                 new Handshake(hostContext),
@@ -796,6 +794,34 @@ namespace Microsoft.Build.BackEnd
                 1);
 
             return nodeContexts.Count == 1 ? nodeContexts[0] : null;
+
+            // Determines whether node reuse should be enabled for the given host context.
+            // Node reuse allows MSBuild to reuse existing task host processes for better performance,
+            // but is disabled for CLR2 because it uses legacy MSBuildTaskHost.
+            bool NodeReuseIsEnabled(HandshakeOptions hostContext)
+            {
+                bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+
+                return Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse)
+                    && !isCLR2;
+            }
+        }
+
+        /// <summary>
+        /// Method called when a context created.
+        /// </summary>
+        private void NodeContextCreated(NodeContext context)
+        {
+            _nodeContexts[(HandshakeOptions)context.NodeId] = context;
+
+            // Start the asynchronous read.
+            context.BeginAsyncPacketRead();
+
+            lock (_activeNodes)
+            {
+                _activeNodes.Add(context.NodeId);
+            }
+            _noNodesActiveEvent.Reset();
         }
 
         /// <summary>
