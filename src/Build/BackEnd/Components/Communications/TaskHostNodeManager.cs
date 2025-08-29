@@ -1,9 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
+using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -40,14 +44,10 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Creates a node on an available NodeProvider, if any..
+        /// Not used - base class <see cref="NodeProviderOutOfProcBase"/> implementation is reused instead.
         /// </summary>
-        /// <param name="configuration">The configuration to use for the remote node.</param>
-        /// <param name="nodeAffinity">The <see cref="NodeAffinity"/> to use.</param>
-        /// <returns>A NodeInfo describing the node created, or null if none could be created.</returns>
-        public NodeInfo CreateNode(NodeConfiguration configuration, NodeAffinity nodeAffinity)
-        {
-            throw new NotSupportedException("not used");
-        }
+        public IList<NodeInfo> CreateNodes(NodeConfiguration configuration, NodeAffinity affinity, int numberOfNodesToCreate)
+            => throw new NotSupportedException("not used");
 
         /// <summary>
         /// Sends data to the specified node.
@@ -164,10 +164,15 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Factory for component creation.
         /// </summary>
-        static internal IBuildComponent CreateComponent(BuildComponentType type)
+        internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
             ErrorUtilities.VerifyThrow(type == BuildComponentType.TaskHostNodeManager, "Cannot create component of type {0}", type);
             return new TaskHostNodeManager();
+        }
+
+        IEnumerable<Process> INodeManager.GetProcesses()
+        {
+            return _outOfProcTaskHostNodeProvider.GetProcesses();
         }
     }
 }

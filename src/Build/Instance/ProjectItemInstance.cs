@@ -1,22 +1,25 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.IO;
-
+using System.Linq;
+#if FEATURE_APPDOMAIN
+using System.Runtime.Remoting;
+#endif
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Construction;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -33,8 +36,8 @@ namespace Microsoft.Build.Execution
         ITaskItem2,
         IMetadataTable,
         ITranslatable,
-        IDeepCloneable<ProjectItemInstance>,
-        IMetadataContainer
+        IMetadataContainer,
+        IItemTypeDefinition
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -113,11 +116,9 @@ namespace Microsoft.Build.Execution
 
             if (directMetadata?.GetEnumerator().MoveNext() == true)
             {
-                metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(directMetadata.FastCountOrZero());
-                foreach (KeyValuePair<string, string> metadatum in directMetadata)
-                {
-                    metadata.Set(new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
-                }
+                metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                IEnumerable<ProjectMetadataInstance> directMetadataInstances = directMetadata.Select(metadatum => new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
+                metadata.ImportProperties(directMetadataInstances);
             }
 
             CommonConstructor(project, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped);
@@ -523,6 +524,8 @@ namespace Microsoft.Build.Execution
 
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => _taskItem.EnumerateMetadata();
 
+        void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata) => _taskItem.ImportMetadata(metadata);
+
         #region IMetadataTable Members
 
         /// <summary>
@@ -581,30 +584,16 @@ namespace Microsoft.Build.Execution
 
         #endregion
 
-        #region IDeepCloneable<T>
-
-        /// <summary>
-        /// Deep clone the item.
-        /// Any metadata inherited from item definitions are also copied.
-        /// </summary>
-        ProjectItemInstance IDeepCloneable<ProjectItemInstance>.DeepClone()
-        {
-            return DeepClone();
-        }
-
-        #endregion
-
         /// <summary>
         /// Set all the supplied metadata on all the supplied items.
         /// </summary>
         internal static void SetMetadata(IEnumerable<KeyValuePair<string, string>> metadataList, IEnumerable<ProjectItemInstance> items)
         {
             // Set up a single dictionary that can be applied to all the items
-            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(metadataList.FastCountOrZero());
-            foreach (KeyValuePair<string, string> metadatum in metadataList)
-            {
-                metadata.Set(new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
-            }
+            CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new();
+
+            IEnumerable<ProjectMetadataInstance> projectMetadataInstances = metadataList.Select(metadatum => new ProjectMetadataInstance(metadatum.Key, metadatum.Value));
+            metadata.ImportProperties(projectMetadataInstances);
 
             foreach (ProjectItemInstance item in items)
             {
@@ -615,7 +604,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Factory for deserialization.
         /// </summary>
-        static internal ProjectItemInstance FactoryForDeserialization(ITranslator translator, ProjectInstance projectInstance)
+        internal static ProjectItemInstance FactoryForDeserialization(ITranslator translator, ProjectInstance projectInstance)
         {
             ProjectItemInstance newItem = new ProjectItemInstance(projectInstance);
             ((ITranslatable)newItem).Translate(translator);
@@ -642,11 +631,11 @@ namespace Microsoft.Build.Execution
         /// which legally have built-in metadata. If necessary we can calculate it on the new items we're making if requested.
         /// We don't copy them too because tasks shouldn't set them (they might become inconsistent)
         /// </summary>
-        internal void SetMetadataOnTaskOutput(string name, string evaluatedValueEscaped)
+        internal void SetMetadataOnTaskOutput(IEnumerable<KeyValuePair<string, string>> items)
         {
             _project.VerifyThrowNotImmutable();
 
-            _taskItem.SetMetadataOnTaskOutput(name, evaluatedValueEscaped);
+            _taskItem.SetMetadataOnTaskOutput(items);
         }
 
         /// <summary>
@@ -719,8 +708,7 @@ namespace Microsoft.Build.Execution
                                         inheritedItemDefinitions,
                                         _project.Directory,
                                         _project.IsImmutable,
-                                        definingFileEscaped
-                                        );
+                                        definingFileEscaped);
         }
 
         /// <summary>
@@ -795,7 +783,7 @@ namespace Microsoft.Build.Execution
             /// Creates an instance of this class given the item-spec.
             /// </summary>
             internal TaskItem(string includeEscaped, string definingFileEscaped)
-                : this(includeEscaped, includeEscaped, null, null, null, /* mutable */ false, definingFileEscaped)
+                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped)
             {
             }
 
@@ -810,8 +798,7 @@ namespace Microsoft.Build.Execution
                               List<ProjectItemDefinitionInstance> itemDefinitions,
                               string projectDirectory,
                               bool immutable,
-                              string definingFileEscaped // the actual project file (or import) that defines this item.
-                              )
+                              string definingFileEscaped) // the actual project file (or import) that defines this item.
             {
                 ErrorUtilities.VerifyThrowArgumentLength(includeEscaped, nameof(includeEscaped));
                 ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped, nameof(includeBeforeWildcardExpansionEscaped));
@@ -831,13 +818,6 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal TaskItem(ProjectItemInstance item)
                 : this(item._taskItem, false /* no original itemspec */)
-            {
-            }
-
-            /// <summary>
-            /// Constructor for deserialization only.
-            /// </summary>
-            private TaskItem()
             {
             }
 
@@ -929,12 +909,16 @@ namespace Microsoft.Build.Execution
             {
                 get
                 {
-                    List<string> names = new List<string>((List<string>)CustomMetadataNames);
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadataCollection = MetadataCollection;
 
-                    foreach (string name in FileUtilities.ItemSpecModifiers.All)
+                    List<string> names = new List<string>(capacity: metadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length);
+
+                    foreach (ProjectMetadataInstance metadatum in metadataCollection)
                     {
-                        names.Add(name);
+                        names.Add(metadatum.Name);
                     }
+
+                    names.AddRange(FileUtilities.ItemSpecModifiers.All);
 
                     return names;
                 }
@@ -947,37 +931,6 @@ namespace Microsoft.Build.Execution
             public int MetadataCount
             {
                 get { return MetadataNames.Count; }
-            }
-
-            /// <summary>
-            /// Gets the names of custom metadata on the item.
-            /// If there is none, returns an empty collection.
-            /// Does not include built-in metadata.
-            /// Computed, not necessarily fast.
-            /// </summary>
-            public ICollection CustomMetadataNames
-            {
-                get
-                {
-                    List<string> names = new List<string>();
-
-                    foreach (ProjectMetadataInstance metadatum in MetadataCollection)
-                    {
-                        names.Add(metadatum.Name);
-                    }
-
-                    return names;
-                }
-            }
-
-            /// <summary>
-            /// Gets the number of custom metadata set on the item.
-            /// Does not include built-in metadata.
-            /// Computed, not necessarily fast.
-            /// </summary>
-            public int CustomMetadataCount
-            {
-                get { return CustomMetadataNames.Count; }
             }
 
             /// <summary>
@@ -1082,8 +1035,21 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    return Array.Empty<KeyValuePair<string, string>>();
+                    return Enumerable.Empty<KeyValuePair<string, string>>();
                 }
+            }
+
+            /// <summary>
+            /// Sets the given metadata.
+            /// Equivalent to calling <see cref="SetMetadata(string,string)"/> for each item in <paramref name="metadata"/>.
+            /// </summary>
+            /// <param name="metadata">The metadata to set.</param>
+            public void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
+            {
+                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
+
+                _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                _directMetadata.ImportProperties(metadata.Select(kvp => new ProjectMetadataInstance(kvp.Key, kvp.Value, allowItemSpecModifiers: true)));
             }
 
             /// <summary>
@@ -1143,48 +1109,53 @@ namespace Microsoft.Build.Execution
                         return (_directMetadata == null) ? new CopyOnWritePropertyDictionary<ProjectMetadataInstance>() : _directMetadata.DeepClone(); // copy on write!
                     }
 
-                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> allMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(_itemDefinitions.Count + (_directMetadata?.Count ?? 0));
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> allMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
 
-                    // Next, any inherited item definitions. Front of the list is highest priority,
-                    // so walk backwards.
-                    for (int i = _itemDefinitions.Count - 1; i >= 0; i--)
-                    {
-                        foreach (ProjectMetadataInstance metadatum in _itemDefinitions[i].Metadata)
-                        {
-                            if (metadatum != null)
-                            {
-                                allMetadata.Set(metadatum);
-                            }
-                            else
-                            {
-                                Debug.Fail($"metadatum from {_itemDefinitions[i]} is null, see https://github.com/microsoft/msbuild/issues/5267");
-                            }
-                        }
-                    }
-
-                    // Finally any direct metadata win.
-                    if (_directMetadata != null)
-                    {
-                        foreach (ProjectMetadataInstance metadatum in _directMetadata)
-                        {
-                            if (metadatum != null)
-                            {
-                                allMetadata.Set(metadatum);
-                            }
-                            else
-                            {
-                                Debug.Fail("metadatum in _directMetadata is null, see https://github.com/microsoft/msbuild/issues/5267");
-                            }
-                        }
-                    }
+                    allMetadata.ImportProperties(metaData());
 
                     return allMetadata;
+
+                    IEnumerable<ProjectMetadataInstance> metaData()
+                    {
+                        // Next, any inherited item definitions. Front of the list is highest priority,
+                        // so walk backwards.
+                        for (int i = _itemDefinitions.Count - 1; i >= 0; i--)
+                        {
+                            foreach (ProjectMetadataInstance metadatum in _itemDefinitions[i].Metadata)
+                            {
+                                if (metadatum != null)
+                                {
+                                    yield return metadatum;
+                                }
+                                else
+                                {
+                                    Debug.Fail($"metadatum from {_itemDefinitions[i]} is null, see https://github.com/dotnet/msbuild/issues/5267");
+                                }
+                            }
+                        }
+
+                        // Finally any direct metadata win.
+                        if (_directMetadata != null)
+                        {
+                            foreach (ProjectMetadataInstance metadatum in _directMetadata)
+                            {
+                                if (metadatum != null)
+                                {
+                                    yield return metadatum;
+                                }
+                                else
+                                {
+                                    Debug.Fail("metadatum in _directMetadata is null, see https://github.com/dotnet/msbuild/issues/5267");
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
             IEnumerable<ProjectMetadataInstance> IItem<ProjectMetadataInstance>.Metadata => MetadataCollection;
 
-#region Operators
+            #region Operators
 
             /// <summary>
             /// This allows an explicit typecast from a "TaskItem" to a "string", returning the ItemSpec for this item.
@@ -1225,7 +1196,7 @@ namespace Microsoft.Build.Execution
                 return !(left == right);
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Produce a string representation.
@@ -1247,7 +1218,7 @@ namespace Microsoft.Build.Execution
             }
 #endif
 
-#region IItem and ITaskItem2 Members
+            #region IItem and ITaskItem2 Members
 
             /// <summary>
             /// Returns the metadata with the specified key.
@@ -1377,8 +1348,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                // If the metadata was all removed, toss the dictionary
-                _directMetadata?.Remove(metadataName, clearIfEmpty: true);
+                _directMetadata?.Remove(metadataName);
             }
 
             /// <summary>
@@ -1419,9 +1389,7 @@ namespace Microsoft.Build.Execution
                     originalItemSpec = destinationItem.GetMetadata("OriginalItemSpec");
                 }
 
-                TaskItem destinationAsTaskItem = destinationItem as TaskItem;
-
-                if (destinationAsTaskItem != null && destinationAsTaskItem._directMetadata == null)
+                if (destinationItem is TaskItem destinationAsTaskItem && destinationAsTaskItem._directMetadata == null)
                 {
                     ProjectInstance.VerifyThrowNotImmutable(destinationAsTaskItem._isImmutable);
 
@@ -1438,6 +1406,24 @@ namespace Microsoft.Build.Execution
                     {
                         destinationAsTaskItem._itemDefinitions.AddRange(_itemDefinitions);
                     }
+                }
+                else if (destinationItem is IMetadataContainer destinationItemAsMetadataContainer)
+                {
+                    // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
+                    IEnumerable<ProjectMetadataInstance> metadataEnumerable = MetadataCollection;
+                    IEnumerable<KeyValuePair<string, string>> metadataToImport = metadataEnumerable
+                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Name)))
+                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Name, GetMetadataEscaped(metadatum.Name)));
+
+#if FEATURE_APPDOMAIN
+                    if (RemotingServices.IsTransparentProxy(destinationItem))
+                    {
+                        // Linq is not serializable so materialize the collection before making the call.
+                        metadataToImport = metadataToImport.ToList();
+                    }
+#endif
+
+                    destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
                 }
                 else
                 {
@@ -1499,9 +1485,9 @@ namespace Microsoft.Build.Execution
                 return clonedMetadata;
             }
 
-#endregion
+            #endregion
 
-#region INodePacketTranslatable Members
+            #region INodePacketTranslatable Members
 
             /// <summary>
             /// Reads or writes the packet to the serializer.
@@ -1531,19 +1517,23 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-#endregion
+            #endregion
 
-#region IEquatable<TaskItem> Members
+            #region IEquatable<TaskItem> Members
 
             /// <summary>
             /// Override of GetHashCode.
             /// </summary>
             public override int GetHashCode()
             {
-                // This is ignore case to ensure that task items whose item specs differ only by 
-                // casing still have the same hash code, since this is used to determine if we have duplicates when 
+                // This is ignore case to ensure that task items whose item specs differ only by
+                // casing still have the same hash code, since this is used to determine if we have duplicates when
                 // we do duplicate removal.
-                return StringComparer.OrdinalIgnoreCase.GetHashCode(ItemSpec);
+                //
+                // Ideally this would also hash in something like the metadata count. However this requires calculation,
+                // because local and inherited metadata are equally considered during equality comparison, and the
+                // former may mask some of the latter.
+                return StringComparer.OrdinalIgnoreCase.GetHashCode(_includeEscaped);
             }
 
             /// <summary>
@@ -1576,9 +1566,8 @@ namespace Microsoft.Build.Execution
                     return true;
                 }
 
-                // Since both sides are this class, we know both sides support ITaskItem2.
-                ITaskItem2 thisAsITaskItem2 = this as ITaskItem2;
-                ITaskItem2 otherAsITaskItem2 = other as ITaskItem2;
+                ITaskItem2 thisAsITaskItem2 = this;
+                ITaskItem2 otherAsITaskItem2 = other;
 
                 // This is case-insensitive. See GetHashCode().
                 if (!MSBuildNameIgnoreCaseComparer.Default.Equals(thisAsITaskItem2.EvaluatedIncludeEscaped, otherAsITaskItem2.EvaluatedIncludeEscaped))
@@ -1586,32 +1575,61 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                if (this.CustomMetadataCount != other.CustomMetadataCount)
+                // Metadata can come from both item definitions and direct values, and they must
+                // be applied in order, with later values overriding newer ones. Here we determine
+                // the set of metadata names on 'this', to avoid computing the full metadata collection
+                // of both 'this' and 'other'. Once we have the names for 'this', we enumerate 'other'
+                // and ensure the names we see there are set-equal to the names we produce here.
+                var thisNames = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+
+                if (_itemDefinitions is not null)
+                {
+                    foreach (ProjectItemDefinitionInstance itemDefinition in _itemDefinitions)
+                    {
+                        thisNames.UnionWith(itemDefinition.MetadataNames);
+                    }
+                }
+
+                if (_directMetadata is not null)
+                {
+                    foreach (ProjectMetadataInstance metadatum in _directMetadata)
+                    {
+                        thisNames.Add(metadatum.Name);
+                    }
+                }
+
+                CopyOnWritePropertyDictionary<ProjectMetadataInstance> otherMetadata = other.MetadataCollection;
+
+                if (otherMetadata.Count != thisNames.Count)
                 {
                     return false;
                 }
 
-                foreach (string name in this.CustomMetadataNames)
+                foreach (ProjectMetadataInstance metadatum in otherMetadata)
                 {
+                    string name = metadatum.Name;
+
+                    if (!thisNames.Remove(name))
+                    {
+                        return false;
+                    }
+
                     // This is case-insensitive, so that for example "en-US" and "en-us" match and are bucketed together.
                     // In this respect, therefore, we have to consider item metadata value case as not significant.
-                    if (!String.Equals
-                            (
+                    if (!String.Equals(
                                 thisAsITaskItem2.GetMetadataValueEscaped(name),
                                 otherAsITaskItem2.GetMetadataValueEscaped(name),
-                                StringComparison.OrdinalIgnoreCase
-                            )
-                       )
+                                StringComparison.OrdinalIgnoreCase))
                     {
                         return false;
                     }
                 }
 
                 // Do not consider mutability for equality comparison
-                return true;
+                return thisNames.Count == 0;
             }
 
-#endregion
+            #endregion
 
             /// <summary>
             /// Returns true if a particular piece of metadata is defined on this item (even if
@@ -1672,7 +1690,7 @@ namespace Microsoft.Build.Execution
                 var key = interner.Intern(str);
                 translator.Writer.Write(key);
             }
-            
+
             private void ReadInternString(ITranslator translator, LookasideStringInterner interner, ref string str)
             {
                 var val = translator.Reader.ReadInt32();
@@ -1716,12 +1734,21 @@ namespace Microsoft.Build.Execution
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();
-                        _directMetadata = (count == 0) ? null : new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(count);
-                        for (int i = 0; i < count; i++)
+                        if (count > 0)
                         {
-                            int key = translator.Reader.ReadInt32();
-                            int value = translator.Reader.ReadInt32();
-                            _directMetadata.Set(new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value), allowItemSpecModifiers: true));
+                            IEnumerable<ProjectMetadataInstance> metaData =
+                                Enumerable.Range(0, count).Select(_ =>
+                                {
+                                    int key = translator.Reader.ReadInt32();
+                                    int value = translator.Reader.ReadInt32();
+                                    return new ProjectMetadataInstance(interner.GetString(key), interner.GetString(value), allowItemSpecModifiers: true);
+                                });
+                            _directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                            _directMetadata.ImportProperties(metaData);
+                        }
+                        else
+                        {
+                            _directMetadata = null;
                         }
                     }
                 }
@@ -1806,6 +1833,18 @@ namespace Microsoft.Build.Execution
                     ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, evaluatedValueEscaped, true /* may be built-in metadata name */);
                     _directMetadata.Set(metadatum);
                 }
+            }
+
+            internal void SetMetadataOnTaskOutput(IEnumerable<KeyValuePair<string, string>> items)
+            {
+                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
+                _directMetadata ??= new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+
+                var metadata = items
+                    .Where(item => !FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key))
+                    .Select(item => new ProjectMetadataInstance(item.Key, item.Value, true /* may be built-in metadata name */));
+
+                _directMetadata.ImportProperties(metadata);
             }
 
             /// <summary>
@@ -1971,11 +2010,9 @@ namespace Microsoft.Build.Execution
                 public void SetMetadata(IEnumerable<Pair<ProjectMetadataElement, string>> metadataList, IEnumerable<ProjectItemInstance> destinationItems)
                 {
                     // Set up a single dictionary that can be applied to all the items
-                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>(metadataList.FastCountOrZero());
-                    foreach (Pair<ProjectMetadataElement, string> metadatum in metadataList)
-                    {
-                        metadata.Set(new ProjectMetadataInstance(metadatum.Key.Name, metadatum.Value));
-                    }
+                    CopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = metadataList.Select(metadatum => new ProjectMetadataInstance(metadatum.Key.Name, metadatum.Value));
+                    metadata.ImportProperties(projectMetadataInstances);
 
                     foreach (ProjectItemInstance item in destinationItems)
                     {
@@ -2148,7 +2185,7 @@ namespace Microsoft.Build.Execution
             /// Also, more importantly, because typically the same regular metadata values can be shared by many items,
             /// and keeping item-specific metadata out of it could allow it to be implemented as a copy-on-write table.
             /// </summary>
-            private class BuiltInMetadataTable : IMetadataTable
+            private class BuiltInMetadataTable : IMetadataTable, IItemTypeDefinition
             {
                 /// <summary>
                 /// Item type
@@ -2206,6 +2243,8 @@ namespace Microsoft.Build.Execution
 
                     return value;
                 }
+
+                string IItemTypeDefinition.ItemType => _itemType;
             }
         }
 

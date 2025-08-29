@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Text;
 using Microsoft.Build.Shared.LanguageParser;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -79,7 +81,16 @@ namespace Microsoft.Build.Tasks
                 {
                     if (state.ResolvingNamespace)
                     {
-                        if (t.InnerText == ".")
+                        // If we see a ';' while resolving a namespace, we assume it's a file-scoped namespace
+                        // namespace foo.bar; <- At this point in code, we're at the semicolon.
+                        // class test { ... }
+                        // https://github.com/dotnet/csharplang/blob/088f20b6f9b714a7b68f6d792d54def0f3b3057e/proposals/csharp-10.0/file-scoped-namespaces.md
+                        if (t.InnerText == ";")
+                        {
+                            state.PushNamespacePart(state.Namespace);
+                            state.Reset();
+                        }
+                        else if (t.InnerText == ".")
                         {
                             state.Namespace += ".";
                         }

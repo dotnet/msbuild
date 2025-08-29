@@ -1,28 +1,33 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Collections;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class EvaluatorData : IEvaluatorData<P, I, M, D>
+        private class EvaluatorData : IEvaluatorData<P, I, M, D>
         {
-            IEvaluatorData<P, I, M, D> _wrappedData;
-            Func<string, ICollection<I>> _itemGetter;
+            private readonly IEvaluatorData<P, I, M, D> _wrappedData;
+            private readonly IReadOnlyDictionary<string, LazyItemList> _itemsByType;
 
-            public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, Func<string, ICollection<I>> itemGetter)
+            public EvaluatorData(IEvaluatorData<P, I, M, D> wrappedData, IReadOnlyDictionary<string, LazyItemList> itemsByType)
             {
                 _wrappedData = wrappedData;
-                _itemGetter = itemGetter;
+                _itemsByType = itemsByType;
             }
 
             public ItemDictionary<I> Items
@@ -43,9 +48,10 @@ namespace Microsoft.Build.Evaluation
 
             public ICollection<I> GetItems(string itemType)
             {
-                return _itemGetter(itemType);
+                return _itemsByType.TryGetValue(itemType, out LazyItemList items)
+                    ? items.GetMatchedItems(globsToIgnore: ImmutableHashSet<string>.Empty)
+                    : Array.Empty<I>();
             }
-
 
             public IDictionary<string, List<TargetSpecification>> AfterTargets
             {
@@ -285,9 +291,9 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.GetTarget(targetName);
             }
 
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
             {
-                _wrappedData.InitializeForEvaluation(toolsetProvider, fileSystem);
+                _wrappedData.InitializeForEvaluation(toolsetProvider, evaluationContext);
             }
 
             public void RecordImport(ProjectImportElement importElement, ProjectRootElement import, int versionEvaluated, SdkResult sdkResult)
@@ -305,11 +311,10 @@ namespace Microsoft.Build.Evaluation
                 return _wrappedData.SetProperty(propertyElement, evaluatedValueEscaped);
             }
 
-            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
+            public P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, LoggingContext loggingContext = null)
             {
-                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+                return _wrappedData.SetProperty(name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext: loggingContext);
             }
         }
     }
-    
 }

@@ -13,7 +13,8 @@
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",
       "src\\Utilities.UnitTests\\Microsoft.Build.Utilities.UnitTests.csproj",
       "src\\Utilities\\Microsoft.Build.Utilities.csproj",
-      "src\\Xunit.NetCore.Extensions\\Xunit.NetCore.Extensions.csproj"
+      "src\\Xunit.NetCore.Extensions\\Xunit.NetCore.Extensions.csproj",
+      "src\\StringTools\\StringTools.csproj"
     ]
   }
 }

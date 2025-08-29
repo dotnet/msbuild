@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -12,12 +12,14 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Represents a task that can extract a .zip archive.
     /// </summary>
-    public sealed class Unzip : TaskExtension, ICancelableTask
+    public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask
     {
         // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
         // The CopyTo/CopyToAsync buffer is short-lived and is likely to be collected at Gen0, and it offers a significant
@@ -46,12 +48,12 @@ namespace Microsoft.Build.Tasks
         public ITaskItem DestinationFolder { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether read-only files should be overwritten.
+        /// Gets or sets a value that indicates whether read-only files should be overwritten.
         /// </summary>
         public bool OverwriteReadOnlyFiles { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether files should be skipped if the destination is unchanged.
+        /// Gets or sets a value that indicates whether files should be skipped if the destination is unchanged.
         /// </summary>
         public bool SkipUnchangedFiles { get; set; } = true;
 
@@ -62,14 +64,16 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] SourceFiles { get; set; }
 
         /// <summary>
-        /// Gets or sets an MSBuild glob expression that will be used to determine which files to include being unzipped from the archive.
+        /// Gets or sets an MSBuild glob expression that specifies which files to include being unzipped from the archive.
         /// </summary>
         public string Include { get; set; }
 
         /// <summary>
-        /// Gets or sets an MSBuild glob expression that will be used to determine which files to exclude from being unzipped from the archive.
+        /// Gets or sets an MSBuild glob expression that specifies which files to exclude from being unzipped from the archive.
         /// </summary>
         public string Exclude { get; set; }
+
+        public bool FailIfNotIncremental { get; set; }
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -154,6 +158,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
+            string fullDestinationDirectoryPath = Path.GetFullPath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
+
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
                 if (ShouldSkipEntry(zipArchiveEntry))
@@ -162,7 +168,10 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                FileInfo destinationPath = new FileInfo(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+                string fullDestinationPath = Path.GetFullPath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
+
+                FileInfo destinationPath = new(fullDestinationPath);
 
                 // Zip archives can have directory entries listed explicitly.
                 // If this entry is a directory we should create it and move to the next entry.
@@ -184,6 +193,11 @@ namespace Microsoft.Build.Tasks
                 if (ShouldSkipEntry(zipArchiveEntry, destinationPath))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "Unzip.DidNotUnzipBecauseOfFileMatch", zipArchiveEntry.FullName, destinationPath.FullName, nameof(SkipUnchangedFiles), "true");
+                    continue;
+                }
+                else if (FailIfNotIncremental)
+                {
+                    Log.LogErrorFromResources("Unzip.FileComment", zipArchiveEntry.FullName, destinationPath.FullName);
                     continue;
                 }
 

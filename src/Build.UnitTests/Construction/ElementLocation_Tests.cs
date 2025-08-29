@@ -1,16 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Construction;
-using Microsoft.Build.UnitTests.BackEnd;
-using System.Xml;
 using System.IO;
 using System.Reflection;
-using Xunit;
+using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
+using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -209,8 +212,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", -1, 2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests constructor specifying file, line, negative column
@@ -221,8 +223,7 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Throws<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", 1, -2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests constructor with invalid null file.
@@ -340,8 +341,6 @@ namespace Microsoft.Build.UnitTests.Construction
             Helpers.VerifyAssertLineByLine(readWriteLoadLocations, readOnlyLoadLocations);
         }
 
-        // Without save to file, this becomes identical to SaveReadOnly4
-#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Save read only fails
         /// </summary>
@@ -354,10 +353,8 @@ namespace Microsoft.Build.UnitTests.Construction
                 doc.Load(_pathToCommonTargets);
                 Assert.True(doc.IsReadOnly);
                 doc.Save(FileUtilities.GetTemporaryFile());
-            }
-           );
+            });
         }
-#endif
 
         /// <summary>
         /// Save read only fails
@@ -368,19 +365,10 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly2()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-#if FEATURE_XML_LOADPATH
             doc.Load(_pathToCommonTargets);
-#else
-            using (
-                XmlReader xmlReader = XmlReader.Create(
-                    _pathToCommonTargets,
-                    new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore}))
-            {
-                doc.Load(xmlReader);
-            }
-#endif
             Assert.True(doc.IsReadOnly);
-            Assert.Throws<InvalidOperationException>(() => {
+            Assert.Throws<InvalidOperationException>(() =>
+            {
                 doc.Save(new MemoryStream());
             });
         }
@@ -394,17 +382,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly3()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-#if FEATURE_XML_LOADPATH
             doc.Load(_pathToCommonTargets);
-#else
-            using (
-                XmlReader xmlReader = XmlReader.Create(
-                    _pathToCommonTargets,
-                    new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
-            {
-                doc.Load(xmlReader);
-            }
-#endif
             Assert.True(doc.IsReadOnly);
             Assert.Throws<InvalidOperationException>(() =>
             {
@@ -421,19 +399,9 @@ namespace Microsoft.Build.UnitTests.Construction
         public void SaveReadOnly4()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
-#if FEATURE_XML_LOADPATH
             doc.Load(_pathToCommonTargets);
-#else
-            using (
-                XmlReader xmlReader = XmlReader.Create(
-                    _pathToCommonTargets,
-                    new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
-            {
-                doc.Load(xmlReader);
-            }
-#endif
             Assert.True(doc.IsReadOnly);
-            using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFile(), FileMode.Create)))
+            using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFileName(), FileMode.Create)))
             {
                 Assert.Throws<InvalidOperationException>(() =>
                 {
@@ -451,20 +419,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
             try
             {
-                file = FileUtilities.GetTemporaryFile();
+                file = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(file, content);
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: readOnly);
-#if FEATURE_XML_LOADPATH
                 doc.Load(file);
-#else
-                using (
-                    XmlReader xmlReader = XmlReader.Create(
-                        file,
-                        new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore }))
-                {
-                    doc.Load(xmlReader);
-                }
-#endif
                 Assert.Equal(readOnly, doc.IsReadOnly);
                 var allNodes = doc.SelectNodes("//*|//@*");
 

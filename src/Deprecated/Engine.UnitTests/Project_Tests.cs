@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
+
 using System;
 using System.IO;
 using System.Resources;
@@ -26,8 +30,8 @@ namespace Microsoft.Build.UnitTests.Project_Tests
     {
         /// <summary>
         /// This loads an existing project, and uses the MSBuild object model to
-        /// add a new item (Type="Compile" Include="c.cs") to the project.  Then 
-        /// it compares the final project XML to make sure the item was added in 
+        /// add a new item (Type="Compile" Include="c.cs") to the project.  Then
+        /// it compares the final project XML to make sure the item was added in
         /// the correct place.
         /// </summary>
         /// <param name="originalProjectContents"></param>
@@ -49,7 +53,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // The project shouldn't be marked dirty yet.
             Assertion.Assert("Project shouldn't be dirty", !project.IsDirtyNeedToReevaluate);
 
-            // Add a new item (Type="Compile", Include="c.cs") to the project using 
+            // Add a new item (Type="Compile", Include="c.cs") to the project using
             // the object model.
             BuildItem newItem = project.AddNewItem(newItemType, newItemInclude);
 
@@ -143,7 +147,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -151,7 +155,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -170,7 +174,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -179,7 +183,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// This loads an existing project that did not contain any items previously. 
+        /// This loads an existing project that did not contain any items previously.
         /// It then uses the MSBuild object model to
         /// add a new item to the project.  Then it compares the final project
         /// XML to make sure the item was added in the correct place.
@@ -267,9 +271,9 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// Add a new item of the same name and include path of an item that already 
+        /// Add a new item of the same name and include path of an item that already
         /// exists in the project.  Current behavior is that we add the duplicated item,
-        /// although there's no great reason for this.  If we wanted, we could have 
+        /// although there's no great reason for this.  If we wanted, we could have
         /// made it so that adding a dup results in a no-op to the project file.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -701,7 +705,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
         /// <summary>
         /// There's a wildcard in the project already, but it's part of a semicolon-separated
-        /// list of items.  Now the user tries to add an item that matches that wildcard.  
+        /// list of items.  Now the user tries to add an item that matches that wildcard.
         /// In this case, we don't touch the project at all.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -741,7 +745,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
         /// <summary>
         /// There's a wildcard in the project already, but it's part of a semicolon-separated
-        /// list of items, and it uses a property reference.  Now the user tries to add a new 
+        /// list of items, and it uses a property reference.  Now the user tries to add a new
         /// item that matches that wildcard.  In this case, we don't touch the project at all.
         /// We're so smart.
         /// </summary>
@@ -803,7 +807,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -818,7 +822,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -826,7 +830,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -843,7 +847,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     <ItemGroup />
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -865,17 +869,17 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         /// <summary>
         /// This loads an existing project, and uses the MSBuild object model to
         /// remove an item of a particular item spec (e.g., "b.cs").  It then
-        /// compares the final project XML to make sure the item was added in 
+        /// compares the final project XML to make sure the item was added in
         /// the correct place.
         /// </summary>
         /// <param name="originalProjectContents"></param>
         /// <param name="newExpectedProjectContents"></param>
         /// <param name="itemSpecToRemove"></param>
         /// <owner>RGoel</owner>
-        private void RemoveItemHelper 
+        private void RemoveItemHelper
             (
-            string originalProjectContents, 
-            string newExpectedProjectContents, 
+            string originalProjectContents,
+            string newExpectedProjectContents,
             string itemSpecToRemove
             )
         {
@@ -889,7 +893,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             // The VS IDE does a few re-evaluations with different sets of global properties
             // (i.e., Configuration=Debug, Configuration=Release, etc.).  This is to simulate
-            // that.  If there's a bug in the Project object, then re-evaluation can 
+            // that.  If there's a bug in the Project object, then re-evaluation can
             // potentially mess up the number of items hanging around.
             project.MarkProjectAsDirty ();
             BuildItemGroup evaluatedItems2 = project.EvaluatedItemsIgnoringCondition;
@@ -936,9 +940,9 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     <ItemGroup>
                         <Reference Include=`System` />
                     </ItemGroup>
-                
+
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -957,12 +961,12 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     <ItemGroup>
                         <Reference Include=`System` />
                     </ItemGroup>
-                
+
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
-            
+
             this.RemoveItemHelper (projectOriginalContents, projectNewExpectedContents, "b.cs");
         }
 
@@ -978,7 +982,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -993,9 +997,9 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     <ItemGroup>
                         <Reference Include=`System` />
                     </ItemGroup>
-                
+
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1003,7 +1007,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -1019,12 +1023,12 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     <ItemGroup>
                         <Reference Include=`System` />
                     </ItemGroup>
-                
+
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
-            
+
             this.RemoveItemHelper (projectOriginalContents, projectNewExpectedContents, "b.cs");
         }
 
@@ -1042,7 +1046,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
@@ -1052,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1060,7 +1064,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
@@ -1073,10 +1077,10 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
-            
+
             this.RemoveItemHelper (projectOriginalContents, projectNewExpectedContents, "b.cs");
         }
 
@@ -1101,7 +1105,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1119,10 +1123,10 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
-            
+
             this.RemoveItemHelper (projectOriginalContents, projectNewExpectedContents, "d.cs");
         }
 
@@ -1153,7 +1157,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1174,7 +1178,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1226,7 +1230,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1246,7 +1250,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1287,7 +1291,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1303,7 +1307,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </PropertyGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1667,8 +1671,8 @@ namespace Microsoft.Build.UnitTests.Project_Tests
     {
         /// <summary>
         /// This loads an existing project, and uses the MSBuild object model to
-        /// modify the "Include" attribute of an item of a particular item spec (e.g., 
-        /// "b.cs").  It then compares the final project XML to make sure the item was 
+        /// modify the "Include" attribute of an item of a particular item spec (e.g.,
+        /// "b.cs").  It then compares the final project XML to make sure the item was
         /// modified correctly.
         /// </summary>
         /// <param name="originalProjectContents"></param>
@@ -1676,10 +1680,10 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         /// <param name="oldItemSpec"></param>
         /// <param name="newIncludePath"></param>
         /// <owner>RGoel</owner>
-        internal static void ModifyItemIncludeHelper 
+        internal static void ModifyItemIncludeHelper
             (
-            string originalProjectContents, 
-            string newExpectedProjectContents, 
+            string originalProjectContents,
+            string newExpectedProjectContents,
             string oldItemSpec,
             string newIncludePath
             )
@@ -1694,7 +1698,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             // The VS IDE does a few re-evaluations with different sets of global properties
             // (i.e., Configuration=Debug, Configuration=Release, etc.).  This is to simulate
-            // that.  If there's a bug in the Project object, then re-evaluation can 
+            // that.  If there's a bug in the Project object, then re-evaluation can
             // potentially mess up the number of items hanging around.
             project.MarkProjectAsDirty ();
             BuildItemGroup evaluatedItems2 = project.EvaluatedItemsIgnoringCondition;
@@ -1729,7 +1733,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -1749,7 +1753,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1757,7 +1761,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -1777,7 +1781,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1796,7 +1800,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
@@ -1809,7 +1813,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1817,7 +1821,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
@@ -1836,7 +1840,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -1888,17 +1892,17 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         {
             // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
             CreateThreeWeirdoFilesHelper();
-            
+
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -1906,7 +1910,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
@@ -1914,7 +1918,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                         <MyWildcard Include=`banana.cs` />
                         <MyWildcard Include=`c.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -1940,13 +1944,13 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -1954,13 +1958,13 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -1988,13 +1992,13 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -2002,13 +2006,13 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`banana.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -2073,8 +2077,8 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
         /// <summary>
         /// This loads an existing project, and uses the MSBuild object model to
-        /// modify the Name of an item of a particular item spec (e.g., 
-        /// "b.cs").  It then compares the final project XML to make sure the item was 
+        /// modify the Name of an item of a particular item spec (e.g.,
+        /// "b.cs").  It then compares the final project XML to make sure the item was
         /// modified correctly.
         /// </summary>
         /// <param name="originalProjectContents"></param>
@@ -2100,7 +2104,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             // The VS IDE does a few re-evaluations with different sets of global properties
             // (i.e., Configuration=Debug, Configuration=Release, etc.).  This is to simulate
-            // that.  If there's a bug in the Project object, then re-evaluation can 
+            // that.  If there's a bug in the Project object, then re-evaluation can
             // potentially mess up the number of items hanging around.
             project.MarkProjectAsDirty();
             BuildItemGroup evaluatedItems2 = project.EvaluatedItemsIgnoringCondition;
@@ -2270,7 +2274,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -2285,7 +2289,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2293,7 +2297,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -2311,7 +2315,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2338,7 +2342,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
     public class AddProperty
     {
         /// <summary>
-        /// Tests that the object model correctly adds a new property to the correct 
+        /// Tests that the object model correctly adds a new property to the correct
         /// existing PropertyGroup.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -2348,23 +2352,23 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup Condition=` '$(A)' == 'B' `>
                         <OutputPath>c:\blah</OutputPath>
                     </PropertyGroup>
-                
+
                     <PropertyGroup>
                         <WarningLevel>1</WarningLevel>
                     </PropertyGroup>
-                
+
                     <PropertyGroup>
                         <Optimize>true</Optimize>
                     </PropertyGroup>
-                
+
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2372,24 +2376,24 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup Condition=` '$(A)' == 'B' `>
                         <OutputPath>c:\blah</OutputPath>
                     </PropertyGroup>
-                
+
                     <PropertyGroup>
                         <WarningLevel>1</WarningLevel>
                         <MyNewProperty>woohoo</MyNewProperty>
                     </PropertyGroup>
-                
+
                     <PropertyGroup>
                         <Optimize>true</Optimize>
                     </PropertyGroup>
-                
+
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2398,7 +2402,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // The project shouldn't be marked dirty yet.
             Assertion.Assert("Project shouldn't be dirty", !project.IsDirtyNeedToReevaluate);
 
-            // Set the given new property in the project file using 
+            // Set the given new property in the project file using
             // the object model.
             project.SetProperty("MyNewProperty", "woohoo", "");
 
@@ -2419,7 +2423,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -2434,7 +2438,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2442,7 +2446,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -2458,7 +2462,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2484,7 +2488,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -2499,7 +2503,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2507,7 +2511,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -2524,7 +2528,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2640,7 +2644,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2663,7 +2667,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -2914,7 +2918,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                             <PropertyGroup Condition=`'$(x)'=='y'`>
                                   <ReferencePath>c:\foobar</ReferencePath>
                             </PropertyGroup>
-  
+
                             <PropertyGroup Condition=`'$(x)'=='z'`>
                                   <ReferencePath>c:\foobar</ReferencePath>
                             </PropertyGroup>
@@ -2923,7 +2927,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                             <PropertyGroup Condition=`'$(x)'=='y'`>
                                   <ReferencePath>c:\foobar</ReferencePath>
                             </PropertyGroup>
-  
+
                             <PropertyGroup Condition=`'$(x)'=='z'`>
                                   <ReferencePath>c:\foobar</ReferencePath>
                             </PropertyGroup>
@@ -3112,7 +3116,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -3135,7 +3139,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -3446,7 +3450,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                                 <PropertyGroup>
                                     <abcdef>$(MsBuildProgramFiles32)</abcdef>
                                 </PropertyGroup>
-                                
+
                                 <Target Name='t'>
                                     <Message Text='[$(abcdef)]' />
                                 </Target>
@@ -3513,7 +3517,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             Assertion.AssertEquals(@"c:\boobah", importedProj.EvaluatedProperties["ReferencePath"].FinalValueEscaped);
 
             importedProj.Save(Path.Combine(ObjectModelHelpers.TempProjectDir, "newimported.proj"));
-                
+
             // Now we add a new imported property to the main file, into an existing imported
             // property group.
             mainProj.SetImportedProperty("ReferencePath", @"c:\hoohah", null, importedProj);
@@ -3785,7 +3789,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                   <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                   <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
                         <P>$(Registry:HKEY_CURRENT_USER\" + testRegistryPath + @"@Foo)</P>
                         <Q Condition=""'$(Registry:HKEY_CURRENT_USER\" + testRegistryPath + @"@Foo)' == 'FooValue'"">QValue</Q>
@@ -3812,7 +3816,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                   <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                   <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                       <PropertyGroup>
                         <P>$(Registry:HKEY_CURRENT_USER\" + testRegistryPath + @"@Foo)</P>
                         <Q Condition=""'$(Registry:HKEY_CURRENT_USER\" + testRegistryPath + @"@Bar)' == '%24(Foo)'"">QValue</Q>
@@ -3834,7 +3838,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
     {
         /// <summary>
         /// This tests the Project.EvaluatedItemsIgnoringCondition property.  This
-        /// property should return the list of evaluated items in the project, 
+        /// property should return the list of evaluated items in the project,
         /// pretending that all "Condition"s evaluated to true.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -3856,7 +3860,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </ItemGroup>
 
                     <Target Name=`Build` />
-                
+
                 </Project>
                 ";
 
@@ -4098,7 +4102,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
     public class Evaluation
     {
         /// <summary>
-        /// Relative paths in 'exists' on conditions should be evalauted relative to the 
+        /// Relative paths in 'exists' on conditions should be evalauted relative to the
         /// project directory.
         /// </summary>
         [Test]
@@ -4142,7 +4146,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// Relative paths in 'exists' on conditions should be evalauted relative to the 
+        /// Relative paths in 'exists' on conditions should be evalauted relative to the
         /// project directory.
         /// </summary>
         [Test]
@@ -4181,7 +4185,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// Relative paths in 'exists' on conditions should be evalauted relative to the 
+        /// Relative paths in 'exists' on conditions should be evalauted relative to the
         /// project directory.
         /// </summary>
         [Test]
@@ -4387,7 +4391,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                         <a Include=`x`>
                             <meta.data>foo</meta.data>
                         </a>
-                    </ItemGroup>        
+                    </ItemGroup>
                     <Target Name=`t` />
                 </Project>
                 ";
@@ -4432,7 +4436,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             Project project = ObjectModelHelpers.CreateInMemoryProject(original);
         }
-        
+
         /// <summary>
         /// Unknown attribute on UsingTask should throw
         /// </summary>
@@ -4449,7 +4453,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             // Should throw
             Project project = ObjectModelHelpers.CreateInMemoryProject(original);
-        }                  
+        }
 
         /// <summary>
         /// RequiredRuntime attribute on UsingTask should be ignored
@@ -4467,10 +4471,10 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             // Should not throw
             Project project = ObjectModelHelpers.CreateInMemoryProject(original);
-        }        
+        }
 
         /// <summary>
-        /// Tests that putting invalid characters in the <Import> path results in a 
+        /// Tests that putting invalid characters in the <Import> path results in a
         /// InvalidProjectFileException.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -4589,7 +4593,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// This tests that the project is NOT marked as dirty when we set a 
+        /// This tests that the project is NOT marked as dirty when we set a
         /// global property to the exact same value it had before.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -4641,7 +4645,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             Project myProject = new Project(myEngine);
 
             string expectedValue = null;
-            if(Environment.Is64BitOperatingSystem)
+            if (Environment.Is64BitOperatingSystem)
             {
                 expectedValue = Environment.GetEnvironmentVariable("ProgramFiles(x86)");
             }
@@ -4649,7 +4653,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             {
                 expectedValue = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
             }
-     
+
             Assertion.AssertEquals(expectedValue + @"\MSBuild",
                 (string)myProject.EvaluatedProperties[specialPropertyName]);
 
@@ -4664,7 +4668,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         public void MSBuildExtensionsPathDefault_Legacy()
         {
             string specialPropertyName = "MSBuildExtensionsPath";
-            
+
             // Save the old copy of the MSBuildExtensionsPath, so we can restore it when the unit test is done.
             string backupMSBuildExtensionsPath = Environment.GetEnvironmentVariable(specialPropertyName);
             string backupMagicSwitch = Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH");
@@ -4753,7 +4757,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// The default value for $(MSBuildExtensionsPath32) should point to "c:\program files (x86)\msbuild" on a 64 bit machine. 
+        /// The default value for $(MSBuildExtensionsPath32) should point to "c:\program files (x86)\msbuild" on a 64 bit machine.
         /// We can't test that directly since tests generally don't run on 64 bit boxes. However we can set the "ProgramFiles(x86)"
         /// environment variable and make sure that that's the value used.
         /// </summary>
@@ -5006,7 +5010,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
     public class LoadAndSave
     {
         /// <summary>
-        /// Just load an MSBuild project by passing in a TextReader, and get back the contents to 
+        /// Just load an MSBuild project by passing in a TextReader, and get back the contents to
         /// make sure the project was read in correctly.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -5206,7 +5210,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // Save the modified project
             StringWriter writer = new StringWriter();
             project.Save(writer);
-            
+
             // Load the modified project into a new project object
             xmldoc = new XmlDocument();
             xmldoc.LoadXml(writer.ToString());
@@ -5258,7 +5262,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// Checks to make sure that passing in the DoNotResetPreviouslyBuiltTargets flag 
+        /// Checks to make sure that passing in the DoNotResetPreviouslyBuiltTargets flag
         /// works as expected.
         /// </summary>
         /// <owner>JomoF</owner>
@@ -5287,7 +5291,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
             // At this point, the property $(FileExists) should be 'true'
             Assertion.AssertEquals("true", p.GetEvaluatedProperty("FileExists"));
 
-            // Delete the file 
+            // Delete the file
             File.Delete(tempFile);
 
             // Build again. The result should still be 'true' because the target won't be reevaluated.
@@ -5353,7 +5357,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             // Build the target.
             p.Build(null, null);
-        
+
             Assertion.Assert("Build target should have been run.", myLogger.FullLog.Contains("BuildTargetExecuted"));
             Assertion.Assert("CheckForErrors target should have been run.", myLogger.FullLog.Contains("CheckForErrorsTargetExecuted"));
         }
@@ -5457,14 +5461,14 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
                     ", importedProject1, importedProject2));
 
-                Assertion.AssertEquals("Check all InitialTargets", "CheckForBadUser; CheckForBadProperties; CheckForBadConfigurations", 
+                Assertion.AssertEquals("Check all InitialTargets", "CheckForBadUser; CheckForBadProperties; CheckForBadConfigurations",
                     p.InitialTargets);
 
                 // Build the default target.
                 p.Build(null, null);
 
                 DumpBuildItemGroup(p.GetEvaluatedItemsByName("TargetOrder"));
-            
+
                 // The following method will ensure that the targets were executed in the correct order.
                 EngineHelpers.AssertItemsMatch(@"
                     CheckForBadUser_Executed
@@ -5479,14 +5483,14 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                 // Change the InitialTargets on the main project to be "NewChecks", but do it via an environment variable.
                 p.InitialTargets = "$(MyNewChecks)";
 
-                Assertion.AssertEquals("Check all InitialTargets", "NewChecks; CheckForBadProperties; CheckForBadConfigurations", 
+                Assertion.AssertEquals("Check all InitialTargets", "NewChecks; CheckForBadProperties; CheckForBadConfigurations",
                     p.InitialTargets);
 
                 // Build the default target.
                 p.Build(null, null);
 
                 DumpBuildItemGroup(p.GetEvaluatedItemsByName("TargetOrder"));
-            
+
                 // The following method will ensure that the targets were executed in the correct order.
                 EngineHelpers.AssertItemsMatch(@"
                     NewChecks_Executed
@@ -5555,7 +5559,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             // Build the default target.
             p.Build(null, null);
-        
+
             Assertion.Assert("Build target should have been run.", myLogger.FullLog.Contains("BuildTargetExecuted"));
             Assertion.Assert("CheckForErrors target should have been run.", myLogger.FullLog.Contains("CheckForErrorsTargetExecuted"));
         }
@@ -5680,7 +5684,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
 
         /// <summary>
-        /// There is a certain error that the MSBuild engine fires when you try to do a build on 
+        /// There is a certain error that the MSBuild engine fires when you try to do a build on
         /// a project that has had its targets disabled because of security.  However, the project
         /// system doesn't want to show this error to the user because it's not actionable for
         /// the user.  So it looks for code MSB4112 to throw away this error.  Here we're just
@@ -5693,10 +5697,10 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         {
             ResourceManager resourceManager = new ResourceManager("Microsoft.Build.Engine.Resources.Strings", typeof(Project).Assembly);
             string securityMessage = resourceManager.GetString("SecurityProjectBuildDisabled", CultureInfo.CurrentUICulture);
-            
-            Assertion.Assert( 
+
+            Assertion.Assert(
                 "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp.",
-                securityMessage.Contains("MSB4112") 
+                securityMessage.Contains("MSB4112")
             );
         }
 
@@ -5790,12 +5794,12 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     </Target>
                 </Project>
                 ", logger);
-            
+
             // Set a property and force project evaluation
             project.SetProperty("Configuration", "Release");
             BuildPropertyGroup evaluatedProperties = project.EvaluatedProperties;
 
-            // Set a different value of the property and build without forced reevaluation, 
+            // Set a different value of the property and build without forced reevaluation,
             // check if the new value is passed to the logger
             project.SetProperty("Configuration", "Debug");
             project.Build();
@@ -5815,7 +5819,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     <Target Name=`Build`/>
                 </Project>", null);
 
-            Assertion.AssertEquals("Nonexistent ToolsVersion should evaluate to the default version", 
+            Assertion.AssertEquals("Nonexistent ToolsVersion should evaluate to the default version",
                 Constants.defaultToolsVersion, project.ToolsVersion);
 
             Assertion.AssertEquals("Nonexistent ToolsVersion should mean ToolsVersionAttribute is the default version",
@@ -5823,7 +5827,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             Assertion.AssertEquals("BinPath is the MSBuildBinPath for the default version",
                 "www.msbuild.org", project.EvaluatedProperties[ReservedPropertyNames.binPath].FinalValue);
-            
+
             Assertion.AssertEquals("BinPath is the MSBuildToolsPath for the default version",
                 "www.msbuild.org", project.EvaluatedProperties[ReservedPropertyNames.toolsPath].FinalValue);
         }
@@ -5839,7 +5843,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
                     <Target Name=`Build`/>
                 </Project>", null);
 
-            Assertion.AssertEquals("ToolsVersion should have been picked up from the project attribute", 
+            Assertion.AssertEquals("ToolsVersion should have been picked up from the project attribute",
                 "myValidToolsVersion", project.ToolsVersion);
 
             Assertion.AssertEquals("ToolsVersionAttribute should have been picked up from the project attribute",
@@ -6010,7 +6014,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             Project project = ObjectModelHelpers.CreateInMemoryProject(e, ObjectModelHelpers.CleanupFileContents(@"
                 <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
-                    <UsingTask TaskName='Message' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>    
+                    <UsingTask TaskName='Message' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>
                     <Target Name=`Build`>
                         <Message Text=`##$(MSBuildToolsVersion)##`/>
                     </Target>
@@ -6031,7 +6035,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             Project project = ObjectModelHelpers.CreateInMemoryProject(e, ObjectModelHelpers.CleanupFileContents(@"
                 <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
-                    <UsingTask TaskName='Message' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>    
+                    <UsingTask TaskName='Message' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>
                     <Target Name=`Build`>
                         <Message Text=`##$(MSBuildToolsVersion)##`/>
                     </Target>
@@ -6054,7 +6058,7 @@ namespace Microsoft.Build.UnitTests.Project_Tests
 
             Project project = ObjectModelHelpers.CreateInMemoryProject(e, ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion=`myValidToolsVersion` DefaultTargets=`Build` xmlns=`msbuildnamespace`>
-                    <UsingTask TaskName='Message' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>    
+                    <UsingTask TaskName='Message' AssemblyName='Microsoft.Build.Tasks.Core, Version=msbuildassemblyversion, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>
                     <PropertyGroup>
                        <TheToolsVersion>$(MSBuildToolsVersion)</TheToolsVersion>
                     </PropertyGroup>
@@ -6130,4 +6134,3 @@ namespace Microsoft.Build.UnitTests.Project_Tests
         }
     }
 }
-

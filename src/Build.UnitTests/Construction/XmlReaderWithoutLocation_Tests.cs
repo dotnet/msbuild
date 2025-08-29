@@ -1,16 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Evaluation;
-using System.Xml;
 using System.IO;
+using System.Xml;
+using Microsoft.Build.Evaluation;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
     public class XmlReaderWithoutLocation_Tests
     {
-        private class XmlReaderNoIXmlLineInfo : XmlReader
+        private sealed class XmlReaderNoIXmlLineInfo : XmlReader
         {
             private XmlReader _wrappedReader;
 
@@ -153,12 +155,10 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void CreateProjectWithoutLineInfo()
         {
-            XmlReader reader = XmlReader.Create(new StringReader
-                (
-                @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+            XmlReader reader = XmlReader.Create(new StringReader(
+                @"<Project>
                       <Target Name='foo'/>
-                  </Project>"
-                ));
+                  </Project>"));
             XmlReader noLineInfoReader = new XmlReaderNoIXmlLineInfo(reader);
             Project project = new Project(noLineInfoReader);
             Assert.Single(project.Targets);

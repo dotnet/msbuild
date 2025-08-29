@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="cs" original="../Strings.resx">
     <body>
+      <trans-unit id="DebugPathTooLong">
+        <source>MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">MSB6012: Cesta „{0}“ použitá pro protokoly ladění je příliš dlouhá. Nastavte ji na kratší hodnotu pomocí proměnné prostředí MSBUILDDEBUGPATH nebo změňte konfigurace vašeho systému, aby povolovala dlouhé cesty.</target>
+        <note>{StrBegin="MSB6012: "}</note>
+      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: Přepínač příkazového řádku pro {0} je neplatný. {1}</target>
@@ -21,11 +26,6 @@
         <source>The command exited with code {0}.</source>
         <target state="translated">Příkaz byl ukončen s kódem {0}.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: Úloha se pokusila přihlásit před tím, než byla inicializována. Zpráva: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
@@ -56,6 +56,16 @@
         <source>MSB6003: The specified task executable "{0}" could not be run. {1}</source>
         <target state="translated">MSB6003: Nepodařilo se spustit spustitelný soubor zadané úlohy {0}. {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="translated">Zadaný časový limit ukončení ({0}) je neplatný – očekává se hodnota větší nebo rovna -1.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolTask.NotUpToDate">
+        <source>Unable to skip task because it is not up-to-date.</source>
+        <target state="translated">Úlohu nelze přeskočit, protože není aktuální.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>

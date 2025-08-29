@@ -1,19 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
     /// <summary>
-    // <summary>Tests for the ProjectExtensionsElement class.</summary>
-    /// Tests for the  class
+    /// Tests for the <see cref="ProjectExtensionsElement"/> class.
     /// </summary>
     public class ProjectExtensionsElement_Tests
     {
@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void Read()
         {
             string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions>
                      <a/>
                    </ProjectExtensions>
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             ProjectExtensionsElement extensions = (ProjectExtensionsElement)Helpers.GetFirst(project.Children);
 
-            Assert.Equal(@"<a xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" />", extensions.Content);
+            Assert.Equal(@"<a />", extensions.Content);
         }
 
         /// <summary>
@@ -46,14 +46,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions Condition='c'/>
                  </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read project with more than one ProjectExtensions
@@ -64,7 +63,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions/>
                    <Target Name='t'/>
                    <ProjectExtensions   />
@@ -72,8 +71,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Set valid content
@@ -86,7 +84,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             extensions.Content = "a<b/>c";
 
-            Assert.Equal(@"a<b xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" />c", extensions.Content);
+            Assert.Equal(@"a<b />c", extensions.Content);
             Assert.True(extensions.ContainingProject.HasUnsavedChanges);
         }
 
@@ -101,17 +99,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectExtensionsElement extensions = GetEmptyProjectExtensions();
 
                 extensions.Content = null;
-            }
-           );
+            });
         }
         /// <summary>
-        /// Delete by ID 
+        /// Delete by ID
         /// </summary>
         [Fact]
         public void DeleteById()
         {
             string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions>
                      <a>x</a>
                      <b>y</b>
@@ -130,13 +127,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         /// <summary>
-        /// Get by ID 
+        /// Get by ID
         /// </summary>
         [Fact]
         public void GetById()
         {
             string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions>
                      <a>x</a>
                      <b>y</b>
@@ -161,7 +158,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SetById()
         {
             string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions>
                      <a>x</a>
                      <b>y</b>
@@ -183,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SetByIdWhereItAlreadyExists()
         {
             string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions>
                      <a>x</a>
                      <b>y</b>
@@ -204,7 +201,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectExtensionsElement GetEmptyProjectExtensions()
         {
             string content = @"
-                 <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                 <Project>
                    <ProjectExtensions/>
                  </Project>
                 ";

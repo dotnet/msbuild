@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -40,14 +44,16 @@ namespace Microsoft.Build.BuildEngine
 
                 if (Project.PerThreadProjectDirectory != null && !String.IsNullOrEmpty(expandedValue))
                 {
-                    try 
+                    try
                     {
                         expandedValue = Path.GetFullPath(Path.Combine(Project.PerThreadProjectDirectory, expandedValue));
                     }
                     catch (Exception e) // Catching Exception, but rethrowing unless it's an IO related exception.
                     {
                         if (ExceptionHandling.NotExpectedException(e))
+                        {
                             throw;
+                        }
 
                         // Ignore invalid characters or path related exceptions
 
@@ -88,9 +94,9 @@ namespace Microsoft.Build.BuildEngine
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(
                     false,
-                    state.conditionAttribute, 
+                    state.conditionAttribute,
                     "UndefinedFunctionCall",
-                    state.parsedCondition, 
+                    state.parsedCondition,
                     this.functionName);
 
                 return false;
@@ -109,7 +115,7 @@ namespace Microsoft.Build.BuildEngine
         {
             string argument = argumentNode.GetUnexpandedValue(state);
 
-            List<TaskItem> items = state.expanderToUse.ExpandAllIntoTaskItems(argument, state.conditionAttribute); 
+            List<TaskItem> items = state.expanderToUse.ExpandAllIntoTaskItems(argument, state.conditionAttribute);
 
             string expandedValue = String.Empty;
 

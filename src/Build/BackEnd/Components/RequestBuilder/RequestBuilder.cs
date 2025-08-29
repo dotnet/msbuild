@@ -1,6 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -10,16 +18,10 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -236,7 +238,7 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(HasActiveBuildRequest, "Request not building");
             ErrorUtilities.VerifyThrow(!_terminateEvent.WaitOne(0), "Request already terminated");
-            ErrorUtilities.VerifyThrow(!_pendingResourceRequests.IsEmpty, "No pending resource requests");
+            ErrorUtilities.VerifyThrow(_pendingResourceRequests.Any(), "No pending resource requests");
             VerifyEntryInActiveOrWaitingState();
 
             _pendingResourceRequests.Dequeue()(response);
@@ -288,19 +290,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     taskCleanedUp = _requestTask.Wait(BuildParameters.RequestBuilderShutdownTimeout);
                 }
-                catch (AggregateException e)
+                catch (AggregateException e) when (InnerExceptionsAreAllCancelledExceptions(e))
                 {
-                    AggregateException flattenedException = e.Flatten();
-
-                    if (flattenedException.InnerExceptions.All(ex => (ex is TaskCanceledException || ex is OperationCanceledException)))
-                    {
-                        // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
-                        taskCleanedUp = true;
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    // ignore -- just indicates that the task finished cancelling before we got a chance to wait on it.  
+                    taskCleanedUp = true;
                 }
 
                 if (!taskCleanedUp)
@@ -312,6 +305,11 @@ namespace Microsoft.Build.BackEnd
             }
 
             _isZombie = true;
+        }
+
+        private bool InnerExceptionsAreAllCancelledExceptions(AggregateException e)
+        {
+            return e.Flatten().InnerExceptions.All(ex => ex is TaskCanceledException || ex is OperationCanceledException);
         }
 
         #region IRequestBuilderCallback Members
@@ -364,12 +362,14 @@ namespace Microsoft.Build.BackEnd
                 BuildRequestData data = new BuildRequestData(projectFiles[i], properties[i].ToDictionary(), explicitToolsVersion, targets, null);
 
                 BuildRequestConfiguration config = new BuildRequestConfiguration(data, _componentHost.BuildParameters.DefaultToolsVersion);
-
+                ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
+                bool skipStaticGraphIsolationConstraints = (isolateProjects != ProjectIsolationMode.False && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath))
+                    || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation;
                 requests[i] = new FullyQualifiedBuildRequest(
                     config: config,
                     targets: targets,
                     resultsNeeded: waitForResults,
-                    skipStaticGraphIsolationConstraints: _componentHost.BuildParameters.IsolateProjects && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath),
+                    skipStaticGraphIsolationConstraints: skipStaticGraphIsolationConstraints,
                     flags: skipNonexistentTargets
                         ? BuildRequestDataFlags.SkipNonexistentTargets
                         : BuildRequestDataFlags.None);
@@ -716,9 +716,7 @@ namespace Microsoft.Build.BackEnd
             CultureInfo.CurrentCulture = _componentHost.BuildParameters.Culture;
             CultureInfo.CurrentUICulture = _componentHost.BuildParameters.UICulture;
 
-#if FEATURE_THREAD_PRIORITY
             Thread.CurrentThread.Priority = _componentHost.BuildParameters.BuildThreadPriority;
-#endif
             Thread.CurrentThread.IsBackground = true;
 
             // NOTE: This is safe to do because we have specified long-running so we get our own new thread.
@@ -824,19 +822,34 @@ namespace Microsoft.Build.BackEnd
 
                 thrownException = ex;
             }
-            catch (LoggerException ex)
+            // This is a workaround for https://github.com/dotnet/msbuild/issues/2064. It catches the exception case and turns it into a more understandable warning.
+            catch (UnbuildableProjectTypeException ex)
             {
-                // Polite logger failure
                 thrownException = ex;
-            }
-            catch (InternalLoggerException ex)
-            {
-                // Logger threw arbitrary exception
-                thrownException = ex;
+                if (_projectLoggingContext is null)
+                {
+                    _nodeLoggingContext.LogWarning("SolutionParseUnknownProjectType", ex.Message);
+                }
+                else
+                {
+                    _projectLoggingContext.LogWarning("SolutionParseUnknownProjectType", ex.Message);
+                }
             }
             catch (Exception ex)
             {
                 thrownException = ex;
+                if (ex is BuildAbortedException)
+                {
+                    // The build was likely cancelled. We do not need to log an error in this case.
+                }
+                else if (_projectLoggingContext is null)
+                {
+                    _nodeLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                }
+                else
+                {
+                    _projectLoggingContext.LogError(BuildEventFileInfo.Empty, "UnhandledMSBuildError", ex.ToString());
+                }
 
                 if (ExceptionHandling.IsCriticalException(ex))
                 {
@@ -874,13 +887,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     _projectLoggingContext.LogProjectFinished(result.OverallResult == BuildResultCode.Success);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
-                    if (ExceptionHandling.IsCriticalException(ex))
-                    {
-                        throw;
-                    }
-
                     if (result.Exception == null)
                     {
                         result.Exception = ex;
@@ -1119,21 +1127,17 @@ namespace Microsoft.Build.BackEnd
                         _componentHost,
                         RequestEntry.Request.BuildRequestDataFlags,
                         RequestEntry.Request.SubmissionId,
-                        _nodeLoggingContext.BuildEventContext.NodeId
-                    );
+                        _nodeLoggingContext.BuildEventContext.NodeId);
                 }
             }
             catch
             {
                 // make sure that any errors thrown by a child project are logged in the context of their parent project: create a temporary projectLoggingContext
-                _projectLoggingContext = new ProjectLoggingContext
-                    (
+                _projectLoggingContext = new ProjectLoggingContext(
                     _nodeLoggingContext,
                     _requestEntry.Request,
                     _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion,
-                    _requestEntry.Request.ParentBuildEventContext
-                    );
+                    _requestEntry.RequestConfiguration.ToolsVersion);
 
                 throw;
             }
@@ -1143,6 +1147,9 @@ namespace Microsoft.Build.BackEnd
             // Now that the project has started, parse a few known properties which indicate warning codes to treat as errors or messages
             //
             ConfigureWarningsAsErrorsAndMessages();
+
+            // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
+            ConfigureKnownImmutableFolders();
 
             // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
             _requestEntry.RequestConfiguration.RetrieveFromCache();
@@ -1321,19 +1328,16 @@ namespace Microsoft.Build.BackEnd
         private void ConfigureWarningsAsErrorsAndMessages()
         {
             // Gather needed objects
-            //
             ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
             BuildEventContext buildEventContext = _projectLoggingContext?.BuildEventContext;
             ILoggingService loggingService = _projectLoggingContext?.LoggingService;
 
             // Ensure everything that is required is available at this time
-            //
             if (project != null && buildEventContext != null && loggingService != null && buildEventContext.ProjectInstanceId != BuildEventContext.InvalidProjectInstanceId)
             {
                 if (String.Equals(project.GetPropertyValue(MSBuildConstants.TreatWarningsAsErrors)?.Trim(), "true", StringComparison.OrdinalIgnoreCase))
                 {
                     // If <MSBuildTreatWarningsAsErrors was specified then an empty ISet<string> signals the IEventSourceSink to treat all warnings as errors
-                    //
                     loggingService.AddWarningsAsErrors(buildEventContext, new HashSet<string>());
                 }
                 else
@@ -1346,12 +1350,31 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                ISet<string> warningsNotAsErrors = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsNotAsErrors));
+
+                if (warningsNotAsErrors?.Count > 0)
+                {
+                    loggingService.AddWarningsNotAsErrors(buildEventContext, warningsNotAsErrors);
+                }
+
                 ISet<string> warningsAsMessages = ParseWarningCodes(project.GetPropertyValue(MSBuildConstants.WarningsAsMessages));
 
                 if (warningsAsMessages?.Count > 0)
                 {
                     loggingService.AddWarningsAsMessages(buildEventContext, warningsAsMessages);
                 }
+            }
+        }
+
+        private void ConfigureKnownImmutableFolders()
+        {
+            ProjectInstance project = _requestEntry?.RequestConfiguration?.Project;
+            if (project != null)
+            {
+                // example: C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2
+                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("FrameworkPathOverride")?.Trim());
+                // example: C:\Program Files\dotnet\
+                FileClassifier.Shared.RegisterImmutableDirectory(project.GetPropertyValue("NetCoreRoot")?.Trim());
             }
         }
 

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,8 @@ using System.Xml;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -150,13 +152,10 @@ namespace Microsoft.Build.Tasks
         private const string attrFullConfiguration = "FullConfiguration";
         private const string buildReferenceMetadataName = "BuildReference";
         private const string referenceOutputAssemblyMetadataName = "ReferenceOutputAssembly";
-        private const string buildProjectInSolutionAttribute = "BuildProjectInSolution";
         private const string attrConfiguration = "Configuration";
         private const string attrPlatform = "Platform";
         private const string attrSetConfiguration = "SetConfiguration";
         private const string attrSetPlatform = "SetPlatform";
-
-        private static readonly char[] s_configPlatformSeparator = { '|' };
 
         private IDictionary<string, string> _vcxToDefaultMap;
         private IDictionary<string, string> _defaultToVcxMap;
@@ -252,7 +251,7 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Given a project reference task item and an XML document containing project configurations, 
         /// find the configuration for that task item.
@@ -286,14 +285,14 @@ namespace Microsoft.Build.Tasks
                 {
                     if (_defaultToVcxMap.TryGetValue(CurrentProjectPlatform, out transformedPlatform))
                     {
-                        projectConfiguration = CurrentProjectConfiguration + s_configPlatformSeparator[0] + transformedPlatform;
+                        projectConfiguration = CurrentProjectConfiguration + SolutionConfiguration.ConfigPlatformSeparator[0] + transformedPlatform;
                     }
                 }
                 else
                 {
                     if (_vcxToDefaultMap.TryGetValue(CurrentProjectPlatform, out transformedPlatform))
                     {
-                        projectConfiguration = CurrentProjectConfiguration + s_configPlatformSeparator[0] + transformedPlatform;
+                        projectConfiguration = CurrentProjectConfiguration + SolutionConfiguration.ConfigPlatformSeparator[0] + transformedPlatform;
                     }
                 }
             }
@@ -305,7 +304,7 @@ namespace Microsoft.Build.Tasks
                 resolvedProjectWithConfiguration = projectRef;
                 resolvedProjectWithConfiguration.SetMetadata(attrFullConfiguration, projectConfiguration);
 
-                string[] configurationPlatformParts = projectConfiguration.Split(s_configPlatformSeparator);
+                string[] configurationPlatformParts = projectConfiguration.Split(SolutionConfiguration.ConfigPlatformSeparator);
                 resolvedProjectWithConfiguration.SetMetadata(attrSetConfiguration, "Configuration=" + configurationPlatformParts[0]);
                 resolvedProjectWithConfiguration.SetMetadata(attrConfiguration, configurationPlatformParts[0]);
 
@@ -335,7 +334,7 @@ namespace Microsoft.Build.Tasks
             if (projectConfigurationElement != null && resolvedProjectWithConfiguration != null && onlyReferenceAndBuildProjectsEnabledInSolutionConfiguration)
             {
                 // The value of the specified attribute. An empty string is returned if a matching attribute is not found or if the attribute does not have a specified or default value. 
-                string buildProjectInSolution = projectConfigurationElement.GetAttribute(buildProjectInSolutionAttribute);
+                string buildProjectInSolution = projectConfigurationElement.GetAttribute(SolutionConfiguration.BuildProjectInSolutionAttribute);
 
                 // We could not parse out what was in the attribute, act as if it was not set in the first place. 
                 if (bool.TryParse(buildProjectInSolution, out bool buildProject))

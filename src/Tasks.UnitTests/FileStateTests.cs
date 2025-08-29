@@ -1,11 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
+using Xunit.NetCore.Extensions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -20,8 +23,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Throws<ArgumentException>(() =>
             {
                 new FileState("");
-            }
-           );
+            });
         }
         [Fact]
         public void BadCharsCtorOK()
@@ -35,17 +37,14 @@ namespace Microsoft.Build.UnitTests
             new FileState(new String('x', 5000));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // On Unix there no invalid file name characters
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp, ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void BadChars()
         {
             var state = new FileState("|");
             Assert.Throws<ArgumentException>(() => { var time = state.LastWriteTime; });
         }
 
-        [ConditionalFact(typeof(NativeMethodsShared), nameof(NativeMethodsShared.IsMaxPathLegacyWindows))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [LongPathSupportDisabledFact]
         public void BadTooLongLastWriteTime()
         {
             Helpers.VerifyAssertThrowsSameWay(
@@ -228,7 +227,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void LastWriteTimeReset()
         {
             string file = null;
@@ -255,7 +253,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void LastWriteTimeUtcReset()
         {
             string file = null;
@@ -284,7 +281,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void LengthReset()
         {
             string file = null;
@@ -340,7 +336,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ReadOnlyOnDirectory()
         {
             Assert.Equal(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);
@@ -400,8 +395,7 @@ namespace Microsoft.Build.UnitTests
                 string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
 
                 var x = new FileState(file).IsDirectory;
-            }
-           );
+            });
         }
         [Fact]
         public void DoesNotExistDirectoryOrFileExists()
@@ -421,8 +415,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-
-
-

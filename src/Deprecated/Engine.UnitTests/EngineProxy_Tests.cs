@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -209,8 +213,8 @@ namespace Microsoft.Build.UnitTests
             engine.RegisterLogger(myLogger);
             // Create a custom build event args that derives from MSBuild's BuildErrorEventArgs.
             // Set a custom field on this event (FXCopRule).
-            MyCustomBuildErrorEventArgs fxcopError = new MyCustomBuildErrorEventArgs("Your code is lame.");
-            fxcopError.FXCopRule = "CodeLamenessViolation";
+            MyCustomBuildErrorEventArgs fxcopError = new MyCustomBuildErrorEventArgs("Your code is bad.");
+            fxcopError.FXCopRule = "CodeBadnessViolation";
 
             // Log the custom event args.  (Pretend that the task actually did this.)
             engineProxy.LogErrorEvent(fxcopError);
@@ -221,8 +225,8 @@ namespace Microsoft.Build.UnitTests
 
             // Make sure the special fields in the custom event match what we originally logged.
             fxcopError = myLogger.lastError as MyCustomBuildErrorEventArgs;
-            Assertion.AssertEquals("Your code is lame.", fxcopError.Message);
-            Assertion.AssertEquals("CodeLamenessViolation", fxcopError.FXCopRule);
+            Assertion.AssertEquals("Your code is bad.", fxcopError.Message);
+            Assertion.AssertEquals("CodeBadnessViolation", fxcopError.FXCopRule);
         }
 
         /// <summary>
@@ -396,7 +400,7 @@ namespace Microsoft.Build.UnitTests
                     </Target>
 
                 </Project>
-        
+
                 ");
 
             Assertion.AssertEquals("Expected zero errors", 0, logger.ErrorCount);
@@ -422,8 +426,8 @@ namespace Microsoft.Build.UnitTests
             // Verify TEM is running singleProc mode before we can test to make sure EngineProxy is correctly using the value
             Assertion.Assert("Expected TEM to be running singleProcMode", taskExecutionModule.GetExecutionModuleMode() == TaskExecutionModule.TaskExecutionModuleMode.SingleProcMode);
             Assertion.Assert("Expected EngineProxy for TEM running in singleProc mode to return false for IsRunningMultipleNodes", engineProxy.IsRunningMultipleNodes == false);
-            
-            // Verify TEM is running MultiProc mode before we can test to make sure EngineProxy is correctly using the value 
+
+            // Verify TEM is running MultiProc mode before we can test to make sure EngineProxy is correctly using the value
             TaskExecutionModule.TaskExecutionModuleMode moduleMode = taskExecutionModule2.GetExecutionModuleMode();
             Assertion.Assert("Expected TEM to be not be running SingleProcMode",moduleMode != TaskExecutionModule.TaskExecutionModuleMode.SingleProcMode);
             Assertion.Assert("Expected EngineProxy for TEM running in MultiProc mode to return true for IsRunningMultipleNodes", engineProxy2.IsRunningMultipleNodes);
@@ -616,7 +620,7 @@ namespace Microsoft.Build.UnitTests
 
             //            string childProjectFullPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("child.proj", @"
             //                      <Project ToolsVersion='44.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
-            //                          <UsingTask TaskName='CreateItem' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>    
+            //                          <UsingTask TaskName='CreateItem' AssemblyName='Microsoft.Build.Tasks.v3.5, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'/>
             //                          <Target Name='BuildTarget'>
             //                              <CreateItem Include='BuildTargetRan'>
             //                                  <Output TaskParameter='Include' ItemName='BuildTargetRan'/>

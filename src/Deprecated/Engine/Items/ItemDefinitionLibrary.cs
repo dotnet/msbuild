@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections.Generic;
@@ -21,10 +25,10 @@ namespace Microsoft.Build.BuildEngine
     {
         #region Fields
 
-        Project parentProject;
-        List<ItemDefinitionLibrary.BuildItemDefinitionGroupXml> itemDefinitions;
-        ItemDefinitionsDictionary itemDefinitionsDictionary;
-        bool evaluated;
+        private Project parentProject;
+        private List<ItemDefinitionLibrary.BuildItemDefinitionGroupXml> itemDefinitions;
+        private ItemDefinitionsDictionary itemDefinitionsDictionary;
+        private bool evaluated;
 
         #endregion
 
@@ -176,10 +180,10 @@ namespace Microsoft.Build.BuildEngine
         {
             #region Fields
 
-            XmlElement element;
-            Project parentProject;
-            XmlAttribute conditionAttribute;
-            string condition;
+            private XmlElement element;
+            private Project parentProject;
+            private XmlAttribute conditionAttribute;
+            private string condition;
 
             #endregion
 
@@ -317,8 +321,8 @@ namespace Microsoft.Build.BuildEngine
     /// </summary>
     internal class SpecificItemDefinitionLibrary
     {
-        string itemType;
-        ItemDefinitionLibrary itemDefinitionLibrary;
+        private string itemType;
+        private ItemDefinitionLibrary itemDefinitionLibrary;
 
         /// <summary>
         /// Constructor

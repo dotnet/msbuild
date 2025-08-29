@@ -1,14 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
     /// Class representing a reference to a project import path with property fall-back
+    /// This class is immutable.
+    /// If mutability would be needed in the future, it should be implemented via copy-on-write or
+    ///  a DeepClone would need to be added (and called from DeepClone methods of owning types)
     /// </summary>
     internal class ProjectImportPathMatch : ITranslatable
     {
@@ -17,14 +22,19 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public static readonly ProjectImportPathMatch None = new ProjectImportPathMatch(string.Empty, new List<string>());
 
+        // Those are effectively readonly and should stay so. Cannot be marked readonly due to ITranslatable
+        private string _propertyName;
+        private string _msBuildPropertyFormat;
+        private List<string> _searchPaths;
+
         internal ProjectImportPathMatch(string propertyName, List<string> searchPaths)
         {
             ErrorUtilities.VerifyThrowArgumentNull(propertyName, nameof(propertyName));
             ErrorUtilities.VerifyThrowArgumentNull(searchPaths, nameof(searchPaths));
 
-            PropertyName = propertyName;
-            SearchPaths = searchPaths;
-            MsBuildPropertyFormat = $"$({PropertyName})";
+            _propertyName = propertyName;
+            _searchPaths = searchPaths;
+            _msBuildPropertyFormat = $"$({PropertyName})";
         }
 
         public ProjectImportPathMatch(ITranslator translator)
@@ -35,23 +45,23 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// String representation of the property reference - eg. "MSBuildExtensionsPath32"
         /// </summary>
-        public string PropertyName;
+        public string PropertyName => _propertyName;
 
         /// <summary>
         /// Returns the corresponding property name - eg. "$(MSBuildExtensionsPath32)"
         /// </summary>
-        public string MsBuildPropertyFormat;
+        public string MsBuildPropertyFormat => _msBuildPropertyFormat;
 
         /// <summary>
         /// Enumeration of the search paths for the property.
         /// </summary>
-        public List<string> SearchPaths;
+        public List<string> SearchPaths => _searchPaths;
 
         public void Translate(ITranslator translator)
         {
-            translator.Translate(ref PropertyName);
-            translator.Translate(ref MsBuildPropertyFormat);
-            translator.Translate(ref SearchPaths);
+            translator.Translate(ref _propertyName);
+            translator.Translate(ref _msBuildPropertyFormat);
+            translator.Translate(ref _searchPaths);
         }
 
         /// <summary>

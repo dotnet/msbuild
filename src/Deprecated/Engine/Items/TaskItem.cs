@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections;
@@ -119,7 +123,7 @@ namespace Microsoft.Build.BuildEngine
                 return item.CustomMetadataCount;
             }
         }
-        
+
         /// <summary>
         /// Looks up the value of the given custom metadata.
         /// </summary>
@@ -208,14 +212,14 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>JomoF</owner>
         public IDictionary CloneCustomMetadata()
         {
-            IDictionary backingItemMetadata = item.CloneCustomMetadata(); 
+            IDictionary backingItemMetadata = item.CloneCustomMetadata();
 
             // Go through and escape the metadata as necessary.
             string[] keys = new string[backingItemMetadata.Count];
             backingItemMetadata.Keys.CopyTo(keys, 0);
             foreach (string singleMetadataName in keys)
             {
-                string singleMetadataValue = (string) backingItemMetadata[singleMetadataName];
+                string singleMetadataValue = (string)backingItemMetadata[singleMetadataName];
 
                 bool unescapingWasNecessary;
                 string singleMetadataValueUnescaped = EscapingUtilities.UnescapeAll(singleMetadataValue, out unescapingWasNecessary);
@@ -253,7 +257,7 @@ namespace Microsoft.Build.BuildEngine
 
         // the backing item
         internal BuildItem item;
-        
+
         #region Operators
 
         /// <summary>

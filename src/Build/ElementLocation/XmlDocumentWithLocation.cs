@@ -1,11 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -56,6 +59,13 @@ namespace Microsoft.Build.Construction
         /// In such a case, we can discard as much as possible on load, like comments and whitespace.
         /// </summary>
         private bool? _loadAsReadOnly;
+
+        /// <summary>
+        /// Location of the element to be created via 'CreateElement' call. So that we can
+        ///  receive and use location from the caller up the stack even if we are being called via
+        /// <see cref="XmlDocument"/> internal methods.
+        /// </summary>
+        private readonly AsyncLocal<ElementLocation> _elementLocation = new AsyncLocal<ElementLocation>();
 
         /// <summary>
         /// Constructor
@@ -163,7 +173,6 @@ namespace Microsoft.Build.Construction
             _reader = null;
         }
 
-#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Grab the path to the file, for use in our location information.
         /// </summary>
@@ -173,12 +182,36 @@ namespace Microsoft.Build.Construction
 
             _fullPath = fullPath;
 
-            using(var xtr = XmlReaderExtension.Create(fullPath, _loadAsReadOnly ?? false))
+            using (var xtr = XmlReaderExtension.Create(fullPath, _loadAsReadOnly ?? false))
             {
                 this.Load(xtr.Reader);
             }
         }
-#endif
+
+        /// <summary>
+        /// Called during parse, to add an element.
+        /// </summary>
+        /// <remarks>
+        /// We create our own kind of element, that we can give location information to.
+        /// In order to pass the location through the callchain, that contains XmlDocument function
+        ///  that then calls back to our XmlDocumentWithLocation (so we cannot use call stack via passing via parameters),
+        ///  we use async local field, that simulates variable on call stack.
+        /// </remarks>
+        internal XmlElement CreateElement(string localName, string namespaceURI, ElementLocation location)
+        {
+            if (location != null)
+            {
+                this._elementLocation.Value = location;
+            }
+            try
+            {
+                return CreateElement(localName, namespaceURI);
+            }
+            finally
+            {
+                this._elementLocation.Value = null;
+            }
+        }
 
         /// <summary>
         /// Called during load, to add an element.
@@ -191,6 +224,10 @@ namespace Microsoft.Build.Construction
             if (_reader != null)
             {
                 return new XmlElementWithLocation(prefix, localName, namespaceURI, this, _reader.LineNumber, _reader.LinePosition);
+            }
+            else if (_elementLocation?.Value != null)
+            {
+                return new XmlElementWithLocation(prefix, localName, namespaceURI, this, _elementLocation.Value.Line, _elementLocation.Value.Column);
             }
 
             // Must be a subsequent edit; we can't provide location information
@@ -279,7 +316,6 @@ namespace Microsoft.Build.Construction
             base.Save(outStream);
         }
 
-#if FEATURE_XML_LOADPATH
         /// <summary>
         /// Override Save to verify file was not loaded as readonly
         /// </summary>
@@ -288,7 +324,6 @@ namespace Microsoft.Build.Construction
             VerifyThrowNotReadOnly();
             base.Save(filename);
         }
-#endif
 
         /// <summary>
         /// Override Save to verify file was not loaded as readonly
@@ -352,24 +387,17 @@ namespace Microsoft.Build.Construction
                     // Only files from Microsoft
                     if (Path.GetFileName(fullPath).StartsWith("Microsoft.", StringComparison.OrdinalIgnoreCase))
                     {
-                        // If we are loading devdiv targets, we're in razzle
-                        if (Path.GetFileName(fullPath).StartsWith("Microsoft.DevDiv", StringComparison.OrdinalIgnoreCase))
+                        // Load read-only if they're in program files or windows directories
+                        ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
+                        string directory = Path.GetDirectoryName(fullPath);
+
+                        string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+
+                        if ((!String.IsNullOrEmpty(windowsFolder) && directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase)) ||
+                            (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles32) && directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
+                            (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles64) && directory.StartsWith(FrameworkLocationHelper.programFiles64, StringComparison.OrdinalIgnoreCase)))
                         {
                             _loadAsReadOnly = true;
-                        }
-                        else // Else, only load if they're in program files or windows directories
-                        {
-                            ErrorUtilities.VerifyThrow(Path.IsPathRooted(fullPath), "should be full path");
-                            string directory = Path.GetDirectoryName(fullPath);
-
-                            string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-
-                            if ((!String.IsNullOrEmpty(windowsFolder) && directory.StartsWith(windowsFolder, StringComparison.OrdinalIgnoreCase)) ||
-                                (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles32) && directory.StartsWith(FrameworkLocationHelper.programFiles32, StringComparison.OrdinalIgnoreCase)) ||
-                                (!String.IsNullOrEmpty(FrameworkLocationHelper.programFiles64) && directory.StartsWith(FrameworkLocationHelper.programFiles64, StringComparison.OrdinalIgnoreCase)))
-                            {
-                                _loadAsReadOnly = true;
-                            }
                         }
                     }
                 }

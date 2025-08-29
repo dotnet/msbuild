@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Xml;
@@ -36,10 +40,10 @@ namespace Microsoft.Build.BuildEngine
         )
         {
             // Initialize the data about the target XML that has been calculated in the target class
-            this.targetClass   = targetClass;
-            this.parentEngine  = targetClass.ParentEngine;
+            this.targetClass = targetClass;
+            this.parentEngine = targetClass.ParentEngine;
             this.parentProject = targetClass.ParentProject;
-            this.targetElement   = targetElement;
+            this.targetElement = targetElement;
             this.taskElementList = taskElementList;
             this.targetParameters = targetParameters;
             this.targetBuildEventContext = targetBuildEventContext;
@@ -209,7 +213,7 @@ namespace Microsoft.Build.BuildEngine
 
         #region Methods for building dependencies ( InProgressBuildState.BuildingDependencies )
 
-        private void ContinueBuildingDependencies (ProjectBuildState buildContext)
+        private void ContinueBuildingDependencies(ProjectBuildState buildContext)
         {
             // Verify that the target is in the right state
             ErrorUtilities.VerifyThrow(inProgressBuildState == InProgressBuildState.BuildingDependencies, "Wrong state");
@@ -280,7 +284,7 @@ namespace Microsoft.Build.BuildEngine
         #endregion
 
         #region Methods for build error targets ( InProgressBuildState.BuildingErrorClause )
-        private void ContinueBuildingErrorClause (ProjectBuildState buildContext)
+        private void ContinueBuildingErrorClause(ProjectBuildState buildContext)
         {
             // Verify that the target is in the right state
             ErrorUtilities.VerifyThrow(inProgressBuildState == InProgressBuildState.BuildingErrorClause, "Wrong state");
@@ -776,7 +780,7 @@ namespace Microsoft.Build.BuildEngine
 
             // A TaskExecutionMode of ExecuteTaskAndGatherOutputs should have its messages logged in the context of the task and therefore should have a valid taskID
             // A TaskExecutionMode of InferOutputs or Invalid should have its messages logged in the context of the target and therefore should have an invalid taskID
-            BuildEventContext buildEventContext = PrepareBuildEventContext(executionMode == TaskExecutionMode.ExecuteTaskAndGatherOutputs ? false: true);
+            BuildEventContext buildEventContext = PrepareBuildEventContext(executionMode == TaskExecutionMode.ExecuteTaskAndGatherOutputs ? false : true);
 
             // Create the task execution context
             int handleId = parentEngine.EngineCallback.CreateTaskContext(parentProject, targetClass, buildContext,
@@ -842,9 +846,13 @@ namespace Microsoft.Build.BuildEngine
                                                 howToBuild == DependencyAnalysisResult.IncrementalBuild,
                                                 "We can only see a failure for an execution stage");
                     if (howToBuild != DependencyAnalysisResult.FullBuild)
+                    {
                         howToBuild = DependencyAnalysisResult.SkipUpToDate;
+                    }
                     else
+                    {
                         exitBatchDueToError = true;
+                    }
                 }
             }
 

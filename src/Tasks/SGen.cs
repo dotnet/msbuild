@@ -1,13 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+#if !RUNTIME_TYPE_NETCORE
 using System;
 using System.IO;
 using System.Diagnostics;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -16,7 +22,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     internal interface ISGenTaskContract
     {
-    #region Properties
+        #region Properties
 
         // Input files
         [Required]
@@ -58,13 +64,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         string[] Types { get; set; }
 
-    #endregion
+        #endregion
     }
 
 #if RUNTIME_TYPE_NETCORE
     public class SGen : ToolTaskExtension, ISGenTaskContract
     {
-    #region Properties
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
+        #region Properties
 
         [Required]
         public string BuildAssemblyName { get; set; }
@@ -99,9 +106,9 @@ namespace Microsoft.Build.Tasks
 
         public string[] Types { get; set; }
 
-    #endregion
+        #endregion
 
-    #region Tool Members
+        #region Tool Members
 
         protected override string ToolName
         {
@@ -124,7 +131,8 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
-    #endregion
+        #endregion
+#pragma warning restore format
     }
 #else
     /// <summary>
@@ -133,6 +141,7 @@ namespace Microsoft.Build.Tasks
     public class SGen : ToolTaskExtension, ISGenTaskContract
     {
         private string _buildAssemblyPath;
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
 
         // Input files
@@ -364,7 +373,7 @@ namespace Microsoft.Build.Tasks
 
                 commandLineBuilder.AppendWhenTrue("/proxytypes", Bag, "UseProxyTypes");
 
-                //add the keep switch
+                // add the keep switch
                 commandLineBuilder.AppendWhenTrue("/keep", Bag, "UseKeep");
 
                 // Append the references, if any.
@@ -380,7 +389,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                //Append the Types to the command line, if any.
+                // Append the Types to the command line, if any.
                 if (Types != null)
                 {
                     foreach (string type in Types)
@@ -447,6 +456,7 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+#pragma warning restore format
     }
 #endif
 }

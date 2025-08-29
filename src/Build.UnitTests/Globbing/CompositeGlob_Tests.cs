@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 
 using System.Collections.Generic;
@@ -7,6 +7,8 @@ using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Globbing.Extensions;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
@@ -124,10 +126,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                 new CompositeGlob(
                     new MSBuildGlobWithGaps(g3, MSBuildGlob.Parse("x*")),
                     new CompositeGlob(
-                        g4
-                    )
-                )
-            );
+                        g4)));
 
             var leafGlobs = composite.GetParsedGlobs().ToArray();
 
@@ -137,6 +136,38 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             {
                 Assert.Contains(expectedGlob, leafGlobs);
             }
+        }
+
+        [Fact]
+        public void CreateShouldHandleZeroChildren()
+        {
+            IMSBuildGlob composite = CompositeGlob.Create(Enumerable.Empty<IMSBuildGlob>());
+
+            Assert.False(composite.IsMatch(""));
+        }
+
+        [Fact]
+        public void CreateShouldReturnSingleChildUnchanged()
+        {
+            var glob = MSBuildGlob.Parse("");
+
+            IMSBuildGlob composite = CompositeGlob.Create(new[] { glob });
+
+            Assert.Same(glob, composite);
+        }
+
+        [Fact]
+        public void CreateShouldReturnNewCompositeWhenMultipleProvided()
+        {
+            var glob1 = MSBuildGlob.Parse("");
+            var glob2 = MSBuildGlob.Parse("");
+
+            IMSBuildGlob result = CompositeGlob.Create(new[] { glob1, glob2 });
+
+            var composite = Assert.IsType<CompositeGlob>(result);
+            Assert.Same(glob1, composite.Globs.First());
+            Assert.Same(glob2, composite.Globs.Skip(1).First());
+            Assert.Equal(2, composite.Globs.Count());
         }
     }
 }

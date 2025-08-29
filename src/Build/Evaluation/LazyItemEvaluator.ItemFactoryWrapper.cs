@@ -1,19 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class ItemFactoryWrapper : IItemFactory<I, I>
+        private class ItemFactoryWrapper : IItemFactory<I, I>
         {
-            ProjectItemElement _itemElement;
-            IItemFactory<I, I> _wrappedItemFactory;
+            private ProjectItemElement _itemElement;
+            private IItemFactory<I, I> _wrappedItemFactory;
 
             public ItemFactoryWrapper(ProjectItemElement itemElement, IItemFactory<I, I> wrappedItemFactory)
             {
@@ -21,7 +23,7 @@ namespace Microsoft.Build.Evaluation
                 _wrappedItemFactory = wrappedItemFactory;
             }
 
-            void SetItemElement()
+            private void SetItemElement()
             {
                 _wrappedItemFactory.ItemElement = _itemElement;
             }

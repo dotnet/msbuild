@@ -1,13 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Runtime.Versioning;
+
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -26,45 +30,44 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<ArgumentNullException>(() =>
             {
                 CreateNewBuildRequest(0, null);
-            }
-           );
+            });
         }
         [Fact]
         public void TestConstructorGood()
         {
-            CreateNewBuildRequest(0, new string[0] { });
+            CreateNewBuildRequest(0, Array.Empty<string>());
         }
 
         [Fact]
         public void TestConfigurationId()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.Equal(0, request.ConfigurationId);
 
-            BuildRequest request2 = CreateNewBuildRequest(1, new string[0] { });
+            BuildRequest request2 = CreateNewBuildRequest(1, Array.Empty<string>());
             Assert.Equal(1, request2.ConfigurationId);
 
-            BuildRequest request3 = CreateNewBuildRequest(-1, new string[0] { });
+            BuildRequest request3 = CreateNewBuildRequest(-1, Array.Empty<string>());
             Assert.Equal(-1, request3.ConfigurationId);
         }
 
         [Fact]
         public void TestConfigurationResolved()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.False(request.IsConfigurationResolved);
 
-            BuildRequest request2 = CreateNewBuildRequest(1, new string[0] { });
+            BuildRequest request2 = CreateNewBuildRequest(1, Array.Empty<string>());
             Assert.True(request2.IsConfigurationResolved);
 
-            BuildRequest request3 = CreateNewBuildRequest(-1, new string[0] { });
+            BuildRequest request3 = CreateNewBuildRequest(-1, Array.Empty<string>());
             Assert.False(request3.IsConfigurationResolved);
         }
 
         [Fact]
         public void TestTargets()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.NotNull(request.Targets);
             Assert.Empty(request.Targets);
 
@@ -77,14 +80,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestPacketType()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             Assert.Equal(NodePacketType.BuildRequest, request.Type);
         }
 
         [Fact]
         public void TestResolveConfigurationGood()
         {
-            BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+            BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
             request.ResolveConfiguration(1);
             Assert.True(request.IsConfigurationResolved);
             Assert.Equal(1, request.ConfigurationId);
@@ -95,10 +98,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(1, new string[0] { });
+                BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
                 request.ResolveConfiguration(2);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -106,10 +108,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                BuildRequest request = CreateNewBuildRequest(0, new string[0] { });
+                BuildRequest request = CreateNewBuildRequest(0, Array.Empty<string>());
                 request.ResolveConfiguration(-1);
-            }
-           );
+            });
         }
         [Fact]
         public void TestTranslation()
@@ -136,9 +137,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-#if FEATURE_COM_INTEROP
-        [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "disable com tests on mono")]
+        [WindowsOnlyFact]
+        [SupportedOSPlatform("windows")]
         public void TestTranslationRemoteHostObjects()
         {
             var stateInHostObject = 3;
@@ -178,7 +178,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 hostObject.GetState().ShouldBe(stateInHostObject);
             }
         }
-#endif
 
         [Fact]
         public void TestTranslationHostObjectsWhenEmpty()

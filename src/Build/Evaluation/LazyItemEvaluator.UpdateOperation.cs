@@ -1,20 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Construction;
 using System.Collections.Immutable;
 using System.Linq;
-using Microsoft.Build.Utilities;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class UpdateOperation : LazyItemOperation
+        private class UpdateOperation : LazyItemOperation
         {
-            private readonly ImmutableList<ProjectMetadataElement> _metadata;
+            private readonly ImmutableArray<ProjectMetadataElement> _metadata;
             private ImmutableList<ItemBatchingContext>.Builder _itemsToUpdate = null;
             private ItemSpecMatchesItem _matchItemSpec = null;
             private bool? _needToExpandMetadataForEachItem = null;
@@ -25,7 +27,7 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            readonly struct MatchResult
+            private readonly struct MatchResult
             {
                 public bool IsMatch { get; }
                 public Dictionary<string, I> CapturedItemsFromReferencedItemTypes { get; }
@@ -37,9 +39,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
+            private delegate MatchResult ItemSpecMatchesItem(ItemSpec<P, I> itemSpec, I itemToMatch);
 
-            protected override void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 if (!_conditionResult)
                 {
@@ -145,7 +147,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            private bool QualifiedMetadataReferencesExist(ImmutableList<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
+            private bool QualifiedMetadataReferencesExist(ImmutableArray<ProjectMetadataElement> metadata, out bool? needToExpandMetadataForEachItem)
             {
                 needToExpandMetadataForEachItem = NeedToExpandMetadataForEachItem(metadata, out var itemsAndMetadataFound);
 
@@ -167,7 +169,7 @@ namespace Microsoft.Build.Evaluation
 
             private static bool ItemSpecContainsItemReferences(ItemSpec<P, I> itemSpec)
             {
-                return itemSpec.Fragments.Any(f => f is ItemSpec<P,I>.ItemExpressionFragment);
+                return itemSpec.Fragments.Any(f => f is ItemSpec<P, I>.ItemExpressionFragment);
             }
         }
     }

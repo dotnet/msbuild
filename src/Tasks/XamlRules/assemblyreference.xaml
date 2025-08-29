@@ -1,47 +1,46 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
-    Name="AssemblyReference"
-    DisplayName="Assembly Reference"
-    PageTemplate="generic"
-    Description="Assembly reference properties"
-    xmlns="http://schemas.microsoft.com/build/2009/properties">
-    <Rule.DataSource>
-        <DataSource Persistence="ProjectFile" ItemType="Reference" HasConfigurationCondition="False" />
-    </Rule.DataSource>
+  Name="AssemblyReference"
+  DisplayName="Assembly Reference"
+  PageTemplate="generic"
+  Description="Assembly reference properties"
+  xmlns="http://schemas.microsoft.com/build/2009/properties">
+  <Rule.DataSource>
+    <DataSource Persistence="ProjectFile" ItemType="Reference" HasConfigurationCondition="False" />
+  </Rule.DataSource>
 
-    <StringListProperty Name="Aliases"
-                        DisplayName="Aliases"
-                        Description="A comma-delimited list of aliases to this reference."
-                        Separator="," />
+  <StringListProperty Name="Aliases"
+    DisplayName="Aliases"
+    Description="A comma-delimited list of aliases to this reference."
+    Separator="," />
 
-    <BoolProperty Name="CopyLocal"
-                DisplayName="Copy Local"
-                Description="Indicates whether the reference will be copied to the output directory.">
-        <BoolProperty.DataSource>
-            <DataSource Persistence="ProjectFile" ItemType="Reference" HasConfigurationCondition="False" PersistedName="Private" />
-        </BoolProperty.DataSource>
-    </BoolProperty>
+  <BoolProperty Name="CopyLocal"
+    DisplayName="Copy Local"
+    Description="Indicates whether the reference will be copied to the output directory.">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="ProjectFile" ItemType="Reference" HasConfigurationCondition="False" PersistedName="Private" />
+    </BoolProperty.DataSource>
+  </BoolProperty>
 
-    <BoolProperty Name="EmbedInteropTypes"
-                  DisplayName="Embed Interop Types"
-                  Description="Indicates whether types defined in this assembly will be embedded into the target assembly." />
+  <BoolProperty Name="EmbedInteropTypes"
+    DisplayName="Embed Interop Types"
+    Description="Indicates whether types defined in this assembly will be embedded into the target assembly." />
 
-    <BoolProperty Name="SpecificVersion" 
-                  DisplayName="Specific Version"
-                  Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution.">
-        <BoolProperty.DataSource>
-            <DataSource Persistence="AssemblyReference" ItemType="Reference" HasConfigurationCondition="False"/>
-        </BoolProperty.DataSource>
-    </BoolProperty>
+  <BoolProperty Name="SpecificVersion"
+    DisplayName="Specific Version"
+    Description="Indicates whether this assembly can be resolved without regard to multi-targeting rules for assembly resolution.">
+    <BoolProperty.DataSource>
+      <DataSource Persistence="AssemblyReference" ItemType="Reference" HasConfigurationCondition="False"/>
+    </BoolProperty.DataSource>
+  </BoolProperty>
 
-    <StringProperty Name="RequiredTargetFramework" DisplayName="Required Target Framework" Visible="False" />
-    <StringProperty Name="HintPath" Visible="false" />
-    <StringProperty Name="SDKName" Visible="false" />
-    <BoolProperty Name="IsWinMDFile" Visible="false" />
-    <StringProperty Name="ImageRuntime"
-                    DisplayName="Runtime Version"
-                    Description="The CLR runtime version targeted by this assembly."
-                    Visible="False"
-                    ReadOnly="True" />
+  <StringProperty Name="RequiredTargetFramework" DisplayName="Required Target Framework" Visible="False" />
+  <StringProperty Name="HintPath" Visible="false" />
+  <StringProperty Name="SDKName" Visible="false" />
+  <BoolProperty Name="IsWinMDFile" Visible="false" />
+  <StringProperty Name="ImageRuntime"
+    DisplayName="Runtime Version"
+    Description="The CLR runtime version targeted by this assembly."
+    Visible="False"
+    ReadOnly="True" />
 </Rule>

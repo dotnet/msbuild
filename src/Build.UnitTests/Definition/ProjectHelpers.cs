@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -19,12 +21,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>A project instance.</returns>
         internal static ProjectInstance CreateEmptyProjectInstance()
         {
-            XmlReader reader = XmlReader.Create(new StringReader
-                (
-                @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' ToolsVersion='4.0'>
+            XmlReader reader = XmlReader.Create(new StringReader(
+                @"<Project>
                       <Target Name='foo'/>
-                  </Project>"
-                ));
+                  </Project>"));
 
             Project project = new Project(reader);
             ProjectInstance instance = project.CreateProjectInstance();

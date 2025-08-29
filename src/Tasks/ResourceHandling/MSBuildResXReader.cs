@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,12 +8,16 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
     internal class MSBuildResXReader
     {
-        public static IReadOnlyList<IResource> ReadResources(Stream s, string filename, bool pathsRelativeToBasePath)
+        public static IReadOnlyList<IResource> ReadResources(Stream s, string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
             var resources = new List<IResource>();
             var aliases = new Dictionary<string, string>();
@@ -23,7 +26,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 using (var xmlReader = new XmlTextReader(s))
                 {
-                    xmlReader.WhitespaceHandling = WhitespaceHandling.None;
+                    xmlReader.WhitespaceHandling = WhitespaceHandling.All;
 
                     XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);
                     foreach (XElement elem in doc.Element("root").Elements())
@@ -36,7 +39,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                             case "resheader":
                                 break;
                             case "data":
-                                ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem);
+                                ParseData(filename, pathsRelativeToBasePath, resources, aliases, elem, log, logWarningForBinaryFormatter);
                                 break;
                         }
                     }
@@ -50,7 +53,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
         }
 
-        private static void ParseAssemblyAlias(Dictionary<string,string> aliases, XElement elem)
+        private static void ParseAssemblyAlias(Dictionary<string, string> aliases, XElement elem)
         {
             string alias = elem.Attribute("alias")?.Value;
             string name = elem.Attribute("name").Value;
@@ -70,13 +73,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         // Consts from https://github.com/dotnet/winforms/blob/16b192389b377c647ab3d280130781ab1a9d3385/src/System.Windows.Forms/src/System/Resources/ResXResourceWriter.cs#L46-L63
         private const string Beta2CompatSerializedObjectMimeType = "text/microsoft-urt/psuedoml-serialized/base64";
         private const string CompatBinSerializedObjectMimeType = "text/microsoft-urt/binary-serialized/base64";
-        private const string CompatSoapSerializedObjectMimeType = "text/microsoft-urt/soap-serialized/base64";
         private const string BinSerializedObjectMimeType = "application/x-microsoft.net.object.binary.base64";
-        private const string SoapSerializedObjectMimeType = "application/x-microsoft.net.object.soap.base64";
-        private const string DefaultSerializedObjectMimeType = BinSerializedObjectMimeType;
         private const string ByteArraySerializedObjectMimeType = "application/x-microsoft.net.object.bytearray.base64";
-        private const string ResMimeType = "text/microsoft-resx";
-
         private const string StringTypeNamePrefix = "System.String, mscorlib,";
         private const string StringTypeName40 = "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
         private const string MemoryStreamTypeNamePrefix = "System.IO.MemoryStream, mscorlib,";
@@ -104,10 +102,18 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             return aliasedTypeName;
         }
 
-        private static void ParseData(string resxFilename, bool pathsRelativeToBasePath, List<IResource> resources, Dictionary<string,string> aliases, XElement elem)
+        private static void ParseData(
+            string resxFilename,
+            bool pathsRelativeToBasePath,
+            List<IResource> resources,
+            Dictionary<string, string> aliases,
+            XElement elem,
+            TaskLoggingHelper log,
+            bool logWarningForBinaryFormatter)
         {
             string name = elem.Attribute("name").Value;
             string value;
+            bool preserve = elem.Attribute(XName.Get("space", "http://www.w3.org/XML/1998/namespace"))?.Value == "preserve";
 
             XElement valueElement = elem.Element("value");
             if (valueElement is null)
@@ -122,6 +128,10 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             else
             {
                 value = valueElement.Value;
+                if (!preserve && string.IsNullOrWhiteSpace(value))
+                {
+                    value = string.Empty;
+                }
             }
 
             string typename = elem.Attribute("type")?.Value;
@@ -184,13 +194,27 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     case BinSerializedObjectMimeType:
                     case Beta2CompatSerializedObjectMimeType:
                     case CompatBinSerializedObjectMimeType:
+                        // Warn of BinaryFormatter exposure (SDK should turn this on by default in .NET 8+)
+                        if (logWarningForBinaryFormatter)
+                        {
+                            log?.LogWarningWithCodeFromResources(null, resxFilename, ((IXmlLineInfo)elem).LineNumber, ((IXmlLineInfo)elem).LinePosition, 0, 0, "GenerateResource.BinaryFormatterUse", name, typename);
+                        }
+
                         // BinaryFormatter from byte array
                         byte[] binaryFormatterBytes = Convert.FromBase64String(value);
 
                         resources.Add(new BinaryFormatterByteArrayResource(name, binaryFormatterBytes, resxFilename));
                         return;
                     default:
-                        throw new NotSupportedException($"Resource \"{name}\" in \"{resxFilename}\"uses MIME type \"{mimetype}\", which is not supported by .NET Core MSBuild.");
+                        if (log is null)
+                        {
+                            throw new NotSupportedException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("GenerateResource.MimeTypeNotSupportedOnCore", name, resxFilename, mimetype));
+                        }
+                        else
+                        {
+                            log.LogErrorFromResources("GenerateResource.MimeTypeNotSupportedOnCore", name, resxFilename, mimetype);
+                            return;
+                        }
                 }
             }
         }
@@ -282,19 +306,19 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         /// <summary>
         /// Extract <see cref="IResource"/>s from a given file on disk.
         /// </summary>
-        public static IReadOnlyList<IResource> GetResourcesFromFile(string filename, bool pathsRelativeToBasePath)
+        public static IReadOnlyList<IResource> GetResourcesFromFile(string filename, bool pathsRelativeToBasePath, TaskLoggingHelper log, bool logWarningForBinaryFormatter)
         {
             using (var x = new FileStream(filename, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-                return ReadResources(x, filename, pathsRelativeToBasePath);
+                return ReadResources(x, filename, pathsRelativeToBasePath, log, logWarningForBinaryFormatter);
             }
         }
 
-        public static IReadOnlyList<IResource> GetResourcesFromString(string resxContent, string basePath = null, bool? useRelativePath = null)
+        public static IReadOnlyList<IResource> GetResourcesFromString(string resxContent, TaskLoggingHelper log, bool logWarningForBinaryFormatter, string basePath = null, bool? useRelativePath = null)
         {
             using (var x = new MemoryStream(Encoding.UTF8.GetBytes(resxContent)))
             {
-                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(basePath != null));
+                return ReadResources(x, basePath, useRelativePath.GetValueOrDefault(basePath != null), log, logWarningForBinaryFormatter);
             }
         }
 
@@ -311,20 +335,32 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 {
                     int lastIndexOfQuote = stringValue.LastIndexOf("\"");
                     if (lastIndexOfQuote - 1 < 0)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     fileName = stringValue.Substring(1, lastIndexOfQuote - 1); // remove the quotes in" ..... "
                     if (lastIndexOfQuote + 2 > stringValue.Length)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     remainingString = stringValue.Substring(lastIndexOfQuote + 2);
                 }
                 else
                 {
                     int nextSemiColumn = stringValue.IndexOf(";");
                     if (nextSemiColumn == -1)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     fileName = stringValue.Substring(0, nextSemiColumn);
                     if (nextSemiColumn + 1 > stringValue.Length)
+                    {
                         throw new ArgumentException(nameof(stringValue));
+                    }
+
                     remainingString = stringValue.Substring(nextSemiColumn + 1);
                 }
                 string[] parts = remainingString.Split(';');

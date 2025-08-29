@@ -1,15 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
+    using System.Collections;
     using System.Collections.Generic;
     using System.Linq;
     using Microsoft.Build.Construction;
-    using Microsoft.Build.ObjectModelRemoting;
     using Microsoft.Build.Evaluation;
+    using Microsoft.Build.ObjectModelRemoting;
     using Xunit;
-    using System.Collections;
 
     internal class ElementLinkPair<T> : LinkPair<T>
         where T : ProjectElement
@@ -71,7 +74,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public ElementLinkPair<CT> AddNewLabeledChaildWithVerify<CT>(ObjectType where, string label, Func<T, string, CT> adder)
             where CT : ProjectElement
             => AddNewChaildWithVerify(where, label,
-                (t, l)=>
+                (t, l) =>
                 {
                     var ct = adder(t, l);
                     Assert.NotNull(ct);
@@ -139,7 +142,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return result;
         }
 
-        public ICollection<ElementLinkPair<CT>> QueryChildrenWithValidation<CT>(Func<T,IEnumerable> getter,  Func<CT, bool> matcher)
+        public ICollection<ElementLinkPair<CT>> QueryChildrenWithValidation<CT>(Func<T, IEnumerable> getter, Func<CT, bool> matcher)
             where CT : ProjectElement
         {
             var viewResult = new List<CT>();
@@ -202,9 +205,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
     }
 
-    internal class ProjectXmlPair : ElementLinkPair<ProjectRootElement>
+    internal sealed class ProjectXmlPair : ElementLinkPair<ProjectRootElement>
     {
-        ProjectPair Project { get; }
+        private ProjectPair Project { get; }
         public ProjectXmlPair(ProjectPair pair) : base(null, pair.View.Xml, pair.Real.Xml) { this.Project = pair; this.PRE = this; }
         public ProjectXmlPair(ProjectRootElement viewXml, ProjectRootElement realXml) : base(null, viewXml, realXml) { this.PRE = this; }
 
@@ -244,7 +247,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void VerifySameLocation(ElementLocation expected, ElementLocation actual, ValidationContext context = null)
         {
-            if (object.ReferenceEquals(expected, actual)) return;
+            if (object.ReferenceEquals(expected, actual))
+            {
+                return;
+            }
 
             if (context?.ValidateLocation != null)
             {
@@ -265,10 +271,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return LinkedObjectsFactory.GetLink(obj) != null;
         }
 
-        private static bool dbgIgnoreLinked = false; 
+        private static bool dbgIgnoreLinked = false;
         public static void VerifyNotLinked(object obj)
         {
-            if (dbgIgnoreLinked) return;
+            if (dbgIgnoreLinked)
+            {
+                return;
+            }
+
             Assert.True(obj == null || !IsLinkedObject(obj));
         }
 
@@ -276,8 +286,15 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public static T GetRealObject<T>(T view)
             where T : class
         {
-            if (view == null) return null;
-            if (!IsLinkedObject(view)) return view;
+            if (view == null)
+            {
+                return null;
+            }
+
+            if (!IsLinkedObject(view))
+            {
+                return view;
+            }
 
             var link = LinkedObjectsFactory.GetLink(view) as ILinkMock;
             Assert.NotNull(link);
@@ -291,7 +308,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void VerifyLinked(object obj)
         {
-            if (dbgIgnoreLinked) return;
+            if (dbgIgnoreLinked)
+            {
+                return;
+            }
+
             Assert.True(obj == null || IsLinkedObject(obj));
         }
 
@@ -299,21 +320,33 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public static void VerifyNotNull(object obj, bool linked)
         {
             Assert.NotNull(obj);
-            if (dbgIgnoreLinked) return;
+            if (dbgIgnoreLinked)
+            {
+                return;
+            }
+
             Assert.Equal(linked, IsLinkedObject(obj));
         }
 
         public static void VerifyNotLinkedNotNull(object obj)
         {
             Assert.NotNull(obj);
-            if (dbgIgnoreLinked) return;
+            if (dbgIgnoreLinked)
+            {
+                return;
+            }
+
             Assert.True(!IsLinkedObject(obj));
         }
 
         public static void VerifyLinkedNotNull(object obj)
         {
             Assert.NotNull(obj);
-            if (dbgIgnoreLinked) return;
+            if (dbgIgnoreLinked)
+            {
+                return;
+            }
+
             Assert.True(IsLinkedObject(obj));
         }
 
@@ -342,7 +375,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private static void VerifyProjectElementViewInternal(ProjectElement viewXml, ProjectElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
 
             VerifyLinkedNotNull(viewXml);
             VerifyNotLinkedNotNull(realXml);
@@ -351,7 +387,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             VerifySameLocation(realXml.LabelLocation, viewXml.LabelLocation, context);
 
-            VerifySameLocationWithException(()=>realXml.ConditionLocation, ()=>viewXml.ConditionLocation, context);
+            VerifySameLocationWithException(() => realXml.ConditionLocation, () => viewXml.ConditionLocation, context);
 
             VerifyNotLinked(realXml.ContainingProject);
             VerifyLinked(viewXml.ContainingProject);
@@ -377,7 +413,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private static void VerifyProjectElementContainerView(ProjectElementContainer viewXml, ProjectElementContainer realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElementViewInternal(viewXml, realXml, context);
 
             Assert.Equal(realXml.Count, viewXml.Count);
@@ -391,7 +431,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var realChild = realXml.FirstChild;
             var viewChild = viewXml.FirstChild;
 
-            while (realChild != null )
+            while (realChild != null)
             {
                 Assert.NotNull(viewChild);
                 Assert.Same(realChild.Parent, realXml);
@@ -456,7 +496,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void VerifyProjectElement(ProjectElement viewXml, ProjectElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
 
             if (viewXml is ProjectElementContainer viewContainer)
             {
@@ -472,7 +515,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectRootElement viewXml, ProjectRootElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.FullPath, viewXml.FullPath);
@@ -515,7 +562,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectChooseElement viewXml, ProjectChooseElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
 
@@ -525,7 +576,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectWhenElement viewXml, ProjectWhenElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
 
@@ -536,7 +591,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectOtherwiseElement viewXml, ProjectOtherwiseElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
 
@@ -547,7 +606,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectExtensionsElement viewXml, ProjectExtensionsElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.Content, viewXml.Content);
@@ -555,7 +618,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectMetadataElement viewXml, ProjectMetadataElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.Name, viewXml.Name);
@@ -565,7 +632,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectTaskElement viewXml, ProjectTaskElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.Name, viewXml.Name);
@@ -625,7 +696,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectOutputElement viewXml, ProjectOutputElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.TaskParameter, viewXml.TaskParameter);
@@ -639,7 +714,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectUsingTaskBodyElement viewXml, ProjectUsingTaskBodyElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
 
             VerifyProjectElement(viewXml, realXml, context);
 
@@ -650,7 +728,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectUsingTaskParameterElement viewXml, ProjectUsingTaskParameterElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
 
             VerifyProjectElement(viewXml, realXml, context);
 
@@ -665,7 +746,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(UsingTaskParameterGroupElement viewXml, UsingTaskParameterGroupElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
 
             VerifyProjectElement(viewXml, realXml, context);
 
@@ -674,7 +758,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectUsingTaskElement viewXml, ProjectUsingTaskElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
 
@@ -702,7 +790,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectTargetElement viewXml, ProjectTargetElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
 
@@ -731,7 +823,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectImportElement viewXml, ProjectImportElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
 
@@ -750,7 +846,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectImportGroupElement viewXml, ProjectImportGroupElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             ViewValidation.Verify(viewXml.Imports, realXml.Imports, ViewValidation.Verify, context);
@@ -758,7 +858,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectItemDefinitionElement viewXml, ProjectItemDefinitionElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.ItemType, viewXml.ItemType);
@@ -767,7 +871,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectItemDefinitionGroupElement viewXml, ProjectItemDefinitionGroupElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             ViewValidation.Verify(viewXml.ItemDefinitions, realXml.ItemDefinitions, ViewValidation.Verify, context);
@@ -775,7 +883,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectItemElement viewXml, ProjectItemElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.ItemType, viewXml.ItemType);
@@ -788,20 +900,24 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             Assert.Equal(realXml.KeepDuplicates, viewXml.KeepDuplicates);
             Assert.Equal(realXml.HasMetadata, viewXml.HasMetadata);
 
-           Verify(viewXml.Metadata, realXml.Metadata, ViewValidation.Verify, context);
+            Verify(viewXml.Metadata, realXml.Metadata, ViewValidation.Verify, context);
 
-           VerifySameLocation(realXml.IncludeLocation, viewXml.IncludeLocation, context);
-           VerifySameLocation(realXml.ExcludeLocation, viewXml.ExcludeLocation, context);
-           VerifySameLocation(realXml.RemoveLocation, viewXml.RemoveLocation, context);
-           VerifySameLocation(realXml.UpdateLocation, viewXml.UpdateLocation, context);
-           VerifySameLocation(realXml.KeepMetadataLocation, viewXml.KeepMetadataLocation, context);
-           VerifySameLocation(realXml.RemoveMetadataLocation, viewXml.RemoveMetadataLocation, context);
-           VerifySameLocation(realXml.KeepDuplicatesLocation, viewXml.KeepDuplicatesLocation, context);
+            VerifySameLocation(realXml.IncludeLocation, viewXml.IncludeLocation, context);
+            VerifySameLocation(realXml.ExcludeLocation, viewXml.ExcludeLocation, context);
+            VerifySameLocation(realXml.RemoveLocation, viewXml.RemoveLocation, context);
+            VerifySameLocation(realXml.UpdateLocation, viewXml.UpdateLocation, context);
+            VerifySameLocation(realXml.KeepMetadataLocation, viewXml.KeepMetadataLocation, context);
+            VerifySameLocation(realXml.RemoveMetadataLocation, viewXml.RemoveMetadataLocation, context);
+            VerifySameLocation(realXml.KeepDuplicatesLocation, viewXml.KeepDuplicatesLocation, context);
         }
 
         public static void Verify(ProjectItemGroupElement viewXml, ProjectItemGroupElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Verify(viewXml.Items, realXml.Items, Verify, context);
@@ -809,7 +925,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectPropertyElement viewXml, ProjectPropertyElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.Name, viewXml.Name);
@@ -818,7 +938,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectPropertyGroupElement viewXml, ProjectPropertyGroupElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
             Verify(viewXml.Properties, realXml.Properties, Verify, context);
             Verify(viewXml.PropertiesReversed, realXml.PropertiesReversed, Verify, context);
@@ -826,7 +950,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectSdkElement viewXml, ProjectSdkElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
             Assert.Equal(realXml.Name, viewXml.Name);
             Assert.Equal(realXml.Version, viewXml.Version);
@@ -835,7 +963,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify(ProjectOnErrorElement viewXml, ProjectOnErrorElement realXml, ValidationContext context = null)
         {
-            if (viewXml == null && realXml == null) return;
+            if (viewXml == null && realXml == null)
+            {
+                return;
+            }
+
             VerifyProjectElement(viewXml, realXml, context);
 
             Assert.Equal(realXml.ExecuteTargetsAttribute, viewXml.ExecuteTargetsAttribute);

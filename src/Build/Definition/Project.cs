@@ -1,41 +1,43 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
-using ObjectModel = System.Collections.ObjectModel;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
+using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Execution;
+using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Globbing;
+using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 using Constants = Microsoft.Build.Internal.Constants;
+using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
+using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using ObjectModel = System.Collections.ObjectModel;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
-using System.Globalization;
-using Microsoft.Build.Definition;
-using Microsoft.Build.Evaluation.Context;
-using Microsoft.Build.Globbing;
-using Microsoft.Build.ObjectModelRemoting;
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
-using EvaluationItemSpec = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
-using EvaluationItemExpressionFragment = Microsoft.Build.Evaluation.ItemSpec<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>.ItemExpressionFragment;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
-    using Utilities = Internal.Utilities;
+    using Utilities = Microsoft.Build.Internal.Utilities;
 
     /// <summary>
     /// Represents an evaluated project with design time semantics.
@@ -43,7 +45,7 @@ namespace Microsoft.Build.Evaluation
     /// Edits to this project always update the backing XML.
     /// </summary>
     // UNDONE: (Multiple configurations.) Protect against problems when attempting to edit, after edits were made to the same ProjectRootElement either directly or through other projects evaluated from that ProjectRootElement.
-    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={_data.GlobalPropertiesDictionary.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
+    [DebuggerDisplay("{FullPath} EffectiveToolsVersion={ToolsVersion} #GlobalProperties={implementation._data.GlobalPropertiesDictionary.Count} #Properties={implementation._data.Properties.Count} #ItemTypes={implementation._data.ItemTypes.Count} #ItemDefinitions={implementation._data.ItemDefinitions.Count} #Items={implementation._data.Items.Count} #Targets={implementation._data.Targets.Count}")]
     public class Project : ILinkableObject
     {
         /// <summary>
@@ -54,7 +56,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// * and ? are invalid file name characters, but they occur in globs as wild cards.
         /// </summary>
-        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c!= '/' && c != '\\' && c != ':').ToArray();
+        private static readonly char[] s_invalidGlobChars = FileUtilities.InvalidFileNameChars.Where(c => c != '*' && c != '?' && c != '/' && c != '\\' && c != ':').ToArray();
 
         /// <summary>
         /// Context to log messages and events in.
@@ -67,6 +69,11 @@ namespace Microsoft.Build.Evaluation
         internal bool IsLinked => implementationInternal.IsLinked;
         internal ProjectLink Link => implementation;
         object ILinkableObject.Link => IsLinked ? Link : null;
+
+        /// <summary>
+        /// Host-provided factory for <see cref="IDirectoryCache"/> interfaces to be used during evaluation.
+        /// </summary>
+        private readonly IDirectoryCacheFactory _directoryCacheFactory;
 
         /// <summary>
         /// Default project template options (include all features).
@@ -88,7 +95,7 @@ namespace Microsoft.Build.Evaluation
         /// - <see cref="ProjectItem.SetMetadataValue(string,string)"/>
         /// - <see cref="ProjectItem.SetMetadataValue(string,string, bool)"/>
         ///
-        /// When this property is set to true, the previous item operations throw an <exception cref="InvalidOperationException"></exception>
+        /// When this property is set to true, the previous item operations throw an <see cref="InvalidOperationException" />
         /// instead of expanding the item element.
         /// </summary>
         public bool ThrowInsteadOfSplittingItemElement
@@ -250,21 +257,23 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The <see cref="ProjectCollection"/> the project is added to.</param>
         /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
         public Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+            : this(xml, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
-        private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+        private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
             ProjectCollection = projectCollection;
-            var defaultImplementation = new ProjectImpl(this, xml, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            var defaultImplementation = new ProjectImpl(this, xml, globalProperties, toolsVersion, subToolsetVersion, loadSettings);
             implementationInternal = (IProjectLinkInternal)defaultImplementation;
             implementation = defaultImplementation;
 
-            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            _directoryCacheFactory = directoryCacheFactory;
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
         }
 
         /// <summary>
@@ -342,21 +351,23 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+            : this(xmlReader, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
-        private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+        private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(xmlReader, nameof(xmlReader));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
             ProjectCollection = projectCollection;
-            var defailtImplementation = new ProjectImpl(this, xmlReader, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
-            implementationInternal = (IProjectLinkInternal)defailtImplementation;
-            implementation = defailtImplementation;
+            var defaultImplementation = new ProjectImpl(this, xmlReader, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defaultImplementation;
+            implementation = defaultImplementation;
 
-            defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            _directoryCacheFactory = directoryCacheFactory;
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
         }
 
         /// <summary>
@@ -436,38 +447,38 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectCollection">The collection with which this project should be associated. May not be null.</param>
         /// <param name="loadSettings">The load settings for this project.</param>
         public Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings)
-            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, null)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, loadSettings, evaluationContext: null, directoryCacheFactory: null, interactive: false)
         {
         }
 
-        private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+        private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ErrorUtilities.VerifyThrowArgumentNull(projectCollection, nameof(projectCollection));
 
             ProjectCollection = projectCollection;
-            var defailtImplementation = new ProjectImpl(this, projectFile, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
-            implementationInternal = (IProjectLinkInternal)defailtImplementation;
-            implementation = defailtImplementation;
+            var defaultImplementation = new ProjectImpl(this, projectFile, globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+            implementationInternal = (IProjectLinkInternal)defaultImplementation;
+            implementation = defaultImplementation;
+
+            _directoryCacheFactory = directoryCacheFactory;
 
             // Note: not sure why only this ctor flavor do TryUnloadProject
             // seems the XmlReader based one should also clean the same way.
             try
             {
-                defailtImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext);
+                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
                 // If possible, clear out the XML we just loaded into the XML cache:
                 // if we had loaded the XML from disk into the cache within this constructor,
-                // and then are are bailing out because there is a typo in the XML such that 
+                // and then are are bailing out because there is a typo in the XML such that
                 // evaluation failed, we don't want to leave the bad XML in the cache;
                 // the user wouldn't be able to fix the XML file and try again.
-                if (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    projectCollection.TryUnloadProject(Xml);
-                }
+                projectCollection.TryUnloadProject(Xml);
 
                 throw;
             }
@@ -488,7 +499,9 @@ namespace Microsoft.Build.Evaluation
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -505,7 +518,9 @@ namespace Microsoft.Build.Evaluation
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -522,7 +537,9 @@ namespace Microsoft.Build.Evaluation
                 options.SubToolsetVersion,
                 options.ProjectCollection ?? ProjectCollection.GlobalProjectCollection,
                 options.LoadSettings,
-                options.EvaluationContext);
+                options.EvaluationContext,
+                options.DirectoryCacheFactory,
+                options.Interactive);
         }
 
         /// <summary>
@@ -585,6 +602,21 @@ namespace Microsoft.Build.Evaluation
         /// <see cref="SetGlobalProperty">SetGlobalProperty</see> and <see cref="RemoveGlobalProperty">RemoveGlobalProperty</see>.
         /// </remarks>
         public IDictionary<string, string> GlobalProperties => implementation.GlobalProperties;
+
+        /// <summary>
+        /// Indicates whether the global properties dictionary contains the specified key.
+        /// </summary>
+        internal bool GlobalPropertiesContains(string key) => implementation.GlobalPropertiesContains(key);
+
+        /// <summary>
+        /// Indicates how many elements are in the global properties dictionary.
+        /// </summary>
+        internal int GlobalPropertiesCount => implementation.GlobalPropertiesCount();
+
+        /// <summary>
+        /// Enumerates the values in the global properties dictionary.
+        /// </summary>
+        internal IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable => implementation.GlobalPropertiesEnumerable();
 
         /// <summary>
         /// Item types in this project.
@@ -839,38 +871,48 @@ namespace Microsoft.Build.Evaluation
         /// <example>
         ///
         /// <code>
-        ///<P>*.txt</P>
+        /// <![CDATA[
+        /// <P>*.txt</P>
         ///
-        ///<Bar Include="bar"/> (both outside and inside project cone)
-        ///<Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
-        ///<Foo Include="*.a;*.b" Exclude="3.a"/>
-        ///<Foo Remove="2.a" />
-        ///<Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
-        ///<Foo Include="$(P)"/>
-        ///<Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
-        ///<Foo Include="*.cs" Exclude="@(Bar)"/>
-        ///</code>
+        /// <Bar Include="bar"/> (both outside and inside project cone)
+        /// <Zar Include="C:\**\*.foo"/> (both outside and inside project cone)
+        /// <Foo Include="*.a;*.b" Exclude="3.a"/>
+        /// <Foo Remove="2.a" />
+        /// <Foo Include="**\*.b" Exclude="1.b;**\obj\*.b;**\bar\*.b"/>
+        /// <Foo Include="$(P)"/>
+        /// <Foo Include="*.a;@(Bar);3.a"/> (If Bar has globs, they will have been included when querying Bar ProjectItems for globs)
+        /// <Foo Include="*.cs" Exclude="@(Bar)"/>
+        /// ]]>
+        /// </code>
         ///
-        ///Example result:
-        ///[
-        ///GlobResult(glob: "C:\**\*.foo", exclude: []),
-        ///GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
-        ///GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
-        ///GlobResult(glob: "*.txt", exclude=[]),
-        ///GlobResult(glob: "*.a", exclude=[]),
-        ///GlobResult(glob: "*.cs", exclude=["bar"])
-        ///].
+        /// Example result:
+        /// <code>
+        /// <![CDATA[
+        /// [
+        /// GlobResult(glob: "C:\**\*.foo", exclude: []),
+        /// GlobResult(glob: ["*.a", "*.b"], exclude=["3.a"], remove=["2.a"]),
+        /// GlobResult(glob: "**\*.b", exclude=["1.b, **\obj\*.b", **\bar\*.b"]),
+        /// GlobResult(glob: "*.txt", exclude=[]),
+        /// GlobResult(glob: "*.a", exclude=[]),
+        /// GlobResult(glob: "*.cs", exclude=["bar"])
+        /// ].
+        /// ]]>
+        /// </code>
         /// </example>
         /// <remarks>
+        /// <para>
         /// <see cref="GlobResult.MsBuildGlob"/> is a <see cref="IMSBuildGlob"/> that combines all globs in the include element and ignores
         /// all the fragments in the exclude attribute and all the fragments in all Remove elements that apply to the include element.
+        /// </para>
         ///
         /// Users can construct a composite glob that incorporates all the globs in the Project:
         /// <code>
+        /// <![CDATA[
         /// var uberGlob = new CompositeGlob(project.GetAllGlobs().Select(r => r.MSBuildGlob).ToArray());
         /// uberGlob.IsMatch("foo.cs");
+        /// ]]>
         /// </code>
-        ///
+        /// 
         /// </remarks>
         /// <returns>
         /// List of <see cref="GlobResult"/>.
@@ -1821,6 +1863,11 @@ namespace Microsoft.Build.Evaluation
             private RenameHandlerDelegate _renameHandler;
 
             /// <summary>
+            /// Indicates if the process of loading the project is allowed to interact with the user.
+            /// </summary>
+            private bool _interactive = false;
+
+            /// <summary>
             ///
             /// </summary>
             /// <param name="owner">The owning project object.</param>
@@ -1829,8 +1876,7 @@ namespace Microsoft.Build.Evaluation
             /// <param name="toolsVersion">Tools version to evaluate with. May be null.</param>
             /// <param name="subToolsetVersion">Sub-toolset version to explicitly evaluate the toolset with.  May be null.</param>
             /// <param name="loadSettings">The <see cref="ProjectLoadSettings"/> to use for evaluation.</param>
-            /// <param name="evaluationContext">The evaluation context to use in case reevaluation is required.</param>
-            public ProjectImpl(Project owner, ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            public ProjectImpl(Project owner, ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(xml, nameof(xml));
                 ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -2049,6 +2095,37 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     return false;
+                }
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesContains(string)"/>.
+            /// </summary>
+            /// <param name="key">The key to check for its value.</param>
+            /// <returns>Whether the key is in the global properties dictionary.</returns>
+            public override bool GlobalPropertiesContains(string key)
+            {
+                return _data.GlobalPropertiesDictionary.Contains(key);
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesCount()"/>.
+            /// </summary>
+            /// <returns>The number of properties in the global properties dictionary</returns>
+            public override int GlobalPropertiesCount()
+            {
+                return _data.GlobalPropertiesDictionary.Count;
+            }
+
+            /// <summary>
+            /// See <see cref="ProjectLink.GlobalPropertiesEnumerable()"/>.
+            /// </summary>
+            /// <returns>An IEnumerable of the keys and values of the global properties dictionary</returns>
+            public override IEnumerable<KeyValuePair<string, string>> GlobalPropertiesEnumerable()
+            {
+                foreach (ProjectPropertyInstance property in _data.GlobalPropertiesDictionary)
+                {
+                    yield return new KeyValuePair<string, string>(property.Name, ((IProperty)property).EvaluatedValueEscaped);
                 }
             }
 
@@ -2406,7 +2483,7 @@ namespace Microsoft.Build.Evaluation
             /// their previously stored value to find out, and if so perhaps decide to update their own state.
             /// Note that the number may not increase monotonically.
             ///
-            /// This number corresponds to the <seealso cref="BuildEventContext.EvaluationId"/> and can be used to connect
+            /// This number corresponds to the <see cref="BuildEventContext.EvaluationId"/> and can be used to connect
             /// evaluation logging events back to the Project instance.
             /// </summary>
             public override int LastEvaluationId => _data.EvaluationId;
@@ -2469,7 +2546,7 @@ namespace Microsoft.Build.Evaluation
                     };
                 }
 
-                public void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
+                public readonly void AccumulateInformationFromRemoveItemSpec(EvaluationItemSpec removeSpec)
                 {
                     IEnumerable<string> removeSpecFragmentStrings = removeSpec.FlattenFragmentsAsStrings();
                     var removeGlob = removeSpec.ToMSBuildGlob();
@@ -2503,7 +2580,7 @@ namespace Microsoft.Build.Evaluation
                 // 5. <I Include="C"/>
                 // 6. <I Remove="..."/> // this remove applies to the includes at 1, 3, 5
                 // So A's applicable removes are composed of:
-                // 
+                //
                 // The applicable removes for the element at position 1 (xml element A) are composed of:
                 // - all the removes seen by the next include statement of I's type (xml element B, position 3, which appears after A in file order). In this example that's Removes at positions 4 and 6.
                 // - new removes between A and B. In this example that's Remove 2.
@@ -2548,7 +2625,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
-                var includeGlob = new CompositeGlob(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
+                var includeGlob = CompositeGlob.Create(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = Enumerable.Empty<string>();
                 IMSBuildGlob excludeGlob = null;
@@ -2567,7 +2644,7 @@ namespace Microsoft.Build.Evaluation
                 if (removeElementCache.TryGetValue(itemElement.ItemType, out CumulativeRemoveElementData removeItemElement))
                 {
                     removeFragmentStrings = removeItemElement.FragmentStrings;
-                    removeGlob = new CompositeGlob(removeItemElement.Globs);
+                    removeGlob = CompositeGlob.Create(removeItemElement.Globs);
                 }
 
                 var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
@@ -2577,17 +2654,13 @@ namespace Microsoft.Build.Evaluation
 
             private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
             {
-                if (excludeGlob == null)
+                return (excludeGlob, removeGlob) switch
                 {
-                    return removeGlob == null ? includeGlob :
-                        new MSBuildGlobWithGaps(includeGlob, removeGlob);
-                }
-                else
-                {
-                    return new MSBuildGlobWithGaps(includeGlob,
-                        removeGlob == null ? excludeGlob :
-                        new CompositeGlob(excludeGlob, removeGlob));
-                }
+                    (null, null) => includeGlob,
+                    (not null, null) => new MSBuildGlobWithGaps(includeGlob, excludeGlob),
+                    (null, not null) => new MSBuildGlobWithGaps(includeGlob, removeGlob),
+                    (not null, not null) => new MSBuildGlobWithGaps(includeGlob, new CompositeGlob(excludeGlob, removeGlob))
+                };
             }
 
             private void CacheInformationFromRemoveItem(ProjectItemElement itemElement, Dictionary<string, CumulativeRemoveElementData> removeElementCache)
@@ -2634,7 +2707,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// See <see cref="ProjectLink.GetItemProvenance(ProjectItem, EvaluationContext)"/>.
             /// </summary>
-            /// /// <param name="item"> 
+            /// /// <param name="item">
             /// The ProjectItem object that indicates: the itemspec to match and the item type to constrain the search in.
             /// The search is also constrained on item elements appearing before the item element that produced this <paramref name="item"/>.
             /// The element that produced this <paramref name="item"/> is included in the results.
@@ -2705,12 +2778,13 @@ namespace Microsoft.Build.Evaluation
                     return new List<ProvenanceResult>();
                 }
 
-                return
-                    projectItemElements
+                return projectItemElements
                     .AsParallel()
-                    .AsOrdered()
-                    .Select(i => ComputeProvenanceResult(itemToMatch, i))
-                    .Where(r => r != null)
+                    .Select((item, index) => (Result: ComputeProvenanceResult(itemToMatch, item), Index: index))
+                    .Where(pair => pair.Result != null)
+                    .AsSequential()
+                    .OrderBy(pair => pair.Index)
+                    .Select(pair => pair.Result)
                     .ToList();
             }
 
@@ -2893,7 +2967,7 @@ namespace Microsoft.Build.Evaluation
                     string originalValue = (existing == null) ? String.Empty : ((IProperty)existing).EvaluatedValueEscaped;
 
                     _data.GlobalPropertiesDictionary.Set(ProjectPropertyInstance.Create(name, escapedValue));
-                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, true /* is global */, false /* may not be reserved name */));
+                    _data.Properties.Set(ProjectProperty.Create(Owner, name, escapedValue, isGlobalProperty: true, mayBeReserved: false, loggingContext: null));
 
                     ProjectCollection.AfterUpdateLoadedProjectGlobalProperties(Owner);
                     MarkDirty();
@@ -3163,7 +3237,7 @@ namespace Microsoft.Build.Evaluation
                 ErrorUtilities.VerifyThrowArgumentNull(items, nameof(items));
 
                 // Copying to a list makes it possible to remove
-                // all items of a particular type with 
+                // all items of a particular type with
                 //   RemoveItems(p.GetItems("mytype"))
                 // without modifying the collection during enumeration.
                 var itemsList = new List<ProjectItem>(items);
@@ -3257,6 +3331,10 @@ namespace Microsoft.Build.Evaluation
                 if (!IsBuildEnabled)
                 {
                     LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
+                    if (LoggingService is LoggingService defaultLoggingService)
+                    {
+                        defaultLoggingService.WaitForLoggingToProcessEvents();
+                    }
                     return false;
                 }
 
@@ -3447,7 +3525,15 @@ namespace Microsoft.Build.Evaluation
 
                 var itemFactory = new ProjectItemFactory(Owner, renamedItemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, renamedItemElement, itemFactory, renamedItemElement.Include, _data.Expander);
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    renamedItemElement,
+                    itemFactory,
+                    renamedItemElement.Include,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 if (items.Count != 1)
                 {
@@ -3507,7 +3593,15 @@ namespace Microsoft.Build.Evaluation
             {
                 var itemFactory = new ProjectItemFactory(Owner, itemElement);
 
-                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(DirectoryPath, itemElement, itemFactory, unevaluatedInclude, _data.Expander);
+                List<ProjectItem> items = Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.CreateItemsFromInclude(
+                    DirectoryPath,
+                    itemElement,
+                    itemFactory,
+                    unevaluatedInclude,
+                    _data.Expander,
+                    LoggingService,
+                    FullPath,
+                    s_buildEventContext);
 
                 foreach (ProjectItem item in items)
                 {
@@ -3586,7 +3680,7 @@ namespace Microsoft.Build.Evaluation
                 EvaluationContext evaluationContext = null)
             {
                 // We will skip the evaluation if the flag is set. This will give us better performance on scenarios
-                // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes. 
+                // that we know we don't have to reevaluate. One example is project conversion bulk addfiles and set attributes.
                 if (!SkipEvaluation && !ProjectCollection.SkipEvaluation && IsDirty)
                 {
                     try
@@ -3623,6 +3717,7 @@ namespace Microsoft.Build.Evaluation
 
                 Evaluator<ProjectProperty, ProjectItem, ProjectMetadata, ProjectItemDefinition>.Evaluate(
                     _data,
+                    Owner,
                     Xml,
                     loadSettings,
                     ProjectCollection.MaxNodeCount,
@@ -3630,11 +3725,13 @@ namespace Microsoft.Build.Evaluation
                     loggingServiceForEvaluation,
                     new ProjectItemFactory(Owner),
                     ProjectCollection,
+                    Owner._directoryCacheFactory,
                     ProjectCollection.ProjectRootElementCache,
                     s_buildEventContext,
                     evaluationContext.SdkResolverService,
                     BuildEventContext.InvalidSubmissionId,
-                    evaluationContext);
+                    evaluationContext,
+                    _interactive);
 
                 ErrorUtilities.VerifyThrow(LastEvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
@@ -3667,7 +3764,7 @@ namespace Microsoft.Build.Evaluation
             /// Global properties may be null.
             /// Tools version may be null.
             /// </summary>
-            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext)
+            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext, bool interactive)
             {
                 Xml.MarkAsExplicitlyLoaded();
 
@@ -3684,9 +3781,9 @@ namespace Microsoft.Build.Evaluation
                     {
                         if (String.Equals(pair.Key, Constants.SubToolsetVersionPropertyName, StringComparison.OrdinalIgnoreCase) && subToolsetVersion != null)
                         {
-                            // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property, 
-                            // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at 
-                            // a later point. 
+                            // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property,
+                            // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at
+                            // a later point.
                             globalPropertiesCollection.Set(ProjectPropertyInstance.Create(pair.Key, subToolsetVersion));
                         }
                         else
@@ -3702,6 +3799,7 @@ namespace Microsoft.Build.Evaluation
                 _data = new Data(Owner, globalPropertiesCollection, toolsVersion, subToolsetVersion, canEvaluateElementsWithFalseConditions);
 
                 _loadSettings = loadSettings;
+                _interactive = interactive;
 
                 ErrorUtilities.VerifyThrow(LastEvaluationId == BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 
@@ -4164,7 +4262,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
-            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem)
+            public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
             {
                 DefaultTargets = null;
                 Properties = new PropertyDictionary<ProjectProperty>();
@@ -4172,7 +4270,7 @@ namespace Microsoft.Build.Evaluation
                 Items = new ItemDictionary<ProjectItem>();
                 ItemsIgnoringCondition = new ItemDictionary<ProjectItem>();
                 ItemsByEvaluatedIncludeCache = new MultiDictionary<string, ProjectItem>(StringComparer.OrdinalIgnoreCase);
-                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items, fileSystem);
+                Expander = new Expander<ProjectProperty, ProjectItem>(Properties, Items, evaluationContext);
                 ItemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinition>(MSBuildNameIgnoreCaseComparer.Default);
                 Targets = new RetrievableEntryHashSet<ProjectTargetInstance>(StringComparer.OrdinalIgnoreCase);
                 ImportClosure = new List<ResolvedImport>();
@@ -4185,7 +4283,7 @@ namespace Microsoft.Build.Evaluation
 
                 _globalPropertiesToTreatAsLocal?.Clear();
 
-                // Include the main project in the list of imports, as this list is 
+                // Include the main project in the list of imports, as this list is
                 // used to figure out if any of them have changed.
                 RecordImport(null, Project.Xml, Project.Xml.Version, null);
 
@@ -4197,14 +4295,12 @@ namespace Microsoft.Build.Evaluation
                     toolsVersionLocation = Project.Xml.ToolsVersionLocation;
                 }
 
-                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse
-                (
+                string toolsVersionToUse = Utilities.GenerateToolsVersionToUse(
                     ExplicitToolsVersion,
                     Project.Xml.ToolsVersion,
                     Project.ProjectCollection.GetToolset,
                     Project.ProjectCollection.DefaultToolsVersion,
-                    out var usingDifferentToolsVersionFromProjectFile
-                );
+                    out var usingDifferentToolsVersionFromProjectFile);
 
                 UsingDifferentToolsVersionFromProjectFile = usingDifferentToolsVersionFromProjectFile;
 
@@ -4225,7 +4321,7 @@ namespace Microsoft.Build.Evaluation
                     SubToolsetVersion = Toolset.GenerateSubToolsetVersion(GlobalPropertiesDictionary);
                 }
 
-                // Create a task registry which will fall back on the toolset task registry if necessary.          
+                // Create a task registry which will fall back on the toolset task registry if necessary.
                 TaskRegistry = new TaskRegistry(Toolset, Project.ProjectCollection.ProjectRootElementCache);
             }
 
@@ -4235,7 +4331,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public void FinishEvaluation()
             {
-                // We assume there will be no further changes to the targets collection 
+                // We assume there will be no further changes to the targets collection
                 // This also makes sure that we are thread safe
                 Targets.MakeReadOnly();
 
@@ -4254,7 +4350,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        // Else we'll guess that this latest one is a potential match for the next, 
+                        // Else we'll guess that this latest one is a potential match for the next,
                         // if it actually has any elements (eg., it's not a .user or .filters file)
                         if (Targets.Count > 0)
                         {
@@ -4342,9 +4438,9 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Sets a property which is not derived from Xml.
             /// </summary>
-            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false)
+            public ProjectProperty SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null)
             {
-                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved);
+                ProjectProperty property = ProjectProperty.Create(Project, name, evaluatedValueEscaped, isGlobalProperty, mayBeReserved, loggingContext);
                 Properties.Set(property);
 
                 AddToAllEvaluatedPropertiesList(property);
@@ -4489,7 +4585,7 @@ namespace Microsoft.Build.Evaluation
 
                 // This remove will not succeed if the item include was changed.
                 // If many items are modified and then removed, this will leak them
-                // until the next reevaluation.                
+                // until the next reevaluation.
                 ItemsByEvaluatedIncludeCache.Remove(item.EvaluatedInclude, item);
 
                 ItemsIgnoringCondition.Remove(item);

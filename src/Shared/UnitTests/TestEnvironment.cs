@@ -1,23 +1,25 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-
-using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
-using Microsoft.Build.Utilities;
+using TempPaths = System.Collections.Generic.Dictionary<string, string>;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -83,13 +85,18 @@ namespace Microsoft.Build.UnitTests
 
                 // Reset test variants
                 foreach (var variant in _variants)
+                {
                     variant.Revert();
+                }
 
                 // Assert invariants
                 foreach (var item in _invariants)
+                {
                     item.AssertInvariant(Output);
+                }
 
                 SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                ChangeWaves.ResetStateForTests();
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
             }
         }
@@ -178,7 +185,7 @@ namespace Microsoft.Build.UnitTests
         public TransientTempPath CreateNewTempPathWithSubfolder(string subfolder)
         {
             var folder = CreateFolder(null, true, subfolder);
-            return SetTempPath(folder.Path, true);
+            return WithTransientTestState(SetTempPath(folder.Path, true));
         }
 
         /// <summary>
@@ -190,10 +197,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public TransientTempPath SetTempPath(string tempPath, bool deleteTempDirectory = false)
         {
-            var transientTempPath = new TransientTempPath(tempPath, deleteTempDirectory);
-            _variants.Add(transientTempPath);
-
-            return transientTempPath;
+            return WithTransientTestState(new TransientTempPath(tempPath, deleteTempDirectory));
         }
 
         /// <summary>
@@ -202,7 +206,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="extension">Extensions of the file (defaults to '.tmp')</param>
         public TransientTestFile CreateFile(string extension = ".tmp")
         {
-            return WithTransientTestState(new TransientTestFile(extension, createFile:true, expectedAsOutput:false));
+            return WithTransientTestState(new TransientTestFile(extension, createFile: true, expectedAsOutput: false));
         }
 
         public TransientTestFile CreateFile(string fileName, string contents = "")
@@ -258,17 +262,6 @@ namespace Microsoft.Build.UnitTests
         public TransientTestFile ExpectFile(string extension = ".tmp")
         {
             return WithTransientTestState(new TransientTestFile(extension, createFile: false, expectedAsOutput: true));
-        }
-
-        /// <summary>
-        /// Create a temp file name under a specific temporary folder. The file is expected to exist when the test completes.
-        /// </summary>
-        /// <param name="transientTestFolder">Temp folder</param>
-        /// <param name="extension">Extension of the file (defaults to '.tmp')</param>
-        /// <returns></returns>
-        public TransientTestFile ExpectFile(TransientTestFolder transientTestFolder, string extension = ".tmp")
-        {
-            return WithTransientTestState(new TransientTestFile(transientTestFolder.Path, extension, createFile: false, expectedAsOutput: true));
         }
 
         /// <summary>
@@ -330,9 +323,28 @@ namespace Microsoft.Build.UnitTests
             return WithTransientTestState(new TransientWorkingDirectory(newWorkingDirectory));
         }
 
+        /// <summary>
+        /// Register process ID to be finished/killed after tests ends.
+        /// </summary>
+        public TransientTestProcess WithTransientProcess(int processId)
+        {
+            TransientTestProcess transientTestProcess = new(processId);
+            return WithTransientTestState(transientTestProcess);
+        }
+
+        /// <summary>
+        /// Register transient debug engine.
+        /// Usable for tests which investigating might need msbuild debug logs.
+        /// </summary>
+        public TransientDebugEngine WithTransientDebugEngineForNewProcesses(bool state)
+        {
+            TransientDebugEngine transient = new(state);
+            return WithTransientTestState(transient);
+        }
+
         #endregion
 
-        private class DefaultOutput : ITestOutputHelper
+        private sealed class DefaultOutput : ITestOutputHelper
         {
             public void WriteLine(string message)
             {
@@ -387,7 +399,7 @@ namespace Microsoft.Build.UnitTests
         {
             var currentValue = _accessorFunc();
 
-            //  Something like the following might be preferrable, but the assertion method truncates the values leaving us without
+            // Something like the following might be preferrable, but the assertion method truncates the values leaving us without
             //  useful information.  So use Assert.True instead
             //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
 
@@ -415,9 +427,9 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var key in subset.Keys)
                 {
-                    // workaround for https://github.com/Microsoft/msbuild/pull/3866
+                    // workaround for https://github.com/dotnet/msbuild/pull/3866
                     // if the initial environment had empty keys, then MSBuild will accidentally remove them via Environment.SetEnvironmentVariable
-                    if (operation != "removed" || !string.IsNullOrEmpty((string) subset[key]))
+                    if (operation != "removed" || !string.IsNullOrEmpty((string)subset[key]))
                     {
                         superset.Contains(key).ShouldBe(true, $"environment variable {operation}: {key}");
                         superset[key].ShouldBe(subset[key]);
@@ -429,46 +441,72 @@ namespace Microsoft.Build.UnitTests
 
     public class BuildFailureLogInvariant : TestInvariant
     {
+        private const string MSBuildLogFiles = "MSBuild_*.txt";
         private readonly string[] _originalFiles;
 
         public BuildFailureLogInvariant()
         {
-            _originalFiles = Directory.GetFiles(Path.GetTempPath(), "MSBuild_*.txt");
+            _originalFiles = GetMSBuildLogFiles();
+        }
+
+        private string[] GetMSBuildLogFiles()
+        {
+            List<string> files = new();
+            string debugPath = FileUtilities.TempFileDirectory;
+            if (debugPath != null)
+            {
+                try
+                {
+                    files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // Temp folder might have been deleted by other TestEnvironment logic
+                }
+            }
+
+            try
+            {
+                files.AddRange(Directory.GetFiles(Path.GetTempPath(), MSBuildLogFiles));
+            }
+            catch (DirectoryNotFoundException)
+            {
+                // Temp folder might have been deleted by other TestEnvironment logic
+            }
+
+            return files.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
         }
 
         public override void AssertInvariant(ITestOutputHelper output)
         {
-            var newFiles = Directory.GetFiles(Path.GetTempPath(), "MSBuild_*.txt");
+            var newFiles = GetMSBuildLogFiles();
 
             int newFilesCount = newFiles.Length;
-            if (newFilesCount > _originalFiles.Length)
+            foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
             {
-                foreach (FileInfo file in newFiles.Except(_originalFiles).Select(f => new FileInfo(f)))
+                string contents = File.ReadAllText(file.FullName);
+
+                // Delete the file so we don't pollute the build machine
+                FileUtilities.DeleteNoThrow(file.FullName);
+
+                // Ignore clean shutdown trace logs.
+                if (Regex.IsMatch(file.Name, @"MSBuild_NodeShutdown_\d+\.txt") &&
+                    Regex.IsMatch(contents, @"Node shutting down with reason BuildComplete and exception:\s*"))
                 {
-                    string contents = File.ReadAllText(file.FullName);
-
-                    // Delete the file so we don't pollute the build machine
-                    FileUtilities.DeleteNoThrow(file.FullName);
-
-                    // Ignore clean shutdown trace logs.
-                    if (Regex.IsMatch(file.Name, @"MSBuild_NodeShutdown_\d+\.txt") &&
-                        Regex.IsMatch(contents, @"Node shutting down with reason BuildComplete and exception:\s*"))
-                    {
-                        newFilesCount--;
-                        continue;
-                    }
-
-                    // Com trace file. This is probably fine, but output it as it was likely turned on
-                    // for a reason.
-                    if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt"))
-                    {
-                        output.WriteLine($"{file.Name}: {contents}");
-                        newFilesCount--;
-                        continue;
-                    }
-
-                    output.WriteLine($"Build Error File {file.Name}: {contents}");
+                    newFilesCount--;
+                    continue;
                 }
+
+                // Com trace file. This is probably fine, but output it as it was likely turned on
+                // for a reason.
+                if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt"))
+                {
+                    output.WriteLine($"{file.Name}: {contents}");
+                    newFilesCount--;
+                    continue;
+                }
+
+                output.WriteLine($"Build Error File {file.Name}: {contents}");
             }
 
             // Assert file count is equal minus any files that were OK
@@ -562,6 +600,59 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
+    public class TransientTestProcess : TransientTestState
+    {
+        private readonly int _processId;
+
+        public TransientTestProcess(int processId)
+        {
+            _processId = processId;
+        }
+
+        public override void Revert()
+        {
+            if (_processId > -1)
+            {
+                try
+                {
+                    Process.GetProcessById(_processId).KillTree(1000);
+                }
+                catch
+                {
+                    // ignore if process is already dead
+                }
+            }
+        }
+    }
+
+    public class TransientDebugEngine : TransientTestState
+    {
+        private readonly string _previousDebugEngineEnv;
+        private readonly string _previousDebugPath;
+
+        public TransientDebugEngine(bool enabled)
+        {
+            _previousDebugEngineEnv = Environment.GetEnvironmentVariable("MSBuildDebugEngine");
+            _previousDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+
+            if (enabled)
+            {
+                Environment.SetEnvironmentVariable("MSBuildDebugEngine", "1");
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", FileUtilities.TempFileDirectory);
+            }
+            else
+            {
+                Environment.SetEnvironmentVariable("MSBuildDebugEngine", null);
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", null);
+            }
+        }
+
+        public override void Revert()
+        {
+            Environment.SetEnvironmentVariable("MSBuildDebugEngine", _previousDebugEngineEnv);
+            Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", _previousDebugPath);
+        }
+    }
 
     public class TransientTestFile : TransientTestState
     {
@@ -572,14 +663,14 @@ namespace Microsoft.Build.UnitTests
         {
             _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
-            Path = FileUtilities.GetTemporaryFile(null, extension, createFile);
+            Path = FileUtilities.GetTemporaryFile(null, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
             _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
-            Path = FileUtilities.GetTemporaryFile(rootPath, extension, createFile);
+            Path = FileUtilities.GetTemporaryFile(rootPath, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string fileName, string contents = null)

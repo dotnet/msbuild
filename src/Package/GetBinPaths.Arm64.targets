@@ -1,0 +1,36 @@
+﻿<Project>
+
+  <ItemGroup>
+    <!-- Set up items to build projects where the Platform is set to x64, when we need the x64 versions of the files.
+         We have to treat these separately from normal project references, as the AssignProjectConfiguration task would overwrite
+         the SetPlatform item metadata if they were ProjectReferences.
+    -->
+    <Arm64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuild\MSBuild.csproj"
+                         SetPlatform="Platform=arm64"
+                         SetTargetFramework="TargetFramework=$(FullFrameworkTFM)"
+                         OutputItemType="MSBuildArm64ResolvedProjectReferencePath" />
+
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Framework\Microsoft.Build.Framework.csproj"
+                      Private="false"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="FrameworkResolvedProjectReferencePath" />
+  </ItemGroup>
+
+  <Target Name="SetBinPathsArm64" DependsOnTargets="ResolveProjectReferences">
+    <MSBuild
+        Projects="@(Arm64ProjectReference)"
+        BuildInParallel="$(BuildInParallel)"
+        Properties="Configuration=$(Configuration); %(Arm64ProjectReference.SetPlatform); %(Arm64ProjectReference.SetTargetFramework)"
+        RemoveProperties="%(Arm64ProjectReference.GlobalPropertiesToRemove)">
+
+      <Output TaskParameter="TargetOutputs" ItemName="%(Arm64ProjectReference.OutputItemType)" />
+    </MSBuild>
+    
+    <PropertyGroup>
+      <FrameworkBinPath>@(FrameworkResolvedProjectReferencePath->'%(RootDir)%(Directory)')</FrameworkBinPath>
+      <Arm64BinPath>@(MSBuildArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</Arm64BinPath>
+    </PropertyGroup>
+  </Target>
+
+
+</Project>

@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable enable
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.ProjectCache
@@ -11,16 +10,6 @@ namespace Microsoft.Build.Experimental.ProjectCache
     /// </summary>
     public abstract class PluginLoggerBase
     {
-        protected PluginLoggerBase(LoggerVerbosity verbosity)
-        {
-            Verbosity = verbosity;
-        }
-
-        /// <summary>
-        ///     See <see cref="ILogger.Verbosity" />
-        /// </summary>
-        private LoggerVerbosity Verbosity { get; }
-
         public abstract bool HasLoggedErrors { get; protected set; }
 
         public abstract void LogMessage(string message, MessageImportance? messageImportance = null);

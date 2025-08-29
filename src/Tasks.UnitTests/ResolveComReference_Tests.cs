@@ -1,23 +1,26 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_APPDOMAIN
 
 using System;
 using System.Collections.Generic;
-
+using System.IO;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
+using Shouldly;
+using Xunit;
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-using Microsoft.Build.Tasks;
-using Xunit;
-using Microsoft.Build.Shared;
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ResolveComReference_Tests
+    public sealed class ResolveComReference_Tests
     {
         /// <summary>
         /// Creates a valid task item that's modified later
@@ -55,6 +58,29 @@ namespace Microsoft.Build.UnitTests
         {
             var task = new ResolveComReference();
             Assert.NotNull(task.GetResolvedAssemblyReferenceItemSpecs());
+        }
+
+        [Fact]
+        public void TestSerializationAndDeserialization()
+        {
+            ResolveComReferenceCache cache = new("path1", "path2");
+            cache.componentTimestamps = new()
+            {
+                { "first", DateTime.Now },
+                { "second", DateTime.FromBinary(10000) },
+            };
+            ResolveComReferenceCache cache2 = null;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile();
+                cache.SerializeCache(file.Path, null);
+                cache2 = StateFileBase.DeserializeCache<ResolveComReferenceCache>(file.Path, null);
+            }
+
+            cache2.tlbImpLocation.ShouldBe(cache.tlbImpLocation);
+            cache2.axImpLocation.ShouldBe(cache.axImpLocation);
+            cache2.componentTimestamps.Count.ShouldBe(cache.componentTimestamps.Count);
+            cache2.componentTimestamps["second"].ShouldBe(cache.componentTimestamps["second"]);
         }
 
         /*
@@ -405,11 +431,11 @@ namespace Microsoft.Build.UnitTests
             ComReferenceInfo newTlbInfo = (ComReferenceInfo)rcr.allProjectRefs[3];
             Assert.Equal(axRefInfo.primaryOfAxImpRef, newTlbInfo); // "axRefInfo should hold back reference to tlbRefInfo"
             Assert.True(ComReference.AreTypeLibAttrEqual(newTlbInfo.attr, axRefInfo.attr)); // "The added reference should have the same attributes as the Ax reference"
-            Assert.Equal(newTlbInfo.typeLibName, axRefInfo.typeLibName); // "The added reference should have the same type lib name as the Ax reference"
-            Assert.Equal(newTlbInfo.strippedTypeLibPath, axRefInfo.strippedTypeLibPath); // "The added reference should have the same type lib path as the Ax reference"
+            Assert.Equal(axRefInfo.typeLibName, newTlbInfo.typeLibName); // "The added reference should have the same type lib name as the Ax reference"
+            Assert.Equal(axRefInfo.strippedTypeLibPath, newTlbInfo.strippedTypeLibPath); // "The added reference should have the same type lib path as the Ax reference"
 
             Assert.Equal(newTlbInfo.taskItem.ItemSpec, axRefInfo.taskItem.ItemSpec); // "The added reference should have the same task item spec as the Ax reference"
-            Assert.Equal(newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool), ComReferenceTypes.primaryortlbimp); // "The added reference should have the tlbimp/primary wrapper tool"
+            Assert.Equal(ComReferenceTypes.primaryortlbimp, newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool)); // "The added reference should have the tlbimp/primary wrapper tool"
 
             rcr.AddMissingTlbReferences();
             Assert.Equal(4, rcr.allProjectRefs.Count); // "There should still be four references"
@@ -447,7 +473,6 @@ namespace Microsoft.Build.UnitTests
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CheckSetCopyLocalToFalseOnEmbedInteropTypesAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -536,7 +561,6 @@ namespace Microsoft.Build.UnitTests
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void CheckSetCopyLocalToFalseOnGacAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -609,7 +633,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(rcr.CheckForConflictingReferences());
             Assert.Equal(3, rcr.allProjectRefs.Count);
 
-            
+
             // duplicate refs should not be treated as conflicts
             ComReferenceInfo referenceInfo = new ComReferenceInfo(tlbRefInfo);
             rcr.allProjectRefs.Add(referenceInfo);
@@ -727,7 +751,12 @@ namespace Microsoft.Build.UnitTests
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the PIA reference */, true /* include version in the interop name */);
         }
 
-        private enum RcwStyle { GenerateTlb, PreexistingTlb, PreexistingPia };
+        private enum RcwStyle
+        {
+            GenerateTlb,
+            PreexistingTlb,
+            PreexistingPia,
+        }
 
         /// <summary>
         /// Helper method that will new up an AX and matching TLB reference, and verify that the AX reference
@@ -774,20 +803,16 @@ namespace Microsoft.Build.UnitTests
             var embedInteropTypes = tlbRefInfo.taskItem.GetMetadata(ItemMetadataNames.embedInteropTypes);
             Assert.Equal("false", embedInteropTypes); // "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
             Assert.True(ComReference.AreTypeLibAttrEqual(tlbRefInfo.attr, axRefInfo.attr)); // "reference information should be the same"
-            Assert.Equal(TlbReference.GetWrapperFileName
-                        (
+            Assert.Equal(TlbReference.GetWrapperFileName(
                         axRefInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.tlbReferenceName),
                         includeVersionInInteropName,
                         axRefInfo.attr.wMajorVerNum,
-                        axRefInfo.attr.wMinorVerNum
-                        ),
-                    TlbReference.GetWrapperFileName
-                        (
+                        axRefInfo.attr.wMinorVerNum),
+                    TlbReference.GetWrapperFileName(
                         tlbRefInfo.typeLibName,
                         includeVersionInInteropName,
                         tlbRefInfo.attr.wMajorVerNum,
-                        tlbRefInfo.attr.wMinorVerNum
-                        )); //                     "Expected Ax reference's RCW name to match the new TLB"
+                        tlbRefInfo.attr.wMinorVerNum)); // "Expected Ax reference's RCW name to match the new TLB"
         }
     }
 }

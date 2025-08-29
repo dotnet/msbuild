@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -10,19 +10,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Graph
 {
     /// <summary>
     ///     Represents a graph of evaluated projects.
     /// </summary>
-    [DebuggerDisplay(@"#roots={GraphRoots.Count}, #nodes={ProjectNodes.Count}, #entryPoints={EntryPointNodes.Count}")]
+    [DebuggerDisplay(@"{DebuggerDisplayString()}")]
     public sealed class ProjectGraph
     {
         /// <summary>
@@ -59,7 +60,7 @@ namespace Microsoft.Build.Graph
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
 
-        public GraphConstructionMetrics ConstructionMetrics { get; private set;}
+        public GraphConstructionMetrics ConstructionMetrics { get; private set; }
 
         /// <summary>
         /// Various metrics on graph construction.
@@ -350,7 +351,7 @@ namespace Microsoft.Build.Graph
         ///     on <see cref="ProjectInstanceFactoryFunc" /> for other scenarios.
         /// </param>
         /// <param name="cancellationToken">
-        ///     The <see cref="T:System.Threading.CancellationToken" /> token to observe.
+        ///     The <see cref="CancellationToken"/> to observe.
         /// </param>
         /// <exception cref="InvalidProjectFileException">
         ///     If the evaluation of any project in the graph fails
@@ -394,7 +395,7 @@ namespace Microsoft.Build.Graph
         ///     Number of threads to participate in building the project graph.
         /// </param>
         /// <param name="cancellationToken">
-        ///     The <see cref="T:System.Threading.CancellationToken" /> token to observe.
+        ///     The <see cref="CancellationToken"/> to observe.
         /// </param>
         /// <exception cref="InvalidProjectFileException">
         ///     If the evaluation of any project in the graph fails
@@ -475,13 +476,15 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        internal string ToDot()
+        internal string ToDot(IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null)
         {
             var nodeCount = 0;
-            return ToDot(node => nodeCount++.ToString());
+            return ToDot(node => nodeCount++.ToString(), targetsPerNode);
         }
 
-        internal string ToDot(Func<ProjectGraphNode, string> nodeIdProvider)
+        internal string ToDot(
+            Func<ProjectGraphNode, string> nodeIdProvider,
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetsPerNode = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(nodeIdProvider, nameof(nodeIdProvider));
 
@@ -489,31 +492,56 @@ namespace Microsoft.Build.Graph
 
             var sb = new StringBuilder();
 
-            sb.Append("digraph g\n{\n\tnode [shape=box]\n");
+            sb.AppendLine($"/* {DebuggerDisplayString()} */");
+
+            sb.AppendLine("digraph g")
+                .AppendLine("{")
+                .AppendLine("\tnode [shape=box]");
 
             foreach (var node in ProjectNodes)
             {
-                var nodeId = nodeIds.GetOrAdd(node, (n, idProvider) => idProvider(n), nodeIdProvider);
+                var nodeId = GetNodeId(node);
 
                 var nodeName = Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath);
+
                 var globalPropertiesString = string.Join(
                     "<br/>",
                     node.ProjectInstance.GlobalProperties.OrderBy(kvp => kvp.Key)
                         .Select(kvp => $"{kvp.Key}={kvp.Value}"));
 
-                sb.Append('\t').Append(nodeId).Append(" [label=<").Append(nodeName).Append("<br/>").Append(globalPropertiesString).AppendLine(">]");
+                var targetListString = GetTargetListString(node);
+
+                sb.AppendLine($"\t{nodeId} [label=<{nodeName}<br/>({targetListString})<br/>{globalPropertiesString}>]");
 
                 foreach (var reference in node.ProjectReferences)
                 {
-                    var referenceId = nodeIds.GetOrAdd(reference, (n, idProvider) => idProvider(n), nodeIdProvider);
+                    var referenceId = GetNodeId(reference);
 
-                    sb.Append('\t').Append(nodeId).Append(" -> ").AppendLine(referenceId);
+                    sb.AppendLine($"\t{nodeId} -> {referenceId}");
                 }
             }
 
-            sb.Append("}");
+            sb.Append('}');
 
             return sb.ToString();
+
+            string GetNodeId(ProjectGraphNode node)
+            {
+                return nodeIds.GetOrAdd(node, (n, idProvider) => idProvider(n), nodeIdProvider);
+            }
+
+            string GetTargetListString(ProjectGraphNode node)
+            {
+                var targetListString = targetsPerNode is null
+                    ? string.Empty
+                    : string.Join(", ", targetsPerNode[node]);
+                return targetListString;
+            }
+        }
+
+        private string DebuggerDisplayString()
+        {
+            return $"#roots={GraphRoots.Count}, #nodes={ProjectNodes.Count}, #entryPoints={EntryPointNodes.Count}";
         }
 
         private static IReadOnlyCollection<ProjectGraphNode> TopologicalSort(
@@ -559,9 +587,8 @@ namespace Microsoft.Build.Graph
         ///     This method uses the ProjectReferenceTargets items to determine the targets to run per node. The results can then
         ///     be used to start building each project individually, assuming a given project is built after its references.
         /// </remarks>
-        /// <param name="entryProjectTargets">
-        ///     The target list for the <see cref="GraphRoots" />. May be null or empty, in which case the entry projects' default
-        ///     targets will be used.
+        /// <param name="entryProjectTargets">The target list for the entry project. May be null or empty, in which case the entry
+        /// projects' default targets will be used.
         /// </param>
         /// <returns>
         ///     A dictionary containing the target list for each node. If a node's target list is empty, then no targets were
@@ -577,8 +604,7 @@ namespace Microsoft.Build.Graph
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
 
-            // Initial state for the graph roots
-            foreach (var entryPointNode in GraphRoots)
+            foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
             {
                 var entryTargets = entryProjectTargets == null || entryProjectTargets.Count == 0
                     ? ImmutableList.CreateRange(entryPointNode.ProjectInstance.DefaultTargets)
@@ -740,7 +766,7 @@ namespace Microsoft.Build.Graph
 
             public ImmutableList<string> RequestedTargets { get; }
 
-            public bool Equals(ProjectGraphBuildRequest other)
+            public readonly bool Equals(ProjectGraphBuildRequest other)
             {
                 if (Node != other.Node
                     || RequestedTargets.Count != other.RequestedTargets.Count)
@@ -760,12 +786,12 @@ namespace Microsoft.Build.Graph
                 return true;
             }
 
-            public override bool Equals(object obj)
+            public override readonly bool Equals(object obj)
             {
                 return !(obj is null) && obj is ProjectGraphBuildRequest graphNodeWithTargets && Equals(graphNodeWithTargets);
             }
 
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
                 unchecked
                 {

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Immutable;
@@ -15,6 +15,8 @@ using Microsoft.Build.UnitTests;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
+
+#nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -65,8 +67,14 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <nodoc/>
         public void Dispose()
         {
-            _buildManager.Dispose();
-            _env.Dispose();
+            try
+            {
+                _buildManager.Dispose();
+            }
+            finally
+            {
+                _env.Dispose();
+            }
         }
 
         /// <summary>
@@ -88,7 +96,7 @@ namespace Microsoft.Build.Engine.UnitTests
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
 #if MONO
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Theory]
 #endif
@@ -124,7 +132,7 @@ namespace Microsoft.Build.Engine.UnitTests
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
 #if MONO
-        [Theory(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Theory]
 #endif
@@ -142,7 +150,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -179,7 +187,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -213,7 +221,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -257,7 +265,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if MONO
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/1240")]
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/1240")]
 #else
         [Fact]
 #endif
@@ -299,7 +307,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 var buildRequestData = new BuildRequestData(
                     projectInstance,
-                    new string[]{},
+                    Array.Empty<string>(),
                     projectCollection.HostServices);
 
                 var result = _buildManager.Build(parameters, buildRequestData);
