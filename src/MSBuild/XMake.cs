@@ -1384,7 +1384,7 @@ namespace Microsoft.Build.CommandLine
 
                 projectCollection = new ProjectCollection(
                     globalProperties,
-                    loggers,
+                    isPreprocess ? null : loggers,
                     null,
                     toolsetDefinitionLocations,
                     cpuCount,
