@@ -466,13 +466,13 @@ namespace Microsoft.Build.Execution
             InitializeTargetsData(null, null, null, null);
 
             // Imports
-            var importsListConverter = new ImmutableStringValuedListConverter(linkedProject.Link, GetImportFullPaths);
-            _importPaths = importsListConverter;
-            ImportPaths = importsListConverter;
+            var lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPaths);
+            _importPaths = lazyImportsList;
+            ImportPaths = lazyImportsList;
 
-            importsListConverter = new ImmutableStringValuedListConverter(linkedProject.Link, GetImportFullPathsIncludingDuplicates);
-            _importPathsIncludingDuplicates = importsListConverter;
-            ImportPathsIncludingDuplicates = importsListConverter;
+            lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPathsIncludingDuplicates);
+            _importPathsIncludingDuplicates = lazyImportsList;
+            ImportPathsIncludingDuplicates = lazyImportsList;
 
             Toolset = string.IsNullOrEmpty(linkedProject.ToolsVersion) ? null : linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
             SubToolsetVersion = linkedProject.SubToolsetVersion;

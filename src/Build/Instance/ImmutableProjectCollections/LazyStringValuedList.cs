@@ -15,14 +15,14 @@ namespace Microsoft.Build.Instance
     ///  when it is created from an immutable project link.
     /// It is to reduce memory usage to create and hold the list until a consumer actually accesses it.
     /// </summary>
-    internal class ImmutableStringValuedListConverter : IList<string>, IReadOnlyList<string>
+    internal class LazyStringValuedList : IList<string>, IReadOnlyList<string>
     {
         private readonly LockType _syncLock = new();
         private readonly ProjectLink _immutableProject;
         private readonly Func<ProjectLink, List<string>> _getStringValues;
         private List<string>? _items;
 
-        public ImmutableStringValuedListConverter(ProjectLink immutableProject, Func<ProjectLink, List<string>> getStringValues)
+        public LazyStringValuedList(ProjectLink immutableProject, Func<ProjectLink, List<string>> getStringValues)
         {
             _immutableProject = immutableProject;
             _getStringValues = getStringValues;
