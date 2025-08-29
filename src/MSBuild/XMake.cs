@@ -1382,9 +1382,18 @@ namespace Microsoft.Build.CommandLine
                 bool isPreprocess = preprocessWriter != null;
                 bool isTargets = targetsWriter != null;
 
+                ILogger[] evaluationLoggers =
+                    [
+                        // all of the loggers that are single-node only
+                        .. loggers,
+                        // all of the central loggers for multi-node systems. These need to be resilient to multiple calls
+                        // to Initialize
+                        .. distributedLoggerRecords.Select(d => d.CentralLogger)
+                    ];
+
                 projectCollection = new ProjectCollection(
                     globalProperties,
-                    loggers,
+                    evaluationLoggers,
                     null,
                     toolsetDefinitionLocations,
                     cpuCount,
