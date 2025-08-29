@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,8 @@ using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
@@ -78,19 +80,16 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [InlineData(
             "a/b/c",
             "**",
-            "a/b/c"
-            )]
+            "a/b/c")]
         [InlineData(
             "a/b/c",
             "../../**",
-            "a"
-            )]
+            "a")]
         [InlineData(
             "a/b/c",
             "../d/e/**",
-            "a/b/d/e"
-            )]
-        public void GlobWithRelativeFixedDirectoryPartShouldMissmatchTheGlobRoot(string globRoot, string filespec, string expectedFixedDirectoryPart)
+            "a/b/d/e")]
+        public void GlobWithRelativeFixedDirectoryPartShouldMismatchTheGlobRoot(string globRoot, string filespec, string expectedFixedDirectoryPart)
         {
             var glob = MSBuildGlob.Parse(globRoot, filespec);
 
@@ -326,20 +325,39 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         [InlineData(
             @"a/b\c",
             @"d/e\f/**\a.cs",
-            @"d\e/f\g/h\i/a.cs")]
+            @"d\e/f\g/h\i/a.cs",
+            @"d\e/f\", @"g/h\i/", @"a.cs")]
         [InlineData(
             @"a/b\c",
             @"d/e\f/*b*\*.cs",
-            @"d\e/f\abc/a.cs")]
+            @"d\e/f\abc/a.cs",
+            @"d\e/f\", @"abc/", @"a.cs")]
         [InlineData(
             @"a/b/\c",
             @"d/e\/*b*/\*.cs",
-            @"d\e\\abc/\a.cs")]
-        public void GlobMatchingIgnoresSlashOrientationAndRepetitions(string globRoot, string fileSpec, string stringToMatch)
+            @"d\e\\abc/\a.cs",
+            @"d\e\\", @"abc\\", @"a.cs")]
+        public void GlobMatchingIgnoresSlashOrientationAndRepetitions(string globRoot, string fileSpec, string stringToMatch,
+            string fixedDirectoryPart, string wildcardDirectoryPart, string filenamePart)
         {
             var glob = MSBuildGlob.Parse(globRoot, fileSpec);
 
             Assert.True(glob.IsMatch(stringToMatch));
+
+            MSBuildGlob.MatchInfoResult result = glob.MatchInfo(stringToMatch);
+            Assert.True(result.IsMatch);
+
+            string NormalizeSlashes(string path)
+            {
+                string normalizedPath = path.Replace(Path.DirectorySeparatorChar == '/' ? '\\' : '/', Path.DirectorySeparatorChar);
+                return NativeMethodsShared.IsWindows ? normalizedPath.Replace("\\\\", "\\") : normalizedPath;
+            }
+
+            var rootedFixedDirectoryPart = Path.Combine(FileUtilities.NormalizePath(globRoot), fixedDirectoryPart);
+
+            Assert.Equal(FileUtilities.GetFullPathNoThrow(rootedFixedDirectoryPart), result.FixedDirectoryPartMatchGroup);
+            Assert.Equal(NormalizeSlashes(wildcardDirectoryPart), result.WildcardDirectoryPartMatchGroup);
+            Assert.Equal(NormalizeSlashes(filenamePart), result.FilenamePartMatchGroup);
         }
     }
 }

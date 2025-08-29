@@ -1,18 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
-
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd.Logging;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -122,11 +125,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskHostTask(IElementLocation taskLocation, TaskLoggingContext taskLoggingContext, IBuildComponentHost buildComponentHost, IDictionary<string, string> taskHostParameters, LoadedType taskType
+        ///
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        public TaskHostTask(
+            IElementLocation taskLocation,
+            TaskLoggingContext taskLoggingContext,
+            IBuildComponentHost buildComponentHost,
+            IDictionary<string, string> taskHostParameters,
+            LoadedType taskType
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
 #endif
             )
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType, nameof(taskType));
 
@@ -201,9 +212,9 @@ namespace Microsoft.Build.BackEnd
             {
                 // If we returned an exception, then we want to throw it when we 
                 // do the get.  
-                if (value is Exception)
+                if (value is Exception ex)
                 {
-                    throw (Exception)value;
+                    throw ex;
                 }
 
                 return value;
@@ -252,8 +263,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             TaskHostConfiguration hostConfiguration =
-                new TaskHostConfiguration
-                    (
+                new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
                         NativeMethodsShared.GetCurrentDirectory(),
                         CommunicationsUtilities.GetEnvironmentVariables(),
@@ -268,12 +278,12 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
                         _taskLoggingContext.GetWarningsAsErrors(),
-                        _taskLoggingContext.GetWarningsAsMessages()
-                        
-                    );
+                        _taskLoggingContext.GetWarningsNotAsErrors(),
+                        _taskLoggingContext.GetWarningsAsMessages());
 
             try
             {
@@ -425,6 +435,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete)
         {
+#if FEATURE_REPORTFILEACCESSES
+            if (taskHostTaskComplete.FileAccessData?.Count > 0)
+            {
+                IFileAccessManager fileAccessManager = ((IFileAccessManager)_buildComponentHost.GetComponent(BuildComponentType.FileAccessManager));
+                foreach (FileAccessData fileAccessData in taskHostTaskComplete.FileAccessData)
+                {
+                    fileAccessManager.ReportFileAccess(fileAccessData, _buildComponentHost.BuildParameters.NodeId);
+                }
+            }
+#endif
+
             // If it crashed, or if it failed, it didn't succeed.   
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
@@ -517,21 +538,21 @@ namespace Microsoft.Build.BackEnd
 
                     // "Custom events" in terms of the communications infrastructure can also be, e.g. custom error events, 
                     // in which case they need to be dealt with in the same way as their base type of event. 
-                    if (buildEvent is BuildErrorEventArgs)
+                    if (buildEvent is BuildErrorEventArgs buildErrorEventArgs)
                     {
-                        this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)buildEvent);
+                        this.BuildEngine.LogErrorEvent(buildErrorEventArgs);
                     }
-                    else if (buildEvent is BuildWarningEventArgs)
+                    else if (buildEvent is BuildWarningEventArgs buildWarningEventArgs)
                     {
-                        this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)buildEvent);
+                        this.BuildEngine.LogWarningEvent(buildWarningEventArgs);
                     }
-                    else if (buildEvent is BuildMessageEventArgs)
+                    else if (buildEvent is BuildMessageEventArgs buildMessageEventArgs)
                     {
-                        this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)buildEvent);
+                        this.BuildEngine.LogMessageEvent(buildMessageEventArgs);
                     }
-                    else if (buildEvent is CustomBuildEventArgs)
+                    else if (buildEvent is CustomBuildEventArgs customBuildEventArgs)
                     {
-                        this.BuildEngine.LogCustomEvent((CustomBuildEventArgs)buildEvent);
+                        this.BuildEngine.LogCustomEvent(customBuildEventArgs);
                     }
                     else
                     {

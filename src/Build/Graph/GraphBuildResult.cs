@@ -1,9 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+
+#nullable disable
 
 namespace Microsoft.Build.Graph
 {
@@ -18,17 +21,6 @@ namespace Microsoft.Build.Graph
         {
             SubmissionId = submissionId;
             ResultsByNode = resultsByNode;
-        }
-
-        /// <summary>
-        /// Constructor creates a build result indicating a circular dependency was created.
-        /// </summary>
-        /// <param name="submissionId">The id of the build submission.</param>
-        /// <param name="circularDependency">Set to true if a circular dependency was detected.</param>
-        internal GraphBuildResult(int submissionId, bool circularDependency)
-        {
-            SubmissionId = submissionId;
-            CircularDependency = circularDependency;
         }
 
         /// <summary>
@@ -50,7 +42,7 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Returns a flag indicating if a circular dependency was detected.
         /// </summary>
-        public bool CircularDependency { get; }
+        public bool CircularDependency => Exception is CircularDependencyException;
 
         /// <summary>
         /// Returns the exception generated while this result was run, if any.
@@ -64,7 +56,7 @@ namespace Microsoft.Build.Graph
         {
             get
             {
-                if (Exception != null || CircularDependency)
+                if (Exception != null)
                 {
                     return BuildResultCode.Failure;
                 }

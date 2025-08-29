@@ -1,1 +1,0 @@
-# Xunit.NetCore.Extensions

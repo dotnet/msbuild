@@ -1,13 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if FEATURE_SECURITY_PERMISSIONS
-using System.Security.Permissions;
-#endif
-using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -65,7 +64,7 @@ namespace Microsoft.Build.Evaluation
         /// where metadata key is like "itemname.metadataname" or "metadataname".
         /// PERF: Tables are null if there are no entries, because this is quite a common case.
         /// </summary>
-        internal static ItemsAndMetadataPair GetReferencedItemNamesAndMetadata(List<string> expressions)
+        internal static ItemsAndMetadataPair GetReferencedItemNamesAndMetadata(IEnumerable<string> expressions)
         {
             ItemsAndMetadataPair pair = new ItemsAndMetadataPair(null, null);
 
@@ -110,12 +109,14 @@ namespace Microsoft.Build.Evaluation
         {
             List<ItemExpressionCapture> subExpressions = null;
 
-            if (expression.IndexOf('@') < 0)
+            int startIndex = expression.IndexOf('@', start, end - start);
+
+            if (startIndex < 0)
             {
                 return null;
             }
 
-            for (int i = start; i < end; i++)
+            for (int i = startIndex; i < end; i++)
             {
                 int restartPoint;
                 int startPoint;
@@ -155,10 +156,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Grab the name, but continue to verify it's a well-formed expression
                     // before we store it.
-                    string name = expression.Substring(startOfName, i - startOfName);
-
-                    // return the item that we're working with
-                    string itemName = name;
+                    string itemName = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startOfName, i - startOfName));
 
                     SinkWhitespace(expression, ref i);
                     bool transformOrFunctionFound = true;
@@ -250,10 +248,10 @@ namespace Microsoft.Build.Evaluation
                         subExpressions = new List<ItemExpressionCapture>();
                     }
 
-                    // Create an expression capture that encompases the entire expression between the @( and the )
+                    // Create an expression capture that encompasses the entire expression between the @( and the )
                     // with the item name and any separator contained within it
                     // and each transform expression contained within it (i.e. each ->XYZ)
-                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, expression.Substring(startPoint, endPoint - startPoint), itemName, separator, separatorStart, transformExpressions);
+                    ItemExpressionCapture expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startPoint, endPoint - startPoint)), itemName, separator, separatorStart, transformExpressions);
                     subExpressions.Add(expressionCapture);
 
                     continue;
@@ -600,7 +598,7 @@ namespace Microsoft.Build.Evaluation
 
                     if (endFunctionArguments > startFunctionArguments)
                     {
-                        capture.FunctionArguments = expression.Substring(startFunctionArguments, endFunctionArguments - startFunctionArguments);
+                        capture.FunctionArguments = Microsoft.NET.StringTools.Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
                     }
 
                     return capture;

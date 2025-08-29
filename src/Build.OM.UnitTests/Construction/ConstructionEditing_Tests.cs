@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,13 +7,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -108,8 +108,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project2 = ProjectRootElement.Create();
                 ProjectTargetElement target = project1.CreateTargetElement("t");
                 project2.AppendChild(target);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add node created from different project with PrependChild
@@ -123,8 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project2 = ProjectRootElement.Create();
                 ProjectTargetElement target = project1.CreateTargetElement("t");
                 project2.PrependChild(target);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add node created from different project with InsertBeforeChild
@@ -139,8 +137,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target1 = project1.CreateTargetElement("t");
                 ProjectTargetElement target2 = project2.AddTarget("t2");
                 project2.InsertBeforeChild(target2, target1);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add node created from different project with InsertAfterChild
@@ -155,8 +152,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target1 = project1.CreateTargetElement("t");
                 ProjectTargetElement target2 = project2.AddTarget("t2");
                 project2.InsertAfterChild(target2, target1);
-            }
-           );
+            });
         }
         /// <summary>
         /// Become direct child of self with AppendChild
@@ -171,8 +167,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectChooseElement choose = project.CreateChooseElement();
 
                 choose.AppendChild(choose);
-            }
-           );
+            });
         }
         /// <summary>
         /// Become grandchild of self with AppendChild
@@ -188,8 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 project.AppendChild(choose);
                 choose.AppendChild(when);
                 when.AppendChild(choose);
-            }
-           );
+            });
         }
         /// <summary>
         /// Become grandchild of self with PrependChild
@@ -205,8 +199,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 project.AppendChild(choose);
                 choose.AppendChild(when);
                 when.PrependChild(choose);
-            }
-           );
+            });
         }
         /// <summary>
         /// Become grandchild of self with InsertBeforeChild
@@ -224,8 +217,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 choose1.AppendChild(when);
                 when.PrependChild(choose2);
                 when.InsertBeforeChild(choose1, choose2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Become grandchild of self with InsertAfterChild
@@ -243,8 +235,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 choose1.AppendChild(when);
                 when.PrependChild(choose2);
                 when.InsertAfterChild(choose1, choose2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to reparent with AppendChild
@@ -258,8 +249,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target = project.AddTarget("t");
 
                 project.AppendChild(target);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to reparent with PrependChild
@@ -273,8 +263,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target = project.AddTarget("t");
 
                 project.PrependChild(target);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to reparent with InsertBeforeChild
@@ -289,8 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target2 = project.AddTarget("t2");
 
                 project.InsertBeforeChild(target1, target2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to reparent with InsertAfterChild
@@ -305,8 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target2 = project.AddTarget("t2");
 
                 project.InsertAfterChild(target1, target2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add to unparented parent with AppendChild
@@ -321,8 +308,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = project.CreateTaskElement("tt");
 
                 target.AppendChild(task);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add to unparented parent with PrependChild
@@ -337,8 +323,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = project.CreateTaskElement("tt");
 
                 target.PrependChild(task);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add to unparented parent with InsertBeforeChild
@@ -354,8 +339,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task2 = project.CreateTaskElement("tt");
 
                 target.InsertBeforeChild(task2, task1);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add to unparented parent with InsertAfterChild
@@ -371,8 +355,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task2 = project.CreateTaskElement("tt");
 
                 target.InsertAfterChild(task2, task1);
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting attributes on a target should be reflected in the XML
@@ -650,8 +633,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTargetElement target = project.CreateTargetElement("t");
 
                 target.AppendChild(project);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to insert item in target
@@ -667,8 +649,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 project.AppendChild(target);
                 target.AppendChild(item);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to insert item without include in itemgroup in project
@@ -684,8 +665,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 project.AppendChild(itemGroup);
                 itemGroup.AppendChild(item);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item without include in itemgroup in target
@@ -785,7 +765,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
         public delegate void AddMetadata(ProjectItemElement element);
 
-        public static IEnumerable<object[]> InsertMetadataElemenetAfterSiblingsTestData
+        public static IEnumerable<object[]> InsertMetadataElementAfterSiblingsTestData
         {
             get
             {
@@ -890,7 +870,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Theory]
-        [MemberData(nameof(InsertMetadataElemenetAfterSiblingsTestData))]
+        [MemberData(nameof(InsertMetadataElementAfterSiblingsTestData))]
         public void InsertMetadataElementAfterSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
             Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertAfterChild(c, r); };
@@ -898,7 +878,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             AssertMetadataConstruction(addMetadata, position, expectedItem, act);
         }
 
-        public static IEnumerable<object[]> InsertMetadataElemenetBeforeSiblingsTestData
+        public static IEnumerable<object[]> InsertMetadataElementBeforeSiblingsTestData
         {
             get
             {
@@ -932,10 +912,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Theory]
-        [MemberData(nameof(InsertMetadataElemenetBeforeSiblingsTestData))]
+        [MemberData(nameof(InsertMetadataElementBeforeSiblingsTestData))]
         public void InsertMetadataElementBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
-            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r);};
+            Action<ProjectItemElement, ProjectMetadataElement, ProjectMetadataElement> act = (i, c, r) => { i.InsertBeforeChild(c, r); };
 
             AssertMetadataConstruction(addMetadata, position, expectedItem, act);
         }
@@ -1012,7 +992,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Theory(Skip= "https://github.com/Microsoft/msbuild/issues/1253")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1253")]
         [MemberData(nameof(InsertMetadataAttributeAfterSiblingsTestData))]
         public void InsertMetadataAttributeAfterSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
@@ -1076,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        [Theory(Skip= "https://github.com/Microsoft/msbuild/issues/1253")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/1253")]
         [MemberData(nameof(InsertMetadataAttributeBeforeSiblingsTestData))]
         public void InsertMetadataAttributeBeforeSiblings(AddMetadata addMetadata, int position, string expectedItem)
         {
@@ -1214,8 +1194,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project = ProjectRootElement.Create();
                 ProjectTargetElement target = project.CreateTargetElement("t");
                 project.RemoveChild(target);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to remove a child that is parented by something in another project
@@ -1230,8 +1209,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectRootElement project2 = ProjectRootElement.Create();
 
                 project2.RemoveChild(target);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to remove a child that is parented by something else in the same project
@@ -1248,8 +1226,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 itemGroup1.AppendChild(item);
 
                 itemGroup2.RemoveChild(item);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add an Otherwise before a When
@@ -1267,8 +1244,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 project.AppendChild(choose);
                 choose.AppendChild(when);
                 choose.InsertBeforeChild(otherwise, when);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add an Otherwise after another
@@ -1284,8 +1260,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 choose.AppendChild(project.CreateWhenElement("c"));
                 choose.AppendChild(project.CreateOtherwiseElement());
                 choose.AppendChild(project.CreateOtherwiseElement());
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add an Otherwise before another
@@ -1301,8 +1276,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 choose.AppendChild(project.CreateWhenElement("c"));
                 choose.AppendChild(project.CreateOtherwiseElement());
                 choose.InsertAfterChild(project.CreateOtherwiseElement(), choose.FirstChild);
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add a When after an Otherwise
@@ -1320,8 +1294,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 project.AppendChild(choose);
                 choose.AppendChild(otherwise);
                 choose.InsertAfterChild(when, otherwise);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add When before Otherwise
@@ -2285,8 +2258,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.AddProperty("MSBuildToolsPATH", "v");
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add a property with an illegal name
@@ -2298,8 +2270,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.AddProperty("ItemGroup", "v");
-            }
-           );
+            });
         }
         /// <summary>
         /// Attempt to add a property with an invalid XML name
@@ -2311,8 +2282,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectRootElement project = ProjectRootElement.Create();
                 project.AddProperty("@#$@#", "v");
-            }
-           );
+            });
         }
         /// <summary>
         /// Too much nesting should not cause stack overflow.
@@ -3131,7 +3101,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         }
 
         [Fact]
-        // Exposed https://github.com/Microsoft/msbuild/issues/1210
+        // Exposed https://github.com/dotnet/msbuild/issues/1210
         public void AddMetadataAsAttributeAndAsElement()
         {
             var project = ProjectRootElement.Create();

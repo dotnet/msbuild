@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.Logging.StructuredLogger
 {
     /// <summary>
     /// Class representation of a task output item group.
     /// </summary>
-    internal class OutputItem : TaskParameter
+    internal sealed class OutputItem : TaskParameter
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="OutputItem"/> class.

@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -37,14 +39,12 @@ namespace Microsoft.Build.Framework
         /// <param name="targetName">target name</param>
         /// <param name="projectFile">project file</param>
         /// <param name="targetFile">file in which the target is defined</param>
-        public TargetStartedEventArgs
-        (
+        public TargetStartedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
             string projectFile,
-            string targetFile
-        )
+            string targetFile)
             : this(message, helpKeyword, targetName, projectFile, targetFile, String.Empty, TargetBuiltReason.None, DateTime.UtcNow)
         {
         }
@@ -59,16 +59,14 @@ namespace Microsoft.Build.Framework
         /// <param name="targetFile">file in which the target is defined</param>
         /// <param name="parentTarget">The part of the target.</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
-        public TargetStartedEventArgs
-        (
+        public TargetStartedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
             string projectFile,
             string targetFile,
             string parentTarget,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.targetName = targetName;
@@ -88,8 +86,7 @@ namespace Microsoft.Build.Framework
         /// <param name="parentTarget">The part of the target.</param>
         /// <param name="buildReason">The reason the parent built this target.</param>
         /// <param name="eventTimestamp">Timestamp when the event was created</param>
-        public TargetStartedEventArgs
-        (
+        public TargetStartedEventArgs(
             string message,
             string helpKeyword,
             string targetName,
@@ -97,8 +94,7 @@ namespace Microsoft.Build.Framework
             string targetFile,
             string parentTarget,
             TargetBuiltReason buildReason,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.targetName = targetName;
@@ -146,7 +142,7 @@ namespace Microsoft.Build.Framework
             if (version > 20)
             {
                 parentTarget = reader.ReadByte() == 0 ? null : reader.ReadString();
-                buildReason = (TargetBuiltReason) reader.ReadInt32();
+                buildReason = (TargetBuiltReason)reader.ReadInt32();
             }
         }
         #endregion
@@ -182,32 +178,26 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
+                    if (string.Equals(projectFile, targetFile, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (RawMessage == null)
+                        if (!string.IsNullOrEmpty(parentTarget))
                         {
-                            if (string.Equals(projectFile, targetFile, StringComparison.OrdinalIgnoreCase))
-                            {
-                                if (!string.IsNullOrEmpty(parentTarget))
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectDepends", targetName, projectFile, parentTarget);
-                                }
-                                else
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectEntry", targetName, projectFile);
-                                }
-                            }
-                            else
-                            {
-                                if (!string.IsNullOrEmpty(parentTarget))
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectDepends", targetName, targetFile, projectFile, parentTarget);
-                                }
-                                else
-                                {
-                                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectEntry", targetName, targetFile, projectFile);
-                                }
-                            }
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectDepends", targetName, projectFile, parentTarget);
+                        }
+                        else
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedProjectEntry", targetName, projectFile);
+                        }
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(parentTarget))
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectDepends", targetName, targetFile, projectFile, parentTarget);
+                        }
+                        else
+                        {
+                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TargetStartedFileProjectEntry", targetName, targetFile, projectFile);
                         }
                     }
                 }

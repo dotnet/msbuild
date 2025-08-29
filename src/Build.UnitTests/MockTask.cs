@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -7,6 +7,8 @@ using System.Collections;
 using Microsoft.Build.Framework;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -375,7 +377,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// A simple mock task for use with Unit Testing.
     /// </summary>
-    sealed internal class MockTask : MockTaskBase, ITask
+    internal sealed class MockTask : MockTaskBase, ITask
     {
         private IBuildEngine _e = null;
 
@@ -419,7 +421,7 @@ namespace Microsoft.Build.UnitTests
     /// Custom implementation of ITaskItem for unit testing
     /// Just TaskItem would work fine, but why not test a custom type as well
     /// </summary>
-    internal class MyTaskItem : ITaskItem
+    internal sealed class MyTaskItem : ITaskItem
     {
         #region ITaskItem Members
 

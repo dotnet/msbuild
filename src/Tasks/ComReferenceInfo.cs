@@ -1,17 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
-
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
-
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+// TYPELIBATTR clashes with the one in InteropServices.
+using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -153,10 +153,10 @@ namespace Microsoft.Build.Tasks
             {
                 case ProcessorArchitecture.AMD64:
                 case ProcessorArchitecture.IA64:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_64BIT);
+                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_64BIT);
                     break;
                 case ProcessorArchitecture.X86:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_32BIT);
+                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_32BIT);
                     break;
                 case ProcessorArchitecture.ARM:
                 case ProcessorArchitecture.MSIL:

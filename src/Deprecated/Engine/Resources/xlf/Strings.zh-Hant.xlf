@@ -2419,7 +2419,7 @@
       </trans-unit>
       <trans-unit id="WhenNotAllowedAfterOtherwise">
         <source>MSB4084: A &lt;When&gt; element may not follow an &lt;Otherwise&gt; element in a &lt;Choose&gt;.</source>
-        <target state="translated">MSB4084: 在 &lt;Choose&gt; 中，&lt;When&gt; 項目不能接在 &lt;Otherwise&gt; 項目後面。</target>
+        <target state="translated">MSB4084: 在 &lt;Choose&gt; 中，&lt;When&gt; 元素不能接在 &lt;Otherwise&gt; 元素後面。</target>
         <note>{StrBegin="MSB4084: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="mt-suggestion">MSB4084: A &lt; &gt;-Element kein Element &lt; Otherwise &gt; &lt; auswählen &gt; folgen.</target>

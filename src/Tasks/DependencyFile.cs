@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -7,25 +7,29 @@ using System.IO;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
     /// Represents a single input to a compilation-style task.
     /// Keeps track of timestamp for later comparison.
-    /// 
-    /// On-disk serialization format, don't change field names or types or use readonly.
+    ///
+    /// Must be serializable because instances may be marshaled cross-AppDomain, see <see cref="ProcessResourceFiles.PortableLibraryCacheInfo"/>.
     /// </remarks>
+#if FEATURE_APPDOMAIN
     [Serializable]
+#endif
     internal class DependencyFile
     {
         // Filename
-        private string filename;
+        internal string filename;
 
         // Date and time the file was last modified           
-        private DateTime lastModified;
+        internal DateTime lastModified;
 
         // Whether the file exists or not.
-        private bool exists = false;
+        internal bool exists = false;
 
         /// <summary>
         /// The name of the file.
@@ -68,6 +72,10 @@ namespace Microsoft.Build.Tasks
             {
                 exists = false;
             }
+        }
+
+        internal DependencyFile()
+        {
         }
 
         /// <summary>

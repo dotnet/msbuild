@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +8,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
+#nullable disable
+
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
@@ -15,6 +17,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     public static class TrackedDependencies
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Methods
         /// <summary>
         /// Expand wildcards in the item list.
@@ -46,7 +49,7 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec);
+                        files = FileMatcher.Default.GetFiles(null, item.ItemSpec).FileList;
                     }
 
                     foreach (string file in files)
@@ -89,5 +92,6 @@ namespace Microsoft.Build.Utilities
             return allExist;
         }
         #endregion
+#pragma warning restore format
     }
 }

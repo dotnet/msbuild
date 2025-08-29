@@ -1,16 +1,21 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
+#nullable disable
+
 namespace Xunit.NetCore.Extensions
 {
     public class XunitTestMethodRunnerWithAssemblyFixture : XunitTestMethodRunner
     {
-        readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
-        readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
+        private readonly Dictionary<Type, object> assemblyFixtureMappings = new Dictionary<Type, object>();
+        private readonly List<AssemblyFixtureAttribute> assemblyFixtureAttributes;
 
         public XunitTestMethodRunnerWithAssemblyFixture(List<AssemblyFixtureAttribute> assemblyFixtureAttributes,
                              ITestMethod testMethod,
@@ -35,7 +40,9 @@ namespace Xunit.NetCore.Extensions
             {
                 // Instantiate all the fixtures
                 foreach (var fixtureAttr in assemblyFixtureAttributes.Where(a => a.LifetimeScope == AssemblyFixtureAttribute.Scope.Method))
+                {
                     assemblyFixtureMappings[fixtureAttr.FixtureType] = Activator.CreateInstance(fixtureAttr.FixtureType);
+                }
             });
         }
 
@@ -43,7 +50,9 @@ namespace Xunit.NetCore.Extensions
         {
             // Make sure we clean up everybody who is disposable, and use Aggregator.Run to isolate Dispose failures
             foreach (var disposable in assemblyFixtureMappings.Values.OfType<IDisposable>())
+            {
                 Aggregator.Run(disposable.Dispose);
+            }
 
             base.BeforeTestMethodFinished();
         }

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -7,6 +7,8 @@ using System.Diagnostics;
 // CR: We could move MSBuildApp.ExitType out of MSBuildApp
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.CommandLine
 {
@@ -66,7 +68,7 @@ namespace Microsoft.Build.CommandLine
         [MTAThread]
         public static int Main()
         {
-            int exitCode = (Execute() == ExitType.Success ? 0 : 1);
+            int exitCode = Execute() == ExitType.Success ? 0 : 1;
             return exitCode;
         }
 

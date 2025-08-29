@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
-using Microsoft.Build.Collections;
+using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
-
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -58,7 +57,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get any contained parameters.
         /// </summary>
-        public ICollection<ProjectUsingTaskParameterElement> Parameters => new ReadOnlyCollection<ProjectUsingTaskParameterElement>(Children.OfType<ProjectUsingTaskParameterElement>());
+        public ICollection<ProjectUsingTaskParameterElement> Parameters => GetChildrenOfType<ProjectUsingTaskParameterElement>();
 
         /// <summary>
         /// This does not allow conditions, so it should not be called.

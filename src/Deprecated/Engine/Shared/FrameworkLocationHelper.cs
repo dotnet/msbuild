@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -12,7 +16,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     internal static class FrameworkLocationHelper
     {
         #region Private and internal members
-        
+
         /// <summary>
         /// By default when a root path is not specified we would like to use the program files directory \ reference assemblies\framework as the root location
         /// to generate the reference assembly paths from.
@@ -42,15 +46,15 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal const string dotNetFrameworkVersionFolderPrefixV30 = "v3.0"; // v3.0 is for WinFx.
         private const string dotNetFrameworkVersionV30 = "v3.0"; // full WinFx version to pass to NativeMethodsShared.GetRequestedRuntimeInfo().
         private const string dotNetFrameworkAssemblyFoldersRegistryKeyV30 = dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30;
-        private const string dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 +"\\Setup";
+        private const string dotNetFrameworkRegistryKeyV30 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV30 + "\\Setup";
 
         private const string dotNetFrameworkSdkRegistryPathV35 = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v7.0A";
         internal const string fullDotNetFrameworkSdkRegistryKeyV35 = "HKEY_LOCAL_MACHINE\\" + dotNetFrameworkSdkRegistryPathV35;
         private const string dotNetFrameworkRegistryKeyV35 = dotNetFrameworkSetupRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV35;
         internal const string dotNetFrameworkSdkInstallKeyValueV35 = "InstallationFolder";
-       
+
         internal const string dotNetFrameworkVersionFolderPrefixV35 = "v3.5"; // v3.5 is for Orcas.
-        
+
         private const string dotNetFrameworkAssemblyFoldersRegistryKeyV35 = dotNetFrameworkAssemblyFoldersRegistryPath + "\\" + dotNetFrameworkVersionFolderPrefixV35;
         private const string secondaryDotNetFrameworkSdkRegistryPathV35 = "SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows";
         internal const string secondaryDotNetFrameworkSdkInstallKeyValueV35 = "CurrentInstallFolder";
@@ -66,8 +70,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal const string secondaryDotNetFrameworkSdkInstallKeyValueV40 = "CurrentInstallFolder";
         private const string dotNetFrameworkRegistryKeyV40 = dotNetFrameworkSetupRegistryPath + "\\v4\\Full";
         private static readonly GetDirectories getDirectories = new GetDirectories(Directory.GetDirectories);
-        
-        
+
         private static string pathToDotNetFrameworkV11;
         internal static string PathToDotNetFrameworkV11
         {
@@ -249,13 +252,13 @@ namespace Microsoft.Build.BuildEngine.Shared
                         dotNetFrameworkSdkInstallKeyValueV35);
 
                     // Because there is no longer a strong 1:1 mapping between FX versions and SDK
-                    // versions, if we're unable to locate the desired SDK version, we will try to 
+                    // versions, if we're unable to locate the desired SDK version, we will try to
                     // use whichever SDK version is installed by looking at the key pointing to the
                     // "latest" version.
                     //
-                    // This isn't ideal, but it will allow our tasks to function on any of several 
+                    // This isn't ideal, but it will allow our tasks to function on any of several
                     // related SDKs even if they don't have exactly the same versions.
-                    
+
                     if (String.IsNullOrEmpty(FrameworkLocationHelper.pathToDotNetFrameworkSdkV35))
                     {
                         FrameworkLocationHelper.pathToDotNetFrameworkSdkV35 = FindRegistryValueUnderKey(
@@ -281,11 +284,11 @@ namespace Microsoft.Build.BuildEngine.Shared
                         dotNetFrameworkSdkInstallKeyValueV40);
 
                     // Because there is no longer a strong 1:1 mapping between FX versions and SDK
-                    // versions, if we're unable to locate the desired SDK version, we will try to 
+                    // versions, if we're unable to locate the desired SDK version, we will try to
                     // use whichever SDK version is installed by looking at the key pointing to the
                     // "latest" version. For example, instead of 6.0A, we might fall back to 6.0B.
                     //
-                    // This isn't ideal, but it will allow our tasks to function on any of several 
+                    // This isn't ideal, but it will allow our tasks to function on any of several
                     // related SDKs even if they don't have exactly the same versions.
 
                     if (String.IsNullOrEmpty(FrameworkLocationHelper.pathToDotNetFrameworkSdkV40))
@@ -358,7 +361,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
                     if (FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 == null)
                     {
-                       FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV40);
+                        FrameworkLocationHelper.pathToDotNetFrameworkReferenceAssembliesV40 = GenerateReferenceAssemblyDirectory(dotNetFrameworkVersionFolderPrefixV40);
                     }
                 }
 
@@ -402,7 +405,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string programFilesReferenceAssemblyDirectory = Path.Combine(programFilesReferenceAssemblyLocation, versionPrefix);
             string referenceAssemblyDirectory = null;
 
-            if(Directory.Exists(programFilesReferenceAssemblyDirectory))
+            if (Directory.Exists(programFilesReferenceAssemblyDirectory))
             {
                 referenceAssemblyDirectory = programFilesReferenceAssemblyDirectory;
             }
@@ -449,7 +452,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// <returns>True if the registry key is 1 false if it is not there. This method also return true if the complus enviornment variables are set.</returns>
         internal static bool CheckForFrameworkInstallation(string registryEntryToCheckInstall, string registryValueToCheckInstall)
         {
-             // Get the complus install root and version
+            // Get the complus install root and version
             string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
             string complusVersion = Environment.GetEnvironmentVariable("COMPLUS_VERSION");
 
@@ -506,7 +509,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             // The intention here is to choose the alphabetical maximum.
             string max = directories[0];
 
-            // the max.EndsWith condition: pre beta 2 versions of v3.5 have build number like v3.5.20111.  
+            // the max.EndsWith condition: pre beta 2 versions of v3.5 have build number like v3.5.20111.
             // This was removed in beta2
             // We should favor \v3.5 over \v3.5.xxxxx
             // versions previous to 2.0 have .xxxx version numbers.  3.0 and 3.5 do not.
@@ -530,7 +533,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         #endregion
- 
+
         /// <summary>
         /// Determine the 32 bit program files directory, this is used for finding where the reference assemblies live.
         /// </summary>
@@ -549,7 +552,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Generate the path to the program files reference assembly location by taking in the program files special folder and then 
+        /// Generate the path to the program files reference assembly location by taking in the program files special folder and then
         /// using that path to generate the path to the reference assemblies location.
         /// </summary>
         internal static string GenerateProgramFilesReferenceAssemblyRoot()

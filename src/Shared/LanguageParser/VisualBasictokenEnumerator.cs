@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
@@ -12,7 +14,7 @@ namespace Microsoft.Build.Shared.LanguageParser
     * Given vb sources, enumerate over all tokens.
     *
     */
-    sealed internal class VisualBasicTokenEnumerator : TokenEnumerator
+    internal sealed class VisualBasicTokenEnumerator : TokenEnumerator
     {
         // Reader over the sources.
         private VisualBasicTokenCharReader _reader = null;
@@ -32,7 +34,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Find the next token. Return 'true' if one was found. False, otherwise.
         */
-        override internal bool FindNextToken()
+        internal override bool FindNextToken()
         {
             int startPosition = _reader.Position;
 
@@ -101,8 +103,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 //      Date is a keyword but,
                 //      [Date] is an identifier.
                 _reader.CurrentCharacter == '[' ||
-                _reader.MatchNextIdentifierStart()
-            )
+                _reader.MatchNextIdentifierStart())
             {
                 bool escapedIdentifier = false;
                 if (_reader.CurrentCharacter == '[')
@@ -319,7 +320,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         * 
         * Return the token char reader.
         */
-        override internal TokenCharReader Reader
+        internal override TokenCharReader Reader
         {
             get
             {

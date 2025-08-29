@@ -2,7 +2,7 @@
 
 ## What is the GAC?
 
-See the [public documentation](https://docs.microsoft.com/dotnet/framework/app-domains/gac). The GAC is a folder where different installations of VS on the same machine look for assemblies that are commonly used. If an assembly is in the GAC, it will be prioritized over any other assembly.
+See the [public documentation](https://learn.microsoft.com/dotnet/framework/app-domains/gac). The GAC is a folder where different installations of VS on the same machine look for assemblies that are commonly used. If an assembly is in the GAC, it will be prioritized over any other assembly.
 
 The only MSBuild assemblies you may see in the GAC are version 4.8. There is no reason any modern (15.1+) MSBuild assembly should be in the GAC today.
 

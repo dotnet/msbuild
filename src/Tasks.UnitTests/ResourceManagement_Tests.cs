@@ -1,12 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.UnitTests;
 using System.Collections.Generic;
 using System.Linq;
-using Xunit;
+using Microsoft.Build.Framework;
+using Microsoft.Build.UnitTests;
 using Shouldly;
+using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -23,7 +25,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }", "<UseCores />");
 
             var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ")).ToArray();
-            filteredMessages.Count().ShouldBe(1);
+            filteredMessages.Length.ShouldBe(1);
             GetTrailingIntegerFromMessage(filteredMessages[0]).ShouldBeGreaterThan(0);
         }
 
@@ -38,7 +40,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }", "<UseCores /> <UseCores />");
 
             var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ")).ToArray();
-            filteredMessages.Count().ShouldBe(2);
+            filteredMessages.Length.ShouldBe(2);
 
             int grantedCores1 = GetTrailingIntegerFromMessage(filteredMessages[0]);
             int grantedCores2 = GetTrailingIntegerFromMessage(filteredMessages[1]);
@@ -65,7 +67,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }", "<UseCores />");
 
             var filteredMessages = messages.Where(m => m.Message.StartsWith("Number of cores acquired: ")).ToArray();
-            filteredMessages.Count().ShouldBe(2);
+            filteredMessages.Length.ShouldBe(2);
 
             int grantedCores1 = GetTrailingIntegerFromMessage(filteredMessages[0]);
             int grantedCores2 = GetTrailingIntegerFromMessage(filteredMessages[1]);

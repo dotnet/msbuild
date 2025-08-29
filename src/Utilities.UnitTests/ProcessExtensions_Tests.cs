@@ -1,12 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics;
+using System.Threading.Tasks;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
-using Microsoft.Build.Shared;
-using System.Diagnostics;
-using System.Threading.Tasks;
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Build.UnitTests
         {
             var psi =
                 NativeMethodsShared.IsWindows ?
-                    new ProcessStartInfo("powershell", "-NoLogo -NoProfile -command \"Start-Sleep -Seconds 600\"") :
+                    new ProcessStartInfo("rundll32", "kernel32.dll, Sleep") :
                     new ProcessStartInfo("sleep", "600");
 
             Process p = Process.Start(psi); // sleep 10m.

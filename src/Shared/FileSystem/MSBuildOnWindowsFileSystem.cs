@@ -1,9 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.FileSystem
 {
@@ -11,13 +14,14 @@ namespace Microsoft.Build.Shared.FileSystem
     /// Implementation of file system operations on windows. Combination of native and managed implementations.
     /// TODO Remove this class and replace with WindowsFileSystem. Test perf to ensure no regressions.
     /// </summary>
-    internal class MSBuildOnWindowsFileSystem : IFileSystem
+    [SupportedOSPlatform("windows")]
+    internal sealed class MSBuildOnWindowsFileSystem : IFileSystem
     {
         private static readonly MSBuildOnWindowsFileSystem Instance = new MSBuildOnWindowsFileSystem();
 
         public static MSBuildOnWindowsFileSystem Singleton() => Instance;
 
-        protected MSBuildOnWindowsFileSystem() { }
+        public MSBuildOnWindowsFileSystem() { }
 
         public TextReader ReadFile(string path)
         {
@@ -74,9 +78,9 @@ namespace Microsoft.Build.Shared.FileSystem
             return WindowsFileSystem.Singleton().FileExists(path);
         }
 
-        public bool DirectoryEntryExists(string path)
+        public bool FileOrDirectoryExists(string path)
         {
-            return WindowsFileSystem.Singleton().DirectoryEntryExists(path);
+            return WindowsFileSystem.Singleton().FileOrDirectoryExists(path);
         }
     }
 }

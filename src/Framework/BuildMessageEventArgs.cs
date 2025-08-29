@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -58,13 +60,11 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of event sender</param>
         /// <param name="importance">importance of the message</param>
-        public BuildMessageEventArgs
-        (
+        public BuildMessageEventArgs(
             string message,
             string helpKeyword,
             string senderName,
-            MessageImportance importance
-        )
+            MessageImportance importance)
             : this(message, helpKeyword, senderName, importance, DateTime.UtcNow)
         {
         }
@@ -77,14 +77,12 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of event sender</param>
         /// <param name="importance">importance of the message</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        public BuildMessageEventArgs
-        (
+        public BuildMessageEventArgs(
             string message,
             string helpKeyword,
             string senderName,
             MessageImportance importance,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : this(message, helpKeyword, senderName, importance, eventTimestamp, null)
         {
             // do nothing
@@ -99,15 +97,13 @@ namespace Microsoft.Build.Framework
         /// <param name="importance">importance of the message</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
         /// <param name="messageArgs">message arguments</param>
-        public BuildMessageEventArgs
-        (
+        public BuildMessageEventArgs(
             string message,
             string helpKeyword,
             string senderName,
             MessageImportance importance,
             DateTime eventTimestamp,
-            params object[] messageArgs
-        )
+            params object[] messageArgs)
             : this(null, null, null, 0, 0, 0, 0, message, helpKeyword, senderName, importance, eventTimestamp, messageArgs)
         {
             // do nothing
@@ -127,8 +123,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">help keyword </param>
         /// <param name="senderName">name of event sender</param>
         /// <param name="importance">importance of the message</param>
-        public BuildMessageEventArgs
-        (
+        public BuildMessageEventArgs(
             string subcategory,
             string code,
             string file,
@@ -139,8 +134,7 @@ namespace Microsoft.Build.Framework
             string message,
             string helpKeyword,
             string senderName,
-            MessageImportance importance
-        )
+            MessageImportance importance)
             : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, importance, DateTime.UtcNow)
         {
             // do nothing
@@ -161,8 +155,7 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of event sender</param>
         /// <param name="importance">importance of the message</param>
         /// <param name="eventTimestamp">custom timestamp for the event</param>
-        public BuildMessageEventArgs
-        (
+        public BuildMessageEventArgs(
             string subcategory,
             string code,
             string file,
@@ -174,8 +167,7 @@ namespace Microsoft.Build.Framework
             string helpKeyword,
             string senderName,
             MessageImportance importance,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : this(subcategory, code, file, lineNumber, columnNumber, endLineNumber, endColumnNumber, message, helpKeyword, senderName, importance, eventTimestamp, messageArgs: null)
         {
             // do nothing
@@ -197,8 +189,7 @@ namespace Microsoft.Build.Framework
         /// <param name="importance">importance of the message</param>
         /// <param name="eventTimestamp">custom timestamp for the event</param>
         /// <param name="messageArgs">message arguments</param>
-        public BuildMessageEventArgs
-        (
+        public BuildMessageEventArgs(
             string subcategory,
             string code,
             string file,
@@ -211,8 +202,7 @@ namespace Microsoft.Build.Framework
             string senderName,
             MessageImportance importance,
             DateTime eventTimestamp,
-            params object[] messageArgs
-        )
+            params object[] messageArgs)
             : base(message, helpKeyword, senderName, eventTimestamp, messageArgs)
         {
             this.importance = importance;
@@ -283,7 +273,7 @@ namespace Microsoft.Build.Framework
             base.CreateFromStream(reader, version);
             importance = (MessageImportance)reader.ReadInt32();
 
-            //The data in the stream beyond this point are new to 4.0
+            // The data in the stream beyond this point are new to 4.0
             if (version > 20)
             {
                 subcategory = reader.ReadByte() == 0 ? null : reader.ReadString();
@@ -302,7 +292,11 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Importance of the message
         /// </summary>
-        public MessageImportance Importance => importance;
+        public MessageImportance Importance
+        {
+            get => importance;
+            internal set => importance = value;
+        }
 
         /// <summary>
         /// The custom sub-type of the event.
@@ -322,12 +316,20 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Line number of interest in associated file. 
         /// </summary>
-        public int LineNumber => lineNumber;
+        public int LineNumber
+        {
+            get => lineNumber;
+            internal set => lineNumber = value;
+        }
 
         /// <summary>
         /// Column number of interest in associated file. 
         /// </summary>
-        public int ColumnNumber => columnNumber;
+        public int ColumnNumber
+        {
+            get => columnNumber;
+            internal set => columnNumber = value;
+        }
 
         /// <summary>
         /// Ending line number of interest in associated file. 

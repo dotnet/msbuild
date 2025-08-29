@@ -1,10 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Experimental.FileAccess;
+#endif
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -47,6 +52,10 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHostTaskComplete : INodePacket
     {
+#if FEATURE_REPORTFILEACCESSES
+        private List<FileAccessData> _fileAccessData;
+#endif
+
         /// <summary>
         /// Result of the task's execution. 
         /// </summary>
@@ -80,12 +89,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment = null;
 
+
+#pragma warning disable CS1572 // XML comment has a param tag, but there is no parameter by that name. Justification: xmldoc doesn't seem to interact well with #ifdef of params.
         /// <summary>
-        /// Constructor
+        /// Initializes a new instance of the <see cref="TaskHostTaskComplete"/> class.
         /// </summary>
-        /// <param name="result">Result of the task's execution.</param>
+        /// <param name="result">The result of the task's execution.</param>
+        /// <param name="fileAccessData">The file accesses reported by the task.</param>
         /// <param name="buildProcessEnvironment">The build process environment as it was at the end of the task's execution.</param>
-        public TaskHostTaskComplete(OutOfProcTaskHostTaskResult result, IDictionary<string, string> buildProcessEnvironment)
+#pragma warning restore CS1572 // XML comment has a param tag, but there is no parameter by that name
+        public TaskHostTaskComplete(
+            OutOfProcTaskHostTaskResult result,
+#if FEATURE_REPORTFILEACCESSES
+            List<FileAccessData> fileAccessData,
+#endif
+            IDictionary<string, string> buildProcessEnvironment)
         {
             ErrorUtilities.VerifyThrowInternalNull(result, nameof(result));
 
@@ -93,6 +111,9 @@ namespace Microsoft.Build.BackEnd
             _taskException = result.TaskException;
             _taskExceptionMessage = result.ExceptionMessage;
             _taskExceptionMessageArgs = result.ExceptionMessageArgs;
+#if FEATURE_REPORTFILEACCESSES
+            _fileAccessData = fileAccessData;
+#endif
 
             if (result.FinalParameterValues != null)
             {
@@ -199,6 +220,17 @@ namespace Microsoft.Build.BackEnd
             get { return NodePacketType.TaskHostTaskComplete; }
         }
 
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// Gets the file accesses reported by the task.
+        /// </summary>
+        public List<FileAccessData> FileAccessData
+        {
+            [DebuggerStepThrough]
+            get => _fileAccessData;
+        }
+#endif
+
         /// <summary>
         /// Translates the packet to/from binary form.
         /// </summary>
@@ -211,6 +243,13 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _taskExceptionMessageArgs);
             translator.TranslateDictionary(ref _taskOutputParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+#if FEATURE_REPORTFILEACCESSES
+            translator.Translate(ref _fileAccessData,
+                (ITranslator translator, ref FileAccessData data) => ((ITranslatable)data).Translate(translator));
+#else
+            bool hasFileAccessData = false;
+            translator.Translate(ref hasFileAccessData);
+#endif
         }
 
         /// <summary>

@@ -1,5 +1,7 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#if FEATURE_FILE_TRACKER
 
 using System;
 
@@ -13,46 +15,57 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
-#if FEATURE_FILE_TRACKER
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
     /// <summary>
-    /// Enumeration to express the type of executable being wrapped by Tracker.exe
+    /// Enumeration to express the type of executable being wrapped by Tracker.exe.
     /// </summary>
     public enum ExecutableType
     {
         /// <summary>
-        /// 32-bit native executable
+        /// 32-bit native executable.
         /// </summary>
         Native32Bit = 0,
 
         /// <summary>
-        /// 64-bit native executable 
+        /// 64-bit native executable.
         /// </summary>
         Native64Bit = 1,
 
         /// <summary>
-        /// A managed executable without a specified bitness
+        /// A managed executable without a specified bitness.
         /// </summary>
         ManagedIL = 2,
 
         /// <summary>
-        /// A managed executable specifically marked as 32-bit
+        /// A managed executable specifically marked as 32-bit.
         /// </summary>
         Managed32Bit = 3,
 
         /// <summary>
-        /// A managed executable specifically marked as 64-bit
+        /// A managed executable specifically marked as 64-bit.
         /// </summary>
         Managed64Bit = 4,
 
         /// <summary>
         /// Use the same bitness as the currently running executable. 
         /// </summary>
-        SameAsCurrentProcess = 5
+        SameAsCurrentProcess = 5,
+
+        /// <summary>
+        /// 64-bit native ARM64 executable.
+        /// </summary>
+        NativeARM64 = 6,
+
+        /// <summary>
+        /// 64-bit managed ARM64 executable.
+        /// </summary>
+        ManagedARM64 = 7
     }
 
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
     /// <summary>
     /// This class contains utility functions to encapsulate launching and logging for the Tracker
     /// </summary>
@@ -60,7 +73,13 @@ namespace Microsoft.Build.Utilities
     {
         #region Static Member Data
 
-        // The default path to temp, used to create explicitly short and long paths
+        /// <summary>
+        /// The default path to temp, used to create explicitly short and long paths.
+        /// </summary>
+        /// <remarks>
+        /// This must be the base system-wide temp path because we use it to filter out I/O of tools outside of our control.
+        /// Tools running under the tracker may put temp files in the temp base or in a sub-directory of their choosing.
+        /// </remarks>
         private static readonly string s_tempPath = Path.GetTempPath();
 
         // The short path to temp
@@ -83,14 +102,14 @@ namespace Microsoft.Build.Utilities
         // Is equal to C:\Documents and Settings\All Users\Application Data on XP, and C:\ProgramData on Vista+.
         // But for backward compatibility, the paths "C:\Documents and Settings\All Users\Application Data" and "C:\Users\All Users\Application Data" are still accessible via Junction point on Vista+.
         // Thus this list is created to store all possible common application data paths to cover more cases as possible.
-        private static readonly List<string> s_commonApplicationDataPaths;
+        private static readonly List<string> s_commonApplicationDataPaths = InitializeCommonApplicationDataPaths();
 
         // The name of the standalone tracker tool.
-        private static readonly string s_TrackerFilename = "Tracker.exe";
+        private const string s_TrackerFilename = "Tracker.exe";
 
         // The name of the assembly that is injected into the executing process.
         // Detours handles picking between FileTracker{32,64}.dll so only mention one.
-        private static readonly string s_FileTrackerFilename = "FileTracker32.dll";
+        private const string s_FileTrackerFilename = "FileTracker32.dll";
 
         // The name of the PATH environment variable.
         private const string pathEnvironmentVariableName = "PATH";
@@ -103,29 +122,31 @@ namespace Microsoft.Build.Utilities
 
         #endregion
 
-        #region Static constructor
+        #region Static Member Initializers
 
-        static FileTracker()
+        private static List<string> InitializeCommonApplicationDataPaths()
         {
-            s_commonApplicationDataPaths = new List<string>();
+            List<string> commonApplicationDataPaths = new();
 
             string defaultCommonApplicationDataPath = FileUtilities.EnsureTrailingSlash(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData).ToUpperInvariant());
-            s_commonApplicationDataPaths.Add(defaultCommonApplicationDataPath);
+            commonApplicationDataPaths.Add(defaultCommonApplicationDataPath);
 
             string defaultRootDirectory = Path.GetPathRoot(defaultCommonApplicationDataPath);
             string alternativeCommonApplicationDataPath1 = FileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Documents and Settings\All Users\Application Data").ToUpperInvariant());
 
             if (!alternativeCommonApplicationDataPath1.Equals(defaultCommonApplicationDataPath, StringComparison.Ordinal))
             {
-                s_commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath1);
+                commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath1);
             }
 
             string alternativeCommonApplicationDataPath2 = FileUtilities.EnsureTrailingSlash(Path.Combine(defaultRootDirectory, @"Users\All Users\Application Data").ToUpperInvariant());
 
             if (!alternativeCommonApplicationDataPath2.Equals(defaultCommonApplicationDataPath, StringComparison.Ordinal))
             {
-                s_commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath2);
+                commonApplicationDataPaths.Add(alternativeCommonApplicationDataPath2);
             }
+
+            return commonApplicationDataPaths;
         }
 
         #endregion
@@ -329,7 +350,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The response file path.</returns>
         public static string CreateRootingMarkerResponseFile(string rootMarker)
         {
-            string trackerResponseFile = FileUtilities.GetTemporaryFile(".rsp");
+            string trackerResponseFile = FileUtilities.GetTemporaryFileName(".rsp");
             File.WriteAllText(trackerResponseFile, "/r \"" + rootMarker + "\"", Encoding.Unicode);
 
             return trackerResponseFile;
@@ -366,8 +387,8 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Searches %PATH% for the location of Tracker.exe, and returns the first 
         /// path that matches. 
-        /// <returns>Matching full path to Tracker.exe or null if a matching path is not found.</returns>
         /// </summary>
+        /// <returns>The full path to Tracker.exe, or <see langword="null" /> if a matching path is not found.</returns>
         public static string FindTrackerOnPath()
         {
             string[] paths = Environment.GetEnvironmentVariable(pathEnvironmentVariableName).Split(pathSeparatorArray, StringSplitOptions.RemoveEmptyEntries);
@@ -514,8 +535,7 @@ namespace Microsoft.Build.Utilities
                                        s_TrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase) ||
                                        s_FileTrackerFilename.Equals(filename, StringComparison.OrdinalIgnoreCase),
                                        "This method should only be passed s_TrackerFilename or s_FileTrackerFilename, but was passed {0} instead!",
-                                       filename
-                                       );
+                                       filename);
 
             // Look for FileTracker.dll/Tracker.exe in the MSBuild tools directory. They may exist elsewhere on disk,
             // but other copies aren't guaranteed to be compatible with the latest.
@@ -745,7 +765,7 @@ namespace Microsoft.Build.Utilities
 
         #endregion
     }
-
+#pragma warning restore format
     /// <summary>
     /// Dependency filter delegate. Used during TLog saves in order for tasks to selectively remove dependencies from the written
     /// graph.
@@ -756,3 +776,4 @@ namespace Microsoft.Build.Utilities
 }
 
 #endif
+

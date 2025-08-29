@@ -1420,7 +1420,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
