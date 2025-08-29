@@ -64,12 +64,14 @@ namespace Microsoft.Build.Evaluation
         /// where metadata key is like "itemname.metadataname" or "metadataname".
         /// PERF: Tables are null if there are no entries, because this is quite a common case.
         /// </summary>
-        internal static ItemsAndMetadataPair GetReferencedItemNamesAndMetadata(IEnumerable<string> expressions)
+        internal static ItemsAndMetadataPair GetReferencedItemNamesAndMetadata(IReadOnlyList<string> expressions)
         {
             ItemsAndMetadataPair pair = new ItemsAndMetadataPair(null, null);
 
-            foreach (string expression in expressions)
+            // PERF: Use for to avoid boxing expressions enumerator
+            for (int i = 0; i < expressions.Count; i++)
             {
+                string expression = expressions[i];
                 GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref pair, ShredderOptions.All);
             }
 
@@ -283,7 +285,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// We can ignore any semicolons in the expression, since we're not itemizing it.
         /// </remarks>
-        private static void GetReferencedItemNamesAndMetadata(string expression, int start, int end, ref ItemsAndMetadataPair pair, ShredderOptions whatToShredFor)
+        internal static void GetReferencedItemNamesAndMetadata(string expression, int start, int end, ref ItemsAndMetadataPair pair, ShredderOptions whatToShredFor)
         {
             for (int i = start; i < end; i++)
             {
