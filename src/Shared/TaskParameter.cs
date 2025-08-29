@@ -1042,6 +1042,14 @@ namespace Microsoft.Build.BackEnd
                     SetMetadata(kvp.Key, kvp.Value);
                 }
             }
+
+            public void RemoveMetadataRange(IEnumerable<string> metadataNames)
+            {
+                foreach (string metadataName in metadataNames)
+                {
+                    RemoveMetadata(metadataName);
+                }
+            }
         }
     }
 }
