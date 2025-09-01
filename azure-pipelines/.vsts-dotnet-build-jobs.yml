@@ -88,6 +88,8 @@ jobs:
               /p:VisualStudioIbcDrop=$(OptProfDrop)
               /p:GenerateSbom=true
               /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
+              /p:IsExperimental=${{ parameters.isExperimental }}
+
     displayName: Build
     condition: succeeded()
 
