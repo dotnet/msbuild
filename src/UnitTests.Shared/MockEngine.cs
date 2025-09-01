@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      *
      **************************************************************************/
-    public sealed class MockEngine : IBuildEngine7
+    public sealed class MockEngine : EngineServices, IBuildEngine10
     {
         private readonly LockType _lockObj = new LockType();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -216,6 +216,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         public bool IsRunningMultipleNodes { get; set; }
+
+        public EngineServices EngineServices => this;
+
+        public MessageImportance MinimumMessageImportance { get; set; } = MessageImportance.Low;
+
+        public override bool IsTaskInputLoggingEnabled => SetIsTaskInputLoggingEnabled;
+
+        public override bool IsOutOfProcRarNodeEnabled => SetIsOutOfProcRarNodeEnabled;
+
+        public bool SetIsTaskInputLoggingEnabled { get; set; }
+
+        public bool SetIsOutOfProcRarNodeEnabled { get; set; }
 
         public bool BuildProjectFile(
             string projectFileName,
@@ -472,5 +484,16 @@ namespace Microsoft.Build.UnitTests
             _objectCache.TryRemove(key, out object obj);
             return obj;
         }
+
+        public int RequestCores(int requestedCores) => requestedCores;
+
+        public void ReleaseCores(int coresToRelease)
+        {
+        }
+
+        public bool ShouldTreatWarningAsError(string warningCode) => false;
+
+        public override bool LogsMessagesOfImportance(MessageImportance importance)
+            => importance <= MinimumMessageImportance;
     }
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="6a953e76162f3f079405f80e28664fa51b136740" BarId="276981" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="7f2a07b481a3d24677ebcf6a45e7e27c8ff95a4e" BarId="279809" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="9.0.0">
@@ -33,7 +33,7 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="9.0.0">
+    <Dependency Name="System.Formats.Asn1" Version="9.0.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -63,13 +63,13 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="9.0.0">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="9.0.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="9.0.0">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="9.0.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -106,21 +106,21 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25401.2">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25422.3">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>40693ae2ee51e447f6ca96d07bc1ba779dcb9b9c</Sha>
+      <Sha>f2cdf946c00a12a2c283835bb41ddc2255832055</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.15.0-preview.1.86">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-preview.1.197">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>eb38c4a6cccfce5ee9415da1a930fc6534194b2b</Sha>
+      <Sha>ef6cddc7c977ddbfa28dba10b1ebeec77c6a3674</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25402.2">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25424.8">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>8faa31814969a3da7e92233fe963966debcdc431</Sha>
+      <Sha>e0c717e94a83de00b8ebe340b6c66c04f4e4e639</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25401.2">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25422.3">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>40693ae2ee51e447f6ca96d07bc1ba779dcb9b9c</Sha>
+      <Sha>f2cdf946c00a12a2c283835bb41ddc2255832055</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

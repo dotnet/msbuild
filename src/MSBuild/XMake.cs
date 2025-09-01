@@ -331,8 +331,7 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode) ||
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile) ||
-                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]) ||
-                    IsInteractiveBuild(commandLineSwitches))
+                    !ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]))
                 {
                     canRunServer = false;
                     if (KnownTelemetry.PartialBuildTelemetry != null)
@@ -352,36 +351,6 @@ namespace Microsoft.Build.CommandLine
             }
 
             return canRunServer;
-        }
-
-        private static bool IsInteractiveBuild(CommandLineSwitches commandLineSwitches)
-        {
-            // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
-            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Interactive) &&
-                ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Interactive], true, "InvalidInteractiveValue"))
-            {
-                return true;
-            }
-
-            // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
-            foreach (string parameter in commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Property])
-            {
-                // split each <prop>=<value> string into 2 pieces, breaking on the first = that is found
-                string[] parameterSections = parameter.Split(s_propertyValueSeparator, 2);
-
-                if (parameterSections.Length == 2 &&
-                    parameterSections[0].Length > 0 &&
-                    string.Equals("NuGetInteractive", parameterSections[0], StringComparison.OrdinalIgnoreCase))
-                {
-                    string nuGetInteractiveValue = parameterSections[1].Trim('"', ' ');
-                    if (!string.Equals("false", nuGetInteractiveValue, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
 #if !FEATURE_GET_COMMANDLINE
@@ -747,6 +716,9 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
+
+                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
+
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,
@@ -1352,8 +1324,6 @@ namespace Microsoft.Build.CommandLine
 
                 // Targeted perf optimization for the case where we only have our own parallel console logger, and verbosity is quiet. In such a case
                 // we know we won't emit any messages except for errors and warnings, so the engine should not bother even logging them.
-                // If we're using the original serial console logger we can't do this, as it shows project started/finished context
-                // around errors and warnings.
                 // Telling the engine to not bother logging non-critical messages means that typically it can avoid loading any resources in the successful
                 // build case.
                 if (loggers.Length == 1 &&
@@ -1361,7 +1331,6 @@ namespace Microsoft.Build.CommandLine
                     verbosity == LoggerVerbosity.Quiet &&
                     loggers[0].Parameters != null &&
                     loggers[0].Parameters.IndexOf("ENABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) != -1 &&
-                    loggers[0].Parameters.IndexOf("DISABLEMPLOGGING", StringComparison.OrdinalIgnoreCase) == -1 &&
                     loggers[0].Parameters.IndexOf("V=", StringComparison.OrdinalIgnoreCase) == -1 &&                // Console logger could have had a verbosity
                     loggers[0].Parameters.IndexOf("VERBOSITY=", StringComparison.OrdinalIgnoreCase) == -1)          // override with the /clp switch
                 {
@@ -3497,11 +3466,10 @@ namespace Microsoft.Build.CommandLine
                 }
                 else if (nodeModeNumber == 2)
                 {
-                    // TaskHost nodes don't need to worry about node reuse or low priority. Node reuse is always off, and TaskHosts
-                    // receive a connection immediately after being launched and shut down as soon as their work is over, so
-                    // whatever our priority is is correct.
+                    // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
+                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                     OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                    shutdownReason = node.Run(out nodeException);
+                    shutdownReason = node.Run(out nodeException, nodeReuse);
                 }
                 else if (nodeModeNumber == 3)
                 {

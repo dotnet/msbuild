@@ -838,9 +838,6 @@
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -855,39 +852,36 @@
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
+                     콘솔 로거의 매개 변수. (약식: -clp)
                      사용 가능한 매개 변수는 다음과 같습니다.
-                        PerformanceSummary--작업, 대상, 프로젝트에서 소요된 시간을 
-                            표시합니다.
-                        Summary--종료 시 오류 및 경고 요약을 표시합니다.
-                        NoSummary--종료 시 오류 및 경고 요약을 표시하지
+                        PerformanceSummary--작업, 목표, 프로젝트에
+                            소요된 시간을 표시합니다.
+                        Summary--끝에 오류 및 경고 요약을 표시합니다.
+                        NoSummary--끝에 오류 및 경고 요약을 표시하지
                             않습니다.
                         ErrorsOnly--오류만 표시합니다.
                         WarningsOnly--경고만 표시합니다.
-                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때 항목 및 속성 목록을 
-                            표시하지 않습니다.
-                        ShowCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
-                        ShowTimestamp--메시지 접두사로 타임스탬프를 
+                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때
+                            항목 및 속성 목록을 표시하지 않습니다.
+                        showCommandLine--TaskCommandLineEvent 메시지 표시
+                        ShowTimestamp--모든 메시지 앞에 타임스탬프를 접두사로
                             표시합니다.
-                        ShowEventId--시작된 이벤트, 완료된 이벤트, 메시지의 eventId를 
-                            표시합니다.
-                        ForceNoAlign--콘솔 버퍼 크기에 텍스트를 맞추지 
-                            않습니다.
-                        DisableConsoleColor--모든 로깅 메시지에 기본 콘솔 색을
-                            사용합니다.
-                        DisableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우
-                            출력의 다중 프로세서 로깅 스타일을 
-                            사용하지 않도록 설정합니다.
-                        EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우에도
-                            다중 프로세서 로깅 스타일을 사용하도록 설정합니다.
-                            이 로깅 스타일은 기본적으로 활성화됩니다.
-                        ForceConsoleColor--콘솔에서 지원하지 않더라도 ANSI 콘솔 색을
-                            사용합니다
-                        PreferConsoleColor--대상 콘솔에서 지원되는 경우에만
-                             ANSI 콘솔 색을 사용합니다.
-                     Verbosity--이 로거에 대한 -verbosity 설정을 
+                        ShowEventId--시작된 이벤트, 완료된 이벤트 및 메시지의
+                            이벤트 ID 표시
+                        ForceNoAlign--콘솔 버퍼 크기에 맞게 텍스트를
+                            정렬하지 않습니다.
+                        DisableConsoleColor--모든 로깅 메시지에 대해
+                            기본 콘솔 색상을 사용합니다.
+                        EnableMPLogging--다중 프로세서가 아닌 모드에서
+                            실행되는 경우에도 다중 프로세서 로깅 스타일을
+                            활성화합니다. 이 로깅 스타일은 기본적으로 켜져 있습니다.
+                        ForceConsoleColor--콘솔이 지원하지 않더라도
+                            ANSI 콘솔 색상 사용
+                        PreferConsoleColor--대상 콘솔에서 지원하는 경우에만
+                            ANSI 콘솔 색상 사용
+                     Verbosity--이 로거에 대한 -verbosity 설정을
                             재정의합니다.
-                     예:
+                     예: 
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>

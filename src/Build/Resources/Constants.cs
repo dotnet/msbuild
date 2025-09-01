@@ -111,6 +111,16 @@ namespace Microsoft.Build.Internal
     internal static class Constants
     {
         /// <summary>
+        /// Defines the name of dotnet host path environment variable (e.g  DOTNET_HOST_PATH = C:\msbuild\.dotnet\dotnet.exe).
+        /// </summary>
+        internal const string DotnetHostPathEnvVarName = "DOTNET_HOST_PATH";
+
+        /// <summary>
+        /// The project property name used to get the path to the MSBuild assembly.
+        /// </summary>
+        internal const string RuntimeIdentifierGraphPath = nameof(RuntimeIdentifierGraphPath);
+
+        /// <summary>
         /// Defines the name of dotnet process based on the operating system.
         /// </summary>
         internal static readonly string DotnetProcessName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";
@@ -151,6 +161,15 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal const string SubToolsetVersionPropertyName = VisualStudioVersionPropertyName;
 
+        /// <summary>
+        /// The constant for the storing full path to the resolved dotnet.
+        /// </summary>
+        internal const string DotnetHostPath = nameof(DotnetHostPath);
+
+        /// <summary>
+        /// The constant for the storing the relative path to MSBuild assembly.
+        /// </summary>
+        internal const string MSBuildAssemblyPath = nameof(MSBuildAssemblyPath);
 
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the
@@ -168,6 +187,8 @@ namespace Microsoft.Build.Internal
         internal const string programFilesx86 = "ProgramFiles(x86)";
 
         internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
+
+        internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
     }
 
     /// <summary>
@@ -189,7 +210,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Locker to protect initialization
         /// </summary>
-        private static readonly Object s_locker = new Object();
+        private static readonly LockType s_locker = new();
 
         static AvailableStaticMethods()
         {

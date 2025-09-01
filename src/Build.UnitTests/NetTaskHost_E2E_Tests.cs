@@ -8,6 +8,7 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -17,21 +18,32 @@ namespace Microsoft.Build.Engine.UnitTests
 
         private static string TestAssetsRootPath { get; } = Path.Combine(AssemblyLocation, "TestAssets");
 
+        private readonly ITestOutputHelper _output;
+
+        public NetTaskHost_E2E_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [WindowsFullFrameworkOnlyFact]
         public void NetTaskHostTest()
         {
-            using TestEnvironment env = TestEnvironment.Create();
-            var bootstrapCoreFolder = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
-            _ = env.SetEnvironmentVariable("MSBuildToolsDirectoryNET", Path.Combine(RunnerUtilities.BootstrapRootPath, "core"));
-            _ = env.SetEnvironmentVariable("MSBuildAssemblyDirectory", Path.Combine(RunnerUtilities.BootstrapRootPath, "core", "sdk", RunnerUtilities.BootstrapSdkVersion));
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            var bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
 
+            // Environment variables needed to discover the .NET Core SDK from bootstrap folder.
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:m", out bool successTestTask);
-            successTestTask.ShouldBeTrue();
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
 
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
             testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
-            testTaskOutput.ShouldContain($"Process path: {Path.Combine(bootstrapCoreFolder, Constants.DotnetProcessName)}");
+            testTaskOutput.ShouldContain($"Process path: {bootstrapCorePath}", customMessage: testTaskOutput);
         }
     }
 }
