@@ -123,7 +123,7 @@ extends:
             targetType: inline
             script: |
               # Extract VS version from branch name if it follows exp/vsXX.Y-somename pattern
-              $fullBranch = "$(resources.pipeline.MSBuild.sourceBranch)"
+              $fullBranch = "$(resources.pipeline.MSBuildExpPerf.sourceBranch)"
               $parameterTargetBranch = "${{ parameters.TargetBranch }}"
               $detectedTarget = "main" # Default target branch
 

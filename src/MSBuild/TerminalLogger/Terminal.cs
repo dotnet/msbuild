@@ -200,6 +200,15 @@ internal sealed class Terminal : ITerminal
     /// <inheritdoc/>
     public void Dispose()
     {
-        Console.OutputEncoding = _originalOutputEncoding;
+        try
+        {
+            Console.OutputEncoding = _originalOutputEncoding;
+        }
+        catch
+        {
+            // In some terminal emulators setting back the previous console output encoding fails.
+            // See https://github.com/dotnet/msbuild/issues/9662.
+            // We do not want to throw an exception if it happens, since it is a non-essentual failure in the logger.
+        }
     }
 }

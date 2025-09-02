@@ -27,6 +27,11 @@
         <target state="translated">La commande s'est arrêtée avec le code {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">Le fichier est verrouillé par : "{0}"</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: Impossible de trouver le fichier manifeste de la plateforme dans "{0}".</target>

@@ -13,10 +13,9 @@ namespace Microsoft.Build.Framework
     /// <remarks>
     /// <format type="text/markdown"><![CDATA[
     /// ## Remarks
-    /// > [!CAUTION]
-    /// In .NET 8 and later and Visual Studio 17.8 and later, this type is deprecated; instead use <see cref="ExtendedCustomBuildEventArgs"/>.
-    /// For more information, see <see href="https://learn.microsoft.com/dotnet/core/compatibility/sdk/8.0/custombuildeventargs"/>
-    /// For recommended replacement, see <see href="https://learn.microsoft.com/dotnet/core/compatibility/sdk/8.0/custombuildeventargs#recommended-action" />.
+    /// > [!WARNING]
+    /// > In .NET 8 and later and Visual Studio 17.8 and later, this type is deprecated; instead use [ExtendedCustomBuildEventArgs](/dotnet/api/microsoft.build.framework.extendedcustombuildeventargs).
+    /// > For more information, see [MSBuild custom derived build events deprecated](/dotnet/core/compatibility/sdk/8.0/custombuildeventargs).
     /// ]]></format>
     /// </remarks>
     [Serializable]

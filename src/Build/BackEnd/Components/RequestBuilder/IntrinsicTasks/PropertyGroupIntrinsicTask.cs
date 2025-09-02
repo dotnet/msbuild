@@ -52,7 +52,7 @@ namespace Microsoft.Build.BackEnd
                     // Find all the metadata references in order to create buckets
                     List<string> parameterValues = new List<string>();
                     GetBatchableValuesFromProperty(parameterValues, property);
-                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, property.Location);
+                    buckets = BatchingEngine.PrepareBatchingBuckets(parameterValues, lookup, property.Location, LoggingContext);
 
                     // "Execute" each bucket
                     foreach (ItemBucket bucket in buckets)
@@ -64,9 +64,8 @@ namespace Microsoft.Build.BackEnd
                             ExpanderOptions.ExpandAll,
                             Project.Directory,
                             property.ConditionLocation,
-                            LoggingContext.LoggingService,
-                            LoggingContext.BuildEventContext,
-                            FileSystems.Default);
+                            FileSystems.Default,
+                            LoggingContext);
 
                         if (condition)
                         {
@@ -78,7 +77,12 @@ namespace Microsoft.Build.BackEnd
                                 "CannotModifyReservedProperty",
                                 property.Name);
 
+                            bucket.Expander.PropertiesUseTracker.CurrentlyEvaluatingPropertyElementName = property.Name;
+                            bucket.Expander.PropertiesUseTracker.PropertyReadContext =
+                                PropertyReadContext.PropertyEvaluation;
+
                             string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(property.Value, ExpanderOptions.ExpandAll, property.Location);
+                            bucket.Expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(property, evaluatedValue, LoggingContext);
 
                             if (LogTaskInputs && !LoggingContext.LoggingService.OnlyLogCriticalEvents)
                             {
@@ -97,6 +101,8 @@ namespace Microsoft.Build.BackEnd
                         foreach (ItemBucket bucket in buckets)
                         {
                             bucket.LeaveScope();
+                            // We are now done processing this property - so no need to pop its previous context.
+                            bucket.Expander.PropertiesUseTracker.ResetPropertyReadContext(pop: false);
                         }
                     }
                 }

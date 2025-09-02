@@ -22,7 +22,8 @@ namespace Microsoft.Build.UnitTests
 
             string xml = "<assemblyIdentity name='ClassLibrary1'/>";
 
-            dependentAssembly.Read(new XmlTextReader(xml, XmlNodeType.Document, null));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
+            dependentAssembly.Read(xmlReader);
 
             Assert.NotNull(dependentAssembly.PartialAssemblyName);
         }

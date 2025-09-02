@@ -115,13 +115,12 @@ try {
 
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-  # - Do run tests
-  # - Don't try to create a bootstrap deployment
+  # - Create bootstrap environment as it's required when also running tests
   if ($onlyDocChanged) {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=false /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /p:CreateBootstrap=true /nr:false @properties
   }
 
   exit $lastExitCode
