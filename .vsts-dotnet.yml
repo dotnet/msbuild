@@ -6,7 +6,6 @@ trigger:
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
-#   SignType: real
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -18,6 +17,10 @@ parameters:
   displayName: Enable Signing Validation
   type: boolean
   default: true
+- name: signTypeParameter
+  displayName: Sign Type
+  type: string
+  default: 'real'
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -35,6 +38,11 @@ variables:
       value: ${{ parameters.OptProfDropName }}
     - name: SourceBranch
       value: ''
+  # For now skipping apply optimization data for vs16.11, because the run with real signed bits requires being fully automated
+  # while there is no available optimization data for vs16.11.
+  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs16.11') }}:
+    - name: SkipApplyOptimizationData
+      value: true
   - name: EnableReleaseOneLocBuild
     value: false # Disable loc for vs17.10 now that it's shipped
   - name: Codeql.Enabled
@@ -106,6 +114,7 @@ extends:
         parameters:
           isExperimental: false
           enableComponentGovernance: true
+          signTypeParameter: ${{ parameters.signTypeParameter }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
