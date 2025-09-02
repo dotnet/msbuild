@@ -13,10 +13,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         #region Properties
 
         /// <summary>
-        /// Minimum allowed value for this property. 
+        /// Minimum allowed value for this property.
         /// </summary>
         /// <remarks>
-        /// This field is optional. 
+        /// This field is optional.
         /// It returns null when this property is not set. The value of this
         /// property must be less than or equal to the <see cref="MaxValue"/>
         /// property (assuming that the latter is defined).
@@ -28,10 +28,10 @@ namespace Microsoft.Build.Framework.XamlTypes
         }
 
         /// <summary>
-        /// Maximum allowed value for this property. 
+        /// Maximum allowed value for this property.
         /// </summary>
         /// <remarks>
-        /// This field is optional. 
+        /// This field is optional.
         /// It returns null when this property is not set. The value of this
         /// property must be greater than or equal to the <see cref="MinValue"/>
         /// property (assuming that the latter is defined).

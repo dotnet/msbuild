@@ -64,6 +64,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
   file source=$(X86BinPath)Microsoft.Common.tasks
+  file source=$(X86BinPath)Microsoft.Common.Test.targets
   file source=$(X86BinPath)Microsoft.Managed.targets
   file source=$(X86BinPath)Microsoft.Managed.Before.targets
   file source=$(X86BinPath)Microsoft.Managed.After.targets
@@ -212,6 +213,7 @@ folder InstallDir:\MSBuild\Current\Bin\amd64
   file source=$(X86BinPath)Microsoft.Common.overridetasks
   file source=$(X86BinPath)Microsoft.Common.targets
   file source=$(X86BinPath)Microsoft.Common.tasks
+  file source=$(X86BinPath)Microsoft.Common.Test.targets
   file source=$(X86BinPath)Microsoft.Managed.targets
   file source=$(X86BinPath)Microsoft.Managed.Before.targets
   file source=$(X86BinPath)Microsoft.Managed.After.targets

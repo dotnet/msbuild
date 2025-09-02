@@ -18,7 +18,7 @@ namespace Microsoft.Build.BuildEngine
     /// This call is used to contain, serialize and deserialize arguments for call
     /// made via INodeProvider and IEngineCallback interfaces. To make calls via these
     /// interfaces asyncronous the parameters are queued up for a IO thread which
-    /// reads/writes the shared memory buffer to transfer these parameters cross 
+    /// reads/writes the shared memory buffer to transfer these parameters cross
     /// process.
     /// </summary>
     internal abstract class LocalCallDescriptor
@@ -316,7 +316,7 @@ namespace Microsoft.Build.BuildEngine
                 return buildRequests;
             }
         }
-        #endregion 
+        #endregion
 
         #region CustomSerializationToStream
         internal override void WriteToStream(BinaryWriter writer)
@@ -1439,7 +1439,7 @@ namespace Microsoft.Build.BuildEngine
                 writer.Write((byte)1);
                 writer.Write(scopeName);
             }
-            #endregion 
+            #endregion
             #region ScopeProperties
             if (scopeProperties == null)
             {
@@ -1461,7 +1461,7 @@ namespace Microsoft.Build.BuildEngine
                 writer.Write((byte)1);
                 writer.Write(scopeToolsVersion);
             }
-            #endregion 
+            #endregion
             writer.Write((byte)cacheContentType);
         }
         internal override void CreateFromStream(BinaryReader reader)
@@ -1572,7 +1572,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         ShutdownNode = 8,
         /// <summary>
-        /// Call type for the node to indicate that it has shutdown 
+        /// Call type for the node to indicate that it has shutdown
         /// </summary>
         ShutdownComplete = 9,
         /// <summary>

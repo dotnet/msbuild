@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="manifest"></param>
         /// <param name="output"></param>

@@ -1,7 +1,7 @@
 name: 🐞 Bug Report
 description: Report a bug to help us improve MSBuild.
 title: "[Bug]: "
-labels: ["bug", "needs-triage"]
+labels: ["bug"]
 body:
   - type: textarea
     attributes:

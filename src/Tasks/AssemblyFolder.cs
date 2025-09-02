@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
                 key,
                 directories);
 
-            // Then add the local machine.            
+            // Then add the local machine.
             AddFoldersFromRegistryKey(
                 Registry.LocalMachine,
                 key,

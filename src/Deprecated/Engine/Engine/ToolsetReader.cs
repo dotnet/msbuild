@@ -115,11 +115,11 @@ namespace Microsoft.Build.BuildEngine
                                                BuildPropertyGroup initialProperties,
                                                ToolsetDefinitionLocations locations)
         {
-            // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry. 
-            // The 3.5 installer writes one for 2.0, but 3.5 might not be installed.  
-            // The 4.0 and subsequent installers can't keep writing the 2.0 one, because (a) it causes SxS issues and (b) we 
+            // The 2.0 .NET Framework installer did not write a ToolsVersion key for itself in the registry.
+            // The 3.5 installer writes one for 2.0, but 3.5 might not be installed.
+            // The 4.0 and subsequent installers can't keep writing the 2.0 one, because (a) it causes SxS issues and (b) we
             // don't want it unless 2.0 is installed.
-            // So if the 2.0 framework is actually installed, and we're reading the registry, create a toolset for it. 
+            // So if the 2.0 framework is actually installed, and we're reading the registry, create a toolset for it.
             // The registry and config file can overwrite it.
             if (
                 ((locations & ToolsetDefinitionLocations.Registry) != 0) &&
@@ -186,7 +186,7 @@ namespace Microsoft.Build.BuildEngine
                     ErrorUtilities.VerifyThrow(Constants.defaultToolsVersion == "2.0", "Getting 2.0 FX path so default should be 2.0");
                     string pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV20;
 
-                    // We could not find the default toolsversion because it was not installed on the machine. Fallback to the 
+                    // We could not find the default toolsversion because it was not installed on the machine. Fallback to the
                     // one we expect to always be there when running msbuild 4.0.
                     if (pathToFramework == null)
                     {
@@ -280,7 +280,7 @@ namespace Microsoft.Build.BuildEngine
         {
             foreach (PropertyDefinition toolsVersion in ToolsVersions)
             {
-                // We clone here because we don't want to interfere with the evaluation 
+                // We clone here because we don't want to interfere with the evaluation
                 // of subsequent Toolsets; otherwise, properties found during the evaluation
                 // of this Toolset would be persisted in initialProperties and appear
                 // to later Toolsets as Global or Environment properties from the Engine.

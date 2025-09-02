@@ -8,7 +8,7 @@ using System.Diagnostics;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// The NodeBuildComplete packet is used to indicate to a node that it should clean up its current build and 
+    /// The NodeBuildComplete packet is used to indicate to a node that it should clean up its current build and
     /// possibly prepare for node reuse.
     /// </summary>
     internal class NodeBuildComplete : INodePacket

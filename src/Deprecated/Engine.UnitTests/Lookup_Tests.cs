@@ -18,7 +18,7 @@ using NUnit.Framework;
 using System.Threading;
 
 namespace Microsoft.Build.UnitTests
-{  
+{
     [TestFixture]
     public class Lookup_Tests
     {
@@ -99,13 +99,13 @@ namespace Microsoft.Build.UnitTests
             // Start a target
             lookup.EnterScope();
 
-            // We see the one item 
+            // We see the one item
             Assertion.AssertEquals("a1", lookup.GetItems("i1")[0].FinalItemSpec);
 
             // One item in the project
             Assertion.AssertEquals("a1", group1[0].FinalItemSpec);
             Assertion.AssertEquals(1, group1.Count);
-            
+
             // Start a task (eg) and add a new item
             lookup.EnterScope();
             lookup.AddNewItem(new BuildItem("i1", "a2"));
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests
 
             // Finish the task
             lookup.LeaveScope();
-          
+
             // We still see two items
             Assertion.AssertEquals("a1", lookup.GetItems("i1")[0].FinalItemSpec);
             Assertion.AssertEquals("a2", lookup.GetItems("i1")[1].FinalItemSpec);
@@ -196,13 +196,13 @@ namespace Microsoft.Build.UnitTests
 
 // These tests used to have an #if DEBUG around them, because the method they
 // are testing only gets called in chk builds; they have been removed
-// entirely due to BVT bug 527712:  Main is attempting to run chk unit tests 
+// entirely due to BVT bug 527712:  Main is attempting to run chk unit tests
 // against ret bits.  Please only uncomment these tests if you have verified
 // that that scenario works.
-#if NULL    
+#if NULL
         /// <summary>
         /// Lookup class should never be asked to add an item that was already removed;
-        /// this is not something that is possible through a project file: all adds create 
+        /// this is not something that is possible through a project file: all adds create
         /// brand new items.
         /// </summary>
         [Test]
@@ -406,7 +406,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable table1 = new Hashtable(StringComparer.OrdinalIgnoreCase);
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             BuildItem item1 = new BuildItem("i1", "a2");
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -446,7 +446,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable table1 = new Hashtable(StringComparer.OrdinalIgnoreCase);
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             BuildItem item1 = new BuildItem("i1", "a2");
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -511,7 +511,7 @@ namespace Microsoft.Build.UnitTests
             Assertion.AssertEquals("n2", foundGroup[0].GetMetadata("n"));
             Assertion.AssertEquals("o1", foundGroup[0].GetMetadata("o"));
 
-            // Make a modification to the item to be n=n3 
+            // Make a modification to the item to be n=n3
             newMetadata = new Dictionary<string, string>();
             newMetadata.Add("n", "n3");
             lookup.ModifyItems("i1", group, newMetadata);
@@ -604,7 +604,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable table1 = new Hashtable(StringComparer.OrdinalIgnoreCase);
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             BuildItem item1 = new BuildItem("i1", "a2");
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -651,7 +651,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void ModifyItemInProjectPreviouslyModifiedAndGottenThroughGetItem()
         {
-            // Create some project state with an item with m=m1 and n=n1 
+            // Create some project state with an item with m=m1 and n=n1
             Hashtable table1 = new Hashtable(StringComparer.OrdinalIgnoreCase);
             BuildItem item1 = new BuildItem("i1", "a2");
             item1.SetMetadata("m", "m1");
@@ -708,7 +708,7 @@ namespace Microsoft.Build.UnitTests
             Hashtable table1 = new Hashtable(StringComparer.OrdinalIgnoreCase);
             Lookup lookup = LookupHelpers.CreateLookup(table1);
 
-            // Add an item with m=m1 and n=n1 
+            // Add an item with m=m1 and n=n1
             BuildItem item1 = new BuildItem("i1", "a2");
             item1.SetMetadata("m", "m1");
             lookup.PopulateWithItem(item1);
@@ -741,7 +741,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void RemoveItemFromProjectPreviouslyModifiedAndGottenThroughGetItem()
         {
-            // Create some project state with an item with m=m1 and n=n1 
+            // Create some project state with an item with m=m1 and n=n1
             Hashtable table1 = new Hashtable(StringComparer.OrdinalIgnoreCase);
             BuildItem item1 = new BuildItem("i1", "a2");
             item1.SetMetadata("m", "m1");
@@ -836,7 +836,7 @@ namespace Microsoft.Build.UnitTests
 
             lookup.EnterScope();
 
-            // Change the value again in the new scope 
+            // Change the value again in the new scope
             lookup.SetProperty(new BuildProperty("p1", "v3", PropertyType.OutputProperty));
 
             // Lookup is updated, but not the original item group
@@ -845,14 +845,14 @@ namespace Microsoft.Build.UnitTests
 
             lookup.EnterScope();
 
-            // Change the value again in the new scope 
+            // Change the value again in the new scope
             lookup.SetProperty(new BuildProperty("p1", "v4", PropertyType.OutputProperty));
 
             Assertion.AssertEquals("v4", lookup.GetProperty("p1").FinalValue);
 
             lookup.LeaveScope();
 
-            Assertion.AssertEquals("v4", lookup.GetProperty("p1").FinalValue);              
+            Assertion.AssertEquals("v4", lookup.GetProperty("p1").FinalValue);
 
             // Leave to the outer scope
             lookup.LeaveScope();
@@ -1030,6 +1030,6 @@ namespace Microsoft.Build.UnitTests
             ItemDefinitionLibrary itemDefinitionLibrary = new ItemDefinitionLibrary(new Project());
             itemDefinitionLibrary.Evaluate(new BuildPropertyGroup());
             return itemDefinitionLibrary;
-        }    
+        }
     }
 }

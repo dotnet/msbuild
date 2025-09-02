@@ -642,8 +642,8 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         private void GenerateTemplatedCommandLine(CommandLineBuilder builder)
         {
-            // Match all instances of [asdf], where "asdf" can be any combination of any 
-            // characters *except* a [ or an ]. i.e., if "[ [ sdf ]" is passed, then we will 
+            // Match all instances of [asdf], where "asdf" can be any combination of any
+            // characters *except* a [ or an ]. i.e., if "[ [ sdf ]" is passed, then we will
             // match "[ sdf ]"
             string matchString = @"\[[^\[\]]+\]";
             Regex regex = new Regex(matchString, RegexOptions.ECMAScript);
@@ -658,32 +658,32 @@ namespace Microsoft.Build.Tasks.Xaml
                 }
 
                 // Because we match non-greedily, in the case where we have input such as "[[[[[foo]", the match will
-                // be "[foo]".  However, if there are multiple '[' in a row, we need to do some escaping logic, so we 
-                // want to know what the first *consecutive* square bracket was.  
+                // be "[foo]".  However, if there are multiple '[' in a row, we need to do some escaping logic, so we
+                // want to know what the first *consecutive* square bracket was.
                 int indexOfFirstBracketInMatch = match.Index;
 
-                // Indexing using "indexOfFirstBracketInMatch - 1" is safe here because it will always be 
-                // greater than indexOfEndOfLastSubstitution, which will always be 0 or greater. 
+                // Indexing using "indexOfFirstBracketInMatch - 1" is safe here because it will always be
+                // greater than indexOfEndOfLastSubstitution, which will always be 0 or greater.
                 while (indexOfFirstBracketInMatch > indexOfEndOfLastSubstitution && CommandLineTemplate[indexOfFirstBracketInMatch - 1].Equals('['))
                 {
                     indexOfFirstBracketInMatch--;
                 }
 
-                // Append everything we know we want to add -- everything between where the last substitution ended and 
-                // this match (including previous '[' that were not initially technically part of the match) begins. 
+                // Append everything we know we want to add -- everything between where the last substitution ended and
+                // this match (including previous '[' that were not initially technically part of the match) begins.
                 if (indexOfFirstBracketInMatch != indexOfEndOfLastSubstitution)
                 {
                     builder.AppendTextUnquoted(CommandLineTemplate.Substring(indexOfEndOfLastSubstitution, indexOfFirstBracketInMatch - indexOfEndOfLastSubstitution));
                 }
 
-                // Now replace every "[[" with a literal '['.  We can do this by simply counting the number of '[' between 
-                // the first one and the start of the match, since by definition everything in between is an '['.  
-                // + 1 because match.Index is also a bracket. 
+                // Now replace every "[[" with a literal '['.  We can do this by simply counting the number of '[' between
+                // the first one and the start of the match, since by definition everything in between is an '['.
+                // + 1 because match.Index is also a bracket.
                 int openBracketsInARow = match.Index - indexOfFirstBracketInMatch + 1;
 
                 if (openBracketsInARow % 2 == 0)
                 {
-                    // even number -- they all go away and the rest of the match is appended literally. 
+                    // even number -- they all go away and the rest of the match is appended literally.
                     for (int i = 0; i < openBracketsInARow / 2; i++)
                     {
                         builder.AppendTextUnquoted("[");
@@ -693,7 +693,7 @@ namespace Microsoft.Build.Tasks.Xaml
                 }
                 else
                 {
-                    // odd number -- all but one get merged two at a time, and the rest of the match is substituted. 
+                    // odd number -- all but one get merged two at a time, and the rest of the match is substituted.
                     for (int i = 0; i < (openBracketsInARow - 1) / 2; i++)
                     {
                         builder.AppendTextUnquoted("[");
@@ -726,8 +726,8 @@ namespace Microsoft.Build.Tasks.Xaml
                     }
                     else if (!PropertyExists(propertyName))
                     {
-                        // If the thing enclosed in square brackets is not in fact a property, we 
-                        // don't want to replace it. 
+                        // If the thing enclosed in square brackets is not in fact a property, we
+                        // don't want to replace it.
                         builder.AppendTextUnquoted('[' + propertyName + ']');
                     }
                 }

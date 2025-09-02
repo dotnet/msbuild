@@ -1,0 +1,4 @@
+﻿[1F
+  Namespace.Project [36;1mTargetFramework[m [120G[12DBuild (0.0s)
+[2F
+[K  Namespace.Project [36;1mTargetFramework[m [120G[14DTesting (0.0s)

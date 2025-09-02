@@ -4,6 +4,7 @@
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
     <AssemblyName>Microsoft.Build.Tasks.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
@@ -16,12 +17,15 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
+    <PackageReference Include="Verify.Xunit" />
+
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Samples\PortableTask\PortableTask.csproj" ReferenceOutputAssembly="false" Private="false" />
     <ProjectReference Include="..\Samples\Dependency\Dependency.csproj" ReferenceOutputAssembly="false" Private="false" />
   </ItemGroup>
@@ -43,25 +47,12 @@
     <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\MockEngine.cs" />
-    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
       <Link>NativeMethodsShared_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
-    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs" />
-    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
-      <Link>TestEnvironment.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ProcessExtensions.cs" />
-    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
-    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
-    <Compile Include="..\Shared\UnitTests\LongPathSupportDisabledFactAttribute.cs">
-      <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
-    </Compile>
-    <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs" />
 
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
@@ -71,6 +62,18 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Class1.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM.sln">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Custom_COM.csproj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\Projects\Custom_COM\Custom_COM\Properties\AssemblyInfo.cs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -86,11 +89,6 @@
     <Compile Remove="XamlDataDrivenToolTask_Tests.cs" />
     <Compile Remove="XamlTaskFactory_Tests.cs" />
     <Compile Remove="XamlTestHelpers.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(MonoBuild)' == 'true'">
-    <Compile Remove="LC_Tests.cs" />
-    <Compile Remove="SGen_Tests.cs" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFrameworkIdentifier) != '.NETFramework'">
@@ -145,7 +143,16 @@
 
   <ItemGroup>
     <None Update="ResourceHandling\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <None Update="TestResources\Projects\Custom_COM\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestResources\ClickOnceProfile.pubxml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="TestResources\lorem.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="TestResources\mycert.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

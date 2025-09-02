@@ -16,7 +16,7 @@ namespace Microsoft.Build.BuildEngine
     /// This class represents a collection of persisted &lt;ItemGroup&gt;'s.  Each
     /// MSBuild project has exactly one BuildItemGroupCollection, which includes
     /// all the imported ItemGroups as well as the ones in the main project file.
-    /// 
+    ///
     /// The implementation of this class is that it's basically a Facade.  It just
     /// calls into the GroupingCollection within the Project to do it's work.  It
     /// doesn't maintain any BuildPropertyGroup state on its own.
@@ -120,8 +120,8 @@ namespace Microsoft.Build.BuildEngine
                 {
                     if (itemGroup.IsImported)
                     {
-                        // As soon as we hit an imported BuildItemGroup, we want to 
-                        // completely bail out.  The goal of this function is 
+                        // As soon as we hit an imported BuildItemGroup, we want to
+                        // completely bail out.  The goal of this function is
                         // to return the last itemGroup that is *before* any
                         // imported itemGroups.
                         break;
@@ -141,7 +141,7 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
-        /// This ICollection method copies the contents of this collection to an 
+        /// This ICollection method copies the contents of this collection to an
         /// array.
         /// </summary>
         /// <owner>DavidLe</owner>

@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
     {
         // A build result where the taskoutputs are null
         private BuildResult resultNoOutputs;
-        
+
         // A build result where the task outputs are acutal values
         private BuildResult resultWithOutputs;
 
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
         public void Initialize()
         {
             // Create some items and place them in a dictionary
-            // Add some include information so that when we check the final 
+            // Add some include information so that when we check the final
             // item spec we can verify that the item was recreated properly
             buildItem1.Include = "TestInclude1";
             buildItem2.Include = "TestInclude2";
@@ -76,13 +76,13 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(0, resultWithOutputsFromBuildResult.HandleId, "Expected resultWithOutputsFromBuildResult.NodeProxyId to be 0");
             Assert.AreEqual(1, resultWithOutputsFromBuildResult.RequestId, "Expected resultWithOutputsFromBuildResult.RequestId to be 1");
             Assert.AreEqual(2, resultWithOutputsFromBuildResult.ProjectId, "Expected resultWithOutputsFromBuildResult.ProjectId to be 1");
-            
+
             // Test some setters which are not set otherwise during the tests
             resultWithOutputsFromBuildResult.HandleId = 3;
             resultWithOutputsFromBuildResult.RequestId = 4;
             Assert.AreEqual(3, resultWithOutputsFromBuildResult.HandleId, "Expected resultWithOutputsFromBuildResult.NodeProxyId to be 3");
             Assert.AreEqual(4, resultWithOutputsFromBuildResult.RequestId, "Expected resultWithOutputsFromBuildResult.RequestId to be 4");
-            
+
             // Test the setting of RequestId
             resultWithOutputsFromBuildResult.RequestId = 4;
             Assert.AreEqual(4, resultWithOutputsFromBuildResult.RequestId, "Expected resultWithOutputsFromBuildResult.RequestId to be 4");

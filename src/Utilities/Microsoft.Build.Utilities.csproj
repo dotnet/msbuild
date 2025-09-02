@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETStandard' and '$(DotNetBuildFromSource)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" />
+    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">

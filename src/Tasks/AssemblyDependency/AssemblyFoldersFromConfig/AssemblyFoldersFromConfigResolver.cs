@@ -182,7 +182,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                         {
                             string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder.DirectoryPath, assembliesConsideredAndRejected);
 
-                            // We have a full path returned 
+                            // We have a full path returned
                             if (candidatePath != null)
                             {
                                 if (resolvedPath == null)

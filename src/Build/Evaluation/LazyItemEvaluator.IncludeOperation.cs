@@ -104,7 +104,7 @@ namespace Microsoft.Build.Evaluation
                             string[] includeSplitFilesEscaped;
                             if (MSBuildEventSource.Log.IsEnabled())
                             {
-                                MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
+                                MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
                             }
 
                             using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Evaluation
 
                             if (MSBuildEventSource.Log.IsEnabled())
                             {
-                                MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
+                                MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory ?? string.Empty, glob, string.Join(", ", excludePatternsForGlobs));
                             }
 
                             foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)

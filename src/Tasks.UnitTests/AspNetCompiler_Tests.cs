@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure AspNetCompiler sends ExternalProjectStarted/Finished events properly. The tasks will fail since 
+        /// Make sure AspNetCompiler sends ExternalProjectStarted/Finished events properly. The tasks will fail since
         /// the project files don't exist, but we only care about the events anyway.
         /// </summary>
         [Fact]

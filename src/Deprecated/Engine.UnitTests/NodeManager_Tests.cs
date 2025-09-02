@@ -67,10 +67,10 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void RegisterNodeProviders()
         {
-                      
+
             MockNodeProvider ProviderOneNode = new MockNodeProvider();
             ProviderOneNode.NodeDescriptions.Add(new MockNodeDescription("Provider One Node One"));
-           
+
             MockNodeProvider ProviderThreeNodes = new MockNodeProvider();
             ProviderThreeNodes.NodeDescriptions.Add(new MockNodeDescription("Provider Two Node One"));
             ProviderThreeNodes.NodeDescriptions.Add(new MockNodeDescription("Provider Two Node Two"));
@@ -205,7 +205,7 @@ namespace Microsoft.Build.UnitTests
             nodeManager.PostBuildRequestToNode(2, new BuildRequest(2, "ProjectFile", null, new BuildPropertyGroup(), null, 2, false, false));
             nodeManager.PostBuildRequestToNode(3, new BuildRequest(3, "ProjectFile", null, new BuildPropertyGroup(), null, 3, false, false));
             nodeManager.PostBuildRequestToNode(4, new BuildRequest(4, "ProjectFile", null, new BuildPropertyGroup(), null, 4, false, false));
-            
+
             Assert.IsTrue(ProviderThreeNodes.buildRequestsSubmittedToProvider.Count == 3, "Expected there to be three build results in the mock provider");
             Assert.IsTrue(ProviderThreeNodes.buildRequestsSubmittedToProvider[0].HandleId == 1, "Expected first NodeProxyId to be 1");
             Assert.IsTrue(ProviderThreeNodes.buildRequestsSubmittedToProvider[1].HandleId == 2, "Expected second NodeProxyId to be 2");
@@ -295,7 +295,7 @@ namespace Microsoft.Build.UnitTests
             if ( description == null )
             {
                 throw new ArgumentException("Logger description should be non-null");
-            } 
+            }
         }
 
         void INodeProvider.PostBuildRequestToNode(int nodeIndex, BuildRequest buildRequest)
@@ -332,7 +332,7 @@ namespace Microsoft.Build.UnitTests
 
         public void UpdateSettings(bool enableOutOfProcLogging, bool enableOnlyLogCriticalEvents, bool useBreadthFirstTraversalSetting)
         {
-          
+
         }
 
         #endregion
@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests
 
         public void AssignNodeIdentifiers(int[] nodeIdentifiers)
         {
-           
+
         }
 
         public void RequestNodeStatus(int nodeIndex, int requestId)

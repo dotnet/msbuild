@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
             ItemDefinitionLibrary library = new ItemDefinitionLibrary(new Project());
             library.Add(group);
             library.GetDefaultMetadataValue("ccompile", "defines");
-        } 
+        }
 
         [Test]
         public void Basic()
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             library.Evaluate(null);
 
             Assertion.AssertEquals("DEBUG", library.GetDefaultMetadataValue("ccompile", "defines"));
-        }        
+        }
 
         [Test]
         public void SameGroupTwoChildrenSameItemTypeDifferentMetadata()
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that, given metadata on an item definition, a corresponding item will pick up
-        /// that item definition metadata.  
+        /// that item definition metadata.
         /// </summary>
         [Test]
         public void ItemsPickUpItemDefinitionMetadata()
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests
                             <SomeMetadata>foo</SomeMetadata>
                         </ItemWithDefinition>
                     </ItemDefinitionGroup>
-                    
+
                     <ItemGroup>
                         <ItemWithDefinition Include=`foo.cs` />
                     </ItemGroup>
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that, given metadata on an item definition, a corresponding item will pick up
-        /// that item definition metadata, even if the name of the item has since changed.  
+        /// that item definition metadata, even if the name of the item has since changed.
         /// </summary>
         [Test]
         public void ItemsPickUpItemDefinitionMetadataWithTransforms()
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests
                             <SomeMetadata>foo</SomeMetadata>
                         </ItemWithDefinition>
                     </ItemDefinitionGroup>
-                    
+
                     <ItemGroup>
                         <ItemWithDefinition Include=`foo.cs` />
                     </ItemGroup>
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Verifies that, given metadata on an item definition, a corresponding item will pick up
-        /// that item definition metadata even if the definition is in a different project from the item.  
+        /// that item definition metadata even if the definition is in a different project from the item.
         /// </summary>
         [Test]
         public void ItemsPickUpItemDefinitionMetadataFromImportedProject()

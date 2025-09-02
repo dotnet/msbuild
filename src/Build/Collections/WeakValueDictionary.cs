@@ -119,7 +119,7 @@ namespace Microsoft.Build.Collections
                 {
                     Scavenge();
 
-                    // If that didn't do anything, raise the capacity at which 
+                    // If that didn't do anything, raise the capacity at which
                     // we next scavenge. Note that we never shrink, but neither
                     // does the underlying dictionary.
                     if (_dictionary.Count == _capacity)

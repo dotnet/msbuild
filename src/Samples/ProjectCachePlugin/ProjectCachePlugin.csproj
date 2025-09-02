@@ -6,14 +6,13 @@
 
     <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(FullFrameworkTFM);$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(MonoBuild)'=='true'">$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Shouldly" Version="3.0.0" />
+    <PackageReference Include="Shouldly" Version="4.2.1" />
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 </Project>

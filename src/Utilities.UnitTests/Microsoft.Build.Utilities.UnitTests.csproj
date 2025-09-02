@@ -19,6 +19,7 @@
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" ReferenceOutputAssembly="false" OutputItemType="ReferenceCopyLocalPaths" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
+    <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -26,13 +27,7 @@
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\MockLogger.cs" />
-    <Compile Include="..\Shared\UnitTests\ObjectModelHelpers.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\EngineTestEnvironment.cs" />
-    <Compile Include="..\Shared\UnitTests\TestEnvironment.cs">
-      <Link>TestEnvironment.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs">
       <Link>NativeMethods.cs</Link>

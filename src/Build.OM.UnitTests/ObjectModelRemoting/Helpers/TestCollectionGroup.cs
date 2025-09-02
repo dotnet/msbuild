@@ -120,22 +120,22 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                             <When Condition=""'$(Configuration)'=='Foo'"">
                               <PropertyGroup>
                                 <p>vFoo</p>
-                              </PropertyGroup> 
+                              </PropertyGroup>
                             </When>
                             <When Condition='false'>
                               <PropertyGroup>
                                 <p>vFalse</p>
-                              </PropertyGroup> 
-                            </When>      
+                              </PropertyGroup>
+                            </When>
                             <When Condition='true'>
                               <PropertyGroup>
                                 <p>vTrue</p>
-                              </PropertyGroup> 
-                            </When>      
+                              </PropertyGroup>
+                            </When>
                             <Otherwise>
                               <PropertyGroup>
                                 <p>vOtherwise</p>
-                              </PropertyGroup> 
+                              </PropertyGroup>
                             </Otherwise>
                         </Choose>
 

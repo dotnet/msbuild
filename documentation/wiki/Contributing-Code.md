@@ -8,6 +8,7 @@ Because our focus right now is on maintaining backwards compatibility, the team 
 - Pull requests that do not merge easily with the tip of the main branch will be declined. The author will be asked to merge with tip and submit a new pull request.
 - Submissions must meet functional and performance expectations, including scenarios for which the team doesn't yet have open source tests. This means you may be asked to fix and resubmit your pull request against a new open test case if it fails one of these tests.
 - Submissions must follow the [.NET Runtime Coding Guidelines](https://github.com/dotnet/runtime/blob/main/docs/coding-guidelines/coding-style.md)
+- For any changed or newly introduced test cases usage of Shouldly assertion framework is preferable.
 
 When you are ready to proceed with making a change, get set up to [build](Home.md "See 'Building Testing and Debugging'") the code and familiarize yourself with our workflow and our coding conventions. These two blogs posts on contributing code to open source projects are good too: [Open Source Contribution Etiquette by Miguel de Icaza](https://tirania.org/blog/archive/2010/Dec-31.html) and [Don’t “Push” Your Pull Requests by Ilya Grigorik](https://www.igvita.com/2011/12/19/dont-push-your-pull-requests/).
 

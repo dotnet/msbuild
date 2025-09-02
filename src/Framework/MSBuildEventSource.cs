@@ -3,8 +3,6 @@
 
 using System.Diagnostics.Tracing;
 
-#nullable disable
-
 namespace Microsoft.Build.Eventing
 {
     /// <summary>
@@ -242,7 +240,7 @@ namespace Microsoft.Build.Eventing
             WriteEvent(27);
         }
 
-        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog)]
+        [Event(28, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
         public void RarOverallStop(int assembliesCount, int assemblyFilesCount, int resolvedFilesCount, int resolvedDependencyFilesCount, int copyLocalFilesCount, bool findDependencies)
         {
             WriteEvent(28, assembliesCount, assemblyFilesCount, resolvedFilesCount, resolvedDependencyFilesCount, copyLocalFilesCount, findDependencies);
@@ -478,13 +476,13 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(62, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStart()
+        public void SdkResolverLoadAllResolversStart()
         {
             WriteEvent(62);
         }
 
         [Event(63, Keywords = Keywords.All)]
-        public void SdkResolverServiceInitializeStop(int resolverCount)
+        public void SdkResolverLoadAllResolversStop(int resolverCount)
         {
             WriteEvent(63, resolverCount);
         }
@@ -603,25 +601,25 @@ namespace Microsoft.Build.Eventing
         }
 
         [Event(81, Keywords = Keywords.All)]
-        public void SdkResolverServiceFindResolversManifestsStart()
+        public void SdkResolverFindResolversManifestsStart()
         {
             WriteEvent(81);
         }
 
         [Event(82, Keywords = Keywords.All)]
-        public void SdkResolverServiceFindResolversManifestsStop(int resolverManifestCount)
+        public void SdkResolverFindResolversManifestsStop(int resolverManifestCount)
         {
             WriteEvent(82, resolverManifestCount);
         }
 
         [Event(83, Keywords = Keywords.All)]
-        public void SdkResolverServiceLoadResolversStart()
+        public void SdkResolverLoadResolversStart()
         {
             WriteEvent(83);
         }
 
         [Event(84, Keywords = Keywords.All)]
-        public void SdkResolverServiceLoadResolversStop(string manifestName, int resolverCount)
+        public void SdkResolverLoadResolversStop(string manifestName, int resolverCount)
         {
             WriteEvent(84, manifestName, resolverCount);
         }

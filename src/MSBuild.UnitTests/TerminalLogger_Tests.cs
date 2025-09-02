@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -30,6 +31,7 @@ namespace Microsoft.Build.UnitTests
         private const int _nodeCount = 8;
         private const string _eventSender = "Test";
         private readonly string _projectFile = NativeMethods.IsUnixLike ? "/src/project.proj" : @"C:\src\project.proj";
+        private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
 
         private StringWriter _outputWriter = new();
 
@@ -41,7 +43,7 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
-        private static Regex s_elapsedTime = new($@"\d+{Regex.Escape(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)}\ds", RegexOptions.Compiled);
+        private readonly CultureInfo _originalCulture = Thread.CurrentThread.CurrentCulture;
 
         public TerminalLogger_Tests()
         {
@@ -50,17 +52,12 @@ namespace Microsoft.Build.UnitTests
 
             _terminallogger.Initialize(this, _nodeCount);
 
+            _terminallogger.CreateStopwatch = () => new MockStopwatch();
+
             UseProjectRelativeDirectory("Snapshots");
 
-            // Scrub timestamps on intermediate execution lines,
-            // which are subject to the vagaries of the test machine
-            // and OS scheduler.
-            _settings.AddScrubber(static lineBuilder =>
-            {
-                string line = lineBuilder.ToString();
-                lineBuilder.Clear();
-                lineBuilder.Append(s_elapsedTime.Replace(line, "0.0s"));
-            });
+            // Avoids issues with different cultures on different machines
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         }
 
         #region IEventSource implementation
@@ -102,6 +99,7 @@ namespace Microsoft.Build.UnitTests
         public void Dispose()
         {
             _terminallogger.Shutdown();
+            Thread.CurrentThread.CurrentCulture = _originalCulture;
         }
 
         #endregion
@@ -179,6 +177,14 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
+        private BuildMessageEventArgs MakeMessageEventArgs(string message)
+        {
+            return new BuildMessageEventArgs(message, "keyword", null, MessageImportance.High)
+            {
+                BuildEventContext = MakeBuildEventContext(),
+            };
+        }
+
         private BuildErrorEventArgs MakeErrorEventArgs(string error)
         {
             return new BuildErrorEventArgs("", "AA0000", "directory/file", 1, 2, 3, 4, error, null, null)
@@ -201,12 +207,37 @@ namespace Microsoft.Build.UnitTests
 
             additionalCallbacks();
 
-            Thread.Sleep(1_000);
-
             TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
             TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build", succeeded));
 
             ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+        }
+
+        private void InvokeLoggerCallbacksForTwoProjects(bool succeeded, Action additionalCallbacks, Action additionalCallbacks2)
+        {
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build1"));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task1"));
+
+            additionalCallbacks();
+
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task1", succeeded));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build1", succeeded));
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile2));
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile2, "Build2"));
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile2, "Task2"));
+
+            additionalCallbacks2();
+
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile2, "Task2", succeeded));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile2, "Build2", succeeded));
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile2, succeeded));
+
             BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
         }
 
@@ -223,8 +254,77 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
             });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintImmediateWarningMessage_Succeeded()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("[CredentialProvider]DeviceFlow: https://testfeed/index.json"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs(
+                    "[CredentialProvider]ATTENTION: User interaction required." +
+                    "**********************************************************************" +
+                    "To sign in, use a web browser to open the page https://devicelogin and enter the code XXXXXX to authenticate." +
+                    "**********************************************************************"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintImmediateMessage_Success()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(
+                    "The plugin credential provider could not acquire credentials." +
+                    "Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, " +
+                    "/p:NuGetInteractive=\"true\" for MSBuild or removing the -NonInteractive switch for `NuGet`"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintImmediateMessage_Skipped()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("--anycustomarg"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintRestore_Failed()
+        {
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+
+            bool succeeded = false;
+            ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Restore Failed"));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintRestore_SuccessWithWarnings()
+        {
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+
+            bool succeeded = true;
+            WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Restore with Warning"));
+
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -247,6 +347,45 @@ namespace Microsoft.Build.UnitTests
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [Fact]
+        public Task PrintBuildSummary_FailedWithErrorsAndWarnings()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
+            {
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning1!"));
+                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning2!"));
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error1!"));
+                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error2!"));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+
+        [Fact]
+        public Task PrintBuildSummary_2Projects_FailedWithErrorsAndWarnings()
+        {
+            InvokeLoggerCallbacksForTwoProjects(
+                succeeded: false,
+                () =>
+                {
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning1!"));
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning2!"));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error1!"));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error2!"));
+                },
+                () =>
+                {
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning3!"));
+                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning4!"));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error3!"));
+                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error4!"));
+                });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+
         #endregion
 
         [Fact]
@@ -259,6 +398,43 @@ namespace Microsoft.Build.UnitTests
                 await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
             });
         }
+
+        [Fact]
+        public void DisplayNodesOverwritesTime()
+        {
+            List<MockStopwatch> stopwatches = new();
+
+            Func<StopwatchAbstraction>? createStopwatch = _terminallogger.CreateStopwatch;
+
+            try
+            {
+                _terminallogger.CreateStopwatch = () =>
+                {
+                    MockStopwatch stopwatch = new();
+                    stopwatches.Add(stopwatch);
+                    return stopwatch;
+                };
+
+                InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
+                {
+                    foreach (var stopwatch in stopwatches)
+                    {
+                        // Tick time forward by at least 10 seconds,
+                        // as a regression test for https://github.com/dotnet/msbuild/issues/9562
+                        stopwatch.Tick(111.0);
+                    }
+
+                    _terminallogger.DisplayNodes();
+
+                    await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+                });
+            }
+            finally
+            {
+                _terminallogger.CreateStopwatch = createStopwatch;
+            }
+        }
+
 
         [Fact]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
@@ -293,7 +469,7 @@ namespace Microsoft.Build.UnitTests
         public void TestTerminalLoggerTogetherWithOtherLoggers()
         {
             using (TestEnvironment env = TestEnvironment.Create())
-            { 
+            {
                 string contents = @"
 <Project>
     <ItemGroup>
@@ -310,13 +486,8 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
 
-                BinaryLogger loggerWithTL = new();
                 string logFileWithTL = env.ExpectFile(".binlog").Path;
-                loggerWithTL.Parameters = logFileWithTL;
-
-                BinaryLogger loggerWithoutTL = new();
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
-                loggerWithoutTL.Parameters = logFileWithoutTL;
 
                 // Execute MSBuild with binary, file and terminal loggers
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success);

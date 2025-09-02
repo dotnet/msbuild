@@ -79,9 +79,9 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a set of TLog names, formats a rooting marker from them, that additionally replaces 
-        /// all PIDs and TIDs with "[ID]" so the cache doesn't get overloaded with entries 
-        /// that should be basically the same but have different PIDs or TIDs in the name. 
+        /// Given a set of TLog names, formats a rooting marker from them, that additionally replaces
+        /// all PIDs and TIDs with "[ID]" so the cache doesn't get overloaded with entries
+        /// that should be basically the same but have different PIDs or TIDs in the name.
         /// </summary>
         /// <param name="tlogFiles">The set of tlogs to format</param>
         /// <returns>The normalized rooting marker based on that set of tlogs</returns>
@@ -101,26 +101,26 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Given a TLog path, replace all PIDs and TIDs with "[ID]" in the filename, where 
+        /// Given a TLog path, replace all PIDs and TIDs with "[ID]" in the filename, where
         /// the typical format of a filename is "tool[.PID][-tool].read/write/command/delete.TID.tlog"
         /// </summary>
         /// <comments>
         /// The algorithm used finds all instances of .\d+. and .\d+- in the filename and translates them
-        /// to .[ID]. and .[ID]- respectively, where "filename" is defined as the part of the path following 
-        /// the final '\' in the path.  
-        /// 
-        /// In the VS 2010 C++ project system, there are artificially constructed tlogs that instead follow the 
-        /// pattern "ProjectName.read/write.1.tlog", which means that one result of this change is that such 
+        /// to .[ID]. and .[ID]- respectively, where "filename" is defined as the part of the path following
+        /// the final '\' in the path.
+        ///
+        /// In the VS 2010 C++ project system, there are artificially constructed tlogs that instead follow the
+        /// pattern "ProjectName.read/write.1.tlog", which means that one result of this change is that such
         /// tlogs, should the project name also contain this pattern (e.g. ClassLibrary.1.csproj), will also end up
-        /// with [ID] being substituted for digits in the project name itself -- so the tlog name would end up being 
-        /// ClassLibrary.[ID].read.[ID].tlog, rather than ClassLibrary.1.read.[ID].tlog.  This could potentially 
-        /// cause issues if there are multiple projects differentiated only by the digits in their names; however 
-        /// we believe this is not an interesting scenario to watch for and support, given that the resultant rooting 
-        /// marker is constructed from full paths, so either: 
-        /// - The project directories are also different, and are never substituted, leading to different full paths (e.g. 
+        /// with [ID] being substituted for digits in the project name itself -- so the tlog name would end up being
+        /// ClassLibrary.[ID].read.[ID].tlog, rather than ClassLibrary.1.read.[ID].tlog.  This could potentially
+        /// cause issues if there are multiple projects differentiated only by the digits in their names; however
+        /// we believe this is not an interesting scenario to watch for and support, given that the resultant rooting
+        /// marker is constructed from full paths, so either:
+        /// - The project directories are also different, and are never substituted, leading to different full paths (e.g.
         ///   C:\ClassLibrary.1\Debug\ClassLibrary.[ID].read.[ID].tlog and C:\ClassLibrary.2\Debug\ClassLibrary.[ID].read.[ID].tlog)
-        /// - The project directories are the same, in which case there are two projects that share the same intermediate 
-        ///   directory, which has a host of other problems and is explicitly NOT a supported scenario.  
+        /// - The project directories are the same, in which case there are two projects that share the same intermediate
+        ///   directory, which has a host of other problems and is explicitly NOT a supported scenario.
         /// </comments>
         /// <param name="tlogPath">The tlog path to normalize</param>
         /// <returns>The normalized path</returns>
@@ -128,8 +128,8 @@ namespace Microsoft.Build.Utilities
         {
             if (tlogPath.IndexOfAny(s_numerals) == -1)
             {
-                // no reason to make modifications if there aren't any numerical IDs in the 
-                // log filename to begin with. 
+                // no reason to make modifications if there aren't any numerical IDs in the
+                // log filename to begin with.
                 return tlogPath;
             }
             else
@@ -137,10 +137,10 @@ namespace Microsoft.Build.Utilities
                 int i;
                 StringBuilder normalizedTlogFilename = new StringBuilder();
 
-                // We're walking the filename backwards since once we hit the final '\', we know we can stop parsing. 
-                // So as to avoid allocating more memory and/or forcing StringBuilder to do more character copies 
-                // than necessary, we append the reversed filename character by character to its own StringBuilder, 
-                // and then reverse it again when constructing the final normalized path.  
+                // We're walking the filename backwards since once we hit the final '\', we know we can stop parsing.
+                // So as to avoid allocating more memory and/or forcing StringBuilder to do more character copies
+                // than necessary, we append the reversed filename character by character to its own StringBuilder,
+                // and then reverse it again when constructing the final normalized path.
                 for (i = tlogPath.Length - 1; i >= 0 && tlogPath[i] != '\\'; i--)
                 {
                     // final character in the pattern can be either '.' or '-'
@@ -166,7 +166,7 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        // append this character -- it's not interesting. 
+                        // append this character -- it's not interesting.
                         normalizedTlogFilename.Append(tlogPath[i]);
                     }
                 }
@@ -199,8 +199,8 @@ namespace Microsoft.Build.Utilities
         private class TaskItemItemSpecIgnoreCaseComparer : IEqualityComparer<ITaskItem>
         {
             /// <summary>
-            /// Returns whether the two ITaskItems are equal, where they are judged to be 
-            /// equal as long as the itemspecs, compared case-insensitively, are equal. 
+            /// Returns whether the two ITaskItems are equal, where they are judged to be
+            /// equal as long as the itemspecs, compared case-insensitively, are equal.
             /// </summary>
             public bool Equals(ITaskItem x, ITaskItem y)
             {
@@ -219,8 +219,8 @@ namespace Microsoft.Build.Utilities
 
             /// <summary>
             /// Returns the hashcode of this ITaskItem.  Given that equality is judged solely based
-            /// on the itemspec, the hash code for this particular comparer also only uses the 
-            /// itemspec to make its determination. 
+            /// on the itemspec, the hash code for this particular comparer also only uses the
+            /// itemspec to make its determination.
             /// </summary>
             public int GetHashCode(ITaskItem obj) => obj == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.ItemSpec);
         }

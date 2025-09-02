@@ -9,7 +9,7 @@ using System.Runtime.Serialization;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Internal exception thrown when there's an unrecoverable failure resolving a COM reference and we should 
+    /// Internal exception thrown when there's an unrecoverable failure resolving a COM reference and we should
     /// move on to the next one, if it makes sense.
     /// </summary>
     // WARNING: marking a type [Serializable] without implementing ISerializable imposes a serialization contract -- it is a

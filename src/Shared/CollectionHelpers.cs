@@ -36,7 +36,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Extension method -- combines a TryGet with a check to see that the value is equal. 
+        /// Extension method -- combines a TryGet with a check to see that the value is equal.
         /// </summary>
         internal static bool ContainsValueAndIsEqual(this Dictionary<string, string> dictionary, string key, string value, StringComparison comparer)
         {

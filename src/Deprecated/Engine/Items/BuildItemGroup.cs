@@ -350,7 +350,7 @@ namespace Microsoft.Build.BuildEngine
                 itemToAdd.ItemDefinitionLibrary = parentProject.ItemDefinitionLibrary;
             }
 
-            // If this BuildItemGroup is a persisted <ItemGroup>, then we need the 
+            // If this BuildItemGroup is a persisted <ItemGroup>, then we need the
             // items to have a reference back to their parent BuildItemGroup.  This
             // makes it *much* easier to delete items through the object model.
             if (IsPersisted)
@@ -383,11 +383,11 @@ namespace Microsoft.Build.BuildEngine
                 ErrorUtilities.VerifyThrow(itemToAdd.ItemElement.OwnerDocument == xml.OwnerDocument, "Cannot add an Item with a different XML owner document.");
 
                 // Generally, the desired behavior is to keep items of the same Type physically
-                // contiguous within the BuildItemGroup.  (It's just easier to read that way.)  So we 
+                // contiguous within the BuildItemGroup.  (It's just easier to read that way.)  So we
                 // scan through the existing items in our BuildItemGroup, and try to find the spot where
-                // the new item would fit in alphabetically.  This is nice because it helps 
-                // source code control scenarios where multiple clients are adding items to 
-                // the same list.  By putting them in alphabetical order, there's less of a 
+                // the new item would fit in alphabetically.  This is nice because it helps
+                // source code control scenarios where multiple clients are adding items to
+                // the same list.  By putting them in alphabetical order, there's less of a
                 // chance of merge conflicts.
                 int insertionIndex = items.Count;
                 for (int i = 0; i < items.Count; i++)
@@ -488,7 +488,7 @@ namespace Microsoft.Build.BuildEngine
                 BackupPersistedItems();
             }
 
-            // Don't remove the XML node, or mark the itemgroup as dirty; this is 
+            // Don't remove the XML node, or mark the itemgroup as dirty; this is
             // strictly an operation on temporary items, because we'll be un-backing up the
             // persisted items at the end of the build
 
@@ -859,7 +859,7 @@ namespace Microsoft.Build.BuildEngine
                 BuildItemGroup itemizedGroup = expander.ExpandSingleItemListExpressionIntoItemsLeaveEscaped(itemIncludePieces[i], originalItem.IncludeAttribute);
                 if (itemizedGroup == null)
                 {
-                    // The expression did not represent a single @(...) item list reference. 
+                    // The expression did not represent a single @(...) item list reference.
                     if (expandMetadata)
                     {
                         // We're inside a target: metadata expressions like %(foo) are legal, so expand them now

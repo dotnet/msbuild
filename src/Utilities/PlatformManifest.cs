@@ -18,7 +18,7 @@ namespace Microsoft.Build.Utilities
     internal class PlatformManifest
     {
         /// <summary>
-        /// Location of Platform.xml 
+        /// Location of Platform.xml
         /// </summary>
         private readonly string _pathToManifest;
 
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Utilities
         public string PlatformVersion { get; private set; }
 
         /// <summary>
-        /// The platforms that this platform depends on.  
+        /// The platforms that this platform depends on.
         /// Item1: Platform name
         /// Item2: Platform version
         /// </summary>
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Utilities
         private void LoadManifestFile()
         {
             /*
-               Platform.xml format: 
+               Platform.xml format:
 
                <ApplicationPlatform name="UAP" friendlyName="Universal Application Platform" version="1.0.0.0">
                   <DependentPlatform name="UAP" version="1.0.0.0" />
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Utilities
             internal readonly string Name;
 
             /// <summary>
-            /// Version of the platform on which this platform depends 
+            /// Version of the platform on which this platform depends
             /// </summary>
             internal readonly string Version;
 
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Utilities
         private static class Elements
         {
             /// <summary>
-            /// Root element 
+            /// Root element
             /// </summary>
             public const string ApplicationPlatform = "ApplicationPlatform";
 

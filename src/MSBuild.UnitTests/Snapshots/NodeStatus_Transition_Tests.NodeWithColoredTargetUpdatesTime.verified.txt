@@ -1,0 +1,4 @@
+﻿[1F
+  Namespace.Project [36;1mTargetFramework[m [120G[25D[32;1mpassed[m MyTestName1 (0.0s)
+[2F
+[120G[6D(0.2s)

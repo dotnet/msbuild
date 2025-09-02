@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// Verify the correct exception is thrown when the logger is initialized with a null 
+        /// Verify the correct exception is thrown when the logger is initialized with a null
         /// event source.
         /// </summary>
         [Fact]
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests.Logging
             });
         }
         /// <summary>
-        /// Verify the correct exception is thrown when the logger is initialized with a null 
+        /// Verify the correct exception is thrown when the logger is initialized with a null
         /// event source.
         /// </summary>
         [Fact]
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         /// <summary>
         /// Create a new forwarding logger, event redirector, and event source.
-        /// The returned event source can then have and event raised on it and it can 
+        /// The returned event source can then have and event raised on it and it can
         /// check to see if the event raised matches the one we were expecting.
         /// </summary>
         /// <param name="buildEventToCheck">A build event we are expecting to be forwarded by the forwarding logger</param>
@@ -139,8 +139,8 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         /// <summary>
-        /// An event redirector which takes in an expected event 
-        /// and when the forwarding logger forwards and event 
+        /// An event redirector which takes in an expected event
+        /// and when the forwarding logger forwards and event
         /// we check to see if the events match. This allows
         /// us to check to see if the forwarding logger is
         /// sending us the events we send in.
@@ -150,8 +150,8 @@ namespace Microsoft.Build.UnitTests.Logging
             #region Data
 
             /// <summary>
-            /// Event we expect to see in the ForwardEvent method. 
-            /// This helps us verify that a logger is correctly forwarding 
+            /// Event we expect to see in the ForwardEvent method.
+            /// This helps us verify that a logger is correctly forwarding
             /// an event.
             /// </summary>
             private BuildEventArgs _expectedEvent;

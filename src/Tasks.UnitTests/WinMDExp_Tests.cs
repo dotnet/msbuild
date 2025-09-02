@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
     {
         /// <summary>
         /// Tests the "References" parameter on the winmdexp task, and confirms that it sets
-        /// the /reference switch on the command-line correctly.  
+        /// the /reference switch on the command-line correctly.
         /// </summary>
         [Fact]
         public void References()
