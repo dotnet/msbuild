@@ -808,23 +808,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Method called when a context created.
-        /// </summary>
-        private void NodeContextCreated(NodeContext context)
-        {
-            _nodeContexts[(HandshakeOptions)context.NodeId] = context;
-
-            // Start the asynchronous read.
-            context.BeginAsyncPacketRead();
-
-            lock (_activeNodes)
-            {
-                _activeNodes.Add(context.NodeId);
-            }
-            _noNodesActiveEvent.Reset();
-        }
-
-        /// <summary>
         /// Method called when a context terminates.
         /// </summary>
         private void NodeContextTerminated(int nodeId)
