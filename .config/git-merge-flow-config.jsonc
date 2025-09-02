@@ -2,16 +2,8 @@
 {
     "merge-flow-configurations": {
         // MSBuild servicing chain from oldest supported through currently-supported to main
-        // Automate opening PRs to merge msbuild's vs16.11 (VS until 4/2029) into vs17.0 (SDK 6.0.1xx)
+        // Automate opening PRs to merge msbuild's vs16.11 (VS until 4/2029) into vs17.8 (SDK 8.0.1xx, VS until 7/2025)
         "vs16.11": {
-            "MergeToBranch": "vs17.0"
-        },
-        // Automate opening PRs to merge msbuild's vs17.0 (SDK 6.0.1xx) into vs17.3 (SDK 6.0.4xx)
-        "vs17.0": {
-            "MergeToBranch": "vs17.3"
-        },
-        // Automate opening PRs to merge msbuild's vs17.3 (SDK 6.0.4xx) into vs17.8 (SDK 8.0.1xx, VS until 7/2025)
-        "vs17.3": {
             "MergeToBranch": "vs17.8"
         },
         // Automate opening PRs to merge msbuild's vs17.8 (SDK 8.0.1xx) into vs17.10 (SDK 8.0.3xx, VS until 1/2026)

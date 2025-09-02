@@ -467,8 +467,16 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
-                return nodeStream;
+                if (TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout, out HandshakeResult result))
+                {
+                    return nodeStream;
+                }
+                else
+                {
+                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, result.ErrorMessage.TrimEnd());
+                    nodeStream?.Dispose();
+                    return null;
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -492,7 +500,7 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
         /// </remarks>
-        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
+        internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {
             nodeStream.Connect(timeout);
 
@@ -521,13 +529,24 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
+            if (
+
+            nodeStream.TryReadEndOfHandshakeSignal(true,
 #if NETCOREAPP2_1_OR_GREATER
-            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
-#else
-            nodeStream.ReadEndOfHandshakeSignal(true);
+            timeout,
 #endif
-            // We got a connection.
-            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+            out HandshakeResult innerResult))
+            {
+                // We got a connection.
+                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                result = HandshakeResult.Success(0);
+                return true;
+            }
+            else
+            {
+                result = innerResult;
+                return false;
+            }
         }
 
         /// <summary>
@@ -661,8 +680,9 @@ namespace Microsoft.Build.BackEnd
                 _packetEnqueued = new AutoResetEvent(false);
                 _packetQueueDrainDelayCancellation = new CancellationTokenSource();
 
-                // specify the smallest stack size - 64kb
-                _drainPacketQueueThread = new Thread(DrainPacketQueue, 64 * 1024);
+                // We select a thread size empirically - for debug builds the minimum possible stack size was too small.
+                // The current size is reported to not have the issue.
+                _drainPacketQueueThread = new Thread(DrainPacketQueue, 0x30000);
                 _drainPacketQueueThread.IsBackground = true;
                 _drainPacketQueueThread.Start(this);
             }

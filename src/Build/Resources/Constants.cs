@@ -187,6 +187,8 @@ namespace Microsoft.Build.Internal
         internal const string programFilesx86 = "ProgramFiles(x86)";
 
         internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
+
+        internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
     }
 
     /// <summary>
@@ -208,7 +210,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Locker to protect initialization
         /// </summary>
-        private static readonly Object s_locker = new Object();
+        private static readonly LockType s_locker = new();
 
         static AvailableStaticMethods()
         {
