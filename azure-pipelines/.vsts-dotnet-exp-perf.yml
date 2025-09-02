@@ -5,7 +5,6 @@ trigger:
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
-#   SignType: test
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -17,6 +16,10 @@ parameters:
   displayName: Enable Signing Validation
   type: boolean
   default: false
+- name: signTypeParameter
+  displayName: Sign Type
+  type: string
+  default: 'test'
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -72,6 +75,7 @@ extends:
         parameters:
           isExperimental: true
           enableComponentGovernance: false
+          signTypeParameter: ${{ parameters.signTypeParameter }}
 
     - template: /eng/common/templates/post-build/post-build.yml@self
       parameters:
