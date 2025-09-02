@@ -12,8 +12,6 @@
     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
-    <CheckEolTargetFramework>false</CheckEolTargetFramework>
-    <CheckNotRecommendedTargetFramework>false</CheckNotRecommendedTargetFramework>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
@@ -79,5 +77,4 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
-  <Import Project=".\DotNetBuild.props" />
 </Project>

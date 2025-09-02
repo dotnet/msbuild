@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check that the ARM flag is passed to the compiler when targeting ARM.
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void TargetARM()
         {
             string file = null;
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platform of anycpu, library type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void ExplicitAnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, winmdobj type assemblies do not 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void ExplicitAnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), exe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void AnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -331,7 +331,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void ExplicitAnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -480,7 +480,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), appcontainerexe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void AnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -535,7 +535,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, appcontainerexe type assemblies 
         /// get forced to anycpu32bitpreferred by default. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void ExplicitAnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -591,7 +591,7 @@ namespace Microsoft.Build.UnitTests
         /// Although AnyCPU library projects should not default to AnyCPU32BitPreferred, because that platform is 
         /// not supported for library projects, if Prefer32Bit is explicitly set, we should still respect that. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void AnyCPULibraryProjectIs32BitPreferredIfPrefer32BitSet()
         {
             string file = null;
@@ -642,7 +642,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe, 
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void AnyCPUProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -691,7 +691,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe, 
         /// so it should also default to Prefer32Bit = true. 
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void AnyCPUJupiterProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -839,7 +839,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Doesn't synthesize Link metadata if the items are defined in the project  
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
         {
             string[] files = null;
@@ -977,7 +977,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Don't synthesize link metadata if the SynthesizeLinkMetadata property is false
         /// </summary>
-        [Fact(Skip = "skipped for failing tests when reviving pipeline")]
+        [Fact]
         public void DontSynthesizeLinkMetadataIfPropertyNotSet()
         {
             string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));

@@ -64,7 +64,7 @@ try {
 
   if ($buildStage1)
   {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
   }
 
   KillProcessesFromRepo

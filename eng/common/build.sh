@@ -201,7 +201,6 @@ function InitializeCustomToolset {
 }
 
 function Build {
-
   InitializeToolset
   InitializeCustomToolset
 
