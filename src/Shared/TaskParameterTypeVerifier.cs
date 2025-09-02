@@ -1,10 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Framework;
 using System.Reflection;
+using Microsoft.Build.Framework;
+#if NET35
 using Microsoft.Build.Shared;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -16,11 +20,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
-        internal static bool IsValidScalarInputParameter(Type parameterType)
-        {
-            bool result = (parameterType.GetTypeInfo().IsValueType || parameterType == typeof(string) || parameterType == typeof(ITaskItem));
-            return result;
-        }
+        internal static bool IsValidScalarInputParameter(Type parameterType) =>
+            parameterType.GetTypeInfo().IsValueType || parameterType == typeof(string) || parameterType == typeof(ITaskItem);
 
         /// <summary>
         /// Is the passed in parameterType a valid vector input parameter

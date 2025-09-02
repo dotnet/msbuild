@@ -1,28 +1,38 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
+#if !RUNTIME_TYPE_NETCORE
+using Microsoft.Build.Framework;
 using System.Collections.Generic;
+#endif
 using System.ComponentModel;
 using System.Deployment.Internal.CodeSigning;
 using System.Diagnostics;
+#if !RUNTIME_TYPE_NETCORE
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Globalization;
 using System.IO;
+#if !RUNTIME_TYPE_NETCORE
 using System.Reflection;
+#endif
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+#if !RUNTIME_TYPE_NETCORE
 using System.Security.Permissions;
 using System.Security.Policy;
+#endif
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -44,8 +54,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #if !RUNTIME_TYPE_NETCORE
         private const int Fx2MajorVersion = 2;
         private const int Fx3MajorVersion = 3;
-#endif
         private static readonly Version s_dotNet40Version = new Version("4.0");
+#endif
         private static readonly Version s_dotNet45Version = new Version("4.5");
 
 #if !RUNTIME_TYPE_NETCORE
@@ -129,15 +139,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         private static PermissionSet GetNamedPermissionSet(string targetZone, string targetFrameworkMoniker)
         {
-            FrameworkNameVersioning fn;
+            FrameworkName fn;
 
             if (!string.IsNullOrEmpty(targetFrameworkMoniker))
             {
-                fn = new FrameworkNameVersioning(targetFrameworkMoniker);
+                fn = new FrameworkName(targetFrameworkMoniker);
             }
             else
             {
-                fn = new FrameworkNameVersioning(".NETFramework", s_dotNet40Version);
+                fn = new FrameworkName(".NETFramework", s_dotNet40Version);
             }
 
             int majorVersion = fn.Version.Major;
@@ -156,7 +166,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static XmlElement GetXmlElement(string targetZone, FrameworkNameVersioning fn)
+        private static XmlElement GetXmlElement(string targetZone, FrameworkName fn)
         {
             IList<string> paths = ToolLocationHelper.GetPathToReferenceAssemblies(fn);
 
@@ -220,13 +230,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     }
                                     catch (Exception)
                                     {
-                                        //continue.
+                                        // continue.
                                     }
                                 }
                             }
                             catch (ArgumentException)
                             {
-                                //continue.
+                                // continue.
                             }
                         }
                     }
@@ -409,10 +419,18 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             SecurityElement se = new SecurityElement(xe.Name);
             foreach (XmlAttribute xa in xe.Attributes)
+            {
                 se.AddAttribute(xa.Name, xa.Value);
+            }
+
             foreach (XmlNode xn in xe.ChildNodes)
+            {
                 if (xn.NodeType == XmlNodeType.Element)
+                {
                     se.AddChild(XmlElementToSecurityElement((XmlElement)xn));
+                }
+            }
+
             return se;
         }
 
@@ -421,7 +439,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             XmlNamespaceManager nsmgr = XmlNamespaces.GetNamespaceManager(psElement.OwnerDocument.NameTable);
             XmlNodeList nodes = psElement.SelectNodes(XPaths.permissionClassAttributeQuery, nsmgr);
             if (nodes == null || nodes.Count == 0)
+            {
                 nodes = psElement.SelectNodes(XmlUtil.TrimPrefix(XPaths.permissionClassAttributeQuery));
+            }
+
             string[] a;
             if (nodes != null)
             {
@@ -464,7 +485,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             catch (ArgumentException ex)
             {
-                //UNDONE: Need to log exception thrown from PermissionSet.FromXml
+                // UNDONE: Need to log exception thrown from PermissionSet.FromXml
                 Debug.Fail(String.Format(CultureInfo.CurrentCulture, "PermissionSet.FromXml failed: {0}\r\n\r\n{1}", ex.Message, element.OuterXml));
                 return null;
             }
@@ -478,6 +499,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="certThumbprint">Hexadecimal string that contains the SHA-1 hash of the certificate.</param>
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
+        [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
             SignFile(certThumbprint, timestampUrl, path, null, null);
@@ -490,6 +512,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
+        [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
@@ -506,11 +529,32 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
         /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
+        [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint,
                                     Uri timestampUrl,
                                     string path,
                                     string targetFrameworkVersion,
                                     string targetFrameworkIdentifier)
+        {
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier, false);
+        }
+
+        /// <summary>
+        /// Signs a ClickOnce manifest or PE file.
+        /// </summary>
+        /// <param name="certThumbprint">Hexadecimal string that contains the SHA-1 hash of the certificate.</param>
+        /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
+        /// <param name="path">Path of the file to sign with the certificate.</param>
+        /// <param name="targetFrameworkVersion">Version of the .NET Framework for the target.</param>
+        /// <param name="targetFrameworkIdentifier">.NET Framework identifier for the target.</param>
+        /// <param name="disallowMansignTimestampFallback">Disallow fallback to legacy timestamping when RFC3161 timestamping fails during manifest signing</param>
+        [SupportedOSPlatform("windows")]
+        public static void SignFile(string certThumbprint,
+                                    Uri timestampUrl,
+                                    string path,
+                                    string targetFrameworkVersion,
+                                    string targetFrameworkIdentifier,
+                                    bool disallowMansignTimestampFallback)
         {
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
@@ -546,7 +590,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     // Use SHA-256 digest for .NET Core apps
                     isTargetFrameworkSha256Supported = true;
                 }
-                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources);
+                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, disallowMansignTimestampFallback);
             }
             else
             {
@@ -563,6 +607,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="timestampUrl">URL that specifies an address of a time stamping server.</param>
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function is only for signing a manifest, not a PE file.</remarks>
+        [SupportedOSPlatform("windows")]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
             X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
@@ -572,7 +617,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private static bool UseSha256Algorithm(X509Certificate2 cert)
         {
             Oid oid = cert.SignatureAlgorithm;
-            return string.Equals(oid.FriendlyName, "sha256RSA", StringComparison.OrdinalIgnoreCase);
+            // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256 
+            // for certs with that signature algorithm.
+            return string.Equals(oid.FriendlyName, "sha256RSA", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(oid.FriendlyName, "sha384RSA", StringComparison.OrdinalIgnoreCase) ||
+                   string.Equals(oid.FriendlyName, "sha512RSA", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -583,6 +632,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="path">Path of the file to sign with the certificate.</param>
         /// <remarks>This function can only sign a PE file if the X509Certificate2 parameter represents a certificate in the
         /// current user's personal certificate store.</remarks>
+        [SupportedOSPlatform("windows")]
         public static void SignFile(X509Certificate2 cert, Uri timestampUrl, string path)
         {
             // setup resources
@@ -590,7 +640,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             SignFileInternal(cert, timestampUrl, path, true, resources);
         }
 
-        private static void SignFileInternal(X509Certificate2 cert, Uri timestampUrl, string path, bool targetFrameworkSupportsSha256, System.Resources.ResourceManager resources)
+        [SupportedOSPlatform("windows")]
+        private static void SignFileInternal(X509Certificate2 cert,
+                                            Uri timestampUrl,
+                                            string path,
+                                            bool targetFrameworkSupportsSha256,
+                                            System.Resources.ResourceManager resources,
+                                            bool disallowMansignTimestampFallback = false)
         {
             if (cert == null)
             {
@@ -612,9 +668,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (PathUtil.IsPEFile(path))
             {
                 if (IsCertInStore(cert))
+                {
                     SignPEFile(cert, timestampUrl, path, resources, useSha256);
+                }
                 else
+                {
                     throw new InvalidOperationException(resources.GetString("SignFile.CertNotInStore"));
+                }
             }
             else
             {
@@ -627,20 +687,25 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 #endif
                 {
                     if (rsa == null)
+                    {
                         throw new ApplicationException(resources.GetString("SecurityUtil.OnlyRSACertsAreAllowed"));
+                    }
+
                     try
                     {
                         var doc = new XmlDocument { PreserveWhitespace = true };
-                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                        using (XmlReader xr = XmlReader.Create(path, xrSettings))
+                        var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                        FileStream fs = File.OpenRead(path);
+
+                        using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                         {
                             doc.Load(xr);
                         }
                         var manifest = new SignedCmiManifest2(doc, useSha256);
                         CmiManifestSigner2 signer;
-                        if (useSha256 && rsa is RSACryptoServiceProvider)
+                        if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsa as RSACryptoServiceProvider, useSha256);
+                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
                             signer = new CmiManifestSigner2(csp, cert, useSha256);
                         }
                         else
@@ -663,9 +728,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
 #endif
                         if (timestampUrl == null)
+                        {
                             manifest.Sign(signer);
+                        }
                         else
-                            manifest.Sign(signer, timestampUrl.ToString());
+                        {
+                            manifest.Sign(signer, timestampUrl.ToString(), disallowMansignTimestampFallback);
+                        }
+
                         doc.Save(path);
                     }
                     catch (Exception ex)
@@ -698,15 +768,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true);
             }
-            catch(ApplicationException)
+            catch (ApplicationException) when (timestampUrl != null)
             {
                 // error, retry with signtool /t if timestamp url was given
-                if (timestampUrl != null)
-                {
-                    SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
-                    return;
-                }
-                throw;
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
+                return;
             }
         }
 
@@ -773,9 +839,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             if (timestampUrl != null)
             {
                 commandLine.AppendFormat(CultureInfo.InvariantCulture,
-                                                "{0} {1} ",
-                                                useRFC3161Timestamp ? "/tr" : "/t",
-                                                timestampUrl.ToString());
+                                            "{0} {1} ",
+                                            useRFC3161Timestamp ? "/td sha256 /tr" : "/t",
+                                            timestampUrl.ToString());
             }
             commandLine.AppendFormat(CultureInfo.InvariantCulture, "\"{0}\"", path);
             return commandLine.ToString();
@@ -798,7 +864,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     toolPath = Path.Combine(pathToDotNetFrameworkSdk, "bin", ToolName);
                 }
             }
-            if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
+            if (NativeMethodsShared.IsWindows && (toolPath == null || !FileSystems.Default.FileExists(toolPath)))
             {
                 toolPath = GetVersionIndependentToolPath(ToolName);
             }
@@ -843,7 +909,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 personalStore.Open(OpenFlags.ReadOnly);
                 X509Certificate2Collection foundCerts = personalStore.Certificates.Find(X509FindType.FindByThumbprint, cert.Thumbprint, false);
                 if (foundCerts.Count == 1)
+                {
                     return true;
+                }
             }
             finally
             {
@@ -852,21 +920,23 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return false;
         }
 
+        [SupportedOSPlatform("windows")]
         private static string GetVersionIndependentToolPath(string toolName)
         {
-            RegistryKey localMachineKey = Registry.LocalMachine;
             const string versionIndependentToolKeyName = @"Software\Microsoft\ClickOnce\SignTool";
-
-            using (RegistryKey versionIndependentToolKey = localMachineKey.OpenSubKey(versionIndependentToolKeyName, writable: false))
+            using (RegistryKey localMachineKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32))
             {
-                string versionIndependentToolPath = null;
-
-                if (versionIndependentToolKey != null)
+                using (RegistryKey versionIndependentToolKey = localMachineKey.OpenSubKey(versionIndependentToolKeyName, writable: false))
                 {
-                    versionIndependentToolPath = versionIndependentToolKey.GetValue("Path") as string;
-                }
+                    string versionIndependentToolPath = null;
 
-                return versionIndependentToolPath != null ? Path.Combine(versionIndependentToolPath, toolName) : null;
+                    if (versionIndependentToolKey != null)
+                    {
+                        versionIndependentToolPath = versionIndependentToolKey.GetValue("Path") as string;
+                    }
+
+                    return versionIndependentToolPath != null ? Path.Combine(versionIndependentToolPath, toolName) : null;
+                }
             }
         }
     }

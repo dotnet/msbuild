@@ -1,20 +1,21 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using System.Collections.Generic;
 using Microsoft.Build.Shared.FileSystem;
+using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
-using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -164,8 +165,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // This is expected to throw because not all items contain a value for metadata "Culture".
                 // Only a.foo has a Culture metadata.  b.foo does not.
                 BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Tests the case where an unqualified metadata reference is used illegally.
@@ -186,8 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // This is expected to throw because we have no idea what item list %(Culture) refers to.
                 BatchingEngine.PrepareBatchingBuckets(parameters, CreateLookup(itemsByType, properties), MockElementLocation.Instance);
-            }
-           );
+            });
         }
         /// <summary>
         /// Missing unittest found by mutation testing.
@@ -223,7 +222,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void Simple()
         {
             string content = @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
 
                     <ItemGroup>
                         <AToB Include=""a;b""/>
@@ -254,7 +253,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void Regress72803()
         {
             string content = @"
-                <Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" DefaultTargets=""ReleaseBuild"">
+                <Project DefaultTargets=""ReleaseBuild"">
                     <ItemGroup>
                         <Environments Include=""dev"" />
                         <Environments Include=""prod"" />
@@ -295,7 +294,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BucketsWithEmptyListForBatchedItemList()
         {
             string content = @"
- <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+ <Project ToolsVersion=""msbuilddefaulttoolsversion"">
   <ItemGroup>
     <i Include=""b""/>
     <j Include=""a"">
@@ -324,7 +323,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BucketsWithEmptyListForTargetBatchedItemList()
         {
             string content = @"
-<Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project ToolsVersion=""msbuilddefaulttoolsversion"">
     <ItemGroup>
         <a Include=""a1""/>
         <b Include=""b1""/>
@@ -349,7 +348,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BatchOnEmptyOutput()
         {
             string content = @"
-         <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+         <Project ToolsVersion=""msbuilddefaulttoolsversion"">
             <ItemGroup>
               <File Include=""$(foo)"" />
             </ItemGroup>
@@ -375,7 +374,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EachBatchGetsASeparateTaskObject()
         {
             string content = @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
                   <ItemGroup>
                     <i Include=""i1"">
                       <Code>high</Code>
@@ -404,7 +403,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void BatcherPreservesItemOrderWithinASingleItemList()
         {
             string content = @"
-                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"">
 
                     <ItemGroup>
                         <AToZ Include=""a;b;c;d;e;f;g;h;i;j;k;l;m;n;o;p;q;r;s;t;u;v;w;x;y;z""/>
@@ -439,7 +438,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void UndefinedAndEmptyMetadataValues()
         {
             string content = @"
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                <Project ToolsVersion='msbuilddefaulttoolsversion'>
                     <ItemGroup>
                         <i Include='i1'/>
                         <i Include='i2'>

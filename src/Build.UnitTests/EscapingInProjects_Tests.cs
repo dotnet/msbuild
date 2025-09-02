@@ -1,11 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+#if FEATURE_COMPILE_IN_TESTS
 using System.Reflection;
+#endif
 
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -13,14 +15,20 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
-
-
+#if FEATURE_COMPILE_IN_TESTS
 using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
+#endif
 using FileUtilities = Microsoft.Build.Shared.FileUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+#if FEATURE_COMPILE_IN_TESTS
+using Microsoft.Build.Shared;
+#endif
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 {
@@ -43,7 +51,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
         }
 
-        override public bool Execute()
+        public override bool Execute()
         {
             if (TaskItemParam != null)
             {
@@ -81,7 +89,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         public void SemicolonInPropertyPassedIntoStringParam()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
                     </PropertyGroup>
@@ -94,17 +102,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         /// Make sure I can define a property with escaped characters and pass it into
         /// a string parameter of a task, in this case the Message task.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
                     <PropertyGroup>
                         <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
@@ -117,7 +123,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
-#endif
 
 #if FEATURE_ASSEMBLY_LOCATION
         /// <summary>
@@ -127,11 +132,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Fact]
         public void SemicolonInPropertyPassedIntoITaskItemParam()
         {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@$"
 
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
-                    <UsingTask TaskName=`Microsoft.Build.UnitTests.EscapingInProjects_Tests.MyTestTask` AssemblyFile=`{0}` />
+                    <UsingTask TaskName=`Microsoft.Build.UnitTests.EscapingInProjects_Tests.MyTestTask` AssemblyFile=`{new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath}` />
 
                     <PropertyGroup>
                         <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
@@ -143,7 +148,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 </Project>
 
-                ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath),
+                ",
                 logger: new MockLogger(_output));
 
             logger.AssertLogContains("Received TaskItemParam: 123 abc ; def ; ghi 789");
@@ -154,12 +159,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         /// an ITaskItem[] task parameter.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void SemicolonInPropertyPassedIntoITaskItemParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
 
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <UsingTask TaskName=`Microsoft.Build.UnitTests.EscapingInProjects_Tests.MyTestTask` AssemblyFile=`{0}` TaskFactory=`TaskHostFactory` />
 
@@ -192,7 +196,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               BEFORE
             // ************************************
             string projectOriginalContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <ItemGroup>
                         <MyWildCard Include=`*.weirdo`/>
                     </ItemGroup>
@@ -204,7 +208,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               AFTER
             // ************************************
             string projectNewExpectedContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <ItemGroup>
                         <MyWildCard Include=`*.weirdo`/>
                         <MyWildCard Include=`foo;bar.weirdo`/>
@@ -230,7 +234,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               BEFORE
             // ************************************
             string projectOriginalContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <FilenameWithSemicolon>foo;bar</FilenameWithSemicolon>
                     </PropertyGroup>
@@ -245,7 +249,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               AFTER
             // ************************************
             string projectNewExpectedContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <FilenameWithSemicolon>foo;bar</FilenameWithSemicolon>
                     </PropertyGroup>
@@ -275,7 +279,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               BEFORE
             // ************************************
             string projectOriginalContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
@@ -289,7 +293,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               AFTER
             // ************************************
             string projectNewExpectedContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <ItemGroup>
                         <MyWildcard Include=`a.weirdo` />
@@ -328,7 +332,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               BEFORE
             // ************************************
             string projectOriginalContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
@@ -342,7 +346,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               AFTER
             // ************************************
             string projectNewExpectedContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
@@ -385,7 +389,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               BEFORE
             // ************************************
             string projectOriginalContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <PropertyGroup>
                         <FilenameWithSemicolon>foo;bar</FilenameWithSemicolon>
@@ -403,7 +407,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               AFTER
             // ************************************
             string projectNewExpectedContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <PropertyGroup>
                         <FilenameWithSemicolon>foo;bar</FilenameWithSemicolon>
@@ -446,7 +450,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               BEFORE
             // ************************************
             string projectOriginalContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <ItemGroup>
                         <MyWildCard Include=`*.weirdo`/>
                     </ItemGroup>
@@ -458,7 +462,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               AFTER
             // ************************************
             string projectNewExpectedContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <ItemGroup>
                         <MyWildCard Include=`*.weirdo`/>
                     </ItemGroup>
@@ -488,7 +492,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               BEFORE
             // ************************************
             string projectOriginalContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <ItemGroup>
                         <MyWildCard Include=`*.AAA%253bBBB`/>
                     </ItemGroup>
@@ -500,7 +504,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             //               AFTER
             // ************************************
             string projectNewExpectedContents = @"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <ItemGroup>
                         <MyWildCard Include=`*.AAA%253bBBB`/>
                     </ItemGroup>
@@ -537,7 +541,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
                 MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(String.Format(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
 
                     <Target Name=`GenerateResources` Inputs=`{0}` Outputs=`{1}`>
                         <NonExistentTask OutputResources=`aaa%253bbbb.resx; ccc%253bddd.resx`>
@@ -558,8 +562,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                if (inputFile != null) File.Delete(inputFile);
-                if (outputFile != null) File.Delete(outputFile);
+                if (inputFile != null)
+                {
+                    File.Delete(inputFile);
+                }
+
+                if (outputFile != null)
+                {
+                    File.Delete(outputFile);
+                }
             }
         }
 
@@ -572,7 +583,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
 
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <ItemGroup>
                         <TextFile Include=`X.txt`/>
                         <TextFile Include=`Y.txt`/>
@@ -588,18 +599,16 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         /// Do an item transform, where the transform expression contains an unescaped semicolon as well
         /// as an escaped percent sign.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
 
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
 
                     <ItemGroup>
@@ -616,7 +625,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
             logger.AssertLogContains("Transformed item list: 'X;X%3bX.txt    Y;Y%3bY.txt    Z;Z%3bZ.txt'");
         }
-#endif
 
         /// <summary>
         /// Tests that when we add an item and are in a directory with characters in need of escaping, and the
@@ -646,8 +654,15 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
             finally
             {
-                if (File.Exists(projectAbsolutePath)) File.Delete(projectAbsolutePath);
-                if (Directory.Exists(path)) FileUtilities.DeleteWithoutTrailingBackslash(path);
+                if (File.Exists(projectAbsolutePath))
+                {
+                    File.Delete(projectAbsolutePath);
+                }
+
+                if (Directory.Exists(path))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(path);
+                }
             }
         }
 
@@ -661,7 +676,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         {
             MockLogger logger = new MockLogger();
             Project project = ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Target Name=`Build`>
                         <Message Text=`MyGlobalProperty = '$(MyGlobalProperty)'` />
                     </Target>
@@ -690,7 +705,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
                 EscapingInProjectsHelper.CreateThreeWeirdoFiles();
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Target Name=`t`>
                         <ItemGroup>
                             <type Include=`%2A` Exclude=``/>
@@ -710,23 +725,21 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             }
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         /// If %2A (escaped '*') or %3F (escaped '?') is in an item's Include, it should be treated
         /// literally, not as a wildcard
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new();
 
             try
             {
                 // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
                 EscapingInProjectsHelper.CreateThreeWeirdoFiles();
                 Project project = ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project>
                     <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
 
                     <Target Name=`t`>
@@ -738,8 +751,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 </Project>
                 ");
 
-                bool success = project.Build(logger);
-                Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
+                project.Build(logger).ShouldBeTrue("Build failed.  See test output (Attachments in Azure Pipelines) for details");
                 logger.AssertLogContains("[*]");
             }
             finally
@@ -747,7 +759,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 ObjectModelHelpers.DeleteTempProjectDirectory();
             }
         }
-#endif
 
         /// <summary>
         /// Parity with Orcas: Target names are always unescaped, and in fact, if there are two targets,
@@ -762,7 +773,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             try
             {
                 ObjectModelHelpers.CreateInMemoryProject(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <Target Name=`%24` />
                 </Project>
                 ");
@@ -786,7 +797,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         public void TargetNamesAlwaysUnescaped_Override()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject(@"
-            <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                 <Target Name=`%3B`>
                     <Message Text=`[WRONG]` />
                 </Target>
@@ -809,7 +820,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         public void SpecialCharactersInMetadataValueConstruction()
         {
             string projectString = @"
-                <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"">
                     <ItemGroup>
                         <None Include='MetadataTests'>
                             <EscapedSemicolon>%3B</EscapedSemicolon>
@@ -832,8 +843,8 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         {
             Project project = new Project();
             ProjectItem item = project.AddItem("None", "MetadataTests", new Dictionary<string, string> {
-                {"EscapedSemicolon", "%3B"}, //Microsoft.Build.Evaluation.ProjectCollection.Escape(";")
-                {"EscapedDollarSign", "%24"}, //Microsoft.Build.Evaluation.ProjectCollection.Escape("$")
+                {"EscapedSemicolon", "%3B"}, // Microsoft.Build.Evaluation.ProjectCollection.Escape(";")
+                {"EscapedDollarSign", "%24"}, // Microsoft.Build.Evaluation.ProjectCollection.Escape("$")
             }).Single();
 
             EscapingInProjectsHelper.SpecialCharactersInMetadataValueTests(item);
@@ -852,20 +863,20 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         public void CanGetCorrectListOfItemsWithSemicolonsInThem()
         {
             string projectString = @"
-                <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"">
                     <PropertyGroup>
                         <MyUserMacro>foo%3bbar</MyUserMacro>
                     </PropertyGroup>
                     <ItemGroup>
-                        <CrazyList Include=""a"" />
-                        <CrazyList Include=""b%3bc"" />
-                        <CrazyList Include=""$(MyUserMacro)"" />
+                        <DifferentList Include=""a"" />
+                        <DifferentList Include=""b%3bc"" />
+                        <DifferentList Include=""$(MyUserMacro)"" />
                     </ItemGroup>
                 </Project>";
 
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
-            IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
+            IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
             Assert.Equal(3, items.Count());
             Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
@@ -884,20 +895,20 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         public void CanGetCorrectListOfItemsWithSemicolonsInThem2()
         {
             string projectString = @"
-                <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+                <Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"">
                     <PropertyGroup>
                         <MyUserMacro>foo;bar</MyUserMacro>
                     </PropertyGroup>
                     <ItemGroup>
-                        <CrazyList Include=""a"" />
-                        <CrazyList Include=""b%3bc"" />
-                        <CrazyList Include=""$(MyUserMacro)"" />
+                        <DifferentList Include=""a"" />
+                        <DifferentList Include=""b%3bc"" />
+                        <DifferentList Include=""$(MyUserMacro)"" />
                     </ItemGroup>
                 </Project>";
 
             System.Xml.XmlReader reader = new System.Xml.XmlTextReader(new StringReader(projectString));
             Project project = new Project(reader);
-            IEnumerable<ProjectItem> items = project.GetItems("CrazyList");
+            IEnumerable<ProjectItem> items = project.GetItems("DifferentList");
 
             Assert.Equal(4, items.Count());
             Assert.Equal("a", items.ElementAt(0).EvaluatedInclude);
@@ -954,12 +965,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             // Foo.csproj
             // ---------------------
-            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>ClassLibrary16</AssemblyName>
                     </PropertyGroup>
@@ -1002,7 +1014,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             logger.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\a;b'c\ClassLibrary16.dll")));
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         ///     ESCAPING: Escaping in conditionals is broken.
         /// </summary>
@@ -1019,12 +1030,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 // Foo.csproj
                 // ---------------------
-                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>ClassLibrary16</AssemblyName>
                     </PropertyGroup>
@@ -1071,7 +1083,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
-#endif
 
         /// <summary>
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
@@ -1084,12 +1095,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             // Foo.csproj
             // ---------------------
-            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>Class%3bLibrary16</AssemblyName>
                     </PropertyGroup>
@@ -1127,7 +1139,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             log.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\Debug\Class;Library16.dll")));
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         ///     ESCAPING: CopyBuildTarget target fails if the output assembly name contains a semicolon or single-quote
         /// </summary>
@@ -1144,12 +1155,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 // Foo.csproj
                 // ---------------------
-                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>Class%3bLibrary16</AssemblyName>
                     </PropertyGroup>
@@ -1191,7 +1203,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
-#endif
 
         /// <summary>
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
@@ -1204,12 +1215,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             // Foo.csproj
             // ---------------------
-            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>Class%24%28prop%29Library16</AssemblyName>
                     </PropertyGroup>
@@ -1247,7 +1259,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             log.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\Debug\Class$(prop)Library16.dll")));
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         ///     ESCAPING: Conversion Issue: Properties with $(xxx) as literals are not being converted correctly
         /// </summary>
@@ -1264,12 +1275,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 // Foo.csproj
                 // ---------------------
-                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>Class%24%28prop%29Library16</AssemblyName>
                     </PropertyGroup>
@@ -1311,7 +1323,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
-#endif
 
         /// <summary>
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
@@ -1324,12 +1335,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ---------------------
             // Foo.csproj
             // ---------------------
-            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>ClassLibrary16</AssemblyName>
                     </PropertyGroup>
@@ -1367,7 +1379,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             log.AssertLogContains(String.Format("foo -> {0}", Path.Combine(ObjectModelHelpers.TempProjectDir, @"bin\Debug\ClassLibrary16.dll")));
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         /// This is the case when one of the source code files in the project has a filename containing a semicolon.
         /// </summary>
@@ -1384,12 +1395,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 // ---------------------
                 // Foo.csproj
                 // ---------------------
-                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                ObjectModelHelpers.CreateFileInTempProjectDirectory("foo.csproj", $@"
+                <Project DefaultTargets=`Build`>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
+                        <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                         <OutputType>Library</OutputType>
                         <AssemblyName>ClassLibrary16</AssemblyName>
                     </PropertyGroup>
@@ -1431,15 +1443,14 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
-#endif
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name. There
+        /// have all sorts of different characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
-        public void SolutionWithLotsaCrazyCharacters()
+        public void SolutionWithLotsaDifferentCharacters()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
@@ -1457,7 +1468,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj",
 
                 @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1534,7 +1545,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 @"SLN;!@(foo)'^1\Class;!@(foo)'^(Library1\Class;!@(foo)'^(Library1.csproj",
 
                 @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1596,17 +1607,16 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             MockLogger log = new MockLogger(_testOutput);
             ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
-            Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                     @"Did not find expected file Console;!@(foo)'^(Application1.exe"
+            Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); // @"Did not find expected file Console;!@(foo)'^(Application1.exe"
         }
 
-#if FEATURE_TASKHOST
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name. There
+        /// have all sorts of different characters in their name. There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         [Fact(Skip = "This is a known issue in Roslyn. This test should be enabled if Roslyn is updated for this scenario.")]
-        public void SolutionWithLotsaCrazyCharacters_UsingTaskHost()
+        public void SolutionWithLotsaDifferentCharacters_UsingTaskHost()
         {
             string originalOverrideTaskHostVariable = Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC");
 
@@ -1629,7 +1639,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\Cons.ole;!@(foo)'^(Application1.csproj",
 
                     @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1706,7 +1716,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     @"SLN;!@(foo)'^1\Class;!@(foo)'^(Library1\Class;!@(foo)'^(Library1.csproj",
 
                     @"
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion`>
                     <PropertyGroup>
                         <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
                         <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
@@ -1768,18 +1778,17 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                 MockLogger log = new MockLogger(_testOutput);
                 ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, null, log);
 
-                Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); //                         @"Did not find expected file Console;!@(foo)'^(Application1.exe"
+                Assert.True(File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe"))); // @"Did not find expected file Console;!@(foo)'^(Application1.exe"
             }
             finally
             {
                 Environment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", originalOverrideTaskHostVariable);
             }
         }
-#endif
     }
 #endif
 
-    internal class EscapingInProjectsHelper
+    internal sealed class EscapingInProjectsHelper
     {
         /// <summary>
         /// Deletes all *.weirdo files from the temp path, and dumps 3 files there --

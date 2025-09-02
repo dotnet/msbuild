@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 namespace Microsoft.Build.BuildEngine.Shared
 {
@@ -7,7 +11,7 @@ namespace Microsoft.Build.BuildEngine.Shared
     /// This class contains methods that are useful for error checking and validation of project files.
     /// </summary>
     /// <owner>SumedhK</owner>
-    static internal class ProjectFileErrorUtilities
+    internal static class ProjectFileErrorUtilities
     {
         /// <summary>
         /// This method is used to flag errors in the project file being processed. Do NOT use this method in place of

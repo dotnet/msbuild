@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -7,6 +7,7 @@ using System.Linq;
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
@@ -14,9 +15,11 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class MSBuildTask_Tests : IDisposable
+    public sealed class MSBuildTask_Tests : IDisposable
     {
         private readonly ITestOutputHelper _testOutput;
 
@@ -36,7 +39,7 @@ namespace Microsoft.Build.UnitTests
         /// throw a path too long exception
         /// </summary>
         [Fact]
-        [ActiveIssue("https://github.com/Microsoft/msbuild/issues/4247")]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/4247")]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -287,6 +290,55 @@ namespace Microsoft.Build.UnitTests
             Assert.DoesNotContain("MSB3202", logger.FullLog); // project file not found error
         }
 
+
+        /// <summary>
+        /// </summary>
+        [Fact]
+        public void SkipNonexistentProjectsAsMetadataBuildingInParallel()
+        {
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(
+                "SkipNonexistentProjectsMain.csproj",
+                @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`t` >
+                        <ItemGroup>
+                            <ProjectReference Include=`this_project_does_not_exist_warn.csproj` >
+                                <SkipNonexistentProjects>true</SkipNonexistentProjects>
+                            </ProjectReference>
+                            <ProjectReference Include=`this_project_does_not_exist_error.csproj` >
+                            </ProjectReference>
+                            <ProjectReference Include=`foo.csproj` >
+                                <SkipNonexistentProjects>false</SkipNonexistentProjects>
+                            </ProjectReference>
+                        </ItemGroup>
+                        <MSBuild Projects=`@(ProjectReference)` BuildInParallel=`true` />
+                    </Target>
+                </Project>
+                ");
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(
+                "foo.csproj",
+                @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                    <Target Name=`t` >
+                        <Message Text=`Hello from foo.csproj`/>
+                    </Target>
+                </Project>
+                ");
+
+            MockLogger logger = new MockLogger(_testOutput);
+            ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj", logger);
+
+            logger.AssertLogContains("Hello from foo.csproj");
+            string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist_warn.csproj");
+            string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_warn.csproj");
+            string error2 = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_error.csproj");
+            Assert.Equal(0, logger.WarningCount);
+            Assert.Equal(1, logger.ErrorCount);
+            Assert.Contains(message, logger.FullLog); // for the missing project
+            Assert.Contains(error2, logger.FullLog);
+            Assert.DoesNotContain(error, logger.FullLog);
+        }
+
         [Fact]
         public void LogErrorWhenBuildingVCProj()
         {
@@ -334,9 +386,11 @@ namespace Microsoft.Build.UnitTests
         /// However, it's a situation where the project author doesn't have control over the
         /// property value and so he can't escape it himself.
         /// </summary>
-
-        [Fact(Skip = "https://github.com/Microsoft/msbuild/issues/259")]
-        // [Trait("Category", "mono-osx-failing")]
+#if RUNTIME_TYPE_NETCORE
+        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/259")]
+#else
+        [Fact]
+#endif
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -347,12 +401,13 @@ namespace Microsoft.Build.UnitTests
 
             // Just a normal console application project.
             ObjectModelHelpers.CreateFileInTempProjectDirectory(
-                Path.Combine("bug'533'369", "Sub;Dir", "ConsoleApplication1", "ConsoleApplication1.csproj"), @"
+                Path.Combine("bug'533'369", "Sub;Dir", "ConsoleApplication1", "ConsoleApplication1.csproj"), $@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+                <Project DefaultTargets=`Build` xmlns=`msbuildnamespace`>
                   <Import Project=`$(MSBuildBinPath)\Microsoft.Common.props` />
                   <PropertyGroup>
                     <Configuration Condition=` '$(Configuration)' == '' `>Debug</Configuration>
+                    <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
                     <Platform Condition=` '$(Platform)' == '' `>AnyCPU</Platform>
                     <OutputType>Exe</OutputType>
                     <AssemblyName>ConsoleApplication1</AssemblyName>

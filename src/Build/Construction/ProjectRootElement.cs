@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -23,6 +23,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
+#nullable disable
+
 namespace Microsoft.Build.Construction
 {
     /// <summary>
@@ -43,7 +45,7 @@ namespace Microsoft.Build.Construction
     [DebuggerDisplay("{FullPath} #Children={Count} DefaultTargets={DefaultTargets} ToolsVersion={ToolsVersion} InitialTargets={InitialTargets} ExplicitlyLoaded={IsExplicitlyLoaded}")]
     public class ProjectRootElement : ProjectElementContainer
     {
-        /// Constants for default (empty) project file.
+        // Constants for default (empty) project file.
         private const string EmptyProjectFileContent = "{0}<Project{1}{2}>\r\n</Project>";
         private const string EmptyProjectFileXmlDeclaration = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n";
         private const string EmptyProjectFileToolsVersion = " ToolsVersion=\"" + MSBuildConstants.CurrentToolsVersion + "\"";
@@ -207,8 +209,10 @@ namespace Microsoft.Build.Construction
         /// Assumes path is already normalized.
         /// May throw InvalidProjectFileException.
         /// </summary>
-        private ProjectRootElement(string path, ProjectRootElementCacheBase projectRootElementCache,
-            bool preserveFormatting)
+        private ProjectRootElement(
+                string path,
+                ProjectRootElementCacheBase projectRootElementCache,
+                bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path, nameof(path));
             ErrorUtilities.VerifyThrowInternalRooted(path);
@@ -222,8 +226,6 @@ namespace Microsoft.Build.Construction
             XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting, projectRootElementCache.LoadProjectsReadOnly);
 
             ProjectParser.Parse(document, this);
-
-            projectRootElementCache.AddEntry(this);
         }
 
         /// <summary>
@@ -234,7 +236,7 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// Do not make public: we do not wish to expose particular XML API's.
         /// </remarks>
-        private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase  projectRootElementCache)
+        private ProjectRootElement(XmlDocumentWithLocation document, ProjectRootElementCacheBase projectRootElementCache)
         {
             ErrorUtilities.VerifyThrowArgumentNull(document, nameof(document));
             ErrorUtilities.VerifyThrowArgumentNull(projectRootElementCache, nameof(projectRootElementCache));
@@ -248,7 +250,7 @@ namespace Microsoft.Build.Construction
 
         /// <summary>
         /// Initialize a ProjectRootElement instance from an existing document.
-        /// Helper constructor for the <see cref="ReloadFrom(string,bool,System.Nullable{bool})"/>> mehtod which needs to check if the document parses
+        /// Helper constructor for the <see cref="ReloadFrom(string,bool,bool?)"/>> mehtod which needs to check if the document parses
         /// </summary>
         /// <remarks>
         /// Do not make public: we do not wish to expose particular XML API's.
@@ -285,81 +287,81 @@ namespace Microsoft.Build.Construction
         /// <remarks>
         /// The name is inconsistent to make it more understandable, per API review.
         /// </remarks>
-        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
+        public ICollection<ProjectChooseElement> ChooseElements => GetChildrenOfType<ProjectChooseElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(Children.OfType<ProjectItemDefinitionGroupElement>());
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroups => GetChildrenOfType<ProjectItemDefinitionGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definitions, if any, in all item definition groups anywhere in the project file.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(AllChildren.OfType<ProjectItemDefinitionElement>());
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(GetAllChildrenOfType<ProjectItemDefinitionElement>());
 
         /// <summary>
         /// Get a read-only collection over the child item groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroups => GetChildrenOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child items, if any, in all item groups anywhere in the project file.
         /// Not restricted to root item groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(AllChildren.OfType<ProjectItemElement>());
+        public ICollection<ProjectItemElement> Items => new ReadOnlyCollection<ProjectItemElement>(GetAllChildrenOfType<ProjectItemElement>());
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any.
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroups => new ReadOnlyCollection<ProjectImportGroupElement>(Children.OfType<ProjectImportGroupElement>());
+        public ICollection<ProjectImportGroupElement> ImportGroups => GetChildrenOfType<ProjectImportGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child imports
         /// </summary>
-        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(AllChildren.OfType<ProjectImportElement>());
+        public ICollection<ProjectImportElement> Imports => new ReadOnlyCollection<ProjectImportElement>(GetAllChildrenOfType<ProjectImportElement>());
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any.
         /// Does not include any that may not be at the root, i.e. inside Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => GetChildrenOfType<ProjectPropertyGroupElement>();
 
         /// <summary>
         /// Geta read-only collection of the child properties, if any, in all property groups anywhere in the project file.
         /// Not restricted to root property groups: traverses through Choose elements.
         /// </summary>
-        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(AllChildren.OfType<ProjectPropertyElement>());
+        public ICollection<ProjectPropertyElement> Properties => new ReadOnlyCollection<ProjectPropertyElement>(GetAllChildrenOfType<ProjectPropertyElement>());
 
         /// <summary>
         /// Get a read-only collection of the child targets
         /// </summary>
-        public ICollection<ProjectTargetElement> Targets => new ReadOnlyCollection<ProjectTargetElement>(Children.OfType<ProjectTargetElement>());
+        public ICollection<ProjectTargetElement> Targets => GetChildrenOfType<ProjectTargetElement>();
 
         /// <summary>
         /// Get a read-only collection of the child usingtasks, if any
         /// </summary>
-        public ICollection<ProjectUsingTaskElement> UsingTasks => new ReadOnlyCollection<ProjectUsingTaskElement>(Children.OfType<ProjectUsingTaskElement>());
+        public ICollection<ProjectUsingTaskElement> UsingTasks => GetChildrenOfType<ProjectUsingTaskElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => new ReadOnlyCollection<ProjectItemGroupElement>(ChildrenReversed.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroupsReversed => GetChildrenReversedOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child item definition groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => new ReadOnlyCollection<ProjectItemDefinitionGroupElement>(ChildrenReversed.OfType<ProjectItemDefinitionGroupElement>());
+        public ICollection<ProjectItemDefinitionGroupElement> ItemDefinitionGroupsReversed => GetChildrenReversedOfType<ProjectItemDefinitionGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child import groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => new ReadOnlyCollection<ProjectImportGroupElement>(ChildrenReversed.OfType<ProjectImportGroupElement>());
+        public ICollection<ProjectImportGroupElement> ImportGroupsReversed => GetChildrenReversedOfType<ProjectImportGroupElement>();
 
         /// <summary>
         /// Get a read-only collection of the child property groups, if any, in reverse order
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => new ReadOnlyCollection<ProjectPropertyGroupElement>(ChildrenReversed.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroupsReversed => GetChildrenReversedOfType<ProjectPropertyGroupElement>();
 
         #endregion
 
@@ -700,7 +702,7 @@ namespace Microsoft.Build.Construction
         /// Not public as we do not wish to encourage the use of ProjectExtensions.
         /// </remarks>
         internal ProjectExtensionsElement ProjectExtensions
-            => ChildrenReversed.OfType<ProjectExtensionsElement>().FirstOrDefault();
+            => GetChildrenReversedOfType<ProjectExtensionsElement>().FirstOrDefault();
 
         /// <summary>
         /// Returns an unlocalized indication of how this file was last dirtied.
@@ -785,7 +787,8 @@ namespace Microsoft.Build.Construction
 
             var projectRootElement = new ProjectRootElement(
                 projectCollection.ProjectRootElementCache,
-                newProjectFileOptions) { FullPath = path };
+                newProjectFileOptions)
+            { FullPath = path };
 
             return projectRootElement;
         }
@@ -1235,7 +1238,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectChooseElement CreateChooseElement()
         {
-            return Link!=null ? RootLink.CreateChooseElement() : ProjectChooseElement.CreateDisconnected(this);
+            return Link != null ? RootLink.CreateChooseElement() : ProjectChooseElement.CreateDisconnected(this);
         }
 
         /// <summary>
@@ -1262,7 +1265,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectItemElement CreateItemElement(string itemType, string include)
         {
-            if (Link != null )
+            if (Link != null)
             {
                 return RootLink.CreateItemElement(itemType, include);
             }
@@ -1325,12 +1328,21 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue)
         {
+            return this.CreateMetadataElement(name, unevaluatedValue, null);
+        }
+
+        /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        public ProjectMetadataElement CreateMetadataElement(string name, string unevaluatedValue, ElementLocation location)
+        {
             if (Link != null)
             {
                 return RootLink.CreateMetadataElement(name, unevaluatedValue);
             }
 
-            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this);
+            ProjectMetadataElement metadatum = ProjectMetadataElement.CreateDisconnected(name, this, location);
 
             metadatum.Value = unevaluatedValue;
 
@@ -1783,13 +1795,22 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Creates a metadata node.
+        /// Caller must add it to the location of choice in the project.
+        /// </summary>
+        internal ProjectMetadataElement CreateMetadataElement(XmlAttributeWithLocation attribute)
+        {
+            return CreateMetadataElement(attribute.Name, attribute.Value, attribute.Location);
+        }
+
+        /// <summary>
         /// Creates a XmlElement with the specified name in the document
         /// containing this project.
         /// </summary>
-        internal XmlElementWithLocation CreateElement(string name)
+        internal XmlElementWithLocation CreateElement(string name, ElementLocation location = null)
         {
             ErrorUtilities.VerifyThrow(Link == null, "External project");
-            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace);
+            return (XmlElementWithLocation)XmlDocument.CreateElement(name, XmlNamespace, location);
         }
 
         /// <summary>
@@ -1808,7 +1829,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         /// <remarks>
         /// This is sealed because it is virtual and called in a constructor; by sealing it we
-        /// satisfy FXCop that nobody will override it to do something that would rely on
+        /// satisfy the rule that nobody will override it to do something that would rely on
         /// unconstructed state.
         /// Should be protected+internal.
         /// </remarks>
@@ -1884,15 +1905,18 @@ namespace Microsoft.Build.Construction
                 }
             }
 
-            foreach (var sdkNode in Children.OfType<ProjectSdkElement>())
+            foreach (ProjectElement child in ChildrenEnumerable)
             {
-                var referencedSdk = new SdkReference(
-                    sdkNode.XmlElement.GetAttribute("Name"),
-                    sdkNode.XmlElement.GetAttribute("Version"),
-                    sdkNode.XmlElement.GetAttribute("MinimumVersion"));
+                if (child is ProjectSdkElement sdkNode)
+                {
+                    var referencedSdk = new SdkReference(
+                        sdkNode.XmlElement.GetAttribute("Name"),
+                        sdkNode.XmlElement.GetAttribute("Version"),
+                        sdkNode.XmlElement.GetAttribute("MinimumVersion"));
 
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
-                nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.props", currentProjectOrImport, ImplicitImportLocation.Top, referencedSdk, sdkNode));
+                    nodes.Add(ProjectImportElement.CreateImplicit("Sdk.targets", currentProjectOrImport, ImplicitImportLocation.Bottom, referencedSdk, sdkNode));
+                }
             }
 
             return nodes;
@@ -2006,12 +2030,10 @@ namespace Microsoft.Build.Construction
         /// If the file is in MSBuild format, may throw InvalidProjectFileException.
         /// If the file is a solution, will throw an IO-related exception if the file cannot be read.
         /// </summary>
-        private static ProjectRootElement CreateProjectFromPath
-            (
+        private static ProjectRootElement CreateProjectFromPath(
                 string projectFile,
                 ProjectRootElementCacheBase projectRootElementCache,
-                bool preserveFormatting
-            )
+                bool preserveFormatting)
         {
             ErrorUtilities.VerifyThrowInternalRooted(projectFile);
 
@@ -2050,7 +2072,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrowInternalRooted(fullPath);
 
-            var document = new XmlDocumentWithLocation(loadAsReadOnly ? true : (bool?) null)
+            var document = new XmlDocumentWithLocation(loadAsReadOnly ? true : (bool?)null)
             {
                 FullPath = fullPath,
                 PreserveWhitespace = preserveFormatting
@@ -2080,13 +2102,8 @@ namespace Microsoft.Build.Construction
                     StreamTimeUtc = null;
                 }
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ExceptionHandling.NotExpectedIoOrXmlException(ex))
             {
-                if (ExceptionHandling.NotExpectedIoOrXmlException(ex))
-                {
-                    throw;
-                }
-
                 BuildEventFileInfo fileInfo = ex is XmlException xmlException
                     ? new BuildEventFileInfo(fullPath, xmlException)
                     : new BuildEventFileInfo(fullPath);
@@ -2105,7 +2122,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static XmlDocumentWithLocation LoadDocument(XmlReader reader, bool preserveFormatting)
         {
-            var document = new XmlDocumentWithLocation {PreserveWhitespace = preserveFormatting};
+            var document = new XmlDocumentWithLocation { PreserveWhitespace = preserveFormatting };
 
             try
             {

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -7,15 +7,17 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Versioning;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// A reference to an assembly along with information about resolution.
     /// </summary>
-    sealed internal class Reference
+    internal sealed class Reference
     {
         /// <summary>
         /// dictionary where ITaskItem.ItemSpec (a string) is the key and ITaskItem is the value.
@@ -111,7 +113,7 @@ namespace Microsoft.Build.Tasks
         private bool _isManagedWinMDFile;
 
         /// <summary>
-        /// The imageruntime version for this reference. 
+        /// The imageruntime version for this reference.
         /// </summary>
         private string _imageRuntimeVersion;
 
@@ -224,7 +226,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// A dependee may be removed because it or its dependee's are in the black list
+        /// A dependee may be removed because it or its dependee's are in the deny list
         /// </summary>
         internal void RemoveDependee(Reference dependeeToRemove)
         {
@@ -232,7 +234,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// A dependency may be removed because it may not be referenced any more due this reference being in the black list or being removed due to it depending on something in the black list
+        /// A dependency may be removed because it may not be referenced any more due this reference being in the deny list or being removed due to it depending on something in the deny list
         /// </summary>
         internal void RemoveDependency(Reference dependencyToRemove)
         {
@@ -356,7 +358,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Determines if a given reference or its parent primary references have specific version metadata set to true.
-        /// If anyParentHasMetadata is set to true then we will return true if any parent primary reference has the specific version metadata set to true, 
+        /// If anyParentHasMetadata is set to true then we will return true if any parent primary reference has the specific version metadata set to true,
         /// if the value is false we will return true ONLY if all parent primary references have the metadata set to true.
         /// </summary>
         internal bool CheckForSpecificVersionMetadataOnParentsReference(bool anyParentHasMetadata)
@@ -371,7 +373,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                // Go through all of the primary items which lead to this dependency, if they all have specificVersion set to true then 
+                // Go through all of the primary items which lead to this dependency, if they all have specificVersion set to true then
                 // hasSpecificVersionMetadata will be true. If any item has the metadata set to false or not set then the value will be false.
                 foreach (ITaskItem item in GetSourceItems())
                 {
@@ -419,7 +421,7 @@ namespace Microsoft.Build.Tasks
         internal void AddRelatedFileExtension(string filenameExtension)
         {
 #if DEBUG
-            Debug.Assert(filenameExtension[0]=='.', "Expected extension to start with '.'");
+            Debug.Assert(filenameExtension[0] == '.', "Expected extension to start with '.'");
 #endif
             _relatedFileExtensions.Add(filenameExtension);
         }
@@ -482,7 +484,11 @@ namespace Microsoft.Build.Tasks
         /// <value>The full path to this assembly.</value>
         internal string FullPath
         {
-            get { return _fullPath; }
+            get
+            {
+                return _fullPath;
+            }
+
             set
             {
                 if (_fullPath != value)
@@ -511,6 +517,13 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+        }
+
+        internal void NormalizeFullPath()
+        {
+            _fullPath = FileUtilities.NormalizePath(_fullPath);
+            _fullPathWithoutExtension = null;
+            _directoryName = null;
         }
 
         /// <summary>
@@ -576,7 +589,7 @@ namespace Microsoft.Build.Tasks
         internal string AssemblyFolderKey { get; set; } = String.Empty;
 
         /// <summary>
-        /// Whether this assembly came from the project. If 'false' then this reference was deduced 
+        /// Whether this assembly came from the project. If 'false' then this reference was deduced
         /// through the reference resolution process.
         /// </summary>
         /// <value>'true' if this reference is a primary assembly.</value>
@@ -616,7 +629,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// If 'true' then the path that this item points to is known to be a bad image.
-        /// This item shouldn't be passed to compilers and so forth. 
+        /// This item shouldn't be passed to compilers and so forth.
         /// </summary>
         /// <value>'true' if this reference points to a bad image.</value>
         internal bool IsBadImage { get; private set; } = false;
@@ -708,7 +721,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Add a new version number for a version of this reference 
+        /// Add a new version number for a version of this reference
         /// </summary>
         internal void AddPreUnificationVersion(String referencePath, Version version, UnificationReason reason)
         {
@@ -806,7 +819,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Returns a collection of strings. Each string is the full path to an assembly that was 
+        /// Returns a collection of strings. Each string is the full path to an assembly that was
         /// considered for resolution but then rejected because it wasn't a complete match.
         /// </summary>
         internal List<ResolutionSearchLocation> AssembliesConsideredAndRejected { get; private set; } = new List<ResolutionSearchLocation>();
@@ -822,7 +835,7 @@ namespace Microsoft.Build.Tasks
         internal FrameworkName FrameworkNameAttribute { get; set; }
 
         /// <summary>
-        /// Indicates that the reference is primary and has ExternallyResolved=true metadata to denote that 
+        /// Indicates that the reference is primary and has ExternallyResolved=true metadata to denote that
         /// it was resolved by an external system (commonly from nuget). Such a system has already provided a
         /// resolved closure as primary references and therefore we can skip the expensive closure walk.
         /// </summary>
@@ -833,7 +846,7 @@ namespace Microsoft.Build.Tasks
         ///
         /// For example, if 'sourceReference' is MyAssembly.dll then a dependent assembly file
         /// might be en\MyAssembly.resources.dll
-        /// 
+        ///
         /// Assembly references do not have their own dependencies, therefore they are
         /// </summary>
         /// <param name="sourceReference">The source reference that this reference will be dependent on</param>
@@ -858,18 +871,16 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Make this reference a primary assembly reference. 
+        /// Make this reference a primary assembly reference.
         /// This is a refrence that is an assembly and is primary.
         /// </summary>
         /// <param name="sourceItem">The source item.</param>
         /// <param name="wantSpecificVersionValue">Whether the version needs to match exactly or loosely.</param>
         /// <param name="executableExtension">The filename extension that the resulting assembly must have.</param>
-        internal void MakePrimaryAssemblyReference
-        (
+        internal void MakePrimaryAssemblyReference(
             ITaskItem sourceItem,
             bool wantSpecificVersionValue,
-            string executableExtension
-        )
+            string executableExtension)
         {
             CopyLocal = CopyLocalState.Undecided;
 
@@ -913,14 +924,11 @@ namespace Microsoft.Build.Tasks
                 {
                     if
                     (
-                        String.Compare
-                        (
+                        String.Compare(
                             frameworkPath, 0,
                             fullPath, 0,
                             frameworkPath.Length,
-                            StringComparison.OrdinalIgnoreCase
-                        ) == 0
-                    )
+                            StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         return true;
                     }
@@ -942,8 +950,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="copyLocalDependenciesWhenParentReferenceInGac">if set to true, copy local dependencies when only parent reference in gac.</param>
         /// <param name="doNotCopyLocalIfInGac">If set to true, do not copy local a reference that exists in the GAC (legacy behavior).</param>
         /// <param name="referenceTable">The reference table.</param>
-        internal void SetFinalCopyLocalState
-        (
+        internal void SetFinalCopyLocalState(
             AssemblyNameExtension assemblyName,
             string[] frameworkPaths,
             ProcessorArchitecture targetProcessorArchitecture,
@@ -953,9 +960,14 @@ namespace Microsoft.Build.Tasks
             GetAssemblyPathInGac getAssemblyPathInGac,
             bool copyLocalDependenciesWhenParentReferenceInGac,
             bool doNotCopyLocalIfInGac,
-            ReferenceTable referenceTable
-        )
+            ReferenceTable referenceTable)
         {
+            if (IsBadImage)
+            {
+                CopyLocal = CopyLocalState.NoBecauseBadImage;
+                return;
+            }
+
             // If this item was unresolvable, then copy-local is false.
             if (IsUnresolvable)
             {
@@ -980,12 +992,10 @@ namespace Microsoft.Build.Tasks
             if (IsPrimary)
             {
                 bool found;
-                bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                    (
+                bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                         PrimarySourceItem,
                         ItemMetadataNames.privateMetadata,
-                        out found
-                    );
+                        out found);
 
                 if (found)
                 {
@@ -1004,12 +1014,10 @@ namespace Microsoft.Build.Tasks
                 foreach (ITaskItem item in _sourceItems.Values)
                 {
                     bool found;
-                    bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                        (
+                    bool result = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                             item,
                             ItemMetadataNames.privateMetadata,
-                            out found
-                        );
+                            out found);
 
                     if (found)
                     {
@@ -1114,7 +1122,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            //  It was resolved locally, so copy it.
+            // It was resolved locally, so copy it.
             CopyLocal = CopyLocalState.YesBecauseOfHeuristic;
         }
 
@@ -1131,8 +1139,8 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// There are a number of properties which are set when we generate exclusion lists and it is useful to have this information on the references so that 
-        /// the correct reasons can be logged for these references being in the black list.
+        /// There are a number of properties which are set when we generate exclusion lists and it is useful to have this information on the references so that
+        /// the correct reasons can be logged for these references being in the deny list.
         /// </summary>
         internal class ExclusionListProperties
         {

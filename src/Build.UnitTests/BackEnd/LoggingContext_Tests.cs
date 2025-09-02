@@ -1,16 +1,19 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for logging contexts. 
+    /// Tests for logging contexts.
     /// </summary>
     public class LoggingContext_Tests
     {
@@ -22,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A few simple tests for NodeLoggingContexts. 
+        /// A few simple tests for NodeLoggingContexts.
         /// </summary>
         [Fact]
         public void CreateValidNodeLoggingContexts()
@@ -47,9 +50,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that if an invalid node ID is passed to the NodeLoggingContext, it throws 
-        /// an exception -- this is to guarantee that if we're passing around invalid node IDs, 
-        /// we'll know about it.  
+        /// Verifies that if an invalid node ID is passed to the NodeLoggingContext, it throws
+        /// an exception -- this is to guarantee that if we're passing around invalid node IDs,
+        /// we'll know about it.
         /// </summary>
         [Fact]
         public void InvalidNodeIdOnNodeLoggingContext()
@@ -57,8 +60,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Throws<InternalErrorException>(() =>
             {
                 _ = new NodeLoggingContext(new MockLoggingService(), -2, true);
-            }
-           );
+            });
         }
 
         [Fact]

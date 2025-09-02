@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Xml;
@@ -116,7 +120,7 @@ namespace Microsoft.Build.BuildEngine
             else
             {
                 writer.Write((byte)0);
-                  writer.Write(finalValueEscaped);
+                writer.Write(finalValueEscaped);
             }
             writer.Write((Int32)type);
         }
@@ -181,8 +185,8 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>rgoel</owner>
         internal BuildProperty
         (
-            XmlElement      propertyElement,
-            PropertyType    propertyType
+            XmlElement propertyElement,
+            PropertyType propertyType
         ) :
             this(propertyElement,
                  propertyElement != null ? Utilities.GetXmlNodeInnerContents(propertyElement) : null,
@@ -344,19 +348,6 @@ namespace Microsoft.Build.BuildEngine
         {
         }
 
-        /// <summary>
-        /// Default constructor.  This is not allowed because it leaves the
-        /// property in a bad state -- without a name or value.  But we have to
-        /// have it, otherwise FXCop complains.
-        /// </summary>
-        /// <owner>sumedhk</owner>
-        private BuildProperty
-            (
-            )
-        {
-            // not allowed.
-        }
-
         #endregion
 
         #region Properties
@@ -438,7 +429,9 @@ namespace Microsoft.Build.BuildEngine
             // NO OP if the value we set is the same we already have
             // This will prevent making the project dirty
             if (value == this.propertyValue)
+            {
                 return;
+            }
 
             // NOTE: allow output properties to be modified -- they're just like normal properties (except for their
             // precedence), and it doesn't really matter if they are modified, since they are transient (virtual)
@@ -590,7 +583,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                ErrorUtilities.VerifyThrow( ((value == null) && (this.parentPersistedPropertyGroup != null)) || ((value != null) && (this.parentPersistedPropertyGroup == null)),
+                ErrorUtilities.VerifyThrow(((value == null) && (this.parentPersistedPropertyGroup != null)) || ((value != null) && (this.parentPersistedPropertyGroup == null)),
                     "Either new parent cannot be assigned because we already have a parent, or old parent cannot be removed because none exists.");
 
                 this.parentPersistedPropertyGroup = value;
@@ -710,9 +703,9 @@ namespace Microsoft.Build.BuildEngine
             return
                 (compareToProperty != null) &&
                 (String.Equals(compareToProperty.propertyName, this.propertyName, StringComparison.OrdinalIgnoreCase)) &&
-                (compareToProperty.propertyValue                == this.propertyValue) &&
-                (compareToProperty.FinalValue                   == this.FinalValue) &&
-                (compareToProperty.type                         == this.type);
+                (compareToProperty.propertyValue == this.propertyValue) &&
+                (compareToProperty.FinalValue == this.FinalValue) &&
+                (compareToProperty.type == this.type);
         }
 
         /// <summary>
@@ -723,7 +716,7 @@ namespace Microsoft.Build.BuildEngine
             (
             )
         {
-            return (string) this;
+            return (string)this;
         }
 
         #endregion

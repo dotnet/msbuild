@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -12,6 +12,8 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using MuxLogger = Microsoft.Build.Utilities.MuxLogger;
+
+#nullable disable
 
 namespace Microsoft.VisualStudio.Build.UnitTest
 {
@@ -54,7 +56,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             MuxLogger muxLogger = new MuxLogger();
             BuildParameters parameters = new BuildParameters(ProjectCollection.GlobalProjectCollection);
             parameters.Loggers = new ILogger[] { muxLogger };
-            buildManager.Build(parameters, new BuildRequestData(project, new string[0], null));
+            buildManager.Build(parameters, new BuildRequestData(project, Array.Empty<string>(), null));
         }
 
         /// <summary>
@@ -67,8 +69,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             {
                 MuxLogger muxLogger = new MuxLogger();
                 muxLogger.RegisterLogger(1, new MockLogger());
-            }
-           );
+            });
         }
         /// <summary>
         /// Verifies that building with a logger attached to the mux logger is equivalent to building with the logger directly.
@@ -94,7 +95,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             ProjectInstance project = (new Project(XmlReader.Create(new StringReader(projectBody)), null, ObjectModelHelpers.MSBuildDefaultToolsVersion, projectCollection)).CreateProjectInstance();
             BuildParameters parameters = new BuildParameters(projectCollection);
             parameters.Loggers = new ILogger[] { mockLogger2 };
-            buildManager.Build(parameters, new BuildRequestData(project, new string[0], null));
+            buildManager.Build(parameters, new BuildRequestData(project, Array.Empty<string>(), null));
 
             // Build with the mux logger
             MuxLogger muxLogger = new MuxLogger();
@@ -109,7 +110,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             try
             {
-                BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, new string[0], null));
+                BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, Array.Empty<string>(), null));
                 muxLogger.RegisterLogger(submission.SubmissionId, mockLogger);
                 submission.Execute();
             }
@@ -149,7 +150,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             try
             {
-                BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, new string[0], null));
+                BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, Array.Empty<string>(), null));
 
                 muxLogger.RegisterLogger(submission.SubmissionId, mockLogger);
                 submission.Execute();
@@ -202,11 +203,11 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             try
             {
-                BuildSubmission submission1 = buildManager.PendBuildRequest(new BuildRequestData(project1, new string[0], null));
+                BuildSubmission submission1 = buildManager.PendBuildRequest(new BuildRequestData(project1, Array.Empty<string>(), null));
                 muxLogger.RegisterLogger(submission1.SubmissionId, mockLogger1);
                 submission1.Execute();
 
-                BuildSubmission submission2 = buildManager.PendBuildRequest(new BuildRequestData(project2, new string[0], null));
+                BuildSubmission submission2 = buildManager.PendBuildRequest(new BuildRequestData(project2, Array.Empty<string>(), null));
                 muxLogger.RegisterLogger(submission2.SubmissionId, mockLogger2);
                 submission2.Execute();
             }
@@ -255,7 +256,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             buildManager.BeginBuild(parameters);
             try
             {
-                BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, new string[0], null));
+                BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, Array.Empty<string>(), null));
 
                 muxLogger.RegisterLogger(submission.SubmissionId, mockLogger1);
                 muxLogger.RegisterLogger(submission.SubmissionId, mockLogger2);
@@ -306,7 +307,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
             {
                 try
                 {
-                    BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, new string[0], null));
+                    BuildSubmission submission = buildManager.PendBuildRequest(new BuildRequestData(project, Array.Empty<string>(), null));
 
                     submission.ExecuteAsync(null, null);
                     projectStartedEvent.WaitOne();
@@ -324,7 +325,7 @@ namespace Microsoft.VisualStudio.Build.UnitTest
         /// <summary>
         /// A logger which signals an event when it gets a project started message.
         /// </summary>
-        private class EventingLogger : ILogger
+        private sealed class EventingLogger : ILogger
         {
             /// <summary>
             /// The event source

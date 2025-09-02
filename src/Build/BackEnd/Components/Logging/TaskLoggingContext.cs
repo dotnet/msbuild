@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Execution;
 using System;
 using System.Collections.Generic;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd.Logging
 {
@@ -64,13 +66,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            this.BuildEventContext = LoggingService.LogTaskStarted2
-                (
+            this.BuildEventContext = LoggingService.LogTaskStarted2(
                 targetLoggingContext.BuildEventContext,
                 _taskName,
                 projectFullPath,
-                task.Location.File
-                );
+                task.Location.File,
+                task.Location.Line,
+                task.Location.Column);
             this.IsValid = true;
         }
 
@@ -123,14 +125,12 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
 
-            LoggingService.LogTaskFinished
-                (
+            LoggingService.LogTaskFinished(
                 BuildEventContext,
                 _taskName,
                 projectFullPath,
                 _task.Location.File,
-                success
-                );
+                success);
             this.IsValid = false;
         }
 
@@ -149,6 +149,11 @@ namespace Microsoft.Build.BackEnd.Logging
         internal ICollection<string> GetWarningsAsErrors()
         {
             return LoggingService.GetWarningsAsErrors(BuildEventContext);
+        }
+
+        internal ICollection<string> GetWarningsNotAsErrors()
+        {
+            return LoggingService.GetWarningsNotAsErrors(BuildEventContext);
         }
 
         internal ICollection<string> GetWarningsAsMessages()

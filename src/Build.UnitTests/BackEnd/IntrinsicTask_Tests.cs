@@ -1,12 +1,11 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
-
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -16,9 +15,11 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
+using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -95,8 +96,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -112,12 +112,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <PropertyGroup/>
                 </PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task);
-            }
-           );
+            });
         }
         [Fact]
         public void BlankProperty()
@@ -130,8 +128,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                   <p1></p1>
                 </PropertyGroup>
             </Target>
-            </Project>"
-            );
+            </Project>");
             IntrinsicTask task = CreateIntrinsicTask(content);
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
             ExecuteTask(task, LookupHelpers.CreateLookup(properties));
@@ -151,12 +148,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             <Target Name='t'>
                 <PropertyGroup>x</PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -172,12 +167,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     <p Include='v0'/>
                 </PropertyGroup>
             </Target>
-            </Project>"
-                );
+            </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void PropertyGroupWithConditionOnGroup()
@@ -455,7 +448,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 
         [Fact]
-        public void ItemKeepMetadataNotExistant()
+        public void ItemKeepMetadataNotExistent()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
             <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
@@ -466,7 +459,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                       <m2>m2</m2>
                       <m3>m3</m3>
                     </i1>
-                    <i2 Include='@(i1)' KeepMetadata='NONEXISTANT' />
+                    <i2 Include='@(i1)' KeepMetadata='NONEXISTENT' />
                 </ItemGroup>
             </Target>
             </Project>");
@@ -659,8 +652,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 Lookup lookup = LookupHelpers.CreateEmptyLookup();
                 ExecuteTask(task, lookup);
-            }
-           );
+            });
         }
         /// <summary>
         /// Should not make items with an empty include.
@@ -746,8 +738,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -765,8 +756,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
 
         [Fact]
@@ -784,8 +774,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void ItemGroupWithTransform()
@@ -1573,8 +1562,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void RemoveNoOp()
@@ -1737,7 +1725,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var items = lookup.GetItems("I2");
 
-            items.Select(i => i.EvaluatedInclude).ShouldBe(new []{"a2", "d2"});
+            items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "d2" });
 
             items.ElementAt(0).GetMetadataValue("M1").ShouldBe("x");
             items.ElementAt(0).GetMetadataValue("M2").ShouldBe("c");
@@ -1794,7 +1782,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             <I1 Include='c1' M1='foo/bar.vb' M2='y'/>
                             <I1 Include='d1' M1='foo\foo\foo' M2='b'/>
                             <I1 Include='e1' M1='a/b/../c/./d' M2='1'/>
-                            <I1 Include='f1' M1='{ Environment.CurrentDirectory }\b\c' M2='6'/>
+                            <I1 Include='f1' M1='{Environment.CurrentDirectory}\b\c' M2='6'/>
 
                             <I2 Include='a2' M1='FOO.TXT' m2='c'/>
                             <I2 Include='b2' M1='foo/bar.txt' m2='x'/>
@@ -2012,7 +2000,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Lookup lookup = LookupHelpers.CreateEmptyLookup();
             ExecuteTask(task, lookup);
             ICollection<ProjectItemInstance> items = lookup.GetItems("I2");
-            items.Count().ShouldBe(3);
+            items.Count.ShouldBe(3);
             items.ElementAt(0).EvaluatedInclude.ShouldBe("a2");
             items.ElementAt(1).EvaluatedInclude.ShouldBe("c2");
             items.ElementAt(2).EvaluatedInclude.ShouldBe("d2");
@@ -2962,8 +2950,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target></Project>");
                 IntrinsicTask task = CreateIntrinsicTask(content);
                 ExecuteTask(task, null);
-            }
-           );
+            });
         }
         [Fact]
         public void ModifyItemInTargetWithConditionWithoutItemTypeOnMetadataInCondition()
@@ -3267,7 +3254,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void IncludeCheckOnMetadata_3()
         {
             MockLogger logger = new MockLogger();
@@ -3323,7 +3309,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                importedFile = FileUtilities.GetTemporaryFile();
+                importedFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(importedFile, ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
@@ -3361,7 +3347,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                importedFile = FileUtilities.GetTemporaryFile();
+                importedFile = FileUtilities.GetTemporaryFileName();
                 File.WriteAllText(importedFile, ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <ItemGroup>
@@ -3478,7 +3464,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectInstance instance = new ProjectInstance(xml);
             instance.Build();
 
-            Assert.Equal(2, instance.Items.Count());
+            Assert.Equal(2, instance.Items.Count);
             Assert.Equal("gen.obj", instance.GetItems("CppCompile").First().GetMetadataValue("ObjectFile"));
             Assert.Equal("def.obj", instance.GetItems("CppCompile").Last().GetMetadataValue("ObjectFile"));
         }
@@ -3879,7 +3865,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectTargetInstanceChild targetChild = projectInstance.Targets["t"].Children.First();
 
             NodeLoggingContext nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
-            BuildRequestEntry entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "t" }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0"));
+            BuildRequestEntry entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "t" }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0"));
             entry.RequestConfiguration.Project = projectInstance;
             IntrinsicTask task = IntrinsicTask.InstantiateTask(
                 targetChild,
@@ -3914,7 +3900,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var targetChild = projectInstance.Targets["t"].Children.First();
 
                     var nodeContext = new NodeLoggingContext(new MockLoggingService(), 1, false);
-                    var entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { targetName }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0"));
+                    var entry = new BuildRequestEntry(new BuildRequest(1 /* submissionId */, 0, 1, new string[] { targetName }, null, BuildEventContext.Invalid, null), new BuildRequestConfiguration(1, new BuildRequestData("projectFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0"));
                     entry.RequestConfiguration.Project = projectInstance;
                     var task = IntrinsicTask.InstantiateTask(
                         targetChild,
@@ -3925,7 +3911,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     var lookup = new Lookup(new ItemDictionary<ProjectItemInstance>(), new PropertyDictionary<ProjectPropertyInstance>());
                     task.ExecuteTask(lookup);
 
-                    return lookup.GetItems(itemType).Select(i => (ObjectModelHelpers.TestItem)new ObjectModelHelpers.ProjectItemInstanceTestItemAdapter(i)).ToList();
+                    return lookup.GetItems(itemType).Select(i => (ObjectModelHelpers.ITestItem)new ObjectModelHelpers.ProjectItemInstanceTestItemAdapter(i)).ToList();
                 },
                 projectContents,
                 inputFiles,

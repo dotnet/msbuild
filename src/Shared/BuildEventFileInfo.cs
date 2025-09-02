@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Xml;
 using Microsoft.Build.Construction;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -83,11 +85,7 @@ namespace Microsoft.Build.Shared
         internal BuildEventFileInfo(XmlException e)
         {
             ErrorUtilities.VerifyThrow(e != null, "Need exception context.");
-#if FEATURE_XML_SOURCE_URI
             _file = (e.SourceUri.Length == 0) ? String.Empty : new Uri(e.SourceUri).LocalPath;
-#else
-            _file = String.Empty;
-#endif
             _line = e.LineNumber;
             _column = e.LinePosition;
             _endLine = 0;

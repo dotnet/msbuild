@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -16,6 +16,8 @@ using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -37,6 +39,11 @@ namespace Microsoft.Build.Tasks
         /// Reference simple names that were resolved by an external entity to RAR.
         /// </summary>
         private readonly HashSet<string> _externallyResolvedPrimaryReferences = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// The keys are normalized full paths of primary references resolved by an external entity to RAR and considered immutable, the values are assembly names or null if not known.
+        /// </summary>
+        private readonly Dictionary<string, AssemblyNameExtension> _externallyResolvedImmutableFiles = new Dictionary<string, AssemblyNameExtension>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>The table of remapped assemblies. Used for Unification.</summary>
         private IEnumerable<DependentAssembly> _remappedAssemblies = Enumerable.Empty<DependentAssembly>();
@@ -146,9 +153,9 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// When we exclude an assembly from resolution because it is part of out exclusion list we need to let the user know why this is.
-        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different black list. We need to log a specific message
-        /// depending on which black list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a black list so that when we
-        /// discover an assembly in the black list we can log the correct message.
+        /// There can be a number of reasons each for un-resolving a reference, these reasons are encapsulated by a different deny list. We need to log a specific message
+        /// depending on which deny list we have found the offending assembly in. This delegate allows one to tie a set of logging messages to a deny list so that when we
+        /// discover an assembly in the deny list we can log the correct message.
         /// </summary>
         internal delegate void LogExclusionReason(bool displayPrimaryReferenceMessage, AssemblyNameExtension assemblyName, Reference reference, ITaskItem referenceItem, string targetedFramework);
 
@@ -238,8 +245,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
 #endif
-        internal ReferenceTable
-        (
+        internal ReferenceTable(
             IBuildEngine buildEngine,
             bool findDependencies,
             bool findSatellites,
@@ -333,8 +339,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Compile searchpaths into fast resolver array.
-            Resolvers = AssemblyResolution.CompileSearchPaths
-                (
+            Resolvers = AssemblyResolution.CompileSearchPaths(
                     buildEngine,
                     searchPaths,
                     candidateAssemblyFiles,
@@ -351,8 +356,7 @@ namespace Microsoft.Build.Tasks
                     getRuntimeVersion,
                     targetedRuntimeVersion,
                     getAssemblyPathInGac,
-                    log
-                );
+                    log);
         }
 
         /// <summary>
@@ -407,6 +411,12 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+            if (reference.FullPath.Length > 0)
+            {
+                // Saves effort and makes deduplication possible downstream
+                reference.NormalizeFullPath();
+            }
+
             References[assemblyName] = reference;
         }
 
@@ -428,11 +438,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="reference">The reference to work on</param>
         /// <param name="assemblyFileName">The path to the assembly file.</param>
         /// <returns>The AssemblyName of assemblyFileName</returns>
-        private AssemblyNameExtension NameAssemblyFileReference
-        (
+        private AssemblyNameExtension NameAssemblyFileReference(
             Reference reference,
-            string assemblyFileName
-        )
+            string assemblyFileName)
         {
             AssemblyNameExtension assemblyName = null;
 
@@ -459,23 +467,17 @@ namespace Microsoft.Build.Tasks
                 {
                     assemblyName = new AssemblyNameExtension("*directory*");
 
-                    reference.AddError
-                    (
-                        new ReferenceResolutionException
-                        (
+                    reference.AddError(
+                        new ReferenceResolutionException(
                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileGotDirectory", reference.FullPath),
-                            null
-                        )
-                    );
+                            null));
                     reference.FullPath = String.Empty;
                 }
 
                 if (assemblyName == null)
                 {
-                    reference.AddError
-                    (
-                        new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
-                    );
+                    reference.AddError(
+                        new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null));
                 }
             }
             catch (BadImageFormatException e)
@@ -505,12 +507,10 @@ namespace Microsoft.Build.Tasks
         /// <param name="referenceAssemblyFiles">The task items which contain file names to add.</param>
         /// <param name="referenceAssemblyNames">The task items which contain fusion names to add.</param>
         /// <param name="exceptions">Exceptions encountered while setting primary items. Exceptions are logged, but it doesn't stop the resolution process.</param>
-        private void SetPrimaryItems
-        (
+        private void SetPrimaryItems(
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
-            List<Exception> exceptions
-        )
+            List<Exception> exceptions)
         {
             // Loop over the referenceAssemblyFiles provided and add each one that doesn't exist.
             // Set the primary flag to 'true'.
@@ -543,10 +543,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="referenceAssemblyName">The task item which contain fusion names to add.</param>
         /// <returns>Resulting exception containing resolution failure details, if any: too costly to throw it.</returns>
-        private Exception SetPrimaryAssemblyReferenceItem
-        (
-            ITaskItem referenceAssemblyName
-        )
+        private Exception SetPrimaryAssemblyReferenceItem(
+            ITaskItem referenceAssemblyName)
         {
             // Get the desired executable extension.
             string executableExtension = referenceAssemblyName.GetMetadata(ItemMetadataNames.executableExtension);
@@ -583,10 +581,8 @@ namespace Microsoft.Build.Tasks
             // 2) We have found the metadata and it is specifically set to false
             if (assemblyName != null && (isSimpleName || (foundSpecificVersionMetadata && !wantSpecificVersion)))
             {
-                assemblyName = new AssemblyNameExtension
-                (
-                    AssemblyNameExtension.EscapeDisplayNameCharacters(assemblyName.Name)
-                );
+                assemblyName = new AssemblyNameExtension(
+                    AssemblyNameExtension.EscapeDisplayNameCharacters(assemblyName.Name));
 
                 isSimpleName = assemblyName.IsSimpleName;
             }
@@ -622,11 +618,9 @@ namespace Microsoft.Build.Tasks
             // So, we just ignore this setting on down-level platforms
             if (_projectTargetFramework != null && _projectTargetFramework >= s_targetFrameworkVersion_40)
             {
-                reference.EmbedInteropTypes = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                    (
+                reference.EmbedInteropTypes = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                         referenceAssemblyName,
-                        ItemMetadataNames.embedInteropTypes
-                    );
+                        ItemMetadataNames.embedInteropTypes);
             }
 
             // Set the AssemblyFolderKey if there is one.
@@ -692,10 +686,8 @@ namespace Microsoft.Build.Tasks
                     return new InvalidReferenceAssemblyNameException(referenceAssemblyName.ItemSpec);
                 }
 
-                assemblyName = new AssemblyNameExtension
-                (
-                    AssemblyNameExtension.EscapeDisplayNameCharacters(reference.FileNameWithoutExtension)
-                );
+                assemblyName = new AssemblyNameExtension(
+                    AssemblyNameExtension.EscapeDisplayNameCharacters(reference.FileNameWithoutExtension));
             }
 
             // Check to see if this is a prereq assembly.
@@ -705,14 +697,12 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                _installedAssemblies.GetInfo
-                (
+                _installedAssemblies.GetInfo(
                     assemblyName,
                     out _,
                     out bool isPrerequisite,
                     out bool? isRedistRoot,
-                    out string redistName
-                );
+                    out string redistName);
 
                 reference.IsPrerequisite = isPrerequisite;
                 reference.IsRedistRoot = isRedistRoot;
@@ -735,13 +725,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void TryConvertToAssemblyName(string itemSpec, string fusionName, ref AssemblyNameExtension assemblyName)
         {
-            // FusionName is used if available.
-            string finalName = fusionName;
-            if (string.IsNullOrEmpty(finalName))
-            {
-                // Otherwise, its itemSpec.
-                finalName = itemSpec;
-            }
+            // FusionName is used if available; otherwise use itemspec.
+            string finalName = string.IsNullOrEmpty(fusionName) ? itemSpec : fusionName;
 
             bool pathRooted = false;
             try
@@ -844,6 +829,33 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Tries to create an <see cref="AssemblyNameExtension"/> out of a primary reference metadata.
+        /// </summary>
+        private static AssemblyNameExtension GetAssemblyNameFromItemMetadata(ITaskItem item)
+        {
+            string version = item.GetMetadata(ItemMetadataNames.assemblyVersion);
+            if (string.IsNullOrEmpty(version))
+            {
+                return null;
+            }
+
+            string publicKeyToken = item.GetMetadata(ItemMetadataNames.publicKeyToken);
+            if (string.IsNullOrEmpty(publicKeyToken))
+            {
+                return null;
+            }
+
+            string name = item.GetMetadata(ItemMetadataNames.assemblyName);
+            if (string.IsNullOrEmpty(name))
+            {
+                // Fall back to inferring assembly name from file name.
+                name = item.GetMetadata(FileUtilities.ItemSpecModifiers.Filename);
+            }
+
+            return new AssemblyNameExtension($"{name}, Version={version}, Culture=neutral, PublicKeyToken={publicKeyToken}");
+        }
+
+        /// <summary>
         /// Given an item that refers to a file name, make it a primary reference.
         /// </summary>
         private void SetPrimaryFileItem(ITaskItem referenceAssemblyFile)
@@ -855,28 +867,22 @@ namespace Microsoft.Build.Tasks
 
                 string itemSpec = referenceAssemblyFile.ItemSpec;
                 bool hasSpecificVersionMetadata = MetadataConversionUtilities.TryConvertItemMetadataToBool(referenceAssemblyFile, ItemMetadataNames.specificVersion);
-                reference.MakePrimaryAssemblyReference
-                (
+                reference.MakePrimaryAssemblyReference(
                     referenceAssemblyFile,
                     hasSpecificVersionMetadata,
-                    Path.GetExtension(itemSpec)
-                );
+                    Path.GetExtension(itemSpec));
 
-                AssemblyNameExtension assemblyName = NameAssemblyFileReference
-                (
+                AssemblyNameExtension assemblyName = NameAssemblyFileReference(
                     reference,
-                    itemSpec  // Contains the assembly file name.
-                );
+                    itemSpec);  // Contains the assembly file name.
 
                 // Embed Interop Types aka "NOPIAs" support is not available for Fx < 4.0
                 // So, we just ignore this setting on down-level platforms
                 if (_projectTargetFramework >= s_targetFrameworkVersion_40)
                 {
-                    reference.EmbedInteropTypes = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                        (
+                    reference.EmbedInteropTypes = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                             referenceAssemblyFile,
-                            ItemMetadataNames.embedInteropTypes
-                        );
+                            ItemMetadataNames.embedInteropTypes);
                 }
 
                 AddReference(assemblyName, reference);
@@ -896,10 +902,8 @@ namespace Microsoft.Build.Tasks
         /// Find related files like .pdbs and .xmls
         /// </summary>
         /// <param name="reference">The reference to the parent assembly.</param>
-        private void FindRelatedFiles
-        (
-            Reference reference
-        )
+        private void FindRelatedFiles(
+            Reference reference)
         {
             string baseName = reference.FullPathWithoutExtension;
 
@@ -943,10 +947,8 @@ namespace Microsoft.Build.Tasks
         /// Find satellite assemblies.
         /// </summary>
         /// <param name="reference">The reference to the parent assembly.</param>
-        private void FindSatellites
-        (
-            Reference reference
-        )
+        private void FindSatellites(
+            Reference reference)
         {
             try
             {
@@ -990,10 +992,8 @@ namespace Microsoft.Build.Tasks
         /// Find serialization assemblies.
         /// </summary>
         /// <param name="reference">The reference to the parent assembly.</param>
-        private void FindSerializationAssemblies
-        (
-            Reference reference
-        )
+        private void FindSerializationAssemblies(
+            Reference reference)
         {
             string serializationAssemblyFilename = reference.FileNameWithoutExtension + ".XmlSerializers.dll";
             string serializationAssemblyPath = Path.Combine(reference.DirectoryName, serializationAssemblyFilename);
@@ -1007,12 +1007,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Get unified dependencies and scatter files for a reference.
         /// </summary>
-        private void GetUnifiedAssemblyMetadata
-            (
+        private void GetUnifiedAssemblyMetadata(
                 Reference reference,
                 out IEnumerable<UnifiedAssemblyName> unifiedDependencies,
-                out string[] scatterFiles
-            )
+                out string[] scatterFiles)
         {
             // Shortcut if this is a prereq file--don't find dependencies.
             // We also don't want to look for dependencies if we already know
@@ -1024,14 +1022,12 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            _getAssemblyMetadata
-            (
+            _getAssemblyMetadata(
                 reference.FullPath,
                 _assemblyMetadataCache,
                 out AssemblyNameExtension[] dependentAssemblies,
                 out scatterFiles,
-                out FrameworkName frameworkName
-            );
+                out FrameworkName frameworkName);
 
             reference.FrameworkNameAttribute = frameworkName;
 
@@ -1080,10 +1076,8 @@ namespace Microsoft.Build.Tasks
         /// Given an enumerator of pre-unified assembly names, return an enumerator of unified
         /// assembly names.
         /// </summary>
-        private IEnumerable<UnifiedAssemblyName> GetUnifiedAssemblyNames
-        (
-            IEnumerable<AssemblyNameExtension> preUnificationAssemblyNames
-        )
+        private IEnumerable<UnifiedAssemblyName> GetUnifiedAssemblyNames(
+            IEnumerable<AssemblyNameExtension> preUnificationAssemblyNames)
         {
             foreach (AssemblyNameExtension preUnificationAssemblyName in preUnificationAssemblyNames)
             {
@@ -1103,21 +1097,17 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="reference">The reference to the parent assembly.</param>
         /// <param name="newEntries">New references are added to this list.</param>
-        private void FindDependenciesAndScatterFiles
-        (
+        private void FindDependenciesAndScatterFiles(
             Reference reference,
-            List<KeyValuePair<AssemblyNameExtension, Reference>> newEntries
-        )
+            List<KeyValuePair<AssemblyNameExtension, Reference>> newEntries)
         {
             // Before checking for dependencies check to see if the reference itself exists. 
             // Even though to get to this point the reference must be resolved
             // the reference may not exist on disk if the reference is a project to project reference.
             if (!_fileExists(reference.FullPath))
             {
-                reference.AddError
-                      (
-                          new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null)
-                      );
+                reference.AddError(
+                          new DependencyResolutionException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.ExpectedFileMissing", reference.FullPath), null));
 
                 return;
             }
@@ -1262,13 +1252,22 @@ namespace Microsoft.Build.Tasks
         /// <param name="assemblyName">The fusion name for this reference.</param>
         /// <param name="rawFileNameCandidate">The file name to match if {RawFileName} is seen. (May be null).</param>
         /// <param name="reference">The reference object.</param>
-        private void ResolveReference
-        (
+        private void ResolveReference(
             AssemblyNameExtension assemblyName,
             string rawFileNameCandidate,
-            Reference reference
-        )
+            Reference reference)
         {
+            bool isImmutableFrameworkReference = false;
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+            {
+                // For a path to be an immutable reference, it must be externally resolved and has a FrameworkReferenceName defined.
+                if (assemblyName == null && !string.IsNullOrEmpty(rawFileNameCandidate) && reference.IsPrimary && reference.ExternallyResolved)
+                {
+                    string frameworkReferenceName = reference.PrimarySourceItem.GetMetadata(ItemMetadataNames.frameworkReferenceName);
+                    isImmutableFrameworkReference = !string.IsNullOrEmpty(frameworkReferenceName);
+                }
+            }
+
             // Now, resolve this reference.
             string resolvedPath = null;
             string resolvedSearchPath = String.Empty;
@@ -1310,21 +1309,20 @@ namespace Microsoft.Build.Tasks
             // Resolve
             try
             {
-                resolvedPath = AssemblyResolution.ResolveReference
-                (
+                resolvedPath = AssemblyResolution.ResolveReference(
                     jaggedResolvers,
                     assemblyName,
                     reference.SDKName,
                     rawFileNameCandidate,
                     reference.IsPrimary,
+                    isImmutableFrameworkReference,
                     reference.WantSpecificVersion,
                     reference.GetExecutableExtensions(_allowedAssemblyExtensions),
                     reference.HintPath,
                     reference.AssemblyFolderKey,
                     assembliesConsideredAndRejected,
                     out resolvedSearchPath,
-                    out userRequestedSpecificFile
-                );
+                    out userRequestedSpecificFile);
             }
             catch (BadImageFormatException e)
             {
@@ -1337,12 +1335,13 @@ namespace Microsoft.Build.Tasks
             // If the path was resolved, then specify the full path on the reference.
             if (resolvedPath != null)
             {
-                if (!Path.IsPathRooted(resolvedPath))
+                resolvedPath = FileUtilities.NormalizePath(resolvedPath);
+                if (isImmutableFrameworkReference)
                 {
-                    resolvedPath = Path.GetFullPath(resolvedPath);
+                    _externallyResolvedImmutableFiles[resolvedPath] = GetAssemblyNameFromItemMetadata(reference.PrimarySourceItem);
                 }
-
                 reference.FullPath = resolvedPath;
+
                 reference.ResolvedSearchPath = resolvedSearchPath;
                 reference.UserRequestedSpecificFile = userRequestedSpecificFile;
             }
@@ -1350,28 +1349,24 @@ namespace Microsoft.Build.Tasks
             {
                 if (assemblyName != null)
                 {
-                    reference.AddError
-                    (
-                        new ReferenceResolutionException
-                        (
+                    reference.AddError(
+                        new ReferenceResolutionException(
                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.CouldNotLocateAssembly", assemblyName.FullName),
-                            null
-                        )
-                    );
+                            null));
                 }
             }
         }
 
         /// <summary>
-        /// This method will remove references from the reference table which are contained in the blacklist.
-        /// References which are primary references but are in the black list will be placed in the invalidResolvedFiles list.
-        /// References which are dependency references but are in the black list will be placed in the invalidResolvedDependencyFiles list.
+        /// This method will remove references from the reference table which are contained in the denylist.
+        /// References which are primary references but are in the deny list will be placed in the invalidResolvedFiles list.
+        /// References which are dependency references but are in the deny list will be placed in the invalidResolvedDependencyFiles list.
         /// </summary>
         internal void RemoveReferencesMarkedForExclusion(bool removeOnlyNoWarning, string subsetName)
         {
             MSBuildEventSource.Log.RarRemoveReferencesMarkedForExclusionStart();
             {
-                // Create a table which will contain the references which are not in the black list
+                // Create a table which will contain the references which are not in the deny list
                 var goodReferences = new Dictionary<AssemblyNameExtension, Reference>(AssemblyNameComparer.GenericComparer);
 
                 // List of references which were removed from the reference table, we will loop through these and make sure that we get rid of the dependent references also.
@@ -1385,21 +1380,22 @@ namespace Microsoft.Build.Tasks
                     subsetName = String.Empty;
                 }
 
-                // Go through each of the references, we go through this table because in general it will be considerably smaller than the blacklist. (10's of references vs 100's of black list items)
-                foreach (AssemblyNameExtension assemblyName in References.Keys)
+                // Go through each of the references, we go through this table because in general it will be considerably smaller than the denylist. (10's of references vs 100's of deny list items)
+                foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
                 {
-                    Reference assemblyReference = References[assemblyName];
+                    AssemblyNameExtension assemblyName = assembly.Key;
+                    Reference assemblyReference = assembly.Value;
 
                     AddToDependencyGraph(dependencyGraph, assemblyName, assemblyReference);
 
-                    // Is the assembly name not in the black list. This means the assembly could be allowed.
+                    // Is the assembly name not in the deny list. This means the assembly could be allowed.
                     bool isMarkedForExclusion = assemblyReference.ExclusionListLoggingProperties.IsInExclusionList;
                     LogExclusionReason logExclusionReason = assemblyReference.ExclusionListLoggingProperties.ExclusionReasonLogDelegate;
 
                     // Case one, the assembly is a primary reference
                     if (assemblyReference.IsPrimary)
                     {
-                        // The assembly is good if it is not in the black list or it has specific version set to true.
+                        // The assembly is good if it is not in the deny list or it has specific version set to true.
                         if (!isMarkedForExclusion || assemblyReference.WantSpecificVersion)
                         {
                             // Do not add the reference to the good list if it has been added to the removed references list, possibly because of us processing another reference.
@@ -1418,16 +1414,16 @@ namespace Microsoft.Build.Tasks
                     // the current primary reference and they need to be removed.
                     ICollection<ITaskItem> dependees = assemblyReference.GetSourceItems();
 
-                    // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the black list
+                    // Need to deal with dependencies, this can also include primary references who are dependencies themselves and are in the deny list
                     if (!assemblyReference.IsPrimary || (assemblyReference.IsPrimary && isMarkedForExclusion && (dependees?.Count > 1)))
                     {
                         // Does the assembly have specific version true, or does any of its primary parent references have specific version true.
-                        // This is checked because, if an assembly is in the black list, the only way it can possibly be allowed is if
+                        // This is checked because, if an assembly is in the deny list, the only way it can possibly be allowed is if
                         // ANY of the primary references which caused it have specific version set to true. To see if any primary references have the metadata we pass true to the method indicating 
                         // we want to know if any primary references have specific version set to true.
                         bool hasSpecificVersionTrue = assemblyReference.CheckForSpecificVersionMetadataOnParentsReference(true);
 
-                        //A dependency is "good" if it is not in the black list or any of its parents have specific version set to true
+                        // A dependency is "good" if it is not in the deny list or any of its parents have specific version set to true
                         if (!isMarkedForExclusion || hasSpecificVersionTrue)
                         {
                             // Do not add the reference to the good list if it has been added to the removed references list, possibly because of us processing another reference.
@@ -1437,8 +1433,8 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        // If the dependency is in the black list we need to remove the primary references which depend on this refernce.
-                        // note, a reference can both be in the good references list and in the black list. This can happen if a multiple primary references
+                        // If the dependency is in the deny list we need to remove the primary references which depend on this refernce.
+                        // note, a reference can both be in the good references list and in the deny list. This can happen if a multiple primary references
                         // depend on a single dependency. The dependency can be good for one reference but not allowed for the other.
                         if (isMarkedForExclusion)
                         {
@@ -1483,7 +1479,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// We have determined the given assembly reference is in the black list, we now need to find the primary references which caused it and make sure those are removed from the list of references.
+        /// We have determined the given assembly reference is in the deny list, we now need to find the primary references which caused it and make sure those are removed from the list of references.
         /// </summary>
         private void RemoveDependencyMarkedForExclusion(LogExclusionReason logExclusionReason, bool removeOnlyNoWarning, string subsetName, Dictionary<AssemblyNameExtension, Reference> goodReferences, List<Reference> removedReferences, AssemblyNameExtension assemblyName, Reference assemblyReference)
         {
@@ -1531,7 +1527,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// A primary references has been determined to be in the black list, it needs to be removed from the list of references by not being added to the list of good references
+        /// A primary references has been determined to be in the deny list, it needs to be removed from the list of references by not being added to the list of good references
         /// and added to the list of removed references.
         /// </summary>
         private static void RemovePrimaryReferenceMarkedForExclusion(LogExclusionReason logExclusionReason, bool removeOnlyNoWarning, string subsetName, List<Reference> removedReferences, AssemblyNameExtension assemblyName, Reference assemblyReference)
@@ -1550,12 +1546,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal AssemblyNameExtension GetReferenceFromItemSpec(string itemSpec)
         {
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
-                Reference assemblyReference = References[assemblyName];
+                Reference assemblyReference = assembly.Value;
                 if (assemblyReference.IsPrimary && assemblyReference.PrimarySourceItem.ItemSpec.Equals(itemSpec, StringComparison.OrdinalIgnoreCase))
                 {
-                    return assemblyName;
+                    return assembly.Key;
                 }
             }
 
@@ -1564,7 +1560,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Go through the dependency graph and make sure that for a reference to remove that we get rid of all dependency assemblies which are not referenced by any other
-        /// assembly. The remove reference list should contain ALL primary references which should be removed because they, or one of their dependencies is in the black list.
+        /// assembly. The remove reference list should contain ALL primary references which should be removed because they, or one of their dependencies is in the deny list.
         /// </summary>
         /// <param name="removedReference">Reference to remove dependencies for</param>
         /// <param name="referenceList">Reference list which contains reference to be used in unification and returned as resolved items</param>
@@ -1615,13 +1611,11 @@ namespace Microsoft.Build.Tasks
         /// <param name="referenceAssemblyFiles">The task items which contain file names to add.</param>
         /// <param name="referenceAssemblyNames">The task items which contain fusion names to add.</param>
         /// <param name="exceptions">Errors encountered while computing closure.</param>
-        internal void ComputeClosure
-        (
+        internal void ComputeClosure(
             IEnumerable<DependentAssembly> remappedAssembliesValue,
             ITaskItem[] referenceAssemblyFiles,
             ITaskItem[] referenceAssemblyNames,
-            List<Exception> exceptions
-        )
+            List<Exception> exceptions)
         {
             MSBuildEventSource.Log.RarComputeClosureStart();
             {
@@ -1788,14 +1782,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void ResolveAssemblyFilenames()
         {
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
-                Reference reference = GetReference(assemblyName);
+                Reference reference = assembly.Value;
 
                 // Has this reference been resolved to a file name?
                 if (!reference.IsResolved && !reference.IsUnresolvable)
                 {
-                    ResolveReference(assemblyName, null, reference);
+                    ResolveReference(assembly.Key, null, reference);
                 }
             }
         }
@@ -1824,11 +1818,9 @@ namespace Microsoft.Build.Tasks
 
             while (comparisonIndex < assemblyReferences.Count)
             {
-                bool isLeftVictim = ResolveAssemblyNameConflict
-                (
+                bool isLeftVictim = ResolveAssemblyNameConflict(
                     assemblyReferences[currentWinnerIndex],
-                    assemblyReferences[comparisonIndex]
-                ) == 0;
+                    assemblyReferences[comparisonIndex]) == 0;
 
                 if (isLeftVictim)
                 {
@@ -1843,11 +1835,9 @@ namespace Microsoft.Build.Tasks
         /// Based on the closure, get a table of ideal remappings needed to
         /// produce zero conflicts.
         /// </summary>
-        internal void ResolveConflicts
-        (
+        internal void ResolveConflicts(
             out List<DependentAssembly> idealRemappings,
-            out List<AssemblyNameReference> conflictingReferences
-        )
+            out List<AssemblyNameReference> conflictingReferences)
         {
             idealRemappings = null;
             conflictingReferences = null;
@@ -2211,20 +2201,21 @@ namespace Microsoft.Build.Tasks
             return baseNameToReferences;
         }
 
-        private static void RemoveReferencesWithoutConflicts
-        (
-            Dictionary<string, List<AssemblyNameReference>> baseNameToReferences
-        )
+        private static void RemoveReferencesWithoutConflicts(
+            Dictionary<string, List<AssemblyNameReference>> baseNameToReferences)
         {
-            string[] baseNames = new string[baseNameToReferences.Count];
-            baseNameToReferences.Keys.CopyTo(baseNames, 0);
-
-            foreach (string baseName in baseNames)
+            List<string> toRemove = new(baseNameToReferences.Count);
+            foreach (KeyValuePair<string, List<AssemblyNameReference>> kvp in baseNameToReferences)
             {
-                if (baseNameToReferences[baseName].Count == 1)
+                if (kvp.Value.Count == 1)
                 {
-                    baseNameToReferences.Remove(baseName);
+                    toRemove.Add(kvp.Key);
                 }
+            }
+
+            foreach (string key in toRemove)
+            {
+                baseNameToReferences.Remove(key);
             }
         }
 
@@ -2282,7 +2273,7 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
-        //  Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
+        // Based on coreclr baseassemblyspec.cpp (https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L330)
         private static bool RefMatchesDef(AssemblyName @ref, AssemblyName def)
         {
             if (IsStrongNamed(@ref))
@@ -2302,7 +2293,7 @@ namespace Microsoft.Build.Tasks
             return refPkt != null && refPkt.Length != 0;
         }
 
-        //  Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
+        // Based on https://github.com/dotnet/coreclr/blob/4cf8a6b082d9bb1789facd996d8265d3908757b2/src/vm/baseassemblyspec.cpp#L241
         private static bool CompareRefToDef(AssemblyName @ref, AssemblyName def)
         {
             if (!@ref.Name.Equals(def.Name, StringComparison.OrdinalIgnoreCase))
@@ -2375,7 +2366,7 @@ namespace Microsoft.Build.Tasks
                 string leftConflictFusionName = assemblyReference0.assemblyName.FullName;
                 string rightConflictFusionName = assemblyReference1.assemblyName.FullName;
 
-                //  If both assemblies being compared are primary references, the caller should pass in a zero-flag 
+                // If both assemblies being compared are primary references, the caller should pass in a zero-flag 
                 // (non-unified) for both. (This conforms to the C# assumption that two direct references are meant to be 
                 // SxS.)
                 bool isNonUnified = leftConflictReference.IsPrimary && rightConflictReference.IsPrimary;
@@ -2383,13 +2374,11 @@ namespace Microsoft.Build.Tasks
                 bool rightConflictLegacyUnified = !isNonUnified && assemblyReference1.reference.IsPrimary;
 
                 // This is ok here because even if the method says two versions are equivalent the algorithm below will still pick the highest version.
-                bool equivalent = AreAssembliesEquivalent
-                (
+                bool equivalent = AreAssembliesEquivalent(
                     leftConflictFusionName,
                     leftConflictLegacyUnified,
                     rightConflictFusionName,
-                    rightConflictLegacyUnified
-                );
+                    rightConflictLegacyUnified);
 
                 Version leftConflictVersion = assemblyReference0.assemblyName.Version;
                 Version rightConflictVersion = assemblyReference1.assemblyName.Version;
@@ -2399,8 +2388,7 @@ namespace Microsoft.Build.Tasks
                     // Version comparison only if there are two versions to compare.
                     // Null versions can occur when simply-named assemblies are unresolved.
                     leftConflictVersion != null && rightConflictVersion != null
-                    && leftConflictVersion > rightConflictVersion
-                )
+                    && leftConflictVersion > rightConflictVersion)
                 {
                     // Choose the higher version
                     victim = 1;
@@ -2414,8 +2402,7 @@ namespace Microsoft.Build.Tasks
                     // Version comparison only if there are two versions to compare.
                     // Null versions can occur when simply-named assemblies are unresolved.
                     leftConflictVersion != null && rightConflictVersion != null
-                    && leftConflictVersion < rightConflictVersion
-                )
+                    && leftConflictVersion < rightConflictVersion)
                 {
                     // Choose the higher version
                     victim = 0;
@@ -2485,15 +2472,13 @@ namespace Microsoft.Build.Tasks
         /// <param name="isRedistRoot">May be true, false or null. Null means there was no IsRedistRoot in the redist list.</param>
         /// <param name="redistName">Name of the corresponding Resist specified in the redist list.</param>
         /// <returns>True if there was a unification.</returns>
-        private bool UnifyAssemblyNameVersions
-        (
+        private bool UnifyAssemblyNameVersions(
             AssemblyNameExtension assemblyName,
             out Version unifiedVersion,
             out UnificationReason unificationReason,
             out bool isPrerequisite,
             out bool? isRedistRoot,
-            out string redistName
-        )
+            out string redistName)
         {
             unifiedVersion = assemblyName.Version;
             isPrerequisite = false;
@@ -2536,14 +2521,12 @@ namespace Microsoft.Build.Tasks
             // Try for an installed assemblies unification.
             if (_installedAssemblies != null)
             {
-                _installedAssemblies.GetInfo
-                (
+                _installedAssemblies.GetInfo(
                     assemblyName,
                     out unifiedVersion,
                     out isPrerequisite,
                     out isRedistRoot,
-                    out redistName
-                );
+                    out redistName);
 
                 // Was there a unification?
                 if (unifiedVersion != assemblyName.Version)
@@ -2597,16 +2580,14 @@ namespace Microsoft.Build.Tasks
         /// <param name="serializationAssemblyFiles">Serialization assembly files.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="copyLocalFiles">All copy-local files out of primaryFiles+dependencyFiles+relatedFiles+satelliteFiles.</param>
-        internal void GetReferenceItems
-        (
+        internal void GetReferenceItems(
             out ITaskItem[] primaryFiles,
             out ITaskItem[] dependencyFiles,
             out ITaskItem[] relatedFiles,
             out ITaskItem[] satelliteFiles,
             out ITaskItem[] serializationAssemblyFiles,
             out ITaskItem[] scatterFiles,
-            out ITaskItem[] copyLocalFiles
-        )
+            out ITaskItem[] copyLocalFiles)
         {
             var primaryItems = new List<ITaskItem>();
             var dependencyItems = new List<ITaskItem>();
@@ -2621,48 +2602,48 @@ namespace Microsoft.Build.Tasks
                 AssemblyNameExtension assemblyName = kvp.Key;
                 Reference reference = kvp.Value;
 
+                reference.SetFinalCopyLocalState(
+                    assemblyName,
+                    _frameworkPaths,
+                    _targetProcessorArchitecture,
+                    _getRuntimeVersion,
+                    _targetedRuntimeVersion,
+                    _fileExists,
+                    _getAssemblyPathInGac,
+                    _copyLocalDependenciesWhenParentReferenceInGac,
+                    _doNotCopyLocalIfInGac,
+                    this);
+
                 // Conflict victims and badimages are filtered out.
-                if (!reference.IsBadImage)
+                if (reference.IsBadImage)
                 {
-                    reference.SetFinalCopyLocalState
-                    (
-                        assemblyName,
-                        _frameworkPaths,
-                        _targetProcessorArchitecture,
-                        _getRuntimeVersion,
-                        _targetedRuntimeVersion,
-                        _fileExists,
-                        _getAssemblyPathInGac,
-                        _copyLocalDependenciesWhenParentReferenceInGac,
-                        _doNotCopyLocalIfInGac,
-                        this
-                    );
+                    continue;
+                }
 
-                    // If mscorlib was found as a dependency and not a primary reference we will assume that mscorlib on the target machine will be ok to use.
-                    // If mscorlib was a primary reference then we may have resolved one which is a differnt version that is on the target
-                    // machine and we should gather it along with the other references.
-                    if (!reference.IsPrimary && IsPseudoAssembly(assemblyName.Name))
+                // If mscorlib was found as a dependency and not a primary reference we will assume that mscorlib on the target machine will be ok to use.
+                // If mscorlib was a primary reference then we may have resolved one which is a differnt version that is on the target
+                // machine and we should gather it along with the other references.
+                if (!reference.IsPrimary && IsPseudoAssembly(assemblyName.Name))
+                {
+                    continue;
+                }
+
+                if (reference.IsResolved)
+                {
+                    ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName);
+
+                    if (reference.IsPrimary)
                     {
-                        continue;
+                        if (!reference.IsBadImage)
+                        {
+                            // Add a primary item.
+                            primaryItems.Add(referenceItem);
+                        }
                     }
-
-                    if (reference.IsResolved)
+                    else
                     {
-                        ITaskItem referenceItem = SetItemMetadata(relatedItems, satelliteItems, serializationAssemblyItems, scatterItems, assemblyName.FullName, reference, assemblyName);
-
-                        if (reference.IsPrimary)
-                        {
-                            if (!reference.IsBadImage)
-                            {
-                                // Add a primary item.
-                                primaryItems.Add(referenceItem);
-                            }
-                        }
-                        else
-                        {
-                            // Add the reference item.
-                            dependencyItems.Add(referenceItem);
-                        }
+                        // Add the reference item.
+                        dependencyItems.Add(referenceItem);
                     }
                 }
             }
@@ -2674,7 +2655,7 @@ namespace Microsoft.Build.Tasks
             serializationAssemblyFiles = serializationAssemblyItems.ToArray();
             scatterFiles = scatterItems.ToArray();
 
-             // Sort for stable outputs. (These came from a dictionary, which has undefined enumeration order.)
+            // Sort for stable outputs. (These came from a dictionary, which has undefined enumeration order.)
             Array.Sort(primaryFiles, TaskItemSpecFilenameComparer.GenericComparer);
 
             // Find the copy-local items.
@@ -2695,36 +2676,9 @@ namespace Microsoft.Build.Tasks
             // Set up the main item.
             TaskItem referenceItem = new TaskItem();
             referenceItem.ItemSpec = reference.FullPath;
-            referenceItem.SetMetadata(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
 
-            // Set the CopyLocal metadata.
-            referenceItem.SetMetadata(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
-
-            // Set the Redist name metadata.
-            if (!String.IsNullOrEmpty(reference.RedistName))
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.redist, reference.RedistName);
-            }
-
-            if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
-            {
-                if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
-                {
-                    referenceItem.SetMetadata(ItemMetadataNames.frameworkFile, "true");
-                }
-            }
-
-            if (!String.IsNullOrEmpty(reference.ImageRuntime))
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.imageRuntime, reference.ImageRuntime);
-            }
-
-            // The redist root is "null" when there was no IsRedistRoot flag in the Redist XML
-            // (or there was no redist XML at all for this item).
-            if (reference.IsRedistRoot != null)
-            {
-                referenceItem.SetMetadata(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
-            }
+            IMetadataContainer referenceItemAsMetadataContainer = referenceItem;
+            referenceItemAsMetadataContainer.ImportMetadata(EnumerateCommonMetadata());
 
             // If there was a primary source item, then forward metadata from it.
             // It's important that the metadata from the primary source item
@@ -2898,13 +2852,45 @@ namespace Microsoft.Build.Tasks
             // nonForwardableMetadata should be null here if relatedFileExtensions, satellites, serializationAssemblyFiles, and scatterFiles were all empty.
             if (nonForwardableMetadata != null)
             {
-                foreach (KeyValuePair<string, string> kvp in nonForwardableMetadata)
-                {
-                    referenceItem.SetMetadata(kvp.Key, kvp.Value);
-                }
+                referenceItemAsMetadataContainer.ImportMetadata(nonForwardableMetadata);
             }
 
             return referenceItem;
+
+            // Enumerate common metadata with an iterator to allow using a more efficient bulk-set operation.
+            IEnumerable<KeyValuePair<string, string>> EnumerateCommonMetadata()
+            {
+                yield return new KeyValuePair<string, string>(ItemMetadataNames.resolvedFrom, reference.ResolvedSearchPath);
+
+                // Set the CopyLocal metadata.
+                yield return new KeyValuePair<string, string>(ItemMetadataNames.copyLocal, reference.IsCopyLocal ? "true" : "false");
+
+                // Set the Redist name metadata.
+                if (!string.IsNullOrEmpty(reference.RedistName))
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.redist, reference.RedistName);
+                }
+
+                if (Reference.IsFrameworkFile(reference.FullPath, _frameworkPaths) || (_installedAssemblies?.FrameworkAssemblyEntryInRedist(assemblyName) == true))
+                {
+                    if (!IsAssemblyRemovedFromDotNetFramework(assemblyName, reference.FullPath, _frameworkPaths, _installedAssemblies))
+                    {
+                        yield return new KeyValuePair<string, string>(ItemMetadataNames.frameworkFile, "true");
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(reference.ImageRuntime))
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.imageRuntime, reference.ImageRuntime);
+                }
+
+                // The redist root is "null" when there was no IsRedistRoot flag in the Redist XML
+                // (or there was no redist XML at all for this item).
+                if (reference.IsRedistRoot != null)
+                {
+                    yield return new KeyValuePair<string, string>(ItemMetadataNames.isRedistRoot, (bool)reference.IsRedistRoot ? "true" : "false");
+                }
+            }
         }
 
         /// <summary>
@@ -2932,7 +2918,7 @@ namespace Microsoft.Build.Tasks
                         dllArchitecture = SystemProcessorArchitecture.Arm;
                         break;
                     case NativeMethods.IMAGE_FILE_MACHINE_ARM64:
-                        dllArchitecture = (SystemProcessorArchitecture) 6; // There's no entry for ARM64 in SystemProcessorArchitecture, use the next available constant
+                        dllArchitecture = (SystemProcessorArchitecture)6; // There's no entry for ARM64 in SystemProcessorArchitecture, use the next available constant
                         break;
                     case NativeMethods.IMAGE_FILE_MACHINE_I386:
                         dllArchitecture = SystemProcessorArchitecture.X86;
@@ -2978,13 +2964,8 @@ namespace Microsoft.Build.Tasks
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 _log.LogErrorWithCodeFromResources("ResolveAssemblyReference.ProblemReadingImplementationDll", dllPath, e.Message);
                 return false;
             }
@@ -3068,12 +3049,10 @@ namespace Microsoft.Build.Tasks
         {
             foreach (ITaskItem i in items)
             {
-                bool copyLocal = MetadataConversionUtilities.TryConvertItemMetadataToBool
-                    (
+                bool copyLocal = MetadataConversionUtilities.TryConvertItemMetadataToBool(
                         i,
                         ItemMetadataNames.copyLocal,
-                        out bool found
-                    );
+                        out bool found);
 
                 if (found && copyLocal)
                 {
@@ -3175,10 +3154,11 @@ namespace Microsoft.Build.Tasks
             bool anyMarkedReference = false;
             ListOfExcludedAssemblies = new List<string>();
 
-            foreach (AssemblyNameExtension assemblyName in References.Keys)
+            foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in References)
             {
+                AssemblyNameExtension assemblyName = assembly.Key;
+                Reference reference = assembly.Value;
                 string assemblyFullName = assemblyName.FullName;
-                Reference reference = GetReference(assemblyName);
                 reference.ReferenceVersion = assemblyName.Version;
 
                 MarkReferenceWithHighestVersionInCurrentRedistList(assemblyName, reference);
@@ -3230,6 +3210,29 @@ namespace Microsoft.Build.Tasks
             }
 
             return anyMarkedReference;
+        }
+
+        /// <summary>
+        /// Returns true if the full path passed in <paramref name="path"/> represents a file that came from an external trusted
+        /// entity and is guaranteed to be immutable.
+        /// </summary>
+        /// <param name="path">The path to check.</param>
+        /// <returns>True if known to be immutable, false otherwise.</returns>
+        internal bool IsImmutableFile(string path)
+        {
+            return _externallyResolvedImmutableFiles.ContainsKey(path);
+        }
+
+        /// <summary>
+        /// Returns the assembly name of a file if the file came from an external trusted entity and is considered immutable.
+        /// </summary>
+        /// <param name="path">The file path.</param>
+        /// <returns>Assembly name or null if not known.</returns>
+        internal AssemblyNameExtension GetImmutableFileAssemblyName(string path)
+        {
+            return _externallyResolvedImmutableFiles.TryGetValue(path, out AssemblyNameExtension assemblyNameExtension)
+                ? assemblyNameExtension
+                : null;
         }
     }
 }

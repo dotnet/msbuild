@@ -1,11 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
 using Xunit;
+using Marshal = System.Runtime.InteropServices.Marshal;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -65,8 +66,7 @@ namespace Microsoft.Build.UnitTests
         public void FreeHandle(IntPtr handle)
         {
             Assert.True(_allocatedHandles.Exists(new Predicate<IntPtr>(
-                delegate (IntPtr ptr) { return ptr == handle; }
-            )));
+                delegate (IntPtr ptr) { return ptr == handle; })));
             Marshal.FreeHGlobal(handle);
             _allocatedHandles.Remove(handle);
 

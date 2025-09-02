@@ -1,13 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_STRONG_NAMES
+
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+#nullable disable
 
 namespace Microsoft.Runtime.Hosting
 {
@@ -305,7 +307,10 @@ namespace Microsoft.Runtime.Hosting
     /// version of the interface.
     /// </summary>
     [System.Security.SecurityCritical]
-    [ComImport, ComConversionLoss, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
+    [ComImport]
+    [ComConversionLoss]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
     internal interface IClrStrongNameUsingIntPtr
     {
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
@@ -523,7 +528,10 @@ namespace Microsoft.Runtime.Hosting
     /// all APIs return HResults rather than throw exceptions.
     /// </summary> 
     [System.Security.SecurityCritical]
-    [ComImport, ComConversionLoss, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
+    [ComImport]
+    [ComConversionLoss]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("9FD93CCF-3280-4391-B3A9-96E1CDE77C8D")]
     internal interface IClrStrongName
     {
         [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]

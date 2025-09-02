@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -16,10 +16,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
 using Xunit;
+using SdkReferencePropertyExpansionMode = Microsoft.Build.Framework.EscapeHatches.SdkReferencePropertyExpansionMode;
 using SdkResolverContext = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResult = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactory = Microsoft.Build.Framework.SdkResultFactory;
-using SdkReferencePropertyExpansionMode = Microsoft.Build.Utilities.EscapeHatches.SdkReferencePropertyExpansionMode;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -297,7 +299,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 Project project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(content))));
             });
-            
+
             Assert.Equal("MSB4229", exception.ErrorCode);
         }
 
@@ -475,7 +477,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 loadSettings: ProjectLoadSettings.IgnoreMissingImports);
 
             project.GetPropertyValue("Success").ShouldBe("true");
-            
+
             ProjectImportedEventArgs[] events = logger.BuildMessageEvents.OfType<ProjectImportedEventArgs>().ToArray();
 
             // There are two implicit imports so there should be two logged ProjectImportedEventArgs
@@ -540,7 +542,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedDataTemplate
+        internal sealed class SdkPropertiesAreExpandedDataTemplate
         {
             public SdkPropertiesAreExpandedDataTemplate(string template, bool expectedMinimumVersionIsNull)
             {
@@ -563,7 +565,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             }
         }
 
-        internal class SdkPropertiesAreExpandedCase
+        internal sealed class SdkPropertiesAreExpandedCase
         {
             public SdkPropertiesAreExpandedCase(SdkReferencePropertyExpansionMode? mode,
                 SdkPropertiesAreExpandedDataTemplate template, bool setName, bool setVersion, bool expectedSuccess)
@@ -587,18 +589,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 var result = new StringBuilder(256);
                 if (Mode.HasValue)
+                {
                     result.Append(Mode);
+                }
                 else
+                {
                     result.Append($"{nameof(Mode)}: <null>");
+                }
 
                 result.Append($", {Template}, {nameof(TemplateName)}: {TemplateName}, {nameof(TemplateVersion)}: {TemplateVersion}");
 
                 if (SetNameProperty)
+                {
                     result.Append(", SetName");
+                }
+
                 if (SetVersionProperty)
+                {
                     result.Append(", SetVersion");
+                }
+
                 if (ExpectedSuccess)
+                {
                     result.Append(", ExpectedSuccess");
+                }
 
                 return result.ToString();
             }
@@ -619,26 +633,30 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 data.TemplateName,
                 _projectInnerContents,
                 data.TemplateVersion,
-                null
-            );
+                null);
 
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(
-                new MockExpandedSdkResolver(_testSdkDirectory)
-            );
+                new MockExpandedSdkResolver(_testSdkDirectory));
 
             void AddProperty(string name, string value) =>
                 (projectOptions.GlobalProperties ??= new Dictionary<string, string>()).Add(name, value);
 
             if (data.SetNameProperty)
+            {
                 AddProperty(SdkNamePropertyName, SdkName);
+            }
 
             if (data.SetVersionProperty)
+            {
                 AddProperty(SdkVersionPropertyName, SdkExpectedVersion);
+            }
 
             using var xmlReader = XmlReader.Create(new StringReader(projectContents));
 
             if (!data.ExpectedSuccess)
+            {
                 projectOptions.LoadSettings |= ProjectLoadSettings.IgnoreMissingImports;
+            }
 
             var project = Project.FromXmlReader(xmlReader, projectOptions);
 
@@ -652,14 +670,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 var expectedSdkReferenceRaw = new SdkReference(
                     data.TemplateName,
                     data.TemplateVersion,
-                    data.Template.ExpectedMinimumVersion
-                );
+                    data.Template.ExpectedMinimumVersion);
 
                 var expectedSdkReference = new SdkReference(
                     SdkName,
                     SdkExpectedVersion,
-                    data.Template.ExpectedMinimumVersion
-                );
+                    data.Template.ExpectedMinimumVersion);
 
                 project.Imports.Count.ShouldBe(2);
 
@@ -696,14 +712,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     var templates = new[]
                     {
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsAttributeWithVersion, true
-                        ),
+                            ProjectTemplateSdkAsAttributeWithVersion, true),
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsElementWithVersion, false
-                        ),
+                            ProjectTemplateSdkAsElementWithVersion, false),
                         new SdkPropertiesAreExpandedDataTemplate(
-                            ProjectTemplateSdkAsExplicitImportWithVersion, false
-                        )
+                            ProjectTemplateSdkAsExplicitImportWithVersion, false)
                     };
 
                     foreach (var template in templates)
@@ -729,8 +742,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setName
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setName)
                             {
                                 TemplateName = SdkNameProperty
                             }
@@ -739,8 +751,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setVersion
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setVersion)
                             {
                                 TemplateVersion = SdkVersionProperty
                             }
@@ -749,8 +760,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                         yield return new object[]
                         {
                             new SdkPropertiesAreExpandedCase(
-                                mode, template, setName, setVersion, shouldExpand && setName && setVersion
-                            )
+                                mode, template, setName, setVersion, shouldExpand && setName && setVersion)
                             {
                                 TemplateName = SdkNameProperty,
                                 TemplateVersion = SdkVersionProperty
@@ -785,8 +795,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 {
                     SdkName when sdk.Version == SdkExpectedVersion =>
                     factory.IndicateSuccess(ResolvedPath, SdkExpectedVersion),
-                    SdkName => factory.IndicateFailure(new[] {ErrorVersion}),
-                    _ => factory.IndicateFailure(new[] {ErrorName})
+                    SdkName => factory.IndicateFailure(new[] { ErrorVersion }),
+                    _ => factory.IndicateFailure(new[] { ErrorName })
                 };
             }
         }

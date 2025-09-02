@@ -1,12 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -27,7 +30,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate node as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
         {
             if (String.Equals(_functionName, "exists", StringComparison.OrdinalIgnoreCase))
             {
@@ -90,8 +93,7 @@ namespace Microsoft.Build.Evaluation
             // We haven't implemented any other "functions"
             else
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject(
-                    false,
+                ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
                     "UndefinedFunctionCall",
                     state.Condition,
@@ -185,8 +187,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void VerifyArgumentCount(int expected, ConditionEvaluator.IConditionEvaluationState state)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-                (_arguments.Count == expected,
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                _arguments.Count == expected,
                  state.ElementLocation,
                  "IncorrectNumberOfFunctionArguments",
                  state.Condition,

@@ -1,13 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using System.Text.RegularExpressions;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -441,7 +443,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             if (expected == null)
             {
                 // passing "null" means you expect an empty array back
-                expected = new string[] { };
+                expected = Array.Empty<string>();
             }
 
             Assert.Equal(actual, expected, StringComparer.Ordinal);
@@ -1156,11 +1158,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         /// <param name="batchableObjectParameter"></param>
         /// <param name="consumedMetadataReferences"></param>
-        private static void FindEmbeddedMetadataReferences_OriginalImplementation
-        (
+        private static void FindEmbeddedMetadataReferences_OriginalImplementation(
             string batchableObjectParameter,
-            Dictionary<string, MetadataReference> consumedMetadataReferences
-        )
+            Dictionary<string, MetadataReference> consumedMetadataReferences)
         {
             MatchCollection embeddedMetadataReferences = FindEmbeddedMetadataReferenceMatches_OriginalImplementation(batchableObjectParameter);
 

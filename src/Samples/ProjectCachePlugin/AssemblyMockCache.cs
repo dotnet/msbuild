@@ -1,14 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Graph;
 using Shouldly;
+
+#nullable disable
 
 namespace MockCacheFromAssembly
 {
@@ -22,6 +25,15 @@ namespace MockCacheFromAssembly
         public override Task BeginBuildAsync(CacheContext context, PluginLoggerBase logger, CancellationToken cancellationToken)
         {
             logger.LogMessage($"{nameof(AssemblyMockCache)}: BeginBuildAsync", MessageImportance.High);
+
+            foreach (var ep in context.GraphEntryPoints ?? Enumerable.Empty<ProjectGraphEntryPoint>())
+            {
+                var globalPropertyString = ep.GlobalProperties is not null
+                    ? string.Join("\n\t", ep.GlobalProperties.Select(gp => $"{gp.Key}:{gp.Value}"))
+                    : string.Empty;
+
+                logger.LogMessage($"EntryPoint: {ep.ProjectFile} \n(\n\t{globalPropertyString}\n)");
+            }
 
             ErrorFrom(nameof(BeginBuildAsync), logger);
 

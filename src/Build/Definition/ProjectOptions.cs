@@ -1,6 +1,12 @@
-﻿using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Definition
 {
@@ -25,7 +31,7 @@ namespace Microsoft.Build.Definition
         public string SubToolsetVersion { get; set; }
 
         /// <summary>
-        /// The <see cref="ProjectCollection"/> the project is added to. Default is <see cref="ProjectCollection.GlobalProjectCollection"/>/>
+        /// The <see cref="ProjectCollection"/> the project is added to. Default is <see cref="ProjectCollection.GlobalProjectCollection"/>.
         /// </summary>
         public ProjectCollection ProjectCollection { get; set; }
 
@@ -38,5 +44,15 @@ namespace Microsoft.Build.Definition
         /// The <see cref="EvaluationContext"/> to use for evaluation.
         /// </summary>
         public EvaluationContext EvaluationContext { get; set; }
+
+        /// <summary>
+        /// Provides <see cref="IDirectoryCache"/> to be used for evaluation.
+        /// </summary>
+        public IDirectoryCacheFactory DirectoryCacheFactory { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating if loading the project is allowed to interact with the user.
+        /// </summary>
+        public bool Interactive { get; set; }
     }
 }

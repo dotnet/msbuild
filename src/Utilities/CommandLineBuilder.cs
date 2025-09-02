@@ -1,14 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-
-using Microsoft.Build.Framework;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
@@ -110,19 +111,19 @@ namespace Microsoft.Build.Utilities
         public override string ToString() => CommandLine.ToString();
 
         // Use if escaping of hyphens is supposed to take place
-        private static readonly string s_allowedUnquotedRegexNoHyphen =
+        private const string s_allowedUnquotedRegexNoHyphen =
                          "^"                             // Beginning of line
                        + @"[a-z\\/:0-9\._+=]*"
                        + "$";
 
-        private static readonly string s_definitelyNeedQuotesRegexWithHyphen = @"[|><\s,;\-""]+";
+        private const string s_definitelyNeedQuotesRegexWithHyphen = @"[|><\s,;\-""]+";
 
         // Use if escaping of hyphens is not to take place
-        private static readonly string s_allowedUnquotedRegexWithHyphen =
+        private const string s_allowedUnquotedRegexWithHyphen =
                         "^"                             // Beginning of line
                        + @"[a-z\\/:0-9\._\-+=]*"       //  Allow hyphen to be unquoted
                        + "$";
-        private static readonly string s_definitelyNeedQuotesRegexNoHyphen = @"[|><\s,;""]+";
+        private const string s_definitelyNeedQuotesRegexNoHyphen = @"[|><\s,;""]+";
 
         /// <summary>
         ///  Should hyphens be quoted or not
@@ -154,13 +155,13 @@ namespace Microsoft.Build.Utilities
         /// Use a private property so that we can lazy initialize the regex
         /// </summary>
         private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes
-            ?? (_definitelyNeedQuotes = new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.None));
+            ?? (_definitelyNeedQuotes = new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant));
 
         /// <summary>
         /// Use a private getter property to we can lazy initialize the regex
         /// </summary>
         private Regex AllowedUnquoted => _allowedUnquoted
-            ?? (_allowedUnquoted = new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase));
+            ?? (_allowedUnquoted = new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
 
         /// <summary>
         /// Checks the given switch parameter to see if it must/can be quoted.
@@ -218,9 +219,9 @@ namespace Microsoft.Build.Utilities
                 {
                     CommandLine.Append(Environment.NewLine);
                 }
-                else if(CommandLine[CommandLine.Length - 1] != ' ')
+                else if (CommandLine[CommandLine.Length - 1] != ' ')
                 {
-                    CommandLine.Append(" ");
+                    CommandLine.Append(' ');
                 }
             }
         }
@@ -516,22 +517,18 @@ namespace Microsoft.Build.Utilities
             {
                 if (string.IsNullOrEmpty(switchName))
                 {
-                    ErrorUtilities.VerifyThrowArgument
-                        (
+                    ErrorUtilities.VerifyThrowArgument(
                             -1 == parameter.IndexOf('"'),
                             "General.QuotesNotAllowedInThisKindOfTaskParameterNoSwitchName",
-                            parameter
-                        );
+                            parameter);
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrowArgument
-                        (
+                    ErrorUtilities.VerifyThrowArgument(
                             -1 == parameter.IndexOf('"'),
                             "General.QuotesNotAllowedInThisKindOfTaskParameter",
                             switchName,
-                            parameter
-                        );
+                            parameter);
                 }
             }
         }
