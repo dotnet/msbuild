@@ -282,12 +282,12 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
-                     Abilita BuildChecks durante la compilazione.
-                     BuildCheck consente di valutare le regole per garantire le proprietà 
-                     della compilazione. Per altre informazioni, vedere aka.ms/buildcheck
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -844,9 +844,6 @@ Nota: livello di dettaglio dei logger di file
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -860,38 +857,35 @@ Nota: livello di dettaglio dei logger di file
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
+        <target state="translated">  -consoleLoggerParameters:&lt;parametri&gt;
                      Parametri per il logger di console. (Forma breve: -clp)
                      I parametri disponibili sono:
-                        PerformanceSummary: indica il tempo impiegato per le attività, le destinazioni
+                        PerformanceSummary: indica il tempo impiegato per le attività, le destinazioni 
                             e i progetti.
                         Summary: visualizza un riepilogo degli errori e degli avvisi alla fine.
-                        NoSummary: non visualizza un riepilogo degli errori e degli avvisi alla
+                        NoSummary: non visualizza un riepilogo degli errori alla
                             fine.
                         ErrorsOnly: visualizza solo gli errori.
                         WarningsOnly: visualizza solo gli avvisi.
                         NoItemAndPropertyList: non visualizza l'elenco di elementi e
-                            propertà all’inizio di ogni compilazione del progetto.
+                            proprietà all'inizio di ogni compilazione del progetto.
                         ShowCommandLine: visualizza i messaggi TaskCommandLineEvent
                         ShowTimestamp: visualizza il timestamp sotto forma di prefisso per ogni
                             messaggio.
-                        ShowEventId: mostra l'ID evento per gli eventi iniziati, gli eventi finiti
-                            e i messaggi
+                        ShowEventId: mostra l'ID evento per gli eventi iniziati,
+                            gli eventi finiti e i messaggi
                         ForceNoAlign: non allinea il testo alle dimensioni del
                             buffer della console
                         DisableConsoleColor: usa i colori predefiniti della console
                             per tutti i messaggi di registrazione.
-                        DisableMPLogging: disabilita lo stile di registrazione
-                            multiprocessore dell'output quando è in esecuzione in
-                             modalità non multiprocessore.
-                        EnableMPLogging: abilita lo stile di registrazione
-                            multiprocessore anche quando è in esecuzione in modalità non multiprocessore
-                            .  Si tratta dello stile di registrazione predefinito.
-                        ForceConsoleColor: usa i colori della console ANSI anche
-                            se non sono supportati dalla console.
-                        PreferConsoleColor: usa i colori della console ANSI solo se la
-                            console target li supporta.
-                     Verbosity: esegue l'override dell'impostazione per questo
+                        EnableMPLogging: abilita lo stile di registrazione multiprocessore
+                            anche quando è in esecuzione in modalità
+                            non- multiprocessore. Si tratta dello stile di registrazione predefinito.
+                        ForceConsoleColor: usa i colori della console ANSI anche se
+                            non sono supportati dalla console
+                        PreferConsoleColor- Usa i colori della console ANSI solo se
+                            la console di destinazione lo supporta
+                     Verbosity: esegue l'override dell'impostazione -verbosity per questo
                             logger.
                      Esempio:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;

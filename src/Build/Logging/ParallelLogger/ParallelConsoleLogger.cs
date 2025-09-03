@@ -812,6 +812,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
+
             WriteLinePrefix(e.BuildEventContext, e.Timestamp, false);
             WriteItems(itemList);
             ShownBuildEventContext(e.BuildEventContext);

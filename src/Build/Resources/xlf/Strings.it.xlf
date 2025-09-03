@@ -575,13 +575,13 @@
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="new">The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
-    See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
+        <target state="translated">Non è possibile caricare l'attività perché richiede l'host attività di runtime .NET di MSBuild, ma non è possibile trovare l'host attività di runtime .NET per la versione specificata.
+    Per informazioni dettagliate su come risolvere l'errore, vedere https://aka.ms/nettaskhost.</target>
         <note />
       </trans-unit>
       <trans-unit id="NETHostVersion_Failed">
         <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
-        <target state="new">SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</target>
+        <target state="translated">La versione SDK {0} è inferiore alla versione minima richiesta di {1}. L'host attività di runtime .NET è supportato solo quando si utilizza .NET SDK 10.0.100-rc1 o versioni successive.</target>
         <note />
       </trans-unit>
       <trans-unit id="NoBuildInProgress">
@@ -836,12 +836,12 @@
       </trans-unit>
       <trans-unit id="SDKPathCheck_Failed">
         <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="new">The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</target>
+        <target state="translated">La directory non esiste: {0}. Non è possibile creare un'istanza dell'host attività di runtime .NET. Per informazioni dettagliate su come risolvere l'errore, vedere https://aka.ms/nettaskhost.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKPathResolution_Failed">
         <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
-        <target state="new">UsingTask with Runtime="NET" was specified in a non-SDK project.</target>
+        <target state="translated">UsingTask con Runtime="NET" è stato specificato in un progetto non SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SDKResolverAttempt">

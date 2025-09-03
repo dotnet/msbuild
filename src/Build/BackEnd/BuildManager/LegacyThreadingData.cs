@@ -41,7 +41,7 @@ namespace Microsoft.Build.Execution
         /// Lock object for startNewRequestBuilderMainThreadEventsById, since it's possible for multiple submissions to be
         /// submitted at the same time.
         /// </summary>
-        private readonly Object _legacyThreadingEventsLock = new Object();
+        private readonly LockType _legacyThreadingEventsLock = new();
         #endregion
 
         #region Properties

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="5088919af0e4a144ce5b294542f472bf668c9cc8" BarId="279336" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="7f2a07b481a3d24677ebcf6a45e7e27c8ff95a4e" BarId="279809" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="9.0.0">
@@ -106,21 +106,21 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25408.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25430.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>d27184f7cb92b4abb4b20e91ecb5c43bc43de65b</Sha>
+      <Sha>6122520523105dacdd702177a76c9f6b982fd759</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-preview.1.114">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-preview.1.213">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>6a593d04a27505575664c460b7f50b17f2ec30c8</Sha>
+      <Sha>bb09daa40f1092776b4d9071ec0a2e176fa1e640</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25408.10">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25429.6">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>7ead97fc404947f81a4ee3c6543212d60fddfd03</Sha>
+      <Sha>7ef348b9faacaa3862ee7102f70f900bbfe37938</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25408.3">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25430.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>d27184f7cb92b4abb4b20e91ecb5c43bc43de65b</Sha>
+      <Sha>6122520523105dacdd702177a76c9f6b982fd759</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

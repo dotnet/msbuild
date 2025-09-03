@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Synchronize the creation of assemblyFolders
         /// </summary>
-        private static readonly Object s_syncLock = new Object();
+        private static readonly LockType s_syncLock = new();
 
         /// <summary>
         /// Given a registry key, find all of the registered assembly folders and add them to the list.
