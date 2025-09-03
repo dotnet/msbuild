@@ -283,30 +283,34 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we get an error if a reference is missing an include attribute is set but it is empty
         /// </summary>
-        [Fact]
-        public void EmptyReferenceInclude()
+        [Theory]
+        [InlineData("")]
+        [InlineData("Include=\"\"")]
+        [InlineData("Include=\" \"")]
+        public void EmptyReferenceInclude(string includeSetting)
         {
-            string projectFileContents = @"
+            string taskName = "CustomTaskFromCodeFactory_EmptyReferenceInclude";
+            string projectFileContents = @$"
                     <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_EmptyReferenceInclude` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                        <UsingTask TaskName=`{taskName}` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
                          <ParameterGroup>
                              <Text/>
                           </ParameterGroup>
                             <Task>
-                                 <Reference/>
+                                 <Reference {includeSetting}/>
                                 <Code>
                                        Log.LogMessage(MessageImportance.High, Text);
                                 </Code>
                             </Task>
                         </UsingTask>
                         <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_EmptyReferenceInclude/>
+                            <{taskName}/>
                         </Target>
                     </Project>";
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, false);
-            string unformattedMessage = ResourceUtilities.GetResourceString("CodeTaskFactory.AttributeEmpty");
-            mockLogger.AssertLogContains(String.Format(unformattedMessage, "Include"));
+            string unformattedMessage = ResourceUtilities.GetResourceString("CodeTaskFactory.AttributeEmptyWithTaskElement");
+            mockLogger.AssertLogContains(String.Format(unformattedMessage, "Include", "Reference", taskName));
         }
 
         /// <summary>
@@ -1152,7 +1156,7 @@ namespace Microsoft.Build.UnitTests
         {
             string taskName = "HelloTask";
 
-            string sourceContent =  $$"""
+            string sourceContent = $$"""
                 namespace InlineTask
                 {
                     using Microsoft.Build.Utilities;

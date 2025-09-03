@@ -67,19 +67,19 @@ The BuildCheck infrastructure will be prepared to be available concurrently with
 
 Prerequisites: [MSBuild Replaying a Binary Log](../../wiki/Binary-Log.md#replaying-a-binary-log)
 
-When replaying a binary log, we can apply BuildCheck with help of `-check` switch:
+When replaying a binary log, we can apply BuildChecks with help of `-check` switch:
 ```
-> msbuild.exe msbuild.binlog -check
+> msbuild msbuild.binlog -check
 ```
 
 If BuildCheck is enabled, then the events from `BinaryLogReplayEventSource` and new events from BuildCheck are merged into the `IEventSource`, from which the loggers get events.
 
 ```mermaid
 flowchart TD
-    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> mergedEventSource[IEventSource\nmergedEventSource]
-    replayEventSource[BinaryLogReplayEventSource\nreplayEventSource] --> BuildCheckBuildEventHandler[BuildCheckBuildEventHandler]
-    BuildCheckBuildEventHandler[BuildCheckBuildEventHandler] --> mergedEventSource[IEventSource\nmergedEventSource]
-    mergedEventSource[IEventSource\nmergedEventSource] --> loggers
+    replayEventSource[BinaryLogReplayEventSource replayEventSource] --> mergedEventSource[IEventSource mergedEventSource]
+    replayEventSource[BinaryLogReplayEventSource replayEventSource] --> BuildCheckBuildEventHandler[BuildCheckBuildEventHandler]
+    BuildCheckBuildEventHandler[BuildCheckBuildEventHandler] --> mergedEventSource[IEventSource mergedEventSource]
+    mergedEventSource[IEventSource mergedEventSource] --> loggers
 ```
 1. The events from `BinaryLogReplayEventSource replayEventSource` are passed to the `IEventSource mergedEventSource` unchanged.
 2. The events from `BinaryLogReplayEventSource replayEventSource` are passed to `BuildCheckBuildEventHandler` in order to produce new events from BuildCheck.
@@ -106,7 +106,7 @@ How we'll internally handle the distributed model:
 Planned model:
 * Checks factories get registered with the BuildCheck infrastructure (`BuildCheckManager`)
     * For inbox checks - this happens on startup.
-    * For custom checks - this happens on connecting `ILogger` instance in scheduler node receives acquistion event (`BuildCheckAcquisitionEventArgs`). This event is being sent by worker node as soon as it hits a special marker (a magic property function call) during early evaluation. Loading is not processed by worker node as currently we want custom checks only in the main node (as they will be only given data proxied from BuildEventArgs).
+    * For custom checks - this happens on connecting `ILogger` instance in scheduler node receives acquistion event (`BuildCheckAcquisitionEventArgs`). This event is being sent by worker node as soon as it hits a special marker (a magic property function call) during early evaluation. Loading is not processed by worker node as currently we want custom checks only in the main node (as they will be only given data proxied from BuildEventArgs). Loading in worker node in Evaluation context would result in double work as the custom Check needs to be loaded in the main node anyways.
     The `BuildCheckAcquisitionEventArgs` should be sent prior `ProjectEvaluationStartedEventArgs` (buffering will need to take place), or main node will need to replay some initial data after custom check is registered.
 * `BuildCheckManager` receives info about new project starting to be build
     * On scheduler node the information is sourced from `ProjectEvaluationStartedEventArgs`
@@ -135,6 +135,8 @@ Once `TargetFramework` is known, we can combine the default checks config with w
 Since we are unlikely to enable any checks by default in .NET 9, the focus in this release should be on optimizing the `.editorconfig` handling.
 
 # Acquisition
+
+(For details on internals of processing acquisition by the infrastructure see [Check Lifecycle](#check-lifecycle))
 
 BuildCheck employs two distinct types of checks: inbox and custom. As a result, the acquisition and distribution processes vary.
 Inbox rules are integrated into the MSBuild repository, while custom checks can be packaged as NuGet packages and detected by MSBuild provided they adhere to a specific structure. 

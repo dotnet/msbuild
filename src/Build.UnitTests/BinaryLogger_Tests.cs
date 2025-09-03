@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests
 </Project>";
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                
+
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} -bl:{_logFile}", out bool success);
                 success.ShouldBeTrue();
 
@@ -411,7 +411,7 @@ namespace Microsoft.Build.UnitTests
                     """;
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
                 TransientTestFile projectFile = env.CreateFile(logFolder, "myProj.proj", contents);
-                
+
                 env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
                 RunnerUtilities.ExecMSBuild($"{projectFile.Path} -nr:False -bl:{_logFile} -flp1:logfile={Path.Combine(logFolder.Path, "logFile.log")};verbosity=diagnostic -flp2:logfile={Path.Combine(logFolder.Path, "logFile2.log")};verbosity=normal", out bool success);
                 success.ShouldBeTrue();

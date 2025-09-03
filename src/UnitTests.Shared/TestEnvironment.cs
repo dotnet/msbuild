@@ -56,6 +56,7 @@ namespace Microsoft.Build.UnitTests
             // Clear these two environment variables first in case pre-setting affects the test.
             env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
             env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
+            env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
             return env;
         }
@@ -315,7 +316,7 @@ namespace Microsoft.Build.UnitTests
         /// Will not work for out of proc nodes since the output writer does not reach into those
         public TransientPrintLineDebugger CreatePrintLineDebuggerWithTestOutputHelper()
         {
-            ErrorUtilities.VerifyThrowInternalNull(Output, nameof(Output));
+            ErrorUtilities.VerifyThrowInternalNull(Output);
             return WithTransientTestState(new TransientPrintLineDebugger(this, OutPutHelperWriter(Output)));
 
             CommonWriterType OutPutHelperWriter(ITestOutputHelper output)

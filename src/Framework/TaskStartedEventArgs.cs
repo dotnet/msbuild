@@ -120,7 +120,7 @@ namespace Microsoft.Build.Framework
             this.taskFile = taskFile;
             TaskAssemblyLocation = taskAssemblyLocation;
         }
-        
+
         private string taskName;
         private string projectFile;
         private string taskFile;

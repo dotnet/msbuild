@@ -125,7 +125,7 @@ namespace Microsoft.Build.Utilities
             return new SimpleVersion(major, minor, build, revision);
         }
 
-        private static readonly char[] s_semverSeparators = new char[] { '-', '+' };
+        private static readonly char[] s_semverSeparators = ['-', '+'];
 
         private static ReadOnlySpan<char> RemoveTrivia(string input)
         {

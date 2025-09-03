@@ -509,7 +509,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             if (searchPaths == null)
             {
-                searchPaths = new[] { ".\\" };
+                searchPaths = [".\\"];
             }
 
             foreach (string searchPath in searchPaths)

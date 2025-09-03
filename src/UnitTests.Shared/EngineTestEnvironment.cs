@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -90,7 +91,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="files">Files to be created.</param>
         /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to
         /// the root of the project directory.</param>
-        public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectFileName, string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
+        public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectFileName, [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
             => WithTransientTestState(new TransientTestProjectWithFiles(projectFileName, projectContents, files, relativePathFromRootToProject));
 
         /// <summary>
@@ -101,7 +102,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="files">Files to be created.</param>
         /// <param name="relativePathFromRootToProject">Path for the specified files to be created in relative to
         /// the root of the project directory.</param>
-        public TransientTestProjectWithFiles CreateTestProjectWithFiles(string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
+        public TransientTestProjectWithFiles CreateTestProjectWithFiles([StringSyntax(StringSyntaxAttribute.Xml)] string projectContents, string[] files = null, string relativePathFromRootToProject = ".")
             => CreateTestProjectWithFiles("build.proj", projectContents, files, relativePathFromRootToProject);
     }
 
@@ -117,7 +118,7 @@ namespace Microsoft.Build.UnitTests
 
         public TransientTestProjectWithFiles(
             string projectFileName,
-            string projectContents,
+            [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
             string[] files,
             string relativePathFromRootToProject = ".")
         {

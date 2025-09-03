@@ -57,12 +57,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        public override void Dispose() {
-            if (_eventSources  != null)
+        public override void Dispose()
+        {
+            if (_eventSources != null)
             {
                 DisableEvents(_eventSources);
             }
-            
+
             base.Dispose();
         }
 
@@ -79,7 +80,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 resultList = new List<EventWrittenEventArgs>(emittedEvents);
                 emittedEvents.Clear();
             }
-            
+
             return resultList;
         }
     }

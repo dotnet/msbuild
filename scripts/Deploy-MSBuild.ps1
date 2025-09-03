@@ -81,7 +81,7 @@ if ($runtime -eq "Desktop") {
 
 # If bootstrap directory is not defined in parameters, use the default location
 if ($binDirectory -eq "") {
-    $binDirectory = "artifacts\bin" 
+    $binDirectory = "artifacts\bin"
 }
 
 $bootstrapBinDirectory = "$binDirectory\MSBuild.Bootstrap\$configuration\$targetFramework"
@@ -116,8 +116,6 @@ $filesToCopyToBin = @(
 
 if ($runtime -eq "Desktop") {
     $runtimeSpecificFiles = @(
-        FileToCopy "$binDirectory\Microsoft.Build.Conversion\$configuration\$targetFramework\Microsoft.Build.Conversion.Core.dll"
-        FileToCopy "$binDirectory\Microsoft.Build.Engine\$configuration\$targetFramework\Microsoft.Build.Engine.dll"
 
         FileToCopy "$bootstrapBinDirectory\Microsoft.Bcl.AsyncInterfaces.dll"
         FileToCopy "$bootstrapBinDirectory\Microsoft.Data.Entity.targets"

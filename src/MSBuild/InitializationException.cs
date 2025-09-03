@@ -59,7 +59,7 @@ namespace Microsoft.Build.CommandLine
             StreamingContext context) :
             base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info, nameof(info));
+            ErrorUtilities.VerifyThrowArgumentNull(info);
 
             invalidSwitch = info.GetString("invalidSwitch");
         }

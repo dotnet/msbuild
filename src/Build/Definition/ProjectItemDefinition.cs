@@ -55,8 +55,8 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal ProjectItemDefinition(Project project, string itemType)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project, nameof(project));
-            ErrorUtilities.VerifyThrowArgumentLength(itemType, nameof(itemType));
+            ErrorUtilities.VerifyThrowInternalNull(project);
+            ErrorUtilities.VerifyThrowArgumentLength(itemType);
 
             _project = project;
             _itemType = itemType;
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Evaluation
         /// This is a read-only collection.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-        public IEnumerable<ProjectMetadata> Metadata => Link != null ? Link.Metadata : _metadata ?? Enumerable.Empty<ProjectMetadata>();
+        public IEnumerable<ProjectMetadata> Metadata => Link != null ? Link.Metadata : _metadata ?? [];
 
         /// <summary>
         /// Count of metadata on the item definition.

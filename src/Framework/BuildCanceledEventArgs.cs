@@ -18,7 +18,7 @@ namespace Microsoft.Build.Framework
         /// <param name="message">text message</param>
         public BuildCanceledEventArgs(string message)
             : this(message, DateTime.UtcNow)
-        { 
+        {
         }
 
         /// <summary>

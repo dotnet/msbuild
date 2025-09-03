@@ -37,7 +37,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public RoslynCodeTaskFactory_Tests()
         {
             UseProjectRelativeDirectory("TaskFactorySource");
-            
+
             _verifySettings = new();
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
@@ -438,12 +438,15 @@ Log.LogError(Class1.ToPrint());
                 expectedErrorMessage: "You must specify source code within the Code element or a path to a file containing source code.");
         }
 
-        [Fact]
-        public void EmptyIncludeAttributeOnReferenceElement()
+        [Theory]
+        [InlineData("")]
+        [InlineData("Include=\"\"")]
+        [InlineData("Include=\" \"")]
+        public void EmptyIncludeAttributeOnReferenceElement(string includeSetting)
         {
             TryLoadTaskBodyAndExpectFailure(
-                taskBody: "<Reference Include=\"\" />",
-                expectedErrorMessage: "The \"Include\" attribute of the <Reference> element has been set but is empty. If the \"Include\" attribute is set it must not be empty.");
+                taskBody: $"<Reference {includeSetting} />",
+                expectedErrorMessage: $"The \"Include\" attribute of the <Reference> element in the task \"{TaskName}\" has been set but is empty. Make sure the attribute has a proper value.");
         }
 
         [Fact]
@@ -674,7 +677,7 @@ namespace InlineTask
         {
             string taskName = "HelloTask";
 
-            string sourceContent =  $$"""
+            string sourceContent = $$"""
                 namespace InlineTask
                 {
                     using Microsoft.Build.Utilities;

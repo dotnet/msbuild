@@ -80,7 +80,7 @@ namespace Microsoft.Build.Utilities
                 };
             }
 
-            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles);
+            _tlogFiles = TrackedDependencies.ExpandWildcards(tlogFiles, _log);
             _tlogAvailable = TrackedDependencies.ItemsExist(_tlogFiles);
             DependencyTable = new Dictionary<string, Dictionary<string, DateTime>>(StringComparer.OrdinalIgnoreCase);
             if (_tlogFiles != null && constructOutputsFromTLogs)
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>An array of the rooting markers that were removed.</returns>
         public string[] RemoveRootsWithSharedOutputs(ITaskItem[] sources)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources, nameof(sources));
+            ErrorUtilities.VerifyThrowArgumentNull(sources);
 
             var removedMarkers = new List<string>();
             string currentRoot = FileTracker.FormatRootingMarker(sources);
@@ -617,14 +617,14 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Sources that should be removed from the graph</param>
-        public void RemoveEntriesForSource(ITaskItem source) => RemoveEntriesForSource(new[] { source }, null);
+        public void RemoveEntriesForSource(ITaskItem source) => RemoveEntriesForSource([source], null);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Sources that should be removed from the graph</param>
         /// <param name="correspondingOutput">Outputs that correspond ot the sources (used for same file processing)</param>
-        public void RemoveEntriesForSource(ITaskItem source, ITaskItem correspondingOutput) => RemoveEntriesForSource(new[] { source }, new[] { correspondingOutput });
+        public void RemoveEntriesForSource(ITaskItem source, ITaskItem correspondingOutput) => RemoveEntriesForSource([source], [correspondingOutput]);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
@@ -696,14 +696,14 @@ namespace Microsoft.Build.Utilities
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
-        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing(new[] { source }, null);
+        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source) => RemoveDependenciesFromEntryIfMissing([source], null);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs
         /// </summary>
         /// <param name="source">Source that should be removed from the graph</param>
         /// <param name="correspondingOutput">Output that correspond ot the sources (used for same file processing)</param>
-        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source, ITaskItem correspondingOutput) => RemoveDependenciesFromEntryIfMissing(new[] { source }, new[] { correspondingOutput });
+        public void RemoveDependenciesFromEntryIfMissing(ITaskItem source, ITaskItem correspondingOutput) => RemoveDependenciesFromEntryIfMissing([source], [correspondingOutput]);
 
         /// <summary>
         /// Remove the output graph entries for the given sources and corresponding outputs

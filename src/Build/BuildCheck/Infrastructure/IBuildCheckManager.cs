@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck.Acquisition;
 using Microsoft.Build.Framework;
@@ -61,6 +59,8 @@ internal interface IBuildCheckManager
 
     void ProcessCheckAcquisition(CheckAcquisitionData acquisitionData, ICheckContext checksContext);
 
+    void ProcessProjectImportedEventArgs(ICheckContext checkContext, ProjectImportedEventArgs projectImportedEventArgs);
+
     BuildCheckTracingData CreateCheckTracingStats();
 
     void FinalizeProcessing(LoggingContext loggingContext);
@@ -69,13 +69,12 @@ internal interface IBuildCheckManager
     //  but as well from the ConnectorLogger - as even if interleaved, it gives the info
     //  to manager about what checks need to be materialized and configuration fetched.
     // No unloading of checks is yet considered - once loaded it stays for whole build.
-    
-	
+
     // Project might be encountered first time in some node, but be already evaluated in another - so StartProjectEvaluation won't happen
     //  - but we still need to know about it, hence the dedicated event.
     void ProjectFirstEncountered(BuildCheckDataSource buildCheckDataSource, ICheckContext analysisContext, string projectFullPath);
 
-    void ProcessProjectEvaluationStarted(ICheckContext checksContext, string projectFullPath);
+    void ProcessProjectEvaluationStarted(BuildCheckDataSource buildCheckDataSource, ICheckContext checksContext, string projectFullPath);
 
     void EndProjectEvaluation(BuildEventContext buildEventContext);
 

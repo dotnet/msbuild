@@ -129,5 +129,15 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
+
+        public static void WriteDurationsDictionary(this BinaryWriter writer, Dictionary<string, TimeSpan> durations)
+        {
+            writer.Write7BitEncodedInt(durations.Count);
+            foreach (KeyValuePair<string, TimeSpan> kvp in durations)
+            {
+                writer.Write(kvp.Key);
+                writer.Write(kvp.Value.Ticks);
+            }
+        }
     }
 }

@@ -17,7 +17,10 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
         public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction)
             => _evaluatedPropertiesAction += evaluatedPropertiesAction;
+#pragma warning disable CS0618 // Type or member is obsolete
         public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction) => throw new NotImplementedException();
+#pragma warning restore CS0618 // Type or member is obsolete
+        public void RegisterEvaluatedItemsAction(Action<BuildCheckDataContext<EvaluatedItemsCheckData>> evaluatedItemsAction) => throw new NotImplementedException();
 
         public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction)
             => _taskInvocationAction += taskInvocationAction;
@@ -55,5 +58,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             => Results.Add(result);
 
         public void RegisterEnvironmentVariableReadAction(Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction) => throw new NotImplementedException();
+
+        public void RegisterProjectImportedAction(Action<BuildCheckDataContext<ProjectImportedCheckData>> projectImportedAction) => throw new NotImplementedException();
     }
 }

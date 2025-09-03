@@ -185,19 +185,16 @@ namespace Microsoft.Build.Construction
         /// In AG there are 600 locations that have a file but zero line and column.
         /// In theory yet another derived class could be made for these to save 4 bytes each.
         /// </remarks>
-        internal static ElementLocation Create(string file, int line, int column)
+        public static ElementLocation Create(string file, int line, int column)
         {
             if (string.IsNullOrEmpty(file) && line == 0 && column == 0)
             {
                 return EmptyLocation;
             }
 
-            if (line <= 65535 && column <= 65535)
-            {
-                return new ElementLocation.SmallElementLocation(file, line, column);
-            }
-
-            return new ElementLocation.RegularElementLocation(file, line, column);
+            return line <= 65535 && column <= 65535
+                ? new ElementLocation.SmallElementLocation(file, line, column)
+                : new ElementLocation.RegularElementLocation(file, line, column);
         }
 
         /// <summary>
