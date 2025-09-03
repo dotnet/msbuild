@@ -156,13 +156,6 @@ jobs:
       ArtifactName: logs
     condition: succeededOrFailed()
 
-  - task: 1ES.PublishPipelineArtifact@1
-    displayName: 'Publish Artifact: bin'
-    inputs:
-      path: 'artifacts\bin'
-      artifactName: bin
-    condition: succeededOrFailed()
-
   # Publishes setup VSIXes to a drop.
   # Note: The insertion tool looks for the display name of this task in the logs.
   - task: 1ES.MicroBuildVstsDrop@1
