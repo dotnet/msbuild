@@ -282,12 +282,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
-                     在建置期間啟用 BuildChecks。
-                     BuildCheck 會啟用評估規則以確保組建的 
-                     屬性。如需詳細資訊，請參閱 aka.ms/buildcheck
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -850,7 +850,7 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parameters&gt;
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      主控台記錄器的參數。(簡短形式: -clp)
                      可用的參數為:
                         PerformanceSummary--顯示工作、目標
@@ -871,9 +871,6 @@
                             緩衝區的大小
                         DisableConsoleColor--為所有記錄訊息使用預設的
                             主控台色彩。
-                        DisableMPLogging-- 在非多處理器模式下執行時，
-                            停用輸出的多處理器
-                            記錄樣式。
                         EnableMPLogging--在非多處理器模式下執行時，
                             啟用多處理器記錄樣式。
                             此記錄樣式預設為啟用。

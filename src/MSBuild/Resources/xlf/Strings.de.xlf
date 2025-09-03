@@ -282,12 +282,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
-                     Aktiviert BuildChecks während des Builds.
-                     BuildCheck ermöglicht die Regelauswertung, um Eigenschaften 
-                     des Builds sicherzustellen. Weitere Infos: aka.ms/buildcheck
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -850,40 +850,37 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleloggerparameters:&lt;Parameter&gt;
-                     Parameter für die Konsolenprotokollierung. (Kurzform: -clp)
-                     Folgende Parameter sind verfügbar:
-                        PerformanceSummary: Zeigt die in Aufgaben, Zielen und
-                            Projekten verbrachte Zeit an.
-                        Summary: Zeigt abschließend eine Zusammenfassung der Fehler und Warnungen an.
-                        NoSummary: Zeigt keine Fehler- und Warnungsübersicht am
-                            Ende an.
-                        ErrorsOnly: Zeigt nur Fehler an.
-                        WarningsOnly: Zeigt nur Warnungen an.
-                        NoItemAndPropertyList: Zeigt keine Liste der Elemente
-                            und Eigenschaften am Anfang jeder Projekterstellung an.
-                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an. 
-                        ShowTimestamp: Zeigt den Timestamp als Präfix einer
-                            Meldung an.
-                        ShowEventId: Zeigt die eventId für gestartete
-                            Ereignisse, abgeschlossene Ereignisse und Meldungen an.
-                        ForceNoAlign: Richtet den Text nicht an der Größe des
-                            Konsolenpuffers aus.
-                        DisableConsoleColor: Verwendet die Standardkonsolenfarben
-                            für alle Protokollierungsmeldungen.
-                        DisableMPLogging: Deaktiviert die Ausgabe wie
-                            bei der Mehrprozessorprotokollierung im Modus mit nur einem Prozessor.
-                        EnableMPLogging: Aktiviert das Format der
-                            Mehrprozessorprotokollierung auch bei der Ausführung
-                            im Modus mit nur einem Prozessor.
-Dieses Protokollierungsformat ist standardmäßig aktiviert.
-                         ForceConsoleColor: Verwendet selbst dann
-                            ANSI-Konsolenfarben, wenn die Konsole dies nicht unterstützt.
-                        PreferConsoleColor: Verwendet ANSI-Konsolenfarben nur,
-                            wenn die Zielkonsole dies unterstützt.
-                     Verbosity: Überschreibt die Einstellung für -verbosity für
-                            diese Protokollierung.
-                     Beispiel:
+        <target state="translated">  -consoleLoggerParameters:&lt;Parameter&gt;
+                   Parameter für die Konsolenprotokollierung. (Kurz form: -clp)
+                   Verfügbar sind die Parameter:
+                        PerformanceSummary - In Aufgaben, Zielen und Projekten
+                          aufgewendete Zeit anzeigen.
+                   Summary - Fehler- und Warnungszusammenfassung am Ende anzeigen.
+                    NoSummary - Keine Fehler- und Warnungszusammenfassung am Ende 
+                          anzeigen.
+                   ErrorsOnly - Nur Fehler anzeigen.
+                   WarningsOnly - Nur Warnungen anzeigen.
+                   NoItemAndPropertyList - Keine Liste der Elemente und
+                        Eigenschaften am Anfang jedes Projektbuilds anzeigen.
+                   ShowCommandLine - TaskCommandLineEvent-Meldungen anzeigen
+                   ShowTimestamp - Zeitstempel als Präfix für eine beliebige
+                          Meldung anzeigen.
+                   ShowEventId- eventId für begonnene, abgeschlossene
+                          Ereignisse und Meldungen anzeigen
+                   ForceNoAlign - Text wird nicht an der Größe des
+                         Konsolenpuffers ausgerichtet
+                   DisableConsoleColor - Standardkonsolenfarben für alle
+                          Protokollierungsmeldungen anzeigen.
+                   EnableMPLogging - Multiprozessor-Protokollierungsstil aktivieren,
+                          auch wenn er im Nicht-Multiprozessormodus
+                          ausgeführt wird. Dieser Protokollierungsstil ist standardmäßig aktiviert.
+                   ForceConsoleColor - ANSI-Konsolenfarben auch dann verwenden,
+                          wenn die Konsole sie nicht unterstützt
+                   PreferConsoleColor - ANSI-Konsolenfarben nur anzeigen,
+                          wenn die Zielkonsole sie unterstützt
+                   Verbosity - überschreibt die Ausführlichkeitseinstellung für diese
+                          Protokollierung.
+                   Beispiel:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
