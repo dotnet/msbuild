@@ -6,6 +6,9 @@ parameters:
 - name: enableComponentGovernance
   type: boolean
   default: false
+- name: signTypeParameter
+  type: string
+  default: 'test'
 - name: enableOptProf
   type: boolean
   default: false
@@ -45,6 +48,7 @@ jobs:
     env:
       Token: $(dn-bot-dnceng-artifact-feeds-rw)
 
+
   - task: NuGetCommand@2
     displayName: Restore internal tools
     inputs:
@@ -57,14 +61,14 @@ jobs:
   - task: MicroBuildSigningPlugin@4
     displayName: Install MicroBuild plugin
     inputs:
-      signType: $(SignType)
+      signType: ${{ parameters.signTypeParameter }}
       zipSources: false
       feedSource: https://devdiv.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json
-      ${{ if and(eq(variables['SignType'], 'real'), eq(variables['System.TeamProject'], 'DevDiv')) }}:
+      ${{ if and(eq(parameters.signTypeParameter, 'real'), eq(variables['System.TeamProject'], 'DevDiv')) }}:
         ConnectedPMEServiceName: 6cc74545-d7b9-4050-9dfa-ebefcc8961ea
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-    condition: and(succeeded(), in(variables['SignType'], 'test', 'real'))
+    condition: and(succeeded(), in('${{ parameters.signTypeParameter }}', 'test', 'real'))
 
   - task: MicroBuildOptProfPlugin@6
     inputs:
@@ -88,12 +92,14 @@ jobs:
               /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
               /p:VisualStudioDropAccessToken=$(System.AccessToken)
               /p:VisualStudioDropName=$(VisualStudio.DropName)
-              /p:DotNetSignType=$(SignType)
+              /p:DotNetSignType=${{ parameters.signTypeParameter }}
               /p:TeamName=MSBuild
               /p:DotNetPublishUsingPipelines=true
               /p:VisualStudioIbcDrop=$(OptProfDrop)
               /p:GenerateSbom=true
               /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
+              /p:IsExperimental=${{ parameters.isExperimental }}
+
     displayName: Build
     condition: succeeded()
 
