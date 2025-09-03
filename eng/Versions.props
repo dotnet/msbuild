@@ -2,11 +2,15 @@
 <!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
   <PropertyGroup>
-    <VersionPrefix>17.12.48</VersionPrefix>
+    <VersionPrefix>17.12.49</VersionPrefix>
     <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <PackageValidationBaselineVersion>17.11.4</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+
+    <!-- differentiate experimental insertions to avoid package id conflicts, 
+    it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
+    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
