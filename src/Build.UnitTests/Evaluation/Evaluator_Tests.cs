@@ -21,7 +21,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -49,6 +48,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
             GC.Collect();
+        }
+
+        [Fact]
+        public void EnsureProjectEvaluationFinishedIsLogged()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            TransientTestFile projectFile = env.CreateFile("project.proj", $@"
+<Project Sdk=""Microsoft.NETT.Sdk"">
+  <Target Name=""DefaultTarget"">
+  </Target>
+</Project>
+");
+
+            MockLogger logger = new();
+            using ProjectCollection collection = new(new Dictionary<string, string>(), [logger], ToolsetDefinitionLocations.Default);
+            Assert.Throws<InvalidProjectFileException>(() => collection.LoadProject(projectFile.Path));
+            logger.EvaluationFinishedEvents.ShouldNotBeEmpty();
         }
 
         [Theory]
@@ -1921,11 +1937,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                 {
-                    Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                    Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                 }
                 else if (!property.Equals(propertyFromAllEvaluated))
                 {
-                    Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                    Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                 }
             }
 
@@ -2085,11 +2101,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                     if (!allEvaluatedPropertiesWithNoBackingXmlAndNoDuplicates.TryGetValue(property.Name, out propertyFromAllEvaluated))
                     {
-                        Assert.True(false, String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
+                        Assert.Fail(String.Format("project.Properties contained property {0}, but AllEvaluatedProperties did not.", property.Name));
                     }
                     else if (!property.Equals(propertyFromAllEvaluated))
                     {
-                        Assert.True(false, String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
+                        Assert.Fail(String.Format("The properties in project.Properties and AllEvaluatedProperties for property {0} were different.", property.Name));
                     }
                 }
 
@@ -3126,7 +3142,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 project.Build(logger);
 
                 // Should not reach this point.
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -4369,7 +4385,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             catch (XmlException)
             {
                 // XmlException thrown when invalid DTD statement is parsed: it means DTD processing was enabled
-                Assert.True(false);
+                Assert.Fail();
             }
         }
 
@@ -4384,7 +4400,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// </summary>
         [Fact]
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7623")]
-        public async void VerifyDTDProcessingIsDisabled2()
+        public async Task VerifyDTDProcessingIsDisabled2()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<?xml version=""1.0"" encoding=""utf-8""?>
                                 <!DOCTYPE Project [
@@ -4459,7 +4475,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     MockElementLocation.Instance,
                     FileSystems.Default,
                     new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
-                Assert.True(false, "Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
+                Assert.Fail("Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
             }
             catch (InvalidProjectFileException e)
             {

@@ -6,6 +6,7 @@ trigger:
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
+#   SignType: real
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -21,10 +22,6 @@ parameters:
   displayName: Enable Signing Validation
   type: boolean
   default: true
-- name: signTypeParameter
-  displayName: Sign Type
-  type: string
-  default: 'real'
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -47,7 +44,7 @@ variables:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
-    value: false # disable loc for vs17.11
+    value: false # Disable loc for vs17.12
   - name: Codeql.Enabled
     value: true
   # ensures we don't build and push experimental versions to official feeds as release versions
@@ -80,6 +77,12 @@ extends:
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
+      codeSignValidation:
+        enabled: true
+        break: true
+        additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
     - ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
@@ -117,7 +120,6 @@ extends:
         parameters:
           isExperimental: false
           enableComponentGovernance: true
-          signTypeParameter: ${{ parameters.signTypeParameter }}
           enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self

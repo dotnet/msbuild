@@ -132,7 +132,7 @@ namespace Microsoft.Build.CommandLine
             JsonObject targetResultsNode = new();
             foreach (string targetName in targetNames)
             {
-                TargetResult targetResult = result.ResultsByTarget[targetName];
+                TargetResult targetResult = result.ResultsByTarget![targetName];
                 JsonObject targetResults = new();
                 targetResults["Result"] = targetResult.ResultCode.ToString();
                 JsonArray outputArray = new();

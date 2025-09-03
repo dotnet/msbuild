@@ -27,8 +27,8 @@
      -->
      <!-- When building in source-only modes, let the TFM float based on what arcade is in use.
           When building in normal modes (independent build or a dotnet product build), set explicitly. -->
-    <LatestDotNetCoreForMSBuild>net8.0</LatestDotNetCoreForMSBuild>
-    <LatestDotNetCoreForMSBuild Condition="'$(DotNetBuildFromSource)' == 'true' or '$(DotNetBuildSourceOnly)' == 'true'">$(NetCurrent)</LatestDotNetCoreForMSBuild>
+    <LatestDotNetCoreForMSBuild>net9.0</LatestDotNetCoreForMSBuild>
+    <LatestDotNetCoreForMSBuild Condition="'$(DotNetBuildSourceOnly)' == 'true'">$(NetCurrent)</LatestDotNetCoreForMSBuild>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -58,6 +58,9 @@
     -->
 
     <NoWarn>$(NoWarn);NU1507;NU1603;NU5105;1701;1702;SYSLIB0011;SYSLIB0037;SYSLIB0044;RS0016;RS0017;</NoWarn>
+    <!-- Loading certificate data through the constructor or Import is obsolete. Use X509CertificateLoader instead to load certific
+ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/syslib0057 -->
+    <NoWarn>$(NoWarn);SYSLIB0057;</NoWarn>
   </PropertyGroup>
 
   <!-- Configuration MSBuild for portable (xcopy-install) toolsets: works on WinNT and linux/mac via Mono, isolates from machine environment:

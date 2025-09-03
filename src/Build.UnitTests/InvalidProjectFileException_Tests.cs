@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
                 MockLogger logger = new MockLogger(_testOutput);
                 ObjectModelHelpers.BuildTempProjectFileExpectFailure(file, logger);
 
-                Assert.True(false, "Loading an invalid project should have thrown an InvalidProjectFileException.");
+                Assert.Fail("Loading an invalid project should have thrown an InvalidProjectFileException.");
             }
             catch (InvalidProjectFileException e)
             {

@@ -162,6 +162,11 @@ namespace Microsoft.Build.BackEnd
             return componentEntry.GetInstance(_host);
         }
 
+        internal TComponent GetComponent<TComponent>(BuildComponentType type) where TComponent : IBuildComponent
+        {
+            return (TComponent)GetComponent(type);
+        }
+
         /// <summary>
         /// A helper class wrapping build components.
         /// </summary>

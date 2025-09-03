@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Collections;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -13,7 +14,7 @@ namespace Microsoft.Build.Evaluation
     internal interface IProperty : IKeyed
     {
         /// <summary>
-        /// Name of the property
+        /// Name of the property.
         /// </summary>
         string Name
         {
@@ -29,9 +30,22 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Returns the evaluated, escaped value for the property
+        /// Returns the evaluated, escaped value for the property.
         /// </summary>
         string EvaluatedValueEscaped
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Returns the evaluated, escaped value for the property and sets up the property location if it is available.
+        /// </summary>
+        string GetEvaluatedValueEscaped(IElementLocation location);
+
+        /// <summary>
+        /// Returns property location in xml file. Can be empty.
+        /// </summary>
+        (string File, int Line, int Column) Location
         {
             get;
         }

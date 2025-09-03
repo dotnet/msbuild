@@ -6,11 +6,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Data;
 using System.Runtime.Serialization;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Instance
@@ -18,20 +15,19 @@ namespace Microsoft.Build.Instance
     /// <summary>
     /// A specialized collection used when element data originates in an immutable Project.
     /// </summary>
-    internal sealed class ImmutableElementCollectionConverter<TCached, T> : IRetrievableEntryHashSet<T>
+    internal class ImmutableElementCollectionConverter<TCached, T> : IRetrievableEntryHashSet<T>
         where T : class, IKeyed
     {
-        private readonly IDictionary<string, TCached> _projectElements;
-        private readonly IDictionary<(string, int, int), TCached> _constrainedProjectElements;
+        protected readonly IDictionary<string, TCached> _projectElements;
         private readonly ValuesCollection _values;
 
         public ImmutableElementCollectionConverter(
             IDictionary<string, TCached> projectElements,
-            IDictionary<(string, int, int), TCached> constrainedProjectElements)
+            IDictionary<(string, int, int), TCached> constrainedProjectElements,
+            Func<TCached, T> convertElement)
         {
             _projectElements = projectElements;
-            _constrainedProjectElements = constrainedProjectElements;
-            _values = new ValuesCollection(_projectElements, _constrainedProjectElements);
+            _values = new ValuesCollection(_projectElements, constrainedProjectElements, convertElement);
         }
 
         public T this[string key]
@@ -110,13 +106,16 @@ namespace Microsoft.Build.Instance
         {
             private readonly IDictionary<string, TCached> _projectElements;
             private readonly IDictionary<(string, int, int), TCached> _constrainedProjectElements;
+            private readonly Func<TCached, T> _getElementInstance;
 
             public ValuesCollection(
                 IDictionary<string, TCached> projectElements,
-                IDictionary<(string, int, int), TCached> constrainedProjectElements)
+                IDictionary<(string, int, int), TCached> constrainedProjectElements,
+                Func<TCached, T> getElementInstance)
             {
                 _projectElements = projectElements;
                 _constrainedProjectElements = constrainedProjectElements;
+                _getElementInstance = getElementInstance;
             }
 
             public int Count => _projectElements.Count;
@@ -155,7 +154,7 @@ namespace Microsoft.Build.Instance
                 int endIndex = arrayIndex + count;
                 foreach (var item in _projectElements.Values)
                 {
-                    array[index] = GetElementInstance(item);
+                    array[index] = _getElementInstance(item);
                     ++index;
                     if (index >= endIndex)
                     {
@@ -171,7 +170,7 @@ namespace Microsoft.Build.Instance
                 int index = arrayIndex;
                 foreach (var item in _projectElements.Values)
                 {
-                    var itemInstance = GetElementInstance(item);
+                    var itemInstance = _getElementInstance(item);
                     array[index] = new KeyValuePair<string, T>(itemInstance.Key, itemInstance);
                     ++index;
                 }
@@ -181,7 +180,7 @@ namespace Microsoft.Build.Instance
             {
                 foreach (var item in _projectElements.Values)
                 {
-                    yield return GetElementInstance(item);
+                    yield return _getElementInstance(item);
                 }
             }
 
@@ -189,7 +188,7 @@ namespace Microsoft.Build.Instance
             {
                 foreach (var kvp in _projectElements)
                 {
-                    T instance = GetElementInstance(kvp.Value);
+                    T instance = _getElementInstance(kvp.Value);
                     yield return new KeyValuePair<string, T>(kvp.Key, instance);
                 }
             }
@@ -200,7 +199,7 @@ namespace Microsoft.Build.Instance
             {
                 foreach (var item in _projectElements.Values)
                 {
-                    yield return GetElementInstance(item);
+                    yield return _getElementInstance(item);
                 }
             }
 
@@ -208,7 +207,7 @@ namespace Microsoft.Build.Instance
             {
                 if (_projectElements.TryGetValue(key, out TCached element))
                 {
-                    return GetElementInstance(element);
+                    return _getElementInstance(element);
                 }
 
                 return null;
@@ -216,9 +215,14 @@ namespace Microsoft.Build.Instance
 
             public T Get(string keyString, int startIndex, int length)
             {
+                if (_constrainedProjectElements == null)
+                {
+                    return Get(keyString);
+                }
+
                 if (_constrainedProjectElements.TryGetValue((keyString, startIndex, length), out TCached element))
                 {
-                    return GetElementInstance(element);
+                    return _getElementInstance(element);
                 }
 
                 return null;
@@ -232,18 +236,8 @@ namespace Microsoft.Build.Instance
                     return false;
                 }
 
-                value = GetElementInstance(element);
+                value = _getElementInstance(element);
                 return value != null;
-            }
-
-            private T GetElementInstance(TCached element)
-            {
-                if (element is IImmutableInstanceProvider<T> instanceProvider)
-                {
-                    return instanceProvider.ImmutableInstance;
-                }
-
-                return null;
             }
         }
     }
