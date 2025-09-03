@@ -2460,7 +2460,7 @@ namespace Microsoft.Build.Utilities
                     var monikers = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
                     GatherSDKListFromDirectory(sdkDiskRoots, monikers);
 
-                    if (NativeMethodsShared.IsWindows && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4))
+                    if (NativeMethodsShared.IsWindows)
                     {
                         GatherSDKListFromRegistry(registryRoot, monikers);
                     }

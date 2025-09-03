@@ -82,6 +82,16 @@ It is a `GZipStream`-compressed binary stream of serialized `BuildEventArgs` obj
  * https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BuildEventArgsWriter.cs
  * https://source.dot.net/#Microsoft.Build/Logging/BinaryLogger/BuildEventArgsReader.cs
 
+## Meaning of various Ids in the BuildEventArgs
+
+The [`BuildEventArgs`](https://github.com/dotnet/msbuild/blob/main/src/Framework/BuildEventArgs.cs) sent to the loggers (and later stored in the binlog) can have [`BuildEventContext`](https://github.com/dotnet/msbuild/blob/main/src/Framework/BuildEventContext.cs) attached. This context contains multiple integer Ids, that can be of interest for the consumer:
+* `ProjectInstanceId` - This indicates unique combination of a project and global properties (basically a project configuration for a build.). The same combination dictates a need for evaluation (or possibility to reuse existing) - so the id correlates with `EvaluationId`. `ProjectInstanceId` is however not present on evaluation events.
+* `EvaluationId` - Indicates unique evaluation run - that needs to happen for each unique combination of project and global properties. `EvaluationId` is present on all evaluation time events and on the `ProjectStartedEventArgs` (this event can be used to correlate the `EvaluationId` with `ProjectInstanceId` - to get all build execution time events that used a specific evaluation).
+* `ProjectContextId` - This indicates unique build request (so request for result from project + target(s) combination). There can be multiple build requests using the same evaluation - so a single `ProjectInstanceId` (and `EvaluationId`) often maps to multiple `ProjectContextId`s
+* `NodeId` - indicates the node where the event was generated ('0' for the SchedulerNode with possible in-proc execution node, positive ids for the out-of-proc execution nodes). The whole evaluation happens on a single node - so all evaluation time events with single `EvaluationId` have same `NodeId`. Execution is attempted to be performed on a node which evaluated ('evaluation affinity') - so usually all events with corresponding `EvaluationId` and `InstanceId` have the same `NodeId`. But evaluation results are transferable between nodes (it's `Translatable`) so evaluation events and build events `NodeId` doesn't have to match. Single build execution happens on the same node - so all events with same `ProjectContextId` have same `NodeId`. Though multiple build executions can be interleaved on a same node (due to 'Yielding' - either voluntarily explicitly called by the Task, or implicitly enforced by `RequestBuilder`).
+
+It's also good to note that those Ids can have negative values - indicating uninitialized value (this can be expected in many cases - e.g. evaluation time events cannot have `ProjectContextId` as they are not tied to single result request; or `ProjectInstanceId` are not ever populated on evaluation time events).
+
 ## Incrementing the file format
 
 Every .binlog file has the first four bytes that indicate the file version. The current file format is indicated in [`BinaryLogger.cs`](/src/Build/Logging/BinaryLogger/BinaryLogger.cs).

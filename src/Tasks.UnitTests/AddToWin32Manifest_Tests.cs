@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData("testManifestSavesTheCurrentNodesPositions.manifest", true)]
         [InlineData("testManifestNoPrefixes.manifest", true)]
         [InlineData(null, true)]
-        public void ManifestPopulationCheck(string manifestName, bool expectedResult)
+        public void ManifestPopulationCheck(string? manifestName, bool expectedResult)
         {
             AddToWin32Manifest task = new AddToWin32Manifest()
             {
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(null, true)]
         [InlineData("buildIn.manifest", true)]
         [InlineData("testManifestWithValidSupportedArchs.manifest", true)]
-        public void E2EScenarioTests(string manifestName, bool expectedResult)
+        public void E2EScenarioTests(string? manifestName, bool expectedResult)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {

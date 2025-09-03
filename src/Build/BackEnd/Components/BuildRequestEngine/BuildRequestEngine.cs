@@ -283,8 +283,11 @@ namespace Microsoft.Build.BackEnd
                         throw new AggregateException(deactivateExceptions);
                     }
 
-                    var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
+                    IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
+                    var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
+                    // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
+                    buildCheckProvider.ShutdownComponent();
                 },
                 isLastTask: true);
 

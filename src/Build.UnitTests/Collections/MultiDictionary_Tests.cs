@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
 
             foreach (string value in dictionary["x"])
             {
-                Assert.True(false);
+                Assert.Fail();
             }
         }
 

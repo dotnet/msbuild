@@ -4,11 +4,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
@@ -93,6 +95,45 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(args,
                 e => ToString(e.BuildEventContext),
                 e => e.Succeeded.ToString());
+        }
+
+        [Fact]
+        public void RoundtripBuildSubmissionStartedEventArgs()
+        {
+            var globalVariables = new Dictionary<string, string>
+            {
+                {"Variable1", "Value1" },
+                {"Variable2", "" },
+                {"Variable3", null },
+            };
+            var entryPointProjects = new List<string>()
+            {
+                "project1",
+                "project2",
+                "",
+            };
+            var targetNames = new List<string>()
+            {
+                "target1",
+                "target2",
+                "",
+            };
+            var flag = Execution.BuildRequestDataFlags.FailOnUnresolvedSdk;
+            var submissionId = 1234;
+
+            BuildSubmissionStartedEventArgs args = new(
+                globalVariables,
+                entryPointProjects,
+                targetNames,
+                flag,
+                submissionId);
+
+            Roundtrip<BuildSubmissionStartedEventArgs>(args,
+                e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
+                e => TranslationHelpers.GetPropertiesString(e.EntryProjectsFullPath),
+                e => TranslationHelpers.GetPropertiesString(e.TargetNames),
+                e => e.Flags.ToString(),
+                e => e.SubmissionId.ToString());
         }
 
         [Fact]
@@ -209,7 +250,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RoundtripEnvironmentVariableReadEventArgs()
         {
-            EnvironmentVariableReadEventArgs args = new("VarName", "VarValue");
+            EnvironmentVariableReadEventArgs args = new("VarName", "VarValue", "file", 10, 20);
             args.BuildEventContext = new BuildEventContext(4, 5, 6, 7);
             Roundtrip(args,
                 e => e.Message,
@@ -489,6 +530,27 @@ namespace Microsoft.Build.UnitTests
                 e => e.MVID.ToString(),
                 e => e.AppDomainDescriptor,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
+        }
+
+        [Fact]
+        public void RoundtripBuildCheckTracingEventArgs()
+        {
+            string key1 = "AA";
+            TimeSpan span1 = TimeSpan.FromSeconds(5);
+            string key2 = "b";
+            TimeSpan span2 = TimeSpan.FromSeconds(15);
+            string key3 = "cCc";
+            TimeSpan span3 = TimeSpan.FromSeconds(50);
+
+            Dictionary<string, TimeSpan> stats = new() { { key1, span1 }, { key2, span2 }, { key3, span3 } };
+
+            BuildCheckTracingEventArgs args = new BuildCheckTracingEventArgs(stats);
+
+            Roundtrip(args,
+                e => e.TracingData.InfrastructureTracingData.Keys.Count.ToString(),
+                e => e.TracingData.InfrastructureTracingData.Keys.ToCsvString(false),
+                e => e.TracingData.InfrastructureTracingData.Values
+                    .Select(v => v.TotalSeconds.ToString(CultureInfo.InvariantCulture)).ToCsvString(false));
         }
 
         [Theory]
@@ -798,22 +860,6 @@ namespace Microsoft.Build.UnitTests
                 e => e.EvaluatedCondition,
                 e => e.OriginalBuildEventContext.ToString(),
                 e => e.OriginallySucceeded.ToString());
-        }
-
-        [Fact]
-        public void RoundTripEnvironmentVariableReadEventArgs()
-        {
-            var args = new EnvironmentVariableReadEventArgs(
-                environmentVariableName: Guid.NewGuid().ToString(),
-                message: Guid.NewGuid().ToString(),
-                helpKeyword: Guid.NewGuid().ToString(),
-                senderName: Guid.NewGuid().ToString());
-
-            Roundtrip(args,
-                e => e.EnvironmentVariableName,
-                e => e.Message,
-                e => e.HelpKeyword,
-                e => e.SenderName);
         }
 
         [Fact]

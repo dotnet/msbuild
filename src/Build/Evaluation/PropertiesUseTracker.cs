@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
@@ -20,9 +21,9 @@ namespace Microsoft.Build.Evaluation;
 /// </summary>
 internal sealed class PropertiesUseTracker
 {
-    internal LoggingContext LoggingContext { get; init; }
+    internal LoggingContext? LoggingContext { get; init; }
 
-    public PropertiesUseTracker(LoggingContext loggingContext) => LoggingContext = loggingContext;
+    public PropertiesUseTracker(LoggingContext? loggingContext) => LoggingContext = loggingContext;
 
     /// <summary>
     /// Whether to warn when we set a property for the first time, after it was previously used.
@@ -38,7 +39,16 @@ internal sealed class PropertiesUseTracker
 
     internal void TrackRead(string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, bool isUninitialized, bool isArtificial)
     {
-        if (isArtificial || !isUninitialized)
+        if (isArtificial)
+        {
+            return;
+        }
+
+        // LoggingContext can be null e.g. for initial toolset resolving and reading - we'll miss those expansions in our tracking
+        LoggingContext?.ProcessPropertyRead(new PropertyReadInfo(propertyName, startIndex, endIndex,
+            elementLocation, isUninitialized, GetPropertyReadContext(propertyName, startIndex, endIndex)));
+
+        if (!isUninitialized)
         {
             return;
         }
@@ -62,6 +72,19 @@ internal sealed class PropertiesUseTracker
                     elementLocation);
             }
         }
+    }
+
+    private PropertyReadContext GetPropertyReadContext(string propertyName, int startIndex, int endIndex)
+    {
+        if (PropertyReadContext == PropertyReadContext.PropertyEvaluation &&
+            !string.IsNullOrEmpty(CurrentlyEvaluatingPropertyElementName) &&
+            MSBuildNameIgnoreCaseComparer.Default.Equals(CurrentlyEvaluatingPropertyElementName, propertyName,
+                startIndex, endIndex - startIndex + 1))
+        {
+            return PropertyReadContext.PropertyEvaluationSelf;
+        }
+
+        return PropertyReadContext;
     }
 
     internal void TryAdd(string propertyName, IElementLocation elementLocation)

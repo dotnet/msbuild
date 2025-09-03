@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+	  <MSBuildCheck>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)CustomCheck.dll))</MSBuildCheck>
+  </PropertyGroup>
+</Project>
