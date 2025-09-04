@@ -353,6 +353,14 @@ namespace Microsoft.Build.BackEnd
                 list = (List<T>)listAsInterface;
             }
 
+            /// <inheritdoc/>
+            public void Translate<T>(ref List<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
+            {
+                IList<T> listAsInterface = list;
+                Translate(ref listAsInterface, objectTranslator, valueFactory, count => new List<T>(count));
+                list = (List<T>)listAsInterface;
+            }
+
             public void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
             {
                 if (!TranslateNullable(list))
@@ -368,6 +376,25 @@ namespace Microsoft.Build.BackEnd
                     T value = default(T);
 
                     objectTranslator(this, ref value);
+                    list.Add(value);
+                }
+            }
+
+            public void Translate<T, L>(ref IList<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
+            {
+                if (!TranslateNullable(list))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                list = collectionFactory(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    T value = default(T);
+
+                    objectTranslator(this, valueFactory, ref value);
                     list.Add(value);
                 }
             }
@@ -557,13 +584,8 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            /// <summary>
-            /// Translates an array of objects using an <see cref="ObjectTranslator{T}"/>
-            /// </summary>
-            /// <typeparam name="T">The reference type.</typeparam>
-            /// <param name="array">The array to be translated.</param>
-            /// <param name="objectTranslator">The translator to use for the elements in the array</param>
-            public void TranslateArray<T>(ref T[] array, ObjectTranslator<T> objectTranslator)
+            /// <inheritdoc/>
+            public void TranslateArray<T>(ref T[] array, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
             {
                 if (!TranslateNullable(array))
                 {
@@ -575,7 +597,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < count; i++)
                 {
-                    objectTranslator(this, ref array[i]);
+                    objectTranslator(this, valueFactory, ref array[i]);
                 }
             }
 
@@ -686,14 +708,34 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            /// <summary>
-            /// Translates a dictionary of { string, T }.
-            /// </summary>
-            /// <typeparam name="T">The reference type for the values</typeparam>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
-            /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslator<T> objectTranslator)
+            /// <inheritdoc/>
+            public void TranslateDictionary<K, V>(
+                ref IDictionary<K, V> dictionary,
+                ObjectTranslator<K> keyTranslator,
+                ObjectTranslatorWithValueFactory<V> valueTranslator,
+                NodePacketValueFactory<V> valueFactory,
+                NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator)
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = _reader.ReadInt32();
+                dictionary = dictionaryCreator(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    K key = default(K);
+                    keyTranslator(this, ref key);
+                    V value = default(V);
+                    valueTranslator(this, valueFactory, ref value);
+                    dictionary[key] = value;
+                }
+            }
+
+            /// <inheritdoc/>
+            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
                 where T : class
             {
                 if (!TranslateNullable(dictionary))
@@ -709,19 +751,13 @@ namespace Microsoft.Build.BackEnd
                     string key = null;
                     Translate(ref key);
                     T value = null;
-                    objectTranslator(this, ref value);
+                    objectTranslator(this, valueFactory, ref value);
                     dictionary[key] = value;
                 }
             }
 
-            /// <summary>
-            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
-            /// </summary>
-            /// <typeparam name="D">The reference type for the dictionary.</typeparam>
-            /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator)
+            /// <inheritdoc/>
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
                 where D : IDictionary<string, T>, new()
                 where T : class
             {
@@ -738,20 +774,13 @@ namespace Microsoft.Build.BackEnd
                     string key = null;
                     Translate(ref key);
                     T value = null;
-                    objectTranslator(this, ref value);
+                    objectTranslator(this, valueFactory, ref value);
                     dictionary[key] = value;
                 }
             }
 
-            /// <summary>
-            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
-            /// </summary>
-            /// <typeparam name="D">The reference type for the dictionary.</typeparam>
-            /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-            /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<D> dictionaryCreator)
+            /// <inheritdoc/>
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
                 where T : class
             {
@@ -768,7 +797,7 @@ namespace Microsoft.Build.BackEnd
                     string key = null;
                     Translate(ref key);
                     T value = null;
-                    objectTranslator(this, ref value);
+                    objectTranslator(this, valueFactory, ref value);
                     dictionary[key] = value;
                 }
             }
@@ -1154,6 +1183,24 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            /// <inheritdoc/>
+            public void Translate<T>(ref List<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
+            {
+                if (!TranslateNullable(list))
+                {
+                    return;
+                }
+
+                int count = list.Count;
+                _writer.Write(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    T value = list[i];
+                    objectTranslator(this, valueFactory, ref value);
+                }
+            }
+
             /// <summary>
             /// Translates a list of T using an <see cref="ObjectTranslator{T}"/>
             /// </summary>
@@ -1176,6 +1223,24 @@ namespace Microsoft.Build.BackEnd
                 {
                     T value = list[i];
                     objectTranslator(this, ref value);
+                }
+            }
+
+            /// <inheritdoc/>
+            public void Translate<T, L>(ref IList<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>
+            {
+                if (!TranslateNullable(list))
+                {
+                    return;
+                }
+
+                int count = list.Count;
+                _writer.Write(count);
+
+                for (int i = 0; i < count; i++)
+                {
+                    T value = list[i];
+                    objectTranslator(this, valueFactory, ref value);
                 }
             }
 
@@ -1351,13 +1416,8 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            /// <summary>
-            /// Translates an array of objects using an <see cref="ObjectTranslator{T}"/>
-            /// </summary>
-            /// <typeparam name="T">The reference type.</typeparam>
-            /// <param name="array">The array to be translated.</param>
-            /// <param name="objectTranslator">The translator to use for the elements in the array</param>
-            public void TranslateArray<T>(ref T[] array, ObjectTranslator<T> objectTranslator)
+            /// <inheritdoc/>
+            public void TranslateArray<T>(ref T[] array, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
             {
                 if (!TranslateNullable(array))
                 {
@@ -1369,7 +1429,7 @@ namespace Microsoft.Build.BackEnd
 
                 for (int i = 0; i < count; i++)
                 {
-                    objectTranslator(this, ref array[i]);
+                    objectTranslator(this, valueFactory, ref array[i]);
                 }
             }
 
@@ -1492,14 +1552,33 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            /// <summary>
-            /// Translates a dictionary of { string, T }.
-            /// </summary>
-            /// <typeparam name="T">The reference type for the values, which implements INodePacketTranslatable.</typeparam>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
-            /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslator<T> objectTranslator)
+            /// <inheritdoc/>
+            public void TranslateDictionary<K, V>(
+                ref IDictionary<K, V> dictionary,
+                ObjectTranslator<K> keyTranslator,
+                ObjectTranslatorWithValueFactory<V> valueTranslator,
+                NodePacketValueFactory<V> valueFactory,
+                NodePacketCollectionCreator<IDictionary<K, V>> collectionCreator)
+            {
+                if (!TranslateNullable(dictionary))
+                {
+                    return;
+                }
+
+                int count = dictionary.Count;
+                _writer.Write(count);
+
+                foreach (KeyValuePair<K, V> pair in dictionary)
+                {
+                    K key = pair.Key;
+                    keyTranslator(this, ref key);
+                    V value = pair.Value;
+                    valueTranslator(this, valueFactory, ref value);
+                }
+            }
+
+            /// <inheritdoc/>
+            public void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
                 where T : class
             {
                 if (!TranslateNullable(dictionary))
@@ -1515,18 +1594,12 @@ namespace Microsoft.Build.BackEnd
                     string key = pair.Key;
                     Translate(ref key);
                     T value = pair.Value;
-                    objectTranslator(this, ref value);
+                    objectTranslator(this, valueFactory, ref value);
                 }
             }
 
-            /// <summary>
-            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
-            /// </summary>
-            /// <typeparam name="D">The reference type for the dictionary.</typeparam>
-            /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator)
+            /// <inheritdoc/>
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
                 where D : IDictionary<string, T>, new()
                 where T : class
             {
@@ -1543,19 +1616,12 @@ namespace Microsoft.Build.BackEnd
                     string key = pair.Key;
                     Translate(ref key);
                     T value = pair.Value;
-                    objectTranslator(this, ref value);
+                    objectTranslator(this, valueFactory, ref value);
                 }
             }
 
-            /// <summary>
-            /// Translates a dictionary of { string, T } for dictionaries with public parameterless constructors.
-            /// </summary>
-            /// <typeparam name="D">The reference type for the dictionary.</typeparam>
-            /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
-            /// <param name="dictionary">The dictionary to be translated.</param>
-            /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-            /// <param name="dictionaryCreator">The delegate used to instantiate the dictionary.</param>
-            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<D> dictionaryCreator)
+            /// <inheritdoc/>
+            public void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> dictionaryCreator)
                 where D : IDictionary<string, T>
                 where T : class
             {
@@ -1572,7 +1638,7 @@ namespace Microsoft.Build.BackEnd
                     string key = pair.Key;
                     Translate(ref key);
                     T value = pair.Value;
-                    objectTranslator(this, ref value);
+                    objectTranslator(this, valueFactory, ref value);
                 }
             }
 
