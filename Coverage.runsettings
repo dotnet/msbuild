@@ -19,8 +19,8 @@
                         <UseVerifiableInstrumentation>False</UseVerifiableInstrumentation>
                         <EnableStaticNativeInstrumentation>True</EnableStaticNativeInstrumentation>
                         <EnableDynamicNativeInstrumentation>False</EnableDynamicNativeInstrumentation>
-                        <EnableStaticManagedInstrumentation>True</EnableStaticManagedInstrumentation>
-                        <EnableDynamicManagedInstrumentation>False</EnableDynamicManagedInstrumentation>
+                        <EnableStaticManagedInstrumentation>False</EnableStaticManagedInstrumentation>
+                        <EnableDynamicManagedInstrumentation>True</EnableDynamicManagedInstrumentation>
                     </CodeCoverage>
                 </Configuration>
             </DataCollector>
