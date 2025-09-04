@@ -323,6 +323,11 @@
         <target state="translated">Der Parameter "{0}" mit dem zugewiesenen Wert "{1}" darf keinen ungültigen Pfad und keine ungültigen Dateizeichen haben.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Eine Ausnahme ist beim Erweitern einer fileSpec mit Globs aufgetreten: fileSpec: „{0}“, angenommen, es handelt sich um einen Dateinamen. Ausnahme: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: Der Wert „{0}“ des Attributs „{1}“ in Element &lt;{2}&gt; in der Datei „{3}“ ist ein Platzhalter, der dazu führt, dass alle Dateien auf dem Laufwerk aufgelistet werden, was wahrscheinlich nicht beabsichtigt war. Überprüfen Sie, ob die referenzierten Eigenschaften immer definiert sind und dass sich das Projekt und das aktuelle Arbeitsverzeichnis nicht im Laufwerkstamm befinden.</target>

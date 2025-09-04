@@ -281,12 +281,12 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
-                     Habilita BuildChecks durante la compilación.
-                     BuildCheck permite evaluar reglas para garantizar que las propiedades
-                     de la compilación. Para obtener más información, consulta aka.ms/buildcheck
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -840,9 +840,6 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -872,22 +869,19 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                         ShowTimestamp: muestra la marca de tiempo como un prefijo en los
                             mensajes.
                         ShowEventId: muestra el identificador de evento para los eventos iniciados, los eventos 
-                            finalizados y los mensajes.
+                            finalizados y los mensajes
                         ForceNoAlign: no alinea el texto al tamaño del
                             búfer de la consola
                         DisableConsoleColor: usa los colores de consola predeterminados
                             para todos los mensajes de registro.
-                        DisableMPLogging: deshabilita el estilo de registro de resultados
-                            de multiprocesador al ejecutarse en el
-                            modo de no multiprocesador.
                         EnableMPLogging: habilita el estilo de registro de
                             multiprocesador aunque se ejecute en el modo de
                             no multiprocesador. Este estilo de registro está habilitado de forma predeterminada.
-                     ForceConsoleColor: usa los colores de consola ANSI incluso si
-                            la consola no lo admite.
-                        PreferConsoleColor--usa los colores de consola ANSI solo si
-                            la consola lo admite
-                        Verbosity: invalida el valor -verbosity para este
+                        ForceConsoleColor: usa los colores de consola ANSI incluso si
+                            la consola no lo admite
+                        PreferConsoleColor: usa colores de consola ANSI solo si
+                            la consola de destino sí lo admite
+                     Verbosity: invalida el valor -verbosity para este
                             registrador.
                      Ejemplo:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
