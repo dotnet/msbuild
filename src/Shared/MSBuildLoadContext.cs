@@ -55,10 +55,14 @@ namespace Microsoft.Build.Shared
             }
 
             // respect plugin.dll.json with the AssemblyDependencyResolver
-            string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
-            if (assemblyPath != null)
-            {
-                return LoadFromAssemblyPath(assemblyPath);
+            if (_resolver is not null)
+            { 
+                string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+                if (assemblyPath != null)
+                {
+                    return LoadFromAssemblyPath(assemblyPath);
+                }
+                return null;
             }
 
             // Fall back to the older MSBuild-on-Core behavior to continue to support
