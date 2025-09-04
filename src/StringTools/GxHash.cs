@@ -40,6 +40,9 @@ namespace GxHash;
 public class GxHash
 {
 #if NET10_0_OR_GREATER
+
+    public static bool IsSupported = ArmAes.IsSupported || X86Aes.IsSupported;
+
     // Internal usage only because T cannot be checked at compile time via generic type constrains
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static T Hash<T>(ReadOnlySpan<byte> bytes, UInt128 seed)
