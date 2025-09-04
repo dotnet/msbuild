@@ -14,7 +14,7 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-- name: EnableOptProf
+- name: enableOptProf
   displayName: Enable OptProf data collection for this build
   type: boolean
   default: true
@@ -42,7 +42,7 @@ variables:
     - name: SourceBranch
       value: ''
   # Override SkipApplyOptimizationData to true when disabling OptProf data collection
-  - ${{ if eq(parameters.EnableOptProf, false) }}:
+  - ${{ if eq(parameters.enableOptProf, false) }}:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
@@ -124,6 +124,7 @@ extends:
         parameters:
           isExperimental: false
           enableComponentGovernance: true
+          enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
