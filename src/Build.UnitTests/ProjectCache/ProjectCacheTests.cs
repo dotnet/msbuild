@@ -1688,6 +1688,13 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             <Project Sdk="Microsoft.NET.Sdk">
                 <PropertyGroup>
                     <TargetFramework>{s_currentTargetNETFramework}</TargetFramework>
+
+                    <!-- The .NET SDK contains a file called Microsoft.NETCoreSdk.BundledVersions.props that defines
+                        which runtime and package versions the SDK will use by default. During bootstrap builds,
+                        this file often references an older runtime version that doesn't match the actual runtime
+                        being built, causing NuGet restore failures. This property make them match with the bootstrapped dotnet package. -->
+                    <RuntimeFrameworkVersion>{GetRuntimeVersion()}</RuntimeFrameworkVersion>
+
                     <OutputType>Exe</OutputType>
                     <OutputPath>bin/</OutputPath>
                 </PropertyGroup>
@@ -1748,6 +1755,27 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
             output.ShouldNotContain("A=1");
             output.ShouldContain("B=1");
+
+            static string GetRuntimeVersion()
+            {
+                // Pattern to match SDK versions: MAJOR.MINOR.PATCH[-PRERELEASE[.BUILD[.REVISION]]]
+                var sdkPattern = @"^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(?<prerelease>-.+)?$";
+                var match = Regex.Match(RunnerUtilities.BootstrapSdkVersion, sdkPattern);
+
+                if (match.Success)
+                {
+                    var major = match.Groups["major"].Value;
+                    var minor = match.Groups["minor"].Value;
+                    var prerelease = match.Groups["prerelease"].Value;
+
+                    // Runtime version uses 0 for patch position
+                    var runtimeVersion = $"{major}.{minor}.0{prerelease}";
+
+                    return runtimeVersion;
+                }
+
+                return string.Empty;
+            }
         }
     }
 }
