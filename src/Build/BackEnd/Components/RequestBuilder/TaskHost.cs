@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Frozen;
 using System.Globalization;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -1276,6 +1277,74 @@ namespace Microsoft.Build.BackEnd
         private void VerifyActiveProxy()
         {
             ErrorUtilities.VerifyThrow(_activeProxy, "Attempted to use an inactive task host.");
+        }
+
+        /// <summary>
+        /// Determines if a task should be executed out-of-process based on multi-threaded execution routing.
+        /// </summary>
+        /// <param name="taskName">The name of the task to evaluate.</param>
+        /// <returns>True if the task should be executed out-of-process, false otherwise.</returns>
+        internal bool ShouldTaskExecuteOutOfProc(string taskName)
+        {
+            // First, check if we're already in an out-of-process node
+            if (_host.BuildParameters.IsOutOfProc)
+            {
+                return true;
+            }
+
+            // If multi-threaded execution mode is enabled, route tasks based on thread safety
+            if (_host.BuildParameters.MultiThreaded)
+            {
+                if (!string.IsNullOrEmpty(taskName))
+                {
+                    // If task is NOT thread-safe, route to sidecar taskhost (out-of-process)
+                    return !ThreadSafeTaskRegistry.IsTaskThreadSafe(taskName);
+                }
+            }
+
+            // Default behavior - use the build parameters setting
+            return _host.BuildParameters.IsOutOfProc;
+        }
+    }
+
+    /// <summary>
+    /// This is an interim solution until we adopt a proper thread-safe task interface.
+    /// Tasks listed here have been manually verified to be thread-safe in their current
+    /// implementation. Once a formal thread-safe task interface is established, this
+    /// allowlist approach will be replaced with interface-based detection.
+    /// </summary>
+    internal static class ThreadSafeTaskRegistry
+    {
+        /// <summary>
+        /// Set of task names that are known to be thread-safe and can run in multi-threaded mode.
+        /// Initially contains core MSBuild tasks. This will be expanded over time as more tasks
+        /// are verified to be thread-safe.
+        /// </summary>
+        private static readonly FrozenSet<string> s_threadSafeTasks = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            // Core MSBuild tasks that are known to be thread-safe
+            "Message",
+            "Warning",
+            "Error",
+            "ItemGroup",
+            "PropertyGroup",
+            "CallTarget",
+            "MSBuild"
+        }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Determines if a task is known to be thread-safe and can be executed within a thread node.
+        /// </summary>
+        /// <param name="taskName">The name of the task to check.</param>
+        /// <returns>True if the task is on the thread-safe allowlist, false otherwise.</returns>
+        public static bool IsTaskThreadSafe(string taskName)
+        {
+            if (string.IsNullOrEmpty(taskName))
+            {
+                return false;
+            }
+
+            return s_threadSafeTasks.Contains(taskName);
         }
     }
 }
