@@ -25,11 +25,11 @@ namespace Microsoft.Build.Engine.UnitTests.Telemetry
 
         public OpenTelemetryManagerTests()
         {
-            ResetManagerState();
         }
 
         public void Dispose()
         {
+            ResetManagerState();
         }
 
         [Theory]
