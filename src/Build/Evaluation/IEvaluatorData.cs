@@ -200,6 +200,13 @@ namespace Microsoft.Build.Evaluation
         /// Evaluation ordered list of project item elements that were evaluated by the Evaluator
         /// It means that both the item element's condition and the item group element's conditions evaluated to true
         /// </summary>
+        /// <remarks>
+        /// This property is obsolete because ProjectInstance is disconnected from source XML,
+        /// making this property unreliable for XML round-trip scenarios.
+        /// </remarks>
+        [Obsolete("IEvaluatorData.EvaluatedItemElements is deprecated because ProjectInstance is disconnected from source XML. " +
+                  "To inspect item elements, re-evaluate the project using the Project class instead. " +
+                  "This property will be removed in a future version.", false)]
         List<ProjectItemElement> EvaluatedItemElements
         {
             get;
