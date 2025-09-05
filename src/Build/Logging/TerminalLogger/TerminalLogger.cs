@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,6 +12,8 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 #if NET
 using System.Buffers;
@@ -32,8 +35,6 @@ namespace Microsoft.Build.Logging;
 /// </remarks>
 public sealed partial class TerminalLogger : INodeLogger
 {
-    private const string FilePathPattern = " -> ";
-
 #if NET
     private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
 #else
@@ -42,6 +43,19 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
+    internal record struct NodeContext(int Id)
+    {
+        public NodeContext(BuildEventContext context)
+            : this(context.NodeId)
+        {
+        }
+
+        /// <summary>
+        /// Node Ids are 1-based, so if we want to use them in an array we need a consistent way to map them.
+        /// </summary>
+        public readonly int ArrayIndex => Id - 1;
+    }
+
     /// <summary>
     /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
     /// </summary>
@@ -49,7 +63,61 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         public ProjectContext(BuildEventContext context)
             : this(context.ProjectContextId)
-        { }
+        {
+        }
+    }
+
+    /// <summary>
+    /// A wrapper over the evaluation context ID passed to us in <see cref="IEventSource"/> logger events.
+    /// </summary>
+    internal record struct EvalContext(int Id)
+    {
+        public EvalContext(BuildEventContext context)
+            : this(context.EvaluationId)
+        {
+        }
+    }
+
+    internal record struct TargetContext(int Id)
+    {
+        public TargetContext(BuildEventContext context)
+            : this(context.TargetId)
+        {
+        }
+    }
+
+    internal record struct TaskContext(int Id)
+    {
+        public TaskContext(BuildEventContext context)
+            : this(context.TaskId)
+        {
+        }
+    }
+
+
+    internal record struct TargetTaskOutput(string TaskName, ITaskOutput TaskOutput)
+    {
+        public bool AppliesToTask(TaskStartedEventArgs args) => args.TaskName == TaskName;
+    }
+
+    internal interface ITaskOutput
+    {
+        bool AppliesToTaskOutput(TaskParameterEventArgs args);
+        void Apply(TaskParameterEventArgs args);
+    }
+
+    internal record struct TaskItemOutput(string ItemType, Action<TaskParameterEventArgs> handler) : ITaskOutput
+    {
+        public bool AppliesToTaskOutput(TaskParameterEventArgs args) => args.ItemType == ItemType;
+
+        public void Apply(TaskParameterEventArgs args) => handler(args);
+    }
+
+    internal record struct TaskPropertyOutput(string PropertyName, Action<TaskParameterEventArgs> handler) : ITaskOutput
+    {
+        public bool AppliesToTaskOutput(TaskParameterEventArgs args) => args.PropertyName == PropertyName;
+
+        public void Apply(TaskParameterEventArgs args) => handler(args);
     }
 
     private readonly record struct TestSummary(int Total, int Passed, int Skipped, int Failed);
@@ -64,13 +132,9 @@ public sealed partial class TerminalLogger : INodeLogger
     internal const string TripleIndentation = $"{Indentation}{Indentation}{Indentation}";
 
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
+    internal const TerminalColor RuntimeIdentifierColor = TerminalColor.Magenta;
 
     internal Func<StopwatchAbstraction>? CreateStopwatch = null;
-
-    /// <summary>
-    /// Name of target that identifies the project cache plugin run has just started.
-    /// </summary>
-    private const string CachePluginStartTarget = "_CachePluginRunStart";
 
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
@@ -90,6 +154,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </remarks>
     private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = new();
 
+    private readonly Dictionary<EvalContext, EvalProjectInfo> _evals = new();
+
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
     /// </summary>
@@ -108,6 +174,12 @@ public sealed partial class TerminalLogger : INodeLogger
     /// The working directory when the build starts, to trim relative output paths.
     /// </summary>
     private readonly string _initialWorkingDirectory = Environment.CurrentDirectory;
+
+    /// <summary>
+    /// Tracks target context ids of targets that we've skipped. For these targets, we need to listen for
+    /// taskoutput parameter events to patch up missing outputs.
+    /// </summary>
+    private readonly Dictionary<TargetContext, string> _targetNamesForSkippedOutputs = new();
 
     /// <summary>
     /// Number of build errors.
@@ -168,7 +240,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Name of target that identifies a project that has tests, and that they just started.
     /// </summary>
-    private static string _testStartTarget = "_TestRunStart";
+    private const string _testStartTarget = "_TestRunStart";
 
     /// <summary>
     /// Time of the oldest observed test target start.
@@ -179,11 +251,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Time of the most recently observed test target finished.
     /// </summary>
     private DateTime? _testEndTime;
-
-    /// <summary>
-    /// Demonstrates whether there exists at least one project which is a cache plugin project.
-    /// </summary>
-    private bool _hasUsedCache = false;
 
     /// <summary>
     /// Whether to show TaskCommandLineEventArgs high-priority messages.
@@ -283,7 +350,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return new TerminalLogger(verbosity, originalConsoleMode);
         }
-        
+
         // If explicitly disabled, always use console logger
         if (isDisabled)
         {
@@ -588,9 +655,16 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private void StatusEventRaised(object sender, BuildStatusEventArgs e)
     {
-        if (e is BuildCanceledEventArgs buildCanceledEventArgs)
+        switch (e)
         {
-            RenderImmediateMessage(e.Message!);
+            case BuildCanceledEventArgs cancelEvent:
+                RenderImmediateMessage(cancelEvent.Message!);
+                break;
+            case ProjectEvaluationStartedEventArgs:
+                break;
+            case ProjectEvaluationFinishedEventArgs evalFinish:
+                CaptureEvalContext(evalFinish);
+                break;
         }
     }
 
@@ -599,28 +673,35 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void ProjectStarted(object sender, ProjectStartedEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
-        if (buildEventContext is null)
+        if (e.BuildEventContext is null)
         {
             return;
         }
 
-        ProjectContext c = new ProjectContext(buildEventContext);
+        ProjectContext c = new(e.BuildEventContext);
 
         if (_restoreContext is null)
         {
-            if (e.GlobalProperties?.TryGetValue("TargetFramework", out string? targetFramework) != true)
+            EvalContext evalContext = new(e.BuildEventContext);
+            string? targetFramework = null;
+            string? runtimeIdentifier = null;
+            if (_evals.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
             {
-                targetFramework = null;
+                targetFramework = evalInfo.TargetFramework;
+                runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            _projects[c] = new(e.ProjectFile!, targetFramework, CreateStopwatch?.Invoke());
+
+            Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
+
+            TerminalProjectInfo projectInfo = new(c, evalInfo, e.TargetNames?.Split(';'), CreateStopwatch?.Invoke());
+            _projects[c] = projectInfo;
 
             // First ever restore in the build is starting.
             if (e.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
-                int nodeIndex = NodeIndexForContext(buildEventContext);
-                _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, null, "Restore", _projects[c].Stopwatch);
+                var nodeContext = new NodeContext(e.BuildEventContext);
+                _nodes[nodeContext.ArrayIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
     }
@@ -662,8 +743,6 @@ public sealed partial class TerminalLogger : INodeLogger
                     EraseNodes();
 
                     string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
                     // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
                     // reported during build.
                     string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
@@ -697,72 +776,31 @@ public sealed partial class TerminalLogger : INodeLogger
                     // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
                     // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
                     // and it is hard to see if project finished, or did not run at all.
-                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
+                    else if (project.Outputs is { Count: > 0 } || project.BuildMessages is not null || project.IsTestProject)
                     {
                         // Show project build complete and its output
                         string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
                         Terminal.Write(projectFinishedHeader);
 
                         // Print the output path as a link if we have it.
-                        if (outputPath is not null)
+                        if (project.Outputs is { Count: > 0 })
                         {
-                            ReadOnlySpan<char> outputPathSpan = outputPath.Value.Span;
-                            ReadOnlySpan<char> url = outputPathSpan;
-                            try
+                            var workingDirMemory = _initialWorkingDirectory.AsMemory();
+                            if (project.Outputs.Count == 1)
                             {
-                                // If possible, make the link point to the containing directory of the output.
-                                url = Path.GetDirectoryName(url);
+                                var renderString = GetTargetOutputRenderable(project.Outputs[0], workingDirMemory, project.SourceRoot).ToString();
+                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", renderString));
                             }
-                            catch
+                            else
                             {
-                                // Ignore any GetDirectoryName exceptions.
-                            }
-
-                            // Generates file:// schema url string which is better handled by various Terminal clients than raw folder name.
-                            string urlString = url.ToString();
-                            if (Uri.TryCreate(urlString, UriKind.Absolute, out Uri? uri))
-                            {
-                                // url.ToString() un-escapes the URL which is needed for our case file://
-                                // but not valid for http://
-                                urlString = uri.ToString();
-                            }
-
-                            // now we compute the path to show the user for this project.
-                            // some options:
-                            // * the raw, full output path from the MSBuild logic (OutputPath property)
-                            // * the output path relative to the initial working directory, if it is under it
-                            // * the output path relative to the source root, if it is under it
-
-                            // full path fallback
-                            var projectDisplayPathSpan = outputPathSpan;
-                            var workingDirectorySpan = _initialWorkingDirectory.AsSpan();
-                            // under working dir case
-                            if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
-                            {
-                                if (outputPathSpan.Length > workingDirectorySpan.Length
-                                    && (outputPathSpan[workingDirectorySpan.Length] == Path.DirectorySeparatorChar
-                                        || outputPathSpan[workingDirectorySpan.Length] == Path.AltDirectorySeparatorChar))
+                                // render each output on a new line underneath the project header, indented by another level of indentation,
+                                // and with a ∟ glyph
+                                Terminal.WriteLine("");
+                                foreach (var output in project.Outputs)
                                 {
-                                    projectDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
+                                    Terminal.WriteLine($"{DoubleIndentation}∟{GetTargetOutputRenderable(output, workingDirMemory, project.SourceRoot).ToString()}");
                                 }
                             }
-                            // under source root case
-                            else if (project.SourceRoot is { Span: var sourceRootSpan } )
-                            {
-                                var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
-                                if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
-                                {
-                                    if (outputPathSpan.Length > sourceRootSpan.Length
-                                        // offsets are -1 here compared to above for ***reasons***
-                                        && (outputPathSpan[sourceRootSpan.Length - 1] == Path.DirectorySeparatorChar
-                                            || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
-                                    {
-                                        projectDisplayPathSpan = Path.Combine(relativePathFromWorkingDirToSourceRoot.ToString(), outputPathSpan.Slice(sourceRootSpan.Length).ToString()).AsSpan();
-                                    }
-                                }
-                            }
-
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(uri, projectDisplayPathSpan.ToString())));
                         }
                         else
                         {
@@ -792,6 +830,157 @@ public sealed partial class TerminalLogger : INodeLogger
         }
     }
 
+    /// <summary>
+    /// Renders the 'output' line for a project's output. This line will contain an output-specific glyph and the path to the output, which will be clickable and navigate to an OutputKind-specific location.
+    /// </summary>
+    private static ReadOnlySpan<char> GetTargetOutputRenderable((ReadOnlyMemory<char> path, ProjectOutputKind kind) output, ReadOnlyMemory<char> workingDir, ReadOnlyMemory<char>? sourceRoot)
+    {
+        var projectDisplayPath = DetermineOutputPathToRender(output.path, workingDir, sourceRoot);
+        var urlLink = GenerateUriForOutput(output.path, output.kind);
+        var glyph = GetGlyphForKind(output.kind);
+        return $"{glyph} {CreateLink(urlLink, projectDisplayPath)}".AsSpan();
+    }
+
+
+    private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
+    {
+        var buildEventContext = evalFinish.BuildEventContext;
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        EvalContext c = new(buildEventContext);
+
+        if (!_evals.TryGetValue(c, out _))
+        {
+            string? tfm = null;
+            string? rid = null;
+            SdkOutputType outputType = SdkOutputType.Unknown;
+            foreach (var property in evalFinish.EnumerateProperties())
+            {
+                if (tfm is not null && rid is not null && outputType != SdkOutputType.Unknown)
+                {
+                    // perf - we short-circuit once we've computed all the values
+                    // We already have both properties, no need to continue.
+                    break;
+                }
+                switch (property.Name)
+                {
+                    case "TargetFramework":
+                        tfm = property.Value;
+                        break;
+                    case "RuntimeIdentifier":
+                        rid = property.Value;
+                        break;
+                    case "OutputType":
+                        outputType = property.Value switch
+                        {
+                            "Library" => SdkOutputType.Library,
+                            "Exe" => SdkOutputType.Exe,
+                            "WinExe" => SdkOutputType.Exe,
+                            _ => SdkOutputType.Unknown
+                        };
+                        break;
+                }
+            }
+            var evalInfo = new EvalProjectInfo(c, evalFinish.ProjectFile!, tfm, rid, outputType);
+            _evals[c] = evalInfo;
+        }
+    }
+
+    private static string GetGlyphForKind(ProjectOutputKind kind) => kind switch
+    {
+        ProjectOutputKind.Library => "🗄️",
+        ProjectOutputKind.Executable => "🏃",
+        ProjectOutputKind.Package => "📦",
+        ProjectOutputKind.Unknown => "❓",
+        _ => throw new NotImplementedException(),
+    };
+
+    private static Uri? GenerateUriForOutput(ReadOnlyMemory<char> outputPath, ProjectOutputKind kind)
+    {
+        var uriInput = GetPathForUriForOutput(outputPath, kind);
+        Uri.TryCreate(uriInput, UriKind.Absolute, out Uri? uri);
+        return uri;
+    }
+
+    private static string? GetPathForUriForOutput(ReadOnlyMemory<char> outputPath, ProjectOutputKind kind)
+    {
+        if (kind == ProjectOutputKind.Package || kind == ProjectOutputKind.Executable)
+        {
+            // for packages and binaries, use the full path
+            return
+#if NET
+                new(outputPath.Span);
+#else
+                outputPath.Span.ToString();
+#endif
+        }
+        else
+        {
+            // for libraries and other non-invokable things, use the parent dir
+            var parent =
+#if NET
+                Path.GetDirectoryName(outputPath.Span);
+#else
+                Path.GetDirectoryName(outputPath.Span.ToString());
+#endif
+            return
+#if NET
+                new(parent);
+#else
+                parent;
+#endif
+        }
+    }
+
+    private static string DetermineOutputPathToRender(ReadOnlyMemory<char> outputPath, ReadOnlyMemory<char> workingDir, ReadOnlyMemory<char>? sourceRoot)
+    {
+        ReadOnlySpan<char> outputPathSpan = outputPath.Span;
+
+        // compute the path to show the user for this project.
+        // some options:
+        // * the raw, full output path from the MSBuild logic (OutputPath property)
+        // * the output path relative to the initial working directory, if it is under it
+        // * the output path relative to the source root, if it is under it
+
+        // full path fallback
+        var projectDisplayPathSpan = outputPathSpan;
+        var workingDirectorySpan = workingDir.Span;
+        // under working dir case
+        if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
+        {
+            if (outputPathSpan.Length > workingDirectorySpan.Length
+                && (outputPathSpan[workingDirectorySpan.Length] == Path.DirectorySeparatorChar
+                    || outputPathSpan[workingDirectorySpan.Length] == Path.AltDirectorySeparatorChar))
+            {
+                projectDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
+            }
+        }
+        // under source root case
+        else if (sourceRoot is { Span: var sourceRootSpan })
+        {
+            var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
+            if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
+            {
+                if (outputPathSpan.Length > sourceRootSpan.Length
+                    // offsets are -1 here compared to above for ***reasons***
+                    && (outputPathSpan[sourceRootSpan.Length - 1] == Path.DirectorySeparatorChar
+                        || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
+                {
+
+                    projectDisplayPathSpan = Path.Combine(relativePathFromWorkingDirToSourceRoot.ToString(), outputPathSpan.Slice(sourceRootSpan.Length).ToString()).AsSpan();
+                }
+            }
+        }
+#if NET
+        return new(projectDisplayPathSpan);
+#else
+        return projectDisplayPathSpan.ToString();
+#endif
+    }
+
     private static string? CreateLink(Uri? uri, string? linkText) =>
         (uri, linkText) switch
         {
@@ -802,32 +991,70 @@ public sealed partial class TerminalLogger : INodeLogger
 
     private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
     {
-        string projectFile = project.File is not null ?
-            Path.GetFileNameWithoutExtension(project.File) :
+        string projectFile = project.ProjectFile is not null ?
+            Path.GetFileNameWithoutExtension(project.ProjectFile) :
             string.Empty;
 
-        if (string.IsNullOrEmpty(project.TargetFramework))
+        return (project.TargetFramework, project.RuntimeIdentifier, project.IsTestProject) switch
         {
-            string resourceName = project.IsTestProject ? "TestProjectFinished_NoTF" : "ProjectFinished_NoTF";
-
-            return ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName,
+            (string tfm, null, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                buildResult,
+                duration),
+            (string tfm, null, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                buildResult,
+                duration),
+            (null, string rid, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (null, string rid, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (string tfm, string rid, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTFAndRID",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (string tfm, string rid, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTFAndRID",
+                Indentation,
+                projectFile,
+                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                buildResult,
+                duration),
+            (null, null, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
                 Indentation,
                 projectFile,
                 buildResult,
-                duration);
-        }
-        else
-        {
-            string resourceName = project.IsTestProject ? "TestProjectFinished_WithTF" : "ProjectFinished_WithTF";
-
-            return ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName,
+                duration),
+            (null, null, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_NoTF",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(project.TargetFramework, TargetFrameworkColor),
                 buildResult,
-                duration);
-        }
+                duration),
+        };
     }
+
+    private readonly Dictionary<TargetContext, TargetTaskOutput> _targetsListeningForTasks = new();
+
+    /// <summary>
+    /// These tasks will be watched for specific kinds of their outputs, typically because
+    /// they produce important artifacts that we want to track.
+    /// </summary>
+    private readonly Dictionary<TaskContext, ITaskOutput> _tasksToWatchForOutputs = new();
 
     /// <summary>
     /// The <see cref="IEventSource.TargetStarted"/> callback.
@@ -842,34 +1069,34 @@ public sealed partial class TerminalLogger : INodeLogger
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
             string targetName = e.TargetName;
-            if (targetName == CachePluginStartTarget)
+
+            switch (targetName)
             {
-                project.IsCachePluginProject = true;
-                _hasUsedCache = true;
+                case _testStartTarget:
+                    targetName = "Testing";
+
+                    // Use the minimal start time, so if we run tests in parallel, we can calculate duration
+                    // as this start time, minus time when tests finished.
+                    _testStartTime = _testStartTime == null
+                        ? e.Timestamp
+                        : e.Timestamp < _testStartTime
+                            ? e.Timestamp : _testStartTime;
+                    project.IsTestProject = true;
+                    break;
+                case "CopyFilesToOutputDirectory":
+                    // The Copy task in this target is used to copy the main assembly to the output directory.
+                    _targetsListeningForTasks[new(e.BuildEventContext!)] = new TargetTaskOutput("Copy", new TaskItemOutput("MainAssembly", TrySetMainAssemblyAsProjectOutput));
+                    break;
             }
 
-            if (targetName == _testStartTarget)
-            {
-                targetName = "Testing";
-
-                // Use the minimal start time, so if we run tests in parallel, we can calculate duration
-                // as this start time, minus time when tests finished.
-                _testStartTime = _testStartTime == null
-                    ? e.Timestamp
-                    : e.Timestamp < _testStartTime
-                        ? e.Timestamp : _testStartTime;
-                project.IsTestProject = true;
-            }
-
-            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, targetName, project.Stopwatch);
+            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, targetName, project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
 
     private void UpdateNodeStatus(BuildEventContext buildEventContext, TerminalNodeStatus? nodeStatus)
     {
-        int nodeIndex = NodeIndexForContext(buildEventContext);
-        _nodes[nodeIndex] = nodeStatus;
+        _nodes[new NodeContext(buildEventContext).ArrayIndex] = nodeStatus;
     }
 
     /// <summary>
@@ -877,39 +1104,167 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void TargetFinished(object sender, TargetFinishedEventArgs e)
     {
-        // For cache plugin projects which result in a cache hit, ensure the output path is set
-        // to the item spec corresponding to the GetTargetPath target upon completion.
         var buildEventContext = e.BuildEventContext;
         var targetOutputs = e.TargetOutputs;
         if (_restoreContext is not null || buildEventContext is null)
         {
             return;
         }
+        if (targetOutputs is null)
+        {
+            // we only care about Targets that finish here for output-detection purposes, so we can exit if there are no outputs.
+            return;
+        }
+        if (!_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        {
+            // we need a project to associate the outputs with, so exit if we don't have one.
+            return;
+        }
 
-        if (targetOutputs is not null
-                && _hasUsedCache
-                && e.TargetName == "GetTargetPath"
-                && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
-        {
-            if (project is not null && project.IsCachePluginProject)
+        // TODO: we should probably have something more like a target-name-based switch here too -
+        //       the sourceroots being at the end here feels awkward.
+        var detectedOutputs =
+            e.TargetName switch
             {
-                foreach (ITaskItem output in targetOutputs)
-                {
-                    project.OutputPath = output.ItemSpec.AsMemory();
-                    break;
-                }
-            }
-        }
-        else if (targetOutputs is not null
-            && e.TargetName == "InitializeSourceRootMappedPaths"
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out project)
-            && project.SourceRoot is null)
+                "GenerateNuspec" => TryDetectPackages(e.TargetOutputs, project),
+                "PublishItemsOutputGroup" => TryDetectPublishOutputs(e.TargetOutputs, project),
+                _ => null
+            };
+
+        if (detectedOutputs is not null)
         {
-            project.SourceRoot =
-                (targetOutputs as IEnumerable<ITaskItem>)?
-                .FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")))
-                ?.ItemSpec.AsMemory();
+            if (project.Outputs is null)
+            {
+                project.Outputs = detectedOutputs;
+            }
+            else
+            {
+                project.Outputs.AddRange(detectedOutputs);
+            }
+
+            // If we detected outputs, we don't need to do anything else.
+            return;
         }
+
+        if (e.TargetName == "InitializeSourceRootMappedPaths" && project.SourceRoot is null)
+        {
+            TryDetectSourceRoots(targetOutputs, project);
+            return;
+        }
+    }
+
+    private List<(ReadOnlyMemory<char>, ProjectOutputKind)>? TryDetectPublishOutputs(IEnumerable outputs, TerminalProjectInfo project)
+    {
+        if (project.EntryTargets?.Contains("Publish") == true)
+        {
+            var mappedOutputs = TransformGenericEnumerable(outputs);
+            if (mappedOutputs is null || !mappedOutputs.Any())
+            {
+                // If there are no outputs, we don't have anything to set.
+                return null;
+            }
+            List<(ReadOnlyMemory<char>, ProjectOutputKind)> computedOutputs = new();
+            ProjectOutputKind kind = project.OutputType switch
+            {
+                SdkOutputType.Library => ProjectOutputKind.Library,
+                SdkOutputType.Exe => ProjectOutputKind.Executable,
+                _ => ProjectOutputKind.Unknown
+            };
+            foreach (var output in mappedOutputs.Where(OutputIsOfType(kind)))
+            {
+                computedOutputs.Add((output.AsMemory(), kind));
+            }
+            return computedOutputs;
+        }
+        return null;
+    }
+
+    private List<(ReadOnlyMemory<char>, ProjectOutputKind)>? TryDetectPackages(IEnumerable outputs, TerminalProjectInfo project)
+    {
+        // if this project is intending to make a package, we want to capture the .nupkg output(s).
+        if (project.EntryTargets?.Contains("Pack") == true)
+        {
+            List<(ReadOnlyMemory<char>, ProjectOutputKind)> detectedOutputs = new();
+            foreach (var output in TransformGenericEnumerable(outputs))
+            {
+                if (Path.GetExtension(output) != ".nupkg")
+                {
+                    // We only care about the .nupkg files.
+                    continue;
+                }
+
+                detectedOutputs.Add(new(output.AsMemory(), ProjectOutputKind.Package));
+            }
+            return detectedOutputs;
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> TransformGenericEnumerable(IEnumerable outputs)
+    {
+        if (outputs is IEnumerable<string> stringOutputs)
+        {
+            return stringOutputs;
+        }
+        else if (outputs is IEnumerable<ITaskItem> taskItems)
+        {
+            return taskItems.Select(item => item.ItemSpec);
+        }
+        else if (outputs is ArrayList && outputs.Cast<ITaskItem>() is IEnumerable<ITaskItem> taskItemsArrayList)
+        {
+            // If we have an ArrayList, we can cast it to IEnumerable<ITaskItem> and then to IEnumerable<string>.
+            return taskItemsArrayList.Select(item => item.ItemSpec);
+        }
+
+        // If we don't know how to handle the outputs, return an empty enumerable.
+        Debug.Assert(false, "Unsupported outputs type in TerminalLogger: " + outputs.GetType().FullName);
+        return Enumerable.Empty<string>();
+    }
+
+    private List<(ReadOnlyMemory<char>, ProjectOutputKind)>? TryDetectOutputPath(IEnumerable outputs, TerminalProjectInfo project)
+    {
+        if (project.EntryTargets?.Contains("Pack") == true || project.EntryTargets?.Contains("Publish") == true)
+        {
+            // If this is a Pack or Publish project, we don't want to capture the output path here.
+            // It will be captured in the Pack or Publish target.
+            return null;
+        }
+
+        var mappedOutputs = TransformGenericEnumerable(outputs);
+        if (mappedOutputs is null || !mappedOutputs.Any())
+        {
+            // If there are no outputs, we don't have anything to set.
+            return null;
+        }
+
+        List<(ReadOnlyMemory<char>, ProjectOutputKind)> computedOutputs = new();
+        ProjectOutputKind kind = project.OutputType switch
+        {
+            SdkOutputType.Library => ProjectOutputKind.Library,
+            SdkOutputType.Exe => ProjectOutputKind.Executable,
+            _ => ProjectOutputKind.Unknown
+        };
+        foreach (var output in mappedOutputs.Where(OutputIsOfType(kind)))
+        {
+            computedOutputs.Add((output.AsMemory(), kind));
+        }
+        return computedOutputs;
+    }
+
+    private Func<string, bool> OutputIsOfType(ProjectOutputKind kind)
+    {
+        var binarySuffix = kind switch
+        {
+            ProjectOutputKind.Library => ".dll",
+            // TODO: these checks are wrong - they should be based on the target runtime, not the host
+            // In addition, there's probably an eval property we should be looking for here to get the right
+            // name directly instead of computing it.
+            ProjectOutputKind.Executable when RuntimeInformation.IsOSPlatform(OSPlatform.Windows) => ".exe",
+            ProjectOutputKind.Executable when !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) => "",
+            _ => null
+        };
+        return outputPath => Path.GetExtension(outputPath) == binarySuffix;
     }
 
     /// <summary>
@@ -918,7 +1273,12 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
+        if (buildEventContext is null)
+        {
+            return;
+        }
+
+        if (_restoreContext is null  && e.TaskName == "MSBuild")
         {
             // This will yield the node, so preemptively mark it idle
             UpdateNodeStatus(buildEventContext, null);
@@ -926,6 +1286,16 @@ public sealed partial class TerminalLogger : INodeLogger
             if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
             {
                 project.Stopwatch.Stop();
+            }
+        }
+
+        if (_targetsListeningForTasks.TryGetValue(new TargetContext(buildEventContext), out var targetTaskOutput))
+        {
+            // If we are listening for this task, we need to check if it is the one we are interested in.
+            if (targetTaskOutput.AppliesToTask(e))
+            {
+                // If it is, we need to register it for output watching.
+                _tasksToWatchForOutputs[new TaskContext(buildEventContext)] = targetTaskOutput.TaskOutput;
             }
         }
     }
@@ -941,27 +1311,149 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        string? message = e.Message;
-
-        if (message is not null && e.Importance == MessageImportance.High)
+        switch (e)
         {
-            var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
-
-            // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
-            // pattern used by the CopyFilesToOutputDirectory target.
-            int index = message.IndexOf(FilePathPattern, StringComparison.Ordinal);
-            if (index > 0)
-            {
-                var projectFileName = Path.GetFileName(e.ProjectFile.AsSpan());
-                if (!projectFileName.IsEmpty &&
-                    message.AsSpan().StartsWith(Path.GetFileNameWithoutExtension(projectFileName)) && hasProject)
+            case TargetSkippedEventArgs skipArgs:
+                TrackSkippedTarget(skipArgs);
+                return;
+            case TaskParameterEventArgs tpea:
+                if (tpea is { Kind: TaskParameterMessageKind.SkippedTargetOutputs })
                 {
-                    ReadOnlyMemory<char> outputPath = e.Message.AsMemory().Slice(index + 4);
-                    project!.OutputPath = outputPath;
+                    LookForTargetOutputsFromSkippedTargetNotification(tpea);
+                }
+                else if (tpea is { Kind: TaskParameterMessageKind.TaskOutput })
+                {
+                    LookForTaskOutputs(tpea);
+                }
+
+                return;
+            default:
+                HandleActualMessages(e);
+                return;
+        };
+    }
+
+    private void TrackSkippedTarget(TargetSkippedEventArgs skipArgs)
+    {
+        // what to do if this has been built originally elsewhere...
+        if (skipArgs.SkipReason == TargetSkipReason.PreviouslyBuiltSuccessfully)
+        {
+            if (skipArgs.TargetName == "InitializeSourceRootMappedPaths")
+            {
+                // if the sourceRoots we're looking for have been set on another project, we can look them
+                // up and apply them to _this_ project!
+                if (_projects.TryGetValue(new ProjectContext(skipArgs.OriginalBuildEventContext), out TerminalProjectInfo? originalProject)
+                    && originalProject.SourceRoot is not null
+                    && _projects.TryGetValue(new ProjectContext(skipArgs.BuildEventContext!), out TerminalProjectInfo? currentProject)
+                    && currentProject.SourceRoot is null
+                )
+                {
+                    currentProject.SourceRoot = originalProject.SourceRoot;
                     return;
                 }
             }
+        }
 
+
+        // this was forwarded by the child node, so it must be a target we need to track for skipped-output purposes
+        var targetContext = new TargetContext(skipArgs.BuildEventContext!);
+        _targetNamesForSkippedOutputs[targetContext] = skipArgs.TargetName;
+    }
+
+    private void LookForTargetOutputsFromSkippedTargetNotification(TaskParameterEventArgs taskParameterEventArgs)
+    {
+        var targetContext = new TargetContext(taskParameterEventArgs.BuildEventContext!);
+        if (!_targetNamesForSkippedOutputs.TryGetValue(targetContext, out string? targetName))
+        {
+            // we're not looking for this target, so skip
+            return;
+        }
+
+        if (taskParameterEventArgs.Items is null)
+        {
+            // we only care about Targets that have outputs here for output-detection purposes, so we can exit if there are no outputs.
+            return;
+        }
+
+        if (!_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext!), out TerminalProjectInfo? project))
+        {
+            // we need a project to associate the outputs with, so exit if we don't have one.
+            return;
+        }
+
+        // based on the target name, we can determine which outputs to patch up
+        var detectedOutputs =
+            targetName switch
+            {
+                "CopyFilesToOutputDirectory" => TryDetectOutputPath(taskParameterEventArgs.Items, project),
+                "GenerateNuspec" => TryDetectPackages(taskParameterEventArgs.Items, project),
+                "PublishItemsOutputGroup" => TryDetectPublishOutputs(taskParameterEventArgs.Items, project),
+                _ => null,
+            };
+        if (detectedOutputs is not null)
+        {
+            project.Outputs ??= [];
+            project.Outputs.AddRange(detectedOutputs);
+            return;
+        }
+
+        if (targetName == "InitializeSourceRootMappedPaths")
+        {
+            TryDetectSourceRoots(taskParameterEventArgs.Items, project);
+            return;
+        }     
+    }
+
+    private void TryDetectSourceRoots(IEnumerable outputs, TerminalProjectInfo project)
+    {
+        var mappedOutputs = outputs as IEnumerable<ITaskItem>;
+        if (mappedOutputs is null || !mappedOutputs.Any())
+        {
+            // If there are no outputs, we don't have anything to set.
+            return;
+        }
+
+        project.SourceRoot =
+            mappedOutputs
+            .FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")))
+            ?.ItemSpec.AsMemory();
+    }
+
+    private void LookForTaskOutputs(TaskParameterEventArgs taskParameterEventArgs)
+    {
+        var taskContext = new TaskContext(taskParameterEventArgs.BuildEventContext!);
+        if (_tasksToWatchForOutputs.TryGetValue(taskContext, out ITaskOutput? taskOutput)
+            && taskOutput.AppliesToTaskOutput(taskParameterEventArgs))
+        {
+            // cleanup both us and our parent to prevent leaks
+            _tasksToWatchForOutputs.Remove(taskContext);
+            _targetsListeningForTasks.Remove(new TargetContext(taskParameterEventArgs.BuildEventContext!));
+            // Based on what the output was, figure out what to do with it
+            taskOutput.Apply(taskParameterEventArgs);
+        }
+    }
+
+    public void TrySetMainAssemblyAsProjectOutput(TaskParameterEventArgs taskParameterEventArgs)
+    {
+        // This is the main assembly, so we can set the output path to the project.
+        if (_projects.TryGetValue(new ProjectContext(taskParameterEventArgs.BuildEventContext!), out var project))
+        {
+            var results = TryDetectOutputPath(taskParameterEventArgs.Items, project);
+            if (results is not null)
+            {
+                project.Outputs ??= [];
+                project.Outputs.AddRange(results);
+            }
+        }
+    }
+
+    private void HandleActualMessages(BuildMessageEventArgs e)
+    {
+        string? message = e.Message;
+        var buildEventContext = e.BuildEventContext!;
+
+        if (message is not null && e.Importance == MessageImportance.High)
+        {
             // auth provider messages should always be shown to the user.
             if (IsAuthProviderMessage(message))
             {
@@ -969,26 +1461,25 @@ public sealed partial class TerminalLogger : INodeLogger
                 return;
             }
 
-            if (Verbosity > LoggerVerbosity.Quiet)
+            // ensure we only log the preview message once for the entire build.
+            if (Verbosity > LoggerVerbosity.Quiet && e is { Code: "NETSDK1057" } && !_loggedPreviewMessage)
             {
-                if (e.Code == "NETSDK1057" && !_loggedPreviewMessage)
+                if (!_loggedPreviewMessage)
                 {
-                    // ensure we only log the preview message once for the entire build.
-                    if (!_loggedPreviewMessage)
-                    {
-                        // The SDK will log the high-pri "not-a-warning" message NETSDK1057
-                        // when it's a preview version up to MaxCPUCount times, but that's
-                        // an implementation detail--the user cares about at most one.
-                        RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, DoubleIndentation));
-                        _loggedPreviewMessage = true;
-                    }
-                    return;
+                    // The SDK will log the high-pri "not-a-warning" message NETSDK1057
+                    // when it's a preview version up to MaxCPUCount times, but that's
+                    // an implementation detail--the user cares about at most one.
+                    RenderImmediateMessage(FormatSimpleMessageWithoutFileData(e, DoubleIndentation));
+                    _loggedPreviewMessage = true;
                 }
+                return;
             }
 
-            if (hasProject && project!.IsTestProject)
+            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project)
+                && project.IsTestProject)
             {
-                var node = _nodes[NodeIndexForContext(buildEventContext)];
+                var nodeContext = new NodeContext(buildEventContext);
+                var node = _nodes[nodeContext.ArrayIndex];
 
                 // Consumes test update messages produced by VSTest and MSTest runner.
                 if (node != null && e is IExtendedBuildEventArgs extendedMessage)
@@ -1000,7 +1491,7 @@ public sealed partial class TerminalLogger : INodeLogger
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Green, indicator, displayName, project.Stopwatch);
+                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
@@ -1010,7 +1501,7 @@ public sealed partial class TerminalLogger : INodeLogger
                                 var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                 var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
+                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
                                 UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
@@ -1056,7 +1547,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     return;
                 }
 
-                if (hasProject)
+                if (project is not null)
                 {
                     project!.AddBuildMessage(TerminalMessageSeverity.Message, FormatInformationalMessage(e));
                 }
@@ -1173,7 +1664,7 @@ public sealed partial class TerminalLogger : INodeLogger
             return null;
         }
     }
-    
+
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
@@ -1321,15 +1812,6 @@ public sealed partial class TerminalLogger : INodeLogger
             EraseNodes();
             Terminal.WriteLine(message);
         }
-    }
-
-    /// <summary>
-    /// Returns the <see cref="_nodes"/> index corresponding to the given <see cref="BuildEventContext"/>.
-    /// </summary>
-    private int NodeIndexForContext(BuildEventContext context)
-    {
-        // Node IDs reported by the build are 1-based.
-        return context.NodeId - 1;
     }
 
     /// <summary>
