@@ -22,7 +22,7 @@ namespace Microsoft.Build.Instance
 
         /// <summary>
         /// Properties in the underlying dictionary.
-        /// This dictionary contains all properties that are directly defined in the project item,
+        /// This dictionary contains all properties that are directly defined in the project item.
         /// </summary>
         private readonly IDictionary<string, ProjectMetadata> _properties;
 
