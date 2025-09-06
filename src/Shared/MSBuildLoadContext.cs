@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
@@ -63,7 +64,10 @@ namespace Microsoft.Build.Shared
                     return LoadFromAssemblyPath(assemblyPath);
                 }
 
-                return null;
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                {
+                    return null;
+                }
             }
 
             // Fall back to the older MSBuild-on-Core behavior to continue to support
