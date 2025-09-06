@@ -11,6 +11,15 @@ using Microsoft.Build.Evaluation;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
+    /// <summary>
+    /// this is a fake implementation of CachedEntityDictionary just to be used in unit tests.
+    /// </summary>
+    /// <typeparam name="T">Element type</typeparam>
+    /// <remarks>
+    ///  This class deliberately does not implement any functionality except Count property.
+    ///  This is to ensure that the project instance created from cache state does not access any of the collections during its construction.
+    ///  We try to maintain the instance in this state working like a shim layer, and keep the cost minimal until data is actually accessed.
+    /// </remarks>
     internal class FakeCachedEntityDictionary<T> :
         ICollection<T>,
         IDictionary<string, T>,

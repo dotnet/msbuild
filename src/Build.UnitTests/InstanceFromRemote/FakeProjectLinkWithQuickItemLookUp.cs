@@ -11,6 +11,9 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
+    /// <summary>
+    /// A fake implementation of ProjectLink that supports quick lookup of items by evaluated include.
+    /// </summary>
     internal sealed class FakeProjectLinkWithQuickItemLookUp : FakeProjectLink
     {
         private readonly IDictionary<string, ProjectItemLink[]> _itemsByEvaluatedInclude;

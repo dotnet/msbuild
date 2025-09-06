@@ -13,6 +13,9 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
+    /// <summary>
+    /// A mock implementation of ProjectRootElementLink to be used to test ProjectInstance created from cache state does not access most state unless needed.
+    /// </summary>
     internal sealed class FakeProjectRootElementLink : ProjectRootElementLink
     {
         public FakeProjectRootElementLink(string path)

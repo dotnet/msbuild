@@ -17,6 +17,9 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
+    /// <summary>
+    /// A mock implementation of ProjectLink to be used for testing ProjectInstance created from cache state.
+    /// </summary>
     internal class FakeProjectLink : ProjectLink
     {
         public FakeProjectLink(
@@ -42,6 +45,7 @@ namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
         public override ICollection<string> ItemTypes => throw new NotImplementedException();
 
         public override ICollection<ProjectProperty> Properties { get; }
+
         public override IDictionary<string, List<string>> ConditionedProperties => throw new NotImplementedException();
 
         public override IDictionary<string, ProjectItemDefinition> ItemDefinitions { get; }

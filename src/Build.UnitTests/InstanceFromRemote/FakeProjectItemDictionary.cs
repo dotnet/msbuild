@@ -12,6 +12,11 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
+    /// <summary>
+    /// This is a fake implementation of IDictionary<string, ICollection<ProjectItem>> to be used to test ProjectInstance created from cache state does not access most state unless needed.
+    /// The majority of the methods throw NotImplementedException by deliberate design.
+    /// Mostly, the project system would retrieve items by item types, which is implemented here.
+    /// </summary>
     internal sealed class FakeProjectItemDictionary : ICollection<ProjectItem>, IDictionary<string, ICollection<ProjectItem>>
     {
         private readonly IDictionary<string, ProjectItemLink[]>? _items;

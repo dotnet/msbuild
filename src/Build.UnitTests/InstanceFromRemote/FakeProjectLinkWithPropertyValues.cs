@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
+    /// <summary>
+    /// This is a fake implementation of ProjectLink that can return property values for testing.
+    /// </summary>
     internal sealed class FakeProjectLinkWithPropertyValues : FakeProjectLink
     {
         private readonly Dictionary<string, string> _propertyValues;

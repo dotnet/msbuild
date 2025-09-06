@@ -12,6 +12,10 @@ using Microsoft.Build.ObjectModelRemoting;
 
 namespace Microsoft.Build.Engine.UnitTests.InstanceFromRemote
 {
+    /// <summary>
+    /// This is a fake implementation of ProjectItemLink to be used to test ProjectInstance created from cache state does not access most state unless needed.
+    /// Project Items are actually being accessed by the project system, which is interested in a few key properties. Besiedes those, most methods throw NotImplementedException by deliberate design.
+    /// </summary>
     internal sealed class FakeProjectItemLink : ProjectItemLink
     {
         private readonly IDictionary<string, string> _metadataValues;
