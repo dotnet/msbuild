@@ -56,12 +56,13 @@ namespace Microsoft.Build.Shared
 
             // respect plugin.dll.json with the AssemblyDependencyResolver
             if (_resolver is not null)
-            { 
+            {
                 string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
                 if (assemblyPath != null)
                 {
                     return LoadFromAssemblyPath(assemblyPath);
                 }
+
                 return null;
             }
 
