@@ -581,7 +581,7 @@ internal static class NativeMethods
 
     private static bool IsMaxPathSet { get; set; }
 
-    private static readonly object MaxPathLock = new object();
+    private static readonly LockType MaxPathLock = new LockType();
 
     private static void SetMaxPath()
     {
@@ -945,7 +945,7 @@ internal static class NativeMethods
 
     private static SystemInformationData _systemInformation;
     private static bool _systemInformationInitialized;
-    private static readonly object SystemInformationLock = new object();
+    private static readonly LockType SystemInformationLock = new LockType();
 
     /// <summary>
     /// Architecture getter
@@ -1590,6 +1590,13 @@ internal static class NativeMethods
         if (Console.IsOutputRedirected)
         {
             // There's no ANSI terminal support if console output is redirected.
+            return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
+        }
+
+        if (Console.BufferHeight == 0 || Console.BufferWidth == 0)
+        {
+            // The current console doesn't have a valid buffer size, which means it is not a real console. let's default to not using TL
+            // in those scenarios.
             return (acceptAnsiColorCodes: false, outputIsScreen: false, originalConsoleMode: null);
         }
 

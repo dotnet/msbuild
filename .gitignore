@@ -224,3 +224,6 @@ stage1/
 
 # We keep launchSettings.json local
 **/launchSettings.json
+
+# ignore test result files
+**/TestResults
