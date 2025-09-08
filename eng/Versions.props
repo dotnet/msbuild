@@ -7,6 +7,10 @@
     <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+
+    <!-- differentiate experimental insertions to avoid package id conflicts, 
+     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
+    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <!--
       Don't use shipping versions when building in the VMR unless the VMR directs the build to use shipping versions.
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
@@ -69,7 +73,7 @@
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.100-preview.7.25322.101</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.100-rc.1.25411.109</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
