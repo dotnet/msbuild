@@ -4,7 +4,7 @@
 
 MSBuild's current execution model assumes that tasks have exclusive control over the entire process during execution. This allows tasks to freely modify global process state such as environment variables, the current working directory, and other process-level resources. This design works well for MSBuild's approach of executing builds in separate processes for parallelization. With the introduction of multithreaded execution within a single MSBuild process, multiple tasks can now run concurrently. This requires a new task design to ensure thread safety when multiple tasks access shared process state simultaneously.
 
-To enable this multithreaded execution model, tasks will declare their thread-safety capabilities. Thread-safe tasks must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Reference](thread-safe-tasks-api-reference.md) for detailed guidelines. Task authors will also get access to an `ExecutionContext` that provides safe alternatives to global process state APIs. For example, task authors should use `ExecutionContext.GetAbsolutePath()` instead of `Path.GetFullPath()` to ensure correct path resolution in multithreaded scenarios. 
+To enable this multithreaded execution model, tasks will declare their thread-safety capabilities. Thread-safe tasks must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Analysis Reference](thread-safe-tasks-api-analysis.md) for detailed guidelines. Task authors will also get access to an `ExecutionContext` that provides safe alternatives to global process state APIs. For example, task authors should use `ExecutionContext.GetAbsolutePath()` instead of `Path.GetFullPath()` to ensure correct path resolution in multithreaded scenarios.
 
 Tasks that are not thread-safe can still participate in multithreaded builds. MSBuild will execute these tasks in separate TaskHost processes to provide process-level isolation.
 
@@ -45,9 +45,20 @@ So, task authors who need to support older MSBuild versions will have three choi
 Tasks indicate thread-safety capabilities by implementing the `IThreadSafeTask` interface.
 
 ```csharp
+namespace Microsoft.Build.Framework;
 public interface IThreadSafeTask : ITask
 {
-    ITaskExecutionContext ExecutionContext { get; set; }
+    TaskExecutionContext? ExecutionContext { get; set; }
+}
+```
+
+Similar to how MSBuild provides the abstract `Task` class with default implementations for the `ITask` interface, MSBuild will offer a `ThreadSafeTask` abstract class with default implementations for the `IThreadSafeTask` interface. Task authors will only need to implement the `Execute` method for the `ITask` interface and use `ExecutionContext` to create their thread-safe tasks.
+
+```csharp
+namespace Microsoft.Build.Utilities;
+public abstract class ThreadSafeTask : Task, IThreadSafeTask
+{
+    public TaskExecutionContext? ExecutionContext { get; set; }
 }
 ```
 
@@ -71,9 +82,19 @@ Task authors who want to support older MSBuild versions need to:
 An alternative approach would be to use a parameter-based interface design:
 
 ```csharp
+namespace Microsoft.Build.Framework;
 public interface IThreadSafeTask
 {
-    bool Execute(ITaskExecutionContext context);
+    bool Execute(TaskExecutionContext context);
+}
+```
+
+```csharp
+namespace Microsoft.Build.Utilities;
+public abstract class ThreadSafeTask : IThreadSafeTask
+{
+    bool Execute(TaskExecutionContext context);
+    ... // same as in Microsoft.Build.Utilities.Task
 }
 ```
 
@@ -98,8 +119,12 @@ public interface IThreadSafeTask
 Task authors will indicate thread-safety capabilities using attributes. Tasks marked with this attribute can run in multithreaded builds but do not have access to the `ExecutionContext` APIs.
 
 ```csharp
-[TaskCapability("ThreadSafe")] // Or just [ThreadSafe]
-public class MyTask : Task {...}
+namespace Microsoft.Build.Framework;
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+public class ThreadSafeAttribute : Attribute
+{
+    public ThreadSafeAttribute() { }
+}
 ```
 
 **Pros:**
@@ -114,9 +139,16 @@ public class MyTask : Task {...}
 - No MSBuild assistance for thread-safe operations
 - Risk of false declarations if tasks aren't truly thread-safe
 
+#### API Usage Example
+
+```csharp
+[ThreadSafe]
+public class MyTask : Task {...}
+```
+
 ### Alternative, Parameter-Based Execute Method Overloads (Option 3)
 
-Task authors implement Execute method overloads that accept additional parameters, without relying on the interface. MSBuild automatically calls the most advanced overload it can support, while older MSBuild versions always call the basic overload.
+Task authors implement `Execute` method overloads that accept additional parameters, without relying on the interface. MSBuild automatically calls the most advanced overload it can support, while older MSBuild versions always call the basic overload.
 
 ```csharp
 public class MyTask : Task
@@ -181,9 +213,10 @@ Task authors or task users declare thread-safety capabilities using an attribute
 The `ExecutionContext` provides thread-safe alternatives to APIs that use global process state, enabling tasks to execute safely in a multithreaded environment.
 
 ```csharp
+namespace Microsoft.Build.Framework;
 public interface IThreadSafeTask : ITask
 {
-    TaskExecutionContext ExecutionContext { get; set; }
+    TaskExecutionContext? ExecutionContext { get; set; }
 }
 
 public abstract class TaskExecutionContext
@@ -210,26 +243,20 @@ The `ExecutionContext` that MSBuild provides is not thread-safe. Task authors wh
 To prevent common thread-safety issues related to path handling, we introduce path types that are implicitly convertible to string:
 
 ```csharp
+namespace Microsoft.Build.Framework;
 public struct AbsolutePath
 {
     public string Path { get; }
-    
-    // Will be banned for use in tasks by analyzers
-    public AbsolutePath(string path) { }
-    
+    internal AbsolutePath(string path) { }
     public AbsolutePath(string path, AbsolutePath basePath) { }
-    
     public static implicit operator string(AbsolutePath path) { }
 }
 
 public struct RelativePath
 {
     public string Path { get; }
-    
     public RelativePath(string path) { }
-    
     public AbsolutePath ToAbsolute(AbsolutePath? basePath = null) { }
-    
     public static implicit operator string(RelativePath path) { }
 }
 ```
@@ -238,7 +265,7 @@ Both types convert implicitly to string for seamless integration with existing F
 
 **TODO:** Consider adding conversion methods for `ITaskItem` integration.
 
-### Usage Example
+### API Usage Example
 
 ```csharp
 public bool Execute(...)
@@ -253,7 +280,7 @@ public bool Execute(...)
 }
 ```
 
-### Alternative: Interfaces
+### Alternative design: Interfaces
 Alternatively, ExecutionContext could be an implementation of the `ITaskExecutionContext` interface.
 
 ```csharp
