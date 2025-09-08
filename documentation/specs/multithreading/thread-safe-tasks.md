@@ -2,7 +2,7 @@
 
 ## Overview
 
-MSBuild's current execution model assumes that tasks have exclusive control over the entire process during execution. This allows tasks to freely modify global process state such as environment variables, the current working directory, and other process-level resources. This design works well for MSBuild's approach of executing builds in separate processes for parallelization. With the introduction of multithreaded execution within a single MSBuild process, multiple tasks can now run concurrently. This requires a new task design to ensure thread safety when multiple tasks access shared process state simultaneously.
+MSBuild's current execution model assumes that tasks have exclusive control over the entire process during execution. This allows tasks to freely modify global process state such as environment variables, the current working directory, and other process-level resources. This design works well for MSBuild's approach of executing builds in separate processes for parallelization. With the introduction of multithreaded execution within a single MSBuild process, multiple tasks can now run concurrently. This requires a new task design to ensure that multiple tasks do not access/modify shared process state, and the relative paths are resolved correctly.
 
 To enable this multithreaded execution model, tasks will declare their thread-safety capabilities. Thread-safe tasks must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Analysis Reference](thread-safe-tasks-api-analysis.md) for detailed guidelines. Task authors will also get access to an `ExecutionContext` that provides safe alternatives to global process state APIs. For example, task authors should use `ExecutionContext.GetAbsolutePath()` instead of `Path.GetFullPath()` to ensure correct path resolution in multithreaded scenarios.
 
@@ -30,7 +30,7 @@ Task authors can declare thread-safe capabilities through various approaches. Th
 
 Tasks that use ExecutionContext-enabled approaches cannot load in older MSBuild versions that do not support the multithreading mode feature, so they are dropping support for older MSBuild versions. To address this challenge, MSBuild provides **compatibility bridge approaches** that allow legacy tasks to participate in multithreaded builds under specific conditions:
 - The task must not modify global process state (environment variables, working directory)
-- The task must not depend on process-wide state, including relative path resolution
+- The task must not depend on global process state, including relative path resolution
 - The task will not have access to `ExecutionContext` APIs
 
 This bridge enables existing tasks to benefit from multithreaded execution without requiring code changes.
@@ -256,7 +256,7 @@ public struct RelativePath
 {
     public string Path { get; }
     public RelativePath(string path) { }
-    public AbsolutePath ToAbsolute(AbsolutePath? basePath = null) { }
+    public AbsolutePath ToAbsolutePath(AbsolutePath? basePath = null) { }
     public static implicit operator string(RelativePath path) { }
 }
 ```
