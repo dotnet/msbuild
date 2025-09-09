@@ -281,13 +281,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
-                     Derleme sırasında BuildChecks seçeneğini etkinleştirir.
-                     BuildCheck, özelliklerin güvenliğini sağlamak için
-                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için aka.ms/buildcheck
- adresine bakın
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
