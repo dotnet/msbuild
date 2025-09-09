@@ -615,14 +615,14 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Set all the supplied metadata on all the supplied items.
         /// </summary>
-        internal static void SetMetadata(IEnumerable<KeyValuePair<string, string>> metadataList, IEnumerable<ProjectItemInstance> items)
+        internal static void SetMetadata(Dictionary<string, string> metadataList, List<ProjectItemInstance> items)
         {
-            // Set up a single dictionary that can be applied to all the items
-            ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
-                .SetItems(metadataList, ProjectMetadataInstance.VerifyThrowReservedName);
-
-            if (metadata.Count > 0)
+            if (metadataList.Count != 0 && items.Count != 0)
             {
+                // Set up a single dictionary that can be applied to all the items
+                ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
+                    .SetItems(metadataList, ProjectMetadataInstance.VerifyThrowReservedName);
+
                 foreach (ProjectItemInstance item in items)
                 {
                     item._taskItem.SetMetadata(metadata); // Potential copy on write
