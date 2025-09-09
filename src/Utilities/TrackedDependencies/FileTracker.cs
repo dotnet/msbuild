@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -80,7 +79,7 @@ namespace Microsoft.Build.Utilities
         /// This must be the base system-wide temp path because we use it to filter out I/O of tools outside of our control.
         /// Tools running under the tracker may put temp files in the temp base or in a sub-directory of their choosing.
         /// </remarks>
-        private static readonly string s_tempPath = Path.GetTempPath();
+        private static readonly string s_tempPath = FileUtilities.EnsureTrailingSlash(Path.GetTempPath());
 
         // The short path to temp
         private static readonly string s_tempShortPath = FileUtilities.EnsureTrailingSlash(NativeMethodsShared.GetShortFilePath(s_tempPath).ToUpperInvariant());
@@ -247,12 +246,25 @@ namespace Microsoft.Build.Utilities
             // 5. Files under the common ("All Users") Application Data location -- C:\Documents and Settings\All Users\Application Data
             //    on XP and either C:\Users\All Users\Application Data or C:\ProgramData on Vista+
 
-            return FileIsUnderPath(fileName, s_applicationDataPath) ||
-                   FileIsUnderPath(fileName, s_localApplicationDataPath) ||
-                   FileIsUnderPath(fileName, s_localLowApplicationDataPath) ||
-                   FileIsUnderPath(fileName, s_tempShortPath) ||
-                   FileIsUnderPath(fileName, s_tempLongPath) ||
-                   s_commonApplicationDataPaths.Any(p => FileIsUnderPath(fileName, p));
+            if (FileIsUnderNormalizedPath(fileName, s_applicationDataPath) ||
+                FileIsUnderNormalizedPath(fileName, s_localApplicationDataPath) ||
+                FileIsUnderNormalizedPath(fileName, s_localLowApplicationDataPath) ||
+                FileIsUnderNormalizedPath(fileName, s_tempShortPath) ||
+                FileIsUnderNormalizedPath(fileName, s_tempLongPath))
+            {
+                return true;
+            }
+
+            // PERF: Avoid LINQ in this path.
+            foreach (string p in s_commonApplicationDataPaths)
+            {
+                if (FileIsUnderNormalizedPath(fileName, p))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -266,15 +278,31 @@ namespace Microsoft.Build.Utilities
         /// </param>
         public static bool FileIsUnderPath(string fileName, string path)
         {
+            // Ensure that the path has a trailing slash that we are checking under
+            // By default the paths that we check for most often will have, so this will
+            // return fast and not allocate memory in the process
+            return FileIsUnderNormalizedPath(fileName, FileUtilities.EnsureTrailingSlash(path));
+        }
+
+        internal static bool FileIsUnderNormalizedPath(string fileName, string path)
+        {
+            int pathLength = path.Length;
+
+            Debug.Assert(path[pathLength - 1] == Path.DirectorySeparatorChar);
+
             // UNDONE: Get the long file path for the entry
             // This is an incredibly expensive operation. The tracking log
             // as written by CL etc. does not contain short paths
             // fileDirectory = NativeMethods.GetFullLongFilePath(fileDirectory);
 
-            // Ensure that the path has a trailing slash that we are checking under
-            // By default the paths that we check for most often will have, so this will
-            // return fast and not allocate memory in the process
-            path = FileUtilities.EnsureTrailingSlash(path);
+            // quick checks to return early. If our given filename is less than the length of the path, it can't be under it.
+            // Similarly, if the file name doesn't have a path separator
+            // at the index of the last separator in the path, it doesn't match.
+            // Because we have a normalized path below we can check against normal-slash directly.
+            if (fileName.Length < pathLength || fileName[pathLength - 1] != Path.DirectorySeparatorChar)
+            {
+                return false;
+            }
 
             // Is the fileName under the filePath?
             return string.Compare(fileName, 0, path, 0, path.Length, StringComparison.OrdinalIgnoreCase) == 0;

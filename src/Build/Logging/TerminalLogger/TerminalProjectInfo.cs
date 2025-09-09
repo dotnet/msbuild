@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Microsoft.Build.Logging;
@@ -48,6 +47,11 @@ internal sealed class TerminalProjectInfo
     /// Full path to the primary output of the project, if known.
     /// </summary>
     public ReadOnlyMemory<char>? OutputPath { get; set; }
+
+    /// <summary>
+    /// Full path to the 'root' of this project's source control repository, if known.
+    /// </summary>
+    public ReadOnlyMemory<char>? SourceRoot { get; set; }
 
     /// <summary>
     /// The target framework of the project or null if not multi-targeting.

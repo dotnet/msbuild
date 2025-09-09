@@ -46,7 +46,9 @@ internal class TargetFrameworkConfusionCheck : Check
         string? frameworks;
         string? framework;
         if (context.Data.EvaluatedProperties.TryGetValue(PropertyNames.TargetFrameworks, out frameworks) &&
+            !string.IsNullOrEmpty(frameworks) &&
             context.Data.EvaluatedProperties.TryGetValue(PropertyNames.TargetFramework, out framework) &&
+            !string.IsNullOrEmpty(framework) &&
             !context.Data.GlobalProperties.ContainsKey(PropertyNames.TargetFramework))
         {
             // {0} specifies 'TargetFrameworks' property '{1}' and 'TargetFramework' property '{2}'

@@ -4,9 +4,6 @@
 using System;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 

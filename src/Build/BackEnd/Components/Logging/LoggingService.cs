@@ -94,7 +94,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<PropertyInfo> s_projectStartedEventArgsGlobalProperties = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("GlobalProperties", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         /// <summary>
         /// A cached reflection accessor for an internal member.
@@ -103,7 +103,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// We use a BindingFlags.Public flag here because the getter is public, so although the setter is internal,
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
-        private static Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
 
         #region Data
 
@@ -255,7 +255,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private AutoResetEvent _dequeueEvent;
 
         /// <summary>
-        /// Event set when queue become empty. 
+        /// Event set when queue become empty.
         /// </summary>
         private ManualResetEvent _emptyQueueEvent;
 
@@ -463,6 +463,15 @@ namespace Microsoft.Build.BackEnd.Logging
             get => _onlyLogCriticalEvents;
 
             set => _onlyLogCriticalEvents = value;
+        }
+
+        /// <summary>
+        /// When true, target outputs (and returns) are logged as well.
+        /// </summary>
+        public bool EnableTargetOutputLogging
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -874,6 +883,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
+                EnableTargetOutputLogging = buildComponentHost.BuildParameters.EnableTargetOutputLogging;
 
                 _serviceState = LoggingServiceState.Initialized;
 

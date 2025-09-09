@@ -85,7 +85,7 @@ namespace Microsoft.NET.StringTools
             string expectedString = candidate.ExpensiveConvertToString();
             if (!String.Equals(internedString, expectedString))
             {
-                throw new InvalidOperationException(String.Format("Interned string {0} should have been {1}", internedString, expectedString));
+                throw new InvalidOperationException($"Interned string {internedString} should have been {expectedString}");
             }
 #endif
 
@@ -137,12 +137,12 @@ namespace Microsoft.NET.StringTools
 
             if (_internCallCountsByString != null)
             {
-                result.AppendLine(string.Format("\n{0}{1}{0}", new string('=', 41 - (title.Length / 2)), title));
-                result.AppendLine(string.Format("||{0,50}|{1,20:N0}|{2,8}|", "WeakStringCache Hits", _regularInternHits, "hits"));
-                result.AppendLine(string.Format("||{0,50}|{1,20:N0}|{2,8}|", "WeakStringCache Misses", _regularInternMisses, "misses"));
-                result.AppendLine(string.Format("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Strings*", _internEliminatedStrings, "strings"));
-                result.AppendLine(string.Format("||{0,50}|{1,20:N0}|{2,8}|", "Eliminated Chars", _internEliminatedChars, "chars"));
-                result.AppendLine(string.Format("||{0,50}|{1,20:N0}|{2,8}|", "Estimated Eliminated Bytes", _internEliminatedChars * 2, "bytes"));
+                result.AppendLine($"\n{new string('=', 41 - (title.Length / 2))}{title}{new string('=', 41 - (title.Length / 2))}");
+                result.AppendLine($"||{"WeakStringCache Hits",50}|{_regularInternHits,20:N0}|{"hits",8}|");
+                result.AppendLine($"||{"WeakStringCache Misses",50}|{_regularInternMisses,20:N0}|{"misses",8}|");
+                result.AppendLine($"||{"Eliminated Strings*",50}|{_internEliminatedStrings,20:N0}|{"strings",8}|");
+                result.AppendLine($"||{"Eliminated Chars",50}|{_internEliminatedChars,20:N0}|{"chars",8}|");
+                result.AppendLine($"||{"Estimated Eliminated Bytes",50}|{_internEliminatedChars * 2,20:N0}|{"bytes",8}|");
                 result.AppendLine("Elimination assumes that strings provided were unique objects.");
                 result.AppendLine("|---------------------------------------------------------------------------------|");
 
@@ -158,7 +158,7 @@ namespace Microsoft.NET.StringTools
 
                 WeakStringCache.DebugInfo debugInfo = _weakStringCache.GetDebugInfo();
                 result.AppendLine("WeakStringCache statistics:");
-                result.AppendLine(string.Format("String count live/collected/total = {0}/{1}/{2}", debugInfo.LiveStringCount, debugInfo.CollectedStringCount, debugInfo.LiveStringCount + debugInfo.CollectedStringCount));
+                result.AppendLine($"String count live/collected/total = {debugInfo.LiveStringCount}/{debugInfo.CollectedStringCount}/{debugInfo.LiveStringCount + debugInfo.CollectedStringCount}");
             }
             else
             {

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
 
 using Microsoft.Build.Framework;
 using Shouldly;
@@ -18,17 +17,11 @@ namespace Microsoft.Build.UnitTests
     public class ProjectStartedEventArgs_Tests
     {
         /// <summary>
-        /// Default event to use in tests.
-        /// </summary>
-        private static ProjectStartedEventArgs s_baseProjectStartedEvent;
-
-        /// <summary>
         /// Setup for text fixture, this is run ONCE for the entire test fixture
         /// </summary>
         public ProjectStartedEventArgs_Tests()
         {
             BuildEventContext parentBuildEventContext = new BuildEventContext(2, 3, 4, 5);
-            s_baseProjectStartedEvent = new ProjectStartedEventArgs(1, "Message", "HelpKeyword", "ProjecFile", "TargetNames", null, null, parentBuildEventContext);
         }
 
         /// <summary>

@@ -7,6 +7,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+#if !NET
+using Microsoft.Build.Internal;
+#endif
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
@@ -319,6 +322,8 @@ namespace Microsoft.Build.BackEnd
 
                 if (items != null)
                 {
+                    buckets.EnsureCapacity(buckets.Count + items.Count);
+
                     foreach (ProjectItemInstance item in items)
                     {
                         // Get this item's values for all the metadata consumed by the batchable object.
@@ -331,13 +336,15 @@ namespace Microsoft.Build.BackEnd
                         // this item for all metadata consumed by the batchable object
                         int matchingBucketIndex = buckets.BinarySearch(dummyBucket);
 
-                        ItemBucket matchingBucket = (matchingBucketIndex >= 0)
-                            ? buckets[matchingBucketIndex]
-                            : null;
+                        ItemBucket matchingBucket;
 
                         // If we didn't find a bucket that matches this item, create a new one, adding
                         // this item to the bucket.
-                        if (matchingBucket == null)
+                        if (matchingBucketIndex >= 0)
+                        {
+                            matchingBucket = buckets[matchingBucketIndex];
+                        }
+                        else
                         {
                             matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
                             if (loggingContext != null)
@@ -362,17 +369,22 @@ namespace Microsoft.Build.BackEnd
 
             // Put the buckets back in the order in which they were discovered, so that the first
             // item declared in the project file ends up in the first batch passed into the target/task.
-            var orderedBuckets = new List<ItemBucket>(buckets.Count);
-            for (int i = 0; i < buckets.Count; ++i)
+            for (int i = 0; i < buckets.Count;)
             {
-                orderedBuckets.Add(null);
+                ItemBucket currentBucket = buckets[i];
+                if (i == currentBucket.BucketSequenceNumber)
+                {
+                    // This bucket is in the right place, so just move on to the next one.
+                    ++i;
+                }
+                else
+                {
+                    buckets[i] = buckets[currentBucket.BucketSequenceNumber];
+                    buckets[currentBucket.BucketSequenceNumber] = currentBucket;
+                }
             }
 
-            foreach (ItemBucket bucket in buckets)
-            {
-                orderedBuckets[bucket.BucketSequenceNumber] = bucket;
-            }
-            return orderedBuckets;
+            return buckets;
         }
 
         /// <summary>

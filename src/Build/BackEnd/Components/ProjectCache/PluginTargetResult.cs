@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     /// <summary>
     ///     A cache hit can use this to instruct MSBuild to construct a BuildResult with the target result specified in this

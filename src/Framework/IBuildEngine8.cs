@@ -17,6 +17,6 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="warningCode">The warning code to check.</param>
         /// <returns>A boolean to determine whether the warning should be treated as an error.</returns>
-        public bool ShouldTreatWarningAsError(string warningCode);
+        bool ShouldTreatWarningAsError(string warningCode);
     }
 }

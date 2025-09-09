@@ -16,15 +16,11 @@ namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 internal sealed class BuildCheckConnectorLogger : ILogger
 {
     private readonly BuildCheckBuildEventHandler _eventHandler;
-    private readonly IBuildCheckManager _buildCheckManager;
-    private readonly ICheckContextFactory _checkContextFactory;
 
     internal BuildCheckConnectorLogger(
         ICheckContextFactory checkContextFactory,
         IBuildCheckManager buildCheckManager)
     {
-        _buildCheckManager = buildCheckManager;
-        _checkContextFactory = checkContextFactory;
         _eventHandler = new BuildCheckBuildEventHandler(checkContextFactory, buildCheckManager);
     }
 

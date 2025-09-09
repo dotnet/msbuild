@@ -4,7 +4,6 @@
 using Shouldly;
 
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.Framework.UnitTests
 {

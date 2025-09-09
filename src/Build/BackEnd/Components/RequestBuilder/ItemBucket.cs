@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -20,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// This class represents a collection of items that are homogeneous w.r.t.
     /// a certain set of metadata.
     /// </summary>
-    internal sealed class ItemBucket : IComparable
+    internal struct ItemBucket : IComparable<ItemBucket>
     {
         #region Member data
 
@@ -75,7 +74,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
         internal ItemBucket(
-            ICollection<string> itemNames,
+            Dictionary<string, ICollection<ProjectItemInstance>>.KeyCollection itemNames, // PERF: directly use the KeyCollection to avoid boxing the enumerator.
             Dictionary<string, string> metadata,
             Lookup lookup,
             int bucketSequenceNumber)
@@ -120,15 +119,15 @@ namespace Microsoft.Build.BackEnd
         /// Compares this item bucket against the given one. The comparison is
         /// solely based on the values of the item metadata in the buckets.
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="other"></param>
         /// <returns>
         /// -1, if this bucket is "less than" the second one
         ///  0, if this bucket is equivalent to the second one
         /// +1, if this bucket is "greater than" the second one
         /// </returns>
-        public int CompareTo(object obj)
+        public int CompareTo(ItemBucket other)
         {
-            return HashTableUtility.Compare(_metadata, ((ItemBucket)obj)._metadata);
+            return HashTableUtility.Compare(_metadata, other._metadata);
         }
 
         /// <summary>

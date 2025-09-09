@@ -9,11 +9,13 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+#if FEATURE_REPORTFILEACCESSES
+using Microsoft.Build.Experimental.FileAccess;
+using Microsoft.Build.FileAccesses;
+#endif
 
 #nullable disable
 
@@ -70,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of parameters used to decide which host to launch.
         /// </summary>
-        private IDictionary<string, string> _taskHostParameters;
+        private Dictionary<string, string> _taskHostParameters;
 
         /// <summary>
         /// The type of the task that we are wrapping.
@@ -104,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Lock object to serialize access to the task host.
         /// </summary>
-        private Object _taskHostLock;
+        private LockType _taskHostLock;
 
         /// <summary>
         /// Keeps track of whether the wrapped task has had cancel called against it.
@@ -123,16 +125,22 @@ namespace Microsoft.Build.BackEnd
         private bool _taskExecutionSucceeded = false;
 
         /// <summary>
-        /// Constructor
+        /// This separates the cause where we force all tasks to run in a task host via environment variables and TaskHostFactory
+        /// The difference is that TaskHostFactory requires the TaskHost to be transient i.e. to expire after build.
         /// </summary>
-        ///
+        private bool _taskHostFactoryExplicitlyRequested = false;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         public TaskHostTask(
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
-            IDictionary<string, string> taskHostParameters,
-            LoadedType taskType
+            Dictionary<string, string> taskHostParameters,
+            LoadedType taskType,
+            bool taskHostFactoryExplicitlyRequested
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
 #endif
@@ -149,6 +157,7 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _taskHostParameters = taskHostParameters;
+            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
 
             _packetFactory = new NodePacketFactory();
 
@@ -158,7 +167,7 @@ namespace Microsoft.Build.BackEnd
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
-            _taskHostLock = new Object();
+            _taskHostLock = new();
 
             _setParameters = new Dictionary<string, object>();
         }
@@ -253,6 +262,7 @@ namespace Microsoft.Build.BackEnd
             // log that we are about to spawn the task host
             string runtime = _taskHostParameters[XMakeAttributes.runtime];
             string architecture = _taskHostParameters[XMakeAttributes.architecture];
+        
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
 
             // set up the node
@@ -289,8 +299,14 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
+                        taskHost: true,
+
+                        // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
+                        // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
+                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
+                        taskHostParameters: _taskHostParameters);
+                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
                 }
 
                 if (_connectedToTaskHost)
@@ -370,6 +386,16 @@ namespace Microsoft.Build.BackEnd
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
+        }
+
+        /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
         }
 
         /// <summary>
@@ -569,10 +595,19 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
         {
-            string msbuildLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationFromHostContext(requiredContext) ??
+            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
+#if NETFRAMEWORK
+            if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
+            {
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters).MSBuildAssemblyPath;
+            }
+#endif
+            string msbuildLocation = taskHostLocation ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a
                 // 32-bit machine.  At least give them the exe name to look for, though ...
-                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2 ? "MSBuildTaskHost.exe" : "MSBuild.exe");
+                ((requiredContext & HandshakeOptions.CLR2) == HandshakeOptions.CLR2 
+                ? "MSBuildTaskHost.exe" 
+                : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredContext));
 
             if (e == null)
             {
