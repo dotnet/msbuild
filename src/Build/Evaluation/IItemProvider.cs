@@ -20,6 +20,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <param name="itemType">The item type of items to return.</param>
         /// <returns>A list of matching items.</returns>
-        ICollection<T> GetItems(string itemType);
+        IReadOnlyCollection<T> GetItems(string itemType);
     }
 }
