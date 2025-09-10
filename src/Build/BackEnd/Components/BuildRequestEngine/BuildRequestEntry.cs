@@ -107,7 +107,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The object used to build this request.
         /// </summary>
-        private IRequestBuilder _requestBuilder;
+        private volatile IRequestBuilder _requestBuilder;
 
         /// <summary>
         /// The project's root directory.
@@ -301,10 +301,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string[] GetActiveTargets()
         {
-            lock (GlobalLock)
-            {
-                return RequestConfiguration.ActivelyBuildingTargets.Keys.ToArray();
-            }
+            return RequestConfiguration.ActivelyBuildingTargets.Keys.ToArray();
         }
 
         /// <summary>
