@@ -149,14 +149,14 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public bool SdkTelemetryOptOut = IsEnvVarOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
         public bool FrameworkTelemetryOptOut = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
-        public double? TelemetrySampleRateOverride = ParseDoubleFromEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE");
+        public double? TelemetrySampleRateOverride = 1.0;
         public bool ExcludeTasksDetailsFromTelemetry = IsEnvVarOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
         public bool FlushNodesTelemetryIntoConsole = IsEnvVarOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
 
         public bool EnableTargetOutputLogging = IsEnvVarOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
         // for VS17.14
-        public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
+        public readonly bool TelemetryOptIn = true;
         public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
 
         public static void UpdateFromEnvironment()
