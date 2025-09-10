@@ -125,16 +125,22 @@ namespace Microsoft.Build.BackEnd
         private bool _taskExecutionSucceeded = false;
 
         /// <summary>
-        /// Constructor
+        /// This separates the cause where we force all tasks to run in a task host via environment variables and TaskHostFactory
+        /// The difference is that TaskHostFactory requires the TaskHost to be transient i.e. to expire after build.
         /// </summary>
-        ///
+        private bool _taskHostFactoryExplicitlyRequested = false;
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         public TaskHostTask(
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             Dictionary<string, string> taskHostParameters,
-            LoadedType taskType
+            LoadedType taskType,
+            bool taskHostFactoryExplicitlyRequested
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup appDomainSetup
 #endif
@@ -151,6 +157,7 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _taskHostParameters = taskHostParameters;
+            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
 
             _packetFactory = new NodePacketFactory();
 
@@ -255,6 +262,7 @@ namespace Microsoft.Build.BackEnd
             // log that we are about to spawn the task host
             string runtime = _taskHostParameters[XMakeAttributes.runtime];
             string architecture = _taskHostParameters[XMakeAttributes.architecture];
+        
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
 
             // set up the node
@@ -291,7 +299,13 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: _taskHostParameters);
+                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
+                        taskHost: true,
+
+                        // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
+                        // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
+                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
+                        taskHostParameters: _taskHostParameters);
                     _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
                 }
 

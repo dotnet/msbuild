@@ -165,6 +165,8 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
     <Compile Include="BuildCheck\**\*.cs" />
+    <Compile Include="Collections\IValueDictionaryConverter.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
@@ -176,6 +178,7 @@
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
+    <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
     <Compile Include="TelemetryInfra\TelemetryDataUtils.cs" />
@@ -519,9 +522,9 @@
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDefinitionsListConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableLinkedMultiDictionaryConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutablePropertyCollectionConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutableStringValuedListConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutableValuedElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectMetadataCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectPropertyCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\LazyStringValuedList.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
@@ -572,7 +575,6 @@
     <Compile Include="Logging\ParallelLogger\ConsoleOutputAligner.cs" />
     <Compile Include="Logging\FileLogger.cs" />
     <Compile Include="Logging\LogFormatter.cs" />
-    <Compile Include="Logging\SerialConsoleLogger.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectPropertyLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectElementContainerLink.cs" />

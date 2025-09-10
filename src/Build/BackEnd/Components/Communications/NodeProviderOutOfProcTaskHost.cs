@@ -663,7 +663,7 @@ namespace Microsoft.Build.BackEnd
                 // There is always one task host per host context so we always create just 1 one task host node here.      
                 nodeContexts = GetNodes(
                     runtimeHostPath,
-                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
+                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
                     nodeId,
                     this,
                     handshake,
@@ -687,7 +687,7 @@ namespace Microsoft.Build.BackEnd
 
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
+                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
                 nodeId,
                 this,
                 new Handshake(hostContext),
@@ -696,6 +696,17 @@ namespace Microsoft.Build.BackEnd
                 1);
 
             return nodeContexts.Count == 1;
+
+            // Determines whether node reuse should be enabled for the given host context.
+            // Node reuse allows MSBuild to reuse existing task host processes for better performance,
+            // but is disabled for CLR2 because it uses legacy MSBuildTaskHost.
+            bool NodeReuseIsEnabled(HandshakeOptions hostContext)
+            {
+                bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+
+                return Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse)
+                    && !isCLR2;
+            }
         }
 
         /// <summary>
