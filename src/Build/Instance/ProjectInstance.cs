@@ -466,17 +466,17 @@ namespace Microsoft.Build.Execution
             InitializeTargetsData(null, null, null, null);
 
             // Imports
-            var lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPaths);
-            _importPaths = lazyImportsList;
-            ImportPaths = lazyImportsList;
+            var importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.Imports, GetImportFullPath);
+            _importPaths = importsListConverter;
+            ImportPaths = importsListConverter;
 
-            lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPathsIncludingDuplicates);
-            _importPathsIncludingDuplicates = lazyImportsList;
-            ImportPathsIncludingDuplicates = lazyImportsList;
+            importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.ImportsIncludingDuplicates, GetImportFullPath);
+            _importPathsIncludingDuplicates = importsListConverter;
+            ImportPathsIncludingDuplicates = importsListConverter;
 
-            Toolset = string.IsNullOrEmpty(linkedProject.ToolsVersion) ? null : linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
+            Toolset = linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
             SubToolsetVersion = linkedProject.SubToolsetVersion;
-            TaskRegistry = Toolset is null ? new TaskRegistry(linkedProject.ProjectCollection.ProjectRootElementCache) : new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
+            TaskRegistry = new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
@@ -487,38 +487,6 @@ namespace Microsoft.Build.Execution
             _explicitToolsVersionSpecified = linkedProject.SubToolsetVersion != null;
 
             _isImmutable = true;
-
-            static List<string> GetImportFullPaths(ObjectModelRemoting.ProjectLink projectLink)
-            {
-                // Imports collection contains ResolvedImports, which are structures which are much bigger than the string list.
-                // We convert to the string list and let Imports itself to BE GCed.
-                var imports = projectLink.Imports;
-                var paths = new List<string>(imports.Count);
-                foreach (var import in imports)
-                {
-                    if (import.ImportedProject != null)
-                    {
-                        paths.Add(import.ImportedProject.FullPath);
-                    }
-                }
-
-                return paths;
-            }
-
-            static List<string> GetImportFullPathsIncludingDuplicates(ObjectModelRemoting.ProjectLink projectLink)
-            {
-                var imports = projectLink.ImportsIncludingDuplicates;
-                var paths = new List<string>(imports.Count);
-                foreach (var import in imports)
-                {
-                    if (import.ImportedProject != null)
-                    {
-                        paths.Add(import.ImportedProject.FullPath);
-                    }
-                }
-
-                return paths;
-            }
         }
 
         /// <summary>
@@ -1055,8 +1023,7 @@ namespace Microsoft.Build.Execution
                 out IDictionary<string, ProjectProperty> elementsDictionary,
                 out IDictionary<(string, int, int), ProjectProperty> constrainedElementsDictionary);
 
-            var hashSet = new ImmutableProjectPropertyCollectionConverter(
-                                linkedProject,
+            var hashSet = new ImmutableValuedElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(
                                 elementsDictionary,
                                 constrainedElementsDictionary,
                                 ConvertCachedPropertyToInstance);
@@ -1122,7 +1089,14 @@ namespace Microsoft.Build.Execution
                     return ReadOnlyEmptyDictionary<string, string>.Instance;
                 }
 
-                return _globalProperties.ToReadOnlyDictionary();
+                Dictionary<string, string> dictionary = new Dictionary<string, string>(_globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
+
+                foreach (ProjectPropertyInstance property in _globalProperties)
+                {
+                    dictionary[property.Name] = ((IProperty)property).EvaluatedValueEscaped;
+                }
+
+                return new ObjectModel.ReadOnlyDictionary<string, string>(dictionary);
             }
         }
 
@@ -3483,21 +3457,14 @@ namespace Microsoft.Build.Execution
                     itemTypeDefinition,
                     ConvertCachedItemDefinitionToInstance);
 
-            IReadOnlyDictionary<string, string> directMetadata = null;
+            ImmutableDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata is not null)
             {
-                if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
-                {
-                    directMetadata = new ImmutableProjectMetadataCollectionConverter(item, metadataDict);
-                }
-                else
-                {
-                    IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
-                        => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
+                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
+                    => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
 
-                    directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
-                        .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
-                }
+                directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
             }
 
             GetEvaluatedIncludesFromProjectItem(
@@ -3515,6 +3482,11 @@ namespace Microsoft.Build.Execution
                 item.Xml.ContainingProject.EscapedFullPath,
                 useItemDefinitionsWithoutModification: true);
             return instance;
+        }
+
+        private static string GetImportFullPath(ResolvedImport import)
+        {
+            return import.ImportedProject.FullPath;
         }
 
         /// <summary>
