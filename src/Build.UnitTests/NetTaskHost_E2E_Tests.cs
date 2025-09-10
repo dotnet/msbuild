@@ -37,7 +37,7 @@ namespace Microsoft.Build.Engine.UnitTests
             // Environment variables needed to discover the .NET Core SDK from bootstrap folder.
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask, timeoutMilliseconds: 30000000);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
 
             if (!successTestTask)
             {
