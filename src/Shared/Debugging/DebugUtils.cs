@@ -34,9 +34,15 @@ namespace Microsoft.Build.Shared.Debugging
 
             if (Traits.Instance.DebugEngine)
             {
-                if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
+                if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory) && !IsPathInSolutionDirectory(debugDirectory))
                 {
                     // Debug directory is writable; no need for fallbacks
+                }
+                else if (!string.IsNullOrWhiteSpace(debugDirectory) && IsPathInSolutionDirectory(debugDirectory))
+                {
+                    // Redirect to temp to avoid infinite build loops in Visual Studio
+                    debugDirectory = Path.Combine(FileUtilities.TempFileDirectory, "MSBuild_Logs");
+                    Console.WriteLine($"MSBuild: Redirecting debug logs from '{environmentDebugPath}' to '{debugDirectory}' to prevent infinite build loops in Visual Studio.");
                 }
                 else if (FileUtilities.CanWriteToDirectory(Directory.GetCurrentDirectory()))
                 {
@@ -119,6 +125,26 @@ namespace Microsoft.Build.Shared.Debugging
             }
 
             return fullPath;
+        }
+
+        private static bool IsPathInSolutionDirectory(string debugPath)
+        {
+            if (string.IsNullOrWhiteSpace(debugPath))
+            {
+                return false;
+            }            
+
+            try
+            {
+                string resolvedPath = Path.GetFullPath(debugPath);
+                string currentDir = Path.GetFullPath(Directory.GetCurrentDirectory());
+                
+                return resolvedPath.StartsWith(currentDir, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }
