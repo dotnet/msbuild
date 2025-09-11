@@ -310,7 +310,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Create an instance of the wrapped ITask for a batch run of the task.
+        /// Create an instance of the wrapped ITask for a batch run of the task. For testing only - it provides stub task environment.
         /// </summary>
         internal ITask CreateTaskInstance(
             ElementLocation taskLocation,
@@ -323,6 +323,36 @@ namespace Microsoft.Build.BackEnd
             bool isOutOfProc,
             int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty)
+        {
+            return CreateTaskInstance(
+                taskLocation,
+                taskLoggingContext,
+                buildComponentHost,
+                taskIdentityParameters,
+#if FEATURE_APPDOMAIN
+                appDomainSetup,
+#endif
+                isOutOfProc,
+                scheduledNodeId,
+                getProperty,
+                new TaskEnvironment(StubTaskEnvironmentDriver.Instance));
+        }
+
+        /// <summary>
+        /// Create an instance of the wrapped ITask for a batch run of the task.
+        /// </summary>
+        internal ITask CreateTaskInstance(
+            ElementLocation taskLocation,
+            TaskLoggingContext taskLoggingContext,
+            IBuildComponentHost buildComponentHost,
+            in TaskHostParameters taskIdentityParameters,
+#if FEATURE_APPDOMAIN
+            AppDomainSetup appDomainSetup,
+#endif
+            bool isOutOfProc,
+            int scheduledNodeId,
+            Func<string, ProjectPropertyInstance> getProperty,
+            TaskEnvironment taskEnvironment)
         {
             // If the type was loaded via MetadataLoadContext, we MUST use TaskFactory since it didn't load any task assemblies in memory.
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
@@ -374,7 +404,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
-                    scheduledNodeId);
+                    scheduledNodeId,
+                    taskEnvironment);
                 return task;
             }
             else

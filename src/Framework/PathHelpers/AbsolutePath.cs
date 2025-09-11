@@ -24,7 +24,8 @@ namespace Microsoft.Build.Framework
         /// <param name="path">The absolute path string.</param>
         public AbsolutePath(string path)
         {
-            throw new NotImplementedException();
+            ValidatePath(path);
+            Path = path;
         }
 
         /// <summary>
@@ -34,7 +35,29 @@ namespace Microsoft.Build.Framework
         /// <param name="ignoreRootedCheck">If true, skips checking whether the path is rooted.</param>
         internal AbsolutePath(string path, bool ignoreRootedCheck)
         {
-            throw new NotImplementedException();
+            if (!ignoreRootedCheck) 
+            {
+                ValidatePath(path);
+            }
+            Path = path;
+        }
+
+        /// <summary>
+        /// Validates that the specified file system path is non-empty and rooted.
+        /// </summary>
+        /// <param name="path">The file system path to validate. Must not be null, empty, or a relative path.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
+        private static void ValidatePath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException("Path must not be null or empty.", nameof(path));
+            }
+
+            if (!System.IO.Path.IsPathRooted(path))
+            {
+                throw new ArgumentException("Path must be rooted.", nameof(path));
+            }
         }
 
         /// <summary>
@@ -44,19 +67,19 @@ namespace Microsoft.Build.Framework
         /// <param name="basePath">The base path to combine with.</param>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
-            throw new NotImplementedException();
+            Path = System.IO.Path.Combine(basePath.Path, path);
         }
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.
         /// </summary>
         /// <param name="path">The path to convert.</param>
-        public static implicit operator string(AbsolutePath path) => throw new NotImplementedException();
+        public static implicit operator string(AbsolutePath path) => path.Path;
 
         /// <summary>
         /// Returns the string representation of this path.
         /// </summary>
         /// <returns>The path as a string.</returns>
-        public override string ToString() => throw new NotImplementedException();
+        public override string ToString() => Path;
     }
 }
