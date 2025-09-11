@@ -1852,15 +1852,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region CustomTaskFactoryRestrictionTests
 
         /// <summary>
-        /// Verify that custom task factories are allowed when change wave 17.16 is disabled
+        /// Verify that custom task factories are allowed when change wave 18.0 is disabled
         /// </summary>
         [Fact]
         public void CustomTaskFactoryAllowedWhenChangeWaveDisabled()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-                // Set environment variable to disable change wave 17.16
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.16");
+                // Set environment variable to disable change wave 18.0
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "18.0");
 
                 // Reset change wave state for this test
                 ChangeWaves.ResetStateForTests();
@@ -1891,14 +1891,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that custom task factories are blocked when change wave 17.16 is enabled
+        /// Verify that custom task factories are blocked when change wave 18.0 is enabled
         /// </summary>
         [Fact]
         public void CustomTaskFactoryBlockedWhenChangeWaveEnabled()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-                // Ensure change wave 17.16 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
+                // Ensure change wave 18.0 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
                 // Reset change wave state for this test
                 ChangeWaves.ResetStateForTests();
 
@@ -1929,14 +1929,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that built-in task factories are still allowed when change wave 17.16 is enabled
+        /// Verify that built-in task factories are still allowed when change wave 18.0 is enabled
         /// </summary>
         [Fact]
         public void BuiltInTaskFactoriesAllowedWhenChangeWaveEnabled()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-                // Ensure change wave 17.16 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
+                // Ensure change wave 18.0 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
                 // Reset change wave state for this test
                 ChangeWaves.ResetStateForTests();
 

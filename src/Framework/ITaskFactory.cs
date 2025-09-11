@@ -14,7 +14,7 @@ namespace Microsoft.Build.Framework
     /// <remarks>
     /// This interface is deprecated. Custom task factories that implement this interface
     /// are not compatible with future multithreaded MSBuild improvements and their usage
-    /// will result in build errors starting with MSBuild change wave 17.16.
+    /// will result in build errors starting with MSBuild change wave 18.0.
     /// Only built-in MSBuild task factories should be used going forward.
     /// </remarks>
     public interface ITaskFactory

@@ -1503,7 +1503,7 @@ namespace Microsoft.Build.Execution
                     else
                     {
                         // Check if custom task factories are restricted by change wave
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_16))
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                         {
                             if (!IsBuiltInTaskFactory(TaskFactoryAttributeName))
                             {
