@@ -8,10 +8,9 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 {
-    public WorkerNodeTelemetryData(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData, Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
+    public WorkerNodeTelemetryData(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData)
     {
         TasksExecutionData = tasksExecutionData;
-        TargetsExecutionData = targetsExecutionData;
     }
 
     public void Add(IWorkerNodeTelemetryData other)
@@ -19,11 +18,6 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         foreach (var task in other.TasksExecutionData)
         {
             AddTask(task.Key, task.Value.CumulativeExecutionTime, task.Value.ExecutionsCount, task.Value.TotalMemoryBytes);
-        }
-
-        foreach (var target in other.TargetsExecutionData)
-        {
-            AddTarget(target.Key, target.Value);
         }
     }
 
@@ -43,17 +37,9 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTarget(TaskOrTargetTelemetryKey target, bool wasExecuted)
-    {
-        TargetsExecutionData[target] =
-            // we just need to store if it was ever executed
-            wasExecuted || (TargetsExecutionData.TryGetValue(target, out bool wasAlreadyExecuted) && wasAlreadyExecuted);
-    }
-
     public WorkerNodeTelemetryData()
-        : this(new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>(), new Dictionary<TaskOrTargetTelemetryKey, bool>())
+        : this(new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>())
     { }
 
     public Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
-    public Dictionary<TaskOrTargetTelemetryKey, bool> TargetsExecutionData { get; }
 }

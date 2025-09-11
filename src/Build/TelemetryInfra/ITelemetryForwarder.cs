@@ -17,15 +17,5 @@ internal interface ITelemetryForwarder
     void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom,
         bool isFromNugetCache);
 
-    /// <summary>
-    /// Add info about target execution to the telemetry.
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="wasExecuted">Means anytime, not necessarily from the last time target was added to telemetry</param>
-    /// <param name="isCustom"></param>
-    /// <param name="isMetaproj"></param>
-    /// <param name="isFromNugetCache"></param>
-    void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache);
-
     void FinalizeProcessing(LoggingContext loggingContext);
 }

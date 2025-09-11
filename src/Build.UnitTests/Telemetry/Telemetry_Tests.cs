@@ -73,10 +73,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
             workerNodeTelemetryData!.ShouldNotBeNull();
-            var buildTargetKey = new TaskOrTargetTelemetryKey("Build", true, false);
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(buildTargetKey);
-            workerNodeTelemetryData.TargetsExecutionData[buildTargetKey].ShouldBeTrue();
-            workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(1);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
             ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(2);
@@ -145,13 +141,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
             workerNodeTelemetryData!.ShouldNotBeNull();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("Build", true, false));
-            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("Build", true, false)].ShouldBeTrue();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("BeforeBuild", true, false));
-            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("BeforeBuild", true, false)].ShouldBeTrue();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("NotExecuted", true, false));
-            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("NotExecuted", true, false)].ShouldBeFalse();
-            workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(3);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
             ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(3);
@@ -263,9 +252,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 var tags = activity.Tags.ToDictionary(t => t.Key, t => t.Value);
                 tags.ShouldNotBeNull();
 
-                tags.ShouldContainKey("VS.MSBuild.BuildTarget");
-                tags["VS.MSBuild.BuildTarget"].ShouldNotBeNullOrEmpty();
-
                 // Verify task data
                 tags.ShouldContainKey("VS.MSBuild.Tasks");
                 var tasksJson = tags["VS.MSBuild.Tasks"];
@@ -289,16 +275,6 @@ namespace Microsoft.Build.Engine.UnitTests
                 createItemTask.GetProperty("ExecutionsCount").GetInt32().ShouldBe(1);
                 createItemTask.GetProperty("TotalMilliseconds").GetDouble().ShouldBeGreaterThan(0);
                 createItemTask.GetProperty("TotalMemoryBytes").GetInt64().ShouldBeGreaterThanOrEqualTo(0);
-
-                // Verify Targets summary information
-                tags.ShouldContainKey("VS.MSBuild.TargetsSummary");
-                var targetsSummaryJson = tags["VS.MSBuild.TargetsSummary"];
-                targetsSummaryJson.ShouldNotBeNullOrEmpty();
-                var targetsSummary = JsonSerializer.Deserialize<JsonElement>(targetsSummaryJson);
-
-                // Verify loaded and executed targets counts - match structure in TargetsSummaryConverter.Write
-                targetsSummary.GetProperty("Loaded").GetProperty("Total").GetInt32().ShouldBe(2);
-                targetsSummary.GetProperty("Executed").GetProperty("Total").GetInt32().ShouldBe(2);
 
                 // Verify Tasks summary information
                 tags.ShouldContainKey("VS.MSBuild.TasksSummary");

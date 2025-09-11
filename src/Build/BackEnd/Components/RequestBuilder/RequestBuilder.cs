@@ -1280,41 +1280,6 @@ namespace Microsoft.Build.BackEnd
             // Hence we need to fetch the original result from the cache - to get the data for all executed targets.
             BuildResult unfilteredResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
 
-            foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
-            {
-                bool wasExecuted =
-                    unfilteredResult.ResultsByTarget.TryGetValue(projectTargetInstance.Key, out TargetResult targetResult) &&
-                    // We need to match on location of target as well - as multiple targets with same name can be defined.
-                    // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
-                    projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
-
-                bool isFromNuget, isMetaprojTarget, isCustom;
-
-                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
-                {
-                    isMetaprojTarget = true;
-                    isFromNuget = false;
-                    isCustom = false;
-                }
-                else
-                {
-                    isMetaprojTarget = false;
-                    isFromNuget = FileClassifier.Shared.IsInNugetCache(projectTargetInstance.Value.FullPath);
-                    isCustom = !FileClassifier.Shared.IsBuiltInLogic(projectTargetInstance.Value.FullPath) ||
-                               // add the isFromNuget to condition - to prevent double checking of nonnuget package
-                               (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
-                }
-
-                telemetryForwarder.AddTarget(
-                    projectTargetInstance.Key,
-                    // would we want to distinguish targets that were executed only during this execution - we'd need
-                    //  to remember target names from ResultsByTarget from before execution
-                    wasExecuted,
-                    isCustom,
-                    isMetaprojTarget,
-                    isFromNuget);
-            }
-
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
             CollectTasksStats(taskReg);
 
@@ -1340,9 +1305,6 @@ namespace Microsoft.Build.BackEnd
                 taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
             }
         }
-
-        private static bool IsMetaprojTargetPath(string targetPath)
-            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment.

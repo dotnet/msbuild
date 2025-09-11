@@ -21,8 +21,7 @@ namespace Microsoft.Build.Framework.UnitTests
                         { (TaskOrTargetTelemetryKey)"task1", new TaskExecutionStats(TimeSpan.FromMinutes(1), 5, 1234) },
                         { (TaskOrTargetTelemetryKey)"task2", new TaskExecutionStats(TimeSpan.Zero, 0, 0) },
                         { (TaskOrTargetTelemetryKey)"task3", new TaskExecutionStats(TimeSpan.FromTicks(1234), 12, 987654321) }
-                },
-                new Dictionary<TaskOrTargetTelemetryKey, bool>() { { (TaskOrTargetTelemetryKey)"target1", false }, { (TaskOrTargetTelemetryKey)"target2", true }, });
+                });
 
             WorkerNodeTelemetryEventArgs args = new WorkerNodeTelemetryEventArgs(td);
 
@@ -36,7 +35,6 @@ namespace Microsoft.Build.Framework.UnitTests
             int packetVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
             argDeserialized.CreateFromStream(br, packetVersion);
-            argDeserialized.WorkerNodeTelemetryData.TargetsExecutionData.ShouldBeEquivalentTo(td.TargetsExecutionData);
             argDeserialized.WorkerNodeTelemetryData.TasksExecutionData.ShouldBeEquivalentTo(td.TasksExecutionData);
         }
     }

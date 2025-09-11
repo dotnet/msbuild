@@ -46,12 +46,6 @@ internal sealed class InternalTelemetryConsumingLogger : ILogger
         }
 
         Console.WriteLine("==========================================");
-        Console.WriteLine($"Targets ({_workerNodeTelemetryData.TargetsExecutionData.Count}):");
-        foreach (var target in _workerNodeTelemetryData.TargetsExecutionData)
-        {
-            Console.WriteLine($"{target.Key} : {target.Value}");
-        }
-        Console.WriteLine("==========================================");
         Console.WriteLine($"Tasks: ({_workerNodeTelemetryData.TasksExecutionData.Count})");
         Console.WriteLine("Custom tasks:");
         foreach (var task in _workerNodeTelemetryData.TasksExecutionData.Where(t => t.Key.IsCustom))

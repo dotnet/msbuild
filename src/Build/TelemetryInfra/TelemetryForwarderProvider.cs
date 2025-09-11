@@ -61,12 +61,6 @@ internal class TelemetryForwarderProvider : IBuildComponent
             _workerNodeTelemetryData.AddTask(key, cumulativeExecutionTime, executionsCount, totalMemoryConsumed);
         }
 
-        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache)
-        {
-            var key = GetKey(name, isCustom, isMetaproj, isFromNugetCache);
-            _workerNodeTelemetryData.AddTarget(key, wasExecuted);
-        }
-
         private static TaskOrTargetTelemetryKey GetKey(string name, bool isCustom, bool isMetaproj,
             bool isFromNugetCache)
             => new TaskOrTargetTelemetryKey(name, isCustom, isFromNugetCache, isMetaproj);
@@ -84,7 +78,6 @@ internal class TelemetryForwarderProvider : IBuildComponent
         public bool IsTelemetryCollected => false;
 
         public void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache) { }
-        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }
     }
