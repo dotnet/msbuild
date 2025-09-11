@@ -387,7 +387,7 @@ namespace Microsoft.Build.Shared
                     if (!string.IsNullOrEmpty(typeName))
                     {
                         foundType = loadedAssembly.GetType(typeName, throwOnError: false);
-                        if (foundType?.IsPublic == true && _isDesiredType(foundType, null))
+                        if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
                         {
                             numberOfTypesSearched = 1;
                         }
