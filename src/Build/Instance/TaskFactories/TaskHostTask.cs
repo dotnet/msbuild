@@ -131,6 +131,11 @@ namespace Microsoft.Build.BackEnd
         private bool _taskHostFactoryExplicitlyRequested = false;
 
         /// <summary>
+        /// The task environment for virtualized environment operations.
+        /// </summary>
+        private TaskEnvironment _taskEnvironment;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -140,14 +145,17 @@ namespace Microsoft.Build.BackEnd
             IBuildComponentHost buildComponentHost,
             Dictionary<string, string> taskHostParameters,
             LoadedType taskType,
-            bool taskHostFactoryExplicitlyRequested
+            bool taskHostFactoryExplicitlyRequested,
 #if FEATURE_APPDOMAIN
-                , AppDomainSetup appDomainSetup
+            AppDomainSetup appDomainSetup,
 #endif
+
+            TaskEnvironment taskEnvironment
             )
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
+            ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
 
             _taskLocation = taskLocation;
             _taskLoggingContext = taskLoggingContext;
@@ -158,6 +166,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             _taskHostParameters = taskHostParameters;
             _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
+            _taskEnvironment = taskEnvironment;
 
             _packetFactory = new NodePacketFactory();
 
@@ -487,8 +496,15 @@ namespace Microsoft.Build.BackEnd
             // If it crashed, or if it failed, it didn't succeed.
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
-            // reset the environment, as though the task were executed in this process all along.
-            CommunicationsUtilities.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            // Update the task environment with the environment changes from the task host execution
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0) && taskHostTaskComplete.BuildProcessEnvironment != null)
+            {
+                _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            }
+            else
+            {
+                CommunicationsUtilities.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            }
 
             // If it crashed during the execution phase, then we can effectively replicate the inproc task execution
             // behaviour by just throwing here and letting the taskbuilder code take care of it the way it would

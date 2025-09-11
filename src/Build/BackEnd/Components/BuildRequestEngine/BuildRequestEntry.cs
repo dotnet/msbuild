@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
 #nullable disable
@@ -119,7 +120,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="request">The originating build request.</param>
         /// <param name="requestConfiguration">The build request configuration.</param>
-        internal BuildRequestEntry(BuildRequest request, BuildRequestConfiguration requestConfiguration)
+        /// <param name="taskEnvironment">Task enviroment information that would be passed to tasks executing for the build request. If set to null will use stub environment.</param>
+        internal BuildRequestEntry(BuildRequest request, BuildRequestConfiguration requestConfiguration, TaskEnvironment taskEnvironment = null)
         {
             ErrorUtilities.VerifyThrowArgumentNull(request);
             ErrorUtilities.VerifyThrowArgumentNull(requestConfiguration);
@@ -128,6 +130,7 @@ namespace Microsoft.Build.BackEnd
             GlobalLock = new LockType();
             Request = request;
             RequestConfiguration = requestConfiguration;
+            TaskEnvironment = taskEnvironment ?? new TaskEnvironment(StubTaskEnvironmentDriver.Instance);
             _blockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
             Result = null;
             ChangeState(BuildRequestEntryState.Ready);
@@ -184,6 +187,12 @@ namespace Microsoft.Build.BackEnd
                 _requestBuilder = value;
             }
         }
+        
+        /// <summary>
+        /// Gets or sets the task environment for this request.
+        /// Tasks implementing IMultiThreadableTask will use this environment for file system and environment operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Informs the entry that it has configurations which need to be resolved.

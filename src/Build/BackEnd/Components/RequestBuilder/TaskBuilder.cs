@@ -21,6 +21,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.PathHelpers;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
@@ -128,6 +129,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal TaskBuilder()
         {
+        }
+
+        /// <summary>
+        /// Sets the task environment on the TaskExecutionHost for use with IMultiThreadableTask instances.
+        /// </summary>
+        /// <param name="taskEnvironment">The task environment to set, or null to clear.</param>
+        public void SetTaskEnvironment(TaskEnvironment taskEnvironment)
+        {
+            ErrorUtilities.VerifyThrow(_taskExecutionHost != null, "TaskExecutionHost must be initialized before setting TaskEnvironment.");
+            _taskExecutionHost.TaskEnvironment = taskEnvironment;
         }
 
         /// <summary>
@@ -415,7 +426,14 @@ namespace Microsoft.Build.BackEnd
                     // If that directory does not exist, do nothing. (Do not check first as it is almost always there and it is slow)
                     // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
                     // No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
-                    NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                    {
+                        _buildRequestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_buildRequestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
+                    }
+                    else
+                    {
+                        NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
+                    }
                 }
 
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
