@@ -399,10 +399,18 @@ namespace Microsoft.Build.Shared
                         foreach (Type publicType in loadedAssembly.GetExportedTypes())
                         {
                             numberOfTypesSearched++;
-                            if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                            try
                             {
-                                foundType = publicType;
-                                break;
+                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                {
+                                    foundType = publicType;
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Ignore types that can't be loaded/reflected upon.
+                                // These types might be needed out of proc and be resolved there.
                             }
                         }
                     }
