@@ -78,6 +78,7 @@ jobs:
   displayName: "Windows Full"
   pool:
     vmImage: 'windows-2022'
+  timeoutInMinutes: 120
   steps:
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
@@ -189,6 +190,7 @@ jobs:
     coverageReportName: WindowsCoreCoverage
   pool:
     vmImage: 'windows-2022'
+  timeoutInMinutes: 120
   steps:
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
@@ -277,6 +279,7 @@ jobs:
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
+  timeoutInMinutes: 120
   steps:
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
