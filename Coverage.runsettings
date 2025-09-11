@@ -8,6 +8,11 @@
                     <IncludeTestAssembly>true</IncludeTestAssembly>
                     <ExcludeAssembliesWithoutSources>MissingAll</ExcludeAssembliesWithoutSources>
                     <CodeCoverage>
+                        <ModulePaths>
+                            <Exclude>
+                                <ModulePath>.*doc.dll</ModulePath>
+                            </Exclude>
+                        </ModulePaths>
                         <Sources>
                             <Exclude>
                                 <Source>.*\.g\.cs$</Source>
