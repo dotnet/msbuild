@@ -91,4 +91,4 @@ Expressed and collected via [BuildTelemetry type](https://github.com/dotnet/msbu
 | All          | Version of MSBuild. |
 | >= 9.0.100   | Indication of enablement of BuildCheck feature. |
 | >= 9.0.100   | Indication of Smart App Control being in evaluation mode on machine executing the build. |
-| >= 10.0.100  | If the build was run in multithreaded mode or not |
+| >= 10.0.100  | Indication if the build was run in multithreaded mode. |
