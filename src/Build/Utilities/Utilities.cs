@@ -599,6 +599,52 @@ namespace Microsoft.Build.Internal
             return environmentProperties;
         }
 
+#if !NET
+        /// <summary>
+        /// Ensures that the capacity of this list is at least the specified <paramref name="capacity"/>.
+        /// If the current capacity of the list is less than specified <paramref name="capacity"/>,
+        /// the capacity is increased by continuously twice current capacity until it is at least the specified <paramref name="capacity"/>.
+        /// </summary>
+        /// <typeparam name="T">The type contained in the list.</typeparam>
+        /// <param name="list">The list to adjust the capacity of.</param>
+        /// <param name="capacity">The minimum capacity to ensure.</param>
+        /// <returns>The new capacity of this list.</returns>
+        public static int EnsureCapacity<T>(this List<T> list, int capacity)
+        {
+            const int DefaultCapacity = 4;
+            const int MaxArrayLength = 0X7FFFFFC7;
+
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            }
+
+            if (capacity > list.Capacity)
+            {
+                // Implementation copied and slightly modified from List's internal implementation.
+                int newCapacity = list.Count == 0 ? DefaultCapacity : 2 * list.Capacity;
+
+                // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
+                // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
+                if ((uint)newCapacity > MaxArrayLength)
+                {
+                    newCapacity = MaxArrayLength;
+                }
+
+                // If the computed capacity is still less than specified, set to the original argument.
+                // Capacities exceeding Array.MaxLength will be surfaced as OutOfMemoryException by Array.Resize.
+                if (newCapacity < capacity)
+                {
+                    newCapacity = capacity;
+                }
+
+                list.Capacity = newCapacity;
+            }
+
+            return list.Capacity;
+        }
+#endif
+
         /// <summary>
         /// Extension to IEnumerable to get the count if it
         /// can be quickly gotten, otherwise 0.

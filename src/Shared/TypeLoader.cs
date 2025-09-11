@@ -262,7 +262,7 @@ namespace Microsoft.Build.Shared
             /// Lock to prevent two threads from using this object at the same time.
             /// Since we fill up internal structures with what is in the assembly
             /// </summary>
-            private readonly Object _lockObject = new Object();
+            private readonly LockType _lockObject = new();
 
             /// <summary>
             /// Type filter to pick the correct types out of an assembly

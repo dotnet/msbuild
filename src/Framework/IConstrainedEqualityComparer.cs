@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
@@ -11,7 +11,11 @@ namespace Microsoft.Build.Collections
     ///     Defines methods to support the comparison of objects for
     ///     equality over constrained inputs.
     /// </summary>
+#if TASKHOST
+    internal interface IConstrainedEqualityComparer<T> : IEqualityComparer<T>
+#else
     internal interface IConstrainedEqualityComparer<in T> : IEqualityComparer<T>
+#endif
     {
         /// <summary>
         /// Determines whether the specified objects are equal, factoring in the specified bounds when comparing <paramref name="y"/>.

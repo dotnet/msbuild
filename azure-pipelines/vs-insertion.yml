@@ -85,6 +85,8 @@ variables:
       value: 'rel/d17.0'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'main') }}:
       value: 'main'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.15') }}:
+      value: 'main'
     ${{ else }}:
       value: ''
   - name: InsertTargetBranch
@@ -148,6 +150,9 @@ extends:
               $branch = $branchSegments[-1]
               Write-Host "Setting source branch to '$branch'"
               Write-Host "##vso[task.setvariable variable=SourceBranchName;isoutput=true]$branch"
+              Write-Host "updating build number with build commit"
+              Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber).$(MSBuild_CI_SourceVersion)"
+          displayName: 'Append source version to build name'
         - task: MicroBuildRetainVstsDrops@1
           name: MicroBuildRetainVstsDrops_2
           displayName: Retain VSTS Drops
