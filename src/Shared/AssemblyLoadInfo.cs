@@ -64,6 +64,14 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Gets whether this assembly is an inline task assembly that should be loaded from bytes to avoid file locking.
+        /// </summary>
+        internal abstract bool IsInlineTask
+        {
+            get;
+        }
+
+        /// <summary>
         /// Computes a hashcode for this assembly info, so this object can be used as a key into
         /// a hash table.
         /// </summary>
@@ -158,6 +166,15 @@ namespace Microsoft.Build.Shared
             {
                 get { return _assemblyName; }
             }
+
+            /// <summary>
+            /// Gets whether this assembly is an inline task assembly.
+            /// Assembly names are never inline tasks.
+            /// </summary>
+            internal override bool IsInlineTask
+            {
+                get { return false; }
+            }
         }
 
         /// <summary>
@@ -204,6 +221,17 @@ namespace Microsoft.Build.Shared
             {
                 get { return _assemblyFile; }
             }
+
+#if !NET35
+            /// <summary>
+            /// Gets whether this assembly is an inline task assembly.
+            /// Detects inline tasks by checking if the file path ends with the inline task suffix.
+            /// </summary>
+            internal override bool IsInlineTask
+            {
+                get { return _assemblyFile?.EndsWith(TaskFactoryUtilities.InlineTaskSuffix, StringComparison.OrdinalIgnoreCase) == true; }
+            }
+#endif
         }
     }
 }

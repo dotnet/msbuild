@@ -1149,7 +1149,8 @@ namespace Microsoft.Build.Execution
 
                     if (Traits.Instance.ForceTaskFactoryOutOfProc)
                     {
-                        TaskFactoryUtilities.CleanInlineTaskCaches();
+                        TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
+                        TaskFactoryUtilities.ClearAssemblyPathRegistry();
                     }
 
                     MSBuildEventSource.Log.BuildStop();

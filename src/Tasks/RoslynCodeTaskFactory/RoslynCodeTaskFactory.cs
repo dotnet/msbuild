@@ -765,7 +765,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Return the compiled assembly
-                assembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath, Traits.Instance.ForceTaskFactoryOutOfProc);
+                assembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
 
                 CompiledAssemblyCache.TryAdd(taskInfo, assembly);
                 return true;

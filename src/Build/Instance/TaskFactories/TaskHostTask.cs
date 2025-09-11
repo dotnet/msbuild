@@ -277,6 +277,16 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
             }
 
+            string taskLocation = AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly);
+            if (string.IsNullOrEmpty(taskLocation))
+            {
+                // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
+                if (!TaskFactoryUtilities.TryReconstructInlineTaskAssemblyPath(_taskType.Type, out taskLocation))
+                {
+                    taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
+                }
+            }
+
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
@@ -292,7 +302,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ProjectFileOfTaskNode,
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        taskLocation,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
