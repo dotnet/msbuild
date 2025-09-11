@@ -222,16 +222,18 @@ namespace Microsoft.Build.Shared
                 get { return _assemblyFile; }
             }
 
-#if !NET35
             /// <summary>
             /// Gets whether this assembly is an inline task assembly.
             /// Detects inline tasks by checking if the file path ends with the inline task suffix.
             /// </summary>
             internal override bool IsInlineTask
             {
+#if !NET35
                 get { return _assemblyFile?.EndsWith(TaskFactoryUtilities.InlineTaskSuffix, StringComparison.OrdinalIgnoreCase) == true; }
-            }
+#else
+                get { return false; }
 #endif
+            }
         }
     }
 }

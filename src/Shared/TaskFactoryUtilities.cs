@@ -360,17 +360,5 @@ namespace Microsoft.Build.Shared
 
             return false;
         }
-
-        /// <summary>
-        /// Gets the process-specific inline task directory path.
-        /// </summary>
-        /// <returns>The directory path for the current process's inline tasks.</returns>
-        private static string GetProcessSpecificInlineTaskDirectory()
-        {
-            return Path.Combine(
-                FileUtilities.TempFileDirectory,
-                InlineTaskTempDllSubPath,
-                $"pid_{EnvironmentUtilities.CurrentProcessId}");
-        }
     }
 }
