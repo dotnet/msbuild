@@ -459,9 +459,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static bool ExpressionContainsItemVector(string expression)
         {
-            List<ExpressionShredder.ItemExpressionCapture> transforms = ExpressionShredder.GetReferencedItemExpressions(expression);
+            ExpressionShredder.ReferencedItemExpressionsEnumerator transformsEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
 
-            return transforms != null;
+            return transformsEnumerator.MoveNext();
         }
 
         /// <summary>
@@ -639,7 +639,7 @@ namespace Microsoft.Build.Evaluation
             return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
         }
 
-        internal static ExpressionShredder.ItemExpressionCapture ExpandSingleItemVectorExpressionIntoExpressionCapture(
+        internal static ExpressionShredder.ItemExpressionCapture? ExpandSingleItemVectorExpressionIntoExpressionCapture(
                 string expression, ExpanderOptions options, IElementLocation elementLocation)
         {
             return ItemExpander.ExpandSingleItemVectorExpressionIntoExpressionCapture(expression, options, elementLocation);
@@ -1010,50 +1010,45 @@ namespace Microsoft.Build.Evaluation
                     }
                     else
                     {
-                        List<ExpressionShredder.ItemExpressionCapture> itemVectorExpressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-
-                        // The most common case is where the transform is the whole expression
-                        // Also if there were no valid item vector expressions found, then go ahead and do the replacement on
-                        // the whole expression (which is what Orcas did).
-                        if (itemVectorExpressions?.Count == 1 && itemVectorExpressions[0].Value == expression && itemVectorExpressions[0].Separator == null)
-                        {
-                            return expression;
-                        }
+                        ExpressionShredder.ReferencedItemExpressionsEnumerator itemVectorExpressionsEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
 
                         // otherwise, run the more complex Regex to find item metadata references not contained in transforms
                         using SpanBasedStringBuilder finalResultBuilder = Strings.GetSpanBasedStringBuilder();
 
                         int start = 0;
 
-                        if (itemVectorExpressions != null && itemVectorExpressions.Count > 0)
+                        if (itemVectorExpressionsEnumerator.MoveNext())
                         {
                             MetadataMatchEvaluator matchEvaluator = new MetadataMatchEvaluator(metadata, options, elementLocation, loggingContext);
-                            // Move over the expression, skipping those that have been recognized as an item vector expression
-                            // Anything other than an item vector expression we want to expand bare metadata in.
-                            for (int n = 0; n < itemVectorExpressions.Count; n++)
+                            ExpressionShredder.ItemExpressionCapture firstItemExpressionCapture = itemVectorExpressionsEnumerator.Current;
+
+                            if (itemVectorExpressionsEnumerator.MoveNext())
                             {
-                                ExpressionShredder.ItemExpressionCapture itemExpressionCapture = itemVectorExpressions[n];
+                                // we're in the uncommon case with a partially enumerated enumerator. We need to process the first two items we enumerated and the remaining ones.
+                                // Move over the expression, skipping those that have been recognized as an item vector expression
+                                // Anything other than an item vector expression we want to expand bare metadata in.
+                                start = ProcessItemExpressionCapture(expression, finalResultBuilder, matchEvaluator, start, firstItemExpressionCapture);
+                                start = ProcessItemExpressionCapture(expression, finalResultBuilder, matchEvaluator, start, itemVectorExpressionsEnumerator.Current);
 
-                                // Extract the part of the expression that appears before the item vector expression
-                                // e.g. the ABC in ABC@(foo->'%(FullPath)')
-                                string subExpressionToReplaceIn = expression.Substring(start, itemExpressionCapture.Index - start);
-
-                                RegularExpressions.ReplaceAndAppend(subExpressionToReplaceIn, MetadataMatchEvaluator.ExpandSingleMetadata, matchEvaluator, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
-
-                                // Expand any metadata that appears in the item vector expression's separator
-                                if (itemExpressionCapture.Separator != null)
+                                while (itemVectorExpressionsEnumerator.MoveNext())
                                 {
-                                    RegularExpressions.ReplaceAndAppend(itemExpressionCapture.Value, MetadataMatchEvaluator.ExpandSingleMetadata, matchEvaluator, -1, itemVectorExpressions[n].SeparatorStart, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
+                                    start = ProcessItemExpressionCapture(expression, finalResultBuilder, matchEvaluator, start, itemVectorExpressionsEnumerator.Current);
+                                }
+                            }
+                            else
+                            {
+                                // There is only one item. Check to see if we're in the common case.
+                                if (firstItemExpressionCapture.Value == expression && firstItemExpressionCapture.Separator == null)
+                                {
+                                    // The most common case is where the transform is the whole expression
+                                    // Also if there were no valid item vector expressions found, then go ahead and do the replacement on
+                                    // the whole expression (which is what Orcas did).
+                                    return expression;
                                 }
                                 else
                                 {
-                                    // Append the item vector expression as is
-                                    // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
-                                    finalResultBuilder.Append(itemExpressionCapture.Value);
+                                    start = ProcessItemExpressionCapture(expression, finalResultBuilder, matchEvaluator, start, firstItemExpressionCapture);
                                 }
-
-                                // Move onto the next part of the expression that isn't an item vector expression
-                                start = (itemExpressionCapture.Index + itemExpressionCapture.Length);
                             }
                         }
 
@@ -1088,6 +1083,31 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return null;
+
+                static int ProcessItemExpressionCapture(string expression, SpanBasedStringBuilder finalResultBuilder, MetadataMatchEvaluator matchEvaluator, int start, ExpressionShredder.ItemExpressionCapture itemExpressionCapture)
+                {
+                    // Extract the part of the expression that appears before the item vector expression
+                    // e.g. the ABC in ABC@(foo->'%(FullPath)')
+                    string subExpressionToReplaceIn = expression.Substring(start, itemExpressionCapture.Index - start);
+
+                    RegularExpressions.ReplaceAndAppend(subExpressionToReplaceIn, MetadataMatchEvaluator.ExpandSingleMetadata, matchEvaluator, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
+
+                    // Expand any metadata that appears in the item vector expression's separator
+                    if (itemExpressionCapture.Separator != null)
+                    {
+                        RegularExpressions.ReplaceAndAppend(itemExpressionCapture.Value, MetadataMatchEvaluator.ExpandSingleMetadata, matchEvaluator, -1, itemExpressionCapture.SeparatorStart, finalResultBuilder, RegularExpressions.NonTransformItemMetadataRegex);
+                    }
+                    else
+                    {
+                        // Append the item vector expression as is
+                        // e.g. the @(foo->'%(FullPath)') in ABC@(foo->'%(FullPath)')
+                        finalResultBuilder.Append(itemExpressionCapture.Value);
+                    }
+
+                    // Move onto the next part of the expression that isn't an item vector expression
+                    start = (itemExpressionCapture.Index + itemExpressionCapture.Length);
+                    return start;
+                }
             }
         }
 
@@ -2059,11 +2079,11 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                return ExpandExpressionCaptureIntoItems(expressionCapture, expander, items, itemFactory, options, includeNullEntries,
+                return ExpandExpressionCaptureIntoItems(expressionCapture.Value, expander, items, itemFactory, options, includeNullEntries,
                     out isTransformExpression, elementLocation);
             }
 
-            internal static ExpressionShredder.ItemExpressionCapture ExpandSingleItemVectorExpressionIntoExpressionCapture(
+            internal static ExpressionShredder.ItemExpressionCapture? ExpandSingleItemVectorExpressionIntoExpressionCapture(
                     string expression, ExpanderOptions options, IElementLocation elementLocation)
             {
                 if (((options & ExpanderOptions.ExpandItems) == 0) || (expression.Length == 0))
@@ -2071,29 +2091,26 @@ namespace Microsoft.Build.Evaluation
                     return null;
                 }
 
-                List<ExpressionShredder.ItemExpressionCapture> matches;
                 if (!expression.Contains('@'))
                 {
                     return null;
                 }
-                else
-                {
-                    matches = ExpressionShredder.GetReferencedItemExpressions(expression);
 
-                    if (matches == null)
-                    {
-                        return null;
-                    }
+                ExpressionShredder.ReferencedItemExpressionsEnumerator matchesEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
+
+                if (!matchesEnumerator.MoveNext())
+                {
+                    return null;
                 }
 
-                ExpressionShredder.ItemExpressionCapture match = matches[0];
+                ExpressionShredder.ItemExpressionCapture match = matchesEnumerator.Current;
 
                 // We have a single valid @(itemlist) reference in the given expression.
                 // If the passed-in expression contains exactly one item list reference,
                 // with nothing else concatenated to the beginning or end, then proceed
                 // with itemizing it, otherwise error.
                 ProjectErrorUtilities.VerifyThrowInvalidProject(match.Value == expression, elementLocation, "EmbeddedItemVectorCannotBeItemized", expression);
-                ErrorUtilities.VerifyThrow(matches.Count == 1, "Expected just one item vector");
+                ErrorUtilities.VerifyThrow(!matchesEnumerator.MoveNext(), "Expected just one item vector");
 
                 return match;
             }
@@ -2307,39 +2324,42 @@ namespace Microsoft.Build.Evaluation
 
                 ErrorUtilities.VerifyThrow(items != null, "Cannot expand items without providing items");
 
-                List<ExpressionShredder.ItemExpressionCapture> matches = ExpressionShredder.GetReferencedItemExpressions(expression);
+                ExpressionShredder.ReferencedItemExpressionsEnumerator matchesEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
 
-                if (matches == null)
+                if (!matchesEnumerator.MoveNext())
                 {
                     return expression;
                 }
 
                 using SpanBasedStringBuilder builder = Strings.GetSpanBasedStringBuilder();
+
                 // As we walk through the matches, we need to copy out the original parts of the string which
                 // are not covered by the match.  This preserves original behavior which did not trim whitespace
                 // from between separators.
                 int lastStringIndex = 0;
-                for (int i = 0; i < matches.Count; i++)
+                do
                 {
-                    if (matches[i].Index > lastStringIndex)
+                    ExpressionShredder.ItemExpressionCapture currentItem = matchesEnumerator.Current;
+                    if (currentItem.Index > lastStringIndex)
                     {
                         if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
                         {
                             return null;
                         }
 
-                        builder.Append(expression, lastStringIndex, matches[i].Index - lastStringIndex);
+                        builder.Append(expression, lastStringIndex, currentItem.Index - lastStringIndex);
                     }
 
-                    bool brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, matches[i], items, elementLocation, builder, options);
+                    bool brokeEarlyNonEmpty = ExpandExpressionCaptureIntoStringBuilder(expander, currentItem, items, elementLocation, builder, options);
 
                     if (brokeEarlyNonEmpty)
                     {
                         return null;
                     }
 
-                    lastStringIndex = matches[i].Index + matches[i].Length;
+                    lastStringIndex = currentItem.Index + currentItem.Length;
                 }
+                while (matchesEnumerator.MoveNext());
 
                 builder.Append(expression, lastStringIndex, expression.Length - lastStringIndex);
 

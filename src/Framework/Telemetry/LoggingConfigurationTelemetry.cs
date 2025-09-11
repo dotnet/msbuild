@@ -57,30 +57,14 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
     public bool ConsoleLogger { get; set; }
 
     /// <summary>
-    /// Type of console logger: serial | parallel
-    /// </summary>
-    public string? ConsoleLoggerType { get; set; }
-
-    /// <summary>
     /// Verbosity of console logger: quiet | minimal | normal | detailed | diagnostic
     /// </summary>
     public string? ConsoleLoggerVerbosity { get; set; }
-
 
     /// <summary>
     /// True if file logger was used.
     /// </summary>
     public bool FileLogger { get; set; }
-
-    /// <summary>
-    /// Type of file logger: serial | parallel
-    /// </summary>
-    public string? FileLoggerType { get; set; }
-
-    /// <summary>
-    /// Number of file loggers.
-    /// </summary>
-    public int FileLoggersCount { get; set; }
 
     /// <summary>
     /// Verbosity of file logger: quiet | minimal | normal | detailed | diagnostic
@@ -125,10 +109,6 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
         }
 
         properties["ConsoleLogger"] = ConsoleLogger.ToString(CultureInfo.InvariantCulture);
-        if (ConsoleLoggerType != null)
-        {
-            properties["ConsoleLoggerType"] = ConsoleLoggerType;
-        }
 
         if (ConsoleLoggerVerbosity != null)
         {
@@ -136,11 +116,6 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
         }
 
         properties["FileLogger"] = FileLogger.ToString(CultureInfo.InvariantCulture);
-        if (FileLoggerType != null)
-        {
-            properties["FileLoggerType"] = FileLoggerType;
-            properties["FileLoggersCount"] = FileLoggersCount.ToString(CultureInfo.InvariantCulture);
-        }
 
         if (FileLoggerVerbosity != null)
         {
