@@ -52,27 +52,27 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// A result of executing a target or task.
     /// </summary>
-    internal class WorkUnitResult : ITranslatable
+    internal readonly struct WorkUnitResult : ITranslatable
     {
         /// <summary>
         /// The result.
         /// </summary>
-        private WorkUnitResultCode _resultCode;
+        private readonly WorkUnitResultCode _resultCode;
 
         /// <summary>
         /// The next action to take.
         /// </summary>
-        private WorkUnitActionCode _actionCode;
+        private readonly WorkUnitActionCode _actionCode;
 
         /// <summary>
         /// The exception from the failure, if any.
         /// </summary>
-        private Exception _exception;
+        private readonly Exception _exception;
 
         /// <summary>
         /// Creates a new work result ready for aggregation during batches.
         /// </summary>
-        internal WorkUnitResult()
+        public WorkUnitResult()
         {
             _resultCode = WorkUnitResultCode.Skipped;
             _actionCode = WorkUnitActionCode.Continue;
@@ -94,7 +94,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private WorkUnitResult(ITranslator translator)
         {
-            ((ITranslatable)this).Translate(translator);
+            translator.TranslateEnum(ref _resultCode, (int)_resultCode);
+            translator.TranslateEnum(ref _actionCode, (int)_actionCode);
+            translator.TranslateException(ref _exception);
         }
 
         /// <summary>
@@ -105,11 +107,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Get the action code.
         /// </summary>
-        internal WorkUnitActionCode ActionCode
-        {
-            get => _actionCode;
-            set => _actionCode = value;
-        }
+        internal WorkUnitActionCode ActionCode => _actionCode;
 
         /// <summary>
         /// Get the exception
@@ -123,9 +121,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void Translate(ITranslator translator)
         {
-            translator.TranslateEnum(ref _resultCode, (int)_resultCode);
-            translator.TranslateEnum(ref _actionCode, (int)_actionCode);
-            translator.TranslateException(ref _exception);
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                throw new InvalidOperationException("Readonly struct - use the factory method for deserialization.");
+            }
+
+            WorkUnitResultCode resultCode = _resultCode;
+            WorkUnitActionCode actionCode = _actionCode;
+            Exception exception = _exception;
+            translator.TranslateEnum(ref resultCode, (int)_resultCode);
+            translator.TranslateEnum(ref actionCode, (int)_actionCode);
+            translator.TranslateException(ref exception);
         }
 
         #endregion

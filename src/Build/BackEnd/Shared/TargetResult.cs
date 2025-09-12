@@ -22,6 +22,11 @@ namespace Microsoft.Build.Execution
     public class TargetResult : ITargetResult, ITranslatable
     {
         /// <summary>
+        /// Lock for cache file access.
+        /// </summary>
+        private readonly object _lock = new();
+
+        /// <summary>
         /// The result for this target.
         /// </summary>
         private WorkUnitResult _result;
@@ -100,7 +105,7 @@ namespace Microsoft.Build.Execution
             [DebuggerStepThrough]
             get
             {
-                lock (_result)
+                lock (_lock)
                 {
                     if (_items == null)
                     {
@@ -167,6 +172,9 @@ namespace Microsoft.Build.Execution
         {
             [DebuggerStepThrough]
             get => _result;
+
+            [DebuggerStepThrough]
+            set => _result = value;
         }
 
         /// <summary>
@@ -214,7 +222,7 @@ namespace Microsoft.Build.Execution
         {
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                lock (_result)
+                lock (_lock)
                 {
                     // Should we have cached these items but now want to send them to another node, we need to
                     // ensure they are loaded before doing so.
@@ -271,7 +279,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal void CacheItems(int configId, string targetName)
         {
-            lock (_result)
+            lock (_lock)
             {
                 if (_items == null)
                 {
