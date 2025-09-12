@@ -253,7 +253,7 @@ namespace Microsoft.Build.Shared
     /// Build Event Type
     /// Build Event Args
     /// </summary>
-    internal abstract class LogMessagePacketBase : INodePacket
+    internal class LogMessagePacketBase : INodePacket
     {
         /// <summary>
         /// The packet version, which is based on the CLR version. Cached because querying Environment.Version each time becomes an allocation bottleneck.
