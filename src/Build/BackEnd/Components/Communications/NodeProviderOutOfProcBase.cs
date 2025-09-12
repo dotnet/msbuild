@@ -591,6 +591,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private HandshakeOptions _handshakeOptions;
 
+            internal HandshakeOptions HandshakeOptions => _handshakeOptions;
+
             /// <summary>
             /// A buffer typically big enough to handle a packet body.
             /// We use this as a convenient way to manage and cache a byte[] that's resized

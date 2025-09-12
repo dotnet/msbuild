@@ -91,7 +91,9 @@ namespace Microsoft.Build.BackEnd
         /// The task host context of the task host we're launching -- used to
         /// communicate with the task host.
         /// </summary>
-        private HandshakeOptions _requiredContext = HandshakeOptions.None;
+        private HandshakeOptions _requiredHandshakeOptions = HandshakeOptions.None;
+
+        private int _requiredNodeId = -1;
 
         /// <summary>
         /// True if currently connected to the task host; false otherwise.
@@ -251,7 +253,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        _taskHostProvider.SendData(_requiredContext, new TaskHostTaskCancelled());
+                        _taskHostProvider.SendData(_requiredNodeId, new TaskHostTaskCancelled());
                     }
                 }
 
@@ -304,14 +306,14 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_taskHostLock)
                 {
-                    _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
+                    _requiredHandshakeOptions = CommunicationsUtilities.GetHandshakeOptions(
                         taskHost: true,
 
                         // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
                         // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
                         nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
                         taskHostParameters: _taskHostParameters);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
+                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredHandshakeOptions, this, this, hostConfiguration, _taskHostParameters, out _requiredNodeId);
                 }
 
                 if (_connectedToTaskHost)
@@ -340,23 +342,23 @@ namespace Microsoft.Build.BackEnd
                     {
                         lock (_taskHostLock)
                         {
-                            _taskHostProvider.DisconnectFromHost(_requiredContext);
+                            _taskHostProvider.DisconnectFromHost(_requiredNodeId);
                             _connectedToTaskHost = false;
                         }
                     }
                 }
                 else
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, null);
+                    LogErrorUnableToCreateTaskHost(_requiredHandshakeOptions, runtime, architecture, null);
                 }
             }
             catch (BuildAbortedException)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, null);
+                LogErrorUnableToCreateTaskHost(_requiredHandshakeOptions, runtime, architecture, null);
             }
             catch (NodeFailedToLaunchException e)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, e);
+                LogErrorUnableToCreateTaskHost(_requiredHandshakeOptions, runtime, architecture, e);
             }
 
             return _taskExecutionSucceeded;
