@@ -1745,17 +1745,10 @@ namespace Microsoft.Build.BackEnd
 
             // Create a LoadedType for the actual task type so we can wrap it in TaskHostTask
             Type taskType = innerTask.GetType();
-            
-            // Handle inline tasks that were loaded from bytes (Assembly.Location is empty)
-            string assemblyLocation = taskType.Assembly.Location;
-            if (string.IsNullOrEmpty(assemblyLocation))
-            {
-                TaskFactoryUtilities.TryReconstructInlineTaskAssemblyPath(taskType, out assemblyLocation);
-            }
-            
+
             LoadedType taskLoadedType = new LoadedType(
                 taskType,
-                AssemblyLoadInfo.Create(null, assemblyLocation),
+                AssemblyLoadInfo.Create(null, ((IOutOfProcTaskFactory)_taskFactoryWrapper.TaskFactory).GetAssemblyPath()),
                 taskType.Assembly,
                 typeof(ITaskItem));
 

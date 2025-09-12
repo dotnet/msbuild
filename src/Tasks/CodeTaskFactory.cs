@@ -161,6 +161,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public Type TaskType { get; private set; }
 
+        public string GetAssemblyPath() => _assemblyPath;
+
         /// <summary>
         /// Get the type information for all task parameters.
         /// </summary>
@@ -852,7 +854,7 @@ namespace Microsoft.Build.Tasks
                     if (Traits.Instance.ForceTaskFactoryOutOfProc)
                     {
                         TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
-                        compiledAssembly = Assembly.LoadFrom(compilerResults.PathToAssembly);
+                        compiledAssembly = Assembly.Load(File.ReadAllBytes(_assemblyPath));
                     }
                     else
                     {

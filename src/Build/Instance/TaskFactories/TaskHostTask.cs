@@ -281,10 +281,7 @@ namespace Microsoft.Build.BackEnd
             if (string.IsNullOrEmpty(taskLocation))
             {
                 // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
-                if (!TaskFactoryUtilities.TryReconstructInlineTaskAssemblyPath(_taskType.Type, out taskLocation))
-                {
-                    taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
-                }
+                taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
             }
 
             TaskHostConfiguration hostConfiguration =

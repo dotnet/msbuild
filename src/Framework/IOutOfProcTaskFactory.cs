@@ -10,4 +10,9 @@ namespace Microsoft.Build.Framework;
 /// </summary>
 internal interface IOutOfProcTaskFactory
 {
+    /// <summary>
+    /// Gets the assembly path for the compiled task that can be used by out-of-process task hosts.
+    /// </summary>
+    /// <returns>The absolute path to the assembly file that contains the compiled task, or null if not available.</returns>
+    string GetAssemblyPath();
 }

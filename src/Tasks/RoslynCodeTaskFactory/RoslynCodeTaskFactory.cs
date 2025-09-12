@@ -144,6 +144,9 @@ namespace Microsoft.Build.Tasks
             return _parameters;
         }
 
+        /// <inheritdoc cref="IOutOfProcTaskFactory.GetAssemblyPath"/>
+        public string GetAssemblyPath() => _assemblyPath;
+
         /// <inheritdoc cref="ITaskFactory.Initialize"/>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {

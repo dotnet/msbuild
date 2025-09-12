@@ -35,11 +35,20 @@ namespace Microsoft.Build.Tasks
         /// The compiled task assembly.
         /// </summary>
         private Assembly _taskAssembly;
+        
+
+        private string _assemblyPath;
 
         /// <summary>
         /// The task type.
         /// </summary>
         private Type _taskType;
+        
+        /// <summary>
+        /// Location of the assembly for out of proc taskhosts. 
+        /// </summary>
+        public string GetAssemblyPath() => _assemblyPath;
+
 
         /// <summary>
         /// The name of the task pulled from the XAML.
@@ -116,10 +125,9 @@ namespace Microsoft.Build.Tasks
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
             // for the out of proc execution
-            string taskAssemblyPath = null;
             if (Traits.Instance.ForceTaskFactoryOutOfProc)
             {
-                taskAssemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
+                _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
             }
 
             // create the code generator options
@@ -133,7 +141,7 @@ namespace Microsoft.Build.Tasks
                 ])
             {
                 GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
-                OutputAssembly = taskAssemblyPath,
+                OutputAssembly = _assemblyPath,
                 TreatWarningsAsErrors = false
             };
 

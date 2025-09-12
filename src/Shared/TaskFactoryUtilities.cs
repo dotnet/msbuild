@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -23,16 +22,9 @@ namespace Microsoft.Build.Shared
     /// 2. Generating load manifest files for out-of-process task execution
     /// 3. Loading assemblies based on execution mode (in-process vs out-of-process)
     /// 4. Assembly resolution for custom reference locations
-    /// 5. Tracking assembly paths for inline tasks loaded from bytes
     /// </summary>
     internal static class TaskFactoryUtilities
     {
-        /// <summary>
-        /// Registry to track the mapping between assembly identity and the original file path.
-        /// This is needed because when assemblies are loaded from bytes, Assembly.Location is empty.
-        /// </summary>
-        private static readonly ConcurrentDictionary<string, string> s_assemblyPathRegistry = new();
-
         /// <summary>
         /// The sub-path within the temporary directory where compiled inline tasks are located.
         /// </summary>
@@ -162,61 +154,11 @@ namespace Microsoft.Build.Shared
                 throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath));
             }
 
+            // Load the assembly from bytes so we don't lock the file and record its original path for out-of-proc hosts
             Assembly assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
-            
-            // Register the mapping between assembly identity and file path
-            RegisterAssemblyPath(assembly, assemblyPath);
-            
             return assembly;
         }
 
-        /// <summary>
-        /// Registers the mapping between an assembly and its original file path.
-        /// This is essential for assemblies loaded from bytes where Assembly.Location is empty.
-        /// </summary>
-        /// <param name="assembly">The loaded assembly.</param>
-        /// <param name="assemblyPath">The original file path of the assembly.</param>
-        public static void RegisterAssemblyPath(Assembly assembly, string assemblyPath)
-        {
-            if (assembly == null)
-            {
-                throw new ArgumentNullException(nameof(assembly));
-            }
-
-            if (string.IsNullOrEmpty(assemblyPath))
-            {
-                throw new ArgumentException("Assembly path cannot be null or empty.", nameof(assemblyPath));
-            }
-
-            // Use assembly full name as the key for uniqueness
-            string assemblyKey = assembly.FullName ?? assembly.GetName().Name ?? "Unknown";
-            s_assemblyPathRegistry.TryAdd(assemblyKey, assemblyPath);
-        }
-
-        /// <summary>
-        /// Attempts to get the registered assembly path for the given assembly.
-        /// </summary>
-        /// <param name="assembly">The assembly to look up.</param>
-        /// <param name="assemblyPath">The registered assembly path if found.</param>
-        /// <returns>True if the assembly path was found; otherwise, false.</returns>
-        public static bool TryGetRegisteredAssemblyPath(Assembly assembly, out string assemblyPath)
-        {
-            assemblyPath = string.Empty;
-
-            if (assembly == null)
-            {
-                return false;
-            }
-
-            string assemblyKey = assembly.FullName ?? assembly.GetName().Name ?? "Unknown";
-            if (s_assemblyPathRegistry.TryGetValue(assemblyKey, out string? registeredPath))
-            {
-                assemblyPath = registeredPath;
-                return true;
-            }
-            
-            return false;
-        }
 
         /// <summary>
         /// Registers assembly resolution handlers for inline tasks based on their load manifest file.
@@ -289,15 +231,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Clears the assembly path registry. This should be called at the end of a build
-        /// to prevent memory leaks and stale assembly path references.
-        /// </summary>
-        public static void ClearAssemblyPathRegistry()
-        {
-            s_assemblyPathRegistry.Clear();
-        }
-
-        /// <summary>
         /// Attempts to load an assembly by searching in the specified directories.
         /// </summary>
         /// <param name="directories">The directories to search in.</param>
@@ -328,37 +261,6 @@ namespace Microsoft.Build.Shared
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Attempts to reconstruct the assembly path for inline tasks loaded from bytes.
-        /// When assemblies are loaded via Assembly.Load(byte[]), their Location property is empty,
-        /// but we need the original path for AssemblyLoadInfo creation.
-        /// </summary>
-        /// <param name="taskType">The task type whose assembly path needs reconstruction.</param>
-        /// <param name="assemblyPath">When this method returns true, contains the reconstructed assembly path.</param>
-        /// <returns>True if the assembly path was successfully reconstructed; otherwise, false.</returns>
-        public static bool TryReconstructInlineTaskAssemblyPath(Type taskType, out string assemblyPath)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
-            
-            assemblyPath = string.Empty;
-            Assembly assembly = taskType.Assembly;
-            
-            // If assembly has a location, we're done
-            if (!string.IsNullOrEmpty(assembly.Location))
-            {
-                assemblyPath = assembly.Location;
-                return true;
-            }
-
-            // Try to get the registered assembly path
-            if (TryGetRegisteredAssemblyPath(assembly, out assemblyPath))
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }
