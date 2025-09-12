@@ -40,18 +40,15 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SetDebugPath_ShouldRedirectAbsolutePathInSolutionToTemp()
+        public void SetDebugPath_ShouldRedirectPathInSolutionDirectoryToTemp()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-
                 TransientTestProjectWithFiles dummyProject = env.CreateTestProjectWithFiles(@"
             <Project xmlns='msbuildnamespace'>
                 <Target Name='Build' />
             </Project>");
-
                 string testCurrentDir = Path.GetDirectoryName(dummyProject.ProjectFile);
-                Directory.CreateDirectory(testCurrentDir);
 
                 string originalCurrentDir = Directory.GetCurrentDirectory();
                 Directory.SetCurrentDirectory(testCurrentDir);
@@ -62,30 +59,28 @@ namespace Microsoft.Build.UnitTests
                 try
                 {
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
-                    string outsidePath = Path.Combine(testCurrentDir, "AbsoluteLogs");
 
+                    string inSolutionPath = Path.Combine(testCurrentDir, "AbsoluteLogs");
                     string fullCurrentDir = Path.GetFullPath(Directory.GetCurrentDirectory());
-                    string fullOutsidePath = Path.GetFullPath(outsidePath);
-                    Console.WriteLine($"CurrentDir: {fullCurrentDir}");
-                    Console.WriteLine($"OutsidePath: {fullOutsidePath}");
+                    string fullInSolutionPath = Path.GetFullPath(inSolutionPath);
 
-                    Directory.CreateDirectory(outsidePath);
-                    string dummyFile = Path.Combine(outsidePath, "dummy.txt");
+                    Directory.CreateDirectory(inSolutionPath);
+                    string dummyFile = Path.Combine(inSolutionPath, "dummy.txt");
                     File.WriteAllText(dummyFile, "test");
-                    File.Delete(dummyFile);
+                    File.Delete(dummyFile); 
 
-                    Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", outsidePath);
+                    Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", inSolutionPath);
                     DebugUtils.SetDebugPath();
                     string resultPath = DebugUtils.DebugPath;
 
                     resultPath.ShouldNotBeNull();
-                    resultPath.ShouldContain("MSBuild_Logs");
-                    resultPath.ShouldContain(FileUtilities.TempFileDirectory);
-                    resultPath.ShouldNotBe(Path.Combine(Directory.GetCurrentDirectory(), "AbsoluteLogs"));
+                    resultPath.ShouldContain("MSBuild_Logs");  
+                    resultPath.ShouldContain(FileUtilities.TempFileDirectory);  
+                    resultPath.ShouldNotBe(fullInSolutionPath);  
                 }
                 finally
                 {
-                    Directory.SetCurrentDirectory(originalCurrentDir);  // Restore current dir
+                    Directory.SetCurrentDirectory(originalCurrentDir);
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", originalEnvVar);
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGENGINE", originalDebugEngineValue);
                 }
