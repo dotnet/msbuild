@@ -73,10 +73,32 @@ namespace Microsoft.Build.Shared
                     : FileUtilities.TempFileDirectory;
         }
 
+        private static string s_debugDumpPathInRunningTests = GetDebugDumpPath();
+        internal static bool ResetDebugDumpPathInRunningTests = false;
+
         /// <summary>
         /// The directory used for diagnostic log files.
         /// </summary>
-        internal static string DebugDumpPath => s_debugDumpPath;
+        internal static string DebugDumpPath
+        {
+            get
+            {
+                if (BuildEnvironmentHelper.Instance.RunningTests)
+                {
+                    if (ResetDebugDumpPathInRunningTests)
+                    {
+                        s_debugDumpPathInRunningTests = GetDebugDumpPath();
+                        // reset dump file name so new one is created in new path
+                        s_dumpFileName = null;
+                        ResetDebugDumpPathInRunningTests = false;
+                    }
+
+                    return s_debugDumpPathInRunningTests;
+                }
+
+                return s_debugDumpPath;
+            }
+        }
 
         /// <summary>
         /// The file used for diagnostic log files.
