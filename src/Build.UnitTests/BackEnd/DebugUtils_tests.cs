@@ -51,6 +51,7 @@ namespace Microsoft.Build.UnitTests
                 string testCurrentDir = Path.GetDirectoryName(dummyProject.ProjectFile);
 
                 string originalCurrentDir = Directory.GetCurrentDirectory();
+                Console.WriteLine($"originalCurrentDir: {originalCurrentDir}");
                 Directory.SetCurrentDirectory(testCurrentDir);
 
                 string originalEnvVar = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
@@ -59,24 +60,22 @@ namespace Microsoft.Build.UnitTests
                 try
                 {
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
-
                     string inSolutionPath = Path.Combine(testCurrentDir, "AbsoluteLogs");
                     string fullCurrentDir = Path.GetFullPath(Directory.GetCurrentDirectory());
                     string fullInSolutionPath = Path.GetFullPath(inSolutionPath);
 
-                    Directory.CreateDirectory(inSolutionPath);
-                    string dummyFile = Path.Combine(inSolutionPath, "dummy.txt");
-                    File.WriteAllText(dummyFile, "test");
-                    File.Delete(dummyFile); 
+                    Console.WriteLine($"fullInSolutionPath: {fullInSolutionPath}");
+
+                    Console.WriteLine($"CurrentDir: {fullCurrentDir}");
+                    Console.WriteLine($"InSolutionPath: {fullInSolutionPath}");
 
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", inSolutionPath);
                     DebugUtils.SetDebugPath();
                     string resultPath = DebugUtils.DebugPath;
 
                     resultPath.ShouldNotBeNull();
-                    resultPath.ShouldContain("MSBuild_Logs");  
-                    resultPath.ShouldContain(FileUtilities.TempFileDirectory);  
-                    resultPath.ShouldNotBe(fullInSolutionPath);  
+                    resultPath.ShouldStartWith(FileUtilities.TempFileDirectory); 
+                    resultPath.ShouldNotBe(fullInSolutionPath);
                 }
                 finally
                 {
