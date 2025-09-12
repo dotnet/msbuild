@@ -132,14 +132,24 @@ namespace Microsoft.Build.Shared.Debugging
             if (string.IsNullOrWhiteSpace(debugPath))
             {
                 return false;
-            }            
-
+            }
             try
             {
                 string resolvedPath = Path.GetFullPath(debugPath);
                 string currentDir = Path.GetFullPath(Directory.GetCurrentDirectory());
-                
-                return resolvedPath.StartsWith(currentDir, StringComparison.OrdinalIgnoreCase);
+
+                // Check if currentDir is root path (e.g., "/" or "C:\") to avoid matching all absolute paths
+                if (currentDir == Path.GetPathRoot(currentDir))
+                {
+                    return false;
+                }
+
+                // Add trailing separator to ensure strict prefix match
+                string currentDirWithSep = currentDir.EndsWith(Path.DirectorySeparatorChar.ToString())
+                    ? currentDir
+                    : currentDir + Path.DirectorySeparatorChar;
+
+                return resolvedPath.StartsWith(currentDirWithSep, StringComparison.OrdinalIgnoreCase);
             }
             catch (Exception)
             {
