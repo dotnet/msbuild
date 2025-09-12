@@ -1234,6 +1234,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TaskFactoryWithNullTaskTypeLogsError()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_0.ToString());
+
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
@@ -1936,14 +1939,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
-                // Ensure change wave 18.0 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
-                // Reset change wave state for this test
-                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_0.ToString());
 
                 List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
 
                 ProjectRootElement project = ProjectRootElement.Create();
-                
+
                 // Test with AssemblyTaskFactory (default factory)
                 ProjectUsingTaskElement element1 = project.AddUsingTask("TestTask", _testTaskLocation, null);
                 elementList.Add(element1);
@@ -1954,11 +1955,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 elementList.Add(element2);
 
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                
+
                 // These should not throw exceptions
                 TaskFactoryWrapper factory1 = registry.GetRegisteredTask("TestTask", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
                 TaskFactoryWrapper factory2 = registry.GetRegisteredTask("TestTask2", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
-                
+
                 Assert.NotNull(factory1);
                 Assert.NotNull(factory2);
             }
