@@ -26,7 +26,7 @@ namespace Microsoft.Build.CommandLine
         /// Encapsulates the buildEventArg in this packet.
         /// </summary>
         internal LogMessagePacket(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent)
-            : base(nodeBuildEvent, null)
+            : base(nodeBuildEvent)
         {
         }
 
@@ -36,7 +36,6 @@ namespace Microsoft.Build.CommandLine
         private LogMessagePacket(ITranslator translator)
             : base(translator)
         {
-            Translate(translator);
         }
 
         /// <summary>
