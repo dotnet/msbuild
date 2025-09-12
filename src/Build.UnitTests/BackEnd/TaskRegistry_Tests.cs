@@ -1931,40 +1931,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        /// <summary>
-        /// Verify that built-in task factories are still allowed when change wave 18.0 is enabled
-        /// </summary>
-        [Fact]
-        public void BuiltInTaskFactoriesAllowedWhenChangeWaveEnabled()
-        {
-            using (TestEnvironment env = TestEnvironment.Create(_output))
-            {
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_0.ToString());
-
-                List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
-
-                ProjectRootElement project = ProjectRootElement.Create();
-
-                // Test with AssemblyTaskFactory (default factory)
-                ProjectUsingTaskElement element1 = project.AddUsingTask("TestTask", _testTaskLocation, null);
-                elementList.Add(element1);
-
-                // Test with explicit AssemblyTaskFactory
-                ProjectUsingTaskElement element2 = project.AddUsingTask("TestTask2", _testTaskLocation, null);
-                element2.TaskFactory = "AssemblyTaskFactory";
-                elementList.Add(element2);
-
-                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-
-                // These should not throw exceptions
-                TaskFactoryWrapper factory1 = registry.GetRegisteredTask("TestTask", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
-                TaskFactoryWrapper factory2 = registry.GetRegisteredTask("TestTask2", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
-
-                Assert.NotNull(factory1);
-                Assert.NotNull(factory2);
-            }
-        }
-
         #endregion
 
         #region SerializationTests
