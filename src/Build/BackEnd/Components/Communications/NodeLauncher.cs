@@ -43,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Creates new MSBuild or dotnet process.
         /// </summary>
         private Process StartInternal(string msbuildLocation, string commandLineArgs)
         {
