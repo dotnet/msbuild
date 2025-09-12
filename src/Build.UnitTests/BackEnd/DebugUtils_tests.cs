@@ -44,28 +44,44 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                TransientTestProjectWithFiles dummyProject = env.CreateTestProjectWithFiles(@"
+            <Project xmlns='msbuildnamespace'>
+                <Target Name='Build' />
+            </Project>");
+
+                string testCurrentDir = Path.GetDirectoryName(dummyProject.ProjectFile);
+                Directory.CreateDirectory(testCurrentDir);
+
+                string originalCurrentDir = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(testCurrentDir);
+
                 string originalEnvVar = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
                 string originalDebugEngineValue = Environment.GetEnvironmentVariable("MSBUILDDEBUGENGINE");
-                
+
                 try
                 {
-                    // Enable debug engine and set a relative path
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
-                    Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", "./TestLogs");
+                    string outsidePath = Path.Combine(FileUtilities.TempFileDirectory, "ExternalLogs");
 
-                    // Call SetDebugPath
+                    string fullCurrentDir = Path.GetFullPath(Directory.GetCurrentDirectory());
+                    string fullOutsidePath = Path.GetFullPath(outsidePath);
+                    Console.WriteLine($"CurrentDir: {fullCurrentDir}");
+                    Console.WriteLine($"OutsidePath: {fullOutsidePath}");
+
+                    Directory.CreateDirectory(outsidePath);
+                    string dummyFile = Path.Combine(outsidePath, "dummy.txt");
+                    File.WriteAllText(dummyFile, "test");
+                    File.Delete(dummyFile);
+
+                    Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", outsidePath);
                     DebugUtils.SetDebugPath();
-
                     string resultPath = DebugUtils.DebugPath;
 
-                    // Should be redirected to temp directory with MSBuild_Logs
-                    resultPath.ShouldNotBeNull();
-                    resultPath.ShouldContain("MSBuild_Logs");
-                    resultPath.ShouldContain(FileUtilities.TempFileDirectory);
-                    resultPath.ShouldNotContain("TestLogs");
+                    resultPath.ShouldBe(fullOutsidePath);
                 }
                 finally
                 {
+                    Directory.SetCurrentDirectory(originalCurrentDir);  // Restore current dir
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", originalEnvVar);
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGENGINE", originalDebugEngineValue);
                 }
@@ -77,28 +93,44 @@ namespace Microsoft.Build.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                TransientTestProjectWithFiles dummyProject = env.CreateTestProjectWithFiles(@"
+            <Project xmlns='msbuildnamespace'>
+                <Target Name='Build' />
+            </Project>");
+
+                string testCurrentDir = Path.GetDirectoryName(dummyProject.ProjectFile);
+                Directory.CreateDirectory(testCurrentDir);
+
+                string originalCurrentDir = Directory.GetCurrentDirectory();
+                Directory.SetCurrentDirectory(testCurrentDir);
+
                 string originalEnvVar = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
                 string originalDebugEngineValue = Environment.GetEnvironmentVariable("MSBUILDDEBUGENGINE");
-                
+
                 try
                 {
-                    // Enable debug engine and set the test path
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
-                    Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", Path.Combine(Directory.GetCurrentDirectory(), "AbsoluteLogs"));
+                    string outsidePath = Path.Combine(FileUtilities.TempFileDirectory, "ExternalLogs");
 
-                    // Call SetDebugPath
+                    string fullCurrentDir = Path.GetFullPath(Directory.GetCurrentDirectory());
+                    string fullOutsidePath = Path.GetFullPath(outsidePath);
+                    Console.WriteLine($"CurrentDir: {fullCurrentDir}");
+                    Console.WriteLine($"OutsidePath: {fullOutsidePath}");
+
+                    Directory.CreateDirectory(outsidePath);
+                    string dummyFile = Path.Combine(outsidePath, "dummy.txt");
+                    File.WriteAllText(dummyFile, "test");
+                    File.Delete(dummyFile);
+
+                    Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", outsidePath);
                     DebugUtils.SetDebugPath();
-
                     string resultPath = DebugUtils.DebugPath;
 
-                    // Should be redirected to temp directory with MSBuild_Logs
-                    resultPath.ShouldNotBeNull();
-                    resultPath.ShouldContain("MSBuild_Logs");
-                    resultPath.ShouldContain(FileUtilities.TempFileDirectory);
-                    resultPath.ShouldNotBe(Path.Combine(Directory.GetCurrentDirectory(), "AbsoluteLogs"));
+                    resultPath.ShouldBe(fullOutsidePath);
                 }
                 finally
                 {
+                    Directory.SetCurrentDirectory(originalCurrentDir);  // Restore current dir
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", originalEnvVar);
                     Environment.SetEnvironmentVariable("MSBUILDDEBUGENGINE", originalDebugEngineValue);
                 }
