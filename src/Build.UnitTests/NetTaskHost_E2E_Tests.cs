@@ -34,7 +34,6 @@ namespace Microsoft.Build.Engine.UnitTests
             using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
             var bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
 
-            // Environment variables needed to discover the .NET Core SDK from bootstrap folder.
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
             string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
@@ -56,6 +55,25 @@ namespace Microsoft.Build.Engine.UnitTests
                Path.Combine(RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "Microsoft.Build.dll"),
                customTaskAssemblyLocation);
             testTaskOutput.ShouldNotContain(resource);
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void MSBuildTaskInNetHostTest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            var bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestMSBuildTaskInNet", "TestMSBuildTaskInNet.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain($"Hello TEST");
         }
     }
 }
