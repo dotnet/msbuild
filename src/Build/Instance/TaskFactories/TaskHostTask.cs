@@ -302,6 +302,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+                int _acquiredHostNodeId = -1;
                 lock (_taskHostLock)
                 {
                     _requiredContext = CommunicationsUtilities.GetHandshakeOptions(
@@ -311,7 +312,8 @@ namespace Microsoft.Build.BackEnd
                         // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
                         nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
                         taskHostParameters: _taskHostParameters);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
+                    _acquiredHostNodeId = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
+                    _connectedToTaskHost = (_acquiredHostNodeId != -1);
                 }
 
                 if (_connectedToTaskHost)
@@ -340,7 +342,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         lock (_taskHostLock)
                         {
-                            _taskHostProvider.DisconnectFromHost(_requiredContext);
+                            _taskHostProvider.DisconnectFromHost(_requiredContext, _acquiredHostNodeId);
                             _connectedToTaskHost = false;
                         }
                     }

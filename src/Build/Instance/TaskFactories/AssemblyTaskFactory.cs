@@ -355,14 +355,14 @@ namespace Microsoft.Build.BackEnd
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
-                useTaskFactory = _taskHostFactoryExplicitlyRequested || !TaskHostParametersMatchCurrentProcess(mergedParameters);
+                useTaskFactory = _taskHostFactoryExplicitlyRequested || !TaskHostParametersMatchCurrentProcess(mergedParameters) || isOutOfProc;
             }
             else
             {
                 // if we don't have any task host parameters specified on either the using task or the
                 // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
                 // as the task factory.
-                useTaskFactory = _taskHostFactoryExplicitlyRequested;
+                useTaskFactory = _taskHostFactoryExplicitlyRequested || isOutOfProc;
             }
 
             if (useTaskFactory)
