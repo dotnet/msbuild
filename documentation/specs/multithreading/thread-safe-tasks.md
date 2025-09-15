@@ -244,7 +244,7 @@ To prevent common thread-safety issues related to path handling, we introduce pa
 
 ```csharp
 namespace Microsoft.Build.Framework;
-public struct AbsolutePath
+public readonly struct AbsolutePath
 {
     public string Path { get; }
     internal AbsolutePath(string path) { }
@@ -252,11 +252,12 @@ public struct AbsolutePath
     public static implicit operator string(AbsolutePath path) { }
 }
 
-public struct RelativePath
+public readonly struct RelativePath
 {
     public string Path { get; }
     public RelativePath(string path) { }
-    public AbsolutePath ToAbsolutePath(AbsolutePath? basePath = null) { }
+    public AbsolutePath ToAbsolutePath(AbsolutePath basePath) { }
+    internal AbsolutePath ToAbsolutePath() { }
     public static implicit operator string(RelativePath path) { }
 }
 ```
