@@ -138,7 +138,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                throw new NotImplementedException();
+                return int.MaxValue;
             }
         }
 
@@ -628,13 +628,12 @@ namespace Microsoft.Build.BackEnd
         internal bool CreateNode(HandshakeOptions hostContext, int nextNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, Dictionary<string, string> taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
+            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(nextNodeId), "We should not already have a factory for this nodeId!  Did we forget to call DisconnectFromHost somewhere?");
 
             // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
             string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
             IList<NodeContext> nodeContexts;
-            // int nodeId = (int)hostContext;
 
             // Handle .NET task host context
 #if NETFRAMEWORK
