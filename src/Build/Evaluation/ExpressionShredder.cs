@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
@@ -164,7 +165,7 @@ namespace Microsoft.Build.Evaluation
 
                     SinkWhitespace(expression, ref currentIndex);
                     bool transformOrFunctionFound = true;
-                    List<ItemExpressionCapture> transformExpressions = null;
+                    ItemExpressionCaptureList transformExpressions = null;
 
                     // If there's an '->' eat it and the subsequent quoted expression or transform function
                     while (Sink(expression, ref currentIndex, end, '-', '>') && transformOrFunctionFound)
@@ -179,7 +180,7 @@ namespace Microsoft.Build.Evaluation
                             int endQuoted = currentIndex - 1;
                             if (transformExpressions == null)
                             {
-                                transformExpressions = new List<ItemExpressionCapture>();
+                                transformExpressions = new ItemExpressionCaptureList();
                             }
 
                             transformExpressions.Add(new ItemExpressionCapture(startQuoted, endQuoted - startQuoted, expression.Substring(startQuoted, endQuoted - startQuoted)));
@@ -192,7 +193,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (transformExpressions == null)
                             {
-                                transformExpressions = new List<ItemExpressionCapture>();
+                                transformExpressions = new ItemExpressionCaptureList();
                             }
 
                             transformExpressions.Add(functionCapture.Value);
@@ -702,6 +703,98 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Used to track <see cref="ItemExpressionCapture"/> instances found in the <see cref="ReferencedItemExpressionsEnumerator"/>.
+        /// The is commonly only one item, so we optimize for that case and avoid allocating a list until we need to.
+        /// </summary>
+        internal class ItemExpressionCaptureList : IEnumerable<ItemExpressionCapture>
+        {
+            private ItemExpressionCapture singleItem;
+            private List<ItemExpressionCapture> additional;
+            private int count;
+
+            public int Count => count;
+
+            public ItemExpressionCapture this[int index]
+            {
+                get
+                {
+                    if (index < 0 || index > count - 1)
+                    {
+                        throw new ArgumentOutOfRangeException();
+                    }
+
+                    if (index == 0)
+                    {
+                        return singleItem;
+                    }
+                    else
+                    {
+                        int additionalIndex = index - 1;
+                        return additional[additionalIndex];
+                    }
+                }
+            }
+
+            public void Add(ItemExpressionCapture item)
+            {
+                if (count == 0)
+                {
+                    singleItem = item;
+                }
+                else
+                {
+                    additional ??= new List<ItemExpressionCapture>();
+                    additional.Add(item);
+                }
+
+                ++count;
+            }
+
+            public Enumerator GetEnumerator() => new Enumerator(this);
+
+            IEnumerator<ItemExpressionCapture> IEnumerable<ItemExpressionCapture>.GetEnumerator() => GetEnumerator();
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+            public struct Enumerator : IEnumerator<ItemExpressionCapture>
+            {
+                private readonly ItemExpressionCaptureList list;
+                private int index;
+
+                public Enumerator(ItemExpressionCaptureList list)
+                {
+                    this.list = list;
+                    index = 0;
+                    Current = default;
+                }
+
+                public ItemExpressionCapture Current { get; private set; }
+
+                object IEnumerator.Current => Current;
+
+                public bool MoveNext()
+                {
+                    if (index < list.count)
+                    {
+                        Current = list[index];
+                        ++index;
+                        return true;
+                    }
+
+                    Current = default;
+
+                    return false;
+                }
+
+                void IDisposable.Dispose() { }
+
+                void IEnumerator.Reset()
+                {
+                    index = 0;
+                }
+            }
+        }
+
+        /// <summary>
         /// Represents one substring for a single successful capture.
         /// </summary>
         internal struct ItemExpressionCapture
@@ -715,7 +808,7 @@ namespace Microsoft.Build.Evaluation
             {
             }
 
-            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, List<ItemExpressionCapture> captures)
+            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, ItemExpressionCaptureList captures)
                 : this(index, length, subExpression, itemType, separator, separatorStart, captures, null, null)
             {
             }
@@ -724,7 +817,7 @@ namespace Microsoft.Build.Evaluation
             /// Create an Expression Capture instance
             /// Represents a sub expression, shredded from a larger expression
             /// </summary>
-            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, List<ItemExpressionCapture> captures, string functionName, string functionArguments)
+            public ItemExpressionCapture(int index, int length, string subExpression, string itemType, string separator, int separatorStart, ItemExpressionCaptureList captures, string functionName, string functionArguments)
             {
                 Index = index;
                 Length = length;
@@ -740,7 +833,7 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Captures within this capture
             /// </summary>
-            public List<ItemExpressionCapture> Captures { get; }
+            public ItemExpressionCaptureList Captures { get; }
 
             /// <summary>
             /// The position in the original string where the first character of the captured

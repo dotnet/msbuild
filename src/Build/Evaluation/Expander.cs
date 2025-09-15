@@ -1921,7 +1921,7 @@ namespace Microsoft.Build.Evaluation
                     IElementLocation elementLocation,
                     ExpanderOptions options,
                     bool includeNullEntries,
-                    List<ExpressionShredder.ItemExpressionCapture> captures,
+                    ExpressionShredder.ItemExpressionCaptureList captures,
                     ICollection<S> itemsOfType,
                     out bool brokeEarly)
                 where S : class, IItem
@@ -2246,7 +2246,7 @@ namespace Microsoft.Build.Evaluation
                 isTransformExpression = false;
 
                 ICollection<S> itemsOfType = evaluatedItems.GetItems(expressionCapture.ItemType);
-                List<ExpressionShredder.ItemExpressionCapture> captures = expressionCapture.Captures;
+                ExpressionShredder.ItemExpressionCaptureList captures = expressionCapture.Captures;
 
                 // If there are no items of the given type, then bail out early
                 if (itemsOfType.Count == 0)
