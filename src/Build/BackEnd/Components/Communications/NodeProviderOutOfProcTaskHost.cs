@@ -83,8 +83,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ConcurrentDictionary<int, NodeContext> _nodeContexts;
 
-        private object _nodeContextsLock = new object();
-
         /// <summary>
         /// The next node id to assign to a node.
         /// </summary>
@@ -192,10 +190,7 @@ namespace Microsoft.Build.BackEnd
             // Send the build completion message to the nodes, causing them to shutdown or reset.
             List<NodeContext> contextsToShutDown;
 
-            lock (_nodeContextsLock)
-            {
-                contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
-            }
+            contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
@@ -699,10 +694,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextCreated(NodeContext context)
         {
-            lock (_nodeContextsLock)
-            {
-                _nodeContexts[context.NodeId] = context;
-            }
+            _nodeContexts[context.NodeId] = context;
 
             // Start the asynchronous read.
             context.BeginAsyncPacketRead();
