@@ -711,10 +711,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
-            lock (_nodeContexts)
-            {
-                _nodeContexts.TryRemove(nodeId, out _);
-            }
+            _nodeContexts.TryRemove(nodeId, out _);
 
             // May also be removed by unnatural termination, so don't assume it's there
             lock (_activeNodes)
