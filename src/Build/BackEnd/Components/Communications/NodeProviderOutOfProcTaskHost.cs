@@ -88,8 +88,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private int _nextNodeId = 1;
 
-        private object _nextNodeIdLock = new object();
-
+        private LockType _nextNodeIdLock = new LockType();
         /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
         /// </summary>
