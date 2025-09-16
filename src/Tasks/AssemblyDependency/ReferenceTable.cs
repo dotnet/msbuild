@@ -2703,8 +2703,7 @@ namespace Microsoft.Build.Tasks
             else
             {
                 // If there were non-primary source items, then forward metadata from them.
-                ICollection<ITaskItem> sourceItems = reference.GetSourceItems();
-                foreach (ITaskItem sourceItem in sourceItems)
+                foreach (ITaskItem sourceItem in reference.GetSourceItems())
                 {
                     referenceItem ??= new TaskItem(reference.FullPath);
                     sourceItem.CopyMetadataTo(referenceItem);
