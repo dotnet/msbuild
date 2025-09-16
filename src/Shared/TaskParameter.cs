@@ -825,10 +825,6 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            public SerializableMetadata BackingMetadata => default;
-
-            public bool HasCustomMetadata => _customEscapedMetadata?.Count > 0;
-
             /// <summary>
             /// Allows the values of metadata on the item to be queried.
             /// </summary>

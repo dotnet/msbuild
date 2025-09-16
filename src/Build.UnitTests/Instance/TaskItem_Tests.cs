@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -192,12 +191,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.MetadataNames.Cast<string>().ShouldBeSetEquivalentTo(new[] { "a", "b" }.Concat(s_builtInMetadataNames));
             item.MetadataCount.ShouldBe(s_builtInMetadataNames.Length + 2);
             item.DirectMetadataCount.ShouldBe(1);
-            item.HasCustomMetadata.ShouldBeTrue();
 
-            ImmutableDictionary<string, string> metadata = item.MetadataCollection;
+            ICopyOnWritePropertyDictionary<ProjectMetadataInstance> metadata = item.MetadataCollection;
             metadata.Count.ShouldBe(2);
-            metadata["a"].ShouldBe("override");
-            metadata["b"].ShouldBe("base");
+            metadata["a"].EvaluatedValue.ShouldBe("override");
+            metadata["b"].EvaluatedValue.ShouldBe("base");
 
             item.EnumerateMetadata().ShouldBeSetEquivalentTo(new KeyValuePair<string, string>[] { new("a", "override"), new("b", "base") });
 
@@ -221,12 +219,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     }
                 }
 
-                ImmutableDictionary<string, string> directMetadata = ImmutableDictionaryExtensions.EmptyMetadata;
+                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = new();
                 if (metadata is not null)
                 {
                     foreach ((string name, string value) in metadata)
                     {
-                        directMetadata = directMetadata.SetItem(name, value);
+                        directMetadata.Set(new(name, value));
                     }
                 }
 
