@@ -388,7 +388,7 @@ namespace Microsoft.Build.BackEnd
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    _isTaskHostFactory
+                    taskHostFactoryExplicitlyRequested: _isTaskHostFactory
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif

@@ -337,16 +337,42 @@ namespace Microsoft.Build.BackEnd
             }
 
             string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
-            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) &&
-                realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+
+            // When MSBuild loads a task assembly, it uses Assembly.LoadFrom() with a specific path,
+            // but .NET then loads based on the assembly identity with that path only as a hint.
+            // This can result in the assembly being loaded from a different location than expected:
+            //
+            // 1. Assembly loading from the Global Assembly Cache (GAC) if that assembly version is GACed
+            // 2. Assembly loading from elsewhere if someone already loaded an assembly with the same 
+            //    identity from a different path
+            //
+            // Both scenarios can result in confusing task behavior because you're not loading the 
+            // assembly you intended. MSBuild tells .NET Framework to load a specific assembly,
+            // but .NET Framework may load something else entirely.
+            //
+            // Common example: A NuGet package task that doesn't change its assembly version between 
+            // package versions. When you update the package and build while worker nodes are still 
+            // alive, the task stays loaded from the old version instead of the new one.
+            //
+            // This validation helps identify these scenarios by checking if the loaded assembly 
+            // location matches what we expected, and logging a message when there's a mismatch
+            // to help diagnose confusing task behavior issues.
+            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
             {
-                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                if (!IsTaskAssemblyMatchFactoryType())
+                {
+                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                }
             }
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
 
             return true;
+
+            // Function to validate that if this is a TaskHostTask, the assembly it loaded is the same one we found in the registry.
+            bool IsTaskAssemblyMatchFactoryType() => TaskInstance is not TaskHostTask tht
+                || tht.LoadedTaskAssemblyInfo.AssemblyLocation == _taskFactoryWrapper.TaskFactoryLoadedType.Path;
         }
 
         /// <summary>
@@ -1384,7 +1410,6 @@ namespace Microsoft.Build.BackEnd
                 {
                     // Only count non-null elements. We sometimes have a single-element array where the element is null
                     bool hasElements = false;
-                    _batchBucket.Lookup.EnsureCapacity(outputs.Length);
 
                     foreach (ITaskItem output in outputs)
                     {
@@ -1549,8 +1574,6 @@ namespace Microsoft.Build.BackEnd
             {
                 if (outputTargetIsItem)
                 {
-                    _batchBucket.Lookup.EnsureCapacity(outputs.Length);
-
                     // to store the outputs as items, use the string representations of the outputs as item-specs
                     foreach (string output in outputs)
                     {

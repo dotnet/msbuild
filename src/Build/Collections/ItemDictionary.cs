@@ -29,7 +29,7 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Item class type to store</typeparam>
     [DebuggerDisplay("#Item types={ItemTypes.Count} #Items={Count}")]
-    internal sealed class ItemDictionary<T> : IItemDictionary<T>
+    internal sealed class ItemDictionary<T> : ICollection<T>, IItemDictionary<T>
         where T : class, IKeyed, IItem
     {
         /// <summary>
@@ -82,27 +82,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Number of items in total, for debugging purposes.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                lock (_itemLists)
-                {
-                    return _nodes.Count;
-                }
-            }
-        }
-
-        public int ItemTypesCount
-        {
-            get
-            {
-                lock (_itemLists)
-                {
-                    return _itemLists.Count;
-                }
-            }
-        }
+        public int Count => _nodes.Count;
 
         /// <summary>
         /// Get the item types that have at least one item in this collection
@@ -121,6 +101,8 @@ namespace Microsoft.Build.Collections
                 }
             }
         }
+
+        public bool IsReadOnly => false;
 
         /// <summary>
         /// Returns the item list for a particular item type,
@@ -147,16 +129,6 @@ namespace Microsoft.Build.Collections
                 return new ReadOnlyCollection<T>(list);
             }
         }
-
-#if NET
-        public void EnsureCapacity(int desiredCapacity)
-        {
-            lock (_itemLists)
-            {
-                _itemLists.EnsureCapacity(desiredCapacity);
-            }
-        }
-#endif
 
         /// <summary>
         /// Empty the collection
@@ -431,6 +403,20 @@ namespace Microsoft.Build.Collections
 
             LinkedListNode<T> node = list.AddLast(projectItem);
             _nodes.Add(projectItem, node);
+        }
+
+        public void CopyTo(T[] array, int arrayIndex)
+        {
+            if (Count > array.Length - arrayIndex)
+            {
+                throw new ArgumentException(nameof(array));
+            }
+
+            foreach (T item in this)
+            {
+                array[arrayIndex] = item;
+                ++arrayIndex;
+            }
         }
 
         /// <summary>

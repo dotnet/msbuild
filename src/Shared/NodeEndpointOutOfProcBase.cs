@@ -416,7 +416,7 @@ namespace Microsoft.Build.BackEnd
                         foreach (var component in handshakeComponents.EnumerateComponents())
                         {
                            
-                            if (_pipeServer.TryReadIntForHandshake(
+                            if (!_pipeServer.TryReadIntForHandshake(
                                 byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
                              ClientConnectTimeout, /* wait a long time for the handshake from this side */
@@ -425,6 +425,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 CommunicationsUtilities.Trace($"Handshake failed with error: {result.ErrorMessage}");
                             }
+
                             if (!IsHandshakePartValid(component, result.Value, index))
                             {
                                 CommunicationsUtilities.Trace(
