@@ -22,7 +22,7 @@ Run these commands in sequence to set up a complete development environment:
 **Windows:**
 ```cmd
 # Full build with restore - NEVER CANCEL: Takes ~2-3 minutes. Set timeout to 300+ seconds.
-.\build.cmd /v:q
+.\build.cmd -v quiet
 
 # Set up bootstrap environment for using built MSBuild
 artifacts\msbuild-build-env.bat
@@ -31,7 +31,7 @@ artifacts\msbuild-build-env.bat
 **macOS/Linux:**
 ```bash
 # Full build with restore - NEVER CANCEL: Takes ~2-3 minutes. Set timeout to 300+ seconds.
-./build.sh /v:q
+./build.sh -v quiet
 
 # Set up bootstrap environment for using built MSBuild
 source artifacts/sdk-build-env.sh
@@ -131,8 +131,8 @@ dotnet artifacts/bin/bootstrap/core/MSBuild.dll --help
 ### Development Workflow
 1. Make your changes to source code
 2. Run the full build to compile (WAIT for completion - takes 2-3 minutes):
-   - Windows: `.\build.cmd -build`
-   - macOS/Linux: `./build.sh -build`
+   - Windows: `.\build.cmd -v quiet`
+   - macOS/Linux: `./build.sh -v quiet`
 3. Set up environment:
    - Windows: `artifacts\msbuild-build-env.bat`
    - macOS/Linux: `source artifacts/sdk-build-env.sh`
