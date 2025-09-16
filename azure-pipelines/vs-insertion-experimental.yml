@@ -2,14 +2,6 @@
 trigger: none
 name: $(Date:yyyyMMdd).$(Rev:r)
 
-schedules:
-  - cron: '0 * * * *' # Runs every hour automatically
-    displayName: Hourly VS insertion exp
-    branches:
-      include:
-        - exp/*
-    always: false # Don't run if there are no code changes
-    
 resources:
   pipelines:
   - pipeline: 'MSBuildExpPerf'
@@ -41,7 +33,8 @@ parameters:
       - rel/d17.6
       - rel/d17.3
       - rel/d17.0
-
+      - rel/d16.11
+      
 variables:
   - name: TeamName
     value: msbuild
@@ -112,6 +105,8 @@ extends:
               $branch = $branchSegments[-1]
               Write-Host "Setting drops branch to '$branch'"
               Write-Host "##vso[task.setvariable variable=SourceBranchName]$branch"
+              Write-Host "updating build number with build commit"
+              Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber).$(MSBuild_CI_SourceVersion)"
 
         - task: Powershell@2
           name: DetermineTargetBranch
@@ -187,3 +182,4 @@ extends:
             InsertionReviewers: MSBuild
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
             InsertionBuildPolicy: Request Perf DDRITs
+

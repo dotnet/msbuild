@@ -17,6 +17,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Instance;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -101,7 +102,7 @@ namespace Microsoft.Build.Execution
             string itemType,
             string includeEscaped,
             string includeBeforeWildcardExpansionEscaped,
-            ImmutableDictionary<string, string> directMetadata,
+            IReadOnlyDictionary<string, string> directMetadata,
             IList<ProjectItemDefinitionInstance> itemDefinitions,
             string definingFileEscaped,
             bool useItemDefinitionsWithoutModification)
@@ -616,14 +617,14 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Set all the supplied metadata on all the supplied items.
         /// </summary>
-        internal static void SetMetadata(IEnumerable<KeyValuePair<string, string>> metadataList, IEnumerable<ProjectItemInstance> items)
+        internal static void SetMetadata(Dictionary<string, string> metadataList, List<ProjectItemInstance> items)
         {
-            // Set up a single dictionary that can be applied to all the items
-            ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
-                .SetItems(metadataList, ProjectMetadataInstance.VerifyThrowReservedName);
-
-            if (metadata.Count > 0)
+            if (metadataList.Count != 0 && items.Count != 0)
             {
+                // Set up a single dictionary that can be applied to all the items
+                ImmutableDictionary<string, string> metadata = ImmutableDictionaryExtensions.EmptyMetadata
+                    .SetItems(metadataList, ProjectMetadataInstance.VerifyThrowReservedName);
+
                 foreach (ProjectItemInstance item in items)
                 {
                     item._taskItem.SetMetadata(metadata); // Potential copy on write
@@ -728,7 +729,7 @@ namespace Microsoft.Build.Execution
             string itemTypeToUse,
             string includeEscaped,
             string includeBeforeWildcardExpansionEscaped,
-            ImmutableDictionary<string, string> directMetadata,
+            IReadOnlyDictionary<string, string> directMetadata,
             IList<ProjectItemDefinitionInstance> itemDefinitions,
             string definingFileEscaped,
             bool useItemDefinitionsWithoutModification)
@@ -812,7 +813,7 @@ namespace Microsoft.Build.Execution
             /// Lazily created, as there are huge numbers of items generated in
             /// a build that have no metadata at all.
             /// </remarks>
-            private ImmutableDictionary<string, string> _directMetadata;
+            private IReadOnlyDictionary<string, string> _directMetadata;
 
             /// <summary>
             /// Cached value of the fullpath metadata. All other metadata are computed on demand.
@@ -855,7 +856,7 @@ namespace Microsoft.Build.Execution
             internal TaskItem(
                               string includeEscaped,
                               string includeBeforeWildcardExpansionEscaped,
-                              ImmutableDictionary<string, string> directMetadata,
+                              IReadOnlyDictionary<string, string> directMetadata,
                               IList<ProjectItemDefinitionInstance> itemDefinitions,
                               string projectDirectory,
                               bool immutable,
@@ -1073,6 +1074,31 @@ namespace Microsoft.Build.Execution
                 get { return (_directMetadata == null) ? 0 : _directMetadata.Count; }
             }
 
+            private ImmutableDictionary<string, string> DirectMetadata
+            {
+                get
+                {
+                    if (_directMetadata is null)
+                    {
+                        return ImmutableDictionaryExtensions.EmptyMetadata;
+                    }
+                    else if (_directMetadata is ImmutableDictionary<string, string> realImplementation)
+                    {
+                        return realImplementation;
+                    }
+                    else if (_directMetadata is ImmutableProjectMetadataCollectionConverter collectionFromCache)
+                    {
+                        return collectionFromCache.ToImmutableDictionary();
+                    }
+                    else
+                    {
+                        var directMetadata = _directMetadata.ToImmutableDictionary(MSBuildNameIgnoreCaseComparer.Default);
+                        _directMetadata = directMetadata;
+                        return directMetadata;
+                    }
+                }
+            }
+
             /// <summary>
             /// Gets a value indicating whether indicates whether the item has any custom metadata.
             /// </summary>
@@ -1086,7 +1112,7 @@ namespace Microsoft.Build.Execution
             {
                 // If we have item definitions, call the expensive property that does the right thing.
                 // Otherwise use _directMetadata to avoid allocations caused by DeepClone().
-                var list = _itemDefinitions != null ? MetadataCollection : _directMetadata;
+                var list = _itemDefinitions != null ? MetadataCollection : DirectMetadata;
                 if (list != null)
                 {
 #if FEATURE_APPDOMAIN
@@ -1156,10 +1182,9 @@ namespace Microsoft.Build.Execution
                 }
                 else
                 {
-                    _directMetadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
                     _directMetadata = validateKeys
-                        ? _directMetadata.SetItems(metadata, ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers)
-                        : _directMetadata.SetItems(metadata);
+                        ? DirectMetadata.SetItems(metadata, ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers)
+                        : DirectMetadata.SetItems(metadata);
                 }
             }
 
@@ -1213,7 +1238,7 @@ namespace Microsoft.Build.Execution
                     //  (last of which is any item definition metadata associated with the destination item's item type)
                     if (_itemDefinitions == null || _itemDefinitions.Count == 0)
                     {
-                        return _directMetadata ?? ImmutableDictionaryExtensions.EmptyMetadata; // copy on write!
+                        return DirectMetadata; // copy on write!
                     }
 
                     ImmutableDictionary<string, string> lastItemDefinition = _itemDefinitions[_itemDefinitions.Count - 1].BackingMetadata;
@@ -1375,6 +1400,11 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string GetMetadata(string metadataName)
             {
+                if (_directMetadata is ImmutableProjectMetadataCollectionConverter metadataFromCache)
+                {
+                    return metadataFromCache.GetExtendedPropertyValue(metadataName);
+                }
+
                 return EscapingUtilities.UnescapeAll(GetMetadataEscaped(metadataName));
             }
 
@@ -1446,7 +1476,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                _directMetadata = _directMetadata?.Remove(metadataName);
+                _directMetadata = DirectMetadata?.Remove(metadataName);
             }
 
             /// <summary>
@@ -1935,7 +1965,7 @@ namespace Microsoft.Build.Execution
                     return;
                 }
 
-                _directMetadata = DirectMetadataCount == 0 ? metadata : _directMetadata.SetItems(metadata);
+                _directMetadata = DirectMetadataCount == 0 ? metadata : DirectMetadata.SetItems(metadata);
             }
 
             /// <summary>
@@ -1956,8 +1986,7 @@ namespace Microsoft.Build.Execution
                     ProjectMetadataInstance.VerifyThrowReservedName(name);
                 }
 
-                _directMetadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
-                _directMetadata = _directMetadata.SetItem(name, metadataValueEscaped ?? string.Empty);
+                _directMetadata = DirectMetadata.SetItem(name, metadataValueEscaped ?? string.Empty);
             }
 
             /// <summary>
@@ -1969,9 +1998,8 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                _directMetadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
                 ProjectMetadataInstance metadatum = new ProjectMetadataInstance(name, metadataValueEscaped, allowItemSpecModifiers /* may not be built-in metadata name */);
-                _directMetadata = _directMetadata.SetItem(name, metadatum.EvaluatedValueEscaped);
+                _directMetadata = DirectMetadata.SetItem(name, metadatum.EvaluatedValueEscaped);
 
                 return metadatum;
             }
@@ -1991,9 +2019,8 @@ namespace Microsoft.Build.Execution
 
                 if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
                 {
-                    _directMetadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
                     ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers(name);
-                    _directMetadata = _directMetadata.SetItem(name, evaluatedValueEscaped ?? string.Empty);
+                    _directMetadata = DirectMetadata.SetItem(name, evaluatedValueEscaped ?? string.Empty);
                 }
             }
 
@@ -2005,7 +2032,7 @@ namespace Microsoft.Build.Execution
                 var metadata = items
                     .Where(item => !FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key));
 
-                _directMetadata = _directMetadata.SetItems(metadata, ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers);
+                _directMetadata = DirectMetadata.SetItems(metadata, ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers);
             }
 
             /// <summary>
@@ -2029,7 +2056,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 // Don't bother checking for item-spec modifiers since Utilities.TaskItem already validates them.
-                _directMetadata = DirectMetadataCount == 0 ? items : _directMetadata.SetItems(items);
+                _directMetadata = DirectMetadataCount == 0 ? items : DirectMetadata.SetItems(items);
             }
 
             /// <summary>
@@ -2319,7 +2346,7 @@ namespace Microsoft.Build.Execution
                         itemDefinitionsClone.Add(sourceItemDefinition);
                     }
 
-                    return new ProjectItemInstance(_project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped, source._taskItem._directMetadata, itemDefinitionsClone, definingProject, useItemDefinitionsWithoutModification: false);
+                    return new ProjectItemInstance(_project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped, source._taskItem.DirectMetadata, itemDefinitionsClone, definingProject, useItemDefinitionsWithoutModification: false);
                 }
             }
 
