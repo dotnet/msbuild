@@ -52,6 +52,12 @@ namespace MSBuild
                     // Parse through this dependentAssembly subtree to find assemblyIdentity and bindingRedirect
                     while (reader.Read())
                     {
+                        if (reader.NodeType == XmlNodeType.EndElement && 
+                            reader.LocalName == "dependentAssembly")
+                        {
+                            break;
+                        }
+
                         if (reader.NodeType == XmlNodeType.Element)
                         {
                             if (reader.LocalName == "assemblyIdentity")
