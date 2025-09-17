@@ -34,9 +34,14 @@ namespace Microsoft.Build.Shared.Debugging
 
             if (Traits.Instance.DebugEngine)
             {
-                if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
+                if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory) && !IsPathInSolutionDirectory(debugDirectory))
                 {
                     // Debug directory is writable; no need for fallbacks
+                }
+                else if (!string.IsNullOrWhiteSpace(debugDirectory) && IsPathInSolutionDirectory(debugDirectory))
+                {
+                    // Redirect to temp to avoid infinite build loops in Visual Studio
+                    debugDirectory = Path.Combine(FileUtilities.TempFileDirectory, "MSBuild_Logs");
                 }
                 else if (FileUtilities.CanWriteToDirectory(Directory.GetCurrentDirectory()))
                 {
@@ -119,6 +124,51 @@ namespace Microsoft.Build.Shared.Debugging
             }
 
             return fullPath;
+        }
+
+        private static bool IsPathInSolutionDirectory(string debugPath)
+        {
+            if (string.IsNullOrWhiteSpace(debugPath))
+            {
+                return false;
+            }
+            try
+            {
+                string resolvedPath = Path.GetFullPath(debugPath).TrimEnd(Path.DirectorySeparatorChar);
+                string currentDir = Path.GetFullPath(Directory.GetCurrentDirectory()).TrimEnd(Path.DirectorySeparatorChar);
+
+                // On macOS, when current directory is in temp folder, Path.GetFullPath() 
+                // return paths with /private prefix while environment variables don't.
+                // Normalize both paths to ensure consistent comparison.
+                if (NativeMethodsShared.IsOSX)
+                {
+                    resolvedPath = NormalizePath(resolvedPath);
+                    currentDir = NormalizePath(currentDir);
+                }
+                return resolvedPath.StartsWith(currentDir, StringComparison.OrdinalIgnoreCase);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static string NormalizePath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+
+            // On macOS, remove /private prefix if present to ensure consistent path comparison
+            // This is needed when current directory is in temp folder, as Path.GetFullPath() 
+            // may return paths with /private prefix while environment variables don't
+            if (path.StartsWith("/private/", StringComparison.Ordinal))
+            {
+                return path.Substring(8); // Remove "/private" (8 characters)
+            }
+
+            return path;
         }
     }
 }
