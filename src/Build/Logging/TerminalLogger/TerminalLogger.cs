@@ -283,7 +283,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             return new TerminalLogger(verbosity, originalConsoleMode);
         }
-        
+
         // If explicitly disabled, always use console logger
         if (isDisabled)
         {
@@ -354,10 +354,14 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
         eventSource.StatusEventRaised += StatusEventRaised;
-
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
         eventSource.ErrorRaised += ErrorRaised;
+
+        if (eventSource is IEventSource3 eventSource3)
+        {
+            eventSource3.IncludeTaskInputs();
+        }
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -439,7 +443,6 @@ public sealed partial class TerminalLogger : INodeLogger
         return true;
     }
 
-
     /// <inheritdoc/>
     public void Shutdown()
     {
@@ -449,6 +452,16 @@ public sealed partial class TerminalLogger : INodeLogger
         _refresher?.Join();
         Terminal.Dispose();
         _cts.Dispose();
+    }
+
+    public MessageImportance GetMinimumMessageImportance()
+    {
+        if (Verbosity == LoggerVerbosity.Quiet)
+        {
+            // If the verbosity is quiet, we don't want to log anything.
+            return MessageImportance.High - 1;
+        }
+        return MessageImportance.High;
     }
 
     #endregion
@@ -722,19 +735,42 @@ public sealed partial class TerminalLogger : INodeLogger
                                 urlString = uri.ToString();
                             }
 
-                            // If the output path is under the initial working directory, make the console output relative to that to save space.
-                            if (outputPathSpan.StartsWith(_initialWorkingDirectory.AsSpan(), FileUtilities.PathComparison))
+                            // now we compute the path to show the user for this project.
+                            // some options:
+                            // * the raw, full output path from the MSBuild logic (OutputPath property)
+                            // * the output path relative to the initial working directory, if it is under it
+                            // * the output path relative to the source root, if it is under it
+
+                            // full path fallback
+                            var projectDisplayPathSpan = outputPathSpan;
+                            var workingDirectorySpan = _initialWorkingDirectory.AsSpan();
+                            // under working dir case
+                            if (outputPathSpan.StartsWith(workingDirectorySpan, FileUtilities.PathComparison))
                             {
-                                if (outputPathSpan.Length > _initialWorkingDirectory.Length
-                                    && (outputPathSpan[_initialWorkingDirectory.Length] == Path.DirectorySeparatorChar
-                                        || outputPathSpan[_initialWorkingDirectory.Length] == Path.AltDirectorySeparatorChar))
+                                if (outputPathSpan.Length > workingDirectorySpan.Length
+                                    && (outputPathSpan[workingDirectorySpan.Length] == Path.DirectorySeparatorChar
+                                        || outputPathSpan[workingDirectorySpan.Length] == Path.AltDirectorySeparatorChar))
                                 {
-                                    outputPathSpan = outputPathSpan.Slice(_initialWorkingDirectory.Length + 1);
+                                    projectDisplayPathSpan = outputPathSpan.Slice(workingDirectorySpan.Length + 1);
+                                }
+                            }
+                            // under source root case
+                            else if (project.SourceRoot is { Span: var sourceRootSpan } )
+                            {
+                                var relativePathFromWorkingDirToSourceRoot = Path.GetRelativePath(workingDirectorySpan.ToString(), sourceRootSpan.ToString()).AsSpan();
+                                if (outputPathSpan.StartsWith(sourceRootSpan, FileUtilities.PathComparison))
+                                {
+                                    if (outputPathSpan.Length > sourceRootSpan.Length
+                                        // offsets are -1 here compared to above for ***reasons***
+                                        && (outputPathSpan[sourceRootSpan.Length - 1] == Path.DirectorySeparatorChar
+                                            || outputPathSpan[sourceRootSpan.Length - 1] == Path.AltDirectorySeparatorChar))
+                                    {
+                                        projectDisplayPathSpan = Path.Combine(relativePathFromWorkingDirToSourceRoot.ToString(), outputPathSpan.Slice(sourceRootSpan.Length).ToString()).AsSpan();
+                                    }
                                 }
                             }
 
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath",
-                                CreateLink(uri, outputPathSpan.ToString())));
+                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(uri, projectDisplayPathSpan.ToString())));
                         }
                         else
                         {
@@ -853,12 +889,15 @@ public sealed partial class TerminalLogger : INodeLogger
         // to the item spec corresponding to the GetTargetPath target upon completion.
         var buildEventContext = e.BuildEventContext;
         var targetOutputs = e.TargetOutputs;
-        if (_restoreContext is null
-            && buildEventContext is not null
-            && targetOutputs is not null
-            && _hasUsedCache
-            && e.TargetName == "GetTargetPath"
-            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        if (_restoreContext is not null || buildEventContext is null)
+        {
+            return;
+        }
+
+        if (targetOutputs is not null
+                && _hasUsedCache
+                && e.TargetName == "GetTargetPath"
+                && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
             if (project is not null && project.IsCachePluginProject)
             {
@@ -868,6 +907,16 @@ public sealed partial class TerminalLogger : INodeLogger
                     break;
                 }
             }
+        }
+        else if (targetOutputs is not null
+            && e.TargetName == "InitializeSourceRootMappedPaths"
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out project)
+            && project.SourceRoot is null)
+        {
+            project.SourceRoot =
+                (targetOutputs as IEnumerable<ITaskItem>)?
+                .FirstOrDefault(root => !string.IsNullOrEmpty(root.GetMetadata("SourceControl")))
+                ?.ItemSpec.AsMemory();
         }
     }
 
@@ -901,6 +950,7 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         string? message = e.Message;
+
         if (message is not null && e.Importance == MessageImportance.High)
         {
             var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
@@ -1131,7 +1181,7 @@ public sealed partial class TerminalLogger : INodeLogger
             return null;
         }
     }
-    
+
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
@@ -1148,7 +1198,9 @@ public sealed partial class TerminalLogger : INodeLogger
         else
         {
             // It is necessary to display error messages reported by MSBuild, even if it's not tracked in _projects collection or the verbosity is Quiet.
-            RenderImmediateMessage(FormatErrorMessage(e, Indentation));
+            // For nicer formatting, any messages from the engine we strip the file portion from.
+            bool hasMSBuildPlaceholderLocation = e.File.Equals("MSBUILD", StringComparison.Ordinal);
+            RenderImmediateMessage(FormatErrorMessage(e, Indentation, requireFileAndLinePortion: !hasMSBuildPlaceholderLocation));
             _buildErrorsCount++;
         }
     }
@@ -1363,7 +1415,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 prependIndentation: true);
     }
 
-    private string FormatErrorMessage(BuildErrorEventArgs e, string indent)
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true)
     {
         return FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
@@ -1376,7 +1428,8 @@ public sealed partial class TerminalLogger : INodeLogger
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
                 indent,
-                terminalWidth: Terminal.Width);
+                terminalWidth: Terminal.Width,
+                requireFileAndLinePortion: requireFileAndLinePortion);
     }
 
     private static string FormatEventMessage(
@@ -1396,6 +1449,7 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         message ??= string.Empty;
         StringBuilder builder = new(128);
+
         if (prependIndentation)
         {
             builder.Append(indent);
@@ -1405,7 +1459,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             if (string.IsNullOrEmpty(file))
             {
-                builder.Append("MSBUILD : ");    // Should not be localized.
+                builder.Append("MSBUILD : ");  // Should not be localized.
             }
             else
             {

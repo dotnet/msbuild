@@ -381,7 +381,7 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, hostHandshake.HandshakeOptions);
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -467,8 +467,16 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                ConnectToPipeStream(nodeStream, pipeName, handshake, timeout);
-                return nodeStream;
+                if (TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout, out HandshakeResult result))
+                {
+                    return nodeStream;
+                }
+                else
+                {
+                    CommunicationsUtilities.Trace("Failed to connect to pipe {0}. {1}", pipeName, result.ErrorMessage.TrimEnd());
+                    nodeStream?.Dispose();
+                    return null;
+                }
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -492,7 +500,7 @@ namespace Microsoft.Build.BackEnd
         /// <remarks>
         /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
         /// </remarks>
-        internal static void ConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout)
+        internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {
             nodeStream.Connect(timeout);
 
@@ -521,13 +529,24 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
+            if (
+
+            nodeStream.TryReadEndOfHandshakeSignal(true,
 #if NETCOREAPP2_1_OR_GREATER
-            nodeStream.ReadEndOfHandshakeSignal(true, timeout);
-#else
-            nodeStream.ReadEndOfHandshakeSignal(true);
+            timeout,
 #endif
-            // We got a connection.
-            CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+            out HandshakeResult innerResult))
+            {
+                // We got a connection.
+                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
+                result = HandshakeResult.Success(0);
+                return true;
+            }
+            else
+            {
+                result = innerResult;
+                return false;
+            }
         }
 
         /// <summary>
@@ -566,6 +585,11 @@ namespace Microsoft.Build.BackEnd
             /// An array used to store the header byte for each packet when read.
             /// </summary>
             private readonly byte[] _headerByte;
+
+            /// <summary>
+            /// Handshake options used to connect to the node.
+            /// </summary>
+            private HandshakeOptions _handshakeOptions;
 
             /// <summary>
             /// A buffer typically big enough to handle a packet body.
@@ -627,9 +651,13 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Constructor.
             /// </summary>
-            public NodeContext(int nodeId, Process process,
+            public NodeContext(
+                int nodeId,
+                Process process,
                 Stream nodePipe,
-                INodePacketFactory factory, NodeContextTerminateDelegate terminateDelegate)
+                INodePacketFactory factory,
+                NodeContextTerminateDelegate terminateDelegate,
+                HandshakeOptions handshakeOptions = HandshakeOptions.None)
             {
                 _nodeId = nodeId;
                 _process = process;
@@ -641,6 +669,7 @@ namespace Microsoft.Build.BackEnd
                 _readTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
+                _handshakeOptions = handshakeOptions;
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
                 _bodyReadCompleteCallback = BodyReadComplete;
@@ -651,8 +680,9 @@ namespace Microsoft.Build.BackEnd
                 _packetEnqueued = new AutoResetEvent(false);
                 _packetQueueDrainDelayCancellation = new CancellationTokenSource();
 
-                // specify the smallest stack size - 64kb
-                _drainPacketQueueThread = new Thread(DrainPacketQueue, 64 * 1024);
+                // We select a thread size empirically - for debug builds the minimum possible stack size was too small.
+                // The current size is reported to not have the issue.
+                _drainPacketQueueThread = new Thread(DrainPacketQueue, 0x30000);
                 _drainPacketQueueThread.IsBackground = true;
                 _drainPacketQueueThread.Start(this);
             }
@@ -786,10 +816,23 @@ namespace Microsoft.Build.BackEnd
                         ITranslator writeTranslator = context._writeTranslator;
                         try
                         {
-                            writeStream.WriteByte((byte)packet.Type);
+                            NodePacketType packetType = packet.Type;
+
+                            // Write packet type with extended header.
+                            // On the receiving side we will check if the extended header is present before making an attempt to read the packet version.
+                            bool extendedHeaderCreated = NodePacketTypeExtensions.TryCreateExtendedHeaderType(_handshakeOptions, packetType, out byte rawPacketType);
+                            writeStream.WriteByte(rawPacketType);
 
                             // Pad for the packet length
                             WriteInt32(writeStream, 0);
+
+                            if (extendedHeaderCreated)
+                            {
+                                // Write extended header with version BEFORE writing packet data
+                                NodePacketTypeExtensions.WriteVersion(writeStream, NodePacketTypeExtensions.PacketVersion);
+                                writeTranslator.PacketVersion = NodePacketTypeExtensions.PacketVersion;
+                            }
+
                             packet.Translate(writeTranslator);
 
                             int writeStreamLength = (int)writeStream.Position;

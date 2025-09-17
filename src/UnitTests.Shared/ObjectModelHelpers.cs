@@ -1340,9 +1340,9 @@ namespace Microsoft.Build.UnitTests
         /// Build a project with the provided content in memory.
         /// Assert that it succeeded, and return the mock logger with the output.
         /// </summary>
-        public static MockLogger BuildProjectWithNewOMExpectSuccess(string content, Dictionary<string, string> globalProperties = null, MockLogger logger = null)
+        public static MockLogger BuildProjectWithNewOMExpectSuccess(string content, Dictionary<string, string> globalProperties = null, MockLogger logger = null, bool enableTargetOutputLogging = false)
         {
-            BuildProjectWithNewOM(content, ref logger, out bool result, false, globalProperties);
+            BuildProjectWithNewOM(content, ref logger, out bool result, false, globalProperties, enableTargetOutputLogging);
             Assert.True(result);
 
             return logger;
@@ -1351,19 +1351,32 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Build a project in memory using the new OM
         /// </summary>
-        private static void BuildProjectWithNewOM([StringSyntax(StringSyntaxAttribute.Xml)] string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
+        private static void BuildProjectWithNewOM([StringSyntax(StringSyntaxAttribute.Xml)] string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null, bool enableTargetOutputLogging = false)
         {
             // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
-            using ProjectFromString projectFromString = new(content, globalProperties, toolsVersion: null);
+            var projectCollection = ProjectCollection.GlobalProjectCollection;
+            IDisposable disposable = null;
+            if (enableTargetOutputLogging)
+            {
+                // need to use a separate project collection so we can set the logging service flags required to make this work
+                projectCollection = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: enableTargetOutputLogging);
+                disposable = projectCollection;
+            }
+            // ensure we clean up, but only if we made a new project collection
+            using var _ = disposable;
+            using ProjectFromString projectFromString = new(content, globalProperties, null, projectCollection);
             Project project = projectFromString.Project;
             logger ??= new MockLogger
             {
-                AllowTaskCrashes = allowTaskCrash
+                AllowTaskCrashes = allowTaskCrash,
             };
-            List<ILogger> loggers = new List<ILogger>();
-            loggers.Add(logger);
-            result = project.Build(loggers);
+            if (enableTargetOutputLogging)
+            {
+                logger.Verbosity = LoggerVerbosity.Diagnostic;
+            }
+            result = project.Build([logger]);
         }
 
         public static void BuildProjectWithNewOMAndBinaryLogger([StringSyntax(StringSyntaxAttribute.Xml)] string content, BinaryLogger binaryLogger, out bool result, out string projectDirectory)

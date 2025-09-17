@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
         private static Dictionary<string, string[]> s_redistListPathCache;
 
         // Lock object
-        private static readonly Object s_locker = new Object();
+        private static readonly LockType s_locker = new();
 
         /// <summary>
         /// When we check to see if an assembly is in this redist list we want to cache it so that if we ask again we do not
@@ -1009,7 +1009,7 @@ namespace Microsoft.Build.Tasks
         private static Dictionary<string, string[]> s_subsetListPathCache;
 
         // Lock for subsetListPathCache
-        private static readonly Object s_subsetListPathCacheLock = new Object();
+        private static readonly LockType s_subsetListPathCacheLock = new();
 
         // Folder to look for the subset lists in under the target framework directories
         private const string subsetListFolder = "SubsetList";
