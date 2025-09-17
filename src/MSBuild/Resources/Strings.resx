@@ -216,7 +216,8 @@
     </comment>
   </data>
   <data name="HelpMessage_5_NoLogoSwitch" xml:space="preserve">
-    <value>  -noLogo            Do not display the startup banner and copyright message.
+    <value>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
