@@ -644,9 +644,10 @@ arquivo de resposta.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  -noLogo            Do not display the startup banner and copyright message.
+        <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo            Não exibe a faixa de inicialização e a mensagem de direitos autorais.
+        <target state="needs-review-translation">  -noLogo            Não exibe a faixa de inicialização e a mensagem de direitos autorais.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:

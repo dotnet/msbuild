@@ -643,9 +643,10 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  -noLogo            Do not display the startup banner and copyright message.
+        <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo            Başlangıç başlığını ve telif hakkı iletisini görüntüleme.
+        <target state="needs-review-translation">  -noLogo            Başlangıç başlığını ve telif hakkı iletisini görüntüleme.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:

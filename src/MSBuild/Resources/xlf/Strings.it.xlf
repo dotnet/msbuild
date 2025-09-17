@@ -649,9 +649,10 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  -noLogo            Do not display the startup banner and copyright message.
+        <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo            Evita la visualizzazione del messaggio di avvio e di
+        <target state="needs-review-translation">  -noLogo            Evita la visualizzazione del messaggio di avvio e di
                      copyright.
 </target>
         <note>
