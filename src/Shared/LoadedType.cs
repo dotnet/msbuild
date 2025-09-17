@@ -91,7 +91,7 @@ namespace Microsoft.Build.Shared
                             requiredAttribute = true;
                         }
                     }
-                    catch
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         // Skip attributes that can't be loaded
                         continue;
@@ -108,9 +108,9 @@ namespace Microsoft.Build.Shared
                         pt = pt.GetElementType();
                     }
                 }
-                catch
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    // Skip properties with types that can't be loaded
+                    // Skip properties that can't be loaded
                     continue;
                 }
 
@@ -119,7 +119,7 @@ namespace Microsoft.Build.Shared
                 {
                     isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
                 }
-                catch
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
                     // Can't determine assignability, default to false
                 }
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Shared
                     {
                         PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
                     }
-                    catch
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         PropertyAssemblyQualifiedNames[i] = string.Empty;
                     }
@@ -241,8 +241,10 @@ namespace Microsoft.Build.Shared
             {
                 return CustomAttributeData.GetCustomAttributes(type).Any(attr => SafeGetAttributeName(attr) == attributeName);
             }
-            catch
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
+                // Skip this attribute - it references a type that can't be loaded/found
+                // It might be available in the child node.
                 return false;
             }
         }
@@ -253,15 +255,9 @@ namespace Microsoft.Build.Shared
             {
                 return attr.AttributeType?.Name;
             }
-            catch (TypeLoadException)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                // Skip this attribute - it references a type that can't be loaded
-                // It might be available in the child node.
-                return null;
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-                // Skip this attribute - it references a type that can't be found
+                // Skip this attribute - it references a type that can't be loaded/found
                 // It might be available in the child node.
                 return null;
             }
