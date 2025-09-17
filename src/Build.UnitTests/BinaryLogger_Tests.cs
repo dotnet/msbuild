@@ -611,7 +611,7 @@ namespace Microsoft.Build.UnitTests
                 TransientTestFile projectFile1 = env.CreateFile(testFolder, "testProject01.proj", contents);
                 string consoleOutput1 = RunnerUtilities.ExecMSBuild($"{projectFile1.Path} -bl:{_logFile} -verbosity:diag -nologo", out bool success1);
                 success1.ShouldBeTrue();
-                var expected1 = $"-nologo -bl:{_logFile} -verbosity:diag {projectFile1.Path}";
+                var expected1 = $"-bl:{_logFile} -nologo -verbosity:diag {projectFile1.Path}";
                 consoleOutput1.ShouldContain(expected1);
 
                 foreach (var verbosity in new string[] { "q", "m", "n", "d" })
@@ -619,7 +619,7 @@ namespace Microsoft.Build.UnitTests
                     TransientTestFile projectFile2 = env.CreateFile(testFolder, $"testProject_{verbosity}.proj", contents);
                     string consoleOutput2 = RunnerUtilities.ExecMSBuild($"{projectFile2.Path} -bl:{_logFile} -verbosity:{verbosity} -nologo", out bool success2);
                     success2.ShouldBeTrue();
-                    var expected2 = $"-nologo -bl:{_logFile} -verbosity:{verbosity} {projectFile2.Path}";
+                    var expected2 = $"-bl:{_logFile} -nologo -verbosity:{verbosity} {projectFile2.Path}";
                     consoleOutput2.ShouldNotContain(expected2);
                 }
             }
