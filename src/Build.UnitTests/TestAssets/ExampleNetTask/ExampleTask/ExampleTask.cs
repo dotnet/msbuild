@@ -7,6 +7,9 @@ namespace NetTask
 {
     public class ExampleTask : Microsoft.Build.Utilities.Task
     {
+        // nullable isn't available in net runtime
+        public string? OutputValue { get; set; }
+
         public override bool Execute()
         {
             try
