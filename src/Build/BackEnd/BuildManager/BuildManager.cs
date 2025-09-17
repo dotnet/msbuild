@@ -57,12 +57,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The object used for thread-safe synchronization of static members.
         /// </summary>
-        private static readonly Object s_staticSyncLock = new Object();
+        private static readonly LockType s_staticSyncLock = new();
 
         /// <summary>
         /// The object used for thread-safe synchronization of BuildManager shared data and the Scheduler.
         /// </summary>
-        private readonly Object _syncLock = new Object();
+        private readonly Object _syncLock = new();
 
         /// <summary>
         /// The singleton instance for the BuildManager.
@@ -1120,6 +1120,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
+                            _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
                             var sacState = NativeMethodsShared.GetSACState();
                             // The Enforcement would lead to build crash - but let's have the check for completeness sake.
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
@@ -2854,7 +2855,8 @@ namespace Microsoft.Build.Execution
                     loggingService.IncludeEvaluationProfile,
                     loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
                     loggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
-                    loggingService.IncludeTaskInputs));
+                    loggingService.IncludeTaskInputs,
+                    loggingService.EnableTargetOutputLogging));
             }
 
             return _nodeConfiguration;
@@ -3042,6 +3044,12 @@ namespace Microsoft.Build.Execution
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
+
+            if (_buildParameters.EnableTargetOutputLogging)
+            {
+                loggingService.EnableTargetOutputLogging = true;
+            }
+
 
             try
             {

@@ -323,6 +323,11 @@
         <target state="translated">Параметр "{0}" с назначенным значением "{1}" не может иметь недопустимый путь или недопустимые символы файлов.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Возникло исключение при расширении fileSpec со стандартными масками: fileSpec: "{0}", предполагая, что это имя файла. Исключение: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: значение "{0}" атрибута "{1}" в элементе &lt;{2}&gt; в файле "{3}" является подстановочным знаком, который приводит к перечислению всех файлов на диске, что, вероятно, не предполагалось. Убедитесь, что указанные свойства всегда определены и что проект и текущий рабочий каталог не находятся в корне диска.</target>

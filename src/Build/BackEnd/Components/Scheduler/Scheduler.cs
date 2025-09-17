@@ -11,8 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
@@ -1036,8 +1036,16 @@ namespace Microsoft.Build.BackEnd
         {
             if (idleNodes.Contains(InProcNodeId))
             {
-                SchedulableRequest[] unscheduledRequests = RentPooledBuffer(
-                    _schedulingData.UnscheduledRequestsWhichCanBeScheduled, _schedulingData.UnscheduledRequestsCount, out int numRead);
+                SchedulableRequest[] unscheduledRequests = _requestBufferPool.Rent(_schedulingData.UnscheduledRequestsCount);
+
+                int numRead = 0;
+                SchedulingData.UnscheduledRequestsWhichCanBeScheduledEnumerator unscheduledRequestsRead = _schedulingData.UnscheduledRequestsWhichCanBeScheduled.GetEnumerator();
+                while (numRead < _schedulingData.UnscheduledRequestsCount && unscheduledRequestsRead.MoveNext())
+                {
+                    unscheduledRequests[numRead] = unscheduledRequestsRead.Current;
+                    numRead++;
+                }
+
                 foreach (SchedulableRequest request in new ReadOnlySpan<SchedulableRequest>(unscheduledRequests, 0, numRead))
                 {
                     if (CanScheduleRequestToNode(request, InProcNodeId) && shouldBeScheduled(request))
