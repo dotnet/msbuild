@@ -408,11 +408,7 @@ namespace Microsoft.Build.Execution
 
             this.ProjectRootElementCache = project.ProjectCollection.ProjectRootElementCache;
 
-            this.EvaluatedItemElements = new List<ProjectItemElement>(project.Items.Count);
-            foreach (var item in project.Items)
-            {
-                this.EvaluatedItemElements.Add(item.Xml);
-            }
+            this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = project.ToolsVersion;
@@ -470,31 +466,59 @@ namespace Microsoft.Build.Execution
             InitializeTargetsData(null, null, null, null);
 
             // Imports
-            var importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.Imports, GetImportFullPath);
-            _importPaths = importsListConverter;
-            ImportPaths = importsListConverter;
+            var lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPaths);
+            _importPaths = lazyImportsList;
+            ImportPaths = lazyImportsList;
 
-            importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.ImportsIncludingDuplicates, GetImportFullPath);
-            _importPathsIncludingDuplicates = importsListConverter;
-            ImportPathsIncludingDuplicates = importsListConverter;
+            lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPathsIncludingDuplicates);
+            _importPathsIncludingDuplicates = lazyImportsList;
+            ImportPathsIncludingDuplicates = lazyImportsList;
 
-            Toolset = linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
+            Toolset = string.IsNullOrEmpty(linkedProject.ToolsVersion) ? null : linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
             SubToolsetVersion = linkedProject.SubToolsetVersion;
-            TaskRegistry = new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
+            TaskRegistry = Toolset is null ? new TaskRegistry(linkedProject.ProjectCollection.ProjectRootElementCache) : new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
-            EvaluatedItemElements = new List<ProjectItemElement>(linkedProject.Items.Count);
-            foreach (var item in linkedProject.Items)
-            {
-                EvaluatedItemElements.Add(item.Xml);
-            }
+            EvaluatedItemElements = new List<ProjectItemElement>();
 
             _usingDifferentToolsVersionFromProjectFile = false;
             _originalProjectToolsVersion = linkedProject.ToolsVersion;
             _explicitToolsVersionSpecified = linkedProject.SubToolsetVersion != null;
 
             _isImmutable = true;
+
+            static List<string> GetImportFullPaths(ObjectModelRemoting.ProjectLink projectLink)
+            {
+                // Imports collection contains ResolvedImports, which are structures which are much bigger than the string list.
+                // We convert to the string list and let Imports itself to BE GCed.
+                var imports = projectLink.Imports;
+                var paths = new List<string>(imports.Count);
+                foreach (var import in imports)
+                {
+                    if (import.ImportedProject != null)
+                    {
+                        paths.Add(import.ImportedProject.FullPath);
+                    }
+                }
+
+                return paths;
+            }
+
+            static List<string> GetImportFullPathsIncludingDuplicates(ObjectModelRemoting.ProjectLink projectLink)
+            {
+                var imports = projectLink.ImportsIncludingDuplicates;
+                var paths = new List<string>(imports.Count);
+                foreach (var import in imports)
+                {
+                    if (import.ImportedProject != null)
+                    {
+                        paths.Add(import.ImportedProject.FullPath);
+                    }
+                }
+
+                return paths;
+            }
         }
 
         /// <summary>
@@ -1031,7 +1055,8 @@ namespace Microsoft.Build.Execution
                 out IDictionary<string, ProjectProperty> elementsDictionary,
                 out IDictionary<(string, int, int), ProjectProperty> constrainedElementsDictionary);
 
-            var hashSet = new ImmutableValuedElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(
+            var hashSet = new ImmutableProjectPropertyCollectionConverter(
+                                linkedProject,
                                 elementsDictionary,
                                 constrainedElementsDictionary,
                                 ConvertCachedPropertyToInstance);
@@ -1097,14 +1122,7 @@ namespace Microsoft.Build.Execution
                     return ReadOnlyEmptyDictionary<string, string>.Instance;
                 }
 
-                Dictionary<string, string> dictionary = new Dictionary<string, string>(_globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
-
-                foreach (ProjectPropertyInstance property in _globalProperties)
-                {
-                    dictionary[property.Name] = ((IProperty)property).EvaluatedValueEscaped;
-                }
-
-                return new ObjectModel.ReadOnlyDictionary<string, string>(dictionary);
+                return _globalProperties.ToReadOnlyDictionary();
             }
         }
 
@@ -1387,9 +1405,6 @@ namespace Microsoft.Build.Execution
             ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
 
             _sdkResolvedEnvironmentVariableProperties.Set(property);
-
-            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
-            _environmentVariableProperties.Set(property);
 
             // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
             if (GetProperty(name) is null)
@@ -2778,6 +2793,11 @@ namespace Microsoft.Build.Execution
                     parameters.LogTaskInputs ||
                     loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
                     loggingService?.IncludeTaskInputs == true;
+
+                parameters.EnableTargetOutputLogging =
+                    parameters.EnableTargetOutputLogging ||
+                    loggers.Any(logger => logger.Verbosity == LoggerVerbosity.Diagnostic) ||
+                    loggingService?.EnableTargetOutputLogging == true;
             }
 
             if (remoteLoggers != null)
@@ -3463,14 +3483,21 @@ namespace Microsoft.Build.Execution
                     itemTypeDefinition,
                     ConvertCachedItemDefinitionToInstance);
 
-            ImmutableDictionary<string, string> directMetadata = null;
+            IReadOnlyDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata is not null)
             {
-                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
-                    => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
+                if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
+                {
+                    directMetadata = new ImmutableProjectMetadataCollectionConverter(item, metadataDict);
+                }
+                else
+                {
+                    IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
+                        => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
 
-                directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
-                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
+                    directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                        .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
+                }
             }
 
             GetEvaluatedIncludesFromProjectItem(
@@ -3488,11 +3515,6 @@ namespace Microsoft.Build.Execution
                 item.Xml.ContainingProject.EscapedFullPath,
                 useItemDefinitionsWithoutModification: true);
             return instance;
-        }
-
-        private static string GetImportFullPath(ResolvedImport import)
-        {
-            return import.ImportedProject.FullPath;
         }
 
         /// <summary>
