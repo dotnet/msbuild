@@ -5761,6 +5761,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_CleanPriorFileWrites Include="@(_CleanUnfilteredPriorFileWrites)" Exclude="@(_ResolveAssemblyReferenceResolvedFilesAbsolute)"/>
     </ItemGroup>
+    
+    <PropertyGroup>
     <!--
         Of shareable files, keep only those that are in the project's directory.
         We never clean shareable files outside of the project directory because
