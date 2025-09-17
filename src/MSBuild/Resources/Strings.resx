@@ -1471,6 +1471,15 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>
+  <data name="InvalidNoLogoValue" xml:space="preserve">
+    <value>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1071: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the nologo parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
   <data name="InvalidIsolateProjectsValue" xml:space="preserve">
     <value>MSBUILD : error MSB1056: Isolate projects value is not valid. {0}</value>
     <comment>
