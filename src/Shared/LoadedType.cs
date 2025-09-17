@@ -49,12 +49,12 @@ namespace Microsoft.Build.Shared
             Type? t = type;
             while (t is not null)
             {
-                if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals(nameof(LoadInSeparateAppDomainAttribute))))
+                if (TypeExtensions.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
                 {
                     HasLoadInSeparateAppDomainAttribute = true;
                 }
 
-                if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals(nameof(RunInSTAAttribute))))
+                if (TypeExtensions.HasAttribute<RunInSTAAttribute>(t))
                 {
                     HasSTAThreadAttribute = true;
                 }
@@ -80,29 +80,61 @@ namespace Microsoft.Build.Shared
                 bool requiredAttribute = false;
                 foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
                 {
-                    if (attr.AttributeType.Name.Equals(nameof(OutputAttribute)))
+                    try
                     {
-                        outputAttribute = true;
+                        if (attr.AttributeType?.Name.Equals(nameof(OutputAttribute)) == true)
+                        {
+                            outputAttribute = true;
+                        }
+                        else if (attr.AttributeType?.Name.Equals(nameof(RequiredAttribute)) == true)
+                        {
+                            requiredAttribute = true;
+                        }
                     }
-                    else if (attr.AttributeType.Name.Equals(nameof(RequiredAttribute)))
+                    catch
                     {
-                        requiredAttribute = true;
+                        // Skip attributes that can't be loaded
+                        continue;
                     }
                 }
 
                 // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type? pt = props[i].PropertyType;
-                if (pt.IsArray)
+                Type? pt = null;
+                try
                 {
-                    pt = pt.GetElementType();
+                    pt = props[i].PropertyType;
+                    if (pt.IsArray)
+                    {
+                        pt = pt.GetElementType();
+                    }
+                }
+                catch
+                {
+                    // Skip properties with types that can't be loaded
+                    continue;
                 }
 
-                bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
+                bool isAssignableToITask = false;
+                try
+                {
+                    isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
+                }
+                catch
+                {
+                    // Can't determine assignability, default to false
+                }
 
                 Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
                 if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
-                    PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName?? string.Empty;
+                    try
+                    {
+                        PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
+                    }
+                    catch
+                    {
+                        PropertyAssemblyQualifiedNames[i] = string.Empty;
+                    }
                 }
             }
 #else
@@ -112,7 +144,6 @@ namespace Microsoft.Build.Shared
             IsMarshalByRef = this.Type.IsMarshalByRef;
 #endif
         }
-
 
         #endregion
 
@@ -189,4 +220,52 @@ namespace Microsoft.Build.Shared
 
         #endregion
     }
+
+#if !NET35
+
+    internal static class TypeExtensions
+    {
+        public static bool HasAttribute<T>(this Type type) where T : Attribute
+        {
+            return type.HasAttribute(typeof(T).Name);
+        }
+
+        public static bool HasAttribute(this Type type, string attributeName)
+        {
+            if (type == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                return CustomAttributeData.GetCustomAttributes(type).Any(attr => SafeGetAttributeName(attr) == attributeName);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string? SafeGetAttributeName(CustomAttributeData attr)
+        {
+            try
+            {
+                return attr.AttributeType?.Name;
+            }
+            catch (TypeLoadException)
+            {
+                // Skip this attribute - it references a type that can't be loaded
+                // It might be available in the child node.
+                return null;
+            }
+            catch (System.IO.FileNotFoundException)
+            {
+                // Skip this attribute - it references a type that can't be found
+                // It might be available in the child node.
+                return null;
+            }
+        }
+    }
+#endif
 }
