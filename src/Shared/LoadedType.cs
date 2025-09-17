@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -49,12 +48,12 @@ namespace Microsoft.Build.Shared
             Type? t = type;
             while (t is not null)
             {
-                if (TypeExtensions.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
+                if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
                 {
                     HasLoadInSeparateAppDomainAttribute = true;
                 }
 
-                if (TypeExtensions.HasAttribute<RunInSTAAttribute>(t))
+                if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
                 {
                     HasSTAThreadAttribute = true;
                 }
@@ -220,48 +219,4 @@ namespace Microsoft.Build.Shared
 
         #endregion
     }
-
-#if !NET35
-
-    internal static class TypeExtensions
-    {
-        public static bool HasAttribute<T>(this Type type) where T : Attribute
-        {
-            return type.HasAttribute(typeof(T).Name);
-        }
-
-        public static bool HasAttribute(this Type type, string attributeName)
-        {
-            if (type == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                return CustomAttributeData.GetCustomAttributes(type).Any(attr => SafeGetAttributeName(attr) == attributeName);
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Skip this attribute - it references a type that can't be loaded/found
-                // It might be available in the child node.
-                return false;
-            }
-        }
-
-        private static string? SafeGetAttributeName(CustomAttributeData attr)
-        {
-            try
-            {
-                return attr.AttributeType?.Name;
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Skip this attribute - it references a type that can't be loaded/found
-                // It might be available in the child node.
-                return null;
-            }
-        }
-    }
-#endif
 }
