@@ -1406,9 +1406,6 @@ namespace Microsoft.Build.Execution
 
             _sdkResolvedEnvironmentVariableProperties.Set(property);
 
-            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
-            _environmentVariableProperties.Set(property);
-
             // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
             if (GetProperty(name) is null)
             {
