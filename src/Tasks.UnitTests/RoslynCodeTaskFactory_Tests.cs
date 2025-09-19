@@ -33,8 +33,6 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         private readonly VerifySettings _verifySettings;
 
-        private static string TestResourcesRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(RoslynCodeTaskFactory_Tests).Assembly.Location) ?? AppContext.BaseDirectory), "TestResources");
-
         public RoslynCodeTaskFactory_Tests()
         {
             UseProjectRelativeDirectory("TaskFactorySource");
@@ -237,30 +235,8 @@ Log.LogError(Class1.ToPrint());
                 TransientTestFile taskFile = env.CreateFile(folder, "SampleTask.cs", @"
                 using Microsoft.Build.Framework;
                 using Microsoft.Build.Utilities;
-                using System;
-                using System.Collections.Generic;
-                using System.Diagnostics;
-                using System.IO;
                 using System.Text.Json;
 
-                namespace VisionAid.Build;
-
-                public sealed class License
-                {
-                    public enum LicenseType
-                    {
-                        File,
-                        URL
-                    }
-
-                    public string ProjectName { get; set; }
-                    public LicenseType Type { get; set; }
-                    public string LicensePath { get; set; }
-                }
-
-                /// <summary>
-                /// Creates an HTML document for the 3rd-party libraries used by the project
-                /// </summary>
                 public sealed class SampleTask : Microsoft.Build.Utilities.Task
                 {
 
@@ -276,17 +252,13 @@ Log.LogError(Class1.ToPrint());
                 }
 
                 ");
-                TransientTestFile inputFile = env.CreateFile(folder, "Test.json", "{}");
 
-                string testResourcesNugetPath = Path.Combine(TestResourcesRootPath, "Nuget");
-                string memoryLibPath = Path.Combine(testResourcesNugetPath, "system.memory", "4.6.3", "lib", "netstandard2.0", "System.Memory.dll");
-                string jsonLibPath = Path.Combine(testResourcesNugetPath, "system.text.json", "9.0.7", "lib", "netstandard2.0", "System.Text.Json.dll");
-
-                TransientTestFile projectFile = env.CreateFile(folder, "NoCS1702.proj", @$"
+                TransientTestFile projectFile = env.CreateFile(folder, "Warning.proj", @$"
                 <Project DefaultTargets=""Build"" ToolsVersion=""Current"">
                   <PropertyGroup>
-                    <NuGetDir>{folder.Path}</NuGetDir>
                     <TargetFramework>netstandard2.0</TargetFramework>
+                    <RestorePackagesPath>{folder.Path}\packages</RestorePackagesPath>
+                    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
                   </PropertyGroup>
 
                   <ItemGroup>
@@ -299,8 +271,8 @@ Log.LogError(Class1.ToPrint());
                       <InputFileName ParameterType=""System.String"" Required=""true"" />
                     </ParameterGroup>
                     <Task>
-                      <Reference Include=""{memoryLibPath}"" />
-                      <Reference Include=""{jsonLibPath}"" />
+                      <Reference Include=""System.Memory"" />
+                      <Reference Include=""System.Text.Json"" />
                       <Using Namespace=""System"" />
                       <Code Type=""Class"" Language=""cs"" Source=""{taskFile.Path}"" />
                     </Task>
