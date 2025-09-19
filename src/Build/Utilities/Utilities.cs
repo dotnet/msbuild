@@ -881,7 +881,7 @@ namespace Microsoft.Build.Internal
                 }
 
                 // if itemTypeNameToFetch was not set - then return all items
-                if (itemValue != null && (itemTypeNamesToFetch == null || itemTypeNamesToFetch.Any(tp => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))))
+                if (itemValue != null && (itemTypeNamesToFetch == null || MatchesAnyItemTypeToFetch(itemTypeNamesToFetch, itemType)))
                 {
                     // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
                     //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
@@ -889,6 +889,20 @@ namespace Microsoft.Build.Internal
                     //  (see xml comments of TaskItemData for details)
                     yield return new ItemData(itemType!, itemValue);
                 }
+            }
+
+            // PERF: This replaces a previous call to Any() that was causing an allocation due to a closure.
+            static bool MatchesAnyItemTypeToFetch(string[] itemTypeNamesToFetch, string itemType)
+            {
+                foreach (string tp in itemTypeNamesToFetch)
+                {
+                    if (MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
         }
     }
