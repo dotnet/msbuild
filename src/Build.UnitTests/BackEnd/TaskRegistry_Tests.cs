@@ -1234,6 +1234,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TaskFactoryWithNullTaskTypeLogsError()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_0.ToString());
+
             List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
             ProjectRootElement project = ProjectRootElement.Create();
 
@@ -1847,6 +1850,87 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
             Assert.True(registry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("Name", null)][0].ParameterGroupAndTaskBody.TaskBodyEvaluated);
         }
+        #endregion
+
+        #region CustomTaskFactoryRestrictionTests
+
+        /// <summary>
+        /// Verify that custom task factories are allowed when change wave 18.0 is disabled
+        /// </summary>
+        [Fact]
+        public void CustomTaskFactoryAllowedWhenChangeWaveDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // Set environment variable to disable change wave 18.0
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "18.0");
+
+                // Reset change wave state for this test
+                ChangeWaves.ResetStateForTests();
+
+                List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+
+                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", _testTaskLocation, null);
+                element.TaskFactory = "SomeCustomTaskFactory"; // Use a custom factory name that's not built-in
+                elementList.Add(element);
+
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+                
+                // This should not throw the custom task factory restriction error when change wave is disabled
+                // (It may throw other errors like "could not find factory", but not our specific restriction error)
+                try
+                {
+                    registry.GetRegisteredTask("CustomTask", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
+                }
+                catch (InvalidProjectFileException ex)
+                {
+                    // Check the full error message
+                    _output.WriteLine($"Full error message: {ex.Message}");
+                    // Make sure it's not our restriction error
+                    Assert.DoesNotContain("MSB4279", ex.Message);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verify that custom task factories are blocked when change wave 18.0 is enabled
+        /// </summary>
+        [Fact]
+        public void CustomTaskFactoryBlockedWhenChangeWaveEnabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // Ensure change wave 18.0 is enabled by not setting MSBUILDDISABLEFEATURESFROMVERSION
+                // Reset change wave state for this test
+                ChangeWaves.ResetStateForTests();
+
+                List<ProjectUsingTaskElement> elementList = new List<ProjectUsingTaskElement>();
+
+                ProjectRootElement project = ProjectRootElement.Create();
+                ProjectUsingTaskElement element = project.AddUsingTask("CustomTask", _testTaskLocation, null);
+                element.TaskFactory = "SomeCustomTaskFactory"; // Use a custom factory name that's not built-in
+                elementList.Add(element);
+
+                TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
+                
+                // This should throw our specific restriction error when change wave is enabled
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(() =>
+                {
+                    registry.GetRegisteredTask("CustomTask", null, null, false, _targetLoggingContext, ElementLocation.Create("foo.targets"));
+                });
+                
+                // Check the full error message
+                _output.WriteLine($"Full error message: {ex.Message}");
+                
+                // The message should include MSB4279 
+                // But sometimes the format strips the error code, so let's also check for key parts
+                Assert.True(ex.Message.Contains("MSB4279") || ex.Message.Contains("is not supported"), 
+                    $"Expected error message to contain MSB4279 or 'is not supported'. Actual: {ex.Message}");
+                Assert.Contains("SomeCustomTaskFactory", ex.Message);
+            }
+        }
+
         #endregion
 
         #region SerializationTests
