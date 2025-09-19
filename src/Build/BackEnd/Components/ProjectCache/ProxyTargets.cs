@@ -52,9 +52,9 @@ namespace Microsoft.Build.ProjectCache
         }
 #pragma warning disable CS0618 // Type or member is obsolete
 
-        internal static ProxyTargets FromExperimental(Experimental.ProjectCache.ProxyTargets? experimentalProxyTargets)
+        internal static ProxyTargets? FromExperimental(Experimental.ProjectCache.ProxyTargets? experimentalProxyTargets)
         {
-            return experimentalProxyTargets == null ? new ProxyTargets() : new ProxyTargets(experimentalProxyTargets.ProxyTargetToRealTargetMap);
+            return experimentalProxyTargets == null ? null : new ProxyTargets(experimentalProxyTargets.ProxyTargetToRealTargetMap);
         }
     }
 }

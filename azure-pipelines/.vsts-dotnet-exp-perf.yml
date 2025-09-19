@@ -1,0 +1,104 @@
+trigger:
+- exp/*
+- perf/*
+
+# If defined here, these values are not overrideable
+# Once they exist, we should define these as "runtime parameters"
+# https://github.com/Microsoft/azure-pipelines-yaml/pull/129
+# variables:
+#   SkipApplyOptimizationData: false
+
+parameters:
+- name: OptProfDropName
+  displayName: Optional OptProfDrop Override
+  type: string
+  default: 'default'
+- name: enableSigningValidation
+  displayName: Enable Signing Validation
+  type: boolean
+  default: false
+- name: signTypeParameter
+  displayName: Sign Type
+  type: string
+  default: 'test'
+- name: enableOptProf
+  displayName: Enable OptProf data collection for this build
+  type: boolean
+  default: false
+
+variables:
+  # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
+  - name: OptProfDrop
+    value: ''
+  - name: requireDefaultChannels
+    value: false
+  - name: SourceBranch
+    value: $(IbcSourceBranchName)
+  # Use main as our optprof collection branch by default in exp branches.
+  - ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs')) }}:
+    - name: SourceBranch
+      value: main
+  # if OptProfDropName is set as a parameter, set OptProfDrop to the parameter and unset SourceBranch
+  - ${{ if ne(parameters.OptProfDropName, 'default') }}:
+    - name: OptProfDrop
+      value: ${{parameters.OptProfDropName}}
+    - name: SourceBranch
+      value: ''
+  - name: Codeql.Enabled
+    value: false
+  - group: DotNet-MSBuild-SDLValidation-Params
+  - group: AzureDevOps-Artifact-Feeds-Pats
+  - name: cfsNugetWarnLevel
+    value: warn
+  - name: nugetMultiFeedWarnLevel
+    value: none
+  - name: NugetSecurityAnalysisWarningLevel
+    value: none
+
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    featureFlags:
+      autoBaseline: true
+    pool:
+      name: VSEngSS-MicroBuild2022-1ES
+      os: windows
+    sdl:
+      policheck:
+        enabled: true
+        exclusionsFile: $(Build.SourcesDirectory)\eng\policheck_exclusions.xml
+      tsa:
+        enabled: true
+      # We generate SBOM ourselves, so don't need steps injected by 1ES.
+      sbom:
+        enabled: false
+      codeSignValidation:
+        enabled: false
+        additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
+
+    stages:
+    - stage: build
+      displayName: Build
+      jobs:
+      - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
+        parameters:
+          isExperimental: true
+          enableComponentGovernance: false
+          signTypeParameter: ${{ parameters.signTypeParameter }}
+          enableOptProf: ${{ parameters.enableOptProf }}
+
+    - template: /eng/common/templates-official/post-build/post-build.yml@self
+      parameters:
+        publishingInfraVersion: 3
+        enableSymbolValidation: true
+        enableSourceLinkValidation: false
+        enableNugetValidation: false
+        enableSigningValidation: ${{ parameters.enableSigningValidation }}
