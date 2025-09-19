@@ -41,7 +41,7 @@ namespace Microsoft.Build.Instance
         }
 
         /// <inheritdoc />
-        public ICollection<T> this[string itemType]
+        public IReadOnlyCollection<T> this[string itemType]
         {
             get
             {
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Instance
                 return false;
             }
 
-            ICollection<T> items = GetItems(itemType);
+            IReadOnlyCollection<T> items = GetItems(itemType);
             return items.Contains(projectItem);
         }
 
@@ -145,7 +145,7 @@ namespace Microsoft.Build.Instance
         }
 
         /// <inheritdoc />
-        public ICollection<T> GetItems(string itemType)
+        public IReadOnlyCollection<T> GetItems(string itemType)
         {
             if (_itemsByType.TryGetValue(itemType, out ICollection<TCached>? items))
             {
@@ -173,7 +173,7 @@ namespace Microsoft.Build.Instance
         /// <inheritdoc />
         public void Replace(T existingItem, T newItem) => throw new NotSupportedException();
 
-        private sealed class ListConverter : ICollection<T>
+        private sealed class ListConverter : IReadOnlyCollection<T>
         {
             private readonly ICollection<TCached> _list;
             private readonly Func<TCached, T?> _getInstance;

@@ -134,7 +134,7 @@ namespace Microsoft.Build.Evaluation
         #endregion
 
         #region IEvaluatorData<> members that are forwarded directly to wrapped object.
-        public ICollection<I> GetItems(string itemType) => _wrapped.GetItems(itemType);
+        public IReadOnlyCollection<I> GetItems(string itemType) => _wrapped.GetItems(itemType);
         public int EvaluationId { get => _wrapped.EvaluationId; set => _wrapped.EvaluationId = value; }
         public string Directory => _wrapped.Directory;
         public TaskRegistry TaskRegistry { get => _wrapped.TaskRegistry; set => _wrapped.TaskRegistry = value; }
