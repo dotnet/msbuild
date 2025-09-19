@@ -41,11 +41,18 @@ namespace Microsoft.Build.Tasks.UnitTests
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
 
-        [Fact]
-        public void InlineTaskWithAssemblyPlatformAgnostic()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void InlineTaskWithAssemblyPlatformAgnostic(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
+
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 string location = Assembly.GetExecutingAssembly().Location;
                 TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
@@ -81,12 +88,19 @@ Log.LogError(Alpha.GetString());
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
-        public void InlineTaskWithAssembly()
+        public void InlineTaskWithAssembly(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
+
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 TransientTestFile assemblyProj = env.CreateFile(folder, "5106.csproj", @$"
                     <Project DefaultTargets=""Build"">
@@ -143,14 +157,17 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
-        public void RoslynCodeTaskFactory_ReuseCompilation()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
+            int num = forceOutOfProc ? 1 : 2;
             string text1 = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -166,8 +183,8 @@ Log.LogError(Class1.ToPrint());
 
     <Target Name=""Build"">
         <MSBuild Projects=""p2.proj"" Targets=""Build"" />
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -176,7 +193,7 @@ Log.LogError(Class1.ToPrint());
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -191,13 +208,17 @@ Log.LogError(Class1.ToPrint());
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
 
             using var env = TestEnvironment.Create();
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
 
             var p2 = env.CreateTestProjectWithFiles("p2.proj", text2);
             text1 = text1.Replace("p2.proj", p2.ProjectFile);
@@ -208,7 +229,7 @@ Log.LogError(Class1.ToPrint());
                 .BuildMessageEvents
                 .Where(m => m.Message == "Compiling task source code")
                 .ToArray();
-
+            
             // with broken cache we get two Compiling messages
             // as we fail to reuse the first assembly
             messages.Length.ShouldBe(1);
@@ -605,8 +626,10 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
-        public void MismatchedTaskNameAndTaskClassName()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MismatchedTaskNameAndTaskClassName(bool forceOutOfProc)
         {
             const string taskName = "SayHello";
             const string className = "HelloWorld";
@@ -640,6 +663,10 @@ namespace InlineTask
 
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
                 var logger = proj.BuildProjectExpectFailure();
                 logger.AssertLogContains(errorMessage);
@@ -722,14 +749,17 @@ namespace InlineTask
         }
 
 #if !FEATURE_RUN_EXE_IN_TESTS
-        [Fact]
-        public void RoslynCodeTaskFactory_UsingAPI()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RoslynCodeTaskFactory_UsingAPI(bool forceOutOfProc)
         {
+            int num = forceOutOfProc ? 3 : 4;
             string text = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -746,12 +776,17 @@ namespace InlineTask
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""World"" />
+        <Custom{num} SayHi=""World"" />
     </Target>
 
 </Project>";
 
             using var env = TestEnvironment.Create();
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
+            
             RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
             var dotnetPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
 
