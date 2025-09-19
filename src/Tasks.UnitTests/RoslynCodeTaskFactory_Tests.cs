@@ -257,8 +257,6 @@ Log.LogError(Class1.ToPrint());
                 <Project DefaultTargets=""Build"" ToolsVersion=""Current"">
                   <PropertyGroup>
                     <TargetFramework>netstandard2.0</TargetFramework>
-                    <RestorePackagesPath>{folder.Path}\packages</RestorePackagesPath>
-                    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
                   </PropertyGroup>
 
                   <ItemGroup>
