@@ -6,7 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Evaluation;
+#if DEBUG
 using Microsoft.Build.Shared;
+#endif
 
 #nullable disable
 
@@ -34,8 +36,6 @@ namespace Microsoft.Build.Collections
     {
         /// <summary>
         /// Dictionary of item lists used as a backing store.
-        /// An empty list should never be stored in here unless it is an empty marker.
-        /// See <see cref="AddEmptyMarker">AddEmptyMarker</see>.
         /// This collection provides quick access to the ordered set of items of a particular type.
         /// </summary>
         private readonly Dictionary<string, LinkedList<T>> _itemLists;
@@ -247,17 +247,6 @@ namespace Microsoft.Build.Collections
             }
         }
 
-        public void AddRange(IEnumerable<T> projectItems)
-        {
-            lock (_itemLists)
-            {
-                foreach (var projectItem in projectItems)
-                {
-                    AddProjectItem(projectItem);
-                }
-            }
-        }
-
         /// <summary>
         /// Removes an item, if it is in the collection.
         /// Returns true if it was found, otherwise false.
@@ -290,33 +279,18 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
-        /// Replaces an exsting item with a new item.  This is necessary to preserve the original ordering semantics of Lookup.GetItems
-        /// when items with metadata modifications are being returned.  See Dev10 bug 480737.
-        /// If the item is not found, does nothing.
-        /// </summary>
-        /// <param name="existingItem">The item to be replaced.</param>
-        /// <param name="newItem">The replacement item.</param>
-        public void Replace(T existingItem, T newItem)
-        {
-            ErrorUtilities.VerifyThrow(existingItem.Key == newItem.Key, "Cannot replace an item {0} with an item {1} with a different name.", existingItem.Key, newItem.Key);
-            lock (_itemLists)
-            {
-                if (_nodes.TryGetValue(existingItem, out LinkedListNode<T> node))
-                {
-                    node.Value = newItem;
-                    _nodes.Remove(existingItem);
-                    _nodes.Add(newItem, node);
-                }
-            }
-        }
-
-        /// <summary>
         /// Add the set of items specified to this dictionary
         /// </summary>
         /// <param name="other">An enumerator over the items to remove.</param>
         public void ImportItems(IEnumerable<T> other)
         {
-            AddRange(other);
+            lock (_itemLists)
+            {
+                foreach (var projectItem in other)
+                {
+                    AddProjectItem(projectItem);
+                }
+            }
         }
 
         /// <summary>
@@ -356,40 +330,6 @@ namespace Microsoft.Build.Collections
             foreach (T item in other)
             {
                 Remove(item);
-            }
-        }
-
-        /// <summary>
-        /// Special method used for batching buckets.
-        /// Adds an explicit marker indicating there are no items for the specified item type.
-        /// In the general case, this is redundant, but batching buckets use this to indicate that they are
-        /// batching over the item type, but their bucket does not contain items of that type.
-        /// See <see cref="HasEmptyMarker">HasEmptyMarker</see>.
-        /// </summary>
-        public void AddEmptyMarker(string itemType)
-        {
-            lock (_itemLists)
-            {
-                ErrorUtilities.VerifyThrow(!_itemLists.ContainsKey(itemType), "Should be none");
-                _itemLists.Add(itemType, new LinkedList<T>());
-            }
-        }
-
-        /// <summary>
-        /// Special method used for batching buckets.
-        /// Lookup can call this to see whether there was an explicit marker placed indicating that
-        /// there are no items of this type. See comment on <see cref="AddEmptyMarker">AddEmptyMarker</see>.
-        /// </summary>
-        public bool HasEmptyMarker(string itemType)
-        {
-            lock (_itemLists)
-            {
-                if (_itemLists.TryGetValue(itemType, out LinkedList<T> list) && list.Count == 0)
-                {
-                    return true;
-                }
-
-                return false;
             }
         }
 
