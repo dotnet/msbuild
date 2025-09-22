@@ -777,7 +777,7 @@ namespace Microsoft.Build.Logging
                     // - We can't control the threading behavior of the objects passed to us
                     // - The corruption typically happens before objects reach this method
                     // - Defensive exception handling is more efficient than preemptive locking
-                    argument = arguments[i]?.GetType().Name ?? "<null>";
+                    argument = arguments[i]?.GetType()?.Name ?? "<null>";
                 }
 
                 WriteDeduplicatedString(argument);
