@@ -308,7 +308,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        protected LogMessagePacketBase(ITranslator translator) => Translate(translator);
+        internal LogMessagePacketBase(ITranslator translator) => Translate(translator);
 
         #endregion
 
