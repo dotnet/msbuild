@@ -27,6 +27,7 @@ namespace Microsoft.Build.Graph
         private const string SetPlatformMetadataName = "SetPlatform";
         private const string SetTargetFrameworkMetadataName = "SetTargetFramework";
         private const string GlobalPropertiesToRemoveMetadataName = "GlobalPropertiesToRemove";
+        private const string ProjectReferenceTargetIsInnerBuildMetadataName = "InnerBuild";
         private const string ProjectReferenceTargetIsOuterBuildMetadataName = "OuterBuild";
         private const string InnerBuildReferenceItemName = "_ProjectSelfReference";
         internal static string TransitiveReferenceItemName = "_TransitiveProjectReference";
@@ -467,11 +468,13 @@ namespace Microsoft.Build.Graph
         public readonly struct TargetsToPropagate
         {
             private readonly ImmutableList<TargetSpecification> _outerBuildTargets;
+            private readonly ImmutableList<TargetSpecification> _innerBuildTargets;
             private readonly ImmutableList<TargetSpecification> _allTargets;
 
-            private TargetsToPropagate(ImmutableList<TargetSpecification> outerBuildTargets, ImmutableList<TargetSpecification> nonOuterBuildTargets)
+            private TargetsToPropagate(ImmutableList<TargetSpecification> outerBuildTargets, ImmutableList<TargetSpecification> innerBuildTargets, ImmutableList<TargetSpecification> nonOuterBuildTargets)
             {
                 _outerBuildTargets = outerBuildTargets;
+                _innerBuildTargets = innerBuildTargets;
 
                 // This is used as the list of entry targets for both inner builds and non-multitargeting projects.
                 // It represents the concatenation of outer build targets and non outer build targets, in this order.
@@ -493,6 +496,7 @@ namespace Microsoft.Build.Graph
             {
                 ImmutableList<TargetSpecification>.Builder targetsForOuterBuild = ImmutableList.CreateBuilder<TargetSpecification>();
                 ImmutableList<TargetSpecification>.Builder targetsForInnerBuild = ImmutableList.CreateBuilder<TargetSpecification>();
+                ImmutableList<TargetSpecification>.Builder targetsForNonOuterBuild = ImmutableList.CreateBuilder<TargetSpecification>();
 
                 ICollection<ProjectItemInstance> projectReferenceTargets = project.GetItems(ItemTypeNames.ProjectReferenceTargets);
 
@@ -504,6 +508,7 @@ namespace Microsoft.Build.Graph
                         {
                             string targetsMetadataValue = projectReferenceTarget.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName);
                             bool skipNonexistentTargets = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue("SkipNonexistentTargets"));
+                            bool targetsAreForInnerBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsInnerBuildMetadataName));
                             bool targetsAreForOuterBuild = MSBuildStringIsTrue(projectReferenceTarget.GetMetadataValue(ProjectReferenceTargetIsOuterBuildMetadataName));
                             TargetSpecification[] targets = ExpressionShredder.SplitSemiColonSeparatedList(targetsMetadataValue)
                                 .Select(t => new TargetSpecification(t, skipNonexistentTargets)).ToArray();
@@ -511,15 +516,19 @@ namespace Microsoft.Build.Graph
                             {
                                 targetsForOuterBuild.AddRange(targets);
                             }
-                            else
+                            else if(targetsAreForInnerBuild)
                             {
                                 targetsForInnerBuild.AddRange(targets);
+                            }
+                            else
+                            {
+                                targetsForNonOuterBuild.AddRange(targets);
                             }
                         }
                     }
                 }
 
-                return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable());
+                return new TargetsToPropagate(targetsForOuterBuild.ToImmutable(), targetsForInnerBuild.ToImmutable(), targetsForNonOuterBuild.ToImmutable());
             }
 
             public ImmutableList<string> GetApplicableTargetsForReference(ProjectGraphNode projectGraphNode)
@@ -535,7 +544,7 @@ namespace Microsoft.Build.Graph
 
                 return projectGraphNode.ProjectType switch
                 {
-                    ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_allTargets),
+                    ProjectType.InnerBuild => RemoveNonexistentTargetsIfSkippable(_innerBuildTargets.Count > 0 ? _innerBuildTargets : _allTargets),
                     ProjectType.OuterBuild => RemoveNonexistentTargetsIfSkippable(_outerBuildTargets),
                     ProjectType.NonMultitargeting => RemoveNonexistentTargetsIfSkippable(_allTargets),
                     _ => throw new ArgumentOutOfRangeException(),
