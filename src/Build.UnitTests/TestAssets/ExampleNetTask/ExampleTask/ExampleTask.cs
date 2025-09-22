@@ -7,7 +7,8 @@ namespace NetTask
 {
     public class ExampleTask : Microsoft.Build.Utilities.Task
     {
-        // nullable isn't available in net runtime
+        // nullable isn't available in net framework runtime
+        // the presence of the property covers the test case
         public string? OutputValue { get; set; }
 
         public override bool Execute()

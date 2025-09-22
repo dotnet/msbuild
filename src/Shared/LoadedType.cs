@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -49,12 +48,12 @@ namespace Microsoft.Build.Shared
             Type? t = type;
             while (t is not null)
             {
-                if (TypeExtensions.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
+                if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
                 {
                     HasLoadInSeparateAppDomainAttribute = true;
                 }
 
-                if (TypeExtensions.HasAttribute<RunInSTAAttribute>(t))
+                if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
                 {
                     HasSTAThreadAttribute = true;
                 }
@@ -91,7 +90,7 @@ namespace Microsoft.Build.Shared
                             requiredAttribute = true;
                         }
                     }
-                    catch
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         // Skip attributes that can't be loaded
                         continue;
@@ -108,9 +107,9 @@ namespace Microsoft.Build.Shared
                         pt = pt.GetElementType();
                     }
                 }
-                catch
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    // Skip properties with types that can't be loaded
+                    // Skip properties that can't be loaded
                     continue;
                 }
 
@@ -119,7 +118,7 @@ namespace Microsoft.Build.Shared
                 {
                     isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
                 }
-                catch
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
                     // Can't determine assignability, default to false
                 }
@@ -131,7 +130,7 @@ namespace Microsoft.Build.Shared
                     {
                         PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
                     }
-                    catch
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
                         PropertyAssemblyQualifiedNames[i] = string.Empty;
                     }
@@ -220,52 +219,4 @@ namespace Microsoft.Build.Shared
 
         #endregion
     }
-
-#if !NET35
-
-    internal static class TypeExtensions
-    {
-        public static bool HasAttribute<T>(this Type type) where T : Attribute
-        {
-            return type.HasAttribute(typeof(T).Name);
-        }
-
-        public static bool HasAttribute(this Type type, string attributeName)
-        {
-            if (type == null)
-            {
-                return false;
-            }
-
-            try
-            {
-                return CustomAttributeData.GetCustomAttributes(type).Any(attr => SafeGetAttributeName(attr) == attributeName);
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private static string? SafeGetAttributeName(CustomAttributeData attr)
-        {
-            try
-            {
-                return attr.AttributeType?.Name;
-            }
-            catch (TypeLoadException)
-            {
-                // Skip this attribute - it references a type that can't be loaded
-                // It might be available in the child node.
-                return null;
-            }
-            catch (System.IO.FileNotFoundException)
-            {
-                // Skip this attribute - it references a type that can't be found
-                // It might be available in the child node.
-                return null;
-            }
-        }
-    }
-#endif
 }
