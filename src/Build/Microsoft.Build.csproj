@@ -655,6 +655,9 @@
     <Compile Include="..\Shared\LoadedType.cs">
       <Link>SharedUtilities\LoadedType.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TypeUtilities.cs">
+      <Link>SharedUtilities\TypeUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
     </Compile>
