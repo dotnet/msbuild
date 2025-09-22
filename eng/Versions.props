@@ -6,7 +6,6 @@
     <DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-
     <!-- differentiate experimental insertions to avoid package id conflicts, 
     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
