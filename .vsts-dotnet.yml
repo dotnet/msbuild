@@ -6,7 +6,6 @@ trigger:
 # Once they exist, we should define these as "runtime parameters"
 # https://github.com/Microsoft/azure-pipelines-yaml/pull/129
 # variables:
-#   SignType: real
 #   SkipApplyOptimizationData: false
 
 parameters:
@@ -14,18 +13,18 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
-- name: EnableOptProf
+- name: enableOptProf
   displayName: Enable OptProf data collection for this build
-  type: boolean
-  default: true
-- name: requireDefaultChannelsEnabled
-  displayName: Require Default Channels
   type: boolean
   default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
   default: true
+- name: signTypeParameter
+  displayName: Sign Type
+  type: string
+  default: 'real'
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -46,11 +45,9 @@ variables:
     - name: SourceBranch
       value: ''
   # Override SkipApplyOptimizationData to true when disabling OptProf data collection
-  - ${{ if eq(parameters.EnableOptProf, false) }}:
+  - ${{ if eq(parameters.enableOptProf, false) }}:
     - name: SkipApplyOptimizationData
       value: true
-  - name: requireDefaultChannels
-    value: ${{ parameters.requireDefaultChannelsEnabled }}
   - name: EnableReleaseOneLocBuild
     value: true # Enable loc for vs17.14
   - name: Codeql.Enabled
@@ -130,6 +127,8 @@ extends:
         parameters:
           isExperimental: false
           enableComponentGovernance: true
+          signTypeParameter: ${{ parameters.signTypeParameter }}
+          enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
@@ -137,5 +136,4 @@ extends:
         enableSymbolValidation: true
         enableSourceLinkValidation: false
         enableNugetValidation: false
-        requireDefaultChannels: ${{ parameters.requireDefaultChannelsEnabled }}
         enableSigningValidation: ${{ parameters.enableSigningValidation }}

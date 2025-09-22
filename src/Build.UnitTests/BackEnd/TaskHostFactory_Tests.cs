@@ -115,7 +115,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// can coexist in the same build and operate independently.
         /// </summary>
         [Fact]
-        public void TransientandSidecarNodeCanCoexist()
+        public void TransientAndSidecarNodeCanCoexist()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
             {
