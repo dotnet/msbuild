@@ -780,7 +780,7 @@
       </trans-unit>
       <trans-unit id="ProjectFinished_WithTFAndRID">
         <source>{0}{1} {2} {3} {4} ({5}s)</source>
-        <target state="new">{0}{1} {2} {3} {4} ({5}s)</target>
+        <target state="translated">{0}{1} {2} {3} {4} ({5} s)</target>
         <note>
       Project finished summary including target framework and runtime identifier information.
       {0}: indentation - few spaces to visually indent row
@@ -1029,7 +1029,7 @@ Errores: {3}</target>
       </trans-unit>
       <trans-unit id="TestProjectFinished_WithTFAndRID">
         <source>{0}{1} test {2} {3} {4} ({5}s)</source>
-        <target state="new">{0}{1} test {2} {3} {4} ({5}s)</target>
+        <target state="translated">{0}{1} prueba {2} {3} {4} ({5} s)</target>
         <note>
       Project finished summary including target framework and runtime identifier information.
       {0}: indentation - few spaces to visually indent row
