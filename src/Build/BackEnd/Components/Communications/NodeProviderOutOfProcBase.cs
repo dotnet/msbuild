@@ -683,6 +683,7 @@ namespace Microsoft.Build.BackEnd
                 // We select a thread size empirically - for debug builds the minimum possible stack size was too small.
                 // The current size is reported to not have the issue.
                 _drainPacketQueueThread = new Thread(DrainPacketQueue, 0x30000);
+                _drainPacketQueueThread.Name = "DrainPacketQueueThread";
                 _drainPacketQueueThread.IsBackground = true;
                 _drainPacketQueueThread.Start(this);
             }
@@ -855,6 +856,11 @@ namespace Microsoft.Build.BackEnd
                                 context._exitPacketState = ExitPacketState.ExitPacketSent;
                                 context._packetQueueDrainDelayCancellation.Cancel();
 
+                                return;
+                            }
+
+                            if (packet is NodeBuildComplete)
+                            {
                                 return;
                             }
                         }
