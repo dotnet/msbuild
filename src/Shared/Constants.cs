@@ -91,7 +91,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
         /// </summary>
-        internal const string CurrentProductVersion = "17.0";
+        internal const string CurrentProductVersion = "18.0";
 
         /// <summary>
         /// Symbol used in ProjectReferenceTarget items to represent default targets

@@ -778,6 +778,20 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="ProjectFinished_WithTFAndRID">
+        <source>{0}{1} {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} {2} {3} {4} ({5} s)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph no admite elementos de ProjectReference con los metadatos de ToolsVersion establecidos. Se encontró ProjectReference "{0}" con ToolsVersion en el archivo "{1}"</target>
@@ -1010,6 +1024,20 @@ Errores: {3}</target>
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTFAndRID">
+        <source>{0}{1} test {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} prueba {2} {3} {4} ({5} s)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>

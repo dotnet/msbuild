@@ -30,7 +30,7 @@ internal static class TelemetryConstants
     /// <summary>
     /// For VS OpenTelemetry Collector to apply the correct privacy policy.
     /// </summary>
-    public const string VSMajorVersion = "17.0";
+    public const string VSMajorVersion = "18.0";
 
     /// <summary>
     /// Sample rate for the default namespace.

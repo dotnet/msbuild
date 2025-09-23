@@ -625,36 +625,35 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        private static IEnumerable<string> GetExpandedMetadataValuesAndConditions(ICollection<ProjectMetadataElement> metadata, Expander<P, I> expander)
-        {
-            // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
-            // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
-            // See: https://github.com/dotnet/msbuild/issues/3460
-            const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
-
-            // Expand properties here, because a property may have a value which is an item reference (ie "@(Bar)"), and
-            // if so we need to add the right item reference.
-            foreach (var metadatumElement in metadata)
-            {
-                yield return expander.ExpandIntoStringLeaveEscaped(
-                    metadatumElement.Value,
-                    expanderOptions,
-                    metadatumElement.Location);
-
-                yield return expander.ExpandIntoStringLeaveEscaped(
-                    metadatumElement.Condition,
-                    expanderOptions,
-                    metadatumElement.ConditionLocation);
-            }
-        }
-
         private void ProcessMetadataElements(ProjectItemElement itemElement, OperationBuilderWithMetadata operationBuilder)
         {
             if (itemElement.HasMetadata)
             {
                 operationBuilder.Metadata.AddRange(itemElement.Metadata);
 
-                var itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetExpandedMetadataValuesAndConditions(itemElement.Metadata, _expander));
+                ItemsAndMetadataPair itemsAndMetadataFound = new ItemsAndMetadataPair(null, null);
+
+                // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
+                // unexpected errors may occur when evaluating property functions on unexpanded metadata. Just ignore them if that happens.
+                // See: https://github.com/dotnet/msbuild/issues/3460
+                const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
+                foreach (var metadatumElement in itemElement.Metadata)
+                {
+                    string expression = _expander.ExpandIntoStringLeaveEscaped(
+                        metadatumElement.Value,
+                        expanderOptions,
+                        metadatumElement.Location);
+
+                    ExpressionShredder.GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref itemsAndMetadataFound, ShredderOptions.All);
+
+                    expression = _expander.ExpandIntoStringLeaveEscaped(
+                        metadatumElement.Condition,
+                        expanderOptions,
+                        metadatumElement.ConditionLocation);
+
+                    ExpressionShredder.GetReferencedItemNamesAndMetadata(expression, 0, expression.Length, ref itemsAndMetadataFound, ShredderOptions.All);
+                }
+
                 if (itemsAndMetadataFound.Items != null)
                 {
                     foreach (var itemType in itemsAndMetadataFound.Items)
@@ -673,7 +672,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                ExpressionShredder.ItemExpressionCapture match = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
+                ExpressionShredder.ItemExpressionCapture? match = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
                     expression, ExpanderOptions.ExpandItems, elementLocation);
 
                 if (match == null)
@@ -681,7 +680,7 @@ namespace Microsoft.Build.Evaluation
                     return;
                 }
 
-                AddReferencedItemLists(operationBuilder, match);
+                AddReferencedItemLists(operationBuilder, match.Value);
             }
         }
 

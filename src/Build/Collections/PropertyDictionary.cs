@@ -36,7 +36,7 @@ namespace Microsoft.Build.Collections
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
+    internal sealed class PropertyDictionary<T> : IEnumerable<T>, ICollection<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
         where T : class, IKeyed, IValued, IEquatable<T>
     {
         /// <summary>
@@ -162,6 +162,8 @@ namespace Microsoft.Build.Collections
                 }
             }
         }
+
+        bool ICollection<T>.IsReadOnly => false;
 
         /// <summary>
         /// Get the property with the specified name, or null if none exists.
@@ -344,6 +346,11 @@ namespace Microsoft.Build.Collections
         /// <returns>True if a property with a matching name was found. False otherwise.</returns>
         public bool TryGetPropertyUnescapedValue(string propertyName, out string unescapedValue)
         {
+            if (_properties is IRetrievableUnescapedValuedEntryHashSet unescapedProperties)
+            {
+                return unescapedProperties.TryGetUnescapedValue(propertyName, out unescapedValue);
+            }
+
             if (_properties.TryGetEscapedValue(propertyName, out string escapedValue) && escapedValue != null)
             {
                 unescapedValue = EscapingUtilities.UnescapeAll(escapedValue);
@@ -451,6 +458,28 @@ namespace Microsoft.Build.Collections
             return ((IDictionary<string, T>)this).Remove(item.Key);
         }
 
+        /// <inheritdoc/>
+        void ICollection<T>.Add(T item) => Set(item);
+
+        /// <inheritdoc/>
+        bool ICollection<T>.Contains(T item)
+        {
+            return ((IDictionary<string, T>)this).TryGetValue(item.Key, out T existingItem) &&
+                EqualityComparer<T>.Default.Equals(existingItem, item);
+        }
+
+        /// <inheritdoc/>
+        void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+        {
+            using (_lock.EnterDisposableWriteLock())
+            {
+                _properties.CopyTo(array, arrayIndex);
+            }
+        }
+
+        /// <inheritdoc/>
+        bool ICollection<T>.Remove(T item) => Remove(item.Key);
+
         #endregion
 
         #region IEnumerable<KeyValuePair<string,T>> Members
@@ -470,6 +499,7 @@ namespace Microsoft.Build.Collections
         }
 
         #endregion
+
 
         /// <summary>
         /// Removes any property with the specified name.
@@ -545,6 +575,13 @@ namespace Microsoft.Build.Collections
 
                 return dictionary;
             }
+        }
+
+        internal IDictionary<string, string> ToReadOnlyDictionary()
+        {
+            return _properties is IValueDictionaryConverter converter
+                ? converter.ToReadOnlyDictionary()
+                : new System.Collections.ObjectModel.ReadOnlyDictionary<string, string>(ToDictionary());
         }
 
         internal IEnumerable<PropertyData> Enumerate()

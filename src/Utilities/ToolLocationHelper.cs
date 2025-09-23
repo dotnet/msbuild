@@ -177,7 +177,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// The latest version available at the time of release
         /// </summary>
-        VersionLatest = Version170
+        VersionLatest = Version180
     }
 
     /// <summary>

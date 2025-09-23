@@ -1,0 +1,244 @@
+# Template for the main Windows_NT build job
+parameters:
+- name: isExperimental
+  type: boolean
+  default: false
+- name: enableComponentGovernance
+  type: boolean
+  default: false
+- name: signTypeParameter
+  type: string
+  default: 'test'
+- name: enableOptProf
+  type: boolean
+  default: false
+
+jobs:
+- job: Windows_NT
+  pool:
+    name: VSEngSS-MicroBuild2022-1ES
+    demands:
+    - agent.os -equals Windows_NT
+
+  timeoutInMinutes: 180
+
+  variables:
+  - group: Publish-Build-Assets
+  - name: TeamName
+    value: MSBuild
+  - name: VisualStudio.MajorVersion
+    value: 18
+  - name: VisualStudio.ChannelName
+    value: 'int.main'
+  - name: VisualStudio.DropName
+    value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
+
+  steps:
+  - task: NuGetToolInstaller@1
+    displayName: 'Install NuGet.exe'
+  - pwsh: Get-MpComputerStatus
+
+  - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
+
+  - task: PowerShell@2
+    displayName: Setup Private Feeds Credentials
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+    env:
+      Token: $(dn-bot-dnceng-artifact-feeds-rw)
+
+
+  - task: NuGetCommand@2
+    displayName: Restore internal tools
+    inputs:
+      command: restore
+      feedsToUse: config
+      restoreSolution: 'eng\common\internal\Tools.csproj'
+      nugetConfigPath: 'eng\common\internal\NuGet.config'
+      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
+
+  - task: MicroBuildSigningPlugin@4
+    displayName: Install MicroBuild plugin
+    inputs:
+      signType: ${{ parameters.signTypeParameter }}
+      zipSources: false
+      feedSource: https://devdiv.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json
+      ${{ if and(eq(parameters.signTypeParameter, 'real'), eq(variables['System.TeamProject'], 'DevDiv')) }}:
+        ConnectedPMEServiceName: 6cc74545-d7b9-4050-9dfa-ebefcc8961ea
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    condition: and(succeeded(), in('${{ parameters.signTypeParameter }}', 'test', 'real'))
+
+  - task: MicroBuildOptProfPlugin@6
+    inputs:
+      ProfilingInputsDropName: '$(VisualStudio.DropName)'
+      ShouldSkipOptimize: true
+      AccessToken: '$(System.AccessToken)'
+      feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+    displayName: 'Install OptProf Plugin'
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
+
+  # Required by MicroBuildBuildVSBootstrapper
+  - task: MicroBuildSwixPlugin@4
+    inputs:
+      dropName: $(VisualStudio.DropName)
+
+  - script: eng/CIBuild.cmd
+              -configuration $(BuildConfiguration)
+              -officialBuildId $(Build.BuildNumber)
+              -officialSkipApplyOptimizationData $(SkipApplyOptimizationData)
+              /p:RepositoryName=$(Build.Repository.Name)
+              /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
+              /p:VisualStudioDropAccessToken=$(System.AccessToken)
+              /p:VisualStudioDropName=$(VisualStudio.DropName)
+              /p:DotNetSignType=${{ parameters.signTypeParameter }}
+              /p:TeamName=MSBuild
+              /p:DotNetPublishUsingPipelines=true
+              /p:VisualStudioIbcDrop=$(OptProfDrop)
+              /p:GenerateSbom=true
+              /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
+              /p:IsExperimental=${{ parameters.isExperimental }}
+
+    displayName: Build
+    condition: succeeded()
+
+  # Required by Microsoft policy
+  - template: /eng/common/templates-official/steps/generate-sbom.yml@self
+
+  # Publish OptProf configuration files
+  - task: 1ES.PublishArtifactsDrop@1
+    inputs:
+      dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+      buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+      toLowerCase: false
+      usePat: true
+    displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
+
+  # Build VS bootstrapper
+  # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+  - task: MicroBuildBuildVSBootstrapper@3
+    inputs:
+      vsMajorVersion: $(VisualStudio.MajorVersion)
+      channelName: $(VisualStudio.ChannelName)
+      manifests: $(VisualStudio.SetupManifestList)
+      outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+    displayName: 'OptProf - Build VS bootstrapper'
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
+
+  # Publish run settings
+  - task: PowerShell@2
+    inputs:
+      filePath: eng\common\sdk-task.ps1
+      arguments: -configuration $(BuildConfiguration)
+                -task VisualStudio.BuildIbcTrainingSettings
+                /p:VisualStudioDropName=$(VisualStudio.DropName)
+                /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
+    displayName: 'OptProf - Build IBC training settings'
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
+
+  # Publish bootstrapper info
+  - task: 1ES.PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+      ArtifactName: MicroBuildOutputs
+      ArtifactType: Container
+    displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
+    condition: succeeded()
+
+  - task: 1ES.PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+      ArtifactName: logs
+    condition: succeededOrFailed()
+
+  # Publishes setup VSIXes to a drop.
+  # Note: The insertion tool looks for the display name of this task in the logs.
+  - task: 1ES.MicroBuildVstsDrop@1
+    displayName: Upload VSTS Drop
+    inputs:
+      dropName: $(VisualStudio.DropName)
+      dropFolder: 'artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+      dropRetentionDays: '30' # extended by insertion + VS release
+      accessToken: '$(System.AccessToken)'
+      dropServiceUri: 'https://devdiv.artifacts.visualstudio.com'
+      vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
+    condition: succeeded()
+
+  # Publish an artifact that the RoslynInsertionTool is able to find by its name.
+  - task: 1ES.PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: VSSetup'
+    inputs:
+      PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)'
+      ArtifactName: VSSetup
+    condition: succeeded()
+
+  # Archive NuGet packages to DevOps.
+  # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
+  # arcade templates depend on the name.
+  - task: 1ES.PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: packages'
+    inputs:
+      PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
+      ArtifactName: PackageArtifacts
+    condition: succeeded()
+
+  # Publish "IntelliSense" XSD files to their own artifact
+  # so it can be consumed by the insertion-to-VS job
+  - task: 1ES.PublishPipelineArtifact@1
+    displayName: 'Publish Artifact: xsd'
+    inputs:
+      path: 'artifacts\xsd'
+      artifactName: xsd
+    condition: succeeded()
+
+  # Publish Asset Manifests for Build Asset Registry job
+  - task: 1ES.PublishBuildArtifacts@1
+    displayName: Publish Asset Manifests
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
+      ArtifactName: AssetManifests
+    condition: succeeded()
+
+  # Tag the build at the very end when we know it's been successful.
+  - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
+    displayName: Tag build as ready for optimization training
+    inputs:
+      tags: 'ready-for-training'
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
+
+  - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
+    displayName: Execute cleanup tasks
+    condition: succeededOrFailed()
+
+  - template: /eng/common/templates-official/steps/component-governance.yml@self
+    parameters:
+      ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
+        disableComponentGovernance: false
+      ${{ else }}:
+        disableComponentGovernance: true
+
+- template: /eng/common/templates-official/jobs/source-build.yml@self
+  parameters:
+    platforms:
+      - name: Managed
+        pool:
+          name: AzurePipelines-EO
+          image: 1ESPT-Ubuntu22.04
+          os: linux
+
+- template: /eng/common/templates-official/job/publish-build-assets.yml@self
+  parameters:
+    enablePublishBuildArtifacts: true
+    publishUsingPipelines: true
+    dependsOn:
+      - Windows_NT
+      - Source_Build_Managed
+    pool:
+      name: $(DncEngInternalBuildPool)
+      image: $(WindowsImage)
+      os: windows

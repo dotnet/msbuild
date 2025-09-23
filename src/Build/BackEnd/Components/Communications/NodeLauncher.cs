@@ -81,12 +81,7 @@ namespace Microsoft.Build.BackEnd
                     startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
                     startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
                     startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-
                     creationFlags |= BackendNativeMethods.CREATENOWINDOW;
-
-                    // Avoid spawning a conhost.exe process, since this node won't do console output
-                    // even though Windows thinks of us as a "console process"
-                    creationFlags |= BackendNativeMethods.DETACHED_PROCESS;
                 }
             }
             else

@@ -31,6 +31,48 @@ namespace Microsoft.Build.UnitTests
 {
     public class XMakeAppTests : IDisposable
     {
+        public static TheoryData<string, MessageImportance> MinimumMessageImportanceTestData
+        {
+            get
+            {
+                var data = new TheoryData<string, MessageImportance>
+                {
+                    { "/v:diagnostic /tl:off", MessageImportance.Low },
+                    { "/v:detailed /tl:off", MessageImportance.Low },
+                    { "/v:normal /tl:off", MessageImportance.Normal },
+                    { "/v:minimal /tl:off", MessageImportance.High },
+                    { "/v:quiet /tl:off", MessageImportance.High - 1 },
+                    { "/v:diagnostic /bl", MessageImportance.Low },
+                    { "/v:detailed /bl", MessageImportance.Low },
+                    { "/v:normal /bl", MessageImportance.Low }, // v:normal but with binary logger so everything must be logged
+                    { "/v:minimal /bl", MessageImportance.Low }, // v:minimal but with binary logger so everything must be logged
+                    { "/v:quiet /bl", MessageImportance.Low }, // v:quiet but with binary logger so everything must be logged
+                    { "/v:diagnostic /check", MessageImportance.Low },
+                    { "/v:detailed /check", MessageImportance.Low },
+                    { "/v:normal /check", MessageImportance.Normal },
+                    { "/v:minimal /check", MessageImportance.High },
+                    { "/v:quiet /check", MessageImportance.High },
+                    { "/v:diagnostic /tl:on", MessageImportance.High },
+                    { "/v:detailed /tl:on", MessageImportance.High },
+                    { "/v:normal /tl:on", MessageImportance.High },
+                    { "/v:minimal /tl:on", MessageImportance.High },
+                    { "/v:quiet /tl:on", MessageImportance.High - 1 }
+                };
+
+                return data;
+            }
+        }
+
+        private static string GenerateMessageImportanceProjectFile(MessageImportance expectedMinimumMessageImportance)
+        {
+            return ObjectModelHelpers.CleanupFileContents($"<Project>\n"
+                + $"  <UsingTask TaskName=\"{typeof(MessageImportanceCheckingTask).FullName}\" AssemblyFile=\"{Assembly.GetExecutingAssembly().Location}\"/>\n"
+                + $"  <Target Name=\"CheckMessageImportance\">\n"
+                + $"    <MessageImportanceCheckingTask ExpectedMinimumMessageImportance=\"{(int)expectedMinimumMessageImportance}\" />\n"
+                + $"  </Target>\n"
+                + "</Project>");
+        }
+
 #if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
 #else
@@ -43,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         public XMakeAppTests(ITestOutputHelper output)
         {
             _output = output;
-            _env = UnitTests.TestEnvironment.Create(_output);
+            _env = TestEnvironment.Create(_output);
         }
 
         private static string TestAssetsRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(XMakeAppTests).Assembly.Location) ?? AppContext.BaseDirectory), "TestAssets");
@@ -2498,7 +2540,7 @@ $@"<Project>
         [InlineData("-logger:,Logger.dll", "Logger.dll")]
         public void LoggerThrowsIOExceptionWhenDllNotFound(string logger, string expectedLoggerName)
         {
-            string projectString ="<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+            string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
             var tempDir = _env.CreateFolder();
             var projectFile = tempDir.CreateFile("iologgertest.proj", projectString);
 
@@ -2515,7 +2557,7 @@ $@"<Project>
         [InlineData("-distributedlogger:,BadFile.dll", "BadFile.dll")]
         public void LoggerThrowsBadImageFormatExceptionWhenFileIsInvalid(string logger, string expectedLoggerName)
         {
-            string projectString ="<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+            string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
             var tempDir = _env.CreateFolder();
             var projectFile = tempDir.CreateFile("badimagetest.proj", projectString);
 
@@ -2722,7 +2764,8 @@ EndGlobal
                 bool shouldLogHigh = Log.LogsMessagesOfImportance(MessageImportance.High);
                 bool shouldLogNormal = Log.LogsMessagesOfImportance(MessageImportance.Normal);
                 bool shouldLogLow = Log.LogsMessagesOfImportance(MessageImportance.Low);
-                return (MessageImportance)ExpectedMinimumMessageImportance switch
+                var value = (MessageImportance)ExpectedMinimumMessageImportance;
+                var result = value switch
                 {
                     MessageImportance.High - 1 => !shouldLogHigh && !shouldLogNormal && !shouldLogLow,
                     MessageImportance.High => shouldLogHigh && !shouldLogNormal && !shouldLogLow,
@@ -2730,6 +2773,21 @@ EndGlobal
                     MessageImportance.Low => shouldLogHigh && shouldLogNormal && shouldLogLow,
                     _ => false
                 };
+                if (!result)
+                {
+                    var enumName =
+                        value == MessageImportance.High - 1
+                        ? "Nothing"
+#if NET
+                        : Enum.GetName(value);
+#else
+                        : Enum.GetName(typeof(MessageImportance), value);
+#endif
+
+                    Log.LogError($"Expected minimum message importance {enumName} did not match actual logging behavior:\n" +
+                                 $"\tShouldLogHigh={shouldLogHigh}, ShouldLogNormal={shouldLogNormal}, ShouldLogLow={shouldLogLow}");
+                }
+                return result;
             }
         }
 
@@ -2740,7 +2798,7 @@ EndGlobal
         [InlineData("/getProperty:p", false)]
         public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
         {
-            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
 
             string projectContents = ObjectModelHelpers.CleanupFileContents("""
                                                                             <Project>
@@ -2769,48 +2827,17 @@ EndGlobal
         }
 
         [Theory]
-        [InlineData("/v:diagnostic", MessageImportance.Low)]
-        [InlineData("/v:detailed", MessageImportance.Low)]
-        [InlineData("/v:normal", MessageImportance.Normal)]
-        [InlineData("/v:minimal", MessageImportance.High)]
-        [InlineData("/v:quiet", MessageImportance.High - 1)]
-
-        [InlineData("/v:diagnostic /bl", MessageImportance.Low)]
-        [InlineData("/v:detailed /bl", MessageImportance.Low)]
-        [InlineData("/v:normal /bl", MessageImportance.Low)] // v:normal but with binary logger so everything must be logged
-        [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
-        [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
-
-        [InlineData("/v:diagnostic /check", MessageImportance.Low)]
-        [InlineData("/v:detailed /check", MessageImportance.Low)]
-        [InlineData("/v:normal /check", MessageImportance.Normal)]
-        [InlineData("/v:minimal /check", MessageImportance.High)]
-        [InlineData("/v:quiet /check", MessageImportance.High)]
-
-        [InlineData("/v:diagnostic /tl", MessageImportance.Low)]
-        [InlineData("/v:detailed /tl", MessageImportance.Low)]
-        [InlineData("/v:normal /tl", MessageImportance.Normal)]
-        [InlineData("/v:minimal /tl", MessageImportance.High)]
-        [InlineData("/v:quiet /tl", MessageImportance.High - 1)]
-        public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
+        [MemberData(nameof(MinimumMessageImportanceTestData))]
+        public void EndToEndMinimumMessageImportance_InProc(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
-            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
 
-            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
-
-  <UsingTask TaskName=""" + typeof(MessageImportanceCheckingTask).FullName + @""" AssemblyFile=""" + Assembly.GetExecutingAssembly().Location + @"""/>
-
-  <Target Name=""CheckMessageImportance"">
-    <MessageImportanceCheckingTask ExpectedMinimumMessageImportance=""" + (int)expectedMinimumMessageImportance + @""" />
-  </Target>
-
-</Project>");
+            string projectContents = GenerateMessageImportanceProjectFile(expectedMinimumMessageImportance);
 
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
             // If /bl is specified, set a path for the binlog that is defined by the test environment
-            string pattern = @"/v:(\w+)\s/b"; ;
-            Regex.Match(arguments, pattern);
+            string pattern = @"/v:(\w+)\s/b";
             Match match = Regex.Match(arguments, pattern);
             if (match.Success)
             {
@@ -2818,14 +2845,37 @@ EndGlobal
                 arguments = arguments.Replace("/bl", $"/bl:{binlogPath}");
             }
 
-            // Build in-proc.
+            // Build in-proc only.
             RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
             success.ShouldBeTrue();
+        }
 
-            // Build out-of-proc to exercise both logging code paths.
+        [Theory]
+        [MemberData(nameof(MinimumMessageImportanceTestData))]
+        public void EndToEndMinimumMessageImportance_OutOfProc(string arguments, MessageImportance expectedMinimumMessageImportance)
+        {
+            using var testEnvironment = TestEnvironment.Create();
+
+            // NOTE for this test: out of proc nodes _always_ log every message, so we rewrite the expected minimum message importance to accept every message.
+            expectedMinimumMessageImportance = MessageImportance.Low;
+
+            string projectContents = GenerateMessageImportanceProjectFile(expectedMinimumMessageImportance);
+
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+
+            // If /bl is specified, set a path for the binlog that is defined by the test environment
+            string pattern = @"/v:(\w+)\s/b";
+            Match match = Regex.Match(arguments, pattern);
+            if (match.Success)
+            {
+                string binlogPath = Path.Combine(testProject.TestRoot, match.Groups[1] + ".binlog");
+                arguments = arguments.Replace("/bl", $"/bl:{binlogPath}");
+            }
+
+            // Build out-of-proc only.
             testEnvironment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
             testEnvironment.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", "1");
-            RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out success, _output);
+            RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
             success.ShouldBeTrue();
         }
 
