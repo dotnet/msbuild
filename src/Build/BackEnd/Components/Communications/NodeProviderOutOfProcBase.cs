@@ -851,16 +851,14 @@ namespace Microsoft.Build.BackEnd
                                 serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                             }
 
-                            if (IsExitPacket(packet))
-                            {
-                                context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                context._packetQueueDrainDelayCancellation.Cancel();
-
-                                return;
-                            }
-
                             if (packet is NodeBuildComplete)
                             {
+                                if (IsExitPacket(packet))
+                                {
+                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                    context._packetQueueDrainDelayCancellation.Cancel();
+                                }
+
                                 return;
                             }
                         }
