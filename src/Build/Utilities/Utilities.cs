@@ -853,42 +853,80 @@ namespace Microsoft.Build.Internal
         /// <returns></returns>
         private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string[] itemTypeNamesToFetch)
         {
-            foreach (var item in items)
+            IEnumerator enumerator = items.GetEnumerator();
+            if (enumerator is List<DictionaryEntry>.Enumerator listEnumerator)
             {
-                string itemType = default;
-                object itemValue = null;
+                while (listEnumerator.MoveNext())
+                {
+                    DictionaryEntry dictionaryEntry = listEnumerator.Current;
+                    string itemType = dictionaryEntry.Key as string;
+                    object itemValue = dictionaryEntry.Value;
 
-                if (item is IItem iitem)
-                {
-                    itemType = iitem.Key;
-                    itemValue = iitem;
-                }
-                else if (item is DictionaryEntry dictionaryEntry)
-                {
-                    itemType = dictionaryEntry.Key as string;
-                    itemValue = dictionaryEntry.Value;
-                }
-                else
-                {
-                    if (item == null)
+                    // if itemTypeNameToFetch was not set - then return all items
+                    if (itemValue != null && (itemTypeNamesToFetch == null || MatchesAnyItemTypeToFetch(itemTypeNamesToFetch, itemType)))
                     {
-                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
+                        // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                        //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                        // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                        //  (see xml comments of TaskItemData for details)
+                        yield return new ItemData(itemType!, itemValue);
+                    }
+                }
+            }
+            else
+            {
+                while (enumerator.MoveNext())
+                {
+                    object item = enumerator.Current;
+                    string itemType = default;
+                    object itemValue = null;
+
+                    if (item is IItem iitem)
+                    {
+                        itemType = iitem.Key;
+                        itemValue = iitem;
+                    }
+                    else if (item is DictionaryEntry dictionaryEntry)
+                    {
+                        itemType = dictionaryEntry.Key as string;
+                        itemValue = dictionaryEntry.Value;
                     }
                     else
                     {
-                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                        if (item == null)
+                        {
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
+                        }
+                        else
+                        {
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                        }
+                    }
+
+                    // if itemTypeNameToFetch was not set - then return all items
+                    if (itemValue != null && (itemTypeNamesToFetch == null || MatchesAnyItemTypeToFetch(itemTypeNamesToFetch, itemType)))
+                    {
+                        // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                        //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                        // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                        //  (see xml comments of TaskItemData for details)
+                        yield return new ItemData(itemType!, itemValue);
+                    }
+                }
+            }
+
+            // PERF: This replaces a previous call to Any() that was causing an allocation due to a closure.
+            static bool MatchesAnyItemTypeToFetch(string[] itemTypeNamesToFetch, string itemType)
+            {
+                foreach (string tp in itemTypeNamesToFetch)
+                {
+                    if (MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))
+                    {
+                        return true;
                     }
                 }
 
-                // if itemTypeNameToFetch was not set - then return all items
-                if (itemValue != null && (itemTypeNamesToFetch == null || itemTypeNamesToFetch.Any(tp => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))))
-                {
-                    // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
-                    //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
-                    // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
-                    //  (see xml comments of TaskItemData for details)
-                    yield return new ItemData(itemType!, itemValue);
-                }
+                return false;
             }
         }
     }
