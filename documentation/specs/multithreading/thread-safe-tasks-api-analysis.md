@@ -2,7 +2,7 @@
 
 This document provides a list of .NET APIs that should not be used or should be used with caution in thread-safe tasks. These APIs are problematic because they either rely on or modify process-level state, which can cause race conditions in multithreaded execution.
 
-The APIs listed in this document will be detected by Roslyn analyzers and/or MSBuild BuildCheck to help identify potential threading issues in tasks that implement `IThreadSafeTask`.
+The APIs listed in this document will be detected by Roslyn analyzers and/or MSBuild BuildCheck to help identify potential threading issues in tasks that implement `IMultiThreadableTask`.
 
 **Note**: The analyzers rely on **static code analysis** and may not catch all dynamic scenarios (such as reflection-based API calls).
 
@@ -16,19 +16,14 @@ Categories of threading issues with .NET API usage in thread-safe tasks to be aw
 1. **Assembly Loading**
 1. **Static Fields**
 
-**TODO**: Consider other possible causes of issues:
-1. Creating new AppDomain.
-1. App config changes. 
-
 ### Best Practices
 
 Instead of the problematic APIs listed below, thread-safe tasks should:
 
-1. **Use `ITaskExecutionContext`** for all file system operations, environment variable changes, and working directory changes.
+1. **Use `TaskEnvironment`** for all file system operations, environment variable changes, and working directory changes.
 1. **Always use absolute paths** when still using some standard .NET file system APIs.
-1. **Explicitly configure external processes** with working directory and environment variables.
+1. **Explicitly configure external processes** using `TaskEnvironment`.
 1. **Never modify process culture**: Avoid modifying culture defaults.
-### Additional Considerations
 
 ## Detailed API Reference
 
@@ -39,8 +34,6 @@ The following tables list specific .NET APIs and their threading safety classifi
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
 | `Path.GetFullPath(string path)` | ERROR | Uses current working directory | Use MSBuild API |
-
-**TODO**: Check other methods and exclude any indirect dependency on working directory.
 
 ### System.IO.File Class
 
