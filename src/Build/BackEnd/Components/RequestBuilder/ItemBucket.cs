@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd.Logging;
@@ -74,7 +75,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
         internal ItemBucket(
-            Dictionary<string, ICollection<ProjectItemInstance>>.KeyCollection itemNames, // PERF: directly use the KeyCollection to avoid boxing the enumerator.
+            FrozenSet<string> itemNames,
             Dictionary<string, string> metadata,
             Lookup lookup,
             int bucketSequenceNumber)
@@ -87,15 +88,9 @@ namespace Microsoft.Build.BackEnd
             // Push down the items, so that item changes in this batch are not visible to parallel batches
             _lookupEntry = _lookup.EnterScope("ItemBucket()");
 
-            // Add empty item groups for each of the item names, so that (unless items are added to this bucket) there are
+            // Truncate lookups for each of the item names, so that (unless items are added to this bucket) there are
             // no item types visible in this bucket among the item types being batched on
-            if (itemNames != null)
-            {
-                foreach (string name in itemNames)
-                {
-                    _lookup.PopulateWithItems(name, new List<ProjectItemInstance>());
-                }
-            }
+            _lookup.TruncateLookupsForItemTypes(itemNames);
 
             _metadata = metadata;
 
