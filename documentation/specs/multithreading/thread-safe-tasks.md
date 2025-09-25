@@ -4,15 +4,15 @@
 
 MSBuild's current execution model assumes that tasks have exclusive control over the entire process during execution. This allows tasks to freely modify global process state such as environment variables, the current working directory, and other process-level resources. This design works well for MSBuild's approach of executing builds in separate processes for parallelization. With the introduction of multithreaded execution within a single MSBuild process, multiple tasks can now run concurrently. This requires a new task design to ensure that multiple tasks do not access/modify shared process state, and the relative paths are resolved correctly.
 
-To enable this multithreaded execution model, tasks will declare their capabilities to by run in multiple threads in one process (further called **thread-safety** capabilities). Thread-safe tasks must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Analysis Reference](thread-safe-tasks-api-analysis.md) for detailed guidelines. Task authors will also get access to a `TaskEnvironment` that provides safe alternatives to global process state APIs. For example, task authors should use `TaskEnvironment.GetAbsolutePath()` instead of `Path.GetFullPath()` to ensure correct path resolution in multithreaded scenarios.
+To enable this multithreaded execution model, tasks will declare their capability to run in multiple threads within one process. These capabilities are referred to as **thread-safety** capabilities and the corresponding tasks are called **thread-safe tasks**. Thread-safe tasks must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Analysis Reference](thread-safe-tasks-api-analysis.md) for detailed guidelines. Task authors will also get access to a `TaskEnvironment` that provides safe alternatives to global process state APIs. For example, task authors should use `TaskEnvironment.GetAbsolutePath()` instead of `Path.GetFullPath()` to ensure correct path resolution in multithreaded scenarios.
 
 Tasks that are not thread-safe can still participate in multithreaded builds. MSBuild will execute these tasks in separate TaskHost processes to provide process-level isolation.
 
 ## Thread-Safe Capability Indicators
 
 Task authors can declare thread-safe capabilities in two different ways:
-1. **Interface-Based Thread-Safe Declaration** - Provides access to thread-safe APIs through `TaskEnvironment` to be used in the task code.
-2. **Attribute-Based Capability Declaration** - Allows existing tasks to declare its ability run in multithreaded mode without code changes. It is a **compatibility bridge option**.
+1. **Interface-Based Thread-Safe Capability Declaration** - Provides access to thread-safe APIs through `TaskEnvironment` to be used in the task code.
+2. **Attribute-Based Thread-Safe Capability Declaration** - Allows existing tasks to declare its ability run in multithreaded mode without code changes. It is a **compatibility bridge option**.
 
 Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds. While correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment` in tasks that use compatibility bridge options, tasks must avoid relying on environment variables or modifying global process state.
 
@@ -21,7 +21,7 @@ So, task authors who need to support older MSBuild versions will have three choi
 2. **Use compatibility bridge approaches** - Rely on MSBuild's ability to run legacy tasks in multithreaded mode without access to `TaskEnvironment`.
 3. **Accept reduced performance** - Tasks will execute more slowly than their thread-safe versions because they must run in a separate TaskHost process
 
-### Interface-Based Thread-Safe Declaration
+### Interface-Based Thread-Safe Capability Declaration
 
 Tasks indicate thread-safety capabilities by implementing the `IMultiThreadableTask` interface.
 
@@ -49,19 +49,19 @@ Task authors who want to support older MSBuild versions need to:
 
 **Note:** Consider backporting `IMultiThreadableTask` to MSBuild 17.14 for graceful failure when the interface is used.
 
-### Attribute-Based Capability Declaration
+### Attribute-Based Thread-Safe Capability Declaration
 
 Task authors can indicate thread-safety capabilities by marking their task classes with a specific attribute. Tasks marked with this attribute can run in multithreaded builds but do not have access to `TaskEnvironment` APIs.
 
 ```csharp
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-internal class MSBuildThreadSafeTaskAttribute : Attribute
+internal class MSBuildMultiThreadableTaskAttribute : Attribute
 {
-    public MSBuildThreadSafeTaskAttribute() { }
+    public MSBuildMultiThreadableTaskAttribute() { }
 }
 ```
 
-MSBuild detects `MSBuildThreadSafeTaskAttribute` by its namespace and name only, ignoring the defining assembly, which allows customers to define the attribute in their own assemblies alongside their tasks. Since MSBuild does not ship the attribute, customers using newer MSBuild versions should prefer the Interface-Based Thread-Safe Declaration.
+MSBuild detects `MSBuildMultiThreadableTaskAttribute` by its namespace and name only, ignoring the defining assembly, which allows customers to define the attribute in their own assemblies alongside their tasks. Since MSBuild does not ship the attribute, customers using newer MSBuild versions should prefer the Interface-Based Thread-Safe Capability Declaration.
 
 For tasks to be eligible for multithreaded execution using this approach, they must satisfy the following conditions:
 - The task must not modify global process state (environment variables, working directory)
@@ -70,7 +70,7 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 #### API Usage Example
 
 ```csharp
-[MSBuildThreadSafeTask]
+[MSBuildMultiThreadableTask]
 public class MyTask : Task {...}
 ```
 
@@ -156,6 +156,6 @@ An alternative approach to the TaskEnvironment API would be to use API hooking (
 - More complex implementation
 - Potential performance overhead from API hooking
 
-### Alternative to Attribute-Based Capability Declaration
+### Alternative to Attribute-Based Thread-Safe Capability Declaration
 
 We considered making the thread-safety signal using the task declaration (for example, a `ThreadSafe="true"` attribute on `UsingTask`) so that project authors could declare compatibility without changing task assemblies. However, because older MSBuild versions treat unknown attributes in task declarations as errors, this approach would require updating older MSBuild versions or servicing them to ignore the attribute. For compatibility and simplicity, the attribute-on-task-class approach is preferred because it does not require servicing older msbuild.
