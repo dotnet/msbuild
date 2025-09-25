@@ -1151,7 +1151,7 @@ namespace Microsoft.Build.Execution
 
                 if (DirectMetadataCount > 0)
                 {
-                    _directMetadata = _directMetadata.RemoveRange(metadataNames);
+                    _directMetadata = DirectMetadata.RemoveRange(metadataNames);
                 }
             }
 
