@@ -54,6 +54,7 @@ Task authors who want to support older MSBuild versions need to:
 Task authors can indicate thread-safety capabilities by marking their task classes with a specific attribute. Tasks marked with this attribute can run in multithreaded builds but do not have access to `TaskEnvironment` APIs.
 
 ```csharp
+namespace Microsoft.Build.Framework;
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
 internal class MSBuildMultiThreadableTaskAttribute : Attribute
 {
@@ -102,7 +103,7 @@ public class TaskEnvironment
 
 The `TaskEnvironment` class that MSBuild provides is not thread-safe. Task authors who spawn multiple threads within their task implementation must provide their own synchronization when accessing the task environment from multiple threads. However, each task receives its own isolated environment object, so synchronization with other concurrent tasks is not required.
 
-### Path Handling Types
+### Path Handling
 
 To prevent common thread-safety issues related to path handling, we introduce path type that is implicitly convertible to string:
 
@@ -141,21 +142,14 @@ public bool Execute(...)
 
 ## Appendix: Alternatives
 
-This appendix collects alternative approaches considered during design. These alternatives were moved here to keep the main specification focused and easy to read.
+This appendix collects alternative approaches considered during design.
 
 ### Alternative Approach: API Hooking
 
-An alternative approach to the TaskEnvironment API would be to use API hooking (such as Microsoft Detours) to automatically virtualize global process state without requiring any changes from task authors.
+An alternative approach to the `TaskEnvironment` API could be to use API hooking (such as Microsoft Detours) to automatically virtualize global process state without requiring any changes from task authors.
 
-**Pros of API Hooking:**
-- No action required from task authors - existing tasks work without modification or recompilation
-- No compatibility concerns with older MSBuild versions
-
-**Cons of API Hooking:**
-- Windows-only solution (Detours is platform-specific)
-- More complex implementation
-- Potential performance overhead from API hooking
+The main advantages of API hooking include requiring no action from task authors since existing tasks would work without modification or recompilation, and having no compatibility concerns with older MSBuild versions. However, it would be a Windows-only solution, making it unsuitable for cross-platform scenarios. 
 
 ### Alternative to Attribute-Based Thread-Safe Capability Declaration
 
-We considered making the thread-safety signal using the task declaration (for example, a `ThreadSafe="true"` attribute on `UsingTask`) so that project authors could declare compatibility without changing task assemblies. However, because older MSBuild versions treat unknown attributes in task declarations as errors, this approach would require updating older MSBuild versions or servicing them to ignore the attribute. For compatibility and simplicity, the attribute-on-task-class approach is preferred because it does not require servicing older msbuild.
+We considered making the thread-safety signal using the task declaration (for example, a `ThreadSafe="true"` attribute on `UsingTask`) so that project authors could declare compatibility without changing task assemblies. However, because older MSBuild versions treat unknown attributes in task declarations as errors, this approach would require updating older MSBuild versions or servicing them to ignore the attribute. 
