@@ -471,5 +471,72 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("a1(b1", foo2.GetMetadataValueEscaped("a"));
             Assert.Equal("c1)d1", foo2.GetMetadataValueEscaped("b"));
         }
+
+#if FEATURE_APPDOMAIN
+        private sealed class RemoteTaskItemFactory : MarshalByRefObject
+        {
+            public TaskItem CreateTaskItem() => new TaskItem();
+
+            public ITaskItem CreateTaskParameterTaskItem()
+            {
+                TaskParameter t = new TaskParameter(new TaskItem());
+                return t.WrappedParameter as ITaskItem;
+            }
+        }
+
+        [Fact]
+        public void ITaskItemParameter_CopyMetadataToRemoteTaskItem()
+        {
+            TaskItem sourceItem = new TaskItem();
+            sourceItem.SetMetadata("a", "a1");
+            sourceItem.SetMetadata("b", "b1");
+            TaskParameter t = new TaskParameter(sourceItem);
+            ITaskItem fromItem = t.WrappedParameter as ITaskItem;
+
+            AppDomain appDomain = null;
+            try
+            {
+                appDomain = AppDomain.CreateDomain("CopyMetadataToRemoteTaskItem", null, AppDomain.CurrentDomain.SetupInformation);
+                RemoteTaskItemFactory itemFactory = (RemoteTaskItemFactory)appDomain.CreateInstanceFromAndUnwrap(typeof(RemoteTaskItemFactory).Module.FullyQualifiedName, typeof(RemoteTaskItemFactory).FullName);
+
+                TaskItem toItem = itemFactory.CreateTaskItem();
+
+                fromItem.CopyMetadataTo(toItem);
+
+                Assert.Equal("a1", toItem.GetMetadata("a"));
+                Assert.Equal("b1", toItem.GetMetadata("b"));
+            }
+            finally
+            {
+                AppDomain.Unload(appDomain);
+            }
+        }
+
+        [Fact]
+        public void ITaskItemParameter_CopyMetadataFromRemoteTaskItem()
+        {
+            TaskItem toItem = new TaskItem();
+
+            AppDomain appDomain = null;
+            try
+            {
+                appDomain = AppDomain.CreateDomain("CopyMetadataFromRemoteTaskItem", null, AppDomain.CurrentDomain.SetupInformation);
+                RemoteTaskItemFactory itemFactory = (RemoteTaskItemFactory)appDomain.CreateInstanceFromAndUnwrap(typeof(RemoteTaskItemFactory).Module.FullyQualifiedName, typeof(RemoteTaskItemFactory).FullName);
+
+                ITaskItem fromItem = itemFactory.CreateTaskParameterTaskItem();
+                fromItem.SetMetadata("a", "a1");
+                fromItem.SetMetadata("b", "b1");
+
+                fromItem.CopyMetadataTo(toItem);
+
+                Assert.Equal("a1", toItem.GetMetadata("a"));
+                Assert.Equal("b1", toItem.GetMetadata("b"));
+            }
+            finally
+            {
+                AppDomain.Unload(appDomain);
+            }
+        }
+#endif
     }
 }

@@ -19,9 +19,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_WIN32_REGISTRY
-using Microsoft.Win32;
-#endif
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
@@ -54,67 +51,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private const string OverrideTasksFilePattern = "*.overridetasks";
 
-#if FEATURE_WIN32_REGISTRY
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 is installed.  This should exist if any SKU of Dev10 is installed,
-        /// but is not removed even when the last version of Dev10 is uninstalled, due to 10.0\bsln sticking around.
-        /// </summary>
-        private const string Dev10OverallInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0";
 
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 Ultimate is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10UltimateInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vstscore";
-
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 Premium is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10PremiumInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vstdcore";
-
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 Professional is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10ProfessionalInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\procore";
-
-        /// <summary>
-        /// Regkey that we check to see whether C# Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VCSExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vcs\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether VB Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VBExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vb\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether VC Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VCExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vc\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether VWD Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VWDExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vns\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether LightSwitch 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10LightSwitchInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vslscore";
-
-        /// <summary>
-        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on
-        /// the current machine, false otherwise.
-        /// </summary>
-        private static bool? s_dev10IsInstalled = null;
-#endif // FEATURE_WIN32_REGISTRY
 
         /// <summary>
         /// Name of the tools version
@@ -154,7 +91,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Lock for task registry initialization
         /// </summary>
-        private readonly object _taskRegistryLock = new object();
+        private readonly LockType _taskRegistryLock = new LockType();
 
         /// <summary>
         /// indicates if the default tasks file has already been scanned
@@ -488,7 +425,7 @@ namespace Microsoft.Build.Evaluation
         ///    the order found. We use the highest-versioned sub-toolset because, in the absence of any other information,
         ///    we assume that higher-versioned tools will be more likely to be able to generate something more correct.
         ///
-        /// Will return null if there is no sub-toolset available (and Dev10 is not installed).
+        /// Will return null if there is no sub-toolset available.
         /// </summary>
         public string DefaultSubToolsetVersion
         {
@@ -503,13 +440,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private string ComputeDefaultSubToolsetVersion()
         {
-            // 1) Workaround for ToolsVersion 4.0 + VS 2010
-            if (String.Equals(ToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase) && Dev10IsInstalled)
-            {
-                return Constants.Dev10SubToolsetValue;
-            }
-
-            // 2) Otherwise, just pick the highest available.
+            // Pick the highest available.
             SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
             List<string> additionalSubToolsetNames = new List<string>();
 
@@ -539,70 +470,7 @@ namespace Microsoft.Build.Evaluation
             return null;
         }
 
-        /// <summary>
-        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on
-        /// the current machine, false otherwise.
-        /// </summary>
-        /// <comments>
-        /// Internal so that unit tests can use it too.
-        /// </comments>
-        internal static bool Dev10IsInstalled
-        {
-            get
-            {
-#if FEATURE_WIN32_REGISTRY
-                if (!NativeMethodsShared.IsWindows)
-                {
-                    return false;
-                }
 
-                if (s_dev10IsInstalled == null)
-                {
-                    try
-                    {
-                        // Figure out whether Dev10 is currently installed using the following heuristic:
-                        // - Check whether the overall key (installed if any version of Dev10 is installed) is there.
-                        //   - If it's not, no version of Dev10 exists or has ever existed on this machine, so return 'false'.
-                        //   - If it is, we know that some version of Dev10 has been installed at some point, but we don't know
-                        //     for sure whether it's still there or not.  Check the inndividual keys for {Pro, Premium, Ultimate,
-                        //     C# Express, VB Express, C++ Express, VWD Express, LightSwitch} 2010
-                        //     - If even one of them exists, return 'true'.
-                        //     - Otherwise, return 'false.
-                        if (!RegistryKeyWrapper.KeyExists(Dev10OverallInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32))
-                        {
-                            s_dev10IsInstalled = false;
-                        }
-                        else if (
-                                    RegistryKeyWrapper.KeyExists(Dev10UltimateInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10PremiumInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10ProfessionalInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VCSExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VBExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VCExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VWDExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10LightSwitchInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32))
-                        {
-                            s_dev10IsInstalled = true;
-                        }
-                        else
-                        {
-                            s_dev10IsInstalled = false;
-                        }
-                    }
-                    catch (Exception e) when (!ExceptionHandling.NotExpectedRegistryException(e))
-                    {
-                        // if it's a registry exception, just shrug, eat it, and move on with life on the assumption that whatever
-                        // went wrong, it's pretty clear that Dev10 probably isn't installed.
-                        s_dev10IsInstalled = false;
-                    }
-                }
-
-                return s_dev10IsInstalled.Value;
-#else
-                return false;
-#endif
-            }
-        }
 
         /// <summary>
         /// Path to look for msbuild override task files.

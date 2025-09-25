@@ -1,4 +1,4 @@
-<Project>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -12,6 +12,7 @@
   <UsingTask
 	    TaskName="ExampleTask"
       AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
 	    Runtime="NET"/>
 	
   <Target Name="TestTask" BeforeTargets="Build">

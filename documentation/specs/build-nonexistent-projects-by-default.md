@@ -86,7 +86,7 @@ The .NET SDK will use this property to enable building file-based applications w
 
 ## Alternatives Considered
 
-1. **Always allow building in-memory projects**: This would be a breaking change as it could mask legitimate errors when projects are missing.
+1. **Always allow building in-memory projects**: This would be a small breaking change. It would also likely require more work to implement, as we would need to detect that the project being built is an in-memory project.
 
 2. **Add a new MSBuild task parameter**: This would require modifying all existing targets to use the new parameter, creating compatibility issues.
 
