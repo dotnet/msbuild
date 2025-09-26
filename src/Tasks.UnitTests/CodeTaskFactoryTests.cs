@@ -755,6 +755,63 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void OutOfProcCodeTaskFactoryCachesAssemblyPath()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+
+            TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
+
+            try
+                        {
+                                const string taskElementContents = @"<Code Type=""Fragment"" Language=""cs"">
+        Log.LogMessage(""inline execution"");
+        return true;
+    </Code>";
+
+                var firstFactory = new Microsoft.Build.Tasks.CodeTaskFactory();
+                var firstEngine = new MockEngine();
+                bool initialized = firstFactory.Initialize(
+                    "CachedCodeInlineTask",
+                    new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                    taskElementContents,
+                    firstEngine);
+                initialized.ShouldBeTrue(firstEngine.Log);
+
+                ITask firstTask = firstFactory.CreateTask(firstEngine);
+                firstTask.ShouldNotBeNull();
+
+                string firstAssemblyPath = ((IOutOfProcTaskFactory)firstFactory).GetAssemblyPath();
+                firstAssemblyPath.ShouldNotBeNullOrEmpty();
+                File.Exists(firstAssemblyPath).ShouldBeTrue();
+
+                firstFactory.CleanupTask(firstTask);
+
+                var secondFactory = new Microsoft.Build.Tasks.CodeTaskFactory();
+                var secondEngine = new MockEngine();
+                bool initializedAgain = secondFactory.Initialize(
+                    "CachedCodeInlineTask",
+                    new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                    taskElementContents,
+                    secondEngine);
+                initializedAgain.ShouldBeTrue(secondEngine.Log);
+
+                ITask secondTask = secondFactory.CreateTask(secondEngine);
+                secondTask.ShouldNotBeNull();
+
+                string reusedAssemblyPath = ((IOutOfProcTaskFactory)secondFactory).GetAssemblyPath();
+                reusedAssemblyPath.ShouldBe(firstAssemblyPath);
+                File.Exists(reusedAssemblyPath).ShouldBeTrue();
+
+                secondFactory.CleanupTask(secondTask);
+            }
+            finally
+            {
+                TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
+            }
+        }
+
         /// <summary>
         /// jscript .net works
         /// </summary>

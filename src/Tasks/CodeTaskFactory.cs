@@ -84,7 +84,19 @@ namespace Microsoft.Build.Tasks
         /// A collection of task assemblies which have been instantiated by any CodeTaskFactory.  Used to prevent us from creating
         /// duplicate assemblies.
         /// </summary>
-        private static readonly ConcurrentDictionary<FullTaskSpecification, Assembly> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, Assembly>();
+        private static readonly ConcurrentDictionary<FullTaskSpecification, CachedAssemblyEntry> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, CachedAssemblyEntry>();
+        private readonly struct CachedAssemblyEntry
+        {
+            public CachedAssemblyEntry(Assembly assembly, string assemblyPath)
+            {
+                Assembly = assembly;
+                AssemblyPath = assemblyPath;
+            }
+
+            public Assembly Assembly { get; }
+
+            public string AssemblyPath { get; }
+        }
 
         /// <summary>
         /// Merged set of assembly reference paths (default + specified)
@@ -725,16 +737,13 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private Assembly CompileAssembly()
         {
+            _assemblyPath = null;
+
             // Combine our default assembly references with those specified
             var finalReferencedAssemblies = CombineReferencedAssemblies();
 
             // Combine our default using's with those specified
             string[] finalUsingNamespaces = CombineUsingNamespaces();
-
-            if (Traits.Instance.ForceTaskFactoryOutOfProc)
-            {
-                _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
-            }
 
             // Language can be anything that has a codedom provider, in the standard naming method
             // "c#;cs;csharp", "vb;vbs;visualbasic;vbscript", "js;jscript;javascript", "vj#;vjs;vjsharp", "c++;mc;cpp"
@@ -814,8 +823,14 @@ namespace Microsoft.Build.Tasks
                 string fullCode = codeBuilder.ToString();
 
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
-                if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
+                CachedAssemblyEntry cachedEntry;
+                if (!s_compiledTaskCache.TryGetValue(fullSpec, out cachedEntry))
                 {
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
+                        compilerParameters.OutputAssembly = _assemblyPath;
+                    }
 
                     // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases
                     // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists.
@@ -853,8 +868,15 @@ namespace Microsoft.Build.Tasks
                     Assembly compiledAssembly;
                     if (Traits.Instance.ForceTaskFactoryOutOfProc)
                     {
-                        TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
-                        compiledAssembly = Assembly.Load(File.ReadAllBytes(_assemblyPath));
+                        if (!string.IsNullOrEmpty(_assemblyPath))
+                        {
+                            TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
+                            compiledAssembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
+                        }
+                        else
+                        {
+                            compiledAssembly = compilerResults.CompiledAssembly;
+                        }
                     }
                     else
                     {
@@ -862,11 +884,32 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Add to the cache.  Failing to add is not a fatal error.
-                    s_compiledTaskCache.TryAdd(fullSpec, compiledAssembly);
+                    string cachedAssemblyPath = Traits.Instance.ForceTaskFactoryOutOfProc ? _assemblyPath : string.Empty;
+                    s_compiledTaskCache.TryAdd(fullSpec, new CachedAssemblyEntry(compiledAssembly, cachedAssemblyPath));
                     return compiledAssembly;
                 }
                 else
                 {
+                    Assembly existingAssembly = cachedEntry.Assembly;
+
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        string cachedPath = cachedEntry.AssemblyPath;
+                        if (!string.IsNullOrEmpty(cachedPath))
+                        {
+                            _assemblyPath = cachedPath;
+                        }
+                        else
+                        {
+                            _assemblyPath = existingAssembly?.Location;
+                        }
+
+                        if (!string.IsNullOrEmpty(_assemblyPath))
+                        {
+                            TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
+                        }
+                    }
+
                     return existingAssembly;
                 }
             }

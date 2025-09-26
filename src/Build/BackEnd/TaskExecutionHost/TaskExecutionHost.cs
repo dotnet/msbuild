@@ -1746,9 +1746,37 @@ namespace Microsoft.Build.BackEnd
             // Create a LoadedType for the actual task type so we can wrap it in TaskHostTask
             Type taskType = innerTask.GetType();
 
+            // For out-of-process inline tasks, use the assembly location
+            string assemblyLocation = taskType.Assembly.Location;
+            string resolvedAssemblyLocation = assemblyLocation;
+
+            if (string.IsNullOrEmpty(resolvedAssemblyLocation) && _taskFactoryWrapper.TaskFactory is IOutOfProcTaskFactory outOfProcTaskFactory)
+            {
+                string factoryAssemblyPath = outOfProcTaskFactory.GetAssemblyPath();
+                if (!string.IsNullOrEmpty(factoryAssemblyPath))
+                {
+                    resolvedAssemblyLocation = factoryAssemblyPath;
+                }
+            }
+
+            if (string.IsNullOrEmpty(resolvedAssemblyLocation))
+            {
+                // Fail fast: out-of-proc inline task execution requires an assembly file path
+                _taskLoggingContext.LogError(
+                    new BuildEventFileInfo(_taskLocation),
+                    "TaskInstantiationFailureError",
+                    _taskName,
+                    _taskFactoryWrapper.TaskFactory.FactoryName,
+                    "Out-of-proc inline task requires an assembly file path, but Assembly.Location is empty");
+
+                // Clean up the original task since creation failed
+                _taskFactoryWrapper.TaskFactory.CleanupTask(innerTask);
+                return null;
+            }
+
             LoadedType taskLoadedType = new LoadedType(
                 taskType,
-                AssemblyLoadInfo.Create(null, ((IOutOfProcTaskFactory)_taskFactoryWrapper.TaskFactory).GetAssemblyPath()),
+                AssemblyLoadInfo.Create(null, resolvedAssemblyLocation),
                 taskType.Assembly,
                 typeof(ITaskItem));
 
