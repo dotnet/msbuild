@@ -554,6 +554,8 @@ namespace Microsoft.Build.Execution
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata) => _taskItem.ImportMetadata(metadata);
 
+        void IMetadataContainer.RemoveMetadataRange(IEnumerable<string> metadataNames) => _taskItem.RemoveMetadataRange(metadataNames);
+
         #region IMetadataTable Members
 
         /// <summary>
@@ -1138,6 +1140,20 @@ namespace Microsoft.Build.Execution
             /// <param name="metadata">The metadata to set.</param>
             public void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata) =>
                 ImportMetadata(metadata, validateKeys: true);
+
+            /// <summary>
+            /// Removes any metadata matching the given names.
+            /// </summary>
+            /// <param name="metadataNames">The metadata names to remove.</param>
+            public void RemoveMetadataRange(IEnumerable<string> metadataNames)
+            {
+                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
+
+                if (DirectMetadataCount > 0)
+                {
+                    _directMetadata = DirectMetadata.RemoveRange(metadataNames);
+                }
+            }
 
             /// <summary>
             /// Sets the given metadata.
