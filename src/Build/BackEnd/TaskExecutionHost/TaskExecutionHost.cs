@@ -987,7 +987,7 @@ namespace Microsoft.Build.BackEnd
                         if (Traits.Instance.ForceTaskFactoryOutOfProc && _taskFactoryWrapper.TaskFactory is not IntrinsicTaskFactory)
                         {
                             // Custom Task factories are not supported, internal TaskFactories implement this marker interface
-                            if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory)
+                            if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory outOfProcTaskFactory)
                             {
                                 _taskLoggingContext.LogError(
                                     new BuildEventFileInfo(_taskLocation),
@@ -997,7 +997,7 @@ namespace Microsoft.Build.BackEnd
                                 return null;
                             }
 
-                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost);
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory);
                         }
                         else
                         {
@@ -1729,8 +1729,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="taskIdentityParameters">Task identity parameters.</param>
         /// <param name="loggingHost">The logging host to use for the task.</param>
+        /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory)
         {
             ITask innerTask;
 
@@ -1746,33 +1747,13 @@ namespace Microsoft.Build.BackEnd
             // Create a LoadedType for the actual task type so we can wrap it in TaskHostTask
             Type taskType = innerTask.GetType();
 
-            // For out-of-process inline tasks, use the assembly location
-            string assemblyLocation = taskType.Assembly.Location;
-            string resolvedAssemblyLocation = assemblyLocation;
+            // For out-of-process inline tasks, get the assembly path from the factory
+            // (Assembly.Location is typically empty for inline tasks loaded from bytes)
+            string resolvedAssemblyLocation = outOfProcTaskFactory.GetAssemblyPath();
 
-            if (string.IsNullOrEmpty(resolvedAssemblyLocation) && _taskFactoryWrapper.TaskFactory is IOutOfProcTaskFactory outOfProcTaskFactory)
-            {
-                string factoryAssemblyPath = outOfProcTaskFactory.GetAssemblyPath();
-                if (!string.IsNullOrEmpty(factoryAssemblyPath))
-                {
-                    resolvedAssemblyLocation = factoryAssemblyPath;
-                }
-            }
-
-            if (string.IsNullOrEmpty(resolvedAssemblyLocation))
-            {
-                // Fail fast: out-of-proc inline task execution requires an assembly file path
-                _taskLoggingContext.LogError(
-                    new BuildEventFileInfo(_taskLocation),
-                    "TaskInstantiationFailureError",
-                    _taskName,
-                    _taskFactoryWrapper.TaskFactory.FactoryName,
-                    "Out-of-proc inline task requires an assembly file path, but Assembly.Location is empty");
-
-                // Clean up the original task since creation failed
-                _taskFactoryWrapper.TaskFactory.CleanupTask(innerTask);
-                return null;
-            }
+            // This should never happen - if the factory can create a task, it should know where the assembly is
+            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(resolvedAssemblyLocation), 
+                $"IOutOfProcTaskFactory {_taskFactoryWrapper.TaskFactory.FactoryName} created a task but returned null/empty assembly path");
 
             LoadedType taskLoadedType = new LoadedType(
                 taskType,
