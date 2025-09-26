@@ -985,6 +985,9 @@ namespace Microsoft.Build.BackEnd
                         task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
                             taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
                             _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+
+                        // Track telemetry for non-AssemblyTaskFactory task factories. No task can go to the task host.
+                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost: false);
                     }
                     finally
                     {

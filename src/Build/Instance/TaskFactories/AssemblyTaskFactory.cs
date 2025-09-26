@@ -365,6 +365,8 @@ namespace Microsoft.Build.BackEnd
                 useTaskFactory = _taskHostFactoryExplicitlyRequested;
             }
 
+            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+
             if (useTaskFactory)
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
