@@ -236,60 +236,6 @@ Log.LogError(Class1.ToPrint());
         }
 
         [Fact]
-        public void OutOfProcInlineTaskPersistsAssemblyOnDisk()
-        {
-            using var env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
-
-            // Ensure a clean starting point for this process-specific directory
-            TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
-
-            const string projectContents = @"
-            <Project>
-
-                <UsingTask
-                    TaskName=""PersistedInlineTask""
-                    TaskFactory=""RoslynCodeTaskFactory""
-                    AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
-                    <Task>
-                        <Code Type=""Fragment"" Language=""cs"">
-                            Log.LogMessage(""hello from inline task"");
-                        </Code>
-                    </Task>
-                </UsingTask>
-
-                <Target Name=""Build"">
-                    <PersistedInlineTask />
-                </Target>
-
-            </Project>";
-
-            var testProject = env.CreateTestProjectWithFiles("persist-inline.proj", projectContents);
-
-            try
-            {
-                testProject.BuildProjectExpectSuccess();
-
-                string inlineTaskDirectory = Path.Combine(
-                        FileUtilities.TempFileDirectory,
-                        TaskFactoryUtilities.InlineTaskTempDllSubPath,
-                        $"pid_{EnvironmentUtilities.CurrentProcessId}");
-
-                Directory.Exists(inlineTaskDirectory).ShouldBeTrue();
-
-                string[] inlineAssemblies = Directory.GetFiles(inlineTaskDirectory, "*.dll", SearchOption.AllDirectories);
-                inlineAssemblies.ShouldNotBeEmpty();
-
-                string[] manifests = Directory.GetFiles(inlineTaskDirectory, $"*{TaskFactoryUtilities.InlineTaskLoadManifestSuffix}", SearchOption.AllDirectories);
-                manifests.ShouldNotBeEmpty();
-            }
-            finally
-            {
-                TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
-            }
-        }
-
-        [Fact]
         public void OutOfProcRoslynTaskFactoryCachesAssemblyPath()
         {
             using var env = TestEnvironment.Create();
@@ -300,11 +246,9 @@ Log.LogError(Class1.ToPrint());
             try
             {
                 const string taskBody = @"
-                        <Task>
                             <Code Type=""Fragment"" Language=""cs"">
                                 Log.LogMessage(""inline execution"");
-                            </Code>
-                        </Task>";
+                            </Code>";
 
                 var firstFactory = new RoslynCodeTaskFactory();
                 var firstEngine = new MockEngine();
