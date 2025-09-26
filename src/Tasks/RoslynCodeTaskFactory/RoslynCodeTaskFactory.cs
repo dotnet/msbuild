@@ -678,7 +678,7 @@ namespace Microsoft.Build.Tasks
             CachedAssemblyEntry cachedEntry;
             bool reuseCompiledAssembly = CompiledAssemblyCache.TryGetValue(taskInfo, out cachedEntry);
             assembly = reuseCompiledAssembly ? cachedEntry.Assembly : null;
-            string? sourceCodePath = null;
+            string sourceCodePath = null;
 
             if (reuseCompiledAssembly)
             {
