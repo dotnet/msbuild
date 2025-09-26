@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
     /// </summary>
-    public class CodeTaskFactory : ITaskFactory
+    public class CodeTaskFactory : ITaskFactory, IOutOfProcTaskFactory
     {
         /// <summary>
         /// This dictionary keeps track of custom references to compiled assemblies.  The in-memory assembly is loaded from a byte
@@ -84,7 +84,19 @@ namespace Microsoft.Build.Tasks
         /// A collection of task assemblies which have been instantiated by any CodeTaskFactory.  Used to prevent us from creating
         /// duplicate assemblies.
         /// </summary>
-        private static readonly ConcurrentDictionary<FullTaskSpecification, Assembly> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, Assembly>();
+        private static readonly ConcurrentDictionary<FullTaskSpecification, CachedAssemblyEntry> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, CachedAssemblyEntry>();
+        private readonly struct CachedAssemblyEntry
+        {
+            public CachedAssemblyEntry(Assembly assembly, string assemblyPath)
+            {
+                Assembly = assembly;
+                AssemblyPath = assemblyPath;
+            }
+
+            public Assembly Assembly { get; }
+
+            public string AssemblyPath { get; }
+        }
 
         /// <summary>
         /// Merged set of assembly reference paths (default + specified)
@@ -160,6 +172,8 @@ namespace Microsoft.Build.Tasks
         /// Gets the type of the generated task.
         /// </summary>
         public Type TaskType { get; private set; }
+
+        public string GetAssemblyPath() => _assemblyPath;
 
         /// <summary>
         /// Get the type information for all task parameters.
@@ -271,7 +285,7 @@ namespace Microsoft.Build.Tasks
 
             _taskParameterTypeInfo = taskParameters;
 
-            _compiledAssembly = CompileInMemoryAssembly();
+            _compiledAssembly = CompileAssembly();
 
             // If it wasn't compiled, it logged why.
             // If it was, continue.
@@ -350,7 +364,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Create a property (with the corresponding private field) from the given type information
         /// </summary>
-        private static void CreateProperty(CodeTypeDeclaration ctd, string propertyName, Type propertyType, object defaultValue)
+        private static void CreateProperty(CodeTypeDeclaration ctd, string propertyName, Type propertyType, object defaultValue = null, bool isOutput = false, bool isRequired = false)
         {
             var field = new CodeMemberField(new CodeTypeReference(propertyType), "_" + propertyName)
             {
@@ -371,6 +385,16 @@ namespace Microsoft.Build.Tasks
                 HasGet = true,
                 HasSet = true
             };
+
+            if (isOutput)
+            {
+                prop.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Output"));
+            }
+
+            if (isRequired)
+            {
+                prop.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Required"));
+            }
 
             var fieldRef = new CodeFieldReferenceExpression { FieldName = field.Name };
             prop.GetStatements.Add(new CodeMethodReturnStatement(fieldRef));
@@ -414,7 +438,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void CreateProperty(CodeTypeDeclaration codeTypeDeclaration, TaskPropertyInfo propInfo, object defaultValue)
         {
-            CreateProperty(codeTypeDeclaration, propInfo.Name, propInfo.PropertyType, defaultValue);
+            CreateProperty(codeTypeDeclaration, propInfo.Name, propInfo.PropertyType, defaultValue, propInfo.Output, propInfo.Required);
         }
 
         /// <summary>
@@ -599,6 +623,11 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Stores the path to the compiled assembly when in out-of-process mode
+        /// </summary>
+        private string _assemblyPath;
+
+        /// <summary>
         /// Add a reference assembly to the list of references passed to the compiler. We will try and load the assembly to make sure it is found
         /// before sending it to the compiler. The reason we load here is that we will be using it in this appdomin anyways as soon as we are going to compile, which should be right away.
         /// </summary>
@@ -706,8 +735,10 @@ namespace Microsoft.Build.Tasks
         /// Compile the assembly in memory and get a reference to the assembly itself.
         /// If compilation fails, returns null.
         /// </summary>
-        private Assembly CompileInMemoryAssembly()
+        private Assembly CompileAssembly()
         {
+            _assemblyPath = null;
+
             // Combine our default assembly references with those specified
             var finalReferencedAssemblies = CombineReferencedAssemblies();
 
@@ -729,8 +760,8 @@ namespace Microsoft.Build.Tasks
                         // We don't need debug information
                         IncludeDebugInformation = true,
 
-                        // Not a file based assembly
-                        GenerateInMemory = true,
+                        GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
+                        OutputAssembly = _assemblyPath,
 
                         // Indicates that a .dll should be generated.
                         GenerateExecutable = false
@@ -792,8 +823,20 @@ namespace Microsoft.Build.Tasks
                 string fullCode = codeBuilder.ToString();
 
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
-                if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
+                CachedAssemblyEntry cachedEntry;
+                if (!s_compiledTaskCache.TryGetValue(fullSpec, out cachedEntry))
                 {
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
+                        compilerParameters.OutputAssembly = _assemblyPath;
+                    }
+
+                    // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases
+                    // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists.
+                    // See: https://github.com/dotnet/msbuild/issues/328
+                    Directory.CreateDirectory(Path.GetTempPath());
+
                     // Invokes compilation.
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
@@ -822,12 +865,51 @@ namespace Microsoft.Build.Tasks
                         return null;
                     }
 
+                    Assembly compiledAssembly;
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        if (!string.IsNullOrEmpty(_assemblyPath))
+                        {
+                            TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
+                            compiledAssembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
+                        }
+                        else
+                        {
+                            compiledAssembly = compilerResults.CompiledAssembly;
+                        }
+                    }
+                    else
+                    {
+                        compiledAssembly = compilerResults.CompiledAssembly;
+                    }
+
                     // Add to the cache.  Failing to add is not a fatal error.
-                    s_compiledTaskCache.TryAdd(fullSpec, compilerResults.CompiledAssembly);
-                    return compilerResults.CompiledAssembly;
+                    string cachedAssemblyPath = Traits.Instance.ForceTaskFactoryOutOfProc ? _assemblyPath : string.Empty;
+                    s_compiledTaskCache.TryAdd(fullSpec, new CachedAssemblyEntry(compiledAssembly, cachedAssemblyPath));
+                    return compiledAssembly;
                 }
                 else
                 {
+                    Assembly existingAssembly = cachedEntry.Assembly;
+
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        string cachedPath = cachedEntry.AssemblyPath;
+                        if (!string.IsNullOrEmpty(cachedPath))
+                        {
+                            _assemblyPath = cachedPath;
+                        }
+                        else
+                        {
+                            _assemblyPath = existingAssembly?.Location;
+                        }
+
+                        if (!string.IsNullOrEmpty(_assemblyPath))
+                        {
+                            TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
+                        }
+                    }
+
                     return existingAssembly;
                 }
             }

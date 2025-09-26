@@ -2433,6 +2433,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OpenTelemetryLoadFailed" xml:space="preserve">
     <value>Loading telemetry libraries failed with exception: {0}.</value>
   </data>
+  <data name="CustomTaskFactoryOutOfProcNotSupported" xml:space="preserve">
+    <value>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</value>
+  </data>
   <data name="NETHostTaskLoad_Failed" xml:space="preserve">
     <value>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
