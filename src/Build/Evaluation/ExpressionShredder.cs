@@ -179,7 +179,8 @@ namespace Microsoft.Build.Evaluation
                             int endQuoted = currentIndex - 1;
                             if (transformExpressions == null)
                             {
-                                transformExpressions = new List<ItemExpressionCapture>();
+                                // PERF: Almost all expressions have only one capture, so optimize for that case
+                                transformExpressions = new List<ItemExpressionCapture>(1);
                             }
 
                             transformExpressions.Add(new ItemExpressionCapture(startQuoted, endQuoted - startQuoted, expression.Substring(startQuoted, endQuoted - startQuoted)));
@@ -192,7 +193,8 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (transformExpressions == null)
                             {
-                                transformExpressions = new List<ItemExpressionCapture>();
+                                // PERF: Almost all expressions have only one capture, so optimize for that case
+                                transformExpressions = new List<ItemExpressionCapture>(1);
                             }
 
                             transformExpressions.Add(functionCapture.Value);
