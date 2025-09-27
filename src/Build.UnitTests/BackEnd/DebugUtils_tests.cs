@@ -17,6 +17,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DumpExceptionToFileShouldWriteInDebugDumpPath()
         {
+            ExceptionHandling.ResetDebugDumpPathInRunningTests = true;
             var exceptionFilesBefore = Directory.GetFiles(ExceptionHandling.DebugDumpPath, "MSBuild_*failure.txt");
 
             string[] exceptionFiles = null;
