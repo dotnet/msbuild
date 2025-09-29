@@ -284,10 +284,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see https://aka.ms/buildcheck
+        <target state="translated">  -check
+                     Povolí během sestavování BuildChecks.
+                     BuildCheck umožňuje vyhodnocovat pravidla, aby se zajistily vlastnosti
+                     sestavení. Další informace najdete na https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
