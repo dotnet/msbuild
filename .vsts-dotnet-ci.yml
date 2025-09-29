@@ -110,12 +110,6 @@ jobs:
       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
       artifact: $(coverageReportName)
       publishLocation: 'pipeline'
-  # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
-  - task: PublishCodeCoverageResults@2
-    condition: eq(variables.onlyDocChanged, 0)
-    inputs:
-      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
-      pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -222,12 +216,6 @@ jobs:
       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
       artifact: $(coverageReportName)
       publishLocation: 'pipeline'
-  # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
-  - task: PublishCodeCoverageResults@2
-    condition: eq(variables.onlyDocChanged, 0)
-    inputs:
-      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
-      pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -316,12 +304,6 @@ jobs:
       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
       artifact: $(coverageReportName)
       publishLocation: 'pipeline'
-  # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
-  - task: PublishCodeCoverageResults@2
-    condition: eq(variables.onlyDocChanged, 0)
-    inputs:
-      summaryFileLocation: '$(coverageArtifactsDir)/$(coverageReportName).cobertura.xml'
-      pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -395,12 +377,6 @@ jobs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       artifact: 'LinuxCoreCoverage'
       publishLocation: 'pipeline'
-  # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
-  - task: PublishCodeCoverageResults@2
-    condition: eq(variables.onlyDocChanged, 0)
-    inputs:
-      summaryFileLocation: $(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml
-      pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -490,12 +466,6 @@ jobs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       artifact: 'MacCoreCoverage'
       publishLocation: 'pipeline'
-  # Remove PublishCodeCoverageResults@2 once all tests are passing and then "Code Coverage" job will publish the results,
-  - task: PublishCodeCoverageResults@2
-    condition: eq(variables.onlyDocChanged, 0)
-    inputs:
-      summaryFileLocation: $(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml
-      pathToSources: $(Build.SourcesDirectory)
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
@@ -594,11 +564,6 @@ jobs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
       pwsh: true
-  - task: PublishCodeCoverageResults@2
-    inputs:
-      summaryFileLocation: $(Build.SourcesDirectory)\artifacts\CoverageResults\merged.cobertura.xml
-      pathToSources: $(Build.SourcesDirectory)
-      failIfCoverageEmpty: true
   - task: PublishBuildArtifacts@1
     displayName: Publish Artifact $(Build.BuildNumber)
     inputs:
