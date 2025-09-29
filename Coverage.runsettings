@@ -12,7 +12,7 @@
           <CodeCoverage>
             <ModulePaths>
               <Exclude>
-                <ModulePath>.*doc\.dll</ModulePath>
+                <ModulePath>.*doc\.dll$</ModulePath>
               </Exclude>
             </ModulePaths>
             <Sources>
