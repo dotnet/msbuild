@@ -13,6 +13,10 @@
             <ModulePaths>
               <Exclude>
                 <ModulePath>.*doc\.dll</ModulePath>
+                <ModulePath>net472.*microsoft\.build\.tasks\.unittests\.dll$</ModulePath>
+                <ModulePath>net472.*microsoft\.build\.buildcheck\.unittests\.dll$</ModulePath>
+                <ModulePath>.*microsoft\.build\.buildcheck\.unittests\.endtoendtests\.dll$</ModulePath>
+                <ModulePath>.*microsoft\.build\.engine\.unittests\.dll$</ModulePath>
               </Exclude>
             </ModulePaths>
             <Sources>
