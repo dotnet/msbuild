@@ -13,11 +13,17 @@
             <ModulePaths>
               <Exclude>
                 <ModulePath>.*doc\.dll$</ModulePath>
-                <ModulePath>.*microsoft\.build\.tasks\.unittests\.dll$</ModulePath>
                 <ModulePath>.*microsoft\.build\.buildcheck\.unittests\.dll$</ModulePath>
-                <ModulePath>.*microsoft\.build\.buildcheck\.unittests\.endtoendtests\.dll$</ModulePath>
                 <ModulePath>.*microsoft\.build\.engine\.unittests\.dll$</ModulePath>
+                <ModulePath>.*microsoft\.build\.tasks\.unittests\.dll$</ModulePath>
               </Exclude>
+              <Include>
+                <ModulePath>.*microsoft\.build\.commandline\.unittests\.dll$</ModulePath>
+                <ModulePath>.*microsoft\.build\.engine\.om\.unittests\.dll$</ModulePath>
+                <ModulePath>.*microsoft\.build\.framework\.unittests.dll$</ModulePath>
+                <ModulePath>.*microsoft\.build\.utilities\.unittests\.dll$</ModulePath>
+                <ModulePath>.*microsoft\.net\.stringtools\.unittests\.dll$</ModulePath>
+              </Include>
             </ModulePaths>
             <Sources>
               <Exclude>

@@ -37,9 +37,8 @@
 
     <XunitOptions>$(XunitOptions)&amp;Category!=failing&quot; --Diag $(TargetName).log</XunitOptions>
     <!-- Enable code coverage -->
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) --settings $(RepoRoot)Coverage.runsettings --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions>
-    <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -settings $(RepoRoot)CoverageWindowsFull.runsettings - -test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions> -->
-    <!-- <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -settings $(RepoRoot)Coverage.runsettings - -test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions> -->
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --settings $(RepoRoot)CoverageWindowsFull.runsettings --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions>
+    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --settings $(RepoRoot)Coverage.runsettings --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
