@@ -10,14 +10,6 @@
     <StartAction Condition="'$(StartAction)'==''">Program</StartAction>
   </PropertyGroup>
 
-  <!-- Copy the external RoslynCodeTaskFactory.dll for demonstration -->
-  <ItemGroup>
-    <Content Include="/tmp/external-package/build/net46/RoslynCodeTaskFactory.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <Visible>false</Visible>
-    </Content>
-  </ItemGroup>
-
   <!-- Define a custom task using the built-in RoslynCodeTaskFactory -->
   <UsingTask
     TaskName="BuiltInRoslynTask"
@@ -38,41 +30,14 @@
     </Task>
   </UsingTask>
 
-  <!-- Define a custom task using the external RoslynCodeTaskFactory -->
-  <UsingTask
-    TaskName="ExternalRoslynTask" 
-    TaskFactory="RoslynCodeTaskFactory"
-    AssemblyFile="/tmp/external-package/build/netstandard2.0/RoslynCodeTaskFactory.dll" >
-    <ParameterGroup>
-      <Message ParameterType="System.String" Required="true" />
-      <Result ParameterType="System.String" Output="true" />
-    </ParameterGroup>
-    <Task>
-      <Code Type="Fragment" Language="cs">
-        <![CDATA[
-        string processedMessage = "External RoslynCodeTaskFactory processed: " + Message;
-        Log.LogMessage(MessageImportance.High, processedMessage);
-        Result = processedMessage;
-        ]]>
-      </Code>
-    </Task>
-  </UsingTask>
-
-  <!-- Test targets that use both custom tasks -->
+  <!-- Test target that uses the custom task -->
   <Target Name="TestBuiltInRoslynTask" BeforeTargets="Build">
     <Message Text="=== Testing Built-in RoslynCodeTaskFactory ===" Importance="high" />
     <BuiltInRoslynTask Message="Hello from built-in RoslynCodeTaskFactory!">
-      <Output TaskParameter="Result" PropertyName="BuiltInTaskResult" />
+      <Output TaskParameter="Result" PropertyName="TaskResult" />
     </BuiltInRoslynTask>
-    <Message Text="Built-in task result: $(BuiltInTaskResult)" Importance="high" />
-  </Target>
-
-  <Target Name="TestExternalRoslynTask" BeforeTargets="Build" DependsOnTargets="TestBuiltInRoslynTask">
-    <Message Text="=== Testing External RoslynCodeTaskFactory ===" Importance="high" />
-    <ExternalRoslynTask Message="Hello from external RoslynCodeTaskFactory package!">
-      <Output TaskParameter="Result" PropertyName="ExternalTaskResult" />
-    </ExternalRoslynTask>
-    <Message Text="External task result: $(ExternalTaskResult)" Importance="high" />
+    <Message Text="Task result: $(TaskResult)" Importance="high" />
+    <Message Text="This task is counted as 'RoslynCodeTaskFactory' in telemetry." Importance="high" />
   </Target>
 
 </Project>
