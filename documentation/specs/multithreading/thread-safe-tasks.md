@@ -88,9 +88,9 @@ public interface IMultiThreadableTask : ITask
 
 public class TaskEnvironment
 { 
-    public virtual AbsolutePath ProjectDirectory { get; set; }
+    public virtual AbsolutePath ProjectCurrentDirectory { get; set; }
 
-    // This function resolves paths relative to ProjectDirectory.
+    // This function resolves paths relative to ProjectCurrentDirectory.
     public virtual AbsolutePath GetAbsolutePath(string path);
     
     public virtual string? GetEnvironmentVariable(string name);
