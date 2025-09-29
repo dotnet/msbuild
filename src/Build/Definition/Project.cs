@@ -2624,14 +2624,28 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ItemSpecFragment[] includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment && f.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0).ToArray();
-                if (includeGlobFragments.Length == 0)
+                List<ItemSpecFragment> includeGlobFragmentsList = null;
+                foreach (ItemSpecFragment fragment in includeItemspec.Fragments)
+                {
+                    if (fragment is GlobFragment && fragment.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0)
+                    {
+                        includeGlobFragmentsList ??= new List<ItemSpecFragment>(includeItemspec.Fragments.Count);
+                        includeGlobFragmentsList.Add(fragment);
+                    }
+                }
+
+                if (includeGlobFragmentsList == null || includeGlobFragmentsList.Count == 0)
                 {
                     return null;
                 }
 
-                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
-                var includeGlob = CompositeGlob.Create(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
+                string[] includeGlobStrings = new string[includeGlobFragmentsList.Count];
+                for (int i = 0; i < includeGlobStrings.Length; ++i)
+                {
+                    includeGlobStrings[i] = includeGlobFragmentsList[i].TextFragment;
+                }
+
+                var includeGlob = CompositeGlob.Create(includeGlobFragmentsList.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = [];
                 IMSBuildGlob excludeGlob = null;
@@ -2655,7 +2669,7 @@ namespace Microsoft.Build.Evaluation
 
                 var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
 
-                return new GlobResult(itemElement, includeGlobStrings, includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
+                return new GlobResult(itemElement, includeGlobStrings.ToImmutableArray(), includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
             }
 
             private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
