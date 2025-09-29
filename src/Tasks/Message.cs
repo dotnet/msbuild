@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -69,6 +70,10 @@ namespace Microsoft.Build.Tasks
 
             if (Text != null)
             {
+                int processId = Process.GetCurrentProcess().Id;
+
+                Text += " (PID " + processId + ")";
+
                 if (IsCritical)
                 {
                     Log.LogCriticalMessage(null, Code, HelpKeyword, File, 0, 0, 0, 0, "{0}", Text);
