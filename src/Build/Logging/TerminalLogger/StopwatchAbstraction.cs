@@ -3,7 +3,7 @@
 
 namespace Microsoft.Build.Logging;
 
-internal abstract class StopwatchAbstraction
+public abstract class StopwatchAbstraction
 {
     public abstract void Start();
     public abstract void Stop();
