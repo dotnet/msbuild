@@ -130,11 +130,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _taskHostFactoryExplicitlyRequested = false;
 
+        private readonly int _scheduledNodeId;
+
         /// <summary>
         /// Constructor.
         /// </summary>
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         public TaskHostTask(
+            int scheduledNodeId,
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
@@ -148,6 +151,8 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
+
+            _scheduledNodeId = scheduledNodeId;
 
             _taskLocation = taskLocation;
             _taskLoggingContext = taskLoggingContext;
@@ -251,12 +256,20 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        _taskHostProvider.SendData(_requiredContext, new TaskHostTaskCancelled());
+                        int key = GetTaskHostNodeId();
+                        _taskHostProvider.SendData(key, new TaskHostTaskCancelled());
                     }
                 }
 
                 _taskCancelled = true;
             }
+        }
+
+        private int GetTaskHostNodeId()
+        {
+            return _scheduledNodeId != -1 ?
+                (_scheduledNodeId << 16) | ((int)_requiredContext & 0xFFFF) :
+                (int)_requiredContext;
         }
 
         /// <summary>
@@ -311,7 +324,7 @@ namespace Microsoft.Build.BackEnd
                         // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
                         nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
                         taskHostParameters: _taskHostParameters);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters);
+                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters, _scheduledNodeId);
                 }
 
                 if (_connectedToTaskHost)
@@ -340,7 +353,8 @@ namespace Microsoft.Build.BackEnd
                     {
                         lock (_taskHostLock)
                         {
-                            _taskHostProvider.DisconnectFromHost(_requiredContext);
+                            int taskHostNodeId = GetTaskHostNodeId();
+                            _taskHostProvider.DisconnectFromHost(taskHostNodeId);
                             _connectedToTaskHost = false;
                         }
                     }
