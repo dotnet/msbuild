@@ -337,16 +337,42 @@ namespace Microsoft.Build.BackEnd
             }
 
             string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
-            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) &&
-                realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+
+            // When MSBuild loads a task assembly, it uses Assembly.LoadFrom() with a specific path,
+            // but .NET then loads based on the assembly identity with that path only as a hint.
+            // This can result in the assembly being loaded from a different location than expected:
+            //
+            // 1. Assembly loading from the Global Assembly Cache (GAC) if that assembly version is GACed
+            // 2. Assembly loading from elsewhere if someone already loaded an assembly with the same 
+            //    identity from a different path
+            //
+            // Both scenarios can result in confusing task behavior because you're not loading the 
+            // assembly you intended. MSBuild tells .NET Framework to load a specific assembly,
+            // but .NET Framework may load something else entirely.
+            //
+            // Common example: A NuGet package task that doesn't change its assembly version between 
+            // package versions. When you update the package and build while worker nodes are still 
+            // alive, the task stays loaded from the old version instead of the new one.
+            //
+            // This validation helps identify these scenarios by checking if the loaded assembly 
+            // location matches what we expected, and logging a message when there's a mismatch
+            // to help diagnose confusing task behavior issues.
+            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
             {
-                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                if (!IsTaskAssemblyMatchFactoryType())
+                {
+                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                }
             }
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
 
             return true;
+
+            // Function to validate that if this is a TaskHostTask, the assembly it loaded is the same one we found in the registry.
+            bool IsTaskAssemblyMatchFactoryType() => TaskInstance is not TaskHostTask tht
+                || tht.LoadedTaskAssemblyInfo.AssemblyLocation == _taskFactoryWrapper.TaskFactoryLoadedType.Path;
         }
 
         /// <summary>
@@ -959,6 +985,9 @@ namespace Microsoft.Build.BackEnd
                         task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
                             taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
                             _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+
+                        // Track telemetry for non-AssemblyTaskFactory task factories. No task can go to the task host.
+                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost: false);
                     }
                     finally
                     {

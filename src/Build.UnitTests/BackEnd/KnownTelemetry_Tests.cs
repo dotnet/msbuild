@@ -48,6 +48,9 @@ public class KnownTelemetry_Tests
         buildTelemetry.BuildSuccess.ShouldBeNull();
         buildTelemetry.BuildTarget.ShouldBeNull();
         buildTelemetry.BuildEngineVersion.ShouldBeNull();
+        buildTelemetry.BuildCheckEnabled.ShouldBeNull();
+        buildTelemetry.MultiThreadedModeEnabled.ShouldBeNull();
+        buildTelemetry.SACEnabled.ShouldBeNull();
 
         buildTelemetry.GetProperties().ShouldBeEmpty();
     }
@@ -72,10 +75,13 @@ public class KnownTelemetry_Tests
         buildTelemetry.BuildSuccess = true;
         buildTelemetry.SetProjectEntryPoint([@"C:\\dev\\theProject"], ["clean"]);
         buildTelemetry.BuildEngineVersion = new Version(1, 2, 3, 4);
+        buildTelemetry.BuildCheckEnabled = true;
+        buildTelemetry.MultiThreadedModeEnabled = false;
+        buildTelemetry.SACEnabled = true;
 
         var properties = buildTelemetry.GetProperties();
 
-        properties.Count.ShouldBe(11);
+        properties.Count.ShouldBe(14);
 
         properties["BuildEngineDisplayVersion"].ShouldBe("Some Display Version");
         properties["BuildEngineFrameworkName"].ShouldBe("new .NET");
@@ -86,6 +92,9 @@ public class KnownTelemetry_Tests
         properties["BuildSuccess"].ShouldBe("True");
         properties["BuildTarget"].ShouldBe("clean");
         properties["BuildEngineVersion"].ShouldBe("1.2.3.4");
+        properties["BuildCheckEnabled"].ShouldBe("True");
+        properties["MultiThreadedModeEnabled"].ShouldBe("False");
+        properties["SACEnabled"].ShouldBe("True");
 
         // verify computed
         properties["BuildDurationInMilliseconds"] = (finishedAt - startAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);

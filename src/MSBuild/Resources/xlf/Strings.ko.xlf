@@ -283,12 +283,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      빌드하는 동안 BuildChecks를 사용하도록 설정합니다.
-                     BuildCheck는 속성을 확실히 하기 위해 규칙 평가를 사용 설정합니다
-                     빌드의 자세한 내용은 aka.ms/buildcheck를 참조하세요.
+                     BuildCheck를 사용하면 규칙을 평가하여 빌드의 속성을
+                     확인할 수 있습니다. 자세한 내용은 https://aka.ms/buildcheck 참조
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}

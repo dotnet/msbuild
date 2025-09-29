@@ -9,7 +9,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
-    /// This task was created for https://github.com/dotnet/msbuild/issues/3141
+    /// This task was created for https://github.com/dotnet/msbuild/issues/3141.
     /// </summary>
     public class ProcessIdTaskSidecar : Task
     {

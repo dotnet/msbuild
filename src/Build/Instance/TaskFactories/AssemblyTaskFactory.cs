@@ -365,6 +365,8 @@ namespace Microsoft.Build.BackEnd
                 useTaskFactory = _taskHostFactoryExplicitlyRequested;
             }
 
+            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+
             if (useTaskFactory)
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
@@ -393,7 +395,7 @@ namespace Microsoft.Build.BackEnd
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    _isTaskHostFactory
+                    taskHostFactoryExplicitlyRequested: _isTaskHostFactory
 #if FEATURE_APPDOMAIN
                     , appDomainSetup
 #endif

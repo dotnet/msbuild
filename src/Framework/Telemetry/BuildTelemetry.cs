@@ -85,6 +85,11 @@ namespace Microsoft.Build.Framework.Telemetry
         public bool? BuildCheckEnabled { get; set; }
 
         /// <summary>
+        /// True if multithreaded mode was enabled.
+        /// </summary>
+        public bool? MultiThreadedModeEnabled { get; set; }
+
+        /// <summary>
         /// True if Smart Application Control was enabled.
         /// </summary>
         public bool? SACEnabled { get; set; }
@@ -165,6 +170,11 @@ namespace Microsoft.Build.Framework.Telemetry
                 properties[nameof(BuildCheckEnabled)] = BuildCheckEnabled.Value.ToString(CultureInfo.InvariantCulture);
             }
 
+            if (MultiThreadedModeEnabled != null)
+            {
+                properties[nameof(MultiThreadedModeEnabled)] = MultiThreadedModeEnabled.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
             if (SACEnabled != null)
             {
                 properties[nameof(SACEnabled)] = SACEnabled.Value.ToString(CultureInfo.InvariantCulture);
@@ -214,6 +224,11 @@ namespace Microsoft.Build.Framework.Telemetry
             if (BuildCheckEnabled != null)
             {
                 telemetryItems.Add(new TelemetryItem(nameof(BuildCheckEnabled), BuildCheckEnabled, false));
+            }
+
+            if (MultiThreadedModeEnabled != null)
+            {
+                telemetryItems.Add(new TelemetryItem(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled, false));
             }
 
             if (SACEnabled != null)
