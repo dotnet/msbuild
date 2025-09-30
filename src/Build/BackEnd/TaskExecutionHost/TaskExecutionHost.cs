@@ -980,6 +980,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
+                    bool isTaskHost = false;
                     try
                     {
                         // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
@@ -998,6 +999,7 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory);
+                            isTaskHost = true;
                         }
                         else
                         {
@@ -1007,8 +1009,8 @@ namespace Microsoft.Build.BackEnd
                                 _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
                         }
 
-                        // Track telemetry for non-AssemblyTaskFactory task factories. No task can go to the task host.
-                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost: false);
+                        // Track telemetry for non-AssemblyTaskFactory task factories
+                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost);
                     }
                     finally
                     {
