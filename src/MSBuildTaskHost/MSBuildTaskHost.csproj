@@ -37,6 +37,9 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="..\GlobalUsings.cs">
+      <Link>GlobalUsings.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -226,6 +229,11 @@
     <Compile Include="..\Framework\InterningReadTranslator.cs" />
     <Compile Include="..\Framework\InterningWriteTranslator.cs" />
     <Compile Include="..\Framework\InternPathIds.cs" />
+
+    <Compile Include="..\Framework\IConstrainedEqualityComparer.cs" />
+    <Compile Include="..\Framework\ImmutableDictionaryExtensions.cs" />
+    <Compile Include="..\Framework\MSBuildNameIgnoreCaseComparer.cs" />
+    <Compile Include="..\Framework\SerializableMetadata.cs" />
 
     <Compile Include="..\Shared\FileSystem\IFileSystem.cs" />
     <Compile Include="..\Shared\FileSystem\FileSystems.cs" />

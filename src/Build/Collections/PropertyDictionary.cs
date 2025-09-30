@@ -5,8 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -26,17 +28,15 @@ namespace Microsoft.Build.Collections
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
     /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
-    /// At various places in this class locks are taken on the backing collection.  The reason for this is to allow
-    /// this class to be asynchronously enumerated.  This is accomplished by the CopyOnReadEnumerable which will
-    /// lock the backing collection when it does its deep cloning.  This prevents asynchronous access from corrupting
-    /// the state of the enumeration until the collection has been fully copied.
-    ///
+    /// Uses ReaderWriterLockSlim to allow multiple concurrent readers while preventing deadlocks that can occur
+    /// with exclusive locks during enumeration.
+    /// 
     /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back
     /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
     /// </remarks>
     /// <typeparam name="T">Property or Metadata class type to store</typeparam>
     [DebuggerDisplay("#Entries={Count}")]
-    internal sealed class PropertyDictionary<T> : IEnumerable<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
+    internal sealed class PropertyDictionary<T> : IEnumerable<T>, ICollection<T>, IEquatable<PropertyDictionary<T>>, IPropertyProvider<T>, IDictionary<string, T>, IConstrainableDictionary<T>
         where T : class, IKeyed, IValued, IEquatable<T>
     {
         /// <summary>
@@ -46,7 +46,12 @@ namespace Microsoft.Build.Collections
         private readonly IRetrievableValuedEntryHashSet<T> _properties;
 
         /// <summary>
-        /// Creates empty dictionary
+        /// Reader-writer lock to prevent deadlocks during enumeration.
+        /// </summary>
+        private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.SupportsRecursion);
+
+        /// <summary>
+        /// Creates empty dictionary.
         /// </summary>
         public PropertyDictionary()
         {
@@ -125,7 +130,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                lock (_properties)
+                using (_lock.EnterDisposableReadLock())
                 {
                     return _properties.Values;
                 }
@@ -142,7 +147,7 @@ namespace Microsoft.Build.Collections
         /// Whether the collection is read-only.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        bool ICollection<KeyValuePair<string, T>>.IsReadOnly => false;
+        bool ICollection<KeyValuePair<string, T>>.IsReadOnly => ((ICollection<T>)_properties).IsReadOnly;
 
         /// <summary>
         /// Returns the number of property in the collection.
@@ -151,12 +156,14 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                lock (_properties)
+                using (_lock.EnterDisposableReadLock())
                 {
                     return ((ICollection<T>)_properties).Count;
                 }
             }
         }
+
+        bool ICollection<T>.IsReadOnly => false;
 
         /// <summary>
         /// Get the property with the specified name, or null if none exists.
@@ -189,7 +196,7 @@ namespace Microsoft.Build.Collections
                 // We don't want to check for a zero length name here, since that is a valid name
                 // and should return a null instance which will be interpreted as blank
                 T projectProperty;
-                lock (_properties)
+                using (_lock.EnterDisposableReadLock())
                 {
                     _properties.TryGetValue(name, out projectProperty);
                 }
@@ -227,7 +234,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            lock (_properties)
+            using (_lock.EnterDisposableWriteLock())
             {
                 ((ICollection<T>)_properties).Clear();
             }
@@ -235,24 +242,30 @@ namespace Microsoft.Build.Collections
 
         /// <summary>
         /// Gets an enumerator over all the properties in the collection
-        /// Enumeration is in undefined order
+        /// Enumeration is in undefined order.
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
-                return _properties.Values.GetEnumerator();
+                foreach (T item in _properties.Values)
+                {
+                    yield return item;
+                }
             }
         }
 
         /// <summary>
-        /// Get an enumerator over entries
+        /// Get an enumerator over entries.
         /// </summary>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
-                return ((IEnumerable)_properties.Values).GetEnumerator();
+                foreach (T item in _properties.Values)
+                {
+                    yield return item;
+                }
             }
         }
 
@@ -281,9 +294,9 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
-                foreach (T leftProp in this)
+                foreach (T leftProp in _properties.Values)
                 {
                     T rightProp = other[leftProp.Key];
                     if (rightProp?.Equals(leftProp) != true)
@@ -313,7 +326,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public T GetProperty(string name, int startIndex, int endIndex)
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
                 return _properties.Get(name, startIndex, endIndex - startIndex + 1);
             }
@@ -333,6 +346,11 @@ namespace Microsoft.Build.Collections
         /// <returns>True if a property with a matching name was found. False otherwise.</returns>
         public bool TryGetPropertyUnescapedValue(string propertyName, out string unescapedValue)
         {
+            if (_properties is IRetrievableUnescapedValuedEntryHashSet unescapedProperties)
+            {
+                return unescapedProperties.TryGetUnescapedValue(propertyName, out unescapedValue);
+            }
+
             if (_properties.TryGetEscapedValue(propertyName, out string escapedValue) && escapedValue != null)
             {
                 unescapedValue = EscapingUtilities.UnescapeAll(escapedValue);
@@ -361,7 +379,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool IDictionary<string, T>.ContainsKey(string key)
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
                 return _properties.ContainsKey(key);
             }
@@ -410,7 +428,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> item)
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
                 if (_properties.TryGetValue(item.Key, out T value))
                 {
@@ -440,6 +458,28 @@ namespace Microsoft.Build.Collections
             return ((IDictionary<string, T>)this).Remove(item.Key);
         }
 
+        /// <inheritdoc/>
+        void ICollection<T>.Add(T item) => Set(item);
+
+        /// <inheritdoc/>
+        bool ICollection<T>.Contains(T item)
+        {
+            return ((IDictionary<string, T>)this).TryGetValue(item.Key, out T existingItem) &&
+                EqualityComparer<T>.Default.Equals(existingItem, item);
+        }
+
+        /// <inheritdoc/>
+        void ICollection<T>.CopyTo(T[] array, int arrayIndex)
+        {
+            using (_lock.EnterDisposableWriteLock())
+            {
+                _properties.CopyTo(array, arrayIndex);
+            }
+        }
+
+        /// <inheritdoc/>
+        bool ICollection<T>.Remove(T item) => Remove(item.Key);
+
         #endregion
 
         #region IEnumerable<KeyValuePair<string,T>> Members
@@ -449,10 +489,17 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            return ((IEnumerable<KeyValuePair<string, T>>)_properties).GetEnumerator();
+            using (_lock.EnterDisposableReadLock())
+            {
+                foreach (KeyValuePair<string, T> kvp in (IEnumerable<KeyValuePair<string, T>>)_properties)
+                {
+                    yield return kvp;
+                }
+            }
         }
 
         #endregion
+
 
         /// <summary>
         /// Removes any property with the specified name.
@@ -462,7 +509,7 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentLength(name);
 
-            lock (_properties)
+            using (_lock.EnterDisposableWriteLock())
             {
                 bool result = _properties.Remove(name);
                 return result;
@@ -478,7 +525,7 @@ namespace Microsoft.Build.Collections
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
-            lock (_properties)
+            using (_lock.EnterDisposableWriteLock())
             {
                 _properties[projectProperty.Key] = projectProperty;
             }
@@ -517,11 +564,11 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal Dictionary<string, string> ToDictionary()
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
                 var dictionary = new Dictionary<string, string>(((ICollection<T>)_properties).Count, MSBuildNameIgnoreCaseComparer.Default);
 
-                foreach (T property in this)
+                foreach (T property in _properties.Values)
                 {
                     dictionary[property.Key] = property.EscapedValue;
                 }
@@ -530,9 +577,16 @@ namespace Microsoft.Build.Collections
             }
         }
 
+        internal IDictionary<string, string> ToReadOnlyDictionary()
+        {
+            return _properties is IValueDictionaryConverter converter
+                ? converter.ToReadOnlyDictionary()
+                : new System.Collections.ObjectModel.ReadOnlyDictionary<string, string>(ToDictionary());
+        }
+
         internal IEnumerable<PropertyData> Enumerate()
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
                 foreach (var kvp in (ICollection<T>)_properties)
                 {
@@ -551,7 +605,7 @@ namespace Microsoft.Build.Collections
 
         internal IEnumerable<TResult> Filter<TResult>(Func<T, bool> filter, Func<T, TResult> selector)
         {
-            lock (_properties)
+            using (_lock.EnterDisposableReadLock())
             {
                 // PERF: Prefer using struct enumerators from the concrete types to avoid allocations.
                 // RetrievableValuedEntryHashSet implements a struct enumerator.

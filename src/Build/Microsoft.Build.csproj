@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -31,7 +31,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
-    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
     <PackageReference Include="System.Reflection.MetadataLoadContext" />
@@ -82,9 +82,6 @@
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\IConstrainedEqualityComparer.cs">
-      <Link>IConstrainedEqualityComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\PropertyParser.cs</Link>
     </Compile>
@@ -98,6 +95,7 @@
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
+    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
@@ -167,6 +165,8 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
     <Compile Include="BuildCheck\**\*.cs" />
+    <Compile Include="Collections\IValueDictionaryConverter.cs" />
+    <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
@@ -178,6 +178,7 @@
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
+    <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
     <Compile Include="TelemetryInfra\TelemetryDataUtils.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="BackEnd\Components\Logging\LoggingServiceLogMethods.cs" />
     <Compile Include="BackEnd\Components\Logging\NodeLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\ProjectLoggingContext.cs" />
+    <Compile Include="BackEnd\Components\Logging\ProjectTelemetry.cs" />
     <Compile Include="BackEnd\Components\Logging\TargetLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\TaskLoggingContext.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\CallTarget.cs" />
@@ -381,13 +383,13 @@
       <Link>Collections\CopyOnWriteDictionary.cs</Link>
     </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
-    <Compile Include="..\Shared\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
     <Compile Include="Collections\ICopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\IItemDictionary.cs" />
     <Compile Include="Collections\IMultiDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
+    <Compile Include="Collections\ItemDictionarySlim.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
     <Compile Include="Collections\IValued.cs" />
@@ -522,9 +524,9 @@
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDefinitionsListConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableItemDictionary.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableLinkedMultiDictionaryConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutablePropertyCollectionConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutableStringValuedListConverter.cs" />
-    <Compile Include="Instance\ImmutableProjectCollections\ImmutableValuedElementCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectMetadataCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectPropertyCollectionConverter.cs" />
+    <Compile Include="Instance\ImmutableProjectCollections\LazyStringValuedList.cs" />
     <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
@@ -575,7 +577,6 @@
     <Compile Include="Logging\ParallelLogger\ConsoleOutputAligner.cs" />
     <Compile Include="Logging\FileLogger.cs" />
     <Compile Include="Logging\LogFormatter.cs" />
-    <Compile Include="Logging\SerialConsoleLogger.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectPropertyLink.cs" />
     <Compile Include="ObjectModelRemoting\ConstructionObjectLinks\ProjectElementContainerLink.cs" />
@@ -655,6 +656,9 @@
     </Compile>
     <Compile Include="..\Shared\LoadedType.cs">
       <Link>SharedUtilities\LoadedType.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\TypeUtilities.cs">
+      <Link>SharedUtilities\TypeUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>

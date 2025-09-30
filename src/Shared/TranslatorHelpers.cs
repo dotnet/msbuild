@@ -4,6 +4,7 @@
 using System;
 #if !TASKHOST
 using System.Collections.Frozen;
+using System.Collections.Immutable;
 #endif
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
@@ -48,9 +49,9 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static ObjectTranslator<T> AdaptFactory<T>(NodePacketValueFactory<T> valueFactory) where T : ITranslatable
+        private static ObjectTranslatorWithValueFactory<T> AdaptFactory<T>(NodePacketValueFactory<T> valueFactory) where T : ITranslatable
         {
-            void TranslateUsingValueFactory(ITranslator translator, ref T objectToTranslate)
+            static void TranslateUsingValueFactory(ITranslator translator, NodePacketValueFactory<T> valueFactory, ref T objectToTranslate)
             {
                 translator.Translate(ref objectToTranslate, valueFactory);
             }
@@ -63,7 +64,7 @@ namespace Microsoft.Build.BackEnd
             ref List<T> list,
             NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
         {
-            translator.Translate(ref list, AdaptFactory(valueFactory));
+            translator.Translate(ref list, AdaptFactory(valueFactory), valueFactory);
         }
 
         public static void Translate<T, L>(
@@ -72,7 +73,7 @@ namespace Microsoft.Build.BackEnd
             NodePacketValueFactory<T> valueFactory,
             NodePacketCollectionCreator<L> collectionFactory) where L : IList<T> where T : ITranslatable
         {
-            translator.Translate(ref list, AdaptFactory(valueFactory), collectionFactory);
+            translator.Translate(ref list, AdaptFactory(valueFactory), valueFactory, collectionFactory);
         }
 
         public static void TranslateArray<T>(
@@ -80,7 +81,7 @@ namespace Microsoft.Build.BackEnd
             ref T[] array,
             NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
         {
-            translator.TranslateArray(ref array, AdaptFactory(valueFactory));
+            translator.TranslateArray(ref array, AdaptFactory(valueFactory), valueFactory);
         }
 
         public static void TranslateDictionary<T>(
@@ -89,7 +90,7 @@ namespace Microsoft.Build.BackEnd
             IEqualityComparer<string> comparer,
             NodePacketValueFactory<T> valueFactory) where T : class, ITranslatable
         {
-            translator.TranslateDictionary(ref dictionary, comparer, AdaptFactory(valueFactory));
+            translator.TranslateDictionary(ref dictionary, comparer, AdaptFactory(valueFactory), valueFactory);
         }
 
         public static void InternDictionary(
@@ -118,6 +119,7 @@ namespace Microsoft.Build.BackEnd
                 ref localDict,
                 (ITranslator translator, ref string key) => translator.Intern(ref key),
                 AdaptFactory(valueFactory),
+                valueFactory,
                 capacity => new Dictionary<string, T>(capacity, stringComparer));
             dictionary = (Dictionary<string, T>)localDict;
         }
@@ -150,6 +152,7 @@ namespace Microsoft.Build.BackEnd
                 ref localDict,
                 (ITranslator translator, ref string key) => translator.InternPath(ref key),
                 AdaptFactory(valueFactory),
+                valueFactory,
                 capacity => new Dictionary<string, T>(capacity, stringComparer));
             dictionary = (Dictionary<string, T>)localDict;
         }
@@ -161,7 +164,7 @@ namespace Microsoft.Build.BackEnd
             where D : IDictionary<string, T>, new()
             where T : class, ITranslatable
         {
-            translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory));
+            translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), valueFactory);
         }
 
         public static void TranslateDictionary<D, T>(
@@ -172,7 +175,7 @@ namespace Microsoft.Build.BackEnd
             where D : IDictionary<string, T>
             where T : class, ITranslatable
         {
-            translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), collectionCreator);
+            translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), valueFactory, collectionCreator);
         }
 
 #if !TASKHOST
@@ -187,6 +190,71 @@ namespace Microsoft.Build.BackEnd
             if (translator.Mode == TranslationDirection.ReadFromStream)
             {
                 dictionary = localDict?.ToFrozenDictionary(comparer);
+            }
+        }
+
+        public static void TranslateDictionary(
+            this ITranslator translator,
+            ref IReadOnlyDictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            // Defensive copy since immutable dictionaries are expected to be overwritten.
+            IReadOnlyDictionary<string, string> localDict = dictionary;
+
+            if (!translator.TranslateNullable(localDict))
+            {
+                return;
+            }
+
+            if (translator.Mode == TranslationDirection.WriteToStream)
+            {
+                int count = localDict.Count;
+                translator.Translate(ref count);
+
+                foreach (KeyValuePair<string, string> kvp in localDict)
+                {
+                    string key = kvp.Key;
+                    string value = kvp.Value;
+
+                    translator.Translate(ref key);
+                    translator.Translate(ref value);
+                }
+            }
+            else
+            {
+                int count = default;
+                translator.Translate(ref count);
+
+                ImmutableDictionary<string, string>.Builder builder = ImmutableDictionary.Create<string, string>(comparer).ToBuilder();
+
+                for (int i = 0; i < count; i++)
+                {
+                    string key = null;
+                    string value = null;
+
+                    translator.Translate(ref key);
+                    translator.Translate(ref value);
+
+                    builder[key] = value;
+                }
+
+                dictionary = builder.ToImmutable();
+            }
+        }
+
+        public static void TranslateDictionary(
+            this ITranslator translator,
+            ref ImmutableDictionary<string, string> dictionary,
+            IEqualityComparer<string> comparer)
+        {
+            // Defensive copy since immutable dictionaries are expected to be overwritten.
+            IReadOnlyDictionary<string, string> localDict = dictionary;
+
+            TranslateDictionary(translator, ref localDict, comparer);
+
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                dictionary = (ImmutableDictionary<string, string>)localDict;
             }
         }
 #endif
