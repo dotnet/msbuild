@@ -1787,7 +1787,6 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                // TODO ask Jan about if this is the only case or if we need the falsey path as well.
                 true
 #if FEATURE_APPDOMAIN
                 , AppDomainSetup
