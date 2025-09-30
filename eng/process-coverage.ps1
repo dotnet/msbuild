@@ -23,10 +23,7 @@ try {
     New-Item -ItemType Directory -Force -Path $coverageResultsDir
   }
 
-  Write-Host "Executing: $dotnetCoverageTool merge -o $mergedCoverage $testResultsDir\**\*.coverage"
   & "$dotnetCoverageTool" merge -o $mergedCoverage $testResultsDir\**\*.coverage
-  
-  Write-Host "Executing: $dotnetCoverageTool merge -o $mergedCobertura -f cobertura $mergedCoverage"
   & "$dotnetCoverageTool" merge -o $mergedCobertura -f cobertura $mergedCoverage
 }
 catch {
