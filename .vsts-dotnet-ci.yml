@@ -567,8 +567,7 @@ jobs:
   - task: PublishBuildArtifacts@1
     displayName: Publish Artifact $(Build.BuildNumber)
     inputs:
-      PathtoPublish: '$(Build.ArtifactStagingDirectory)\Artifacts\'
+      PathtoPublish: 'artifacts/MergedCoverageReport'
       ArtifactName: '$(Build.BuildNumber)'
-      publishLocation: Container
     condition: succeededOrFailed()
 - template: /eng/common/templates/jobs/source-build.yml
