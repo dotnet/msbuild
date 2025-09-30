@@ -95,21 +95,21 @@ jobs:
       arguments: -onlyDocChanged $(onlyDocChanged)
     env:
       ForceUseXCopyMSBuild: 1
-#   - task: PowerShell@2
-#     displayName: Process coverage reports
-#     continueOnError: true
-#     condition: eq(variables.onlyDocChanged, 0)
-#     inputs:
-#       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-#       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
-#       pwsh: true
-#   - task: PublishPipelineArtifact@1
-#     displayName: Publish Code Coverage Results
-#     condition: eq(variables.onlyDocChanged, 0)
-#     inputs:
-#       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
-#       artifact: $(coverageReportName)
-#       publishLocation: 'pipeline'
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
+      artifact: $(coverageReportName)
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -201,21 +201,21 @@ jobs:
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
     env:
       MSBUILDUSESERVER: "1"
-#   - task: PowerShell@2
-#     displayName: Process coverage reports
-#     continueOnError: true
-#     condition: eq(variables.onlyDocChanged, 0)
-#     inputs:
-#       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-#       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
-#       pwsh: true
-#   - task: PublishPipelineArtifact@1
-#     displayName: Publish Code Coverage Results
-#     condition: eq(variables.onlyDocChanged, 0)
-#     inputs:
-#       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
-#       artifact: $(coverageReportName)
-#       publishLocation: 'pipeline'
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
+      artifact: $(coverageReportName)
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -289,21 +289,21 @@ jobs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release'
     condition: eq(variables.onlyDocChanged, 1)
-#   - task: PowerShell@2
-#     displayName: Process coverage reports
-#     continueOnError: true
-#     condition: eq(variables.onlyDocChanged, 0)
-#     inputs:
-#       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
-#       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
-#       pwsh: true
-#   - task: PublishPipelineArtifact@1
-#     displayName: Publish Code Coverage Results
-#     condition: eq(variables.onlyDocChanged, 0)
-#     inputs:
-#       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
-#       artifact: $(coverageReportName)
-#       publishLocation: 'pipeline'
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    continueOnError: true
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
+      pwsh: true
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
+      artifact: $(coverageReportName)
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -532,31 +532,31 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
-#   - task: DownloadPipelineArtifact@2
-#     inputs:
-#       buildType: 'current'
-#       artifactName: 'WindowsFullFrameworkCoverage'
-#       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/WindowsFullFramework'
-#   - task: DownloadPipelineArtifact@2
-#     inputs:
-#       buildType: 'current'
-#       artifactName: 'WindowsCoreCoverage'
-#       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/WindowsCore'
-#   - task: DownloadPipelineArtifact@2
-#     inputs:
-#       buildType: 'current'
-#       artifactName: 'WindowsFullReleaseCoverage'
-#       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/WindowsFullRelease'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'WindowsFullFrameworkCoverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsFullFramework'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'WindowsCoreCoverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsCore'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'WindowsFullReleaseCoverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsFullRelease'
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
       artifactName: 'LinuxCoreCoverage'
-      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/LinuxCore'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/LinuxCore'
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
       artifactName: 'MacCoreCoverage'
-      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/MacCore'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/MacCore'
 
   - task: PowerShell@2
     displayName: Process coverage reports
