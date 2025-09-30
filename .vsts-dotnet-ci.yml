@@ -565,9 +565,15 @@ jobs:
       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
       pwsh: true
   - task: PublishBuildArtifacts@1
-    displayName: Publish Artifact $(Build.BuildNumber)
+    displayName: Publish Artifact $(Build.BuildNumber) Coverage
     inputs:
-      PathtoPublish: 'artifacts/MergedCoverageReport'
-      ArtifactName: '$(Build.BuildNumber)'
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      ArtifactName: '$(Build.BuildNumber) Coverage'
+    condition: succeededOrFailed()
+- task: PublishBuildArtifacts@1
+    displayName: Publish Artifact $(Build.BuildNumber) Cobertura
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
+      ArtifactName: '$(Build.BuildNumber) Cobertura'
     condition: succeededOrFailed()
 - template: /eng/common/templates/jobs/source-build.yml
