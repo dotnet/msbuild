@@ -570,7 +570,7 @@ jobs:
       PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       ArtifactName: '$(Build.BuildNumber) Coverage'
     condition: succeededOrFailed()
-- task: PublishBuildArtifacts@1
+  - task: PublishBuildArtifacts@1
     displayName: Publish Artifact $(Build.BuildNumber) Cobertura
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
