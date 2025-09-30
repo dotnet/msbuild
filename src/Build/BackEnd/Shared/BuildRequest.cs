@@ -452,6 +452,6 @@ namespace Microsoft.Build.BackEnd
             return ProxyTargets != null;
         }
 
-        internal int ScheduledNodeId { get; set; }
+        public int ScheduledNodeId { get; set; } = -1;
     }
 }

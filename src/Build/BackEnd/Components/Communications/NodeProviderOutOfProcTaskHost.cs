@@ -183,10 +183,7 @@ namespace Microsoft.Build.BackEnd
             // Send the build completion message to the nodes, causing them to shutdown or reset.
             List<NodeContext> contextsToShutDown;
 
-            lock (_nodeContexts)
-            {
-                contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
-            }
+            contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
@@ -573,18 +570,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(
             HandshakeOptions hostContext,
+            int taskHostNodeId,
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            Dictionary<string, string> taskHostParameters,
-            int nodeId)
+            Dictionary<string, string> taskHostParameters)
         {
-            // key is combination of the noeId and the HandshakeOptions
-            int taskHostNodeId = nodeId != -1 ?
-                (nodeId << 16) | ((int)hostContext & 0xFFFF) :
-                (int)hostContext;
-            
-
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(taskHostNodeId))
             {

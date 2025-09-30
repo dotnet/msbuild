@@ -340,8 +340,8 @@ namespace Microsoft.Build.BackEnd
             AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc,
-            Func<string, ProjectPropertyInstance> getProperty,
-            int scheduledNodeId = -1)
+            int scheduledNodeId,
+            Func<string, ProjectPropertyInstance> getProperty)
         {
             bool useTaskFactory = false;
             Dictionary<string, string> mergedParameters = null;

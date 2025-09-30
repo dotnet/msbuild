@@ -94,6 +94,16 @@ namespace Microsoft.Build.BackEnd
         private HandshakeOptions _requiredContext = HandshakeOptions.None;
 
         /// <summary>
+        /// The task host node ID of the task host we're launching.
+        /// </summary>
+        private int _taskHostNodeId = -1;
+
+        /// <summary>
+        /// The ID of the node on which this task is scheduled to run.
+        /// </summary>
+        private readonly int _scheduledNodeId;
+
+        /// <summary>
         /// True if currently connected to the task host; false otherwise.
         /// </summary>
         private bool _connectedToTaskHost = false;
@@ -129,8 +139,6 @@ namespace Microsoft.Build.BackEnd
         /// The difference is that TaskHostFactory requires the TaskHost to be transient i.e. to expire after build.
         /// </summary>
         private bool _taskHostFactoryExplicitlyRequested = false;
-
-        private readonly int _scheduledNodeId;
 
         /// <summary>
         /// Constructor.
@@ -256,20 +264,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        int key = GetTaskHostNodeId();
-                        _taskHostProvider.SendData(key, new TaskHostTaskCancelled());
+                        _taskHostProvider.SendData(_taskHostNodeId, new TaskHostTaskCancelled());
                     }
                 }
 
                 _taskCancelled = true;
             }
-        }
-
-        private int GetTaskHostNodeId()
-        {
-            return _scheduledNodeId != -1 ?
-                (_scheduledNodeId << 16) | ((int)_requiredContext & 0xFFFF) :
-                (int)_requiredContext;
         }
 
         /// <summary>
@@ -324,7 +324,9 @@ namespace Microsoft.Build.BackEnd
                         // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
                         nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
                         taskHostParameters: _taskHostParameters);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, this, this, hostConfiguration, _taskHostParameters, _scheduledNodeId);
+
+                    _taskHostNodeId = GenerateTaskHostNodeId(_scheduledNodeId, _requiredContext);
+                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, _taskHostNodeId, this, this, hostConfiguration, _taskHostParameters);
                 }
 
                 if (_connectedToTaskHost)
@@ -353,8 +355,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         lock (_taskHostLock)
                         {
-                            int taskHostNodeId = GetTaskHostNodeId();
-                            _taskHostProvider.DisconnectFromHost(taskHostNodeId);
+                            _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
                             _connectedToTaskHost = false;
                         }
                     }
@@ -374,6 +375,20 @@ namespace Microsoft.Build.BackEnd
             }
 
             return _taskExecutionSucceeded;
+        }
+
+        private static int GenerateTaskHostNodeId(int scheduledNodeId, HandshakeOptions handshakeOptions)
+        {
+            // For traditional multi-proc builds, the task host id is just (int)HandshakeOptions that represents the runtime / architecture.
+            // For new multi-threaded mode, NodeProviderOutOfProcTaskHost needs to distinguish task hosts not only by HandshakeOptions (runtime / architecture),
+            // but also by which node they were requested. This is because NodeProviderOutOfProcTaskHost runs on the same process as multiple in-proc nodes,
+            // as opposed to the traditional multi-proc case where each node and single NodeProviderOutOfProcTaskHost runs on its own process.
+            // nodeId: [1, 255] (8 bits more than enough) (max is number of processors, usually 8. Let's assume max is 256 processors)
+            // HandshakeOptions: [0, 511] (9 bits)
+            // Pack nodeId into upper bits, handshakeOptions into lower bits
+            return scheduledNodeId == -1 ?
+                        (int)handshakeOptions :
+                        (scheduledNodeId << 9) | ((int)handshakeOptions & 0x1FF);
         }
 
         /// <summary>
