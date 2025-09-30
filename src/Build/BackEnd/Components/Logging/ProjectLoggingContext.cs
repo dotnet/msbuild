@@ -26,6 +26,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private string _projectFullPath;
 
         /// <summary>
+        /// Telemetry data for a project
+        /// </summary>
+        private readonly ProjectTelemetry _projectTelemetry = new ProjectTelemetry();
+
+        /// <summary>
         /// Constructs a project logging context.
         /// </summary>
         internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
@@ -252,6 +257,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 evaluationId,
                 projectContextId);
         }
+
+        /// <summary>
+        /// Telemetry data for a project
+        /// </summary>
+        internal ProjectTelemetry ProjectTelemetry => _projectTelemetry;
 
         /// <summary>
         /// Log that the project has finished
