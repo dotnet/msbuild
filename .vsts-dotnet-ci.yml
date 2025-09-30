@@ -576,4 +576,9 @@ jobs:
       PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
       ArtifactName: '$(Build.BuildNumber) Cobertura'
     condition: succeededOrFailed()
+  - task: PublishCodeCoverageResults@2
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
+      pathToSources: $(Build.SourcesDirectory)
 - template: /eng/common/templates/jobs/source-build.yml
