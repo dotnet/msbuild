@@ -32,6 +32,29 @@ namespace Microsoft.Build.Shared
         public const string InlineTaskSuffix = "inline_task.dll";
         public const string InlineTaskLoadManifestSuffix = ".loadmanifest";
 
+        /// <summary>
+        /// Represents a cached assembly entry for task factories with validation support.
+        /// </summary>
+        public readonly struct CachedAssemblyEntry
+        {
+            public CachedAssemblyEntry(Assembly assembly, string assemblyPath)
+            {
+                Assembly = assembly;
+                AssemblyPath = assemblyPath;
+            }
+
+            public Assembly Assembly { get; }
+
+            public string AssemblyPath { get; }
+
+            /// <summary>
+            /// Validates that the cached assembly is still usable.
+            /// For out-of-process scenarios (when AssemblyPath is specified), validates the file exists.
+            /// For in-process scenarios (when AssemblyPath is empty), always considers valid.
+            /// </summary>
+            public bool IsValid => string.IsNullOrEmpty(AssemblyPath) || FileUtilities.FileExistsNoThrow(AssemblyPath);
+        }
+
 
         /// <summary>
         /// Creates a process-specific temporary directory for inline task assemblies.

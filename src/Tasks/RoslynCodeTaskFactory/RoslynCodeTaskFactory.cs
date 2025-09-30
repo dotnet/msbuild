@@ -84,19 +84,7 @@ namespace Microsoft.Build.Tasks
         /// A cache of <see cref="RoslynCodeTaskFactoryTaskInfo"/> objects and their corresponding compiled assembly.  This cache ensures that two of the exact same code task
         /// declarations are not compiled multiple times.
         /// </summary>
-        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, CachedAssemblyEntry> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, CachedAssemblyEntry>();
-        private readonly struct CachedAssemblyEntry
-        {
-            public CachedAssemblyEntry(Assembly assembly, string assemblyPath)
-            {
-                Assembly = assembly;
-                AssemblyPath = assemblyPath;
-            }
-
-            public Assembly Assembly { get; }
-
-            public string AssemblyPath { get; }
-        }
+        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, TaskFactoryUtilities.CachedAssemblyEntry> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, TaskFactoryUtilities.CachedAssemblyEntry>();
 
         /// <summary>
         /// Stores the path to the directory that this assembly is located in.
@@ -675,47 +663,41 @@ namespace Microsoft.Build.Tasks
         /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>false</code>.</returns>
         private bool TryCompileAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
         {
-            CachedAssemblyEntry cachedEntry;
-            bool reuseCompiledAssembly = CompiledAssemblyCache.TryGetValue(taskInfo, out cachedEntry);
-            assembly = reuseCompiledAssembly ? cachedEntry.Assembly : null;
-            string sourceCodePath = null;
-
-            if (reuseCompiledAssembly)
+            // Try to get from cache
+            if (CompiledAssemblyCache.TryGetValue(taskInfo, out TaskFactoryUtilities.CachedAssemblyEntry cachedEntry))
             {
-                string cachedPath = cachedEntry.AssemblyPath;
-                if (!string.IsNullOrEmpty(cachedPath))
+                // For out-of-process scenarios, validate the file still exists
+                if (!string.IsNullOrEmpty(cachedEntry.AssemblyPath) && !FileUtilities.FileExistsNoThrow(cachedEntry.AssemblyPath))
                 {
-                    _assemblyPath = cachedPath;
+                    // Cached assembly file was deleted, remove from cache and recompile
+                    CompiledAssemblyCache.TryRemove(taskInfo, out _);
                 }
                 else
                 {
-                    _assemblyPath = assembly?.Location;
+                    // Cache entry is valid, use it
+                    assembly = cachedEntry.Assembly;
+                    _assemblyPath = cachedEntry.AssemblyPath;
+                    return true;
                 }
+            }
+
+            assembly = null;
+            string sourceCodePath = null;
+            // Prepare for compilation
+            sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
+
+            if (Traits.Instance.ForceTaskFactoryOutOfProc)
+            {
+                _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath(); // in a temp directory for this process, persisted until the end of build
             }
             else
             {
-                // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
-                // the temp folder as well as the assembly. After build, the source code and assembly are deleted.
-                sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
-
-                if (Traits.Instance.ForceTaskFactoryOutOfProc)
-                {
-                    _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath(); // in a temp directory for this process, persisted until the end of build
-                }
-                else
-                {
-                    _assemblyPath = FileUtilities.GetTemporaryFileName(".dll"); // dll in the root of the temp directory, removed immediately after compilation
-                }
+                _assemblyPath = FileUtilities.GetTemporaryFileName(".dll"); // dll in the root of the temp directory, removed immediately after compilation
             }
 
             if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
             {
                 return false;
-            }
-
-            if (reuseCompiledAssembly)
-            {
-                return true;
             }
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
@@ -802,7 +784,7 @@ namespace Microsoft.Build.Tasks
                 assembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
 
                 string cachedAssemblyPath = Traits.Instance.ForceTaskFactoryOutOfProc ? _assemblyPath : string.Empty;
-                CompiledAssemblyCache.TryAdd(taskInfo, new CachedAssemblyEntry(assembly, cachedAssemblyPath));
+                CompiledAssemblyCache.TryAdd(taskInfo, new TaskFactoryUtilities.CachedAssemblyEntry(assembly, cachedAssemblyPath));
                 return true;
             }
             catch (Exception e)

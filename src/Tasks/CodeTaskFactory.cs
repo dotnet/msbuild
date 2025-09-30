@@ -84,19 +84,7 @@ namespace Microsoft.Build.Tasks
         /// A collection of task assemblies which have been instantiated by any CodeTaskFactory.  Used to prevent us from creating
         /// duplicate assemblies.
         /// </summary>
-        private static readonly ConcurrentDictionary<FullTaskSpecification, CachedAssemblyEntry> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, CachedAssemblyEntry>();
-        private readonly struct CachedAssemblyEntry
-        {
-            public CachedAssemblyEntry(Assembly assembly, string assemblyPath)
-            {
-                Assembly = assembly;
-                AssemblyPath = assemblyPath;
-            }
-
-            public Assembly Assembly { get; }
-
-            public string AssemblyPath { get; }
-        }
+        private static readonly ConcurrentDictionary<FullTaskSpecification, TaskFactoryUtilities.CachedAssemblyEntry> s_compiledTaskCache = new ConcurrentDictionary<FullTaskSpecification, TaskFactoryUtilities.CachedAssemblyEntry>();
 
         /// <summary>
         /// Merged set of assembly reference paths (default + specified)
@@ -823,95 +811,113 @@ namespace Microsoft.Build.Tasks
                 string fullCode = codeBuilder.ToString();
 
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
-                CachedAssemblyEntry cachedEntry;
-                if (!s_compiledTaskCache.TryGetValue(fullSpec, out cachedEntry))
-                {
-                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
-                    {
-                        _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
-                        compilerParameters.OutputAssembly = _assemblyPath;
-                    }
-
-                    // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases
-                    // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists.
-                    // See: https://github.com/dotnet/msbuild/issues/328
-                    Directory.CreateDirectory(Path.GetTempPath());
-
-                    // Invokes compilation.
-                    CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
-
-                    // Embed generated file in the binlog
-                    string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
-                    _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
-
-                    string outputPath = null;
-                    if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)
-                    {
-                        string tempDirectory = FileUtilities.TempFileDirectory;
-                        string fileName = Guid.NewGuid().ToString() + ".txt";
-                        outputPath = Path.Combine(tempDirectory, fileName);
-                        File.WriteAllText(outputPath, fullCode);
-                    }
-
-                    if (compilerResults.NativeCompilerReturnValue != 0 && compilerResults.Errors.Count > 0)
-                    {
-                        _log.LogErrorWithCodeFromResources("CodeTaskFactory.FindSourceFileAt", outputPath);
-
-                        foreach (CompilerError e in compilerResults.Errors)
-                        {
-                            _log.LogErrorWithCodeFromResources("CodeTaskFactory.CompilerError", e.ToString());
-                        }
-
-                        return null;
-                    }
-
-                    Assembly compiledAssembly;
-                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
-                    {
-                        if (!string.IsNullOrEmpty(_assemblyPath))
-                        {
-                            TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
-                            compiledAssembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
-                        }
-                        else
-                        {
-                            compiledAssembly = compilerResults.CompiledAssembly;
-                        }
-                    }
-                    else
-                    {
-                        compiledAssembly = compilerResults.CompiledAssembly;
-                    }
-
-                    // Add to the cache.  Failing to add is not a fatal error.
-                    string cachedAssemblyPath = Traits.Instance.ForceTaskFactoryOutOfProc ? _assemblyPath : string.Empty;
-                    s_compiledTaskCache.TryAdd(fullSpec, new CachedAssemblyEntry(compiledAssembly, cachedAssemblyPath));
-                    return compiledAssembly;
-                }
-                else
+                
+                // Try to get from cache
+                if (s_compiledTaskCache.TryGetValue(fullSpec, out TaskFactoryUtilities.CachedAssemblyEntry cachedEntry))
                 {
                     Assembly existingAssembly = cachedEntry.Assembly;
-
+                    
                     if (Traits.Instance.ForceTaskFactoryOutOfProc)
                     {
                         string cachedPath = cachedEntry.AssemblyPath;
                         if (!string.IsNullOrEmpty(cachedPath))
                         {
-                            _assemblyPath = cachedPath;
+                            // For out-of-process, validate the assembly file still exists
+                            if (!FileUtilities.FileExistsNoThrow(cachedPath))
+                            {
+                                // Cached assembly file was deleted, remove from cache and recompile
+                                s_compiledTaskCache.TryRemove(fullSpec, out _);
+                            }
+                            else
+                            {
+                                _assemblyPath = cachedPath;
+                                // Assembly exists, assume manifest exists too if it was created
+                                // If manifest is missing, out-of-process execution will handle the error gracefully
+                                return existingAssembly;
+                            }
                         }
                         else
                         {
-                            _assemblyPath = existingAssembly?.Location;
-                        }
-
-                        if (!string.IsNullOrEmpty(_assemblyPath))
-                        {
-                            TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
+                            // This should never happen: we're in out-of-process mode but have a cached entry without a file path.
+                            // When in out-of-process mode, _assemblyPath is always set before compilation.
+                            ErrorUtilities.ThrowInternalError("Cached assembly entry has no file path in out-of-process mode");
                         }
                     }
-
-                    return existingAssembly;
+                    else
+                    {
+                        // In-process scenario - always use cached assembly without file validation
+                        return existingAssembly;
+                    }
                 }
+
+                // Proceed with compilation
+                if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                {
+                    _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
+                    compilerParameters.OutputAssembly = _assemblyPath;
+                }
+
+                // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases
+                // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists.
+                // See: https://github.com/dotnet/msbuild/issues/328
+                Directory.CreateDirectory(Path.GetTempPath());
+
+                // Invokes compilation.
+                CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
+
+                // Embed generated file in the binlog
+                string fileNameInBinlog = $"{Guid.NewGuid()}-{_nameOfTask}-compilation-file.tmp";
+                _log.LogIncludeGeneratedFile(fileNameInBinlog, fullCode);
+
+                string outputPath = null;
+                if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)
+                {
+                    string tempDirectory = FileUtilities.TempFileDirectory;
+                    string fileName = Guid.NewGuid().ToString() + ".txt";
+                    outputPath = Path.Combine(tempDirectory, fileName);
+                    File.WriteAllText(outputPath, fullCode);
+                }
+
+                if (compilerResults.NativeCompilerReturnValue != 0 && compilerResults.Errors.Count > 0)
+                {
+                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.FindSourceFileAt", outputPath);
+                    
+                    foreach (CompilerError error in compilerResults.Errors)
+                    {
+                        _log.LogErrorWithCodeFromResources("CodeTaskFactory.CompilerError", error.ToString());
+                    }
+                    
+                    return null;
+                }
+
+                // Log the location of the code file.
+                if (outputPath != null)
+                {
+                    _log.LogMessageFromResources(MessageImportance.Low, "CodeTaskFactory.FindSourceFileAt", outputPath);
+                }
+
+                Assembly assembly;
+                if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                {
+                    if (!string.IsNullOrEmpty(_assemblyPath))
+                    {
+                        TaskFactoryUtilities.CreateLoadManifestFromReferences(_assemblyPath, finalReferencedAssemblies);
+                        assembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
+                    }
+                    else
+                    {
+                        assembly = compilerResults.CompiledAssembly;
+                    }
+                }
+                else
+                {
+                    assembly = compilerResults.CompiledAssembly;
+                }
+
+                // Add to the cache.  Failing to add is not a fatal error.
+                string cachedAssemblyPath = Traits.Instance.ForceTaskFactoryOutOfProc ? _assemblyPath : string.Empty;
+                s_compiledTaskCache.TryAdd(fullSpec, new TaskFactoryUtilities.CachedAssemblyEntry(assembly, cachedAssemblyPath));
+                return assembly;
             }
         }
 
