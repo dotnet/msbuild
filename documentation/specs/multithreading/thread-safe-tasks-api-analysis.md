@@ -1,4 +1,4 @@
-# Thread-Safe Tasks: API Analysis Reference
+# Thread-Safe Tasks: API Analysis Reference (DRAFT)
 
 This document provides a list of .NET APIs that should not be used or should be used with caution in thread-safe tasks. These APIs are problematic because they either rely on or modify process-level state, which can cause race conditions in multithreaded execution.
 
