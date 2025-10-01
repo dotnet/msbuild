@@ -45,7 +45,7 @@ jobs:
       }
 
       if (!($isInitialCommit -or $isVersionBumped)) {
-        Write-Host "##vso[task.logissue type=error]Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
+        Write-Host "##vso[task.logissue type=error;sourcepath=eng/Versions.props;linenumber=6;]Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
         exit 1
       }
     condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
