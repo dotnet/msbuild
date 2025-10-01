@@ -3089,8 +3089,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CopyToFileWithSameCaseInsensitiveNameAsExistingDirectoryOnUnix()
         {
-            // Skip this test on Windows since Windows file system is case-insensitive
-            if (NativeMethodsShared.IsWindows)
+            // Skip this test on case-insensitive file systems (Windows, macOS with default APFS/HFS+)
+            if (!FileUtilities.GetIsFileSystemCaseSensitive())
             {
                 return;
             }
