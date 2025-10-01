@@ -32,6 +32,14 @@ Expressed and collected via [LoggingConfigurationTelemetry type](https://github.
 | >= 8.0.100   | Indication if Binary logger was used. |
 | >= 8.0.100   | Indication if Binary logger used with default log name. |
 
+#### Deprecated Data
+
+| Introduced    | Removed    | Data |
+|---------------|------------|------|
+| 8.0.100       | 10.0.100   | Console logger type (serial, parallel). |
+| 8.0.100       | 10.0.100   | File logger type (serial, parallel). |
+| 8.0.100       | 10.0.100   | Number of file loggers. |
+
 ### BuildCheck
 
 Expressed and collected via [BuildCheckTelemetry type](https://github.com/dotnet/msbuild/blob/94941d9cb26bb86045452b4a174a357b65a30c99/src/Framework/Telemetry/BuildCheckTelemetry.cs)
@@ -92,3 +100,15 @@ Expressed and collected via [BuildTelemetry type](https://github.com/dotnet/msbu
 | >= 9.0.100   | Indication of enablement of BuildCheck feature. |
 | >= 9.0.100   | Indication of Smart App Control being in evaluation mode on machine executing the build. |
 | >= 10.0.100  | Indication if the build was run in multithreaded mode. |
+
+### Project Build
+
+Expressed and collected via [ProjectTelemetry type](https://github.com/dotnet/msbuild/blob/main/src/Build/Logging/ProjectTelemetry.cs)
+
+| SDK versions | Data |
+|--------------|------|
+| >= 10.0.100  | Count of tasks executed by task factory type (Assembly, Intrinsic, Code, RoslynCode, Xaml, and custom task factories). |
+| >= 10.0.100  | Total count of tasks executed in the project. |
+| >= 10.0.100  | Count of tasks executed in TaskHost (out-of-process). |
+
+**Note**: These telemetry events are aggregated per build by the SDK.
