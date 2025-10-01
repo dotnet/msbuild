@@ -738,6 +738,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
                     managedCompiler.References = references;
                     managedCompiler.Sources = [new TaskItem(sourceCodePath)];
+                    managedCompiler.NoWarn = "1701;1702";
                     managedCompiler.TargetType = "Library";
                     managedCompiler.UseSharedCompilation = false;
 
