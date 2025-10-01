@@ -283,10 +283,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see https://aka.ms/buildcheck
 	</source>
-        <target state="new">  -check
-                     Enables BuildChecks during the build.
-                     BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see https://aka.ms/buildcheck
+        <target state="translated">  -check
+                     Derleme sırasında BuildChecks'i sağlar.
+                     BuildCheck, özelliklerin güvenliğini sağlamak için kuralların değerlendirilmesini sağlar
+                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için bkz. https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}

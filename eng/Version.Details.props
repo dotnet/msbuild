@@ -24,12 +24,12 @@ This file should be imported by eng/Versions.props
     <SystemThreadingChannelsPackageVersion>9.0.0</SystemThreadingChannelsPackageVersion>
     <SystemThreadingTasksDataflowPackageVersion>9.0.0</SystemThreadingTasksDataflowPackageVersion>
     <!-- dotnet/arcade dependencies -->
-    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.25430.1</MicrosoftDotNetArcadeSdkPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.25430.1</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.25476.2</MicrosoftDotNetArcadeSdkPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.25476.2</MicrosoftDotNetXUnitExtensionsPackageVersion>
     <!-- nuget/nuget.client dependencies -->
-    <NuGetBuildTasksPackageVersion>7.0.0-preview.1.213</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>7.0.0-rc.264</NuGetBuildTasksPackageVersion>
     <!-- dotnet/roslyn dependencies -->
-    <MicrosoftNetCompilersToolsetPackageVersion>5.0.0-2.25429.6</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>5.1.0-1.25477.2</MicrosoftNetCompilersToolsetPackageVersion>
   </PropertyGroup>
   <!--Property group for alternate package version names-->
   <PropertyGroup>

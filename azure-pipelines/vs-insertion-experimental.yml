@@ -33,7 +33,8 @@ parameters:
       - rel/d17.6
       - rel/d17.3
       - rel/d17.0
-
+      - rel/d16.11
+      
 variables:
   - name: TeamName
     value: msbuild
@@ -181,3 +182,4 @@ extends:
             InsertionReviewers: MSBuild
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
             InsertionBuildPolicy: Request Perf DDRITs
+

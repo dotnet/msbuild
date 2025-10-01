@@ -380,19 +380,50 @@ namespace Microsoft.Build.Shared
                 {
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
                     Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    Type foundType = null;
                     int numberOfTypesSearched = 0;
-                    foreach (Type publicType in loadedAssembly.GetExportedTypes())
+
+                    // Try direct type lookup first (fastest)
+                    if (!string.IsNullOrEmpty(typeName))
                     {
-                        numberOfTypesSearched++;
-                        if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                        foundType = loadedAssembly.GetType(typeName, throwOnError: false);
+                        if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
                         {
-                            MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                            LoadedType loadedType = new(publicType, _assemblyLoadInfo, loadedAssembly, _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName), loadedViaMetadataLoadContext: true);
-                            _context?.Dispose();
-                            _context = null;
-                            MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
-                            return loadedType;
+                            numberOfTypesSearched = 1;
                         }
+                    }
+
+                    // Fallback: enumerate all types for partial matching
+                    if (foundType == null)
+                    {
+                        foreach (Type publicType in loadedAssembly.GetExportedTypes())
+                        {
+                            numberOfTypesSearched++;
+                            try
+                            {
+                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                {
+                                    foundType = publicType;
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Ignore types that can't be loaded/reflected upon.
+                                // These types might be needed out of proc and be resolved there.
+                            }
+                        }
+                    }
+
+                    if (foundType != null)
+                    {
+                        MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
+                        var taskItemType = _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
+                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, loadedViaMetadataLoadContext: true);
+                        _context?.Dispose();
+                        _context = null;
+                        MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
+                        return loadedType;
                     }
 
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
