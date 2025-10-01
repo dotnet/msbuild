@@ -440,7 +440,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleBuildRequest(BuildRequest request)
         {
-            request.ScheduledNodeId = _nodeId;
+            if (_componentHost.BuildParameters.MultiThreaded)
+            {
+                request.ScheduledNodeId = _nodeId;
+            }
             _buildRequestEngine.SubmitBuildRequest(request);
         }
 
