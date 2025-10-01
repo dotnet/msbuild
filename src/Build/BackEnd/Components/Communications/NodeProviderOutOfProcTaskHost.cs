@@ -79,7 +79,7 @@ namespace Microsoft.Build.BackEnd
         private ManualResetEvent _noNodesActiveEvent;
 
         /// <summary>
-        /// A mapping of all the nodes managed by this provider.
+        /// A mapping of all the task host nodes managed by this provider.
         /// </summary>
         private ConcurrentDictionary<int, NodeContext> _nodeContexts;
 
@@ -129,7 +129,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return int.MaxValue;
+                throw new NotImplementedException("This property is not implemented because available nodes are unlimited.");
             }
         }
 
@@ -618,7 +618,7 @@ namespace Microsoft.Build.BackEnd
         internal bool CreateNode(HandshakeOptions hostContext, int taskHostNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, Dictionary<string, string> taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
+            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             if (AvailableNodes <= 0)
             {

@@ -28,6 +28,12 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHostTask : IGeneratedTask, ICancelableTask, INodePacketFactory, INodePacketHandler
     {
+        private const int HANDSHAKE_OPTIONS_BITS = 9;
+
+        private const int HANDSHAKE_OPTIONS_MASK = 0x1FF;
+
+        private const int NODE_ID_MAX_VALUE_FOR_MULTITHREADED = 255;
+
         /// <summary>
         /// The IBuildEngine callback object.
         /// </summary>
@@ -386,9 +392,11 @@ namespace Microsoft.Build.BackEnd
             // nodeId: [1, 255] (8 bits more than enough) (max is number of processors, usually 8. Let's assume max is 256 processors)
             // HandshakeOptions: [0, 511] (9 bits)
             // Pack nodeId into upper bits, handshakeOptions into lower bits
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(scheduledNodeId == -1 || (scheduledNodeId >= 1 && scheduledNodeId <= NODE_ID_MAX_VALUE_FOR_MULTITHREADED), nameof(scheduledNodeId));
+
             return scheduledNodeId == -1 ?
                         (int)handshakeOptions :
-                        (scheduledNodeId << 9) | ((int)handshakeOptions & 0x1FF);
+                        (scheduledNodeId << HANDSHAKE_OPTIONS_BITS) | ((int)handshakeOptions & HANDSHAKE_OPTIONS_MASK);
         }
 
         /// <summary>
