@@ -229,6 +229,25 @@ namespace Microsoft.Build.Collections
         #endregion
 
         /// <summary>
+        /// Whether the provided item is in this table or not.
+        /// </summary>
+        bool ICollection<T>.Contains(T projectItem)
+        {
+            lock (_itemLists)
+            {
+                foreach (List<T> list in _itemLists.Values)
+                {
+                    if (list.Contains(projectItem))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Add a new item to the collection, at the
         /// end of the list of other items with its key.
         /// </summary>
