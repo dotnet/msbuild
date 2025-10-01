@@ -8,7 +8,6 @@ using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -50,13 +49,13 @@ namespace Microsoft.Build.Shared
             Type? t = type;
             while (t is not null)
             {
-                IList<CustomAttributeData> attributes = CustomAttributeData.GetCustomAttributes(t);
-                if (attributes.Any(attr => attr.AttributeType.Name.Equals(nameof(LoadInSeparateAppDomainAttribute))))
+                IList<CustomAttributeData> attributes = t.GetCustomAttributes();
+                if (TypeUtilities.ContainsAttribute<LoadInSeparateAppDomainAttribute>(attributes))
                 {
                     HasLoadInSeparateAppDomainAttribute = true;
                 }
 
-                if (attributes.Any(attr => attr.AttributeType.Name.Equals(nameof(RunInSTAAttribute))))
+                if (TypeUtilities.ContainsAttribute<RunInSTAAttribute>(attributes))
                 {
                     HasSTAThreadAttribute = true;
                 }
@@ -82,29 +81,61 @@ namespace Microsoft.Build.Shared
                 bool requiredAttribute = false;
                 foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
                 {
-                    if (attr.AttributeType.Name.Equals(nameof(OutputAttribute)))
+                    try
                     {
-                        outputAttribute = true;
+                        if (attr.AttributeType?.Name.Equals(nameof(OutputAttribute)) == true)
+                        {
+                            outputAttribute = true;
+                        }
+                        else if (attr.AttributeType?.Name.Equals(nameof(RequiredAttribute)) == true)
+                        {
+                            requiredAttribute = true;
+                        }
                     }
-                    else if (attr.AttributeType.Name.Equals(nameof(RequiredAttribute)))
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        requiredAttribute = true;
+                        // Skip attributes that can't be loaded
+                        continue;
                     }
                 }
 
                 // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type? pt = props[i].PropertyType;
-                if (pt.IsArray)
+                Type? pt = null;
+                try
                 {
-                    pt = pt.GetElementType();
+                    pt = props[i].PropertyType;
+                    if (pt.IsArray)
+                    {
+                        pt = pt.GetElementType();
+                    }
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Skip properties that can't be loaded
+                    continue;
                 }
 
-                bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
+                bool isAssignableToITask = false;
+                try
+                {
+                    isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Can't determine assignability, default to false
+                }
 
                 Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
                 if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
-                    PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName?? string.Empty;
+                    try
+                    {
+                        PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        PropertyAssemblyQualifiedNames[i] = string.Empty;
+                    }
                 }
             }
 #else
@@ -114,7 +145,6 @@ namespace Microsoft.Build.Shared
             IsMarshalByRef = this.Type.IsMarshalByRef;
 #endif
         }
-
 
         #endregion
 
