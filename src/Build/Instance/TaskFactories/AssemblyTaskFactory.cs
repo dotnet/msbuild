@@ -340,6 +340,7 @@ namespace Microsoft.Build.BackEnd
             AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc,
+            int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty)
         {
             bool useTaskFactory = false;
@@ -390,6 +391,7 @@ namespace Microsoft.Build.BackEnd
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 TaskHostTask task = new TaskHostTask(
+                    scheduledNodeId,
                     taskLocation,
                     taskLoggingContext,
                     buildComponentHost,

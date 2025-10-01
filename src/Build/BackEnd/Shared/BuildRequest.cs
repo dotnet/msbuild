@@ -451,5 +451,7 @@ namespace Microsoft.Build.BackEnd
         {
             return ProxyTargets != null;
         }
+
+        public int ScheduledNodeId { get; set; } = -1;
     }
 }
