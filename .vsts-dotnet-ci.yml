@@ -97,7 +97,7 @@ jobs:
       ForceUseXCopyMSBuild: 1
   - task: PowerShell@2
     displayName: Process coverage reports
-    continueOnError: true
+    continueOnError: false
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
@@ -204,7 +204,7 @@ jobs:
       MSBUILDUSESERVER: "1"
   - task: PowerShell@2
     displayName: Process coverage reports
-    continueOnError: true
+    continueOnError: false
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
@@ -293,7 +293,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 1)
   - task: PowerShell@2
     displayName: Process coverage reports
-    continueOnError: true
+    continueOnError: false
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
@@ -368,7 +368,7 @@ jobs:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
     displayName: Process coverage reports
-    continueOnError: true
+    continueOnError: false
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
@@ -458,7 +458,7 @@ jobs:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
     displayName: Process coverage reports
-    continueOnError: true
+    continueOnError: false
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
