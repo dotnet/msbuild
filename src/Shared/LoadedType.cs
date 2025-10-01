@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -50,12 +49,12 @@ namespace Microsoft.Build.Shared
             while (t is not null)
             {
                 IList<CustomAttributeData> attributes = t.GetCustomAttributes();
-                if (TypeUtilities.ContainsAttribute<LoadInSeparateAppDomainAttribute>(attributes))
+                if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(attributes))
                 {
                     HasLoadInSeparateAppDomainAttribute = true;
                 }
 
-                if (TypeUtilities.ContainsAttribute<RunInSTAAttribute>(attributes))
+                if (TypeUtilities.HasAttribute<RunInSTAAttribute>(attributes))
                 {
                     HasSTAThreadAttribute = true;
                 }
