@@ -1393,7 +1393,7 @@ namespace Microsoft.Build.CommandLine
 
                 projectCollection = new ProjectCollection(
                     globalProperties,
-                    evaluationLoggers,
+                    isPreprocess ? null : evaluationLoggers,
                     null,
                     toolsetDefinitionLocations,
                     cpuCount,
