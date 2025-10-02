@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -1282,7 +1283,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             itemsByName.Add(item2);
             _twoItems = new ITaskItem[] { new TaskItem(item), new TaskItem(item2) };
 
-            _bucket = new ItemBucket(new Dictionary<string, ICollection<ProjectItemInstance>>().Keys, new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
+            _bucket = new ItemBucket(FrozenSet<string>.Empty, new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
             _bucket.Initialize(null);
             _host.FindTask(null);
             _host.InitializeForBatch(talc, _bucket, null);
