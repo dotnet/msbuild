@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         // Bool is just a placeholder, we're mainly interested in a threadsafe key set.
-        private readonly ConcurrentDictionary<string, bool> _directoriesKnownToExist = new ConcurrentDictionary<string, bool>(DefaultCopyParallelism, DefaultCopyParallelism, StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, bool> _directoriesKnownToExist = new ConcurrentDictionary<string, bool>(DefaultCopyParallelism, DefaultCopyParallelism, FileUtilities.PathComparer);
 
         /// <summary>
         /// Force the copy to retry even when it hits ERROR_ACCESS_DENIED -- normally we wouldn't retry in this case since
@@ -493,7 +493,7 @@ namespace Microsoft.Build.Tasks
             // { dest -> source }
             var filesActuallyCopied = new Dictionary<string, string>(
                 DestinationFiles.Length, // Set length to common case of 1:1 source->dest.
-                StringComparer.OrdinalIgnoreCase);
+                FileUtilities.PathComparer);
 
             // Now that we have a list of destinationFolder files, copy from source to destinationFolder.
             for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
@@ -503,7 +503,7 @@ namespace Microsoft.Build.Tasks
                 MSBuildEventSource.Log.CopyUpToDateStart(destPath);
                 if (filesActuallyCopied.TryGetValue(destPath, out string originalSource))
                 {
-                    if (String.Equals(originalSource, SourceFiles[i].ItemSpec, StringComparison.OrdinalIgnoreCase))
+                    if (String.Equals(originalSource, SourceFiles[i].ItemSpec, FileUtilities.PathComparison))
                     {
                         // Already copied from this location, don't copy again.
                         copyComplete = true;
@@ -587,7 +587,7 @@ namespace Microsoft.Build.Tasks
             // Map: Destination path -> indexes in SourceFiles/DestinationItems array indices (ordered low->high).
             var partitionsByDestination = new Dictionary<string, List<int>>(
                 DestinationFiles.Length, // Set length to common case of 1:1 source->dest.
-                StringComparer.OrdinalIgnoreCase);
+                FileUtilities.PathComparer);
 
             for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
@@ -653,7 +653,7 @@ namespace Microsoft.Build.Tasks
                                                 String.Equals(
                                                     sourcePath,
                                                     SourceFiles[partition[partitionIndex - 1]].ItemSpec,
-                                                    StringComparison.OrdinalIgnoreCase);
+                                                    FileUtilities.PathComparison);
 
                             if (!copyComplete)
                             {
