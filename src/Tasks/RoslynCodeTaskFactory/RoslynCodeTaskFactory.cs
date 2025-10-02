@@ -682,9 +682,8 @@ namespace Microsoft.Build.Tasks
             }
 
             assembly = null;
-            string sourceCodePath = null;
             // Prepare for compilation
-            sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
+            string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
 
             if (Traits.Instance.ForceTaskFactoryOutOfProc)
             {
