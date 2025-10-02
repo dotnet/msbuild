@@ -4417,6 +4417,42 @@ $(
         }
 
         [Fact]
+        public void PropertyFunctionVersionParseInvalidWithLeavePropertiesUnexpandedOnError()
+        {
+            // When an invalid version string is provided with LeavePropertiesUnexpandedOnError option,
+            // it should not throw an exception and should return the partially expanded expression
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(ProjectPropertyInstance.Create("X", "not-a-version"));
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(properties, FileSystems.Default);
+            
+            string result = expander.ExpandIntoStringLeaveEscaped(
+                @"$([System.Version]::Parse('$(X)'))", 
+                ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError, 
+                MockElementLocation.Instance);
+            
+            // Should return the partially expanded expression (property expanded, but function call left as-is) since parsing failed
+            result.ShouldBe(@"[System.Version]::Parse(not-a-version)");
+        }
+
+        [Fact]
+        public void PropertyFunctionVersionParseInvalidThrows()
+        {
+            // When an invalid version string is provided without LeavePropertiesUnexpandedOnError option,
+            // it should throw an InvalidProjectFileException
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(ProjectPropertyInstance.Create("X", "not-a-version"));
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(properties, FileSystems.Default);
+            
+            Should.Throw<InvalidProjectFileException>(() =>
+            {
+                expander.ExpandIntoStringLeaveEscaped(
+                    @"$([System.Version]::Parse('$(X)'))", 
+                    ExpanderOptions.ExpandProperties, 
+                    MockElementLocation.Instance);
+            });
+        }
+
+        [Fact]
         public void PropertyFunctionGuidNewGuid()
         {
             var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default);
