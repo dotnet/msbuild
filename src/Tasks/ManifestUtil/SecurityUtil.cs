@@ -578,19 +578,19 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     throw new ArgumentException("TargetFrameworkVersion");
                 }
 
-                bool isTargetFrameworkSha256Supported = false;
+                bool isTargetFrameworkSha256OrHigherSupported = false;
                 if (String.IsNullOrEmpty(targetFrameworkIdentifier) ||
                     targetFrameworkIdentifier.Equals(Constants.DotNetFrameworkIdentifier, StringComparison.InvariantCultureIgnoreCase))
                 {
                     // SHA-256 digest can be parsed only with .NET 4.5 or higher.
-                    isTargetFrameworkSha256Supported = targetVersion.CompareTo(s_dotNet45Version) >= 0;
+                    isTargetFrameworkSha256OrHigherSupported = targetVersion.CompareTo(s_dotNet45Version) >= 0;
                 }
                 else if (targetFrameworkIdentifier.Equals(Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase))
                 {
                     // Use SHA-256 digest for .NET Core apps
-                    isTargetFrameworkSha256Supported = true;
+                    isTargetFrameworkSha256OrHigherSupported = true;
                 }
-                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, disallowMansignTimestampFallback);
+                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256OrHigherSupported, resources, disallowMansignTimestampFallback);
             }
             else
             {
@@ -614,7 +614,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             SignFile(cert, timestampUrl, path);
         }
 
-        private static bool UseSha256Algorithm(X509Certificate2 cert)
+        private static bool UseSha256OrHigherAlgorithm(X509Certificate2 cert)
         {
             Oid oid = cert.SignatureAlgorithm;
             // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256
@@ -637,14 +637,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             // setup resources
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-            SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources);
+            SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256OrHigher: true, resources);
         }
 
         [SupportedOSPlatform("windows")]
         private static void SignFileInternal(X509Certificate2 cert,
                                             Uri timestampUrl,
                                             string path,
-                                            bool targetFrameworkSupportsSha256,
+                                            bool targetFrameworkSupportsSha256OrHigher,
                                             System.Resources.ResourceManager resources,
                                             bool disallowMansignTimestampFallback = false)
         {
@@ -663,13 +663,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 throw new FileNotFoundException(String.Format(CultureInfo.InvariantCulture, resources.GetString("SecurityUtil.SignTargetNotFound"), path), path);
             }
 
-            bool useSha256 = UseSha256Algorithm(cert) && targetFrameworkSupportsSha256;
+            bool useSha256OrHigher = UseSha256OrHigherAlgorithm(cert) && targetFrameworkSupportsSha256OrHigher;
 
             if (PathUtil.IsPEFile(path))
             {
                 if (IsCertInStore(cert))
                 {
-                    SignPEFile(cert, timestampUrl, path, resources, useSha256);
+                    SignPEFile(cert, timestampUrl, path, resources, useSha256OrHigher);
                 }
                 else
                 {
@@ -702,17 +702,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                             doc.Load(xr);
                         }
 
-                        var manifest = new SignedCmiManifest2(doc, useSha256);
+                        var manifest = new SignedCmiManifest2(doc, useSha256OrHigher);
                         CmiManifestSigner2 signer;
-                        if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
+                        if (useSha256OrHigher && rsa is RSACryptoServiceProvider rsacsp)
                         {
 #pragma warning disable CA2000 // Dispose objects before losing scope because CmiManifestSigner2 will dispose the RSACryptoServiceProvider
-                            signer = new CmiManifestSigner2(SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256), cert, useSha256);
+                            signer = new CmiManifestSigner2(SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256OrHigher), cert, useSha256OrHigher);
 #pragma warning restore CA2000 // Dispose objects before losing scope
                         }
                         else
                         {
-                            signer = new CmiManifestSigner2(rsa, cert, useSha256);
+                            signer = new CmiManifestSigner2(rsa, cert, useSha256OrHigher);
                         }
 
 #if RUNTIME_TYPE_NETCORE
@@ -764,27 +764,27 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
+        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256OrHigher)
         {
             try
             {
-                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true);
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256OrHigher, true);
             }
             catch (ApplicationException) when (timestampUrl != null)
             {
                 // error, retry with signtool /t if timestamp url was given
-                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256OrHigher, false);
                 return;
             }
         }
 
         private static void SignPEFileInternal(X509Certificate2 cert, Uri timestampUrl,
                                                string path, System.Resources.ResourceManager resources,
-                                               bool useSha256, bool useRFC3161Timestamp)
+                                               bool useSha256OrHigher, bool useRFC3161Timestamp)
         {
             var startInfo = new ProcessStartInfo(
                 GetPathToTool(resources),
-                GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256, useRFC3161Timestamp))
+                GetCommandLineParameters(cert, timestampUrl, path, useSha256OrHigher, useRFC3161Timestamp))
             {
                 CreateNoWindow = true,
                 UseShellExecute = false,
@@ -825,17 +825,23 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
-        internal static string GetCommandLineParameters(string certThumbprint, Uri timestampUrl, string path,
-                                                        bool useSha256, bool useRFC3161Timestamp)
+        internal static string GetCommandLineParameters(X509Certificate2 cert, Uri timestampUrl, string path,
+                                                        bool useSha256OrHigher, bool useRFC3161Timestamp)
         {
-            var commandLine = new StringBuilder();
-            if (useSha256)
+            string hashAlgoName = ManifestSignatureMethods.GetHashAlgorithmName(cert);
+            if (string.IsNullOrEmpty(hashAlgoName))
             {
-                commandLine.AppendFormat(CultureInfo.InvariantCulture, "sign /fd sha256 /sha1 {0} ", certThumbprint);
+                throw new CryptographicException(System.Deployment.Internal.CodeSigning.Win32.CRYPT_E_UNKNOWN_ALGO);
+            }
+
+            var commandLine = new StringBuilder();
+            if (useSha256OrHigher)
+            {
+                commandLine.AppendFormat(CultureInfo.InvariantCulture, "sign /fd {0} /sha1 {1} ", hashAlgoName, cert.Thumbprint);
             }
             else
             {
-                commandLine.AppendFormat(CultureInfo.InvariantCulture, "sign /sha1 {0} ", certThumbprint);
+                commandLine.AppendFormat(CultureInfo.InvariantCulture, "sign /sha1 {0} ", cert.Thumbprint);
             }
 
             if (timestampUrl != null)
