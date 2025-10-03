@@ -391,18 +391,16 @@ namespace Microsoft.Build.BackEnd
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 TaskHostTask task = new TaskHostTask(
-                    scheduledNodeId,
                     taskLocation,
                     taskLoggingContext,
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    taskHostFactoryExplicitlyRequested: _isTaskHostFactory
+                    taskHostFactoryExplicitlyRequested: _isTaskHostFactory,
 #if FEATURE_APPDOMAIN
-                    , appDomainSetup
+                    appDomainSetup,
 #endif
-                    );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    scheduledNodeId);
                 return task;
             }
             else

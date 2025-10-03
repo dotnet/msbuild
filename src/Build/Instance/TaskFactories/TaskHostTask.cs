@@ -149,20 +149,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor.
         /// </summary>
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         public TaskHostTask(
-            int scheduledNodeId,
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             Dictionary<string, string> taskHostParameters,
             LoadedType taskType,
-            bool taskHostFactoryExplicitlyRequested
+            bool taskHostFactoryExplicitlyRequested,
 #if FEATURE_APPDOMAIN
-                , AppDomainSetup appDomainSetup
+            AppDomainSetup appDomainSetup,
 #endif
-            )
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            int scheduledNodeId = -1)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
 
