@@ -817,7 +817,7 @@ namespace Microsoft.Build.CommandLine
             {
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
             }
-            else 
+            else
             {
                 // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
                 _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
@@ -1220,7 +1220,7 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
             }
         }
