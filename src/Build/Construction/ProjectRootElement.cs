@@ -1994,7 +1994,7 @@ namespace Microsoft.Build.Construction
                     return false;
                 }
 
-                string contents = File.ReadAllText(path);
+                string contents = FileSystems.Default.ReadFileAllText(path);
 
                 // If the file is only whitespace or the XML declaration then it is empty
                 //
