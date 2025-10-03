@@ -24,7 +24,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// The task factory provider for XAML tasks.
     /// </summary>
-    public class XamlTaskFactory : ITaskFactory
+    public class XamlTaskFactory : ITaskFactory, IOutOfProcTaskFactory
     {
         /// <summary>
         /// The namespace we put the task in.
@@ -35,11 +35,20 @@ namespace Microsoft.Build.Tasks
         /// The compiled task assembly.
         /// </summary>
         private Assembly _taskAssembly;
+        
+
+        private string _assemblyPath;
 
         /// <summary>
         /// The task type.
         /// </summary>
         private Type _taskType;
+        
+        /// <summary>
+        /// Location of the assembly for out of proc taskhosts. 
+        /// </summary>
+        public string GetAssemblyPath() => _assemblyPath;
+
 
         /// <summary>
         /// The name of the task pulled from the XAML.
@@ -115,6 +124,12 @@ namespace Microsoft.Build.Tasks
             // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
+            // for the out of proc execution
+            if (Traits.Instance.ForceTaskFactoryOutOfProc)
+            {
+                _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
+            }
+
             // create the code generator options
             // Since we are running msbuild 12.0 these had better load.
             var compilerParameters = new CompilerParameters(
@@ -125,7 +140,8 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
                 ])
             {
-                GenerateInMemory = true,
+                GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
+                OutputAssembly = _assemblyPath,
                 TreatWarningsAsErrors = false
             };
 
