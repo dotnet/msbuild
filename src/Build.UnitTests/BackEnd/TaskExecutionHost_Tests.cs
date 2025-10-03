@@ -1215,16 +1215,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region Validation Routines
 
         /// <summary>
-        /// Is the class a task factory
-        /// </summary>
-        private static bool IsTaskFactoryClass(Type type, object unused)
-        {
-            return type.GetTypeInfo().IsClass &&
-                !type.GetTypeInfo().IsAbstract &&
-                (type.GetInterface("Microsoft.Build.Framework.ITaskFactory") != null);
-        }
-
-        /// <summary>
         /// Initialize the host object
         /// </summary>
         /// <param name="throwOnExecute">Should the task throw when executed</param>
@@ -1239,7 +1229,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Set up a temporary project and add some items to it.
             ProjectInstance project = CreateTestProject();
 
-            TypeLoader typeLoader = new TypeLoader(IsTaskFactoryClass);
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
 #else
