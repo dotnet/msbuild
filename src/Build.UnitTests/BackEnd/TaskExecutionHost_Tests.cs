@@ -1063,7 +1063,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using TestEnvironment env = TestEnvironment.Create();
             var debugFolder = env.CreateFolder();
             // inject the location for failure logs - not to interact with other tests
-            env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+            var transientEnvVar = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
             // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
             // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
             //  to the DebugPath being set before this test runs - and hence the env var is ignored.
@@ -1093,6 +1093,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);
             }
+
+            // Reset DebugPath to not affect other tests
+            transientEnvVar.Revert();
+            DebugUtils.SetDebugPath();
         }
 
         [Fact]
