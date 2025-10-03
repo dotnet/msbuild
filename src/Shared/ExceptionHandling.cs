@@ -391,13 +391,13 @@ namespace Microsoft.Build.Shared
 
             foreach (string file in files)
             {
-                if (File.GetLastWriteTimeUtc(file) >= fromTimeUtc)
+                if (FileSystems.Default.GetLastWriteTimeUtc(file) >= fromTimeUtc)
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
                     builder.Append(':');
                     builder.Append(Environment.NewLine);
-                    builder.Append(File.ReadAllText(file));
+                    builder.Append(FileSystems.Default.ReadFileAllText(file));
                     builder.Append(Environment.NewLine);
                 }
             }

@@ -5,6 +5,7 @@
 using System.IO;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 #endif
 
 namespace Microsoft.Build.BackEnd;
@@ -28,7 +29,7 @@ internal static class CurrentHost
             string dotnetExe = Path.Combine(
                 FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
                 Constants.DotnetProcessName);
-            if (File.Exists(dotnetExe))
+            if (FileSystems.Default.FileExists(dotnetExe))
             {
                 s_currentHost = dotnetExe;
             }
@@ -48,7 +49,7 @@ internal static class CurrentHost
                     dotnetExe = Path.Combine(
                         FileUtilities.GetFolderAbove(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), 4),
                         Constants.DotnetProcessName);
-                    if (File.Exists(dotnetExe))
+                    if (FileSystems.Default.FileExists(dotnetExe))
                     {
                         s_currentHost = dotnetExe;
                     }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
 {
@@ -152,7 +153,7 @@ namespace Microsoft.Build.Shared
 
             foreach (string assemblyPath in assemblyPaths)
             {
-                if (!string.IsNullOrEmpty(assemblyPath) && File.Exists(assemblyPath))
+                if (!string.IsNullOrEmpty(assemblyPath) && FileSystems.Default.FileExists(assemblyPath))
                 {
                     string? directory = Path.GetDirectoryName(assemblyPath);
                     if (!string.IsNullOrEmpty(directory) && seenDirectories.Add(directory))
@@ -178,7 +179,7 @@ namespace Microsoft.Build.Shared
             }
 
             // Load the assembly from bytes so we don't lock the file and record its original path for out-of-proc hosts
-            Assembly assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+            Assembly assembly = Assembly.Load(FileSystems.Default.ReadFileAllBytes(assemblyPath));
             return assembly;
         }
 
@@ -202,7 +203,7 @@ namespace Microsoft.Build.Shared
             }
 
             string manifestPath = taskLocation + InlineTaskLoadManifestSuffix;
-            if (!File.Exists(manifestPath))
+            if (!FileSystems.Default.FileExists(manifestPath))
             {
                 return;
             }
@@ -247,7 +248,7 @@ namespace Microsoft.Build.Shared
                 InlineTaskTempDllSubPath,
                 $"pid_{EnvironmentUtilities.CurrentProcessId}");
                 
-            if (Directory.Exists(processSpecificInlineTaskDir))
+            if (FileSystems.Default.DirectoryExists(processSpecificInlineTaskDir))
             {
                 FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
             }
@@ -269,17 +270,17 @@ namespace Microsoft.Build.Shared
                 if (!string.IsNullOrEmpty(assemblyName.CultureName))
                 {
                     path = Path.Combine(directory, assemblyName.CultureName, assemblyName.Name + ".dll");
-                    if (File.Exists(path))
+                    if (FileSystems.Default.FileExists(path))
                     {
-                        return Assembly.Load(File.ReadAllBytes(path));
+                        return Assembly.Load(FileSystems.Default.ReadFileAllBytes(path));
                     }
                 }
 
                 // Try the standard path
                 path = Path.Combine(directory, assemblyName.Name + ".dll");
-                if (File.Exists(path))
+                if (FileSystems.Default.FileExists(path))
                 {
-                    return Assembly.Load(File.ReadAllBytes(path));
+                    return Assembly.Load(FileSystems.Default.ReadFileAllBytes(path));
                 }
             }
 
