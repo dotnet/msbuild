@@ -243,10 +243,10 @@
                      instead of multiple processes.
                      This option is not supported.
                      The maximum number of threads used is determined by the
-                     -maxCpuCount switch.
+                     -maxCpuCount switch. (recommended not greater than 256)
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="needs-review-translation">  -multithreaded
                      MSBuild で試験的なマルチスレッド モードを有効にします。
                      つまり、MSBuild は複数のプロセスではなく、
                      複数のスレッドを使用してプロジェクトを

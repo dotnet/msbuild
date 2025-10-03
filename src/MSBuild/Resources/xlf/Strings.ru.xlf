@@ -242,10 +242,10 @@
                      instead of multiple processes.
                      This option is not supported.
                      The maximum number of threads used is determined by the
-                     -maxCpuCount switch.
+                     -maxCpuCount switch. (recommended not greater than 256)
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="needs-review-translation">  -multithreaded
                      Включает ЭКСПЕРИМЕНТАЛЬНЫЙ многопоточный режим в MSBuild.
                      Это означает, что MSBuild будет использовать несколько потоков
                      для параллельной сборки проектов
