@@ -859,8 +859,11 @@ namespace Microsoft.Build.Evaluation.Expander
                     {
                         if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                         {
-                            returnVal = Version.Parse(arg0);
-                            return true;
+                            if (Version.TryParse(arg0, out Version? version))
+                            {
+                                returnVal = version;
+                                return true;
+                            }
                         }
                     }
                 }
