@@ -302,7 +302,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific batch of the current task.
         /// </summary>
-        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
+        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters, int scheduledNodeId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
 
@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             // We instantiate a new task object for each batch
-            TaskInstance = InstantiateTask(taskIdentityParameters);
+            TaskInstance = InstantiateTask(scheduledNodeId, taskIdentityParameters);
 
             if (TaskInstance == null)
             {
@@ -962,7 +962,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates the task.
         /// </summary>
-        private ITask InstantiateTask(IDictionary<string, string> taskIdentityParameters)
+        private ITask InstantiateTask(int scheduledNodeId, IDictionary<string, string> taskIdentityParameters)
         {
             ITask task = null;
 
@@ -975,6 +975,7 @@ namespace Microsoft.Build.BackEnd
                         AppDomainSetup,
 #endif
                         IsOutOfProc,
+                        scheduledNodeId,
                         ProjectInstance.GetProperty);
                 }
                 else
