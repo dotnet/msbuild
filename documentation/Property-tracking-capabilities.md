@@ -20,7 +20,7 @@ The implementation tracks properties in the following scenarios:
 
 ## Event Types and Message Formatting
 
-The feature implements specialized event handling for four scenarios:
+The feature implements specialized event handling for four tracking scenarios (plus a 'None' option to disable tracking):
 
 1. `PropertyReassignmentEventArgs`
    - Triggered when a property value is changed
