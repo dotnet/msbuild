@@ -1,0 +1,11 @@
+<Project>
+  <!-- 
+    This props file sets default properties for the ThreadSafeTask analyzer.
+    Users can set EnableThreadSafeTaskAnalyzer=false to disable the analyzer.
+  -->
+  
+  <PropertyGroup Condition="'$(EnableThreadSafeTaskAnalyzer)' == ''">
+    <EnableThreadSafeTaskAnalyzer>true</EnableThreadSafeTaskAnalyzer>
+  </PropertyGroup>
+  
+</Project>
