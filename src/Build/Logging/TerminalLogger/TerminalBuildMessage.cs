@@ -6,5 +6,5 @@ namespace Microsoft.Build.Logging;
 /// <summary>
 /// Represents a piece of diagnostic output (message/warning/error).
 /// </summary>
-internal record struct TerminalBuildMessage(TerminalMessageSeverity Severity, string Message)
+public record struct TerminalBuildMessage(TerminalMessageSeverity Severity, string Message)
 { }
