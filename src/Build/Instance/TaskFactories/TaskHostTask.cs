@@ -102,7 +102,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task host node ID of the task host we're launching.
         /// </summary>
-        private int _taskHostNodeId = -1;
+        private int _taskHostNodeId;
 
         /// <summary>
         /// The ID of the node on which this task is scheduled to run.
