@@ -1180,7 +1180,7 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: O recurso "{0}" será desserializado via BinaryFormatter em tempo de execução. BinaryFormatter foi preterido devido a riscos de segurança conhecidos e foi removido do .NET 9+. Se você quiser continuar a usá-lo, defina a propriedade "GenerateResourceWarnOnBinaryFormatterUse" como falso.
+        <target state="translated">MSB3825: O recurso "{0}" será desserializado por meio do BinaryFormatter em runtime. O BinaryFormatter foi preterido devido a riscos de segurança conhecidos e foi removido do .NET 9+. Se você quiser continuar a usá-lo, defina a propriedade "GenerateResourceWarnOnBinaryFormatterUse" como false.
            Mais informações: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
@@ -2839,7 +2839,7 @@
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
         <source>Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</source>
-        <target state="translated">Não foi possível inferir o tipo do parâmetro "{0}" porque o tipo de atributo "{1}" é desconhecido. O valor será tratado como uma cadeia de caracteres.</target>
+        <target state="new">Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
@@ -3584,12 +3584,12 @@
       </trans-unit>
       <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
         <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
-        <target state="translated">MSB3944: Nível de compactação '{0}' não suportado. Usando o nível de compactação padrão.</target>
+        <target state="new">MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</target>
         <note>{StrBegin="MSB3944: "}</note>
       </trans-unit>
       <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
         <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
-        <target state="translated">MSB3945: O nível de compactação '{0}' não é suportado na versão do .NET Framework do MSBuild. Usando o nível de compactação padrão.</target>
+        <target state="new">MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</target>
         <note>{StrBegin="MSB3945: "}</note>
       </trans-unit>
     </body>
