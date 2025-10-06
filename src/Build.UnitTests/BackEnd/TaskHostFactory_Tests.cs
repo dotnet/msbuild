@@ -98,7 +98,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     bool processExited = taskHostNode.WaitForExit(3000);
 
                     processExited.ShouldBeFalse();
-                    taskHostNode.Kill();
+                    try
+                    {
+                        taskHostNode.Kill();
+                    }
+                    catch
+                    {
+                        // Ignore exceptions from Kill - the process may have exited between the WaitForExit and Kill calls.
+                    }
                 }
             }
         }
