@@ -244,9 +244,10 @@ futures
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of MSBUILDFORCEALLTASKSOUTOFPROC -maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithread
+        <target state="needs-review-translation">  -multithread
                      Active le mode EXPERIMENTAL multithread dans MSBuild.
                      Cela signifie que MSBuild utilisera plusieurs threads
                      pour construire des projets en parallèle,

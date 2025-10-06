@@ -243,9 +243,10 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of MSBUILDFORCEALLTASKSOUTOFPROC -maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -çok iş parçacıklı 
+        <target state="needs-review-translation">  -çok iş parçacıklı 
                      MSBuild'de DENEME amaçlı çok iş parçacıklı modu etkinleştirir.
                      Bu, MSBuild'in
                      projeleri işlemek için birden çok iş parçacığı kullanacağı,

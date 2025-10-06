@@ -243,9 +243,10 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of MSBUILDFORCEALLTASKSOUTOFPROC -maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="needs-review-translation">  -multithreaded
                      在 MSBuild 中启用实验性多线程模式。
                      这意味着 MSBuild 将使用多个线程
                      并行构建项目，

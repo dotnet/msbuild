@@ -244,9 +244,10 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of MSBUILDFORCEALLTASKSOUTOFPROC -maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -Multithreading
+        <target state="needs-review-translation">  -Multithreading
                      Abilita la modalità multithread SPERIMENTALE in MSBuild.
                      Ciò significa che MSBuild userà più thread
                      per creare progetti in parallelo,
