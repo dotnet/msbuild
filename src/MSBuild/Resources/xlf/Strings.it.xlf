@@ -244,7 +244,8 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
-                     In case of MSBUILDFORCEALLTASKSOUTOFPROC -maxCpuCount cannot be greater than 256.
+                     In case of multi-threaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="needs-review-translation">  -Multithreading
