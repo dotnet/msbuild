@@ -12,6 +12,9 @@ using System.Xaml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Xaml;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.CSharp;
 using Shouldly;
 using Xunit;
@@ -444,6 +447,46 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
     public class CompilationTests
     {
+    [Fact]
+    public void OutOfProcXamlTaskFactoryProvidesAssemblyPath()
+    {
+      using TestEnvironment env = TestEnvironment.Create();
+      env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+
+      TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
+
+      try
+      {
+        const string taskElementContents = @"<ProjectSchemaDefinitions xmlns=""clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
+  <Rule Name=""FakeTask"">
+  <BoolProperty Name=""Always"" Switch=""/always"" />
+  </Rule>
+</ProjectSchemaDefinitions>";
+
+        var factory = new Microsoft.Build.Tasks.XamlTaskFactory();
+        var loggingHost = new MockEngine();
+        bool initialized = factory.Initialize(
+          "FakeTask",
+          new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+          taskElementContents,
+          loggingHost);
+        initialized.ShouldBeTrue(loggingHost.Log);
+
+        ITask task = factory.CreateTask(loggingHost);
+        task.ShouldNotBeNull();
+
+        string assemblyPath = factory.GetAssemblyPath();
+        assemblyPath.ShouldNotBeNullOrEmpty();
+        File.Exists(assemblyPath).ShouldBeTrue();
+
+        factory.CleanupTask(task);
+      }
+      finally
+      {
+        TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
+      }
+    }
+
         /// <summary>
         /// Tests to see if the generated stream compiles
         /// Code must be compilable on its own.
