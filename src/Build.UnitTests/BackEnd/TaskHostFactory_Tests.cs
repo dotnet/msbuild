@@ -63,7 +63,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
 
                 // To execute the task in sidecar mode, both node reuse and the environment variable must be set.
-                BuildParameters buildParameters = new() { EnableNodeReuse = envVariableSpecified };
+                BuildParameters buildParameters = new() { EnableNodeReuse = envVariableSpecified && true /* node reuse enabled */ };
 
                 ProjectInstance projectInstance = new(project.Path);
 
