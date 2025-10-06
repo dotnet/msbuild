@@ -445,7 +445,7 @@ namespace Microsoft.Build.Tasks
 
                 // Instead of using the inner text of the <Code /> element, read the specified file as source code
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
-                taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
+                taskInfo.SourceCode = FileSystems.Default.ReadFileAllText(sourceAttribute.Value.Trim());
             }
 
             if (typeAttribute != null)
@@ -569,7 +569,7 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, ReferenceAssemblyDirectoryName),
                     ThisAssemblyDirectoryLazy.Value,
                 }
-                .FirstOrDefault(p => File.Exists(Path.Combine(p, assemblyFileName)));
+                .FirstOrDefault(p => FileSystems.Default.FileExists(Path.Combine(p, assemblyFileName)));
 
                 if (resolvedDir != null)
                 {
