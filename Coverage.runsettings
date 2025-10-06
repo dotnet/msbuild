@@ -16,6 +16,10 @@
                 <ModulePath>.*customlogger\.dll$</ModulePath>
                 <ModulePath>.*invalidcustomcheck\.dll$</ModulePath>
                 <ModulePath>.*portabletask\.dll$</ModulePath>
+                <ModulePath>.*faultylogger\.dll$</ModulePath>
+                <ModulePath>.*customcheck\.dll$</ModulePath>
+                <ModulePath>.*customcheck2\.dll$</ModulePath>
+                <ModulePath>.*errorcustomcheck\.dll$</ModulePath>
               </Exclude>
             </ModulePaths>
             <Sources>
