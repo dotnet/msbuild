@@ -92,6 +92,8 @@ namespace Microsoft.Build.BackEnd
 
         private bool _skipStaticGraphIsolationConstraints;
 
+        private int _scheduledNodeId = -1;
+
         /// <summary>
         /// Constructor for serialization.
         /// </summary>
@@ -433,6 +435,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _hostServices);
             translator.Translate(ref _proxyTargets, ProxyTargets.FactoryForDeserialization);
             translator.Translate(ref _projectContextId);
+            translator.Translate(ref _scheduledNodeId);
 
             // UNDONE: (Compat) Serialize the host object.
         }
@@ -452,6 +455,17 @@ namespace Microsoft.Build.BackEnd
             return ProxyTargets != null;
         }
 
-        public int ScheduledNodeId { get; set; } = -1;
+        /// <summary>
+        /// Returns the scheduled node id
+        /// </summary>
+        public int ScheduledNodeId
+        {
+            [DebuggerStepThrough]
+            get
+            { return _scheduledNodeId; }
+
+            set
+            { _scheduledNodeId = value; }
+        }
     }
 }
