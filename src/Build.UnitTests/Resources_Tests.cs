@@ -115,6 +115,17 @@ namespace Microsoft.Build.UnitTests
                 new[] { "../Shared/Resources/Strings.shared.resx" });
         }
 
+        // NOTE: To add verification for additional assemblies, follow this pattern:
+        // [Fact]
+        // public void AllReferencedResourcesExistInYourAssembly()
+        // {
+        //     VerifyResourcesForAssembly(
+        //         "Your.Assembly.Name",
+        //         Path.Combine(GetRepoRoot(), "src", "YourAssemblyFolder"),
+        //         new[] { "Resources/Strings.resx" },  // Primary resources for this assembly
+        //         new[] { "../Shared/Resources/Strings.shared.resx" });  // Shared resources
+        // }
+
         private void VerifyResourcesForAssembly(
             string assemblyName,
             string sourceDirectory,
