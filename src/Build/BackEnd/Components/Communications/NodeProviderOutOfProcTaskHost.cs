@@ -181,9 +181,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            List<NodeContext> contextsToShutDown;
-
-            contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
+            List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
