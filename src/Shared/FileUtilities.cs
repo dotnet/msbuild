@@ -748,7 +748,7 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                foreach (string dir in Directory.EnumerateDirectories(directory))
+                foreach (string dir in FileSystems.Default.EnumerateDirectories(directory))
                 {
                     DeleteDirectoryNoThrow(dir, recursive: true, retryCount: 1);
                 }
