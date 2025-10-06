@@ -251,7 +251,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 createdTask.ShouldNotBeNull();
                 createdTask.ShouldNotBeOfType<TaskHostTask>();
@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
@@ -424,7 +424,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.False(createdTask is TaskHostTask);
@@ -459,7 +459,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
@@ -492,7 +492,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
@@ -529,7 +529,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
@@ -560,7 +560,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
@@ -595,7 +595,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
@@ -630,7 +630,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
@@ -666,7 +666,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsNotType<TaskHostTask>(createdTask);
@@ -691,7 +691,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new AppDomainSetup(),
 #endif
                     false,
-                    1,
+                    scheduledNodeId: 1,
                     (string propName) => ProjectPropertyInstance.Create("test", "test"));
                 Assert.NotNull(createdTask);
                 Assert.IsType<TaskHostTask>(createdTask);
