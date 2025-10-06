@@ -95,6 +95,7 @@ jobs:
       arguments: -onlyDocChanged $(onlyDocChanged)
     env:
       ForceUseXCopyMSBuild: 1
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
 #     continueOnError: false
@@ -202,6 +203,7 @@ jobs:
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
     env:
       MSBUILDUSESERVER: "1"
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
 #     continueOnError: false
@@ -291,6 +293,7 @@ jobs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release'
     condition: eq(variables.onlyDocChanged, 1)
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
 #     continueOnError: false
@@ -537,6 +540,7 @@ jobs:
   pool:
     vmImage: 'windows-2022'
   steps:
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: DownloadPipelineArtifact@2
 #     inputs:
 #       buildType: 'current'
