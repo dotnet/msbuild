@@ -1695,4 +1695,7 @@
   <data name="SAC_Off" xml:space="preserve">
     <value>0: turned off</value>
   </data>
+  <data name="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc" xml:space="preserve">
+    <value>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</value>
+  </data>
 </root>
