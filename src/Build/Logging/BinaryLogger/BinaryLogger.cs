@@ -29,6 +29,11 @@ namespace Microsoft.Build.Logging
         public BinaryLogger.ProjectImportsCollectionMode ProjectImportsCollectionMode { get; internal set; } = BinaryLogger.ProjectImportsCollectionMode.Embed;
 
         /// <summary>
+        /// Gets whether the ProjectImports parameter was explicitly specified in the parameters string.
+        /// </summary>
+        internal bool HasProjectImportsParameter { get; set; }
+
+        /// <summary>
         /// Gets whether to omit initial info from the log.
         /// </summary>
         public bool OmitInitialInfo { get; internal set; }
@@ -182,14 +187,17 @@ namespace Microsoft.Build.Logging
                 if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
                 {
                     result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.None;
+                    result.HasProjectImportsParameter = true;
                 }
                 else if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
                 {
                     result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.Embed;
+                    result.HasProjectImportsParameter = true;
                 }
                 else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
                 {
                     result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.ZipFile;
+                    result.HasProjectImportsParameter = true;
                 }
                 else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
                 {
@@ -236,6 +244,8 @@ namespace Microsoft.Build.Logging
             bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
             bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
 
+            filePath = parameter;
+
             if (isWildcard)
             {
                 // For wildcards, we return true to indicate this is a valid path parameter,
@@ -244,7 +254,6 @@ namespace Microsoft.Build.Logging
                 return true;
             }
 
-            filePath = parameter;
             return hasProperExtension;
         }
 
@@ -547,7 +556,12 @@ namespace Microsoft.Build.Logging
             var parsedParams = ParseParameters(Parameters);
             
             omitInitialInfo = parsedParams.OmitInitialInfo;
-            CollectProjectImports = parsedParams.ProjectImportsCollectionMode;
+            
+            // Only set CollectProjectImports if it was explicitly specified in parameters
+            if (parsedParams.HasProjectImportsParameter)
+            {
+                CollectProjectImports = parsedParams.ProjectImportsCollectionMode;
+            }
 
             // Handle the file path - expand wildcards if needed
             if (parsedParams.LogFilePath == null)
