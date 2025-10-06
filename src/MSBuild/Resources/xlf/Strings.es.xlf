@@ -242,10 +242,10 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      instead of multiple processes.
                      This option is not supported.
                      The maximum number of threads used is determined by the
-                     -maxCpuCount switch. (recommended not greater than 256)
+                     -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -multiproceso
+        <target state="translated">  -multiproceso
                      Habilita el modo multiproceso EXPERIMENTAL en MSBuild.
                      Esto significa que MSBuild usará varios subprocesos
                      para compilar proyectos en paralelo,

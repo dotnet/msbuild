@@ -242,10 +242,10 @@
                      instead of multiple processes.
                      This option is not supported.
                      The maximum number of threads used is determined by the
-                     -maxCpuCount switch. (recommended not greater than 256)
+                     -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -çok iş parçacıklı 
+        <target state="translated">  -çok iş parçacıklı 
                      MSBuild'de DENEME amaçlı çok iş parçacıklı modu etkinleştirir.
                      Bu, MSBuild'in
                      projeleri işlemek için birden çok iş parçacığı kullanacağı,

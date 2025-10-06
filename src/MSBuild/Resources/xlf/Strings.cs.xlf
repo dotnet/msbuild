@@ -243,10 +243,10 @@
                      instead of multiple processes.
                      This option is not supported.
                      The maximum number of threads used is determined by the
-                     -maxCpuCount switch. (recommended not greater than 256)
+                     -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="needs-review-translation">  -vícevláknový
+        <target state="translated">  -vícevláknový
                      Povolí experimentální vícevláknový režim v nástroji MSBuild.
                      To znamená, že nástroj MSBuild bude používat více vláken
                      k paralelnímu sestavování projektů,
