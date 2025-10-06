@@ -14,6 +14,27 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Logging
 {
     /// <summary>
+    /// Represents the parsed parameters for a BinaryLogger.
+    /// </summary>
+    public sealed class BinaryLoggerParameters
+    {
+        /// <summary>
+        /// Gets the log file path. May be null if not specified (defaults to "msbuild.binlog").
+        /// </summary>
+        public string LogFilePath { get; internal set; }
+
+        /// <summary>
+        /// Gets the project imports collection mode.
+        /// </summary>
+        public BinaryLogger.ProjectImportsCollectionMode ProjectImportsCollectionMode { get; internal set; } = BinaryLogger.ProjectImportsCollectionMode.Embed;
+
+        /// <summary>
+        /// Gets whether to omit initial info from the log.
+        /// </summary>
+        public bool OmitInitialInfo { get; internal set; }
+    }
+
+    /// <summary>
     /// A logger that serializes all incoming BuildEventArgs in a compressed binary file (*.binlog). The file
     /// can later be played back and piped into other loggers (file, console, etc) to reconstruct the log contents
     /// as if a real build was happening. Additionally, this format can be read by tools for
@@ -128,6 +149,103 @@ namespace Microsoft.Build.Logging
             /// Create an external .ProjectImports.zip archive for the project files.
             /// </summary>
             ZipFile,
+        }
+
+        /// <summary>
+        /// Parses the parameters string for a BinaryLogger.
+        /// </summary>
+        /// <param name="parametersString">The parameters string to parse (e.g., "LogFile=msbuild.binlog;ProjectImports=None").</param>
+        /// <returns>A <see cref="BinaryLoggerParameters"/> object containing the parsed parameters.</returns>
+        /// <exception cref="LoggerException">Thrown when the parameters string contains invalid parameters.</exception>
+        /// <remarks>
+        /// This method parses the semicolon-delimited parameters string used by the BinaryLogger.
+        /// Supported parameters include:
+        /// - LogFile=&lt;path&gt; or just &lt;path&gt; (must end with .binlog): specifies the output file path
+        /// - ProjectImports=None|Embed|ZipFile: controls project imports collection
+        /// - OmitInitialInfo: omits initial build information
+        /// 
+        /// Wildcards ({}) in the LogFile path are NOT expanded by this method. The returned LogFilePath
+        /// will be null for wildcard patterns, and callers should handle expansion separately if needed.
+        /// </remarks>
+        public static BinaryLoggerParameters ParseParameters(string parametersString)
+        {
+            if (parametersString == null)
+            {
+                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
+            }
+
+            var result = new BinaryLoggerParameters();
+            var parameters = parametersString.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            
+            foreach (var parameter in parameters)
+            {
+                if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.None;
+                }
+                else if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.Embed;
+                }
+                else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.ZipFile;
+                }
+                else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
+                {
+                    result.OmitInitialInfo = true;
+                }
+                else if (TryParsePathParameter(parameter, out string filePath))
+                {
+                    result.LogFilePath = filePath;
+                }
+                else
+                {
+                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
+                }
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Attempts to parse a file path parameter from a BinaryLogger parameter string.
+        /// </summary>
+        /// <param name="parameter">The parameter to parse.</param>
+        /// <param name="filePath">The parsed file path, or null if the parameter contains wildcards.</param>
+        /// <returns>True if the parameter is a valid file path parameter; otherwise, false.</returns>
+        /// <remarks>
+        /// This method recognizes file paths in the following formats:
+        /// - "LogFile=&lt;path&gt;"
+        /// - "&lt;path&gt;" (must end with .binlog)
+        /// 
+        /// If the path contains wildcards ({}), the method returns true but sets filePath to null,
+        /// as wildcard expansion requires runtime context.
+        /// </remarks>
+        private static bool TryParsePathParameter(string parameter, out string filePath)
+        {
+            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+
+            if (hasPathPrefix)
+            {
+                parameter = parameter.Substring("LogFile=".Length);
+            }
+
+            parameter = parameter.Trim('"');
+
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+
+            if (isWildcard)
+            {
+                // For wildcards, we return true to indicate this is a valid path parameter,
+                // but set filePath to null since we can't expand it without instance context
+                filePath = null;
+                return true;
+            }
+
+            filePath = parameter;
+            return hasProperExtension;
         }
 
         /// <summary>
@@ -426,39 +544,29 @@ namespace Microsoft.Build.Logging
         /// </exception>
         private void ProcessParameters(out bool omitInitialInfo)
         {
-            if (Parameters == null)
-            {
-                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
-            }
+            var parsedParams = ParseParameters(Parameters);
+            
+            omitInitialInfo = parsedParams.OmitInitialInfo;
+            CollectProjectImports = parsedParams.ProjectImportsCollectionMode;
 
-            omitInitialInfo = false;
-            var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var parameter in parameters)
+            // Handle the file path - expand wildcards if needed
+            if (parsedParams.LogFilePath == null)
             {
-                if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
+                // Either no path was specified, or it contained wildcards
+                // Check if any parameter was a wildcard path
+                var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var parameter in parameters)
                 {
-                    CollectProjectImports = ProjectImportsCollectionMode.None;
+                    if (TryInterpretPathParameter(parameter, out string filePath))
+                    {
+                        FilePath = filePath;
+                        break;
+                    }
                 }
-                else if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
-                {
-                    CollectProjectImports = ProjectImportsCollectionMode.Embed;
-                }
-                else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
-                {
-                    CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
-                }
-                else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
-                {
-                    omitInitialInfo = true;
-                }
-                else if (TryInterpretPathParameter(parameter, out string filePath))
-                {
-                    FilePath = filePath;
-                }
-                else
-                {
-                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
-                }
+            }
+            else
+            {
+                FilePath = parsedParams.LogFilePath;
             }
 
             if (FilePath == null)
