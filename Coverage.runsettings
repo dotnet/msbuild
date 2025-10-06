@@ -13,6 +13,9 @@
             <ModulePaths>
               <Exclude>
                 <ModulePath>.*doc\.dll$</ModulePath>
+                <ModulePath>.*customlogger\.dll$</ModulePath>
+                <ModulePath>.*invalidcustomcheck\.dll$</ModulePath>
+                <ModulePath>.*portabletask\.dll$</ModulePath>
               </Exclude>
             </ModulePaths>
             <Sources>
