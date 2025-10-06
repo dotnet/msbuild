@@ -169,9 +169,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.ContainsKey(nodeId), "Invalid host context specified: {0}.", nodeId);
+            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeId, out NodeContext context), "Invalid host context specified: {0}.", nodeId);
 
-            SendData(_nodeContexts[nodeId], packet);
+            SendData(context, packet);
         }
 
         /// <summary>
