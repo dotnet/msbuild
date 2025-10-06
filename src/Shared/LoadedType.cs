@@ -36,7 +36,12 @@ namespace Microsoft.Build.Shared
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
-            Path = loadedAssembly.Location;
+            
+            // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
+            Path = string.IsNullOrEmpty(loadedAssembly.Location) 
+                ? assemblyLoadInfo.AssemblyLocation 
+                : loadedAssembly.Location;
+            
             LoadedAssembly = loadedAssembly;
 
 #if !NET35
