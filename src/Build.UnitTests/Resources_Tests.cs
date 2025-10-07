@@ -200,7 +200,7 @@ namespace Microsoft.Build.UnitTests
                 var name = dataElement.Attribute("name")?.Value;
                 if (!string.IsNullOrEmpty(name))
                 {
-                    resources.Add(name);
+                    resources.Add(name!);
                 }
             }
         }
