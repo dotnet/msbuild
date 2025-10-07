@@ -1001,5 +1001,172 @@ namespace InlineTask
                 Verify(taskInfo.SourceCode, _verifySettings).GetAwaiter().GetResult();
             }
         }
+
+        /// <summary>
+        /// Verifies that ITaskFactoryHostContext.IsMultiThreadedBuild triggers out-of-process compilation
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
+        {
+            MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
+
+            RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
+
+            // Use different task names to avoid cache collision between test cases
+            string taskName = isMultiThreaded ? "TestTaskMultiThreaded" : "TestTaskSingleThreaded";
+            
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello from inline task"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize(taskName, new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            // Get assembly path - should be non-null when compiled for out-of-proc
+            string assemblyPath = factory.GetAssemblyPath();
+
+            if (isMultiThreaded)
+            {
+                assemblyPath.ShouldNotBeNullOrEmpty("Assembly should be compiled to disk in multi-threaded mode");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+            else
+            {
+                // In-memory compilation should not produce a persistent assembly path
+                assemblyPath.ShouldBeNullOrEmpty("In-memory compilation should not have a persistent assembly path");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that environment variable takes precedence over ITaskFactoryHostContext
+        /// </summary>
+        [Fact]
+        public void EnvironmentVariableTakesPrecedenceOverHostContext()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+
+                // Even with IsMultiThreadedBuild = false, env var should force out-of-proc
+                MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = false };
+
+                RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
+
+                string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello"");
+    ]]>
+</Code>";
+
+                bool success = factory.Initialize("TestTask", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+                success.ShouldBeTrue();
+
+                string assemblyPath = factory.GetAssemblyPath();
+                assemblyPath.ShouldNotBeNullOrEmpty("Environment variable should force out-of-proc compilation");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that both environment variable and multi-threaded build work together
+        /// </summary>
+        [Fact]
+        public void BothEnvironmentVariableAndMultiThreadedWork()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+
+                MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = true };
+
+                RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
+
+                string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello"");
+    ]]>
+</Code>";
+
+                bool success = factory.Initialize("TestTask", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+                success.ShouldBeTrue();
+
+                string assemblyPath = factory.GetAssemblyPath();
+                assemblyPath.ShouldNotBeNullOrEmpty("Should compile for out-of-proc");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+        }
+
+        /// <summary>
+        /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
+        /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                
+                // Create a project with an inline task
+                TransientTestFile projectFile = env.CreateFile(folder, "test.proj", @"
+<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  
+  <!-- Define an inline task using RoslynCodeTaskFactory -->
+  <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <ParameterGroup>
+      <Message ParameterType=""System.String"" Required=""true"" />
+      <OutputValue ParameterType=""System.String"" Output=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        Log.LogMessage(MessageImportance.High, ""Inline task executed: "" + Message);
+        OutputValue = ""Success from inline task"";
+        return true;
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name=""Build"">
+    <Message Text=""Starting inline task test..."" Importance=""High"" />
+    <MyInlineTask Message=""Hello from multi-threaded build!"">
+      <Output TaskParameter=""OutputValue"" PropertyName=""TaskResult"" />
+    </MyInlineTask>
+    <Message Text=""Task result: $(TaskResult)"" Importance=""High"" />
+    <Error Text=""Inline task did not produce expected output"" Condition=""'$(TaskResult)' != 'Success from inline task'"" />
+  </Target>
+
+</Project>");
+
+                // Build with /mt flag with detailed verbosity to see task launching details
+                // The fact that this succeeds proves:
+                // 1. The inline task factory detected multi-threaded mode
+                // 2. It compiled the task to disk (not in-memory)
+                // 3. The task executed successfully in TaskHost for out-of-proc execution
+                string output = RunnerUtilities.ExecMSBuild(
+                    projectFile.Path + " /t:Build /mt /v:detailed", 
+                    out bool success);
+
+                success.ShouldBeTrue(customMessage: "Build with /mt should succeed with inline task");
+                output.ShouldContain("Inline task executed: Hello from multi-threaded build!", 
+                    customMessage: "Inline task should execute and log its message");
+                output.ShouldContain("Task result: Success from inline task",
+                    customMessage: "Inline task should produce output parameter correctly");
+                
+                // Verify the inline task was launched from a temporary assembly (out-of-process execution)
+                output.ShouldContain(".inline_task.dll",
+                    customMessage: "Inline task should be compiled to temporary assembly for out-of-process execution");
+                output.ShouldContain("external task host",
+                    customMessage: "Inline task should be launched in external task host");
+            }
+        }
     }
 }

@@ -1512,6 +1512,134 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("MSB4801", error.Code);
             Assert.Contains("CodeTaskFactory", error.Message);
         }
+
+        /// <summary>
+        /// Verifies that ITaskFactoryHostContext.IsMultiThreadedBuild triggers out-of-process compilation
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
+        {
+            MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
+
+            Microsoft.Build.Tasks.CodeTaskFactory factory = new Microsoft.Build.Tasks.CodeTaskFactory();
+
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello from CodeTaskFactory"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize("TestTask", new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            // Get assembly path - should be non-null when compiled for out-of-proc
+            string assemblyPath = factory.GetAssemblyPath();
+
+            if (isMultiThreaded)
+            {
+                assemblyPath.ShouldNotBeNullOrEmpty("Assembly should be compiled to disk in multi-threaded mode");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+            else
+            {
+                // In-memory compilation may not produce a file
+            }
+        }
+
+        /// <summary>
+        /// Verifies that environment variable takes precedence over ITaskFactoryHostContext
+        /// </summary>
+        [Fact]
+        public void EnvironmentVariableTakesPrecedenceOverHostContext()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+
+                MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = false };
+
+                Microsoft.Build.Tasks.CodeTaskFactory factory = new Microsoft.Build.Tasks.CodeTaskFactory();
+
+                string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello"");
+    ]]>
+</Code>";
+
+                bool success = factory.Initialize("TestTask", new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+                success.ShouldBeTrue();
+
+                string assemblyPath = factory.GetAssemblyPath();
+                assemblyPath.ShouldNotBeNullOrEmpty("Environment variable should force out-of-proc compilation");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+        }
+
+        /// <summary>
+        /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
+        /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                
+                // Create a project with an inline task using CodeTaskFactory
+                TransientTestFile projectFile = env.CreateFile(folder, "test.proj", @"
+<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  
+  <!-- Define an inline task using CodeTaskFactory -->
+  <UsingTask TaskName=""MyCodeTask"" TaskFactory=""CodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <ParameterGroup>
+      <Message ParameterType=""System.String"" Required=""true"" />
+      <OutputValue ParameterType=""System.String"" Output=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        Log.LogMessage(MessageImportance.High, ""Code task executed: "" + Message);
+        OutputValue = ""Success from code task"";
+        return true;
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name=""Build"">
+    <Message Text=""Starting code task test..."" Importance=""High"" />
+    <MyCodeTask Message=""Hello from multi-threaded build!"">
+      <Output TaskParameter=""OutputValue"" PropertyName=""TaskResult"" />
+    </MyCodeTask>
+    <Message Text=""Task result: $(TaskResult)"" Importance=""High"" />
+    <Error Text=""Code task did not produce expected output"" Condition=""'$(TaskResult)' != 'Success from code task'"" />
+  </Target>
+
+</Project>");
+
+                // Build with /mt flag with detailed verbosity to see task launching details
+                string output = RunnerUtilities.ExecMSBuild(
+                    projectFile.Path + " /t:Build /mt /v:detailed", 
+                    out bool success);
+
+                success.ShouldBeTrue(customMessage: "Build with /mt should succeed with inline code task");
+                output.ShouldContain("Code task executed: Hello from multi-threaded build!", 
+                    customMessage: "Code task should execute and log its message");
+                output.ShouldContain("Task result: Success from code task",
+                    customMessage: "Code task should produce output parameter correctly");
+                
+                // Verify the inline task was launched from a temporary assembly (out-of-process execution)
+                output.ShouldContain(".inline_task.dll",
+                    customMessage: "Code task should be compiled to temporary assembly for out-of-process execution");
+                output.ShouldContain("external task host",
+                    customMessage: "Code task should be launched in external task host");
+            }
+        }
     }
 #endif
 }

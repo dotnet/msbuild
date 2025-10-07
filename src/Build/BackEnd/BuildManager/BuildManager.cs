@@ -1149,7 +1149,7 @@ namespace Microsoft.Build.Execution
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
 
-                    if (Traits.Instance.ForceTaskFactoryOutOfProc || BuildParameters.MultiThreaded)
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc || _buildParameters.MultiThreaded)
                     {
                         TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
                     }
