@@ -606,7 +606,7 @@ namespace Microsoft.Build.Shared
 
                 // Check for existence of an MSBuild file. Note this is not necessary in a VS installation where we always want to
                 // assume the correct layout.
-                var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : File.Exists;
+                var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : FileSystems.Default.FileExists;
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
                 MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;

@@ -768,7 +768,7 @@ namespace Microsoft.Build.Tasks
                 // If our code is in a separate file, then read it in here
                 if (_sourcePath != null)
                 {
-                    _sourceCode = File.ReadAllText(_sourcePath);
+                    _sourceCode = FileSystems.Default.ReadFileAllText(_sourcePath);
                 }
 
                 // A fragment is essentially the contents of the execute method (except the final return true/false)
