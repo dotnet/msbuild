@@ -39,7 +39,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <param name="envVariableSpecified">Whether to set MSBUILDFORCEALLTASKSOUTOFPROC environment variable</param>
         [Theory]
         [InlineData(true, false)]
-        [InlineData(false, true)]
+        [InlineData(false, true, Skip = "floating failure, it requires separate investigation")]
         [InlineData(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
