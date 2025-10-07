@@ -40,6 +40,12 @@ namespace Microsoft.Build.Tasks
         private string _assemblyPath;
 
         /// <summary>
+        /// Whether this factory should compile for out-of-process execution.
+        /// Set during Initialize() based on environment variables or host context.
+        /// </summary>
+        private bool _compileForOutOfProcess;
+
+        /// <summary>
         /// The task type.
         /// </summary>
         private Type _taskType;
@@ -124,8 +130,12 @@ namespace Microsoft.Build.Tasks
             // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
+            // Determine if we should compile for out-of-process execution
+            _compileForOutOfProcess = Traits.Instance.ForceTaskFactoryOutOfProc ||
+                                      (taskFactoryLoggingHost is ITaskFactoryHostContext hostContext && hostContext.IsMultiThreadedBuild);
+
             // for the out of proc execution
-            if (Traits.Instance.ForceTaskFactoryOutOfProc)
+            if (_compileForOutOfProcess)
             {
                 _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
             }
@@ -140,7 +150,7 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(pathToMSBuildBinaries, "Microsoft.Build.Tasks.Core.dll")
                 ])
             {
-                GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
+                GenerateInMemory = !_compileForOutOfProcess,
                 OutputAssembly = _assemblyPath,
                 TreatWarningsAsErrors = false
             };

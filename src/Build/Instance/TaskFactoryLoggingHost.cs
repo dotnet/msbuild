@@ -24,7 +24,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        IBuildEngine
+        IBuildEngine,
+        ITaskFactoryHostContext
     {
         /// <summary>
         /// Location of the task node in the original file
@@ -35,6 +36,11 @@ namespace Microsoft.Build.BackEnd
         /// The task factory logging context
         /// </summary>
         private BuildLoggingContext _loggingContext;
+
+        /// <summary>
+        /// Whether the build is running in multi-threaded mode.
+        /// </summary>
+        private readonly bool _isMultiThreadedBuild;
 
         /// <summary>
         /// Is the system running in multi-process mode and requires events to be serializable
@@ -58,7 +64,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext)
+        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild = false)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
             ErrorUtilities.VerifyThrowInternalNull(elementLocation);
@@ -67,6 +73,7 @@ namespace Microsoft.Build.BackEnd
             _isRunningWithMultipleNodes = isRunningWithMultipleNodes;
             _loggingContext = loggingContext;
             _elementLocation = elementLocation;
+            _isMultiThreadedBuild = isMultiThreadedBuild;
         }
 
         /// <summary>
@@ -144,6 +151,22 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             get
             { return _loggingContext; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the build is running in multi-threaded mode (/mt flag).
+        /// </summary>
+        /// <remarks>
+        /// This property implements ITaskFactoryHostContext to allow task factories to determine
+        /// if they should compile for out-of-process execution during their Initialize() method.
+        /// </remarks>
+        public bool IsMultiThreadedBuild
+        {
+            get
+            {
+                VerifyActiveProxy();
+                return _isMultiThreadedBuild;
+            }
         }
 
         #region IBuildEngine Members
