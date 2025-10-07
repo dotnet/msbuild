@@ -1408,19 +1408,18 @@ namespace Microsoft.Build.Execution
                     return escapedValue;
                 }
 
-                ProjectMetadataInstance metadatum;
-                metadatum = GetItemDefinitionMetadata(metadataName);
+                escapedValue = GetItemDefinitionMetadataEscaped(metadataName);
 
-                if (metadatum != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.EvaluatedValueEscaped))
+                if (escapedValue != null && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(escapedValue))
                 {
                     Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(null, null, new BuiltInMetadataTable(null, this), FileSystems.Default);
 
                     // We don't have a location to use, but this is very unlikely to error
-                    return expander.ExpandIntoStringLeaveEscaped(metadatum.EvaluatedValueEscaped, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
+                    return expander.ExpandIntoStringLeaveEscaped(escapedValue, ExpanderOptions.ExpandBuiltInMetadata, ElementLocation.EmptyLocation);
                 }
-                else if (metadatum != null)
+                else if (escapedValue != null)
                 {
-                    return metadatum.EvaluatedValueEscaped;
+                    return escapedValue;
                 }
 
                 string value = GetBuiltInMetadataEscaped(metadataName);
@@ -1802,7 +1801,7 @@ namespace Microsoft.Build.Execution
             {
                 if ((_directMetadata?.ContainsKey(name) == true) ||
                      FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
-                    GetItemDefinitionMetadata(name) != null)
+                    GetItemDefinitionMetadataEscaped(name) != null)
                 {
                     return true;
                 }
@@ -1921,19 +1920,14 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal ProjectMetadataInstance GetMetadataObject(string name)
             {
-                ProjectMetadataInstance value = null;
-
-                if (_directMetadata != null && _directMetadata.TryGetValue(name, out string escapedValue))
+                if (_directMetadata == null || !_directMetadata.TryGetValue(name, out string escapedValue))
                 {
-                    value = new ProjectMetadataInstance(name, escapedValue, allowItemSpecModifiers: true);
+                    escapedValue = GetItemDefinitionMetadataEscaped(name);
                 }
 
-                if (value == null)
-                {
-                    value = GetItemDefinitionMetadata(name);
-                }
-
-                return value;
+                return escapedValue != null
+                    ? new ProjectMetadataInstance(name, escapedValue, allowItemSpecModifiers: true)
+                    : null;
             }
 
             /// <summary>
@@ -2085,7 +2079,7 @@ namespace Microsoft.Build.Execution
             /// Retrieves the named metadata from the item definition, if any.
             /// If it is not present, returns null.
             /// </summary>
-            private ProjectMetadataInstance GetItemDefinitionMetadata(string metadataName)
+            private string GetItemDefinitionMetadataEscaped(string metadataName)
             {
                 // Check any inherited item definition metadata first. It's more like
                 // direct metadata, but we didn't want to copy the tables.
@@ -2093,11 +2087,11 @@ namespace Microsoft.Build.Execution
                 {
                     for (int i = 0; i < _itemDefinitions.Count; i++)
                     {
-                        ProjectMetadataInstance metadataFromDefinition = _itemDefinitions[i].GetMetadata(metadataName);
+                        string metadataValue = ((IMetadataTable)_itemDefinitions[i]).GetEscapedValueIfPresent(itemType: null, metadataName);
 
-                        if (metadataFromDefinition != null)
+                        if (metadataValue != null)
                         {
-                            return metadataFromDefinition;
+                            return metadataValue;
                         }
                     }
                 }
