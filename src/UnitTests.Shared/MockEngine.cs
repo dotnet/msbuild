@@ -68,6 +68,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public bool IsMultiThreadedBuild { get; set; }
 
+        /// <summary>
+        /// Gets or sets whether task factories should be forced to compile for out-of-process execution.
+        /// Used to test ITaskFactoryHostContext implementation.
+        /// </summary>
+        public bool ForceOutOfProcessExecution { get; set; }
+
         public MockEngine(bool logToConsole)
         {
             MockLogger = new MockLogger();

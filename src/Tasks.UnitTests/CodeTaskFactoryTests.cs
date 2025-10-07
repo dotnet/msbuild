@@ -758,9 +758,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OutOfProcCodeTaskFactoryCachesAssemblyPath()
         {
-            using var env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
-
             TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
 
             try
@@ -771,7 +768,7 @@ namespace Microsoft.Build.UnitTests
     </Code>";
 
                 var firstFactory = new Microsoft.Build.Tasks.CodeTaskFactory();
-                var firstEngine = new MockEngine();
+                var firstEngine = new MockEngine { ForceOutOfProcessExecution = true };
                 bool initialized = firstFactory.Initialize(
                     "CachedCodeInlineTask",
                     new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
@@ -789,7 +786,7 @@ namespace Microsoft.Build.UnitTests
                 firstFactory.CleanupTask(firstTask);
 
                 var secondFactory = new Microsoft.Build.Tasks.CodeTaskFactory();
-                var secondEngine = new MockEngine();
+                var secondEngine = new MockEngine { ForceOutOfProcessExecution = true };
                 bool initializedAgain = secondFactory.Initialize(
                     "CachedCodeInlineTask",
                     new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
@@ -1480,40 +1477,7 @@ namespace Microsoft.Build.UnitTests
             var tmpFiles = zipArchive.Entries.Where(zE => zE.Name.EndsWith("CustomTask-compilation-file.tmp")).ToList();
             tmpFiles.Count.ShouldBe(1, $"Expected exactly one file ending with 'CustomTask-compilation-file.tmp' in ProjectImports.zip, but found {tmpFiles.Count}.");
         }
-    }
-#else
-    public sealed class CodeTaskFactoryTests
-    {
-        [Fact]
-        public void CodeTaskFactoryNotSupported()
-        {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
-                         <ParameterGroup>
-                             <Text/>
-                          </ParameterGroup>
-                            <Task>
-                                <Code>
-                                     Log.LogMessage(MessageImportance.High, Text);
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name=`Build`>
-                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
-                        </Target>
-                    </Project>";
-
-            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, allowTaskCrash: false);
-
-            BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
-
-            Assert.NotNull(error);
-            Assert.Equal("MSB4801", error.Code);
-            Assert.Contains("CodeTaskFactory", error.Message);
-        }
-
-        /// <summary>
+                /// <summary>
         /// Verifies that ITaskFactoryHostContext.IsMultiThreadedBuild triggers out-of-process compilation
         /// </summary>
         [Theory]
@@ -1536,12 +1500,12 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue();
 
             // Get assembly path - should be non-null when compiled for out-of-proc
-            string assemblyPath = factory.GetAssemblyPath();
+            string assemblyPath = ((IOutOfProcTaskFactory)factory).GetAssemblyPath();
 
             if (isMultiThreaded)
             {
-                assemblyPath.ShouldNotBeNullOrEmpty("Assembly should be compiled to disk in multi-threaded mode");
-                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+                assemblyPath.ShouldNotBeNullOrEmpty();
+                File.Exists(assemblyPath).ShouldBeTrue();
             }
             else
             {
@@ -1550,33 +1514,32 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that environment variable takes precedence over ITaskFactoryHostContext
+        /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
         /// </summary>
         [Fact]
-        public void EnvironmentVariableTakesPrecedenceOverHostContext()
+        public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
         {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            MockEngine buildEngine = new MockEngine 
+            { 
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = false 
+            };
 
-                MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = false };
+            Microsoft.Build.Tasks.CodeTaskFactory factory = new Microsoft.Build.Tasks.CodeTaskFactory();
 
-                Microsoft.Build.Tasks.CodeTaskFactory factory = new Microsoft.Build.Tasks.CodeTaskFactory();
-
-                string taskBody = @"
+            string taskBody = @"
 <Code Type=""Fragment"" Language=""cs"">
     <![CDATA[
     Log.LogMessage(""Hello"");
     ]]>
 </Code>";
 
-                bool success = factory.Initialize("TestTask", new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
-                success.ShouldBeTrue();
+            bool success = factory.Initialize("TestTaskForced", new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
 
-                string assemblyPath = factory.GetAssemblyPath();
-                assemblyPath.ShouldNotBeNullOrEmpty("Environment variable should force out-of-proc compilation");
-                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
-            }
+            string assemblyPath = ((IOutOfProcTaskFactory)factory).GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty();
+            File.Exists(assemblyPath).ShouldBeTrue();
         }
 
         /// <summary>
@@ -1623,22 +1586,50 @@ namespace Microsoft.Build.UnitTests
 </Project>");
 
                 // Build with /mt flag with detailed verbosity to see task launching details
-                string output = RunnerUtilities.ExecMSBuild(
+                string output = Microsoft.Build.UnitTests.Shared.RunnerUtilities.ExecMSBuild(
                     projectFile.Path + " /t:Build /mt /v:detailed", 
                     out bool success);
 
-                success.ShouldBeTrue(customMessage: "Build with /mt should succeed with inline code task");
-                output.ShouldContain("Code task executed: Hello from multi-threaded build!", 
-                    customMessage: "Code task should execute and log its message");
-                output.ShouldContain("Task result: Success from code task",
-                    customMessage: "Code task should produce output parameter correctly");
+                success.ShouldBeTrue();
+                output.ShouldContain("Code task executed: Hello from multi-threaded build!");
+                output.ShouldContain("Task result: Success from code task");
                 
                 // Verify the inline task was launched from a temporary assembly (out-of-process execution)
-                output.ShouldContain(".inline_task.dll",
-                    customMessage: "Code task should be compiled to temporary assembly for out-of-process execution");
-                output.ShouldContain("external task host",
-                    customMessage: "Code task should be launched in external task host");
+                output.ShouldContain(".inline_task.dll");
+                output.ShouldContain("external task host");
             }
+        }
+    }
+#else
+    public sealed class CodeTaskFactoryTests
+    {
+        [Fact]
+        public void CodeTaskFactoryNotSupported()
+        {
+            string projectFileContents = @"
+                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
+                        <UsingTask TaskName=`CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` >
+                         <ParameterGroup>
+                             <Text/>
+                          </ParameterGroup>
+                            <Task>
+                                <Code>
+                                     Log.LogMessage(MessageImportance.High, Text);
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name=`Build`>
+                            <CustomTaskFromCodeFactory_BuildTaskSimpleCodeFactory Text=`Hello, World!` />
+                        </Target>
+                    </Project>";
+
+            MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectFailure(projectFileContents, allowTaskCrash: false);
+
+            BuildErrorEventArgs error = mockLogger.Errors.FirstOrDefault();
+
+            Assert.NotNull(error);
+            Assert.Equal("MSB4801", error.Code);
+            Assert.Contains("CodeTaskFactory", error.Message);
         }
     }
 #endif

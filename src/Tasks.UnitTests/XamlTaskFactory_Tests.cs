@@ -450,9 +450,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     [Fact]
     public void OutOfProcXamlTaskFactoryProvidesAssemblyPath()
     {
-      using TestEnvironment env = TestEnvironment.Create();
-      env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
-
       TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
 
       try
@@ -464,7 +461,7 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 </ProjectSchemaDefinitions>";
 
         var factory = new Microsoft.Build.Tasks.XamlTaskFactory();
-        var loggingHost = new MockEngine();
+        var loggingHost = new MockEngine { ForceOutOfProcessExecution = true };
         bool initialized = factory.Initialize(
           "FakeTask",
           new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
@@ -913,34 +910,33 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
         }
 
         /// <summary>
-        /// Verifies that environment variable takes precedence over ITaskFactoryHostContext
+        /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
         /// </summary>
         [Fact]
-        public void EnvironmentVariableTakesPrecedenceOverHostContext()
+        public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
         {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            MockEngine buildEngine = new MockEngine 
+            { 
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = false 
+            };
 
-                MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = false };
+            XamlTaskFactory factory = new XamlTaskFactory();
 
-                XamlTaskFactory factory = new XamlTaskFactory();
-
-                // XamlTaskFactory uses ProjectSchemaDefinitions format
-                string taskBody = @"
+            // XamlTaskFactory uses ProjectSchemaDefinitions format
+            string taskBody = @"
 <ProjectSchemaDefinitions xmlns=""clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" xmlns:sys=""clr-namespace:System;assembly=mscorlib"">
-  <Rule Name=""TestXamlTask"" ToolName=""cmd.exe"">
+  <Rule Name=""TestXamlTaskForced"" ToolName=""cmd.exe"">
     <StringProperty Name=""TestArg"" Switch=""/c echo "" />
   </Rule>
 </ProjectSchemaDefinitions>";
 
-                bool success = factory.Initialize("TestXamlTask", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
-                success.ShouldBeTrue();
+            bool success = factory.Initialize("TestXamlTaskForced", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
 
-                string assemblyPath = factory.GetAssemblyPath();
-                assemblyPath.ShouldNotBeNullOrEmpty("Environment variable should force out-of-proc compilation");
-                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
-            }
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty("ForceOutOfProcessExecution should trigger out-of-proc compilation");
+            File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
         }
 
         /// <summary>

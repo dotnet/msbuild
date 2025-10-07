@@ -24,5 +24,16 @@ namespace Microsoft.Build.Framework
         /// in-memory to enable out-of-process execution.
         /// </remarks>
         bool IsMultiThreadedBuild { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether task factories should be forced to execute out-of-process
+        /// regardless of the multi-threaded build setting.
+        /// </summary>
+        /// <remarks>
+        /// This property exposes the value of the MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC environment variable
+        /// through the host context, allowing task factories to avoid direct dependency on the Traits class.
+        /// This improves testability by enabling behavior injection through the interface.
+        /// </remarks>
+        bool ForceOutOfProcessExecution { get; }
     }
 }

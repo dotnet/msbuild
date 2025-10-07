@@ -43,6 +43,11 @@ namespace Microsoft.Build.BackEnd
         private readonly bool _isMultiThreadedBuild;
 
         /// <summary>
+        /// Whether task factories should be forced to compile for out-of-process execution.
+        /// </summary>
+        private readonly bool _forceOutOfProcessExecution;
+
+        /// <summary>
         /// Is the system running in multi-process mode and requires events to be serializable
         /// </summary>
         private bool _isRunningWithMultipleNodes;
@@ -64,7 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild = false)
+        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild = false, bool forceOutOfProcessExecution = false)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
             ErrorUtilities.VerifyThrowInternalNull(elementLocation);
@@ -74,6 +79,7 @@ namespace Microsoft.Build.BackEnd
             _loggingContext = loggingContext;
             _elementLocation = elementLocation;
             _isMultiThreadedBuild = isMultiThreadedBuild;
+            _forceOutOfProcessExecution = forceOutOfProcessExecution;
         }
 
         /// <summary>
@@ -166,6 +172,21 @@ namespace Microsoft.Build.BackEnd
             {
                 VerifyActiveProxy();
                 return _isMultiThreadedBuild;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether task factories should be forced to compile for out-of-process execution.
+        /// </summary>
+        /// <remarks>
+        /// This is controlled by the MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC environment variable.
+        /// </remarks>
+        public bool ForceOutOfProcessExecution
+        {
+            get
+            {
+                VerifyActiveProxy();
+                return _forceOutOfProcessExecution;
             }
         }
 

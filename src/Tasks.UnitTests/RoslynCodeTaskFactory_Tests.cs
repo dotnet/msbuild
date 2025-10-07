@@ -238,9 +238,6 @@ Log.LogError(Class1.ToPrint());
         [Fact]
         public void OutOfProcRoslynTaskFactoryCachesAssemblyPath()
         {
-            using var env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
-
             TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
 
             try
@@ -251,7 +248,7 @@ Log.LogError(Class1.ToPrint());
                             </Code>";
 
                 var firstFactory = new RoslynCodeTaskFactory();
-                var firstEngine = new MockEngine();
+                var firstEngine = new MockEngine { ForceOutOfProcessExecution = true };
                 bool initialized = firstFactory.Initialize(
                     "CachedRoslynInlineTask",
                     new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
@@ -269,7 +266,7 @@ Log.LogError(Class1.ToPrint());
                 firstFactory.CleanupTask(firstTask);
 
                 var secondFactory = new RoslynCodeTaskFactory();
-                var secondEngine = new MockEngine();
+                var secondEngine = new MockEngine { ForceOutOfProcessExecution = true };
                 bool initializedAgain = secondFactory.Initialize(
                     "CachedRoslynInlineTask",
                     new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
@@ -1043,64 +1040,62 @@ namespace InlineTask
         }
 
         /// <summary>
-        /// Verifies that environment variable takes precedence over ITaskFactoryHostContext
+        /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
         /// </summary>
         [Fact]
-        public void EnvironmentVariableTakesPrecedenceOverHostContext()
+        public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            var mockEngine = new MockEngine
             {
-                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                // Set ForceOutOfProcessExecution to true, IsMultiThreadedBuild to false
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = false
+            };
 
-                // Even with IsMultiThreadedBuild = false, env var should force out-of-proc
-                MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = false };
-
-                RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
-
-                string taskBody = @"
+            var factory = new RoslynCodeTaskFactory();
+            string taskCode = @"
 <Code Type=""Fragment"" Language=""cs"">
     <![CDATA[
-    Log.LogMessage(""Hello"");
+    Log.LogMessage(""Test"");
     ]]>
 </Code>";
 
-                bool success = factory.Initialize("TestTask", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
-                success.ShouldBeTrue();
+            bool success = factory.Initialize("TestTaskForced", new Dictionary<string, TaskPropertyInfo>(), taskCode, mockEngine);
+            success.ShouldBeTrue();
 
-                string assemblyPath = factory.GetAssemblyPath();
-                assemblyPath.ShouldNotBeNullOrEmpty("Environment variable should force out-of-proc compilation");
-                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
-            }
+            // Should compile for out-of-proc due to ForceOutOfProcessExecution
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty();
+            assemblyPath.ShouldContain(".inline_task.dll");
         }
 
         /// <summary>
-        /// Verifies that both environment variable and multi-threaded build work together
+        /// Verifies that both ForceOutOfProcessExecution and multi-threaded build work together
         /// </summary>
         [Fact]
-        public void BothEnvironmentVariableAndMultiThreadedWork()
+        public void BothForceAndMultiThreadedWork()
         {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            MockEngine buildEngine = new MockEngine 
+            { 
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = true 
+            };
 
-                MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = true };
+            RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
 
-                RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
-
-                string taskBody = @"
+            string taskBody = @"
 <Code Type=""Fragment"" Language=""cs"">
     <![CDATA[
     Log.LogMessage(""Hello"");
     ]]>
 </Code>";
 
-                bool success = factory.Initialize("TestTask", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
-                success.ShouldBeTrue();
+            bool success = factory.Initialize("TestTaskBoth", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
 
-                string assemblyPath = factory.GetAssemblyPath();
-                assemblyPath.ShouldNotBeNullOrEmpty("Should compile for out-of-proc");
-                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
-            }
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty("Should compile for out-of-proc");
+            File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
         }
 
         /// <summary>

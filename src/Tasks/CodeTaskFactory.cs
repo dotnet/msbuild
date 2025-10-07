@@ -192,8 +192,8 @@ namespace Microsoft.Build.Tasks
             };
 
             // Determine if we should compile for out-of-process execution
-            _compileForOutOfProcess = Traits.Instance.ForceTaskFactoryOutOfProc ||
-                                      (taskFactoryLoggingHost is ITaskFactoryHostContext hostContext && hostContext.IsMultiThreadedBuild);
+            _compileForOutOfProcess = taskFactoryLoggingHost is ITaskFactoryHostContext hostContext &&
+                                      (hostContext.ForceOutOfProcessExecution || hostContext.IsMultiThreadedBuild);
 
             XmlNode taskContent = ExtractTaskContent(taskElementContents);
             if (taskContent == null)

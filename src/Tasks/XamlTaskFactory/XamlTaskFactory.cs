@@ -131,8 +131,8 @@ namespace Microsoft.Build.Tasks
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
             // Determine if we should compile for out-of-process execution
-            _compileForOutOfProcess = Traits.Instance.ForceTaskFactoryOutOfProc ||
-                                      (taskFactoryLoggingHost is ITaskFactoryHostContext hostContext && hostContext.IsMultiThreadedBuild);
+            _compileForOutOfProcess = taskFactoryLoggingHost is ITaskFactoryHostContext hostContext &&
+                                      (hostContext.ForceOutOfProcessExecution || hostContext.IsMultiThreadedBuild);
 
             // for the out of proc execution
             if (_compileForOutOfProcess)
