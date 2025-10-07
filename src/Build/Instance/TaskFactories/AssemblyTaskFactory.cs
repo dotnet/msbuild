@@ -340,6 +340,7 @@ namespace Microsoft.Build.BackEnd
             AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc,
+            int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty)
         {
             bool useTaskFactory = false;
@@ -395,12 +396,11 @@ namespace Microsoft.Build.BackEnd
                     buildComponentHost,
                     mergedParameters,
                     _loadedType,
-                    taskHostFactoryExplicitlyRequested: _isTaskHostFactory
+                    taskHostFactoryExplicitlyRequested: _isTaskHostFactory,
 #if FEATURE_APPDOMAIN
-                    , appDomainSetup
+                    appDomainSetup,
 #endif
-                    );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                    scheduledNodeId);
                 return task;
             }
             else

@@ -163,6 +163,11 @@ namespace Microsoft.Build.Shared
                 {
                     return Assembly.Load(assemblyLoadInfo.AssemblyName);
                 }
+                else if (assemblyLoadInfo.IsInlineTask)
+                {
+                    // Load inline task assemblies from bytes and register the path
+                    return TaskFactoryUtilities.LoadTaskAssembly(assemblyLoadInfo.AssemblyFile);
+                }
                 else
                 {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
