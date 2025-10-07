@@ -244,9 +244,12 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="needs-review-translation">  -multithreaded
                      MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
                      즉, MSBuild는 여러 스레드를 사용하여
                      프로젝트를 병렬로 빌드합니다.
@@ -1505,6 +1508,11 @@
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">MSBuild 로그 및 디버그 정보는 "{0}"에 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="new">With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
