@@ -367,7 +367,8 @@ namespace Microsoft.Build.BackEnd
                     projectLoggingContext.BuildEventContext);
                 _state = TargetEntryState.Completed;
 
-                if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                if (projectLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&
+                    !projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
                     string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _target.ConditionLocation);
@@ -503,6 +504,10 @@ namespace Microsoft.Build.BackEnd
                                 // as a result we need separate sets of item and property collections to track changes
                                 if (dependencyResult == DependencyAnalysisResult.IncrementalBuild)
                                 {
+                                    // Ensure that these lookups stop at the current scope, regardless of whether items were added.
+                                    lookupForInference.TruncateLookupsForItemTypes(upToDateTargetInputs.ItemTypes);
+                                    lookupForExecution.TruncateLookupsForItemTypes(changedTargetInputs.ItemTypes);
+
                                     // subset the relevant items to those that are up-to-date
                                     foreach (string itemType in upToDateTargetInputs.ItemTypes)
                                     {

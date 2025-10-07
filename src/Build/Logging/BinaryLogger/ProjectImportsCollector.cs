@@ -64,7 +64,7 @@ namespace Microsoft.Build.Logging
             else
             {
                 string cacheDirectory = FileUtilities.GetCacheDirectory();
-                if (!Directory.Exists(cacheDirectory))
+                if (!FileSystems.Default.DirectoryExists(cacheDirectory))
                 {
                     Directory.CreateDirectory(cacheDirectory);
                 }
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Logging
                 return false;
             }
 
-            if (checkFileExistence && !File.Exists(filePath))
+            if (checkFileExistence && !FileSystems.Default.FileExists(filePath))
             {
                 _processedFiles.Add(filePath);
                 return false;

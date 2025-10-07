@@ -2,13 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Microsoft.Build.Exceptions;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -20,13 +23,6 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class NodeProviderOutOfProcTaskHost : NodeProviderOutOfProcBase, INodeProvider, INodePacketFactory, INodePacketHandler
     {
-        /// <summary>
-        /// The maximum number of nodes that this provider supports. Should
-        /// always be equivalent to the number of different TaskHostContexts
-        /// that exist.
-        /// </summary>
-        private const int MaxNodeCount = 4;
-
         /// <summary>
         /// Store the path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
         /// </summary>
@@ -41,11 +37,6 @@ namespace Microsoft.Build.BackEnd
         /// Store the 64-bit path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
         /// </summary>
         private static string s_baseTaskHostPathArm64;
-
-        /// <summary>
-        /// Store the NET path for MSBuildTaskHost so that we don't have to keep recalculating it.
-        /// </summary>
-        private static string s_baseTaskHostPathNet;
 
         /// <summary>
         /// Store the path for the 32-bit MSBuildTaskHost so that we don't have to keep re-calculating it.
@@ -88,9 +79,9 @@ namespace Microsoft.Build.BackEnd
         private ManualResetEvent _noNodesActiveEvent;
 
         /// <summary>
-        /// A mapping of all the nodes managed by this provider.
+        /// A mapping of all the task host nodes managed by this provider.
         /// </summary>
-        private Dictionary<HandshakeOptions, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<int, NodeContext> _nodeContexts;
 
         /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
@@ -138,7 +129,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                return MaxNodeCount - _nodeContexts.Count;
+                throw new NotImplementedException("This property is not implemented because available nodes are unlimited.");
             }
         }
 
@@ -178,19 +169,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            throw new NotImplementedException("Use the other overload of SendData instead");
-        }
+            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeId, out NodeContext context), "Invalid host context specified: {0}.", nodeId);
 
-        /// <summary>
-        /// Sends data to the specified node.
-        /// </summary>
-        /// <param name="hostContext">The node to which data shall be sent.</param>
-        /// <param name="packet">The packet to send.</param>
-        public void SendData(HandshakeOptions hostContext, INodePacket packet)
-        {
-            ErrorUtilities.VerifyThrow(_nodeContexts.ContainsKey(hostContext), "Invalid host context specified: {0}.", hostContext.ToString());
-
-            SendData(_nodeContexts[hostContext], packet);
+            SendData(context, packet);
         }
 
         /// <summary>
@@ -200,12 +181,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownConnectedNodes(bool enableReuse)
         {
             // Send the build completion message to the nodes, causing them to shutdown or reset.
-            List<NodeContext> contextsToShutDown;
-
-            lock (_nodeContexts)
-            {
-                contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
-            }
+            List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
@@ -230,7 +206,7 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             this.ComponentHost = host;
-            _nodeContexts = new Dictionary<HandshakeOptions, NodeContext>();
+            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
             _nodeIdToPacketFactory = new Dictionary<int, INodePacketFactory>();
             _nodeIdToPacketHandler = new Dictionary<int, INodePacketHandler>();
             _activeNodes = new HashSet<int>();
@@ -474,18 +450,87 @@ namespace Microsoft.Build.BackEnd
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
         /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext)
+        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, Dictionary<string, string> taskHostParameters)
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            s_baseTaskHostPathNet ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryNET;
+            taskHostParameters.TryGetValue(Constants.DotnetHostPath, out string runtimeHostPath);
+            var msbuildAssemblyPath = GetMSBuildAssemblyPath(taskHostParameters);
 
-            string msbuildAssemblyPath = Path.Combine(BuildEnvironmentHelper.Instance.MSBuildAssemblyDirectory, Constants.MSBuildAssemblyName);
-            string runtimeHostPath = Path.Combine(s_baseTaskHostPathNet, Constants.DotnetProcessName);
-
-            // Current process is .NET Framework, but handshake requests .NET
-            // Launch dotnet host and path to MSBuild.dll
             return (runtimeHostPath, msbuildAssemblyPath);
+        }
+
+        private static string GetMSBuildAssemblyPath(Dictionary<string, string> taskHostParameters)
+        {
+            if (taskHostParameters.TryGetValue(Constants.MSBuildAssemblyPath, out string msbuildAssemblyPath))
+            {
+                ValidateNetHostSdkVersion(msbuildAssemblyPath);
+
+                return msbuildAssemblyPath;
+            }
+
+            throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("NETHostTaskLoad_Failed"));
+
+            static void ValidateNetHostSdkVersion(string path)
+            {
+                const int MinimumSdkVersion = 10;
+
+                if (string.IsNullOrEmpty(path))
+                {
+                    ErrorUtilities.ThrowInternalError(ResourceUtilities.GetResourceString("SDKPathResolution_Failed"));
+                }
+
+                if (!FileSystems.Default.DirectoryExists(path))
+                {
+                    ErrorUtilities.ThrowInternalError(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("SDKPathCheck_Failed", path));
+                }
+
+                var sdkVersion = ExtractSdkVersionFromPath(path);
+                if (sdkVersion is null or < MinimumSdkVersion)
+                {
+                    throw new InvalidProjectFileException(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NETHostVersion_Failed", sdkVersion, MinimumSdkVersion));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Extracts the major version number from an SDK directory path by parsing the last directory name.
+        /// </summary>
+        /// <param name="path">
+        /// The full path to an SDK directory. 
+        /// Example: "C:\Program Files\dotnet\sdk\10.0.100-preview.7.25322.101".
+        /// </param>
+        /// <returns>
+        /// The major version number if successfully parsed from the directory name, otherwise null.
+        /// For the example path above, this would return 10.
+        /// </returns>
+        /// <remarks>
+        /// The method works by:
+        /// 1. Extracting the last directory name from the path (e.g., "10.0.100-preview.7.25322.101")
+        /// 2. Finding the first dot in that directory name
+        /// 3. Parsing the substring before the first dot as an integer (the major version)
+        /// 
+        /// Returns null if the path is invalid, the last directory name is empty, 
+        /// there's no dot in the directory name, or the major version cannot be parsed as an integer.
+        /// </remarks>
+        private static int? ExtractSdkVersionFromPath(string path)
+        {
+            string lastDirectoryName = Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar));
+
+            if (string.IsNullOrEmpty(lastDirectoryName))
+            {
+                return null;
+            }
+
+            int dotIndex = lastDirectoryName.IndexOf('.');
+            if (dotIndex <= 0)
+            {
+                return null;
+            }
+
+            return int.TryParse(lastDirectoryName.Substring(0, dotIndex), out int majorVersion)
+                ? majorVersion
+                : null;
         }
 
         private static string GetOrInitializeX64Clr2Path(string toolName)
@@ -521,12 +566,18 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Make sure a node in the requested context exists.
         /// </summary>
-        internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
+        internal bool AcquireAndSetUpHost(
+            HandshakeOptions hostContext,
+            int taskHostNodeId,
+            INodePacketFactory factory,
+            INodePacketHandler handler,
+            TaskHostConfiguration configuration,
+            Dictionary<string, string> taskHostParameters)
         {
             bool nodeCreationSucceeded;
-            if (!_nodeContexts.ContainsKey(hostContext))
+            if (!_nodeContexts.ContainsKey(taskHostNodeId))
             {
-                nodeCreationSucceeded = CreateNode(hostContext, factory, handler, configuration);
+                nodeCreationSucceeded = CreateNode(hostContext, taskHostNodeId, factory, handler, configuration, taskHostParameters);
             }
             else
             {
@@ -536,9 +587,9 @@ namespace Microsoft.Build.BackEnd
 
             if (nodeCreationSucceeded)
             {
-                NodeContext context = _nodeContexts[hostContext];
-                _nodeIdToPacketFactory[(int)hostContext] = factory;
-                _nodeIdToPacketHandler[(int)hostContext] = handler;
+                NodeContext context = _nodeContexts[taskHostNodeId];
+                _nodeIdToPacketFactory[taskHostNodeId] = factory;
+                _nodeIdToPacketHandler[taskHostNodeId] = handler;
 
                 // Configure the node.
                 context.SendData(configuration);
@@ -551,49 +602,44 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Expected to be called when TaskHostTask is done with host of the given context.
         /// </summary>
-        internal void DisconnectFromHost(HandshakeOptions hostContext)
+        internal void DisconnectFromHost(int nodeId)
         {
-            ErrorUtilities.VerifyThrow(_nodeIdToPacketFactory.ContainsKey((int)hostContext) && _nodeIdToPacketHandler.ContainsKey((int)hostContext), "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
+            ErrorUtilities.VerifyThrow(_nodeIdToPacketFactory.ContainsKey(nodeId) && _nodeIdToPacketHandler.ContainsKey(nodeId), "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
 
-            _nodeIdToPacketFactory.Remove((int)hostContext);
-            _nodeIdToPacketHandler.Remove((int)hostContext);
+            _nodeIdToPacketFactory.Remove(nodeId);
+            _nodeIdToPacketHandler.Remove(nodeId);
         }
 
         /// <summary>
         /// Instantiates a new MSBuild or MSBuildTaskHost process acting as a child node.
         /// </summary>
-        internal bool CreateNode(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
+        internal bool CreateNode(HandshakeOptions hostContext, int taskHostNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, Dictionary<string, string> taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey((int)hostContext), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
-
-            if (AvailableNodes <= 0)
-            {
-                ErrorUtilities.ThrowInternalError("All allowable nodes already created ({0}).", _nodeContexts.Count);
-                return false;
-            }
+            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
             string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
             IList<NodeContext> nodeContexts;
-            int nodeId = (int)hostContext;
 
             // Handle .NET task host context
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
             {
-                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext);
+                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext, taskHostParameters);
 
-                CommunicationsUtilities.Trace("For a host context of {0}, spawning dotnet.exe from {1}.", hostContext.ToString(), msbuildAssemblyPath);
+                CommunicationsUtilities.Trace("For a host context of {0}, spawning dotnet.exe from {1}.", hostContext.ToString(), runtimeHostPath);
+
+                var handshake = new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath);
 
                 // There is always one task host per host context so we always create just 1 one task host node here.      
                 nodeContexts = GetNodes(
                     runtimeHostPath,
-                    string.Format(commandLineArgsPlaceholder, msbuildAssemblyPath, ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
-                    nodeId,
+                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
+                    taskHostNodeId,
                     this,
-                    new Handshake(hostContext),
+                    handshake,
                     NodeContextCreated,
                     NodeContextTerminated,
                     1);
@@ -614,8 +660,8 @@ namespace Microsoft.Build.BackEnd
 
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, ComponentHost.BuildParameters.EnableNodeReuse, ComponentHost.BuildParameters.LowPriority),
-                nodeId,
+                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
+                taskHostNodeId,
                 this,
                 new Handshake(hostContext),
                 NodeContextCreated,
@@ -623,6 +669,17 @@ namespace Microsoft.Build.BackEnd
                 1);
 
             return nodeContexts.Count == 1;
+
+            // Determines whether node reuse should be enabled for the given host context.
+            // Node reuse allows MSBuild to reuse existing task host processes for better performance,
+            // but is disabled for CLR2 because it uses legacy MSBuildTaskHost.
+            bool NodeReuseIsEnabled(HandshakeOptions hostContext)
+            {
+                bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
+
+                return Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse)
+                    && !isCLR2;
+            }
         }
 
         /// <summary>
@@ -630,7 +687,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextCreated(NodeContext context)
         {
-            _nodeContexts[(HandshakeOptions)context.NodeId] = context;
+            _nodeContexts[context.NodeId] = context;
 
             // Start the asynchronous read.
             context.BeginAsyncPacketRead();
@@ -647,10 +704,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
-            lock (_nodeContexts)
-            {
-                _nodeContexts.Remove((HandshakeOptions)nodeId);
-            }
+            _nodeContexts.TryRemove(nodeId, out _);
 
             // May also be removed by unnatural termination, so don't assume it's there
             lock (_activeNodes)

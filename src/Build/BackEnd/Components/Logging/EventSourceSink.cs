@@ -3,6 +3,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -15,6 +16,7 @@ namespace Microsoft.Build.BackEnd.Logging
     /// <summary>
     /// This class raises events on behalf of the build engine to all registered loggers.
     /// </summary>
+    [DebuggerDisplay("{Name}")]
     internal sealed class EventSourceSink :
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,

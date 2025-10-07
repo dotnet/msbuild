@@ -40,18 +40,6 @@
     <PackageVersion Include="FakeItEasy" Version="8.1.0" />
     <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
 
-    <PackageVersion Include="System.CodeDom" Version="9.0.0" />
-    <PackageVersion Update="System.CodeDom" Condition="'$(SystemCodeDomVersion)' != ''" Version="$(SystemCodeDomVersion)" />
-
-    <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="9.0.0" />
-    <PackageVersion Update="System.Security.Cryptography.Pkcs" Condition="'$(SystemSecurityCryptographyPkcsVersion)' != ''" Version="$(SystemSecurityCryptographyPkcsVersion)" />
-
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.0" />
-    <PackageVersion Update="System.Security.Cryptography.Xml" Condition="'$(SystemSecurityCryptographyXmlVersion)' != ''" Version="$(SystemSecurityCryptographyXmlVersion)" />
-
-    <PackageVersion Include="Microsoft.Bcl.Cryptography.Xml" Version="9.0.0" />
-    <PackageVersion Update="Microsoft.Bcl.Cryptography.Xml" Condition="'$(MicrosoftBclCryptographyVersion)' != ''" Version="$(MicrosoftBclCryptographyVersion)" />
-
     <!-- when this is bumped the submodule in https://github.com/dotnet/source-build-reference-packages/tree/main/src/externalPackages needs to be bumped in sync -->
     <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
     <PackageVersion Update="Microsoft.VisualStudio.SolutionPersistence" Condition="'$(MicrosoftVisualStudioSolutionPersistenceVersion)' != ''" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />

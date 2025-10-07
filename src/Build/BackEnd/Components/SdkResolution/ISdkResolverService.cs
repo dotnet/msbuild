@@ -21,6 +21,11 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         Action<INodePacket> SendPacket { get; }
 
         /// <summary>
+        /// Gets or sets if shutdown event was already triggered.
+        /// </summary>
+        bool IsNodeShutDown { get; set; }
+
+        /// <summary>
         /// Clears the cache for the specified build submission ID.
         /// </summary>
         /// <param name="submissionId">The build submission ID to clear from the cache.</param>

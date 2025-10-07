@@ -502,10 +502,10 @@ namespace Microsoft.Build.Evaluation
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
             architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
 
-            IDictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            Dictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { XMakeAttributes.runtime, runtime },
-                { XMakeAttributes.architecture, architecture }
+                { XMakeAttributes.architecture, architecture },
             };
 
             HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
@@ -514,7 +514,7 @@ namespace Microsoft.Build.Evaluation
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildAssemblyPath;
             }
 #endif
 
@@ -739,7 +739,7 @@ namespace Microsoft.Build.Evaluation
         public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
             pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
-            if (File.Exists(pathToAssembly))
+            if (FileSystems.Default.FileExists(pathToAssembly))
             {
                 loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
 
