@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Framework;
@@ -25,6 +26,7 @@ namespace Microsoft.Build.BackEnd.Logging
         // This means that if we ever add logging non-integer properties for these events, they will not be included in the telemetry.
         private const string TaskFactoryEventName = "build/tasks/taskfactory";
         private const string TasksEventName = "build/tasks";
+        private const string MicrosoftTasksEventName = "build/tasks/microsoft";
 
         private int _assemblyTaskFactoryTasksExecutedCount = 0;
         private int _intrinsicTaskFactoryTasksExecutedCount = 0;
@@ -34,6 +36,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private int _customTaskFactoryTasksExecutedCount = 0;
 
         private int _taskHostTasksExecutedCount = 0;
+
+        // Telemetry for Microsoft-authored tasks
+        private int _microsoftTasksLoadedCount = 0;
+        private int _microsoftTasksSealedCount = 0;
+        private int _microsoftTasksInheritingFromTaskCount = 0;
 
         /// <summary>
         /// Adds a task execution to the telemetry data.
@@ -74,6 +81,39 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Adds telemetry about a Microsoft-authored task being loaded.
+        /// </summary>
+        /// <param name="taskType">The type of the task being loaded.</param>
+        public void AddMicrosoftTaskLoaded(Type taskType)
+        {
+            if (taskType == null)
+            {
+                return;
+            }
+
+            _microsoftTasksLoadedCount++;
+
+            // Check if the task is sealed
+            if (taskType.IsSealed)
+            {
+                _microsoftTasksSealedCount++;
+            }
+
+            // Check if the task inherits from Microsoft.Build.Utilities.Task
+            // We check the full name to avoid loading the assembly if not already loaded
+            Type? baseType = taskType.BaseType;
+            while (baseType != null)
+            {
+                if (baseType.FullName == "Microsoft.Build.Utilities.Task")
+                {
+                    _microsoftTasksInheritingFromTaskCount++;
+                    break;
+                }
+                baseType = baseType.BaseType;
+            }
+        }
+
+        /// <summary>
         /// Logs telemetry data for a project
         /// </summary>
         public void LogProjectTelemetry(ILoggingService loggingService, BuildEventContext buildEventContext)
@@ -95,6 +135,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (taskTotalProperties.Count > 0)
                 {
                     loggingService.LogTelemetry(buildEventContext, TasksEventName, taskTotalProperties);
+                }
+
+                Dictionary<string, string> microsoftTaskProperties = GetMicrosoftTaskProperties();
+                if (microsoftTaskProperties.Count > 0)
+                {
+                    loggingService.LogTelemetry(buildEventContext, MicrosoftTasksEventName, microsoftTaskProperties);
                 }
             }
             catch
@@ -120,6 +166,10 @@ namespace Microsoft.Build.BackEnd.Logging
             _customTaskFactoryTasksExecutedCount = 0;
 
             _taskHostTasksExecutedCount = 0;
+
+            _microsoftTasksLoadedCount = 0;
+            _microsoftTasksSealedCount = 0;
+            _microsoftTasksInheritingFromTaskCount = 0;
         }
 
         private Dictionary<string, string> GetTaskFactoryProperties()
@@ -178,6 +228,28 @@ namespace Microsoft.Build.BackEnd.Logging
             if (_taskHostTasksExecutedCount > 0)
             {
                 properties["TaskHostTasksExecutedCount"] = _taskHostTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return properties;
+        }
+
+        private Dictionary<string, string> GetMicrosoftTaskProperties()
+        {
+            Dictionary<string, string> properties = new();
+
+            if (_microsoftTasksLoadedCount > 0)
+            {
+                properties["MicrosoftTasksLoadedCount"] = _microsoftTasksLoadedCount.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (_microsoftTasksSealedCount > 0)
+            {
+                properties["MicrosoftTasksSealedCount"] = _microsoftTasksSealedCount.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (_microsoftTasksInheritingFromTaskCount > 0)
+            {
+                properties["MicrosoftTasksInheritingFromTaskCount"] = _microsoftTasksInheritingFromTaskCount.ToString(CultureInfo.InvariantCulture);
             }
 
             return properties;
