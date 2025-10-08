@@ -44,7 +44,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the target runtime identifier (e.g., "net8.0", "net472").
         /// </summary>
-        /// <value>The runtime identifier, or an empty string if not specified.</value>
+        /// <value>The runtime identifier, or null if not specified.</value>
         public string? Runtime => _runtime;
 
         /// <summary>
@@ -56,13 +56,13 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the path to the dotnet host executable.
         /// </summary>
-        /// <value>The dotnet host path, or an empty string if not specified.</value>
+        /// <value>The dotnet host path, or null if not specified.</value>
         public string? DotnetHostPath => _dotnetHostPath;
 
         /// <summary>
         /// Gets the path to the MSBuild assembly.
         /// </summary>
-        /// <value>The MSBuild assembly path, or an empty string if not specified.</value>
+        /// <value>The MSBuild assembly path, or null if not specified.</value>
         public string? MSBuildAssemblyPath => _msBuildAssemblyPath;
 
         /// <summary>
