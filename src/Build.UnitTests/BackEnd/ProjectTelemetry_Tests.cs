@@ -17,108 +17,109 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class ProjectTelemetry_Tests
     {
         /// <summary>
-        /// Test that AddMicrosoftTaskLoaded correctly tracks sealed tasks
+        /// Test that TrackTaskSubclassing ignores sealed tasks
         /// </summary>
         [Fact]
-        public void AddMicrosoftTaskLoaded_TracksSealed()
+        public void TrackTaskSubclassing_IgnoresSealedTasks()
         {
             var telemetry = new ProjectTelemetry();
             
-            // Use a sealed type - string is sealed
-            telemetry.AddMicrosoftTaskLoaded(typeof(string));
+            // Sealed task should not be tracked
+            telemetry.TrackTaskSubclassing(typeof(TestSealedTask), isMicrosoftOwned: false);
             
-            // Get properties using reflection to verify counts
-            var properties = GetMicrosoftTaskProperties(telemetry);
+            var properties = GetMSBuildTaskSubclassProperties(telemetry);
             
-            properties["MicrosoftTasksLoadedCount"].ShouldBe("1");
-            properties["MicrosoftTasksSealedCount"].ShouldBe("1");
+            // No properties should be added for sealed tasks
+            properties.Count.ShouldBe(0);
         }
 
         /// <summary>
-        /// Test that AddMicrosoftTaskLoaded correctly tracks non-sealed tasks
+        /// Test that TrackTaskSubclassing tracks non-sealed subclasses of Microsoft tasks
         /// </summary>
         [Fact]
-        public void AddMicrosoftTaskLoaded_TracksNonSealed()
+        public void TrackTaskSubclassing_TracksNonSealedSubclass()
         {
             var telemetry = new ProjectTelemetry();
             
-            // Use a non-sealed type
-            telemetry.AddMicrosoftTaskLoaded(typeof(TestTask));
+            // Non-sealed user task inheriting from Microsoft.Build.Utilities.Task
+            telemetry.TrackTaskSubclassing(typeof(UserTask), isMicrosoftOwned: false);
             
-            var properties = GetMicrosoftTaskProperties(telemetry);
+            var properties = GetMSBuildTaskSubclassProperties(telemetry);
             
-            properties["MicrosoftTasksLoadedCount"].ShouldBe("1");
-            properties.ShouldNotContainKey("MicrosoftTasksSealedCount");
+            // Should track the Microsoft.Build.Utilities.Task base class
+            properties.Count.ShouldBe(1);
+            properties.ShouldContainKey("Microsoft_Build_Utilities_Task");
+            properties["Microsoft_Build_Utilities_Task"].ShouldBe("1");
         }
 
         /// <summary>
-        /// Test that AddMicrosoftTaskLoaded correctly tracks tasks inheriting from Task
+        /// Test that TrackTaskSubclassing does not track Microsoft-owned tasks
         /// </summary>
         [Fact]
-        public void AddMicrosoftTaskLoaded_TracksInheritanceFromTask()
+        public void TrackTaskSubclassing_IgnoresMicrosoftOwnedTasks()
         {
             var telemetry = new ProjectTelemetry();
             
-            // Use a task that inherits from Microsoft.Build.Utilities.Task
-            telemetry.AddMicrosoftTaskLoaded(typeof(TestTask));
+            // Microsoft-owned task should not be tracked even if non-sealed
+            telemetry.TrackTaskSubclassing(typeof(UserTask), isMicrosoftOwned: true);
             
-            var properties = GetMicrosoftTaskProperties(telemetry);
+            var properties = GetMSBuildTaskSubclassProperties(telemetry);
             
-            properties["MicrosoftTasksLoadedCount"].ShouldBe("1");
-            properties["MicrosoftTasksInheritingFromTaskCount"].ShouldBe("1");
+            // Should not track Microsoft-owned tasks
+            properties.Count.ShouldBe(0);
         }
 
         /// <summary>
-        /// Test that AddMicrosoftTaskLoaded tracks multiple tasks correctly
+        /// Test that TrackTaskSubclassing tracks multiple subclasses
         /// </summary>
         [Fact]
-        public void AddMicrosoftTaskLoaded_TracksMultipleTasks()
+        public void TrackTaskSubclassing_TracksMultipleSubclasses()
         {
             var telemetry = new ProjectTelemetry();
             
-            telemetry.AddMicrosoftTaskLoaded(typeof(TestTask));
-            telemetry.AddMicrosoftTaskLoaded(typeof(string)); // sealed
-            telemetry.AddMicrosoftTaskLoaded(typeof(TestSealedTask)); // sealed and inherits from Task
+            // Track multiple user tasks
+            telemetry.TrackTaskSubclassing(typeof(UserTask), isMicrosoftOwned: false);
+            telemetry.TrackTaskSubclassing(typeof(AnotherUserTask), isMicrosoftOwned: false);
             
-            var properties = GetMicrosoftTaskProperties(telemetry);
+            var properties = GetMSBuildTaskSubclassProperties(telemetry);
             
-            properties["MicrosoftTasksLoadedCount"].ShouldBe("3");
-            properties["MicrosoftTasksSealedCount"].ShouldBe("2");
-            properties["MicrosoftTasksInheritingFromTaskCount"].ShouldBe("2");
+            // Should aggregate counts for the same base class
+            properties.Count.ShouldBe(1);
+            properties["Microsoft_Build_Utilities_Task"].ShouldBe("2");
         }
 
         /// <summary>
-        /// Test that AddMicrosoftTaskLoaded handles null gracefully
+        /// Test that TrackTaskSubclassing handles null gracefully
         /// </summary>
         [Fact]
-        public void AddMicrosoftTaskLoaded_HandlesNull()
+        public void TrackTaskSubclassing_HandlesNull()
         {
             var telemetry = new ProjectTelemetry();
             
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
-            telemetry.AddMicrosoftTaskLoaded(null);
+            telemetry.TrackTaskSubclassing(null, isMicrosoftOwned: false);
 #pragma warning restore CS8625
             
-            var properties = GetMicrosoftTaskProperties(telemetry);
+            var properties = GetMSBuildTaskSubclassProperties(telemetry);
             
             properties.Count.ShouldBe(0);
         }
 
         /// <summary>
-        /// Helper method to get Microsoft task properties from telemetry using reflection
+        /// Helper method to get MSBuild task subclass properties from telemetry using reflection
         /// </summary>
-        private System.Collections.Generic.Dictionary<string, string> GetMicrosoftTaskProperties(ProjectTelemetry telemetry)
+        private System.Collections.Generic.Dictionary<string, string> GetMSBuildTaskSubclassProperties(ProjectTelemetry telemetry)
         {
-            var method = typeof(ProjectTelemetry).GetMethod("GetMicrosoftTaskProperties", 
+            var method = typeof(ProjectTelemetry).GetMethod("GetMSBuildTaskSubclassProperties", 
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             return (System.Collections.Generic.Dictionary<string, string>)method!.Invoke(telemetry, null)!;
         }
 
         /// <summary>
-        /// Test task that inherits from Microsoft.Build.Utilities.Task
+        /// Non-sealed user task that inherits from Microsoft.Build.Utilities.Task
         /// </summary>
 #pragma warning disable CA1852 // Type can be sealed
-        private class TestTask : Task
+        private class UserTask : Task
 #pragma warning restore CA1852
         {
             public override bool Execute()
@@ -128,7 +129,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test sealed task that inherits from Microsoft.Build.Utilities.Task
+        /// Another non-sealed user task that inherits from Microsoft.Build.Utilities.Task
+        /// </summary>
+#pragma warning disable CA1852 // Type can be sealed
+        private class AnotherUserTask : Task
+#pragma warning restore CA1852
+        {
+            public override bool Execute()
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Sealed task that inherits from Microsoft.Build.Utilities.Task
         /// </summary>
         private sealed class TestSealedTask : Task
         {
@@ -142,7 +156,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Integration test that verifies telemetry is logged during a build with Microsoft tasks
         /// </summary>
         [Fact]
-        public void MicrosoftTaskTelemetry_IsLoggedDuringBuild()
+        public void MSBuildTaskTelemetry_IsLoggedDuringBuild()
         {
             string projectContent = @"
                 <Project>

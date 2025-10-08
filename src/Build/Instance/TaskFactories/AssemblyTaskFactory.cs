@@ -439,10 +439,11 @@ namespace Microsoft.Build.BackEnd
                 }
 #endif
 
-                // Collect telemetry for Microsoft-authored tasks
-                if (taskInstance != null && IsMicrosoftAuthoredTask())
+                // Track non-sealed subclasses of Microsoft-owned MSBuild tasks
+                if (taskInstance != null)
                 {
-                    _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddMicrosoftTaskLoaded(_loadedType.Type);
+                    bool isMicrosoftOwned = IsMicrosoftAuthoredTask();
+                    _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
                 }
 
                 return taskInstance;
