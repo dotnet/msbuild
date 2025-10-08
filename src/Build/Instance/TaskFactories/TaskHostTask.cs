@@ -167,8 +167,13 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
+<<<<<<< HEAD
             int scheduledNodeId,
             TaskEnvironment taskEnvironment)
+=======
+            int scheduledNodeId = -1,
+            TaskEnvironment taskEnvironment = null)
+>>>>>>> bf5c794037 (fix merge errors)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
             ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
