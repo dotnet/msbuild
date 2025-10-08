@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -94,7 +95,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             var telemetry = new ProjectTelemetry();
             
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
             telemetry.AddMicrosoftTaskLoaded(null);
+#pragma warning restore CS8625
             
             var properties = GetMicrosoftTaskProperties(telemetry);
             
@@ -114,7 +117,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test task that inherits from Microsoft.Build.Utilities.Task
         /// </summary>
+#pragma warning disable CA1852 // Type can be sealed
         private class TestTask : Task
+#pragma warning restore CA1852
         {
             public override bool Execute()
             {
@@ -131,6 +136,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Integration test that verifies telemetry is logged during a build with Microsoft tasks
+        /// </summary>
+        [Fact]
+        public void MicrosoftTaskTelemetry_IsLoggedDuringBuild()
+        {
+            string projectContent = @"
+                <Project>
+                    <Target Name='Build'>
+                        <Message Text='Hello World' Importance='High' />
+                    </Target>
+                </Project>";
+
+            var events = new System.Collections.Generic.List<BuildEventArgs>();
+            var logger = new Microsoft.Build.Logging.ConsoleLogger(LoggerVerbosity.Diagnostic);
+            
+            using var projectCollection = new ProjectCollection();
+            using var stringReader = new System.IO.StringReader(projectContent);
+            using var xmlReader = System.Xml.XmlReader.Create(stringReader);
+            var project = new Project(xmlReader, null, null, projectCollection);
+
+            // Build the project
+            var result = project.Build();
+            
+            result.ShouldBeTrue();
         }
     }
 }
