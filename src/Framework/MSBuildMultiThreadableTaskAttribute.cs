@@ -29,7 +29,7 @@ namespace Microsoft.Build.Framework
     internal class MSBuildMultiThreadableTaskAttribute : Attribute
     {
         /// <summary>
-        /// Initializes a new instance of the ThreadSafeAttribute class.
+        /// Initializes a new instance of the MSBuildMultiThreadableTaskAttribute class.
         /// </summary>
         public MSBuildMultiThreadableTaskAttribute()
         {
