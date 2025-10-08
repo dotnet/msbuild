@@ -80,20 +80,14 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Tracks non-sealed subclasses of Microsoft-owned MSBuild tasks.
-        /// If the task is a non-sealed subclass of a Microsoft-owned task, increments the usage count for that base task.
+        /// Tracks subclasses of Microsoft-owned MSBuild tasks.
+        /// If the task is a subclass of a Microsoft-owned task, increments the usage count for that base task.
         /// </summary>
         /// <param name="taskType">The type of the task being loaded.</param>
         /// <param name="isMicrosoftOwned">Whether the task itself is Microsoft-owned.</param>
         public void TrackTaskSubclassing(Type taskType, bool isMicrosoftOwned)
         {
             if (taskType == null)
-            {
-                return;
-            }
-
-            // If the task is sealed, we don't track it (sealed means it can't be subclassed)
-            if (taskType.IsSealed)
             {
                 return;
             }

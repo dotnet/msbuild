@@ -17,31 +17,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class ProjectTelemetry_Tests
     {
         /// <summary>
-        /// Test that TrackTaskSubclassing ignores sealed tasks
+        /// Test that TrackTaskSubclassing tracks sealed tasks that derive from Microsoft tasks
         /// </summary>
         [Fact]
-        public void TrackTaskSubclassing_IgnoresSealedTasks()
+        public void TrackTaskSubclassing_TracksSealedTasks()
         {
             var telemetry = new ProjectTelemetry();
             
-            // Sealed task should not be tracked
+            // Sealed task should be tracked if it derives from Microsoft task
             telemetry.TrackTaskSubclassing(typeof(TestSealedTask), isMicrosoftOwned: false);
             
             var properties = GetMSBuildTaskSubclassProperties(telemetry);
             
-            // No properties should be added for sealed tasks
-            properties.Count.ShouldBe(0);
+            // Should track sealed tasks that inherit from Microsoft tasks
+            properties.Count.ShouldBe(1);
+            properties.ShouldContainKey("Microsoft_Build_Utilities_Task");
+            properties["Microsoft_Build_Utilities_Task"].ShouldBe("1");
         }
 
         /// <summary>
-        /// Test that TrackTaskSubclassing tracks non-sealed subclasses of Microsoft tasks
+        /// Test that TrackTaskSubclassing tracks subclasses of Microsoft tasks
         /// </summary>
         [Fact]
-        public void TrackTaskSubclassing_TracksNonSealedSubclass()
+        public void TrackTaskSubclassing_TracksSubclass()
         {
             var telemetry = new ProjectTelemetry();
             
-            // Non-sealed user task inheriting from Microsoft.Build.Utilities.Task
+            // User task inheriting from Microsoft.Build.Utilities.Task
             telemetry.TrackTaskSubclassing(typeof(UserTask), isMicrosoftOwned: false);
             
             var properties = GetMSBuildTaskSubclassProperties(telemetry);
