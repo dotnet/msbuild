@@ -159,7 +159,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            int scheduledNodeId = -1)
+            int scheduledNodeId)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
 

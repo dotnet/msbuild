@@ -1003,7 +1003,7 @@ namespace Microsoft.Build.BackEnd
                                 return null;
                             }
 
-                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory);
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory, scheduledNodeId);
                             isTaskHost = true;
                         }
                         else
@@ -1740,8 +1740,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskIdentityParameters">Task identity parameters.</param>
         /// <param name="taskFactoryEngineContext">The engine context to use for the task.</param>
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
+        /// <param name="scheduledNodeId">Node for which the task host should be called</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryEngineContext taskFactoryEngineContext, IOutOfProcTaskFactory outOfProcTaskFactory)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(
+            IDictionary<string, string> taskIdentityParameters,
+            TaskFactoryEngineContext taskFactoryEngineContext,
+            IOutOfProcTaskFactory outOfProcTaskFactory,
+            int scheduledNodeId)
         {
             ITask innerTask;
 
@@ -1791,19 +1796,17 @@ namespace Microsoft.Build.BackEnd
             // Clean up the original task since we're going to wrap it
             _taskFactoryWrapper.TaskFactory.CleanupTask(innerTask);
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             return new TaskHostTask(
                 _taskLocation,
                 _taskLoggingContext,
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                true
+                true,
 #if FEATURE_APPDOMAIN
-                , AppDomainSetup
+                AppDomainSetup,
 #endif
-                );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                scheduledNodeId);
         }
     }
 }

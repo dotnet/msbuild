@@ -389,7 +389,6 @@ namespace Microsoft.Build.BackEnd
                     AddNetHostParams(ref mergedParameters, getProperty);
                 }
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 TaskHostTask task = new TaskHostTask(
                     taskLocation,
                     taskLoggingContext,
