@@ -164,11 +164,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            int scheduledNodeId = -1
-            TaskEnvironment taskEnvironment
-            )
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-
+            int scheduledNodeId = -1,
+            TaskEnvironment taskEnvironment = null)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
             ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);

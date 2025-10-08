@@ -25,12 +25,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
-        [InlineData("subfolder", "should resolve relative path against base")]
-        [InlineData("deep/nested/path", "should handle nested relative paths")]
-        [InlineData(".", "should resolve to base directory")]
-        [InlineData("", "empty path should resolve to base directory")]
-        [InlineData("..", "should resolve to parent directory")]
-        public void AbsolutePath_FromRelativePath_ShouldResolveAgainstBase(string relativePath, string description)
+        [InlineData("subfolder")]
+        [InlineData("deep/nested/path")]
+        [InlineData(".")]
+        [InlineData("")]
+        [InlineData("..")]
+        public void AbsolutePath_FromRelativePath_ShouldResolveAgainstBase(string relativePath)
         {
             // Arrange
             string baseDirectory = Path.Combine(Path.GetTempPath(), "testfolder");
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests
             // Act
             var absolutePath = new AbsolutePath(relativePath, basePath);
 
-            // Assert - {description}
+            // Assert
             Path.IsPathRooted(absolutePath.Path).ShouldBeTrue();
             
             string expectedPath = Path.Combine(baseDirectory, relativePath);
