@@ -164,8 +164,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            int scheduledNodeId = -1,
-            TaskEnvironment taskEnvironment = null)
+            int scheduledNodeId,
+            TaskEnvironment taskEnvironment)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
             ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
