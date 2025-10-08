@@ -82,4 +82,20 @@ namespace Microsoft.Build.Framework
         /// <returns>The path as a string.</returns>
         public override string ToString() => Path;
     }
+
+    /// <summary>
+    /// Extension methods for AbsolutePath.
+    /// </summary>
+    internal static class AbsolutePathExtensions
+    {
+        internal static string[] ToStringArray(this AbsolutePath[] absolutePaths)
+        {
+            string[] stringPaths = new string[absolutePaths.Length];
+            for (int i = 0; i < absolutePaths.Length; i++)
+            {
+                stringPaths[i] = absolutePaths[i].Path;
+            }
+            return stringPaths;
+        }
+    }
 }
