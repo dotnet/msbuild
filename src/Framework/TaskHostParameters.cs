@@ -8,16 +8,16 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public readonly struct TaskHostParameters
     {
+        /// <summary>
+        /// A static empty instance to avoid allocations when default parameters are needed.
+        /// </summary>
+        public static readonly TaskHostParameters Empty = new();
+
         private readonly string? _runtime;
         private readonly string? _architecture;
         private readonly string? _dotnetHostPath;
         private readonly string? _msBuildAssemblyPath;
         private readonly bool? _isTaskHostFactory;
-
-        /// <summary>
-        /// A static empty instance to avoid allocations when default parameters are needed.
-        /// </summary>
-        public static readonly TaskHostParameters Empty = new();
 
         /// <summary>
         /// Initializes a new instance of the TaskHostParameters struct with the specified parameters.
