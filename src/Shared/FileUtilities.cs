@@ -78,7 +78,7 @@ namespace Microsoft.Build.Shared
                 using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
                 {
                     string lowerCased = pathWithUpperCase.ToLowerInvariant();
-                    return !File.Exists(lowerCased);
+                    return !FileSystems.Default.FileExists(lowerCased);
                 }
             }
             catch (Exception exc)
@@ -748,7 +748,7 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                foreach (string dir in Directory.EnumerateDirectories(directory))
+                foreach (string dir in FileSystems.Default.EnumerateDirectories(directory))
                 {
                     DeleteDirectoryNoThrow(dir, recursive: true, retryCount: 1);
                 }

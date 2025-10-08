@@ -634,6 +634,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </value>
   </data>
@@ -1704,4 +1707,7 @@
 
         Don't forget to update this comment after using the new code.
   -->
+  <data name="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc" xml:space="preserve">
+    <value>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</value>
+  </data>
 </root>

@@ -669,7 +669,7 @@ namespace Microsoft.Build.Construction
             {
                 // This is to align MSBuild with what VS permits in loading solution filter files. These are not in them by default but can be added manually.
                 JsonDocumentOptions options = new JsonDocumentOptions() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
-                JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile), options);
+                JsonDocument text = JsonDocument.Parse(FileSystems.Default.ReadFileAllText(solutionFilterFile), options);
                 solution = text.RootElement.GetProperty("solution");
                 // We do NOT want to escape in order to preserve symbols like @, %, $ etc.
                 return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile), escape: false);
