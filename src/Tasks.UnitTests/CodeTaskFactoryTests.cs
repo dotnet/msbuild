@@ -1496,7 +1496,8 @@ namespace Microsoft.Build.UnitTests
     ]]>
 </Code>";
 
-            bool success = factory.Initialize("TestTask", new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            string taskName = isMultiThreaded ? "TestTaskMultiThreaded" : "TestTaskSingleThreaded";
+            bool success = factory.Initialize(taskName, new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
             success.ShouldBeTrue();
 
             // Get assembly path - should be non-null when compiled for out-of-proc
