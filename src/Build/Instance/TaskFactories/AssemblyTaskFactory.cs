@@ -352,6 +352,7 @@ namespace Microsoft.Build.BackEnd
                 appDomainSetup,
 #endif
                 isOutOfProc,
+                scheduledNodeId,
                 getProperty,
                 new TaskEnvironment(StubTaskEnvironmentDriver.Instance));
         }
@@ -368,6 +369,7 @@ namespace Microsoft.Build.BackEnd
             AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc,
+            int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty,
             TaskEnvironment taskEnvironment)
         {

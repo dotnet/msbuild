@@ -1011,7 +1011,7 @@ namespace Microsoft.Build.BackEnd
                                 return null;
                             }
 
-                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory);
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory, scheduledNodeId);
                             isTaskHost = true;
                         }
                         else
@@ -1748,8 +1748,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskIdentityParameters">Task identity parameters.</param>
         /// <param name="loggingHost">The logging host to use for the task.</param>
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
+        /// <param name="scheduledNodeId">Node for which the task host should be called</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(
+            IDictionary<string, string> taskIdentityParameters,
+            TaskFactoryLoggingHost loggingHost,
+            IOutOfProcTaskFactory outOfProcTaskFactory,
+            int scheduledNodeId)
         {
             ITask innerTask;
 
@@ -1809,6 +1814,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif
+                scheduledNodeId: scheduledNodeId,
                 TaskEnvironment
                 );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
