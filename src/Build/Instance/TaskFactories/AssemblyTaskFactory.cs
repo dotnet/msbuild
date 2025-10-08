@@ -352,6 +352,7 @@ namespace Microsoft.Build.BackEnd
                 appDomainSetup,
 #endif
                 isOutOfProc,
+                scheduledNodeId,
                 getProperty,
                 new TaskEnvironment(StubTaskEnvironmentDriver.Instance));
         }
@@ -368,6 +369,7 @@ namespace Microsoft.Build.BackEnd
             AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc,
+            int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty,
             TaskEnvironment taskEnvironment)
         {
@@ -392,6 +394,24 @@ namespace Microsoft.Build.BackEnd
                 // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
                 // as the task factory.
                 useTaskFactory = _taskHostFactoryExplicitlyRequested;
+            }
+            
+            // Apply multi-threaded routing decision if not already determined by other factors
+            // This routes tasks implementing IMultiThreadableTask to run in-process (thread nodes),
+            // while legacy tasks are routed to out-of-process sidecar TaskHost for isolation.
+            if (!useTaskFactory && _loadedType?.Type != null && buildComponentHost?.BuildParameters != null)
+            {
+                bool shouldRouteOutOfProc = TaskRoutingDecision.ShouldExecuteOutOfProc(
+                    _loadedType.Type,
+                    isOutOfProc,
+                    buildComponentHost.BuildParameters.MultiThreaded,
+                    _taskHostFactoryExplicitlyRequested);
+                
+                // If routing says to go out-of-proc, override the in-proc decision
+                if (shouldRouteOutOfProc)
+                {
+                    useTaskFactory = true;
+                }
             }
 
             _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);

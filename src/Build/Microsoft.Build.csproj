@@ -345,6 +345,7 @@
     <Compile Include="BackEnd\Components\RequestBuilder\TargetUpToDateChecker.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskHost.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskRoutingDecision.cs" />
     <Compile Include="BackEnd\Shared\BuildRequest.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestBlocker.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestConfiguration.cs" />
