@@ -1,0 +1,118 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Microsoft.Build.Framework
+{
+    /// <summary>
+    /// A readonly struct that represents task host parameters used to determine which host process to launch.
+    /// </summary>
+    public readonly struct TaskHostParameters
+    {
+        private readonly string? _runtime;
+        private readonly string? _architecture;
+        private readonly string? _dotnetHostPath;
+        private readonly string? _msBuildAssemblyPath;
+        private readonly bool? _isTaskHostFactory;
+
+        /// <summary>
+        /// A static empty instance to avoid allocations when default parameters are needed.
+        /// </summary>
+        public static readonly TaskHostParameters Empty = new();
+
+        /// <summary>
+        /// Initializes a new instance of the TaskHostParameters struct with the specified parameters.
+        /// </summary>
+        /// <param name="runtime">The target runtime identifier (e.g., "net8.0", "net472").</param>
+        /// <param name="architecture">The target architecture (e.g., "x64", "x86", "arm64").</param>
+        /// <param name="dotnetHostPath">The path to the dotnet host executable.</param>
+        /// <param name="msBuildAssemblyPath">The path to the MSBuild assembly.</param>
+        /// <param name="isTaskHostFactory">Defines if Task Host Factory was explicitly requested.</param>
+        internal TaskHostParameters(
+            string? runtime = null,
+            string? architecture = null,
+            string? dotnetHostPath = null,
+            string? msBuildAssemblyPath = null,
+            bool? isTaskHostFactory = null)
+        {
+            _runtime = runtime;
+            _architecture = architecture;
+            _dotnetHostPath = dotnetHostPath;
+            _msBuildAssemblyPath = msBuildAssemblyPath;
+            _isTaskHostFactory = isTaskHostFactory;
+        }
+
+        /// <summary>
+        /// Gets the target runtime identifier (e.g., "net8.0", "net472").
+        /// </summary>
+        /// <value>The runtime identifier, or an empty string if not specified.</value>
+        public string? Runtime => _runtime;
+
+        /// <summary>
+        /// Gets the target architecture (e.g., "x64", "x86", "arm64").
+        /// </summary>
+        /// <value>The architecture identifier, or an empty string if not specified.</value>
+        public string? Architecture => _architecture;
+
+        /// <summary>
+        /// Gets the path to the dotnet host executable.
+        /// </summary>
+        /// <value>The dotnet host path, or an empty string if not specified.</value>
+        public string? DotnetHostPath => _dotnetHostPath;
+
+        /// <summary>
+        /// Gets the path to the MSBuild assembly.
+        /// </summary>
+        /// <value>The MSBuild assembly path, or an empty string if not specified.</value>
+        public string? MSBuildAssemblyPath => _msBuildAssemblyPath;
+
+        /// <summary>
+        /// Gets if Task Host Factory was requested explicitly.
+        /// </summary>
+        public bool? IsTaskHostFactory => _isTaskHostFactory;
+
+        /// <summary>
+        /// Returns true if all parameters are unset (null or false).
+        /// </summary>
+        internal bool IsEmpty =>
+            _runtime == null &&
+            _architecture == null &&
+            _dotnetHostPath == null &&
+            _msBuildAssemblyPath == null &&
+            _isTaskHostFactory == null;
+
+        /// <summary>
+        /// Merges two TaskHostParameters instances, with the second parameter values taking precedence when both are specified.
+        /// </summary>
+        /// <param name="baseParameters">The base parameters.</param>
+        /// <param name="overrideParameters">The override parameters that take precedence.</param>
+        /// <returns>A new TaskHostParameters with merged values.</returns>
+        internal static TaskHostParameters MergeTaskHostParameters(TaskHostParameters baseParameters, TaskHostParameters overrideParameters)
+        {
+            // If both are empty, return empty
+            if (baseParameters.IsEmpty && overrideParameters.IsEmpty)
+            {
+                return Empty;
+            }
+
+            // If override is empty, return base
+            if (overrideParameters.IsEmpty)
+            {
+                return baseParameters;
+            }
+
+            // If base is empty, return override
+            if (baseParameters.IsEmpty)
+            {
+                return overrideParameters;
+            }
+
+            // Merge: override values take precedence, fall back to base values
+            return new TaskHostParameters(
+                runtime: overrideParameters.Runtime ?? baseParameters.Runtime,
+                architecture: overrideParameters.Architecture ?? baseParameters.Architecture,
+                dotnetHostPath: overrideParameters.DotnetHostPath ?? baseParameters.DotnetHostPath,
+                msBuildAssemblyPath: overrideParameters.MSBuildAssemblyPath ?? baseParameters.MSBuildAssemblyPath,
+                isTaskHostFactory: overrideParameters.IsTaskHostFactory ?? baseParameters.IsTaskHostFactory);
+        }
+    }
+}
