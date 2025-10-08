@@ -71,14 +71,9 @@ namespace Microsoft.Build.Framework
         public bool? IsTaskHostFactory => _isTaskHostFactory;
 
         /// <summary>
-        /// Returns true if all parameters are unset (null or false).
+        /// Gets a value indicating whether returns true if parameters were unset.
         /// </summary>
-        internal bool IsEmpty =>
-            _runtime == null &&
-            _architecture == null &&
-            _dotnetHostPath == null &&
-            _msBuildAssemblyPath == null &&
-            _isTaskHostFactory == null;
+        internal bool IsEmpty => Equals(Empty);
 
         /// <summary>
         /// Merges two TaskHostParameters instances, with the second parameter values taking precedence when both are specified.
