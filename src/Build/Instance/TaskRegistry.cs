@@ -1415,9 +1415,12 @@ namespace Microsoft.Build.Execution
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
 
-                    _taskFactoryParameters = TaskHostParameters.MergeTaskHostParameters(
-                      _taskFactoryParameters,
-                      new TaskHostParameters(isTaskHostFactory: isTaskHostFactory));
+                    if (isTaskHostFactory)
+                    {
+                        _taskFactoryParameters = TaskHostParameters.MergeTaskHostParameters(
+                            _taskFactoryParameters,
+                            new TaskHostParameters(isTaskHostFactory: isTaskHostFactory));
+                    }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
