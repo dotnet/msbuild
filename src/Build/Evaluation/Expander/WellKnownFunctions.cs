@@ -566,6 +566,14 @@ namespace Microsoft.Build.Evaluation.Expander
                     return true;
                 }
             }
+            else if (string.Equals(methodName, nameof(IntrinsicFunctions.GetFileVersion), StringComparison.OrdinalIgnoreCase))
+            {
+                if (ParseArgs.TryGetArg(args, out string? arg0))
+                {
+                    returnVal = IntrinsicFunctions.GetFileVersion(arg0);
+                    return true;
+                }
+            }
             else if (string.Equals(methodName, nameof(IntrinsicFunctions.GetTargetFrameworkIdentifier), StringComparison.OrdinalIgnoreCase))
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0))
