@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Make sure we get an internal error when we call the ITaskFactory2 version of initialize factory.
+        /// Make sure we get an internal error when we call the ITaskFactory3 version of initialize factory.
         /// This is done because we cannot properly initialize the task factory using the public interface and keep
         /// backwards compatibility with orcas and whidbey.
         /// </summary>

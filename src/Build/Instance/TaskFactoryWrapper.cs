@@ -70,7 +70,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The set of special parameters that, along with the name, contribute to the identity of this factory.
         /// </summary>
-        private TaskHostParameters _factoryIdentityParameters;
+        private readonly TaskHostParameters _factoryIdentityParameters;
 
         /// <summary>
         /// An execution statistics holder.

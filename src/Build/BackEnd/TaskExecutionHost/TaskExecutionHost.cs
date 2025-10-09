@@ -993,8 +993,8 @@ namespace Microsoft.Build.BackEnd
                         else
                         {
                             // Normal in-process execution for custom task factories
-                            task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
+                            task = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3 ?
+                                taskFactory3.CreateTask(loggingHost, taskIdentityParameters) :
                                 _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
                         }
 
@@ -1729,8 +1729,8 @@ namespace Microsoft.Build.BackEnd
         {
             ITask innerTask;
 
-            innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
+            innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3 ?
+                taskFactory3.CreateTask(loggingHost, taskIdentityParameters) :
                 _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
 
             if (innerTask == null)
@@ -1759,10 +1759,7 @@ namespace Microsoft.Build.BackEnd
             TaskHostParameters taskHostParameters = new(XMakeAttributes.GetCurrentMSBuildRuntime(), XMakeAttributes.GetCurrentMSBuildArchitecture());
 
             // Merge with any existing task identity parameters
-            if (!taskIdentityParameters.IsEmpty)
-            {
-                taskHostParameters = TaskHostParameters.MergeTaskHostParameters(taskHostParameters, taskIdentityParameters);
-            }
+            taskHostParameters = TaskHostParameters.MergeTaskHostParameters(taskHostParameters, taskIdentityParameters);
 
             // Clean up the original task since we're going to wrap it
             _taskFactoryWrapper.TaskFactory.CleanupTask(innerTask);

@@ -1512,10 +1512,10 @@ namespace Microsoft.Build.Execution
                                 bool initialized = false;
                                 try
                                 {
-                                    ITaskFactory2 factory2 = factory as ITaskFactory2;
-                                    if (factory2 != null)
+                                    ITaskFactory3 factory3 = factory as ITaskFactory3;
+                                    if (factory3 != null)
                                     {
-                                        initialized = factory2.Initialize(RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
+                                        initialized = factory3.Initialize(RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
                                     }
                                     else
                                     {

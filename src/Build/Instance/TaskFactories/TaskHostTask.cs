@@ -280,6 +280,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool Execute()
         {
+            // log that we are about to spawn the task host
             _taskLoggingContext.LogComment(
                 MessageImportance.Low,
                 "ExecutingTaskInTaskHost",
