@@ -684,7 +684,7 @@ namespace Microsoft.Build.CommandLine
                 string schemaFile = null;
 #endif
                 int cpuCount = 1;
-                bool multiThreaded = false;
+                bool multiThreaded = true;
 #if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
 #else
@@ -2720,7 +2720,7 @@ namespace Microsoft.Build.CommandLine
                     // figure out if there was a max cpu count provided
                     cpuCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
 
-                    // figure out if we should use in-proc nodes for parallel build, effectively running the build multi-threaded
+                    // Multithreaded mode will be now always enabled
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
@@ -2838,7 +2838,8 @@ namespace Microsoft.Build.CommandLine
 
         private static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
         {
-            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
+            // Multithreaded mode is now always enabled, ignoring command line switches
+            return true;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)

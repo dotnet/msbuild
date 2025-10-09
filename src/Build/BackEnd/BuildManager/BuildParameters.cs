@@ -552,7 +552,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
-        public bool MultiThreaded { get; set; }
+        public bool MultiThreaded
+        {
+            get => true;
+            set { /* no-op */ }
+        }
 
         /// <summary>
         /// The amount of memory the build should limit itself to using, in megabytes.
