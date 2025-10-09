@@ -20,7 +20,6 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-
     public sealed class WriteLinesToFile_Tests
     {
         private readonly ITestOutputHelper _output;
@@ -419,16 +418,11 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 var buildParameters = new BuildParameters
                 {
-                    MaxNodeCount = Environment.ProcessorCount,
-                    Loggers = new[] { new FileLogger { Verbosity = LoggerVerbosity.Diagnostic, Parameters = $"logfile={logFile}" } }
+                    MaxNodeCount = Environment.ProcessorCount
                 };
 
                 var buildRequestData = new BuildRequestData(parallelProject, new[] { "Build" }, null);
                 var buildResult = buildManager.Build(buildParameters, buildRequestData);
-
-                // Print log location
-                _output.WriteLine($"Build log: {logFile}");
-                _output.WriteLine($"Build result: {buildResult.OverallResult}");
 
                 // Verify build result
                 buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
@@ -546,7 +540,6 @@ namespace Microsoft.Build.Tasks.UnitTests
                 var buildParameters = new BuildParameters { MaxNodeCount = Environment.ProcessorCount };
                 var buildRequestData = new BuildRequestData(parallelProject, new[] { "Build" }, null);
                 var buildResult = buildManager.Build(buildParameters, buildRequestData);
-
 
                 var content = File.ReadAllText(outputFile);
                 var lines = content.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
