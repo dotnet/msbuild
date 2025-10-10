@@ -11,7 +11,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Task that simply emits a message. Importance defaults to high if not specified.
     /// </summary>
-    public sealed class Message : TaskExtension
+    public sealed class Message : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
         /// Text to log.
@@ -44,6 +44,11 @@ namespace Microsoft.Build.Tasks
         /// Indicates if this is a critical message
         /// </summary>
         public bool IsCritical { get; set; }
+
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         public override bool Execute()
         {

@@ -1080,11 +1080,18 @@ namespace Microsoft.Build.BackEnd
         /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
         /// No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
         /// </summary>
-        private void SetProjectCurrentDirectory()
+        private void SetProjectDirectory()
         {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                {
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.PathHelpers.AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
+                }
+                else
+                {
+                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
+                }
             }
         }
 
@@ -1134,7 +1141,14 @@ namespace Microsoft.Build.BackEnd
                     {
                         foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
                         {
-                            Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                            {
+                                _requestEntry.TaskEnvironment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue);
+                            }
+                            else
+                            {
+                                Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
+                            }
                         }
                     }
 
@@ -1190,7 +1204,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.RequestConfiguration.Project.ProjectFileLocation, "NoTargetSpecified");
 
                 // Set the current directory to that required by the project.
-                SetProjectCurrentDirectory();
+                SetProjectDirectory();
 
                 // Transfer results and state from the previous node, if necessary.
                 // In order for the check for target completeness for this project to be valid, all of the target results from the project must be present
@@ -1412,7 +1426,15 @@ namespace Microsoft.Build.BackEnd
 
                 // Restore the saved environment variables.
                 SetEnvironmentVariableBlock(_requestEntry.RequestConfiguration.SavedEnvironmentVariables);
-                NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
+                
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                {
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.PathHelpers.AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
+                }
+                else
+                {
+                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
+                }
             }
         }
 
@@ -1435,7 +1457,14 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!savedEnvironment.ContainsKey(entry.Key))
                 {
-                    Environment.SetEnvironmentVariable(entry.Key, null);
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                    {
+                        _requestEntry.TaskEnvironment.SetEnvironmentVariable(entry.Key, null);
+                    }
+                    else
+                    {
+                        Environment.SetEnvironmentVariable(entry.Key, null);
+                    }
                 }
             }
         }
@@ -1453,7 +1482,14 @@ namespace Microsoft.Build.BackEnd
                 string value;
                 if (!currentEnvironment.TryGetValue(entry.Key, out value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
                 {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                    {
+                        _requestEntry.TaskEnvironment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    }
+                    else
+                    {
+                        Environment.SetEnvironmentVariable(entry.Key, entry.Value);
+                    }
                 }
             }
         }

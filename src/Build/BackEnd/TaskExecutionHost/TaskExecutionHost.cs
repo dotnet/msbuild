@@ -160,6 +160,11 @@ namespace Microsoft.Build.BackEnd
         private readonly PropertyTrackingSetting _propertyTrackingSettings;
 
         /// <summary>
+        /// The task environment to be used by IMultiThreadableTask instances.
+        /// </summary>
+        internal TaskEnvironment TaskEnvironment { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         internal TaskExecutionHost(IBuildComponentHost host)
@@ -367,6 +372,11 @@ namespace Microsoft.Build.BackEnd
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
+            
+            if (TaskInstance is IMultiThreadableTask multiThreadableTask)
+            {
+                multiThreadableTask.TaskEnvironment = TaskEnvironment;
+            }
 
             return true;
 
@@ -614,6 +624,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+                Debug.Assert(TaskInstance is not IMultiThreadableTask multiThreadableTask || multiThreadableTask.TaskEnvironment != null, "task environment missing for multi-threadable task");
                 taskReturnValue = TaskInstance.Execute();
             }
             finally
@@ -728,7 +739,7 @@ namespace Microsoft.Build.BackEnd
         {
             return InternalSetTaskParameter(parameter, item);
         }
-
+        
         /// <summary>
         /// Called on the local side.
         /// </summary>
@@ -976,7 +987,8 @@ namespace Microsoft.Build.BackEnd
 #endif
                         IsOutOfProc,
                         scheduledNodeId,
-                        ProjectInstance.GetProperty);
+                        ProjectInstance.GetProperty,
+                        TaskEnvironment);
                 }
                 else
                 {
@@ -999,7 +1011,7 @@ namespace Microsoft.Build.BackEnd
                                 return null;
                             }
 
-                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory);
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory, scheduledNodeId);
                             isTaskHost = true;
                         }
                         else
@@ -1736,8 +1748,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskIdentityParameters">Task identity parameters.</param>
         /// <param name="loggingHost">The logging host to use for the task.</param>
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
+        /// <param name="scheduledNodeId">The ID of the node where the task is scheduled to run.</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory, int scheduledNodeId)
         {
             ITask innerTask;
 
@@ -1793,11 +1806,12 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                true
+                true,
 #if FEATURE_APPDOMAIN
-                , AppDomainSetup
+                AppDomainSetup,
 #endif
-                );
+                scheduledNodeId,
+                TaskEnvironment);
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         }
     }
