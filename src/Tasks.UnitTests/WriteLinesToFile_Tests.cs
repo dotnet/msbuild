@@ -380,7 +380,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             using (var testEnv = TestEnvironment.Create(_output))
             {
                 var outputFile = testEnv.CreateFile("output.txt").Path;
-                var logFile = Path.Combine(Path.GetDirectoryName(outputFile), "build.log");
                 var projectCount = 8;
 
                 // Create parent project file to run child projects in parallel
