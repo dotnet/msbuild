@@ -25,7 +25,16 @@ namespace Microsoft.Build.Shared
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         /// <param name="iTaskItemType">type of an ITaskItem</param>
-        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly, Type iTaskItemType, bool loadedViaMetadataLoadContext = false)
+        /// <param name="architecture">assembly architecture extracted from PE flags</param>
+        /// <param name="runtime"></param>
+        internal LoadedType(
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? architecture = null,
+            string? runtime = null,
+            bool loadedViaMetadataLoadContext = false)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
             ErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
@@ -36,12 +45,15 @@ namespace Microsoft.Build.Shared
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
-            
+            LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
+            Architecture = architecture;
+            Runtime = runtime;
+
             // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
-            Path = string.IsNullOrEmpty(loadedAssembly.Location) 
-                ? assemblyLoadInfo.AssemblyLocation 
+            Path = string.IsNullOrEmpty(loadedAssembly.Location)
+                ? assemblyLoadInfo.AssemblyLocation
                 : loadedAssembly.Location;
-            
+
             LoadedAssembly = loadedAssembly;
 
 #if !NET35
@@ -167,6 +179,12 @@ namespace Microsoft.Build.Shared
         public bool IsMarshalByRef { get; }
 
         /// <summary>
+        /// Gets whether this type was loaded via MetadataLoadContext.
+        /// If true, the assembly will be pushed out of process.
+        /// </summary>
+        public bool LoadedViaMetadataLoadContext { get; }
+
+        /// <summary>
         /// Determines if the task has a hardcoded requirement for STA thread usage.
         /// </summary>
         private bool CheckForHardcodedSTARequirement()
@@ -198,6 +216,10 @@ namespace Microsoft.Build.Shared
         internal Type Type { get; private set; }
 
         internal AssemblyName LoadedAssemblyName { get; private set; }
+
+        internal string? Architecture { get; private set; }
+
+        internal string? Runtime { get; private set; }
 
         internal string Path { get; private set; }
 

@@ -62,14 +62,6 @@ namespace Microsoft.Build.BackEnd
         private IDictionary<string, string> _factoryIdentityParameters;
 
         /// <summary>
-        /// Tracks whether, in the UsingTask invocation, we were specifically asked to use
-        /// the task host.  If so, that overrides all other concerns, and we will launch
-        /// the task host even if the requested runtime / architecture match that of the
-        /// current MSBuild process.
-        /// </summary>
-        private bool _taskHostFactoryExplicitlyRequested;
-
-        /// <summary>
         /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
         /// TaskLoader will be able to call back with errors.
         /// </summary>
@@ -274,12 +266,12 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
+            bool isTaskHostParamsMatchCurrentProc = false;
             if (taskFactoryIdentityParameters != null)
             {
+                isTaskHostParamsMatchCurrentProc = TaskHostParametersMatchCurrentProcess(taskFactoryIdentityParameters);
                 _factoryIdentityParameters = new Dictionary<string, string>(taskFactoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
             }
-
-            _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
 
             _isTaskHostFactory = (taskFactoryIdentityParameters != null
                  && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
@@ -293,7 +285,7 @@ namespace Microsoft.Build.BackEnd
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
 
-                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, taskHostExplicitlyRequested, isTaskHostParamsMatchCurrentProc);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -343,7 +335,6 @@ namespace Microsoft.Build.BackEnd
             int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty)
         {
-            bool useTaskFactory = false;
             Dictionary<string, string> mergedParameters = null;
             _taskLoggingContext = taskLoggingContext;
 
@@ -356,16 +347,10 @@ namespace Microsoft.Build.BackEnd
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
-                useTaskFactory = _taskHostFactoryExplicitlyRequested || !TaskHostParametersMatchCurrentProcess(mergedParameters);
-            }
-            else
-            {
-                // if we don't have any task host parameters specified on either the using task or the
-                // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
-                // as the task factory.
-                useTaskFactory = _taskHostFactoryExplicitlyRequested;
             }
 
+            // if loaded through a metadata load context, we have to use the task factory since this assembly wasn't loaded in current process.
+            bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
             _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
@@ -376,12 +361,12 @@ namespace Microsoft.Build.BackEnd
 
                 if (!mergedParameters.ContainsKey(XMakeAttributes.runtime))
                 {
-                    mergedParameters[XMakeAttributes.runtime] = XMakeAttributes.GetCurrentMSBuildRuntime();
+                    mergedParameters[XMakeAttributes.runtime] = _loadedType.Runtime ?? XMakeAttributes.GetCurrentMSBuildRuntime();
                 }
 
                 if (!mergedParameters.ContainsKey(XMakeAttributes.architecture))
                 {
-                    mergedParameters[XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                    mergedParameters[XMakeAttributes.architecture] = _loadedType.Architecture ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
 
                 if (mergedParameters[XMakeAttributes.runtime].Equals(XMakeAttributes.MSBuildRuntimeValues.net))
@@ -662,16 +647,16 @@ namespace Microsoft.Build.BackEnd
         /// Returns true if the provided set of task host parameters matches the current process,
         /// and false otherwise.
         /// </summary>
-        private static bool TaskHostParametersMatchCurrentProcess(IDictionary<string, string> mergedParameters)
+        private static bool TaskHostParametersMatchCurrentProcess(IDictionary<string, string> tashHostParameters)
         {
-            if (mergedParameters == null || mergedParameters.Count == 0)
+            if (tashHostParameters == null || tashHostParameters.Count == 0)
             {
                 // We don't care, so they match by default.
                 return true;
             }
 
             string runtime;
-            if (mergedParameters.TryGetValue(XMakeAttributes.runtime, out runtime))
+            if (tashHostParameters.TryGetValue(XMakeAttributes.runtime, out runtime))
             {
                 string currentRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(XMakeAttributes.MSBuildRuntimeValues.currentRuntime);
 
@@ -683,7 +668,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             string architecture;
-            if (mergedParameters.TryGetValue(XMakeAttributes.architecture, out architecture))
+            if (tashHostParameters.TryGetValue(XMakeAttributes.architecture, out architecture))
             {
                 string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
 
