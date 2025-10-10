@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -9,6 +10,7 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -144,7 +146,9 @@ namespace Microsoft.Build.Tasks
             // Use hash for mutex name to avoid excessive string allocation
             string tempFileName = $"temp_{targetFile.GetHashCode()}_{Guid.NewGuid():N}";
             string tempFile = Path.Combine(directoryPath, tempFileName);
-            string mutexName = $"WriteLinesToFile_{targetFile.GetHashCode()}";
+            string normalizedTargetPath = targetFile.ToLowerInvariant();
+            int stableHash = FowlerNollVo1aHash.ComputeHash32Fast(normalizedTargetPath);
+            string mutexName = $"MSBuild_WriteLinesToFile_{stableHash}";
 
             // Retry acquiring mutex up to 5 times with 200ms delay
             const int mutexRetries = 5;
