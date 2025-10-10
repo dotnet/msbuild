@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace Microsoft.Build.Shared
@@ -21,56 +21,53 @@ namespace Microsoft.Build.Shared
     internal static class TypeUtilities
     {
         /// <summary>
-        /// Determines whether the specified <paramref name="type"/> is decorated with an attribute of type <typeparamref name="T"/>.
+        /// Gets all attributes decorating the specified <paramref name="type"/>.
         /// </summary>
-        public static bool HasAttribute<T>(this Type type)
-            where T : Attribute
-        {
-            return type.HasAttribute(typeof(T).Name);
-        }
-
-        /// <summary>
-        /// Determines whether the specified <paramref name="type"/> is decorated with an attribute whose simple type name
-        /// equals <paramref name="attributeName"/>.
-        /// </summary>
-        public static bool HasAttribute(this Type type, string attributeName)
+        public static IList<CustomAttributeData> GetCustomAttributes(this Type type)
         {
             if (type == null)
             {
-                return false;
+                return Array.Empty<CustomAttributeData>();
             }
 
             try
             {
-                return CustomAttributeData
-                    .GetCustomAttributes(type)
-                    .Any(attr => SafeGetAttributeName(attr) == attributeName);
+                return CustomAttributeData.GetCustomAttributes(type);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 // Skip this attribute - it references a type that can't be loaded/found
                 // It might be available in the child node.
-                return false;
+                return Array.Empty<CustomAttributeData>();
             }
         }
 
         /// <summary>
-        /// Safely retrieves the simple name of an attribute's type, swallowing non-critical reflection exceptions.
+        /// Determines whether the list of <paramref name="attributes"/> contains an attribute whose simple type name
+        /// equals <typeparamref name="T"/>, swallowing non-critical reflection exceptions..
         /// </summary>
-        /// <param name="attr">The attribute metadata.</param>
-        /// <returns>The simple attribute type name, or <c>null</c> if it cannot be resolved.</returns>
-        private static string? SafeGetAttributeName(CustomAttributeData attr)
+        /// <param name="attributes">The list of attributes retrieved from a type.</param>
+        /// <returns>True if the attribute is found, or false if it cannot be resolved.</returns>
+        public static bool HasAttribute<T>(IList<CustomAttributeData> attributes)
+            where T : Attribute
         {
-            try
+            foreach (CustomAttributeData attr in attributes)
             {
-                return attr.AttributeType?.Name;
+                try
+                {
+                    if (attr.AttributeType?.Name == nameof(T))
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Skip this attribute - it references a type that can't be loaded/found
+                    // It might be available in the child node.
+                }
             }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Skip this attribute - it references a type that can't be loaded/found
-                // It might be available in the child node.
-                return null;
-            }
+
+            return false;
         }
     }
 }

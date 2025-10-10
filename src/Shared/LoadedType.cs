@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-
 
 namespace Microsoft.Build.Shared
 {
@@ -53,12 +53,13 @@ namespace Microsoft.Build.Shared
             Type? t = type;
             while (t is not null)
             {
-                if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
+                IList<CustomAttributeData> attributes = t.GetCustomAttributes();
+                if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(attributes))
                 {
                     HasLoadInSeparateAppDomainAttribute = true;
                 }
 
-                if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
+                if (TypeUtilities.HasAttribute<RunInSTAAttribute>(attributes))
                 {
                     HasSTAThreadAttribute = true;
                 }
