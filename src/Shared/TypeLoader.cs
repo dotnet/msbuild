@@ -367,23 +367,44 @@ namespace Microsoft.Build.Shared
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName);
 
-                // collects data to push assembly execution out of proc
-                if ((useTaskHost || !isTaskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null)
+                if (ShouldUseMetadataLoadContext(useTaskHost, isTaskHostParamsMatchCurrentProc))
                 {
                     return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
                 }
 
+                LoadedType loadedType = TryLoadInProc(typeName);
+                if (loadedType == null)
+                {
+                    // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
+                    MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
+                    loadedType = GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                    MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
+                }
+
+                return loadedType;
+            }
+
+            /// <summary>
+            /// If assembly should use metadata load contxt it will be executed out of proc.
+            /// </summary>
+            /// <param name="useTaskHost">Task Host Parameter was specified explicitly in XML or throght environment variable.</param>
+            /// <param name="isTaskHostParamsMatchCurrentProc">The parameter defines if Runtime/Architecture explicitly defined in XML match current process.</param>
+            private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool isTaskHostParamsMatchCurrentProc) =>
+                (useTaskHost || !isTaskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
+
+            private LoadedType TryLoadInProc(string typeName)
+            {
+                LoadedType loadedType = null;
                 try
                 {
-                    return LoadInProc(typeName);
+                    loadedType = LoadInProc(typeName);
                 }
-
-                // The assembly can't be loaded in proc due to arhitecture or runtime missmatch that was discovered during in-proc load.
-                // Now msbuild tries to get all necessary info from assembly metadata and to be able to push assembly execution out of proc in the caller.
                 catch
                 {
-                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                    // The assembly can't be loaded in-proc due to architecture or runtime mismatch that was discovered during in-proc load. 
                 }
+
+                return loadedType;
             }
 
             /// <summary>
@@ -471,21 +492,26 @@ namespace Microsoft.Build.Shared
                 void SetRuntime()
                 {
                     string targetFramework = null;
-                    CustomAttributeData targetFrameworkAttr = assembly?
-                        .GetCustomAttributesData()?
-                        .FirstOrDefault(a => a.AttributeType.Name == TargetFrameworkAttributeName && a.AttributeType.Namespace == VersioningNamespaceName);
-
-                    if (targetFrameworkAttr != null && targetFrameworkAttr.ConstructorArguments.Count > 0)
+                    try
                     {
-                        // the final value looks like: ".NETFramework,Version=v3.5"
-                        targetFramework = targetFrameworkAttr.ConstructorArguments[0].Value as string ?? string.Empty;
-                        _runtime = targetFramework.StartsWith(DotNetCoreIdentifier) ? MSBuildRuntimeValues.net : MSBuildRuntimeValues.clr4;
+                        CustomAttributeData targetFrameworkAttr = assembly?
+                            .GetCustomAttributesData()?
+                            .FirstOrDefault(a => a.AttributeType.Name == TargetFrameworkAttributeName && a.AttributeType.Namespace == VersioningNamespaceName);
+
+                        if (targetFrameworkAttr != null && targetFrameworkAttr.ConstructorArguments.Count > 0)
+                        {
+                            // the final value looks like: ".NETFramework,Version=v3.5"
+                            targetFramework = targetFrameworkAttr.ConstructorArguments[0].Value as string ?? string.Empty;
+                            _runtime = targetFramework.StartsWith(DotNetCoreIdentifier) ? MSBuildRuntimeValues.net : MSBuildRuntimeValues.clr4;
+                        }
+                    }
+                    catch
+                    {
+                        // something went wrong with reading the custom attribute!
                     }
 
-                    // if we hit this codition the assembly has explicitly disabled the TargetFrameworkAttribute setup.
-                    if (targetFramework == null)
+                    if (targetFramework == null && _runtime == null)
                     {
-                        // emit message
                         bool hasSystemRuntime = assembly.GetReferencedAssemblies().Any(a => string.Equals(a.Name, SystemRuntimeAssemblyName, StringComparison.OrdinalIgnoreCase));
                         if (hasSystemRuntime)
                         {

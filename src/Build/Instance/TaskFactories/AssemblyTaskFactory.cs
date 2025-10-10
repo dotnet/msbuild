@@ -359,15 +359,16 @@ namespace Microsoft.Build.BackEnd
 
                 mergedParameters ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                if (!mergedParameters.ContainsKey(XMakeAttributes.runtime))
-                {
-                    mergedParameters[XMakeAttributes.runtime] = _loadedType.Runtime ?? XMakeAttributes.GetCurrentMSBuildRuntime();
-                }
+                // overload runtime/architecture with values received during assembly load if these are available.
+                mergedParameters[XMakeAttributes.runtime] =
+                    _loadedType?.Runtime ??
+                    (mergedParameters.TryGetValue(XMakeAttributes.runtime, out string existingRuntime) ? existingRuntime : null) ??
+                    XMakeAttributes.GetCurrentMSBuildRuntime();
 
-                if (!mergedParameters.ContainsKey(XMakeAttributes.architecture))
-                {
-                    mergedParameters[XMakeAttributes.architecture] = _loadedType.Architecture ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
-                }
+                mergedParameters[XMakeAttributes.architecture] =
+                    _loadedType?.Architecture ??
+                    (mergedParameters.TryGetValue(XMakeAttributes.architecture, out string existingArch) ? existingArch : null) ??
+                    XMakeAttributes.GetCurrentMSBuildArchitecture();
 
                 if (mergedParameters[XMakeAttributes.runtime].Equals(XMakeAttributes.MSBuildRuntimeValues.net))
                 {

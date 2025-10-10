@@ -65,19 +65,27 @@ namespace Microsoft.Build.Shared
             Type? t = type;
             while (t is not null)
             {
-                if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
+                try
                 {
-                    HasLoadInSeparateAppDomainAttribute = true;
-                }
+                    if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
+                    {
+                        HasLoadInSeparateAppDomainAttribute = true;
+                    }
 
-                if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
-                {
-                    HasSTAThreadAttribute = true;
-                }
+                    if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
+                    {
+                        HasSTAThreadAttribute = true;
+                    }
 
-                if (t.IsMarshalByRef)
+                    if (t.IsMarshalByRef)
+                    {
+                        IsMarshalByRef = true;
+                    }
+                }
+                catch when (loadedViaMetadataLoadContext)
                 {
-                    IsMarshalByRef = true;
+                    // when assembly is loaded via metadata load context we can ignore exception because there is no expectation to have it in proc.
+                    // BUT we should throw for in-proc case and handle it on higher level.
                 }
 
                 t = t.BaseType;
