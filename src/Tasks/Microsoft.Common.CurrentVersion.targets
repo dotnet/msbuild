@@ -2128,58 +2128,73 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         much information as possible will be passed to the compilers.
         -->
 
+    <ItemGroup>
+      <_ProjectsForGetTargetPath Include="@(_MSBuildProjectReferenceExistent)"
+        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' != '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''">
+        <Properties>%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)</Properties>
+        <RemoveProperties>%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)</RemoveProperties>
+      </_ProjectsForGetTargetPath>
+    </ItemGroup>
+
     <MSBuild
-        Projects="@(_MSBuildProjectReferenceExistent)"
+        Projects="@(_ProjectsForGetTargetPath)"
         Targets="GetTargetPath"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
-        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and ('$(BuildingInsideVisualStudio)' == 'true' or '$(BuildProjectReferences)' != 'true') and '$(VisualStudioVersion)' != '10.0' and '@(_MSBuildProjectReferenceExistent)' != ''"
-        ContinueOnError="!$(BuildingProject)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
-
+        ContinueOnError="!$(BuildingProject)">
       <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProjectReferencePaths"
-        Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)'=='true'" />
+        Condition="'%(_ProjectsForGetTargetPath.ReferenceOutputAssembly)'=='true'" />
       <Output TaskParameter="TargetOutputs"
-        ItemName="%(_MSBuildProjectReferenceExistent.OutputItemType)"
-        Condition="'%(_MSBuildProjectReferenceExistent.OutputItemType)' != ''" />
-
+        ItemName="%(_ProjectsForGetTargetPath.OutputItemType)"
+        Condition="'%(_ProjectsForGetTargetPath.OutputItemType)' != ''" />
     </MSBuild>
 
     <!--
         Build referenced projects when building from the command line.
         -->
-    <MSBuild
-        Projects="@(_MSBuildProjectReferenceExistent)"
-        Targets="%(_MSBuildProjectReferenceExistent.Targets)"
-        BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform);  %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
-        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
-        ContinueOnError="$(ContinueOnError)"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
+    <ItemGroup>
+      <_ProjectsForCommandLineBuild Include="@(_MSBuildProjectReferenceExistent)"
+        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingInsideVisualStudio)' != 'true' and '$(BuildProjectReferences)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''">
+        <Properties>%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)</Properties>
+        <RemoveProperties>%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)</RemoveProperties>
+        <Targets>%(_MSBuildProjectReferenceExistent.Targets)</Targets>
+      </_ProjectsForCommandLineBuild>
+    </ItemGroup>
 
+    <!-- Unlike the other MSBuild Task invocations, we must do some amount of batching here
+         because it's not possible to pass in separate Target lists for the project in a single invocation (yet). -->
+    <MSBuild
+        Projects="@(_ProjectsForCommandLineBuild)"
+        Targets="%(_ProjectsForCommandLineBuild.Targets)"
+        BuildInParallel="$(BuildInParallel)"
+        ContinueOnError="$(ContinueOnError)">
       <Output TaskParameter="TargetOutputs" ItemName="_ResolvedProjectReferencePaths"
-        Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)'=='true' or '$(DesignTimeBuild)' == 'true'" />
+        Condition="'%(_ProjectsForCommandLineBuild.ReferenceOutputAssembly)'=='true' or '$(DesignTimeBuild)' == 'true'" />
       <Output TaskParameter="TargetOutputs"
-        ItemName="%(_MSBuildProjectReferenceExistent.OutputItemType)"
-        Condition="'%(_MSBuildProjectReferenceExistent.OutputItemType)' != ''" />
+        ItemName="%(_ProjectsForCommandLineBuild.OutputItemType)"
+        Condition="'%(_ProjectsForCommandLineBuild.OutputItemType)' != ''" />
 
     </MSBuild>
 
     <!--
         Get manifest items from the (non-exe) built project references (to feed them into ResolveNativeReference).
         -->
+    <ItemGroup>
+      <_ProjectsForNativeManifest Include="@(_MSBuildProjectReferenceExistent)"
+        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingProject)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''">
+        <Properties>%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)</Properties>
+        <RemoveProperties>%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)</RemoveProperties>
+      </_ProjectsForNativeManifest>
+    </ItemGroup>
+
     <MSBuild
-        Projects="@(_MSBuildProjectReferenceExistent)"
+        Projects="@(_ProjectsForNativeManifest)"
         Targets="GetNativeManifest"
         BuildInParallel="$(BuildInParallel)"
-        Properties="%(_MSBuildProjectReferenceExistent.SetConfiguration); %(_MSBuildProjectReferenceExistent.SetPlatform); %(_MSBuildProjectReferenceExistent.SetTargetFramework)"
-        Condition="'%(_MSBuildProjectReferenceExistent.BuildReference)' == 'true' and '@(ProjectReferenceWithConfiguration)' != '' and '$(BuildingProject)' == 'true' and '@(_MSBuildProjectReferenceExistent)' != ''"
         ContinueOnError="$(ContinueOnError)"
-        SkipNonexistentTargets="true"
-        RemoveProperties="%(_MSBuildProjectReferenceExistent.GlobalPropertiesToRemove)$(_GlobalPropertiesToRemoveFromProjectReferences)">
+        SkipNonexistentTargets="true">
 
       <Output TaskParameter="TargetOutputs" ItemName="NativeReference"
-        Condition="'%(_MSBuildProjectReferenceExistent.ReferenceOutputAssembly)' == 'true'" />
+        Condition="'%(_ProjectsForNativeManifest.ReferenceOutputAssembly)' == 'true'" />
     </MSBuild>
 
     <ItemGroup>
