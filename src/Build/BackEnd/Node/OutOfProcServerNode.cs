@@ -99,7 +99,7 @@ namespace Microsoft.Build.Experimental
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
             ServerNodeHandshake handshake = new(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 

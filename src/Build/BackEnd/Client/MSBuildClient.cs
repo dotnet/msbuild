@@ -534,10 +534,10 @@ namespace Microsoft.Build.Experimental
                         partialBuildTelemetry);
         }
 
-        private ServerNodeHandshake GetHandshake()
-        {
-            return new ServerNodeHandshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
-        }
+        private ServerNodeHandshake GetHandshake() => new(CommunicationsUtilities.GetHandshakeOptions(
+            taskHost: false,
+            taskHostParameters: TaskHostParameters.Empty,
+            architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
         /// <summary>
         /// Handle cancellation.
