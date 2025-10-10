@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Reference the actual Framework assembly -->
+  <ItemGroup>
+    <Reference Include="Microsoft.Build.Framework">
+      <HintPath>..\..\..\artifacts\bin\Microsoft.Build.Framework\Debug\netstandard2.0\Microsoft.Build.Framework.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Include the built analyzer with code fixer -->
+  <ItemGroup>
+    <Analyzer Include="..\..\..\artifacts\bin\ThreadSafeTaskAnalyzer\Debug\netstandard2.0\Microsoft.Build.Utilities.MultiThreadableTaskAnalyzer.dll" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,10 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <UseProductOutputPath>true</UseProductOutputPath>
+    <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj" />
+  </ItemGroup>
+</Project>
