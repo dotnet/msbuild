@@ -448,7 +448,7 @@
       </trans-unit>
       <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
         <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
-        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</target>
+        <target state="translated">A TaskFactory personalizada "{0}" para a Tarefa "{1}" não dá suporte à execução do TaskHost fora do processo. Desabilite o modo de compilação multithread ou remova a TaskFactory personalizada das suas definições de &lt;UsingTask&gt; nos arquivos do projeto.</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
