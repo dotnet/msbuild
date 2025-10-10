@@ -134,6 +134,9 @@
     <EmbeddedResource Include="TestAssets\ExampleNetTask\TestMSBuildTaskInNet\global.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTaskWithImplicitParams\global.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTask\global.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
