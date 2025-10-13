@@ -446,6 +446,11 @@
         <target state="translated">Niestandardowa reguła kontrolera: „{0}” została pomyślnie zarejestrowana.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">Niestandardowy obiekt TaskFactory „{0}” dla zadania „{1}” nie obsługuje poza procesem wykonywania hosta zadań (TaskHost). Wyłącz tryb kompilacji wielowątkowej lub usuń niestandardową klasę TaskFactory z definicji &lt;UsingTask&gt; w plikach projektu.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: Domyślne narzędzie Resolver zestawu SDK nie może rozpoznać zestawu SDK „{0}”, ponieważ katalog „{1}” nie istnieje.</target>

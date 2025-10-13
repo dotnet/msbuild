@@ -446,6 +446,11 @@
         <target state="translated">La regla de comprobación personalizada: "{0}" se ha registrado correctamente.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">La TaskFactory personalizada '{0}' para la tarea '{1}' no admite la ejecución de TaskHost fuera de proceso. Desactive el modo de compilación multiproceso o quite el TaskFactory personalizado de las definiciones de &lt;UsingTask&gt; en los archivos del proyecto.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: La resolución predeterminada del SDK no pudo resolver el SDK "{0}" porque el directorio "{1}" no existía.</target>

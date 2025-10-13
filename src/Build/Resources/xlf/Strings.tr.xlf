@@ -446,6 +446,11 @@
         <target state="translated">‘{0}’ özel denetim kuralı başarıyla kaydedildi.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">‘{1}’ Görevi için Özel ‘{0}’ TaskFactory, işlem dışı TaskHost yürütmeyi desteklemiyor. Çok iş parçacıklı derleme modunu kapatın veya özel TaskFactory’yi proje dosyalarındaki &lt;UsingTask&gt; tanımlarınızdan kaldırın.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: "{1}" dizini olmadığından, varsayılan SDK çözümleyicisi "{0}" SDK’sını çözümleyemedi.</target>

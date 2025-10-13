@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -112,7 +113,7 @@ namespace Microsoft.Build.Shared.Debugging
             var fullPath = Path.Combine(DebugPath, fileName);
 
             var counter = 0;
-            while (File.Exists(fullPath))
+            while (FileSystems.Default.FileExists(fullPath))
             {
                 fileName = $"{fileNameWithoutExtension}_{counter++}{extension}";
                 fullPath = Path.Combine(DebugPath, fileName);
