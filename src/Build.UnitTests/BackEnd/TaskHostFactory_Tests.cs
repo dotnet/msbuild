@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -23,6 +24,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// </summary>
     public sealed class TaskHostFactory_Tests
     {
+        private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(TaskHostFactory_Tests).Assembly.Location) ?? AppContext.BaseDirectory, "Microsoft.Build.Engine.UnitTests.dll");
+
         private ITestOutputHelper _output;
 
         public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
@@ -39,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <param name="envVariableSpecified">Whether to set MSBUILDFORCEALLTASKSOUTOFPROC environment variable</param>
         [Theory]
         [InlineData(true, false)]
-        [InlineData(false, true, Skip = "floating failure, it requires separate investigation")]
+        [InlineData(false, true)]
         [InlineData(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
@@ -48,7 +51,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
                 string pidTaskProject = $@"
 <Project>
-    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""{taskFactory}"" />
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""{taskFactory}"" />
     <Target Name='AccessPID'>
         <ProcessIdTask>
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
@@ -97,7 +100,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Process taskHostNode = Process.GetProcessById(pid);
                     bool processExited = taskHostNode.WaitForExit(3000);
 
-                    processExited.ShouldBeFalse();
+                    processExited.ShouldBeFalse($"TaskHost should remain alive after build. TaskHost exited with code: {taskHostNode?.ExitCode}");
                     try
                     {
                         taskHostNode.Kill();
@@ -121,17 +124,17 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 string pidTaskProject = $@"
 <Project>
-<UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""TaskHostFactory"" />
-<UsingTask TaskName=""ProcessIdTaskSidecar"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" TaskFactory=""AssemblyTaskFactory"" />
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+    <UsingTask TaskName=""ProcessIdTaskSidecar"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""AssemblyTaskFactory"" />
 
-<Target Name='AccessPID'>
-    <ProcessIdTask>
-        <Output PropertyName=""PID"" TaskParameter=""Pid"" />
-    </ProcessIdTask>
-    <ProcessIdTaskSidecar>
-        <Output PropertyName=""PID2"" TaskParameter=""Pid"" />
-    </ProcessIdTaskSidecar>
-</Target>
+    <Target Name='AccessPID'>
+        <ProcessIdTask>
+            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
+        </ProcessIdTask>
+        <ProcessIdTaskSidecar>
+            <Output PropertyName=""PID2"" TaskParameter=""Pid"" />
+        </ProcessIdTaskSidecar>
+    </Target>
 </Project>";
 
                 TransientTestFile project = env.CreateFile("testProject.csproj", pidTaskProject);

@@ -213,6 +213,11 @@ namespace Microsoft.Build.Shared
         private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation);
+            }
+
             string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
 
             // Deduplicate between MSBuild assemblies and task dependencies.
@@ -369,15 +374,15 @@ namespace Microsoft.Build.Shared
 
                 if (ShouldUseMetadataLoadContext(useTaskHost, isTaskHostParamsMatchCurrentProc))
                 {
-                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                    return GetTypeForOutOfProcExecution(typeName);
                 }
 
-                LoadedType loadedType = TryLoadInProc(typeName);
+                LoadedType loadedType = TryLoadTypeInProc(typeName);
                 if (loadedType == null)
                 {
                     // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
                     MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
-                    loadedType = GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                    loadedType = GetTypeForOutOfProcExecution(typeName);
                     MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
                 }
 
@@ -387,12 +392,12 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// If assembly should use metadata load contxt it will be executed out of proc.
             /// </summary>
-            /// <param name="useTaskHost">Task Host Parameter was specified explicitly in XML or throght environment variable.</param>
+            /// <param name="useTaskHost">Task Host Parameter was specified explicitly in XML or through environment variable.</param>
             /// <param name="isTaskHostParamsMatchCurrentProc">The parameter defines if Runtime/Architecture explicitly defined in XML match current process.</param>
             private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool isTaskHostParamsMatchCurrentProc) =>
                 (useTaskHost || !isTaskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
 
-            private LoadedType TryLoadInProc(string typeName)
+            private LoadedType TryLoadTypeInProc(string typeName)
             {
                 LoadedType loadedType = null;
                 try
@@ -556,7 +561,7 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
+            private LoadedType GetTypeForOutOfProcExecution(string typeName)
             {
                 return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
                 {

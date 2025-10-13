@@ -266,7 +266,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
-            bool isTaskHostParamsMatchCurrentProc = false;
+            bool isTaskHostParamsMatchCurrentProc = true;
             if (taskFactoryIdentityParameters != null)
             {
                 isTaskHostParamsMatchCurrentProc = TaskHostParametersMatchCurrentProcess(taskFactoryIdentityParameters);
@@ -338,6 +338,9 @@ namespace Microsoft.Build.BackEnd
             Dictionary<string, string> mergedParameters = null;
             _taskLoggingContext = taskLoggingContext;
 
+            // if the loadedType was populated through a metadata load context, we have to use the task factory since this assembly wasn't loaded in current process.
+            bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
+
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
             // still launch the task factory, it will be with parameters corresponding to the
@@ -347,10 +350,9 @@ namespace Microsoft.Build.BackEnd
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
+                useTaskFactory = _loadedType.LoadedViaMetadataLoadContext || !TaskHostParametersMatchCurrentProcess(mergedParameters);
             }
 
-            // if loaded through a metadata load context, we have to use the task factory since this assembly wasn't loaded in current process.
-            bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
             _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
@@ -376,7 +378,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                TaskHostTask task = new TaskHostTask(
+                TaskHostTask task = new(
                     taskLocation,
                     taskLoggingContext,
                     buildComponentHost,
@@ -648,16 +650,16 @@ namespace Microsoft.Build.BackEnd
         /// Returns true if the provided set of task host parameters matches the current process,
         /// and false otherwise.
         /// </summary>
-        private static bool TaskHostParametersMatchCurrentProcess(IDictionary<string, string> tashHostParameters)
+        private static bool TaskHostParametersMatchCurrentProcess(IDictionary<string, string> taskHostParameters)
         {
-            if (tashHostParameters == null || tashHostParameters.Count == 0)
+            if (taskHostParameters == null || taskHostParameters.Count == 0)
             {
                 // We don't care, so they match by default.
                 return true;
             }
 
             string runtime;
-            if (tashHostParameters.TryGetValue(XMakeAttributes.runtime, out runtime))
+            if (taskHostParameters.TryGetValue(XMakeAttributes.runtime, out runtime))
             {
                 string currentRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(XMakeAttributes.MSBuildRuntimeValues.currentRuntime);
 
@@ -669,7 +671,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             string architecture;
-            if (tashHostParameters.TryGetValue(XMakeAttributes.architecture, out architecture))
+            if (taskHostParameters.TryGetValue(XMakeAttributes.architecture, out architecture))
             {
                 string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
 

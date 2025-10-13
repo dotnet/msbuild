@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Expect a false answer when we ask for a task which is not in the factory.
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         public void CreatableByTaskFactoryNotInAssembly()
         {
             Assert.False(_taskFactory.TaskNameCreatableByFactory("NotInAssembly", null, String.Empty, null, ElementLocation.Create(".", 1, 1)));
@@ -715,7 +715,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_ASSEMBLY_LOCATION
             _loadInfo = AssemblyLoadInfo.Create(null, Assembly.GetAssembly(typeof(TaskToTestFactories)).Location);
 #else
-            _loadInfo = AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, null);
+            _loadInfo = explicitlyLaunchTaskHost || isTaskHostFactory
+                ? AssemblyLoadInfo.Create(assemblyName: null, typeof(TaskToTestFactories).GetTypeInfo().Assembly.Location)
+                : AssemblyLoadInfo.Create(typeof(TaskToTestFactories).GetTypeInfo().Assembly.FullName, assemblyFile: null);
 #endif
             if (explicitlyLaunchTaskHost)
             {
@@ -726,7 +728,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
         }
 
-        #endregion
+#endregion
 
         #region InternalClasses
         /// <summary>
