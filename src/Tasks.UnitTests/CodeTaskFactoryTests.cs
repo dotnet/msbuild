@@ -1478,7 +1478,7 @@ namespace Microsoft.Build.UnitTests
             tmpFiles.Count.ShouldBe(1, $"Expected exactly one file ending with 'CustomTask-compilation-file.tmp' in ProjectImports.zip, but found {tmpFiles.Count}.");
         }
                 /// <summary>
-        /// Verifies that ITaskFactoryHostContext.IsMultiThreadedBuild triggers out-of-process compilation
+        /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
         /// </summary>
         [Theory]
         [InlineData(false)]

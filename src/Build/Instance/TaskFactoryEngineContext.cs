@@ -20,12 +20,12 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// The host allows task factories access to method to allow them to log message during the construction of the task factories.
     /// </summary>
-    internal class TaskFactoryLoggingHost :
+    internal class TaskFactoryEngineContext :
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
         IBuildEngine,
-        ITaskFactoryHostContext
+        ITaskFactoryBuildParameterProvider
     {
         /// <summary>
         /// Location of the task node in the original file
@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskFactoryLoggingHost(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild = false, bool forceOutOfProcessExecution = false)
+        public TaskFactoryEngineContext(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild = false, bool forceOutOfProcessExecution = false)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
             ErrorUtilities.VerifyThrowInternalNull(elementLocation);
@@ -163,7 +163,7 @@ namespace Microsoft.Build.BackEnd
         /// Gets a value indicating whether the build is running in multi-threaded mode (/mt flag).
         /// </summary>
         /// <remarks>
-        /// This property implements ITaskFactoryHostContext to allow task factories to determine
+        /// This property implements ITaskFactoryBuildParameterProvider to allow task factories to determine
         /// if they should compile for out-of-process execution during their Initialize() method.
         /// </remarks>
         public bool IsMultiThreadedBuild

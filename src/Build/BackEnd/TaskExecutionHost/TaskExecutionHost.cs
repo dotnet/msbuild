@@ -980,7 +980,7 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
+                    TaskFactoryEngineContext loggingHost = new TaskFactoryEngineContext(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
                     bool isTaskHost = false;
                     try
                     {
@@ -1734,14 +1734,14 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Creates a <see cref="TaskHostTask"/> wrapper to run a non-AssemblyTaskFactory task out of process.
-        /// This is used when Traits.Instance.ForceTaskFactoryOutOfProc=1 or multithreaded mode is active to ensure
+        /// This is used when Traits.Instance.ForceTaskFactoryOutOfProc=1 is true or the multi-threaded mode is active to ensure
         /// non-AssemblyTaskFactory tasks run in isolation.
         /// </summary>
         /// <param name="taskIdentityParameters">Task identity parameters.</param>
         /// <param name="loggingHost">The logging host to use for the task.</param>
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryEngineContext loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory)
         {
             ITask innerTask;
 

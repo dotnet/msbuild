@@ -1000,7 +1000,7 @@ namespace InlineTask
         }
 
         /// <summary>
-        /// Verifies that ITaskFactoryHostContext.IsMultiThreadedBuild triggers out-of-process compilation
+        /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
         /// </summary>
         [Theory]
         [InlineData(false)]

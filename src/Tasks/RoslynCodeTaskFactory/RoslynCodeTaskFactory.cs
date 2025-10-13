@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks
             _parameters = parameterGroup.Values.ToArray();
 
             // Determine if we should compile for out-of-process execution
-            _compileForOutOfProcess = taskFactoryLoggingHost is ITaskFactoryHostContext hostContext &&
+            _compileForOutOfProcess = taskFactoryLoggingHost is ITaskFactoryBuildParameterProvider hostContext &&
                                       (hostContext.ForceOutOfProcessExecution || hostContext.IsMultiThreadedBuild);
 
             // Attempt to parse and extract everything from the <UsingTask />

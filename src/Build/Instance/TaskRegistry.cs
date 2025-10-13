@@ -1582,7 +1582,7 @@ namespace Microsoft.Build.Execution
 #else
                                 factory = (ITaskFactory)Activator.CreateInstance(loadedType.Type);
 #endif
-                                TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext, buildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
+                                TaskFactoryEngineContext taskFactoryLoggingHost = new TaskFactoryEngineContext(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext, buildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
 
                                 bool initialized = false;
                                 try

@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// CodeTaskFactory, XamlTaskFactory) to determine whether they should compile for out-of-process execution
     /// based on the build host's multi-threaded configuration.
     /// </remarks>
-    internal interface ITaskFactoryHostContext
+    internal interface ITaskFactoryBuildParameterProvider
     {
         /// <summary>
         /// Gets a value indicating whether the build is running in multi-threaded mode (/mt flag).
