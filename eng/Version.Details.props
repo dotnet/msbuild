@@ -27,7 +27,7 @@ This file should be imported by eng/Versions.props
     <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.25510.1</MicrosoftDotNetArcadeSdkPackageVersion>
     <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.25510.1</MicrosoftDotNetXUnitExtensionsPackageVersion>
     <!-- nuget/nuget.client dependencies -->
-    <NuGetBuildTasksPackageVersion>7.0.0-rc.264</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>7.0.0-rc.288</NuGetBuildTasksPackageVersion>
     <!-- dotnet/roslyn dependencies -->
     <MicrosoftNetCompilersToolsetPackageVersion>5.1.0-1.25501.2</MicrosoftNetCompilersToolsetPackageVersion>
   </PropertyGroup>
