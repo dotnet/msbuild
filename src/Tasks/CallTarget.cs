@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     /// id validation checks to fail.
     /// </remarks>
     [RunInMTA]
-    public class CallTarget : TaskExtension
+    public class CallTarget : TaskExtension, IMultiThreadableTask
     {
         #region Properties
 
@@ -50,6 +50,11 @@ namespace Microsoft.Build.Tasks
         /// Deprecated. Does nothing.
         /// </summary>
         public bool UseResultsCache { get; set; } = false;
+
+        /// <summary>
+        /// Task environment for isolated execution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
@@ -87,7 +92,8 @@ namespace Microsoft.Build.Tasks
                 Log,
                 _targetOutputs,
                 false,
-                null);            // toolsVersion = null
+                null,           // toolsVersion = null
+                TaskEnvironment);
         }
 
         #endregion
