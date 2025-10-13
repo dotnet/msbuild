@@ -8,8 +8,8 @@ using System.Diagnostics;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Provides task execution environment including environment variables,
-    /// file paths, and process management capabilities to multi-threadable tasks.
+    /// Provides an <see cref="IMultiThreadableTask"/> with access to a run-time execution environment including
+    /// environment variables, file paths, and process management capabilities.
     /// </summary>
     public sealed class TaskEnvironment
     {
