@@ -81,7 +81,7 @@ namespace Microsoft.Build.Internal
 
         protected string PipeName { get; }
 
-        protected int[] HandshakeComponents { get; }
+        protected HandshakeComponents HandshakeComponents { get; }
 
         public void Dispose()
         {

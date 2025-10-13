@@ -24,10 +24,9 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -36,6 +35,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
@@ -58,12 +58,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The object used for thread-safe synchronization of static members.
         /// </summary>
-        private static readonly Object s_staticSyncLock = new Object();
+        private static readonly LockType s_staticSyncLock = new();
 
         /// <summary>
         /// The object used for thread-safe synchronization of BuildManager shared data and the Scheduler.
         /// </summary>
-        private readonly Object _syncLock = new Object();
+        private readonly Object _syncLock = new();
 
         /// <summary>
         /// The singleton instance for the BuildManager.
@@ -1121,6 +1121,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
+                            _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
                             var sacState = NativeMethodsShared.GetSACState();
                             // The Enforcement would lead to build crash - but let's have the check for completeness sake.
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
@@ -1147,6 +1148,11 @@ namespace Microsoft.Build.Execution
 
                     Reset();
                     _buildManagerState = BuildManagerState.Idle;
+
+                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    {
+                        TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
+                    }
 
                     MSBuildEventSource.Log.BuildStop();
 
@@ -1233,7 +1239,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+            Experimental.MSBuildClient.ShutdownServer(CancellationToken.None);
 
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
@@ -1959,6 +1965,10 @@ namespace Microsoft.Build.Execution
             {
                 throw new BuildAbortedException();
             }
+
+            LogMessage(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "StaticGraphConstructionStarted"));
 
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
@@ -2851,7 +2861,8 @@ namespace Microsoft.Build.Execution
                     loggingService.IncludeEvaluationProfile,
                     loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
                     loggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
-                    loggingService.IncludeTaskInputs));
+                    loggingService.IncludeTaskInputs,
+                    loggingService.EnableTargetOutputLogging));
             }
 
             return _nodeConfiguration;
@@ -3039,6 +3050,12 @@ namespace Microsoft.Build.Execution
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
+
+            if (_buildParameters.EnableTargetOutputLogging)
+            {
+                loggingService.EnableTargetOutputLogging = true;
+            }
+
 
             try
             {
@@ -3271,9 +3288,9 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                if (inputCacheFiles.Any(f => !File.Exists(f)))
+                if (inputCacheFiles.Any(f => !FileSystems.Default.FileExists(f)))
                 {
-                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !File.Exists(f)))));
+                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !FileSystems.Default.FileExists(f)))));
                     return false;
                 }
 

@@ -16,6 +16,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         public Action<INodePacket> SendPacket { get; }
 
+        public bool IsNodeShutDown { get; set; }
+
         public void ClearCache(int submissionId)
         {
         }
@@ -33,8 +35,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
         }
 
-        public void ShutdownComponent()
-        {
-        }
+        public void ShutdownComponent() => IsNodeShutDown = true;
     }
 }

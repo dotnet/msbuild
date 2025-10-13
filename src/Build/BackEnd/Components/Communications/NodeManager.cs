@@ -328,7 +328,8 @@ namespace Microsoft.Build.BackEnd
 
             // Assign a global ID to the node we are about to create.
             int fromNodeId;
-            if (nodeProvider is NodeProviderInProc)
+            bool isMultiThreadedModeOn = _componentHost?.BuildParameters.MultiThreaded ?? false;
+            if (nodeProvider is NodeProviderInProc && !isMultiThreadedModeOn)
             {
                 fromNodeId = _inprocNodeId;
             }
@@ -337,7 +338,6 @@ namespace Microsoft.Build.BackEnd
                 // Reserve node numbers for all needed nodes.
                 fromNodeId = Interlocked.Add(ref _nextNodeId, numberOfNodesToCreate) - numberOfNodesToCreate;
             }
-
 
             // Create the node and add it to our mapping.
             IList<NodeInfo> nodes = nodeProvider.CreateNodes(fromNodeId, this, AcquiredNodeConfigurationFactory, numberOfNodesToCreate);

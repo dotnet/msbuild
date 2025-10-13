@@ -131,6 +131,10 @@ Timing based on the [(Microsoft-internal) release schedule](https://dev.azure.co
   git push upstream v{{THIS_RELEASE_VERSION}}.3
   ```
   - [ ]  Create Release in Github with `Create Release from Tag` GH option (https://github.com/dotnet/msbuild/releases/new?tag=v17.9.3) - the release notes can be prepopulated (`Generate Release Notes`)
+- [ ]  Extend the expiration date of the latest Opt-Prof data for `vs{{THIS_RELEASE_VERSION}}` branch.
+  - Identify the location of the latest Opt-Prof data in VS Drop. The path should follow the format `OptimizationData/DotNet-msbuild-Trusted/vs{{THIS_RELEASE_VERSION}}/...`. It can be found in the MSBuild CI logs of the "Build" task or alternatively, in the Opt-Prof pipeline logs under the "Publish OptimizationInputs drop" task.
+  - Get [drop.exe](https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/azure-artifacts/drop-service/azure-artifacts-drop) CLI tool.
+  - Use [this instruction](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/30808/Extend-a-drop's-expiration-date) to set the new expiration to (End of support date for the corresponding Visual Studio version) plus 3 months.
 
 ## After release
 

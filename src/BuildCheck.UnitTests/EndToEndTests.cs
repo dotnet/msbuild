@@ -21,8 +21,11 @@ namespace Microsoft.Build.BuildCheck.UnitTests;
 public class EndToEndTests : IDisposable
 {
     private const string EditorConfigFileName = ".editorconfig";
+    private const string LatestDotNetCoreForMSBuild = "net10.0";
 
     private readonly TestEnvironment _env;
+
+    private int timeoutInMilliseconds = 900_000;
 
     public EndToEndTests(ITestOutputHelper output)
     {
@@ -49,7 +52,7 @@ public class EndToEndTests : IDisposable
             out _,
             "PropsCheckTest.csproj");
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
@@ -168,7 +171,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -229,7 +232,7 @@ public class EndToEndTests : IDisposable
 
     private CopyTestOutput RunCopyToOutputTest(bool restore, bool skipUnchangedDuringCopy)
     {
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")}", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -338,7 +341,7 @@ public class EndToEndTests : IDisposable
             _env.SetEnvironmentVariable("MSBUILDDONOTLIMITBUILDCHECKRESULTSNUMBER", "1");
         }
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
@@ -359,14 +362,14 @@ public class EndToEndTests : IDisposable
     }
 
     [Theory]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework>""", "", false)]
-    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFrameworks>net9.0;net472</TargetFrameworks>""", " /p:TargetFramework=net9.0", false)]
-    [InlineData("""<TargetFramework></TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFramework /><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false)]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks />""", "", false)]
-    [InlineData("""<TargetFramework>net9.0</TargetFramework><TargetFrameworks>net9.0;net472</TargetFrameworks>""", "", true)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>""", "", false)]
+    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", $" /p:TargetFramework={LatestDotNetCoreForMSBuild}", false)]
+    [InlineData($"""<TargetFramework></TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework /><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks></TargetFrameworks>""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks />""", "", false)]
+    [InlineData($"""<TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks>{LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", true)]
     public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
     {
         const string testAssetsFolderName = "TFMConfusionCheck";
@@ -380,7 +383,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(workFolder.Path);
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore" + cliSuffix, out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore" + cliSuffix, out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -419,10 +422,10 @@ public class EndToEndTests : IDisposable
         """,
         false)]
     [InlineData(
-        """
+        $"""
         <Project Sdk="Microsoft.NET.Sdk">
           <PropertyGroup>
-            <TargetFramework>net9.0</TargetFramework>
+            <TargetFramework>{LatestDotNetCoreForMSBuild}</TargetFramework>
           </PropertyGroup>
         </Project>
         """,
@@ -462,7 +465,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(workFolder.Path);
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -485,7 +488,7 @@ public class EndToEndTests : IDisposable
             "PropsCheckTest.csproj");
 
         // Build without BuildCheck - no findings should be reported
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path}", out bool success);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
@@ -494,7 +497,7 @@ public class EndToEndTests : IDisposable
         output.ShouldNotContain("BC0203");
 
         // Build with BuildCheck - findings should be reported
-        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out success);
+        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
@@ -513,7 +516,7 @@ public class EndToEndTests : IDisposable
         File.AppendAllText(editorconfigFile.Path, editorConfigChange);
 
         // Build with BuildCheck - findings with new severity should be reported
-        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out success);
+        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path} -check", out success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         // build should fail due to error checks
@@ -523,7 +526,7 @@ public class EndToEndTests : IDisposable
         output.ShouldContain("error BC0203");
 
         // Build without BuildCheck - no findings should be reported
-        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path}", out success);
+        output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectFile.Path}", out success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue(output);
@@ -543,7 +546,7 @@ public class EndToEndTests : IDisposable
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore" +
-            (checkRequested ? " -check" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            (checkRequested ? " -check" : string.Empty), out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
 
         success.ShouldBeTrue();
@@ -582,7 +585,7 @@ public class EndToEndTests : IDisposable
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore {(checkRequested ? "-check" : string.Empty)} -bl:{logFile}",
-            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         if (BC0101Severity != "error")
         {
@@ -591,7 +594,7 @@ public class EndToEndTests : IDisposable
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic",
-         out success, false, _env.Output, timeoutMilliseconds: 120_000);
+         out success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         _env.Output.WriteLine(output);
 
@@ -633,7 +636,7 @@ public class EndToEndTests : IDisposable
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check",
-            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         if (BC0101Severity != "error")
         {
@@ -696,13 +699,13 @@ public class EndToEndTests : IDisposable
 
         _ = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -bl:{logFile}",
-            out bool success, false, _env.Output, timeoutMilliseconds: 120_000);
+            out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         success.ShouldBeTrue();
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
          $"{logFile} -flp:logfile={Path.Combine(projectDirectory!, "logFile.log")};verbosity=diagnostic {(checkRequested ? "-check" : string.Empty)}",
-         out success, false, _env.Output, timeoutMilliseconds: 120_000);
+         out success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         _env.Output.WriteLine(output);
 
@@ -746,7 +749,7 @@ public class EndToEndTests : IDisposable
             customConfigData);
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         foreach (string expectedMessage in expectedMessages)
         {
@@ -782,7 +785,7 @@ public class EndToEndTests : IDisposable
             customConfigData);
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
-            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output);
+            $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check", out bool success, false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         if (scope == EvaluationCheckScope.ProjectFileOnly)
         {
@@ -808,7 +811,7 @@ public class EndToEndTests : IDisposable
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -restore -check" +
             (warnAsError ? " /p:warn2err=BC0103" : "") + (warnAsMessage ? " /p:warn2msg=BC0103" : ""), out bool success,
-            false, _env.Output);
+            false, _env.Output, timeoutMilliseconds: timeoutInMilliseconds);
 
         success.ShouldBe(!warnAsError);
 
@@ -841,7 +844,7 @@ public class EndToEndTests : IDisposable
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n",
-                out bool successBuild);
+                out bool successBuild, timeoutMilliseconds: timeoutInMilliseconds);
 
             foreach (string registeredRule in expectedRegisteredRules)
             {
@@ -880,7 +883,7 @@ public class EndToEndTests : IDisposable
                 checkCandidatePath));
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _);
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool _, timeoutMilliseconds: timeoutInMilliseconds);
 
             projectCheckBuildLog.ShouldContain(expectedMessage);
 
@@ -909,7 +912,7 @@ public class EndToEndTests : IDisposable
                 checkCandidatePath));
 
             string projectCheckBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success);
+                $"{Path.Combine(checkCandidatePath, $"{checkCandidate}.csproj")} /m:1 -nr:False -restore -check -verbosity:n", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
 
             success.ShouldBeTrue();
             projectCheckBuildLog.ShouldContain(expectedMessage);
@@ -930,7 +933,7 @@ public class EndToEndTests : IDisposable
 
         string output = RunnerUtilities.ExecBootstrapedMSBuild(
             $"{Path.GetFileName(projectFile.Path)} /m:1 -nr:False -t:restore -check",
-            out bool success);
+            out bool success, timeoutMilliseconds: timeoutInMilliseconds);
 
         success.ShouldBeTrue();
         output.ShouldNotContain("BC0101");

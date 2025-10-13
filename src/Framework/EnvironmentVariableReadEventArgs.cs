@@ -40,17 +40,17 @@ namespace Microsoft.Build.Framework
         /// Initializes an instance of the EnvironmentVariableReadEventArgs class.
         /// </summary>
         /// <param name="environmentVarName">The name of the environment variable that was read.</param>
-        /// <param name="environmentVarValue">The value of the environment variable that was read.</param>
-        /// <param name="file">file associated with the event</param>
-        /// <param name="line">line number (0 if not applicable)</param>
-        /// <param name="column">column number (0 if not applicable)</param>
+        /// <param name="message">Message for the log.</param>
+        /// <param name="file">file associated with the event.</param>
+        /// <param name="line">line number (0 if not applicable).</param>
+        /// <param name="column">column number (0 if not applicable).</param>
         public EnvironmentVariableReadEventArgs(
             string environmentVarName,
-            string environmentVarValue,
+            string message,
             string file,
             int line,
             int column)
-            : base(environmentVarValue, file, line, column, MessageImportance.Low) => EnvironmentVariableName = environmentVarName;
+            : base(message, file, line, column, MessageImportance.Low) => EnvironmentVariableName = environmentVarName;
 
         /// <summary>
         /// The name of the environment variable that was read.

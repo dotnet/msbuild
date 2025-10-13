@@ -76,7 +76,7 @@ namespace Microsoft.Build.BackEnd
         /// same time, causing a race condition.  This class is not made 100% threadsafe by the presence
         /// and current usage of this lock.
         /// </summary>
-        private readonly Object _syncLock = new Object();
+        private readonly LockType _syncLock = new();
 
         #endregion
 
@@ -329,6 +329,11 @@ namespace Microsoft.Build.BackEnd
                 return _isTraversalProject.Value;
             }
         }
+
+        /// <summary>
+        /// Flag indicating whether SDK-resolved environment variables have been set for this configuration.
+        /// </summary>
+        internal bool SdkResolvedEnvironmentVariablesSet { get; set; }
 
         /// <summary>
         /// Returns true if this configuration was generated on a node and has not yet been resolved.

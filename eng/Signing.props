@@ -4,6 +4,10 @@
          and thus this file is not populated to VisualStudioSetupInsertionPath -->
     <ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" Condition="'$(MSBuildRuntimeType)' != 'Core'" />
 
+    <!-- Do not include if it is test signing due to arcade issue with validation. -->
+    <ItemsToSign Remove="$(VisualStudioSetupInsertionPath)Microsoft.Build.Arm64.vsix" Condition="'$(SignType)' == 'test'"/>
+    <ItemsToSign Remove="$(VisualStudioSetupInsertionPath)Microsoft.Build.vsix" Condition="'$(SignType)' == 'test'"/>
+
     <ItemsToSign Include="$(ArtifactsDir)\xsd\Update-MSBuildXsds.ps1" />
 
     <FileSignInfo Include="RuntimeContracts.dll" CertificateName="3PartySHA2" />
@@ -13,6 +17,15 @@
     <FileSignInfo Include="OpenTelemetry.Api.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="OpenTelemetry.Api.ProviderBuilderExtensions.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="Newtonsoft.Json.dll" CertificateName="3PartySHA2" />
+  </ItemGroup>
+
+  <!-- Remove existing .nupkg signing info and set to None for testing to workaround the existing issue in arcade. -->
+  <ItemGroup Condition="'$(SignType)' == 'test'">
+    <FileExtensionSignInfo Remove=".nupkg" />
+    <FileExtensionSignInfo Include=".nupkg" CertificateName="None" />
+
+    <FileExtensionSignInfo Remove=".ps1" />
+    <FileExtensionSignInfo Include=".ps1" CertificateName="None" />
   </ItemGroup>
 
   <PropertyGroup>

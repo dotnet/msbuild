@@ -501,25 +501,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(@"c:\abc\def", FileUtilities.NormalizePath(@"c:\abc\" + longPart + @"\..\def"));
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/4205")]
-        public void NormalizePathBadGlobalroot()
-        {
-            Assert.Throws<ArgumentException>(() =>
-            {
-                /*
-                 From Path.cs
-                   // Check for \\?\Globalroot, an internal mechanism to the kernel
-                   // that provides aliases for drives and other undocumented stuff.
-                   // The kernel team won't even describe the full set of what
-                   // is available here - we don't want managed apps mucking
-                   // with this for security reasons.
-                 * */
-                Assert.Null(FileUtilities.NormalizePath(@"\\?\globalroot\XXX"));
-            });
-        }
-#endif
-
         [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void NormalizePathInvalid()
         {

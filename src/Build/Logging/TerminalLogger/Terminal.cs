@@ -36,7 +36,15 @@ internal sealed class Terminal : ITerminal
 
     private const int BigUnknownDimension = 2 << 23;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the height of the <see cref="Console.BufferHeight"/>  of the underlying <see cref="Console"/>.
+    /// If the <see cref="Console.IsOutputRedirected"/> , returns a large number to indicate that the height is unknown.
+    /// If the <see cref="Console.BufferHeight"/> is zero, returns a large number to indicate that the height is unknown/synthetic.
+    /// </summary>
+    /// <remarks>
+    /// We also try to prevent TerminalLogger from being used in scenarios where the console buffer is not set up correctly, such as in some CI environments,
+    /// but a user can always force the use of TerminalLogger so we must be defensive in the implementation.
+    /// </remarks>
     public int Height
     {
         get
@@ -46,11 +54,19 @@ internal sealed class Terminal : ITerminal
                 return BigUnknownDimension;
             }
 
-            return Console.BufferHeight;
+            return Console.BufferHeight == 0 ? BigUnknownDimension : Console.BufferHeight;
         }
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Gets the width of the <see cref="Console.BufferWidth"/>  of the underlying <see cref="Console"/>.
+    /// If the <see cref="Console.IsOutputRedirected"/> , returns a large number to indicate that the width is unknown.
+    /// If the <see cref="Console.BufferWidth"/> is zero, returns a large number to indicate that the width is unknown/synthetic.
+    /// </summary>
+    /// <remarks>
+    /// We also try to prevent TerminalLogger from being used in scenarios where the console buffer is not set up correctly, such as in some CI environments,
+    /// but a user can always force the use of TerminalLogger so we must be defensive in the implementation.
+    /// </remarks>
     public int Width
     {
         get
@@ -60,7 +76,7 @@ internal sealed class Terminal : ITerminal
                 return BigUnknownDimension;
             }
 
-            return Console.BufferWidth;
+            return Console.BufferWidth == 0 ? BigUnknownDimension : Console.BufferWidth;
         }
     }
 
@@ -209,7 +225,7 @@ internal sealed class Terminal : ITerminal
         {
             // In some terminal emulators setting back the previous console output encoding fails.
             // See https://github.com/dotnet/msbuild/issues/9662.
-            // We do not want to throw an exception if it happens, since it is a non-essentual failure in the logger.
+            // We do not want to throw an exception if it happens, since it is a non-essential failure in the logger.
         }
     }
 }

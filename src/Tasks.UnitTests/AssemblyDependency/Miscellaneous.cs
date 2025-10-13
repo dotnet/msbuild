@@ -7889,8 +7889,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 AssemblyTableInfo tableInfo = new AssemblyTableInfo(redistFile, "DoesNotExist");
                 RedistList redist = RedistList.GetRedistList(new AssemblyTableInfo[] { tableInfo });
+                List<AssemblyEntry> entryArray = [.. redist.FindAssemblyNameFromSimpleName("System")];
 
-                List<AssemblyEntry> entryArray = redist.FindAssemblyNameFromSimpleName("System").ToList();
                 Assert.Equal(6, entryArray.Count);
                 AssemblyNameExtension a1 = new AssemblyNameExtension(entryArray[0].FullName);
                 AssemblyNameExtension a2 = new AssemblyNameExtension(entryArray[1].FullName);

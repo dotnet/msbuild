@@ -723,6 +723,37 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             isRunningInVisualStudio.ShouldBeTrue();
         }
 
+        [Fact]
+        public void AssertResolversCanReturnEnvVariables()
+        {
+            var service = new CachingSdkResolverService();
+
+            service.InitializeForTests(
+                resolvers: new List<SdkResolver>
+                {
+                    new SdkUtilities.ConfigurableMockSdkResolver((sdkReference, resolverContext, factory) =>
+                    {
+                        // Simulate returning environment variables
+                        return factory.IndicateSuccess("envresolver", "1.0.0", null, null, environmentVariablesToAdd: new Dictionary<string, string>
+                        {
+                            { "EnvVar1", "Value1" }
+                        });
+                    })
+                });
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                new SdkReference("envresolver", "1.0.0", null),
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.EnvironmentVariablesToAdd.Count.ShouldBe(1);
+        }
+
         internal sealed class SdkResolverServiceTextExtension : SdkResolverService
         {
 
@@ -770,7 +801,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             public bool ResolversHaveBeenLoaded { get; private set; } = false;
             public bool ManifestsHaveBeenLoaded { get; private set; } = false;
 
-            public MockLoaderStrategy(bool includeErrorResolver = false, bool includeResolversWithPatterns = false, bool includeDefaultResolver = false , bool includeSingleResolverOnly = false) : this()
+            public MockLoaderStrategy(bool includeErrorResolver = false, bool includeResolversWithPatterns = false, bool includeDefaultResolver = false, bool includeSingleResolverOnly = false) : this()
             {
                 if (includeSingleResolverOnly)
                 {

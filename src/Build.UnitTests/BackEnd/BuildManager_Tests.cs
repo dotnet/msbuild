@@ -1136,9 +1136,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void EndWithoutBegin()
         {
             Assert.Throws<InvalidOperationException>(() =>
-                {
-                    _buildManager.EndBuild();
-                });
+            {
+                _buildManager.EndBuild();
+            });
         }
 
         [Fact]
@@ -1812,12 +1812,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             submission.WaitHandle.WaitOne();
             var result1 = submission.BuildResult;
+            _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Success, result1.OverallResult);
             Assert.True(result1.HasResultsForTarget("target1")); // "Results for target1 missing"
             Assert.Equal(BuildResultCode.Success, result2.OverallResult);
             Assert.True(result2.HasResultsForTarget("target2")); // "Results for target2 missing"
-            _buildManager.EndBuild();
         }
 
         /// <summary>
@@ -1846,12 +1846,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(project.CreateProjectInstance(), new[] { "target1" }));
             submission.WaitHandle.WaitOne();
             var result1 = submission.BuildResult;
+            _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Success, result1.OverallResult);
             Assert.True(result1.HasResultsForTarget("target1")); // "Results for target1 missing"
             Assert.Equal(BuildResultCode.Success, result2.OverallResult);
             Assert.True(result2.HasResultsForTarget("target1")); // "Results for target1 (second call) missing"
-            _buildManager.EndBuild();
         }
 
         /// <summary>
@@ -4367,6 +4367,7 @@ $@"<Project InitialTargets=`Sleep`>
             logger.TargetStartedEvents.ShouldBeEmpty();
             logger.BuildStartedEvents.ShouldHaveSingleItem();
             logger.BuildFinishedEvents.ShouldHaveSingleItem();
+            logger.FullLog.ShouldContain("Static graph construction started.");
             logger.FullLog.ShouldContain("Static graph loaded in");
             logger.FullLog.ShouldContain("3 nodes, 2 edges");
         }

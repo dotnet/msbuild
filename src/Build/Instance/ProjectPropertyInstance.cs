@@ -389,5 +389,18 @@ namespace Microsoft.Build.Execution
 
             internal LoggingContext loggingContext;
         }
+
+
+        internal class SdkResolvedEnvironmentVariablePropertyInstance(string name, string escapedValue) : ProjectPropertyInstance(name, escapedValue)
+        {
+            /// <summary>
+            /// Whether this object can be changed. An immutable object cannot be made mutable.
+            /// </summary>
+            /// <remarks>
+            /// The environment is captured at the start of the build, so environment-derived
+            /// properties can't change.
+            /// </remarks>
+            public override bool IsImmutable => true;
+        }
     }
 }
