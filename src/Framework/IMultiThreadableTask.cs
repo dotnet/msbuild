@@ -4,10 +4,11 @@
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Interface for tasks that can execute in a thread-safe manner within MSBuild's multithreaded execution model.
-    /// 
-    /// Tasks that implement this interface declare their capability to run in multiple threads within one process
-    /// and guarantee they handle their own thread safety. This means the task must:
+    /// Interface for tasks that can execute in a thread-safe manner within MSBuild's multithreaded execution model. 
+    /// Tasks that implement this interface declare their capability to run in multiple threads within one process.
+    /// </summary>
+    /// <remarks>
+    /// The task must:
     /// 
     /// - Use the provided TaskEnvironment for all modifications to process state such as environment variables,
     ///   working directory, or process spawning instead of directly modifying global process state
@@ -21,13 +22,13 @@ namespace Microsoft.Build.Framework
     /// in multithreaded build scenarios.
     /// 
     /// See the Thread-Safe Tasks specification for detailed guidelines on thread-safe task development.
-    /// </summary>
+    /// </remarks>
     public interface IMultiThreadableTask : ITask
     {
         /// <summary>
-        /// Gets or sets the task environment that provides access to task execution environment.
-        /// This property must be set by the MSBuild infrastructure before task execution.
+        /// This property is set by the build engine to allow a task to call back into it.
         /// </summary>
+        /// <value>Task environment which provides access to project current directory and environment variables.</value>
         TaskEnvironment TaskEnvironment { get; internal set; }
     }
 }

@@ -9,7 +9,8 @@ namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Attribute that marks a task class as thread-safe for multithreaded execution.
-    /// 
+    /// </summary>
+    /// <remarks>
     /// Task classes marked with this attribute indicate they can be safely executed in parallel 
     /// in the same process with other tasks. This is a compatibility bridge option for existing tasks
     /// that do not have access to TaskEnvironment APIs.
@@ -24,7 +25,7 @@ namespace Microsoft.Build.Framework
     /// own projects and mark their task classes with it. Customers using newer MSBuild versions
     /// should prefer implementing IMultiThreadableTask which provides access to TaskEnvironment
     /// for safe process state operations.
-    /// </summary>
+    /// </remarks>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     internal class MSBuildMultiThreadableTaskAttribute : Attribute
     {
