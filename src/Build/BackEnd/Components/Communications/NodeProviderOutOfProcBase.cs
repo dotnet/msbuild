@@ -680,8 +680,9 @@ namespace Microsoft.Build.BackEnd
                 _packetEnqueued = new AutoResetEvent(false);
                 _packetQueueDrainDelayCancellation = new CancellationTokenSource();
 
-                // specify the smallest stack size - 64kb
-                _drainPacketQueueThread = new Thread(DrainPacketQueue, 64 * 1024);
+                // We select a thread size empirically - for debug builds the minimum possible stack size was too small.
+                // The current size is reported to not have the issue.
+                _drainPacketQueueThread = new Thread(DrainPacketQueue, 0x30000);
                 _drainPacketQueueThread.IsBackground = true;
                 _drainPacketQueueThread.Start(this);
             }

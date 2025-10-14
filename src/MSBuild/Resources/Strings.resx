@@ -634,6 +634,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </value>
   </data>
@@ -1037,7 +1040,7 @@
     <value>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</value>
 	<comment>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -1704,4 +1707,7 @@
 
         Don't forget to update this comment after using the new code.
   -->
+  <data name="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc" xml:space="preserve">
+    <value>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</value>
+  </data>
 </root>

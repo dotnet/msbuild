@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -110,7 +111,7 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FileUtilities.FileExistsNoThrow(File.ItemSpec))
                                 {
-                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
+                                    string existingContents = FileSystems.Default.ReadFileAllText(File.ItemSpec);
                                     if (existingContents.Length == buffer.Length)
                                     {
                                         if (existingContents.Equals(contentsAsString))

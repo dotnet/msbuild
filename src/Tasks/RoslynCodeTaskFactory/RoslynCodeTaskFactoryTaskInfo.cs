@@ -53,7 +53,9 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            return String.Equals(SourceCode, other.SourceCode, StringComparison.OrdinalIgnoreCase) && References.SetEquals(other.References);
+            return String.Equals(Name, other.Name, StringComparison.OrdinalIgnoreCase)
+                && String.Equals(SourceCode, other.SourceCode, StringComparison.OrdinalIgnoreCase) 
+                && References.SetEquals(other.References);
         }
 
         public override bool Equals(object obj)
@@ -68,8 +70,8 @@ namespace Microsoft.Build.Tasks
 
         public override int GetHashCode()
         {
-            // This is good enough to avoid most collisions, no need to hash References
-            return SourceCode.GetHashCode();
+            // Include both Name and SourceCode to avoid cache collisions between different task names
+            return HashCode.Combine(Name?.GetHashCode() ?? 0, SourceCode?.GetHashCode() ?? 0);
         }
     }
 }

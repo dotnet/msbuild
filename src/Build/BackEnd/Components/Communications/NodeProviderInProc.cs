@@ -357,7 +357,7 @@ namespace Microsoft.Build.BackEnd
             nodeContext._inProcNodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(InProcNodeEndpoint_OnLinkStatusChanged);
 
             nodeContext._packetFactory = factory;
-            nodeContext._inProcNode = new InProcNode(_componentHost, endpoints.NodeEndpoint);
+            nodeContext._inProcNode = new InProcNode(nodeId, _componentHost, endpoints.NodeEndpoint);
 #if FEATURE_THREAD_CULTURE
             nodeContext._inProcNodeThread = new Thread(() => InProcNodeThreadProc(nodeContext._inProcNode), BuildParameters.ThreadStackSize);
 #else

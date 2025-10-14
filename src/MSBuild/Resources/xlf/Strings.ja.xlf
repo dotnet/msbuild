@@ -244,6 +244,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -254,6 +257,9 @@
                      このオプションはサポートされていません。
                      使用されるスレッドの最大数は、
                      -maxCpuCount スイッチによって決まります。
+                     マルチスレッド モードが有効で、
+                     MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、
+                     maxCpuCount は 256 を超えることはできません。
                      (短い形式: -mt)
     </target>
         <note />
@@ -282,12 +288,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      ビルド中に BuildChecks を有効にします。
                      BuildCheck を使用すると、ビルドのプロパティを保証するための
-                     評価ルールが有効になります。詳細については、aka.ms/buildcheck を参照してください
+                     評価ルールが有効になります。詳しくは https://aka.ms/maxmemory を参照してください
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -850,7 +856,7 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="needs-review-translation">  -consoleLoggerParameters:&lt;parameters&gt;
+        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      コンソール ロガーへのパラメーターです。(短縮形: -clp)
                      利用可能なパラメーター: 
                         PerformanceSummary--タスク、ターゲット、プロジェクトにかかった時間を
@@ -871,9 +877,6 @@
                             サイズに合わせません
                         DisableConsoleColor--すべてのログ メッセージに対して
                             既定のコンソール カラーを使用します。
-                        DisableMPLogging-- 非マルチプロセッサ モードで
-                            実行する際、マルチプロセッサの
-                            出力ログ形式を無効にします。
                         EnableMPLogging--非マルチプロセッサ モードで
                             実行する場合も、マルチプロセッサのログ形式を有効にします。
                             このログ形式は、既定で有効です。
@@ -883,7 +886,7 @@
                             ANSI コンソール カラーを使用します
                      Verbosity--このロガーの -verbosity 設定を
                             上書きします。
-                     例::
+                     例:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -1507,6 +1510,11 @@
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">MSBuild のログとデバッグ情報は、"{0}" にあります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="translated">マルチスレッド モードが有効で、MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、maxCpuCount は {0} を超えることはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">

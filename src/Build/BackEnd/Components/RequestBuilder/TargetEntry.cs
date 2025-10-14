@@ -457,7 +457,6 @@ namespace Microsoft.Build.BackEnd
 
                     targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
                     bucket.Initialize(targetLoggingContext);
-                    WorkUnitResult bucketResult = null;
                     targetSuccess = false;
 
                     Lookup.Scope entryForInference = null;
@@ -504,6 +503,10 @@ namespace Microsoft.Build.BackEnd
                                 // as a result we need separate sets of item and property collections to track changes
                                 if (dependencyResult == DependencyAnalysisResult.IncrementalBuild)
                                 {
+                                    // Ensure that these lookups stop at the current scope, regardless of whether items were added.
+                                    lookupForInference.TruncateLookupsForItemTypes(upToDateTargetInputs.ItemTypes);
+                                    lookupForExecution.TruncateLookupsForItemTypes(changedTargetInputs.ItemTypes);
+
                                     // subset the relevant items to those that are up-to-date
                                     foreach (string itemType in upToDateTargetInputs.ItemTypes)
                                     {
@@ -518,7 +521,7 @@ namespace Microsoft.Build.BackEnd
                                 }
 
                                 // We either have some work to do or at least we need to infer outputs from inputs.
-                                bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
+                                WorkUnitResult bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
 
                                 // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not
                                 // skipped due to being up-to-date:
@@ -549,7 +552,7 @@ namespace Microsoft.Build.BackEnd
                                 entryForInference = null;
                                 entryForExecution.LeaveScope();
                                 entryForExecution = null;
-                                targetSuccess = (bucketResult?.ResultCode == WorkUnitResultCode.Success);
+                                targetSuccess = bucketResult.ResultCode == WorkUnitResultCode.Success;
                                 break;
 
                             case DependencyAnalysisResult.SkipNoInputs:
@@ -780,7 +783,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_targetResult.ResultCode == TargetResultCode.Skipped, "ResultCode must be Skipped. ResultCode is {0}.", _state);
             ErrorUtilities.VerifyThrow(_targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Continue, "ActionCode must be Continue. ActionCode is {0}.", _state);
 
-            _targetResult.WorkUnitResult.ActionCode = WorkUnitActionCode.Stop;
+            _targetResult.WorkUnitResult = new WorkUnitResult(_targetResult.WorkUnitResult.ResultCode, WorkUnitActionCode.Stop, _targetResult.WorkUnitResult.Exception);
         }
 
         /// <summary>

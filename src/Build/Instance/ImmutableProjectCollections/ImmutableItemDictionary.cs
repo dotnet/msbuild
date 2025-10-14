@@ -64,12 +64,6 @@ namespace Microsoft.Build.Instance
         public void Add(T projectItem) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public void AddEmptyMarker(string itemType) => throw new NotSupportedException();
-
-        /// <inheritdoc />
-        public void AddRange(IEnumerable<T> projectItems) => throw new NotSupportedException();
-
-        /// <inheritdoc />
         public void Clear() => throw new NotSupportedException();
 
         /// <inheritdoc />
@@ -156,9 +150,6 @@ namespace Microsoft.Build.Instance
         }
 
         /// <inheritdoc />
-        public bool HasEmptyMarker(string itemType) => _itemsByType.Values.Any(list => list.Count == 0);
-
-        /// <inheritdoc />
         public void ImportItems(IEnumerable<T> other) => throw new NotSupportedException();
 
         /// <inheritdoc />
@@ -169,9 +160,6 @@ namespace Microsoft.Build.Instance
 
         /// <inheritdoc />
         public void RemoveItems(IEnumerable<T> other) => throw new NotSupportedException();
-
-        /// <inheritdoc />
-        public void Replace(T existingItem, T newItem) => throw new NotSupportedException();
 
         private sealed class ListConverter : ICollection<T>
         {

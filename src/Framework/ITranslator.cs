@@ -26,6 +26,14 @@ namespace Microsoft.Build.BackEnd
     internal delegate void ObjectTranslator<T>(ITranslator translator, ref T objectToTranslate);
 
     /// <summary>
+    /// Delegate for users that want to translate an arbitrary structure that doesn't implement <see cref="ITranslatable"/> (e.g. translating a complex collection)
+    /// </summary>
+    /// <param name="translator">the translator</param>
+    /// <param name="valueFactory">The factory to use to create the value.</param>
+    /// <param name="objectToTranslate">the object to translate</param>
+    internal delegate void ObjectTranslatorWithValueFactory<T>(ITranslator translator, NodePacketValueFactory<T> valueFactory, ref T objectToTranslate);
+
+    /// <summary>
     /// This delegate is used to create arbitrary collection types for serialization.
     /// </summary>
     /// <typeparam name="T">The type of dictionary to be created.</typeparam>
@@ -198,6 +206,15 @@ namespace Microsoft.Build.BackEnd
         void Translate<T>(ref List<T> list, ObjectTranslator<T> objectTranslator);
 
         /// <summary>
+        /// Translates a list of T using an <see cref="ObjectTranslator{T}"/>
+        /// </summary>
+        /// <param name="list">The list to be translated.</param>
+        /// <param name="objectTranslator">The translator to use for the items in the list</param>
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        /// <typeparam name="T">A TaskItemType</typeparam>
+        void Translate<T>(ref List<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory);
+
+        /// <summary>
         /// Translates a list of T using an <see cref="ObjectTranslator{T}"/> anda collection factory
         /// </summary>
         /// <param name="list">The list to be translated.</param>
@@ -206,6 +223,17 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="L">An IList subtype</typeparam>
         /// <param name="collectionFactory">factory to create a collection</param>
         void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>;
+
+        /// <summary>
+        /// Translates a list of T using an <see cref="ObjectTranslator{T}"/> and a collection factory
+        /// </summary>
+        /// <param name="list">The list to be translated.</param>
+        /// <param name="objectTranslator">The translator to use for the items in the list</param>
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        /// <typeparam name="T">An ITranslatable subtype</typeparam>
+        /// <typeparam name="L">An IList subtype</typeparam>
+        /// <param name="collectionFactory">factory to create a collection</param>
+        void Translate<T, L>(ref IList<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>;
 
         /// <summary>
         /// Translates a collection of T into the specified type using an <see cref="ObjectTranslator{T}"/> and <see cref="NodePacketCollectionCreator{L}"/>
@@ -305,7 +333,8 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type.</typeparam>
         /// <param name="array">The array to be translated.</param>
         /// <param name="objectTranslator">The translator to use for the elements in the array.</param>
-        void TranslateArray<T>(ref T[] array, ObjectTranslator<T> objectTranslator);
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        void TranslateArray<T>(ref T[] array, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory);
 
         /// <summary>
         /// Translates a dictionary of { string, string }.
@@ -333,6 +362,8 @@ namespace Microsoft.Build.BackEnd
 
         void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
 
+        void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslatorWithValueFactory<V> valueTranslator, NodePacketValueFactory<V> valueFactory, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
+
         /// <summary>
         /// Translates a dictionary of { string, T }.
         /// </summary>
@@ -340,7 +371,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-        void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslator<T> objectTranslator)
+        /// /// <param name="valueFactory">The factory to use to create the value.</param>
+        void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
             where T : class;
 
         /// <summary>
@@ -350,7 +382,8 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="objectTranslator">The translator to use for the values in the dictionary.</param>
-        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator)
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
             where D : IDictionary<string, T>, new()
             where T : class;
 
@@ -361,8 +394,9 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
+        /// /// <param name="valueFactory">The factory to use to create the value.</param>
         /// <param name="collectionCreator">A factory used to create the dictionary.</param>
-        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<D> collectionCreator)
+        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> collectionCreator)
             where D : IDictionary<string, T>
             where T : class;
 

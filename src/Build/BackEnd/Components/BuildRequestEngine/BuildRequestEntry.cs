@@ -303,7 +303,12 @@ namespace Microsoft.Build.BackEnd
             lock (GlobalLock)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(result);
-                ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Waiting || _outstandingRequests == null, "Entry must be in the Waiting state to report results, or we must have flushed our requests due to an error. Config: {0} State: {1} Requests: {2}", RequestConfiguration.ConfigurationId, State, _outstandingRequests != null);
+
+                // PERF: Check the condition and then throw rather than using VerifyThrow to avoid the allocations that happen when boxing the message arguments.
+                if (!(State == BuildRequestEntryState.Waiting || _outstandingRequests == null))
+                {
+                    ErrorUtilities.ThrowInternalError("Entry must be in the Waiting state to report results, or we must have flushed our requests due to an error. Config: {0} State: {1} Requests: {2}", RequestConfiguration.ConfigurationId, State, _outstandingRequests != null);
+                }
 
                 // If the matching request is in the issue list, remove it so we don't try to ask for it to be built.
                 if (_requestsToIssue != null)

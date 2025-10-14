@@ -944,7 +944,9 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-
+#if !CLR2COMPATIBILITY
+                TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
+#endif
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();

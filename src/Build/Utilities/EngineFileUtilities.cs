@@ -5,13 +5,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Internal
 {
@@ -600,7 +600,7 @@ namespace Microsoft.Build.Internal
 
             public bool DirectoryExists(string directory)
             {
-                return existenceCache.Value.GetOrAdd(directory, directory => Directory.Exists(directory));
+                return existenceCache.Value.GetOrAdd(directory, directory => FileSystems.Default.DirectoryExists(directory));
             }
         }
     }

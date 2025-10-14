@@ -739,7 +739,7 @@ namespace Microsoft.Build.Evaluation
         public static bool RegisterBuildCheck(string projectPath, string pathToAssembly, LoggingContext loggingContext)
         {
             pathToAssembly = FileUtilities.GetFullPathNoThrow(pathToAssembly);
-            if (File.Exists(pathToAssembly))
+            if (FileSystems.Default.FileExists(pathToAssembly))
             {
                 loggingContext.LogBuildEvent(new BuildCheckAcquisitionEventArgs(pathToAssembly, projectPath));
 

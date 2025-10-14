@@ -27,6 +27,8 @@ namespace Microsoft.Build.UnitTests
         {
             // Make sure resources are initialized
             MSBuildApp.Initialize();
+            // Reset this static member that might be changed in some tests to avoid side effects.
+            CommandLineSwitches.SwitchesFromResponseFiles = new();
         }
 
         [Fact]

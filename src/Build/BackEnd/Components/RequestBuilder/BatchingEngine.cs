@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
@@ -311,6 +312,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(consumedMetadataReferences.Count > 0, "Need item metadata consumed by the batchable object.");
 
             var buckets = new List<ItemBucket>();
+            FrozenSet<string> itemNames = itemListsToBeBatched.Keys.ToFrozenSet(MSBuildNameIgnoreCaseComparer.Default);
 
             // Get and iterate through the list of item names that we're supposed to batch on.
             foreach (KeyValuePair<string, ICollection<ProjectItemInstance>> entry in itemListsToBeBatched)
@@ -346,7 +348,7 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
-                            matchingBucket = new ItemBucket(itemListsToBeBatched.Keys, itemMetadataValues, lookup, buckets.Count);
+                            matchingBucket = new ItemBucket(itemNames, itemMetadataValues, lookup, buckets.Count);
                             if (loggingContext != null)
                             {
                                 matchingBucket.Initialize(loggingContext);
@@ -359,8 +361,6 @@ namespace Microsoft.Build.BackEnd
                             // from the List.BinarySearch() method
                             buckets.Insert(~matchingBucketIndex, matchingBucket);
                         }
-
-                        matchingBucket.Lookup.EnsureCapacity(items.Count);
 
                         // We already have a bucket for this type of item, so add this item to
                         // the bucket.

@@ -162,6 +162,7 @@
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="AppConfig\*.cs" />
@@ -710,6 +711,20 @@
     <PackageReference Include="System.Security.Cryptography.Xml" />
 
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\netcore\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
+  </ItemGroup>
+
+  <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
+    <PackageReference Update="System.CodeDom" PrivateAssets="all" />
+    <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
+    <PackageReference Update="System.Resources.Extensions" PrivateAssets="all" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" PrivateAssets="all" />
+    <PackageReference Update="System.Security.Cryptography.Xml" PrivateAssets="all" />
+    <PackageReference Update="System.Threading.Tasks.Dataflow" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
+    <PackageReference Include="System.Reflection.Metadata" PrivateAssets="all" />
+    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
