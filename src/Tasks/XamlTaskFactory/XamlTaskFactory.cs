@@ -130,9 +130,7 @@ namespace Microsoft.Build.Tasks
             // MSBuildToolsDirectoryRoot is the canonical location for MSBuild dll's.
             string pathToMSBuildBinaries = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
-            // Determine if we should compile for out-of-process execution
-            _compileForOutOfProcess = taskFactoryLoggingHost is ITaskFactoryBuildParameterProvider hostContext &&
-                                      (hostContext.ForceOutOfProcessExecution || hostContext.IsMultiThreadedBuild);
+            _compileForOutOfProcess = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryLoggingHost);
 
             // for the out of proc execution
             if (_compileForOutOfProcess)

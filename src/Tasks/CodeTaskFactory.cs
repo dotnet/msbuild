@@ -191,9 +191,7 @@ namespace Microsoft.Build.Tasks
                 HelpKeywordPrefix = "MSBuild."
             };
 
-            // Determine if we should compile for out-of-process execution
-            _compileForOutOfProcess = taskFactoryLoggingHost is ITaskFactoryBuildParameterProvider hostContext &&
-                                      (hostContext.ForceOutOfProcessExecution || hostContext.IsMultiThreadedBuild);
+            _compileForOutOfProcess = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryLoggingHost);
 
             XmlNode taskContent = ExtractTaskContent(taskElementContents);
             if (taskContent == null)

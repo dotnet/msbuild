@@ -462,7 +462,7 @@ namespace Microsoft.Build.Execution
             bool exactMatchRequired,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
-            BuildParameters buildParameters = null)
+            bool isMultiThreadedBuild)
         {
 #if DEBUG
             ErrorUtilities.VerifyThrowInternalError(_isInitialized, "Attempt to read from TaskRegistry before its initialization was finished.");
@@ -470,14 +470,14 @@ namespace Microsoft.Build.Execution
             TaskFactoryWrapper taskFactory = null;
 
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
-            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache, buildParameters);
+            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache, isMultiThreadedBuild);
 
             if (record != null)
             {
                 // if the given task name is longer than the registered task name
                 // we will use the longer name to help disambiguate between multiple matches
                 string mostSpecificTaskName = (taskName.Length > record.RegisteredName.Length) ? taskName : record.RegisteredName;
-                taskFactory = record.GetTaskFactoryFromRegistrationRecord(mostSpecificTaskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, buildParameters);
+                taskFactory = record.GetTaskFactoryFromRegistrationRecord(mostSpecificTaskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild);
 
                 if (taskFactory != null && !retrievedFromCache)
                 {
@@ -511,7 +511,7 @@ namespace Microsoft.Build.Execution
         /// <param name="targetLoggingContext">The logging context.</param>
         /// <param name="elementLocation">The location of the task element in the project file.</param>
         /// <param name="retrievedFromCache">True if the record was retrieved from the cache.</param>
-        /// <param name="buildParameters">Optional build parameters for task factory initialization context.</param>
+        /// <param name="isMultiThreadedBuild">Whether the build is running in multi-threaded mode.</param>
         /// <returns>The task registration record, or null if none was found.</returns>
         internal RegisteredTaskRecord GetTaskRegistrationRecord(
             string taskName,
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Execution
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
             out bool retrievedFromCache,
-            BuildParameters buildParameters = null)
+            bool isMultiThreadedBuild = false)
         {
             RegisteredTaskRecord taskRecord = null;
             retrievedFromCache = false;
@@ -548,7 +548,7 @@ namespace Microsoft.Build.Execution
             if (_toolset != null)
             {
                 TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext, RootElementCache);
-                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache, buildParameters);
+                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache, isMultiThreadedBuild);
             }
 
             // Try the current task registry
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Execution
                                 // parameters.
                                 if (record != null)
                                 {
-                                    if (record.CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, buildParameters))
+                                    if (record.CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
                                     {
                                         retrievedFromCache = true;
                                         return record;
@@ -600,14 +600,14 @@ namespace Microsoft.Build.Execution
 
                 // look for the given task name in the registry; if not found, gather all registered task names that partially
                 // match the given name
-                taskRecord = GetMatchingRegistration(taskName, registrations, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, buildParameters);
+                taskRecord = GetMatchingRegistration(taskName, registrations, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild);
             }
 
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
             if (taskRecord == null && _toolset != null)
             {
                 TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext, RootElementCache);
-                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache, buildParameters);
+                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache, isMultiThreadedBuild);
             }
 
             // Cache the result, even if it is null.  We should never again do the work we just did, for this task name.
@@ -770,7 +770,7 @@ namespace Microsoft.Build.Execution
             IDictionary<string, string> taskIdentityParameters,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
-            BuildParameters buildParameters = null)
+            bool isMultiThreadedBuild = false)
             =>
                 taskRecords.FirstOrDefault(r =>
                     r.CanTaskBeCreatedByFactory(
@@ -781,7 +781,7 @@ namespace Microsoft.Build.Execution
                         taskIdentityParameters,
                         targetLoggingContext,
                         elementLocation,
-                        buildParameters));
+                        isMultiThreadedBuild));
 
         /// <summary>
         /// An object representing the identity of a task -- not just task name, but also
@@ -1360,7 +1360,7 @@ namespace Microsoft.Build.Execution
             /// loads an external file and uses that to generate the tasks.
             /// </summary>
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
-            internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, BuildParameters buildParameters = null)
+            internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild = false)
             {
                 // First check (fast path - no locking)
                 if (_taskNamesCreatableByFactory == null)
@@ -1392,7 +1392,7 @@ namespace Microsoft.Build.Execution
 
                 try
                 {
-                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile, buildParameters);
+                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile, isMultiThreadedBuild);
 
                     // Create task Factory will only actually create a factory once.
                     if (haveTaskFactory)
@@ -1468,9 +1468,9 @@ namespace Microsoft.Build.Execution
             /// Given a Registered task record and a task name. Check create an instance of the task factory using the record.
             /// If the factory is a assembly task factory see if the assemblyFile has the correct task inside of it.
             /// </summary>
-            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, BuildParameters buildParameters = null)
+            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild = false)
             {
-                if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, buildParameters))
+                if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
                 {
                     return _taskFactoryWrapperInstance;
                 }
@@ -1482,7 +1482,7 @@ namespace Microsoft.Build.Execution
             /// Create an instance of the task factory and load it from the assembly.
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the task factory could not be properly created an InvalidProjectFileException will be thrown</exception>
-            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, BuildParameters buildParameters = null)
+            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, bool isMultiThreadedBuild = false)
             {
                 // see if we have already created the factory before, only create it once
                 if (_taskFactoryWrapperInstance == null)
@@ -1582,7 +1582,7 @@ namespace Microsoft.Build.Execution
 #else
                                 factory = (ITaskFactory)Activator.CreateInstance(loadedType.Type);
 #endif
-                                TaskFactoryEngineContext taskFactoryLoggingHost = new TaskFactoryEngineContext(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext, buildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
+                                TaskFactoryEngineContext taskFactoryLoggingHost = new TaskFactoryEngineContext(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext, isMultiThreadedBuild, Traits.Instance.ForceTaskFactoryOutOfProc);
 
                                 bool initialized = false;
                                 try
