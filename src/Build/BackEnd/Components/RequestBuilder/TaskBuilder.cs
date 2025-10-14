@@ -186,6 +186,9 @@ namespace Microsoft.Build.BackEnd
 
             _targetLoggingContext = loggingContext;
 
+            // Fingers crossed
+            NativeMethodsShared.CurrentThreadWorkingDirectory = requestEntry.ProjectRootDirectory;
+
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
             if ((mode & TaskExecutionMode.InferOutputsOnly) == TaskExecutionMode.InferOutputsOnly)
             {
