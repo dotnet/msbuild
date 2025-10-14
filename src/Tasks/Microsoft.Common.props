@@ -142,4 +142,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <DisableLogTaskParameterItemMetadata_WriteLinesToFile_Lines>true</DisableLogTaskParameterItemMetadata_WriteLinesToFile_Lines>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <MSBuildRuntimeType>Core</MSBuildRuntimeType>
+ </PropertyGroup>
+
 </Project>
