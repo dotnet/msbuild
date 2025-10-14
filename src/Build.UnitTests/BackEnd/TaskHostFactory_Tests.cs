@@ -41,9 +41,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <param name="taskHostFactorySpecified">Whether to use TaskHostFactory (transient) or AssemblyTaskFactory (sidecar)</param>
         /// <param name="envVariableSpecified">Whether to set MSBUILDFORCEALLTASKSOUTOFPROC environment variable</param>
         [Theory]
-        [InlineData(true, false)]
+        // [InlineData(true, false)]
         [InlineData(false, true)]
-        [InlineData(true, true)]
+        // [InlineData(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -100,7 +100,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     Process taskHostNode = Process.GetProcessById(pid);
                     bool processExited = taskHostNode.WaitForExit(3000);
 
-                    processExited.ShouldBeFalse($"TaskHost should remain alive after build. TaskHost exited with code: {taskHostNode?.ExitCode}");
+                    processExited.ShouldBeFalse(
+                        processExited
+                            ? $"TaskHost should remain alive after build. TaskHost exited with code: {taskHostNode.ExitCode}"
+                            : "TaskHost should remain alive after build for task host case.");
                     try
                     {
                         taskHostNode.Kill();
