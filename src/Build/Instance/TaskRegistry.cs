@@ -521,7 +521,7 @@ namespace Microsoft.Build.Execution
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
             out bool retrievedFromCache,
-            bool isMultiThreadedBuild = false)
+            bool isMultiThreadedBuild)
         {
             RegisteredTaskRecord taskRecord = null;
             retrievedFromCache = false;
@@ -770,7 +770,7 @@ namespace Microsoft.Build.Execution
             IDictionary<string, string> taskIdentityParameters,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
-            bool isMultiThreadedBuild = false)
+            bool isMultiThreadedBuild)
             =>
                 taskRecords.FirstOrDefault(r =>
                     r.CanTaskBeCreatedByFactory(
@@ -1360,7 +1360,7 @@ namespace Microsoft.Build.Execution
             /// loads an external file and uses that to generate the tasks.
             /// </summary>
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
-            internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild = false)
+            internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
                 // First check (fast path - no locking)
                 if (_taskNamesCreatableByFactory == null)
@@ -1468,7 +1468,7 @@ namespace Microsoft.Build.Execution
             /// Given a Registered task record and a task name. Check create an instance of the task factory using the record.
             /// If the factory is a assembly task factory see if the assemblyFile has the correct task inside of it.
             /// </summary>
-            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild = false)
+            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
                 if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
                 {
@@ -1482,7 +1482,7 @@ namespace Microsoft.Build.Execution
             /// Create an instance of the task factory and load it from the assembly.
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the task factory could not be properly created an InvalidProjectFileException will be thrown</exception>
-            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, bool isMultiThreadedBuild = false)
+            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, bool isMultiThreadedBuild)
             {
                 // see if we have already created the factory before, only create it once
                 if (_taskFactoryWrapperInstance == null)

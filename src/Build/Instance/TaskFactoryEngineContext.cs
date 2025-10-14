@@ -69,7 +69,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor
         /// </summary>
-        public TaskFactoryEngineContext(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild = false, bool forceOutOfProcessExecution = false)
+        public TaskFactoryEngineContext(bool isRunningWithMultipleNodes, ElementLocation elementLocation, BuildLoggingContext loggingContext, bool isMultiThreadedBuild, bool forceOutOfProcessExecution)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
             ErrorUtilities.VerifyThrowInternalNull(elementLocation);

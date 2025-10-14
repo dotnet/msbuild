@@ -2008,7 +2008,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                                             string expectedArchitecture)
         {
             bool retrievedFromCache;
-            var record = registry.GetTaskRegistrationRecord(TestTaskName, null, taskParameters, exactMatchRequired, _targetLoggingContext, _elementLocation, out retrievedFromCache);
+            var record = registry.GetTaskRegistrationRecord(TestTaskName, null, taskParameters, exactMatchRequired, _targetLoggingContext, _elementLocation, out retrievedFromCache, false);
 
             if (shouldBeRetrieved)
             {
