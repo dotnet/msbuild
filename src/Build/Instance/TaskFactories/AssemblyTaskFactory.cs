@@ -285,7 +285,8 @@ namespace Microsoft.Build.BackEnd
 
             _isTaskHostFactory = (taskFactoryIdentityParameters != null
                  && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
-                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase));
+                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase))
+                 || !taskHostParamsMatchCurrentProc;
 
             try
             {
