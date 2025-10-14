@@ -99,6 +99,12 @@ namespace Microsoft.Build.Tasks
         private string _assemblyPath;
 
         /// <summary>
+        /// Whether this factory should compile for out-of-process execution.
+        /// Set during Initialize() based on environment variables or host context.
+        /// </summary>
+        private bool _compileForOutOfProcess;
+
+        /// <summary>
         /// Stores functions that were added to the current app domain. Should be removed once we're finished.
         /// </summary>
         private ResolveEventHandler handlerAddedToAppDomain = null;
@@ -159,6 +165,8 @@ namespace Microsoft.Build.Tasks
             _taskName = taskName;
 
             _parameters = parameterGroup.Values.ToArray();
+
+            _compileForOutOfProcess = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryLoggingHost);
 
             // Attempt to parse and extract everything from the <UsingTask />
             if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo))
@@ -445,7 +453,7 @@ namespace Microsoft.Build.Tasks
 
                 // Instead of using the inner text of the <Code /> element, read the specified file as source code
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
-                taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
+                taskInfo.SourceCode = FileSystems.Default.ReadFileAllText(sourceAttribute.Value.Trim());
             }
 
             if (typeAttribute != null)
@@ -569,7 +577,7 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, ReferenceAssemblyDirectoryName),
                     ThisAssemblyDirectoryLazy.Value,
                 }
-                .FirstOrDefault(p => File.Exists(Path.Combine(p, assemblyFileName)));
+                .FirstOrDefault(p => FileSystems.Default.FileExists(Path.Combine(p, assemblyFileName)));
 
                 if (resolvedDir != null)
                 {
@@ -595,7 +603,7 @@ namespace Microsoft.Build.Tasks
 
             // In case of taskhost we cache the resolution to a file placed next to the task assembly
             // so the taskhost can recreate this tryloadassembly logic
-            if (Traits.Instance.ForceTaskFactoryOutOfProc)
+            if (_compileForOutOfProcess)
             {
                 TaskFactoryUtilities.CreateLoadManifest(_assemblyPath, directoriesToAddToAppDomain);
             }
@@ -685,7 +693,7 @@ namespace Microsoft.Build.Tasks
             // Prepare for compilation
             string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
 
-            if (Traits.Instance.ForceTaskFactoryOutOfProc)
+            if (_compileForOutOfProcess)
             {
                 _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath(); // in a temp directory for this process, persisted until the end of build
             }
@@ -783,7 +791,8 @@ namespace Microsoft.Build.Tasks
                 // Return the compiled assembly
                 assembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
 
-                string cachedAssemblyPath = Traits.Instance.ForceTaskFactoryOutOfProc ? _assemblyPath : string.Empty;
+                // Cache the assembly path if we compiled for out-of-process execution
+                string cachedAssemblyPath = _compileForOutOfProcess ? _assemblyPath : string.Empty;
                 CompiledAssemblyCache.TryAdd(taskInfo, new TaskFactoryUtilities.CachedAssemblyEntry(assembly, cachedAssemblyPath));
                 return true;
             }
@@ -799,7 +808,8 @@ namespace Microsoft.Build.Tasks
                     File.Delete(sourceCodePath);
                 }
 
-                if (!Traits.Instance.ForceTaskFactoryOutOfProc && !string.IsNullOrEmpty(_assemblyPath) && FileSystems.Default.FileExists(_assemblyPath))
+                // Only delete the assembly if we're not compiling for out-of-process execution
+                if (!_compileForOutOfProcess && !string.IsNullOrEmpty(_assemblyPath) && FileSystems.Default.FileExists(_assemblyPath))
                 {
                     File.Delete(_assemblyPath);
                     _assemblyPath = null;

@@ -147,6 +147,12 @@ namespace Microsoft.Build.Tasks
         private TaskLoggingHelper _log;
 
         /// <summary>
+        /// Whether this factory should compile for out-of-process execution.
+        /// Set during Initialize() based on environment variables or host context.
+        /// </summary>
+        private bool _compileForOutOfProcess;
+
+        /// <summary>
         /// Task parameter type information
         /// </summary>
         private IDictionary<string, TaskPropertyInfo> _taskParameterTypeInfo;
@@ -184,6 +190,8 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
+
+            _compileForOutOfProcess = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryLoggingHost);
 
             XmlNode taskContent = ExtractTaskContent(taskElementContents);
             if (taskContent == null)
@@ -748,7 +756,7 @@ namespace Microsoft.Build.Tasks
                         // We don't need debug information
                         IncludeDebugInformation = true,
 
-                        GenerateInMemory = !Traits.Instance.ForceTaskFactoryOutOfProc,
+                        GenerateInMemory = !_compileForOutOfProcess,
                         OutputAssembly = _assemblyPath,
 
                         // Indicates that a .dll should be generated.
@@ -768,7 +776,7 @@ namespace Microsoft.Build.Tasks
                 // If our code is in a separate file, then read it in here
                 if (_sourcePath != null)
                 {
-                    _sourceCode = File.ReadAllText(_sourcePath);
+                    _sourceCode = FileSystems.Default.ReadFileAllText(_sourcePath);
                 }
 
                 // A fragment is essentially the contents of the execute method (except the final return true/false)
@@ -817,7 +825,7 @@ namespace Microsoft.Build.Tasks
                 {
                     Assembly existingAssembly = cachedEntry.Assembly;
                     
-                    if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                    if (_compileForOutOfProcess)
                     {
                         string cachedPath = cachedEntry.AssemblyPath;
                         if (!string.IsNullOrEmpty(cachedPath))
@@ -851,7 +859,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Proceed with compilation
-                if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                if (_compileForOutOfProcess)
                 {
                     _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath();
                     compilerParameters.OutputAssembly = _assemblyPath;
@@ -897,7 +905,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 Assembly assembly;
-                if (Traits.Instance.ForceTaskFactoryOutOfProc)
+                if (_compileForOutOfProcess)
                 {
                     if (!string.IsNullOrEmpty(_assemblyPath))
                     {
@@ -915,7 +923,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Add to the cache.  Failing to add is not a fatal error.
-                string cachedAssemblyPath = Traits.Instance.ForceTaskFactoryOutOfProc ? _assemblyPath : string.Empty;
+                string cachedAssemblyPath = _compileForOutOfProcess ? _assemblyPath : string.Empty;
                 s_compiledTaskCache.TryAdd(fullSpec, new TaskFactoryUtilities.CachedAssemblyEntry(assembly, cachedAssemblyPath));
                 return assembly;
             }

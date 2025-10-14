@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
@@ -152,7 +154,7 @@ namespace Microsoft.Build.Shared
 
             foreach (string assemblyPath in assemblyPaths)
             {
-                if (!string.IsNullOrEmpty(assemblyPath) && File.Exists(assemblyPath))
+                if (!string.IsNullOrEmpty(assemblyPath) && FileSystems.Default.FileExists(assemblyPath))
                 {
                     string? directory = Path.GetDirectoryName(assemblyPath);
                     if (!string.IsNullOrEmpty(directory) && seenDirectories.Add(directory))
@@ -178,7 +180,7 @@ namespace Microsoft.Build.Shared
             }
 
             // Load the assembly from bytes so we don't lock the file and record its original path for out-of-proc hosts
-            Assembly assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+            Assembly assembly = Assembly.Load(FileSystems.Default.ReadFileAllBytes(assemblyPath));
             return assembly;
         }
 
@@ -202,7 +204,7 @@ namespace Microsoft.Build.Shared
             }
 
             string manifestPath = taskLocation + InlineTaskLoadManifestSuffix;
-            if (!File.Exists(manifestPath))
+            if (!FileSystems.Default.FileExists(manifestPath))
             {
                 return;
             }
@@ -232,6 +234,29 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Determines whether a task factory should compile for out-of-process execution based on the host context.
+        /// </summary>
+        /// <param name="taskFactoryEngineContext">The build engine/logging host passed to the task factory's Initialize method.</param>
+        /// <returns>True if the task should be compiled for out-of-process execution; otherwise, false.</returns>
+        /// <remarks>
+        /// This method checks if the host implements ITaskFactoryBuildParameterProvider and queries it for:
+        /// 1. ForceOutOfProcessExecution - explicit override via environment variable
+        /// 2. IsMultiThreadedBuild - automatic out-of-proc when /mt flag is used
+        /// 
+        /// This logic is shared across RoslynCodeTaskFactory, CodeTaskFactory, and XamlTaskFactory.
+        /// It needs to be decided during task factory initialization time.
+        /// </remarks>
+        public static bool ShouldCompileForOutOfProcess(IBuildEngine taskFactoryEngineContext)
+        {
+            if (taskFactoryEngineContext is ITaskFactoryBuildParameterProvider hostContext)
+            {
+                return hostContext.ForceOutOfProcessExecution || hostContext.IsMultiThreadedBuild;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Cleans up the current process's inline task directory by deleting the temporary directory
         /// and its contents used for inline task assemblies for this specific process.
         /// This should be called at the end of a build to prevent dangling DLL files.
@@ -247,7 +272,7 @@ namespace Microsoft.Build.Shared
                 InlineTaskTempDllSubPath,
                 $"pid_{EnvironmentUtilities.CurrentProcessId}");
                 
-            if (Directory.Exists(processSpecificInlineTaskDir))
+            if (FileSystems.Default.DirectoryExists(processSpecificInlineTaskDir))
             {
                 FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
             }
@@ -269,17 +294,17 @@ namespace Microsoft.Build.Shared
                 if (!string.IsNullOrEmpty(assemblyName.CultureName))
                 {
                     path = Path.Combine(directory, assemblyName.CultureName, assemblyName.Name + ".dll");
-                    if (File.Exists(path))
+                    if (FileSystems.Default.FileExists(path))
                     {
-                        return Assembly.Load(File.ReadAllBytes(path));
+                        return Assembly.Load(FileSystems.Default.ReadFileAllBytes(path));
                     }
                 }
 
                 // Try the standard path
                 path = Path.Combine(directory, assemblyName.Name + ".dll");
-                if (File.Exists(path))
+                if (FileSystems.Default.FileExists(path))
                 {
-                    return Assembly.Load(File.ReadAllBytes(path));
+                    return Assembly.Load(FileSystems.Default.ReadFileAllBytes(path));
                 }
             }
 

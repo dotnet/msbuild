@@ -302,7 +302,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific batch of the current task.
         /// </summary>
-        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
+        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters, int scheduledNodeId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
 
@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             // We instantiate a new task object for each batch
-            TaskInstance = InstantiateTask(taskIdentityParameters);
+            TaskInstance = InstantiateTask(scheduledNodeId, taskIdentityParameters);
 
             if (TaskInstance == null)
             {
@@ -890,18 +890,18 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
             {
-                returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, true /* exact match */, _targetLoggingContext, _taskLocation);
+                returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, true /* exact match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
                 if (returnClass == null)
                 {
-                    returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, false /* fuzzy match */, _targetLoggingContext, _taskLocation);
+                    returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, taskIdentityParameters, false /* fuzzy match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
 
                     if (returnClass == null)
                     {
-                        returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, true /* exact match */, _targetLoggingContext, _taskLocation);
+                        returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, true /* exact match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
 
                         if (returnClass == null)
                         {
-                            returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, false /* fuzzy match */, _targetLoggingContext, _taskLocation);
+                            returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, false /* fuzzy match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
 
                             if (returnClass == null)
                             {
@@ -962,7 +962,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates the task.
         /// </summary>
-        private ITask InstantiateTask(IDictionary<string, string> taskIdentityParameters)
+        private ITask InstantiateTask(int scheduledNodeId, IDictionary<string, string> taskIdentityParameters)
         {
             ITask task = null;
 
@@ -975,17 +975,22 @@ namespace Microsoft.Build.BackEnd
                         AppDomainSetup,
 #endif
                         IsOutOfProc,
+                        scheduledNodeId,
                         ProjectInstance.GetProperty);
                 }
                 else
                 {
-                    TaskFactoryLoggingHost loggingHost = new TaskFactoryLoggingHost(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext);
+                    TaskFactoryEngineContext taskFactoryEngineContext = new TaskFactoryEngineContext(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
                     bool isTaskHost = false;
                     try
                     {
                         // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
+                        // This happens when: 1) Environment variable is set, OR 2) MultiThreaded build is enabled
                         // IntrinsicTaskFactory tasks run in proc always
-                        if (Traits.Instance.ForceTaskFactoryOutOfProc && _taskFactoryWrapper.TaskFactory is not IntrinsicTaskFactory)
+                        bool shouldRunOutOfProc = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryEngineContext)
+                                                  && _taskFactoryWrapper.TaskFactory is not IntrinsicTaskFactory;
+
+                        if (shouldRunOutOfProc)
                         {
                             // Custom Task factories are not supported, internal TaskFactories implement this marker interface
                             if (_taskFactoryWrapper.TaskFactory is not IOutOfProcTaskFactory outOfProcTaskFactory)
@@ -998,15 +1003,15 @@ namespace Microsoft.Build.BackEnd
                                 return null;
                             }
 
-                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory);
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory);
                             isTaskHost = true;
                         }
                         else
                         {
                             // Normal in-process execution for custom task factories
                             task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
-                                _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
+                                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
                         }
 
                         // Track telemetry for non-AssemblyTaskFactory task factories
@@ -1015,7 +1020,7 @@ namespace Microsoft.Build.BackEnd
                     finally
                     {
 #if FEATURE_APPDOMAIN
-                        loggingHost.MarkAsInactive();
+                        taskFactoryEngineContext.MarkAsInactive();
 #endif
                     }
                 }
@@ -1729,20 +1734,20 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Creates a <see cref="TaskHostTask"/> wrapper to run a non-AssemblyTaskFactory task out of process.
-        /// This is used when Traits.Instance.ForceTaskFactoryOutOfProc is true to ensure
+        /// This is used when Traits.Instance.ForceTaskFactoryOutOfProc=1 is true or the multi-threaded mode is active to ensure
         /// non-AssemblyTaskFactory tasks run in isolation.
         /// </summary>
         /// <param name="taskIdentityParameters">Task identity parameters.</param>
-        /// <param name="loggingHost">The logging host to use for the task.</param>
+        /// <param name="taskFactoryEngineContext">The engine context to use for the task.</param>
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryLoggingHost loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryEngineContext taskFactoryEngineContext, IOutOfProcTaskFactory outOfProcTaskFactory)
         {
             ITask innerTask;
 
             innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
-                _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
+                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
 
             if (innerTask == null)
             {
@@ -1757,7 +1762,8 @@ namespace Microsoft.Build.BackEnd
             string resolvedAssemblyLocation = outOfProcTaskFactory.GetAssemblyPath();
 
             // This should never happen - if the factory can create a task, it should know where the assembly is
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(resolvedAssemblyLocation), 
+            ErrorUtilities.VerifyThrow(
+                !string.IsNullOrEmpty(resolvedAssemblyLocation),
                 $"IOutOfProcTaskFactory {_taskFactoryWrapper.TaskFactory.FactoryName} created a task but returned null/empty assembly path");
 
             LoadedType taskLoadedType = new LoadedType(
