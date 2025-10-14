@@ -341,37 +341,8 @@ namespace Microsoft.Build.BackEnd
 #endif
             bool isOutOfProc,
             int scheduledNodeId,
-            Func<string, ProjectPropertyInstance> getProperty)
-        {
-            return CreateTaskInstance(
-                taskLocation,
-                taskLoggingContext,
-                buildComponentHost,
-                taskIdentityParameters,
-#if FEATURE_APPDOMAIN
-                appDomainSetup,
-#endif
-                isOutOfProc,
-                scheduledNodeId,
-                getProperty,
-                taskEnvironment: null);
-        }
-
-        /// <summary>
-        /// Create an instance of the wrapped ITask for a batch run of the task.
-        /// </summary>
-        internal ITask CreateTaskInstance(
-            ElementLocation taskLocation,
-            TaskLoggingContext taskLoggingContext,
-            IBuildComponentHost buildComponentHost,
-            IDictionary<string, string> taskIdentityParameters,
-#if FEATURE_APPDOMAIN
-            AppDomainSetup appDomainSetup,
-#endif
-            bool isOutOfProc,
-            int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty,
-            TaskEnvironment taskEnvironment)
+            TaskEnvironment taskEnvironment = null) // TODO: taskEnvironment logic was not implemented yet
         {
             bool useTaskFactory = false;
             Dictionary<string, string> mergedParameters = null;
