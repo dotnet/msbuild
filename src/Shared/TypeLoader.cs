@@ -381,7 +381,7 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// If assembly should use metadata load contxt it will be executed out of proc.
+            /// If assembly should use metadata load context it will be executed out of proc.
             /// </summary>
             /// <param name="useTaskHost">Task Host Parameter was specified explicitly in XML or through environment variable.</param>
             /// <param name="isTaskHostParamsMatchCurrentProc">The parameter defines if Runtime/Architecture explicitly defined in XML match current process.</param>
