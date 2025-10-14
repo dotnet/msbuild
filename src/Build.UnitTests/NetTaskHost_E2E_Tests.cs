@@ -75,5 +75,25 @@ namespace Microsoft.Build.Engine.UnitTests
             successTestTask.ShouldBeTrue();
             testTaskOutput.ShouldContain($"Hello TEST");
         }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskWithImplicitHostParamsTest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            var bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskWithImplicitParams", "TestNetTaskWithImplicitParams.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
+            testTaskOutput.ShouldContain($"Process path: {bootstrapCorePath}", customMessage: testTaskOutput);
+        }
     }
 }

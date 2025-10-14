@@ -274,8 +274,10 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
+            bool isTaskHostParamsMatchCurrentProc = true;
             if (taskFactoryIdentityParameters != null)
             {
+                isTaskHostParamsMatchCurrentProc = TaskHostParametersMatchCurrentProcess(taskFactoryIdentityParameters);
                 _factoryIdentityParameters = new Dictionary<string, string>(taskFactoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
             }
 
