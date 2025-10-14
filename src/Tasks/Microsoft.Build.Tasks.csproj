@@ -719,7 +719,6 @@
     <PackageReference Update="System.Threading.Tasks.Dataflow" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
     <PackageReference Include="System.Reflection.Metadata" PrivateAssets="all" />
-    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
