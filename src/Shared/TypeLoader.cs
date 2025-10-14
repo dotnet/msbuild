@@ -213,9 +213,9 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool useTaskHost = false,
-            bool isTaskHostParamsMatchCurrentProc = true)
+            bool taskHostParamsMatchCurrentProc = true)
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, isTaskHostParamsMatchCurrentProc);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, taskHostParamsMatchCurrentProc);
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly)
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, isTaskHostParamsMatchCurrentProc: true);
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, taskHostParamsMatchCurrentProc: true);
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool useTaskHost,
-            bool isTaskHostParamsMatchCurrentProc)
+            bool taskHostParamsMatchCurrentProc)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, isTaskHostParamsMatchCurrentProc);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, taskHostParamsMatchCurrentProc);
         }
 
         /// <summary>
@@ -322,11 +322,11 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost, bool isTaskHostParamsMatchCurrentProc)
+            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost, bool taskHostParamsMatchCurrentProc)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName);
 
-                if (ShouldUseMetadataLoadContext(useTaskHost, isTaskHostParamsMatchCurrentProc))
+                if (ShouldUseMetadataLoadContext(useTaskHost, taskHostParamsMatchCurrentProc))
                 {
                     return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
                 }
@@ -381,12 +381,12 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// If assembly should use metadata load contxt it will be executed out of proc.
+            /// Determine whether an assembly is likely to be used out of process and thus loaded with a <see cref="MetadataLoadContext"/>.
             /// </summary>
             /// <param name="useTaskHost">Task Host Parameter was specified explicitly in XML or through environment variable.</param>
-            /// <param name="isTaskHostParamsMatchCurrentProc">The parameter defines if Runtime/Architecture explicitly defined in XML match current process.</param>
-            private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool isTaskHostParamsMatchCurrentProc) =>
-                (useTaskHost || !isTaskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
+            /// <param name="taskHostParamsMatchCurrentProc">The parameter defines if Runtime/Architecture explicitly defined in XML match current process.</param>
+            private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool taskHostParamsMatchCurrentProc) =>
+                (useTaskHost || !taskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
 
             private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
             {

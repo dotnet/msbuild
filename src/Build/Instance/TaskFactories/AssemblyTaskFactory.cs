@@ -274,10 +274,10 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
 
-            bool isTaskHostParamsMatchCurrentProc = true;
+            bool taskHostParamsMatchCurrentProc = true;
             if (taskFactoryIdentityParameters != null)
             {
-                isTaskHostParamsMatchCurrentProc = TaskHostParametersMatchCurrentProcess(taskFactoryIdentityParameters);
+                taskHostParamsMatchCurrentProc = TaskHostParametersMatchCurrentProcess(taskFactoryIdentityParameters);
                 _factoryIdentityParameters = new Dictionary<string, string>(taskFactoryIdentityParameters, StringComparer.OrdinalIgnoreCase);
             }
 
@@ -295,7 +295,7 @@ namespace Microsoft.Build.BackEnd
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
 
-                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested, taskHostParamsMatchCurrentProc);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
