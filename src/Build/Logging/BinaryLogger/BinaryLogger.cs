@@ -181,39 +181,62 @@ namespace Microsoft.Build.Logging
 
             var result = new BinaryLoggerParameters();
             var parameters = parametersString.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
-            
+
             foreach (var parameter in parameters)
             {
-                if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
+                if (TryParseProjectImports(parameter, result))
                 {
-                    result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.None;
-                    result.HasProjectImportsParameter = true;
+                    continue;
                 }
-                else if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.Embed;
-                    result.HasProjectImportsParameter = true;
-                }
-                else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
-                {
-                    result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.ZipFile;
-                    result.HasProjectImportsParameter = true;
-                }
-                else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
+
+                if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
                 {
                     result.OmitInitialInfo = true;
+                    continue;
                 }
-                else if (TryParsePathParameter(parameter, out string filePath))
+
+                if (TryParsePathParameter(parameter, out string filePath))
                 {
                     result.LogFilePath = filePath;
+                    continue;
                 }
-                else
-                {
-                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
-                }
+
+                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Attempts to parse a ProjectImports parameter.
+        /// </summary>
+        /// <param name="parameter">The parameter to parse.</param>
+        /// <param name="result">The BinaryLoggerParameters object to update.</param>
+        /// <returns>True if the parameter was a ProjectImports parameter; otherwise, false.</returns>
+        private static bool TryParseProjectImports(string parameter, BinaryLoggerParameters result)
+        {
+            if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
+            {
+                result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.None;
+                result.HasProjectImportsParameter = true;
+                return true;
+            }
+
+            if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
+            {
+                result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.Embed;
+                result.HasProjectImportsParameter = true;
+                return true;
+            }
+
+            if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
+            {
+                result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.ZipFile;
+                result.HasProjectImportsParameter = true;
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
