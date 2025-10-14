@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
+#pragma warning disable CS1572, CS1573 // TODO: XML comment warnings - these should be fixed up later
 
 namespace Microsoft.Build.CommandLine
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Build.CommandLine
     /// This class encapsulates the switches gathered from the application command line. It helps with switch detection, parameter
     /// accumulation, and error generation.
     /// </summary>
-    internal sealed class CommandLineSwitches
+    public sealed class CommandLineSwitches
     {
         /// <summary>
         /// Enumeration of all recognized switches that do not take any parameters.
@@ -28,7 +29,7 @@ namespace Microsoft.Build.CommandLine
         /// 2) the value of the last member of the enumeration must indicate the number of valid switches
         /// 3) the values of the first and last members of the enumeration are invalid array indices
         /// </remarks>
-        internal enum ParameterlessSwitch
+        public enum ParameterlessSwitch
         {
             Invalid = -1,
             Help = 0,
@@ -63,7 +64,7 @@ namespace Microsoft.Build.CommandLine
         /// 2) the value of the last member of the enumeration must indicate the number of valid switches
         /// 3) the values of the first and last members of the enumeration are invalid array indices
         /// </remarks>
-        internal enum ParameterizedSwitch
+        public enum ParameterizedSwitch
         {
             Invalid = -1,
             Project = 0,
@@ -307,7 +308,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="parameterlessSwitch">[out] switch identifier (from ParameterlessSwitch enumeration)</param>
         /// <param name="duplicateSwitchErrorMessage"></param>
         /// <returns>true, if switch is a recognized switch that doesn't take parameters</returns>
-        internal static bool IsParameterlessSwitch(
+        public static bool IsParameterlessSwitch(
             string switchName,
             out ParameterlessSwitch parameterlessSwitch,
             out string duplicateSwitchErrorMessage)
@@ -341,7 +342,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="missingParametersErrorMessage"></param>
         /// <param name="unquoteParameters"></param>
         /// <returns>true, if switch is a recognized switch that takes parameters</returns>
-        internal static bool IsParameterizedSwitch(
+        public static bool IsParameterizedSwitch(
             string switchName,
             out ParameterizedSwitch parameterizedSwitch,
             out string duplicateSwitchErrorMessage,
@@ -381,7 +382,7 @@ namespace Microsoft.Build.CommandLine
         /// Get the distinct parameterized switchs map resource ids.
         /// </summary>
         /// <returns>Parameterized switches map resource ids.</returns>
-        internal static IEnumerable<string> GetParameterizedSwitchResourceIds()
+        public static IEnumerable<string> GetParameterizedSwitchResourceIds()
         {
             HashSet<string> parameterizedSwitchResourceIds = new HashSet<string>();
             foreach (ParameterizedSwitchInfo parameterizedSwitch in s_parameterizedSwitchesMap)
@@ -398,7 +399,7 @@ namespace Microsoft.Build.CommandLine
         /// Get the distinct parameterless switchs map resource ids.
         /// </summary>
         /// <returns>Parameterless switchs map resource ids</returns>
-        internal static IEnumerable<string> GetParameterlessSwitchResourceIds()
+        public static IEnumerable<string> GetParameterlessSwitchResourceIds()
         {
             HashSet<string> parameterlessSwitchResourceIds = new HashSet<string>();
             foreach (ParameterlessSwitchInfo parameterlessSwitch in s_parameterlessSwitchesMap)
@@ -440,12 +441,12 @@ namespace Microsoft.Build.CommandLine
         private DetectedParameterizedSwitch[] _parameterizedSwitches;
         // NOTE: the above arrays are instance members because this class is not required to be a singleton
 
-        internal static List<(string path, string contents)> SwitchesFromResponseFiles = new();
+        public static List<(string path, string contents)> SwitchesFromResponseFiles = new();
 
         /// <summary>
         /// Default constructor.
         /// </summary>
-        internal CommandLineSwitches()
+        public CommandLineSwitches()
         {
 #if DEBUG
             Debug.Assert(s_parameterlessSwitchesMap.Length == (int)ParameterlessSwitch.NumberOfParameterlessSwitches,
@@ -482,7 +483,7 @@ namespace Microsoft.Build.CommandLine
         /// Called when a recognized switch that doesn't take parameters is detected on the command line.
         /// </summary>
         /// <param name="parameterlessSwitch"></param>
-        internal void SetParameterlessSwitch(ParameterlessSwitch parameterlessSwitch, string commandLineArg)
+        public void SetParameterlessSwitch(ParameterlessSwitch parameterlessSwitch, string commandLineArg)
         {
             // save the switch text
             _parameterlessSwitches[(int)parameterlessSwitch].commandLineArg = commandLineArg;
@@ -499,7 +500,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="multipleParametersAllowed"></param>
         /// <param name="unquoteParameters"></param>
         /// <returns>true, if the given parameters were successfully stored</returns>
-        internal bool SetParameterizedSwitch(
+        public bool SetParameterizedSwitch(
             ParameterizedSwitch parameterizedSwitch,
             string commandLineArg,
             string switchParameters,
@@ -577,7 +578,7 @@ namespace Microsoft.Build.CommandLine
         /// Don't include the project file, the caller can put it last.
         /// </summary>
         /// <returns></returns>
-        internal string GetEquivalentCommandLineExceptProjectFile()
+        public string GetEquivalentCommandLineExceptProjectFile()
         {
             var commandLineA = new List<string>();
             var commandLineB = new List<string>();
@@ -609,7 +610,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="parameterlessSwitch"></param>
         /// <returns>true, if switch has been seen before</returns>
-        internal bool IsParameterlessSwitchSet(ParameterlessSwitch parameterlessSwitch)
+        public bool IsParameterlessSwitchSet(ParameterlessSwitch parameterlessSwitch)
         {
             return _parameterlessSwitches[(int)parameterlessSwitch].commandLineArg != null;
         }
@@ -622,7 +623,7 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         /// <param name="parameterlessSwitch"></param>
         /// <returns>true if on, false if off</returns>
-        internal bool this[ParameterlessSwitch parameterlessSwitch]
+        public bool this[ParameterlessSwitch parameterlessSwitch]
         {
             get
             {
@@ -635,7 +636,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="parameterlessSwitch"></param>
         /// <returns>The switch text, or null if switch was not detected on the command line.</returns>
-        internal string GetParameterlessSwitchCommandLineArg(ParameterlessSwitch parameterlessSwitch)
+        public string GetParameterlessSwitchCommandLineArg(ParameterlessSwitch parameterlessSwitch)
         {
             return _parameterlessSwitches[(int)parameterlessSwitch].commandLineArg;
         }
@@ -646,7 +647,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>This method is very light-weight.</remarks>
         /// <param name="parameterizedSwitch"></param>
         /// <returns>true, if switch has been seen before</returns>
-        internal bool IsParameterizedSwitchSet(ParameterizedSwitch parameterizedSwitch)
+        public bool IsParameterizedSwitchSet(ParameterizedSwitch parameterizedSwitch)
         {
             return _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg != null;
         }
@@ -665,7 +666,7 @@ namespace Microsoft.Build.CommandLine
         /// An array of all the detected parameters for the given switch, or an empty array (NOT null), if the switch has not yet
         /// been detected on the command line.
         /// </returns>
-        internal string[] this[ParameterizedSwitch parameterizedSwitch]
+        public string[] this[ParameterizedSwitch parameterizedSwitch]
         {
             get
             {
@@ -688,7 +689,7 @@ namespace Microsoft.Build.CommandLine
         /// If a logger is enabled but no parameters were supplied, the array entry is an empty array.
         /// If a particular logger is not supplied, the array entry is null.
         /// </summary>
-        internal string[][] GetFileLoggerParameters()
+        public string[][] GetFileLoggerParameters()
         {
             string[][] groupedFileLoggerParameters = new string[10][];
 
@@ -757,7 +758,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="parameterizedSwitch"></param>
         /// <returns>The switch text, or null if switch was not detected on the command line.</returns>
-        internal string GetParameterizedSwitchCommandLineArg(ParameterizedSwitch parameterizedSwitch)
+        public string GetParameterizedSwitchCommandLineArg(ParameterizedSwitch parameterizedSwitch)
         {
             return _parameterizedSwitches[(int)parameterizedSwitch].commandLineArg;
         }
@@ -766,7 +767,7 @@ namespace Microsoft.Build.CommandLine
         /// Determines whether any switches have been set in this bag.
         /// </summary>
         /// <returns>Returns true if any switches are set, otherwise false.</returns>
-        internal bool HaveAnySwitchesBeenSet()
+        public bool HaveAnySwitchesBeenSet()
         {
             for (int i = 0; i < (int)ParameterlessSwitch.NumberOfParameterlessSwitches; i++)
             {
@@ -791,7 +792,7 @@ namespace Microsoft.Build.CommandLine
         /// Called to flag an error when an unrecognized switch is detected on the command line.
         /// </summary>
         /// <param name="badCommandLineArg"></param>
-        internal void SetUnknownSwitchError(string badCommandLineArgValue, string commandLine = "")
+        public void SetUnknownSwitchError(string badCommandLineArgValue, string commandLine = "")
         {
             SetSwitchError("UnknownSwitchError", badCommandLineArgValue, commandLine);
         }
@@ -800,7 +801,7 @@ namespace Microsoft.Build.CommandLine
         /// Called to flag an error when a switch that doesn't take parameters is found with parameters on the command line.
         /// </summary>
         /// <param name="badCommandLineArg"></param>
-        internal void SetUnexpectedParametersError(string badCommandLineArgValue, string commandLine = "")
+        public void SetUnexpectedParametersError(string badCommandLineArgValue, string commandLine = "")
         {
             SetSwitchError("UnexpectedParametersError", badCommandLineArgValue, commandLine);
         }
@@ -818,7 +819,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="messageResourceName"></param>
         /// <param name="badCommandLineArg"></param>
-        internal void SetSwitchError(string messageResourceNameValue, string badCommandLineArgValue, string commandLine)
+        public void SetSwitchError(string messageResourceNameValue, string badCommandLineArgValue, string commandLine)
         {
             SetError(messageResourceNameValue, badCommandLineArgValue, null, false, commandLine);
         }
@@ -867,7 +868,7 @@ namespace Microsoft.Build.CommandLine
         /// Indicates if any errors were found while parsing the command-line.
         /// </summary>
         /// <returns>true, if any errors were found</returns>
-        internal bool HaveErrors()
+        public bool HaveErrors()
         {
             return _errorMessage != null;
         }
@@ -875,7 +876,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Throws an exception if any errors were found while parsing the command-line.
         /// </summary>
-        internal void ThrowErrors()
+        public void ThrowErrors()
         {
             if (HaveErrors())
             {
@@ -904,7 +905,8 @@ namespace Microsoft.Build.CommandLine
         /// considered to be on the "left", and the switches being appended are on the "right".
         /// </remarks>
         /// <param name="switchesToAppend"></param>
-        internal void Append(CommandLineSwitches switchesToAppend, string commandLine = "")
+        /// <param name="commandLine"></param>
+        public void Append(CommandLineSwitches switchesToAppend, string commandLine = "")
         {
             // if this collection doesn't already have an error registered, but the collection being appended does
             if (!HaveErrors() && switchesToAppend.HaveErrors())

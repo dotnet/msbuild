@@ -91,6 +91,9 @@
     <Compile Include="..\Shared\StringUtils.cs">
       <Link>SharedUtilities\StringUtils.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\QuotingUtilities.cs">
+      <Link>SharedUtilities\QuotingUtilities.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
@@ -168,6 +171,9 @@
     <Compile Include="BuildCheck\**\*.cs" />
     <Compile Include="Collections\IValueDictionaryConverter.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
+    <Compile Include="CommandLine\CommandLineParser.cs" />
+    <Compile Include="CommandLine\CommandLineSwitches.cs" />
+    <Compile Include="CommandLine\CommandLineSwitchException.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
@@ -176,6 +182,7 @@
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
+    <Compile Include="CommandLine\InitializationException.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />

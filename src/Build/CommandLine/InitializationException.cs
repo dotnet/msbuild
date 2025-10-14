@@ -11,6 +11,7 @@ using System.Security.Permissions;
 using Microsoft.Build.Shared;
 
 #nullable disable
+#pragma warning disable CS1572, CS1573 // TODO: XML comment warnings - these should be fixed up later
 
 namespace Microsoft.Build.CommandLine
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Build.CommandLine
     /// Unlike the CommandLineSwitchException, this exception is NOT thrown for syntax errors in switches.
     /// </remarks>
     [Serializable]
-    internal sealed class InitializationException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
+    public sealed class InitializationException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// This constructor initializes the exception message.
@@ -106,7 +107,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="condition"></param>
         /// <param name="messageResourceName"></param>
-        internal static void VerifyThrow(bool condition, string messageResourceName)
+        public static void VerifyThrow(bool condition, string messageResourceName)
         {
             VerifyThrow(condition, messageResourceName, null);
         }
@@ -117,7 +118,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="condition"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="invalidSwitch"></param>
-        internal static void VerifyThrow(bool condition, string messageResourceName, string invalidSwitch)
+        public static void VerifyThrow(bool condition, string messageResourceName, string invalidSwitch)
         {
             if (!condition)
             {
@@ -138,7 +139,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="invalidSwitch"></param>
         /// <param name="e"></param>
         /// <param name="showStackTrace"></param>
-        internal static void Throw(string messageResourceName, string invalidSwitch, Exception e, bool showStackTrace)
+        public static void Throw(string messageResourceName, string invalidSwitch, Exception e, bool showStackTrace)
         {
             string errorMessage = AssemblyResources.GetString(messageResourceName);
 
@@ -160,7 +161,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Throws the exception using the given exception context and can include the logger name.
         /// </summary>
-        internal static void Throw(string messageResourceName, string invalidSwitch, Exception e, bool showStackTrace, params object[] formatArgs)
+        public static void Throw(string messageResourceName, string invalidSwitch, Exception e, bool showStackTrace, params object[] formatArgs)
         {
             string errorMessage = AssemblyResources.GetString(messageResourceName);
 
@@ -182,7 +183,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Throws the exception if the specified condition is not met.
         /// </summary>
-        internal static void VerifyThrow(bool condition, string messageResourceName, string invalidSwitch, params object[] args)
+        public static void VerifyThrow(bool condition, string messageResourceName, string invalidSwitch, params object[] args)
         {
             if (!condition)
             {
@@ -203,7 +204,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="invalidSwitch"></param>
         /// <param name="e"></param>
         /// <param name="showStackTrace"></param>
-        internal static void Throw(string message, string invalidSwitch)
+        public static void Throw(string message, string invalidSwitch)
         {
             ErrorUtilities.VerifyThrow(message != null, "The string must exist.");
             throw new InitializationException(message, invalidSwitch);

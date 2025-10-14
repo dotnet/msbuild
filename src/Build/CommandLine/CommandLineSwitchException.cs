@@ -10,6 +10,7 @@ using System.Security.Permissions;
 using Microsoft.Build.Shared;
 
 #nullable disable
+#pragma warning disable CS1572, CS1573 // TODO: XML comment warnings - these should be fixed up later
 
 namespace Microsoft.Build.CommandLine
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Build.CommandLine
     /// This exception is used to flag (syntax) errors in command line switches passed to the application.
     /// </summary>
     [Serializable]
-    internal sealed class CommandLineSwitchException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
+    public sealed class CommandLineSwitchException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// This constructor initializes the exception message.
@@ -81,7 +82,7 @@ namespace Microsoft.Build.CommandLine
         /// Gets the invalid switch that caused the exception.
         /// </summary>
         /// <value>Can be null.</value>
-        internal string CommandLineArg
+        public string CommandLineArg
         {
             get
             {
@@ -114,7 +115,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="condition"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="commandLineArg"></param>
-        internal static void VerifyThrow(bool condition, string messageResourceName, string commandLineArg)
+        public static void VerifyThrow(bool condition, string messageResourceName, string commandLineArg)
         {
             if (!condition)
             {
@@ -134,7 +135,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="condition"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="commandLineArg"></param>
-        internal static void Throw(string messageResourceName, string commandLineArg)
+        public static void Throw(string messageResourceName, string commandLineArg)
         {
             Throw(messageResourceName, commandLineArg, String.Empty);
         }
@@ -145,7 +146,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="condition"></param>
         /// <param name="messageResourceName"></param>
         /// <param name="messageArgs"></param>
-        internal static void Throw(string messageResourceName, string commandLineArg, params string[] messageArgs)
+        public static void Throw(string messageResourceName, string commandLineArg, params string[] messageArgs)
         {
             string errorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(messageResourceName, messageArgs);
 
