@@ -980,14 +980,14 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    TaskFactoryEngineContext loggingHost = new TaskFactoryEngineContext(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
+                    TaskFactoryEngineContext taskFactoryEngineContext = new TaskFactoryEngineContext(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
                     bool isTaskHost = false;
                     try
                     {
                         // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
                         // This happens when: 1) Environment variable is set, OR 2) MultiThreaded build is enabled
                         // IntrinsicTaskFactory tasks run in proc always
-                        bool shouldRunOutOfProc = (Traits.Instance.ForceTaskFactoryOutOfProc || (_buildComponentHost?.BuildParameters?.MultiThreaded ?? false))
+                        bool shouldRunOutOfProc = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryEngineContext)
                                                   && _taskFactoryWrapper.TaskFactory is not IntrinsicTaskFactory;
 
                         if (shouldRunOutOfProc)
@@ -1003,15 +1003,15 @@ namespace Microsoft.Build.BackEnd
                                 return null;
                             }
 
-                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, loggingHost, outOfProcTaskFactory);
+                            task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory);
                             isTaskHost = true;
                         }
                         else
                         {
                             // Normal in-process execution for custom task factories
                             task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
-                                _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
+                                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
                         }
 
                         // Track telemetry for non-AssemblyTaskFactory task factories
@@ -1020,7 +1020,7 @@ namespace Microsoft.Build.BackEnd
                     finally
                     {
 #if FEATURE_APPDOMAIN
-                        loggingHost.MarkAsInactive();
+                        taskFactoryEngineContext.MarkAsInactive();
 #endif
                     }
                 }
@@ -1738,16 +1738,16 @@ namespace Microsoft.Build.BackEnd
         /// non-AssemblyTaskFactory tasks run in isolation.
         /// </summary>
         /// <param name="taskIdentityParameters">Task identity parameters.</param>
-        /// <param name="loggingHost">The logging host to use for the task.</param>
+        /// <param name="taskFactoryEngineContext">The engine context to use for the task.</param>
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
-        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryEngineContext loggingHost, IOutOfProcTaskFactory outOfProcTaskFactory)
+        private ITask CreateTaskHostTaskForOutOfProcFactory(IDictionary<string, string> taskIdentityParameters, TaskFactoryEngineContext taskFactoryEngineContext, IOutOfProcTaskFactory outOfProcTaskFactory)
         {
             ITask innerTask;
 
             innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
-                _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
+                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
 
             if (innerTask == null)
             {
