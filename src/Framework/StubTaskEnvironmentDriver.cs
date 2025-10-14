@@ -8,8 +8,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-using Microsoft.Build.Framework.PathHelpers;
-
 namespace Microsoft.Build.Framework
 {
     /// <summary>

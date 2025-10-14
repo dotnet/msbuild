@@ -1401,7 +1401,8 @@ namespace Microsoft.Build.CommandLine
 
                 projectCollection = new ProjectCollection(
                     globalProperties,
-                    evaluationLoggers,
+                    // When using the switch -preprocess, the project isn't built. No logger is needed to pass to avoid the crash when loading project.
+                    isPreprocess ? null : evaluationLoggers,
                     null,
                     toolsetDefinitionLocations,
                     cpuCount,

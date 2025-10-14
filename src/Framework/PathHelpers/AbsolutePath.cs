@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Build.Framework.PathHelpers
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Represents an absolute file system path.
@@ -13,7 +13,6 @@ namespace Microsoft.Build.Framework.PathHelpers
     /// </remarks>
     public readonly struct AbsolutePath
     {
-
         /// <summary>
         /// Gets the string representation of this path.
         /// </summary>
