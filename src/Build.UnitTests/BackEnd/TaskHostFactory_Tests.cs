@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -96,11 +97,44 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
                 else
                 {
-                    // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
                     Process taskHostNode = Process.GetProcessById(pid);
+
+                    // This is the sidecar TaskHost case - it should persist after build is done. So we need to clean up and kill it ourselves.
+                    // Wait for process to be responsive. The standard 3 secs can be not enough for the child process to start, let's try several times.
+                    int attempts = 0;
+                    while (attempts < 5)
+                    {
+                        try
+                        {
+                            if (taskHostNode.HasExited)
+                            {
+                                Assert.Fail($"TaskHost exited during startup with code: {taskHostNode.ExitCode}");
+                            }
+
+                            // Check if process has loaded its main module
+                            if (taskHostNode.Modules.Count > 0)
+                            {
+                                break;
+                            }
+                        }
+                        catch
+                        {
+                            // Process not ready yet
+                        }
+
+                        Thread.Sleep(1000);
+                        attempts++;
+                        taskHostNode.Refresh();
+                    }
+
+                    // Now wait to ensure it stays alive
                     bool processExited = taskHostNode.WaitForExit(3000);
 
-                    processExited.ShouldBeFalse($"TaskHost should remain alive after build. TaskHost exited with code: {taskHostNode?.ExitCode}");
+                    processExited.ShouldBeFalse(
+                        processExited
+                            ? $"TaskHost should remain alive after build. TaskHost exited with code: {taskHostNode.ExitCode}"
+                            : "TaskHost should remain alive after build for task host case.");
+
                     try
                     {
                         taskHostNode.Kill();

@@ -257,7 +257,7 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly)
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, isTaskHostParamsMatchCurrentProc: false);
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, isTaskHostParamsMatchCurrentProc: true);
         }
 
         /// <summary>
