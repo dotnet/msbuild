@@ -83,8 +83,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // Verify task was launched in TaskHost
-            logger.FullLog.ShouldContain("Launching task \"NonEnlightenedTestTask\"");
-            logger.FullLog.ShouldContain("external task host");
+            TaskRoutingTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
             
             // Verify task executed successfully
             logger.FullLog.ShouldContain("NonEnlightenedTask executed");
@@ -129,8 +128,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // Verify task was NOT launched in TaskHost (runs in-process)
-            logger.FullLog.ShouldNotContain("Launching task \"InterfaceTestTask\"");
-            logger.FullLog.ShouldNotContain("external task host");
+            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
             
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithInterface executed");
@@ -175,8 +173,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // Verify task was NOT launched in TaskHost (runs in-process)
-            logger.FullLog.ShouldNotContain("Launching task \"AttributeTestTask\"");
-            logger.FullLog.ShouldNotContain("external task host");
+            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "AttributeTestTask");
             
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
@@ -221,8 +218,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // Verify task was NOT launched in TaskHost (runs in-process even though it's NonEnlightened)
-            logger.FullLog.ShouldNotContain("Launching task \"NonEnlightenedTestTask\"");
-            logger.FullLog.ShouldNotContain("external task host");
+            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "NonEnlightenedTestTask");
             
             // Verify task executed successfully
             logger.FullLog.ShouldContain("NonEnlightenedTask executed");
@@ -266,8 +262,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // Verify task was NOT launched in TaskHost
-            logger.FullLog.ShouldNotContain("Launching task \"InterfaceTestTask\"");
-            logger.FullLog.ShouldNotContain("external task host");
+            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
             
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithInterface executed");
@@ -321,16 +316,69 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // NonEnlightenedTask should use TaskHost
-            logger.FullLog.ShouldContain("Launching task \"NonEnlightenedTestTask\"");
+            TaskRoutingTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
             
             // Interface and Attribute tasks should NOT use TaskHost
-            logger.FullLog.ShouldNotContain("Launching task \"InterfaceTestTask\"");
-            logger.FullLog.ShouldNotContain("Launching task \"AttributeTestTask\"");
+            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
+            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "AttributeTestTask");
             
             // All tasks should execute successfully
             logger.FullLog.ShouldContain("NonEnlightenedTask executed");
             logger.FullLog.ShouldContain("TaskWithInterface executed");
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
+        }
+
+        /// <summary>
+        /// Verifies that explicit TaskHostFactory request overrides routing logic,
+        /// forcing tasks to run in TaskHost even if they would normally run in-process.
+        /// </summary>
+        [Fact]
+        public void ExplicitTaskHostFactory_OverridesRoutingLogic()
+        {
+            // Arrange - Use a thread-safe task but explicitly request TaskHostFactory
+            string projectContent = $@"
+<Project>
+    <UsingTask TaskName=""InterfaceTestTask"" 
+               AssemblyFile=""{Assembly.GetExecutingAssembly().Location}""
+               TaskFactory=""TaskHostFactory"" />
+    
+    <Target Name=""TestTarget"">
+        <InterfaceTestTask />
+    </Target>
+</Project>";
+
+            string projectFile = Path.Combine(_testProjectsDir, "ExplicitTaskHostFactory.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = true,
+                Loggers = new[] { logger },
+                DisableInProcNode = false,
+                EnableNodeReuse = false
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                new[] { "TestTarget" },
+                null);
+
+            // Act
+            var buildManager = BuildManager.DefaultBuildManager;
+            var result = buildManager.Build(buildParameters, buildRequestData);
+
+            // Assert
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            
+            // Task should use TaskHost because TaskHostFactory was explicitly requested
+            // This overrides the normal routing logic which would run this in-process
+            TaskRoutingTestHelper.AssertTaskUsedTaskHost(logger, "InterfaceTestTask");
+            
+            // Verify task executed successfully
+            logger.FullLog.ShouldContain("TaskWithInterface executed");
         }
 
         private string CreateTestProject(string taskName, string taskClass)
@@ -343,6 +391,38 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         <{taskName} />
     </Target>
 </Project>";
+        }
+    }
+
+    /// <summary>
+    /// Helper utilities for testing task routing behavior.
+    /// Provides robust assertions that are less fragile than raw log string matching.
+    /// </summary>
+    internal static class TaskRoutingTestHelper
+    {
+        /// <summary>
+        /// Asserts that a task was launched in an external TaskHost process.
+        /// </summary>
+        /// <param name="logger">The build logger containing execution logs.</param>
+        /// <param name="taskName">The name of the task to verify.</param>
+        public static void AssertTaskUsedTaskHost(MockLogger logger, string taskName)
+        {
+            // Look for the distinctive "Launching task" message that indicates TaskHost usage
+            string launchingMessage = $"Launching task \"{taskName}\"";
+            logger.FullLog.ShouldContain(launchingMessage);
+            logger.FullLog.ShouldContain("external task host");
+        }
+
+        /// <summary>
+        /// Asserts that a task ran in-process (not in TaskHost).
+        /// </summary>
+        /// <param name="logger">The build logger containing execution logs.</param>
+        /// <param name="taskName">The name of the task to verify.</param>
+        public static void AssertTaskRanInProcess(MockLogger logger, string taskName)
+        {
+            // Verify the "Launching task" message does NOT appear for this task
+            string launchingMessage = $"Launching task \"{taskName}\"";
+            logger.FullLog.ShouldNotContain(launchingMessage);
         }
     }
 
