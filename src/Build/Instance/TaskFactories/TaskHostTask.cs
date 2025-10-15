@@ -533,6 +533,7 @@ namespace Microsoft.Build.BackEnd
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0) && taskHostTaskComplete.BuildProcessEnvironment != null)
             {
                 _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+                CommunicationsUtilities.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
             }
             else
             {

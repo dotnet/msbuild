@@ -1087,6 +1087,7 @@ namespace Microsoft.Build.BackEnd
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                 {
                     _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
+                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
                 }
                 else
                 {
@@ -1144,6 +1145,7 @@ namespace Microsoft.Build.BackEnd
                             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                             {
                                 _requestEntry.TaskEnvironment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue);
+                                Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
                             }
                             else
                             {
@@ -1430,6 +1432,7 @@ namespace Microsoft.Build.BackEnd
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                 {
                     _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
+                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
                 }
                 else
                 {
@@ -1460,6 +1463,7 @@ namespace Microsoft.Build.BackEnd
                     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                     {
                         _requestEntry.TaskEnvironment.SetEnvironmentVariable(entry.Key, null);
+                        Environment.SetEnvironmentVariable(entry.Key, null);
                     }
                     else
                     {
@@ -1485,6 +1489,7 @@ namespace Microsoft.Build.BackEnd
                     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                     {
                         _requestEntry.TaskEnvironment.SetEnvironmentVariable(entry.Key, entry.Value);
+                        Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                     }
                     else
                     {
