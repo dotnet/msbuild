@@ -9,11 +9,15 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Determines where a task should be executed based on its characteristics.
+    /// Determines where a task should be executed in multi-threaded mode.
     /// In multi-threaded execution mode, tasks implementing IMultiThreadableTask or marked with
     /// MSBuildMultiThreadableTaskAttribute run in-process within thread nodes, while legacy tasks
-    /// are routed to sidecar TaskHost processes.
+    /// are routed to sidecar TaskHost processes for isolation.
     /// </summary>
+    /// <remarks>
+    /// This class should only be used when in multi-threaded mode. Traditional multi-proc builds
+    /// have different semantics and should not use this routing logic.
+    /// </remarks>
     internal static class TaskRoutingDecision
     {
         /// <summary>
@@ -23,56 +27,31 @@ namespace Microsoft.Build.BackEnd
         private static readonly ConcurrentDictionary<Type, bool> s_multiThreadableTaskCache = new();
 
         /// <summary>
-        /// Determines if a task should be executed out-of-process based on its characteristics
-        /// and the current execution mode.
+        /// Determines if a task needs to be routed to an out-of-process TaskHost sidecar
+        /// in multi-threaded mode based on its thread-safety characteristics.
         /// </summary>
         /// <param name="taskType">The type of the task to evaluate.</param>
-        /// <param name="isAlreadyOutOfProc">Whether the build is already running in an out-of-process node.</param>
-        /// <param name="multiThreadedMode">Whether multi-threaded execution mode is enabled.</param>
-        /// <param name="isOutOfProcExplicitlyRequested">Whether out-of-process execution was explicitly requested
-        /// (e.g., via TaskHostFactory or task parameters).</param>
         /// <returns>
-        /// True if the task should be executed in an out-of-process TaskHost; false if it should
-        /// run in-process within a thread node.
+        /// True if the task should be executed in an out-of-process TaskHost sidecar;
+        /// false if it can safely run in-process within a thread node.
         /// </returns>
         /// <remarks>
-        /// The routing decision follows this priority:
-        /// 1. If already out-of-process → stay out-of-process
-        /// 2. If explicitly requested out-of-process → go out-of-process
-        /// 3. If not in multi-threaded mode → use legacy in-process behavior
-        /// 4. If in multi-threaded mode:
-        ///    - Tasks implementing IMultiThreadableTask OR marked with MSBuildMultiThreadableTaskAttribute → run in-process (thread node)
-        ///    - Tasks NOT implementing interface or attribute → run out-of-process (sidecar TaskHost)
+        /// This method only considers the task's thread-safety indicators.
+        /// The caller is responsible for:
+        /// - Only calling this in multi-threaded mode
+        /// - Handling explicit out-of-proc requests (via TaskHostFactory or parameters)
+        /// - Handling the isAlreadyOutOfProc scenario
+        /// 
+        /// In multi-threaded mode:
+        /// - Tasks implementing IMultiThreadableTask OR marked with MSBuildMultiThreadableTaskAttribute
+        ///   are considered thread-safe and can run in-process (returns false)
+        /// - Tasks without these indicators must run in a sidecar TaskHost for isolation (returns true)
         /// </remarks>
-        public static bool ShouldExecuteOutOfProc(
-            Type taskType,
-            bool isAlreadyOutOfProc,
-            bool multiThreadedMode,
-            bool isOutOfProcExplicitlyRequested)
+        public static bool NeedsTaskHostInMultiThreadedMode(Type taskType)
         {
             ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
 
-            // Already out-of-process? Stay there.
-            if (isAlreadyOutOfProc)
-            {
-                return true;
-            }
-
-            // Explicitly requested out-of-process? Honor it regardless of thread-safety indicators.
-            if (isOutOfProcExplicitlyRequested)
-            {
-                return true;
-            }
-
-            // Not in multi-threaded mode? Use legacy behavior (in-process).
-            if (!multiThreadedMode)
-            {
-                return false;
-            }
-
-            // Multi-threaded mode: route based on thread-safety indicators (interface or attribute).
-            // Tasks with thread-safety indicators can safely run in-process in a thread node.
-            // Tasks without them must run in a sidecar TaskHost for isolation.
+            // Tasks without thread-safety indicators need isolation in a TaskHost sidecar
             return !IsMultiThreadableTask(taskType);
         }
 

@@ -367,21 +367,12 @@ namespace Microsoft.Build.BackEnd
                 useTaskFactory = _taskHostFactoryExplicitlyRequested;
             }
 
-            // Apply multi-threaded routing decision if not already determined by other factors.
-            // This routes tasks implementing IMultiThreadableTask to run in-process (thread nodes),
-            // while non-enlightened tasks are routed to out-of-process sidecar TaskHost for isolation.
-            // Only apply this routing logic in multi-threaded mode - in traditional multi-proc builds,
-            // isOutOfProc indicates we're in an out-of-proc build node, not a TaskHost sidecar.
-            if (!useTaskFactory && _loadedType?.Type != null && buildComponentHost?.BuildParameters != null && buildComponentHost.BuildParameters.MultiThreaded)
+            // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
+            if (!useTaskFactory 
+                && _loadedType?.Type != null 
+                && buildComponentHost?.BuildParameters?.MultiThreaded == true)
             {
-                bool shouldRouteOutOfProc = TaskRoutingDecision.ShouldExecuteOutOfProc(
-                    _loadedType.Type,
-                    isOutOfProc,
-                    buildComponentHost.BuildParameters.MultiThreaded,
-                    _taskHostFactoryExplicitlyRequested);
-
-                // If routing says to go out-of-proc, override the in-proc decision
-                if (shouldRouteOutOfProc)
+                if (TaskRoutingDecision.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
                 {
                     useTaskFactory = true;
                 }
