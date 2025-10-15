@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {
@@ -230,6 +231,29 @@ namespace Microsoft.Build.Shared
             }
 
             return (sender, args) => TryLoadAssembly(searchDirectories, new AssemblyName(args.Name));
+        }
+
+        /// <summary>
+        /// Determines whether a task factory should compile for out-of-process execution based on the host context.
+        /// </summary>
+        /// <param name="taskFactoryEngineContext">The build engine/logging host passed to the task factory's Initialize method.</param>
+        /// <returns>True if the task should be compiled for out-of-process execution; otherwise, false.</returns>
+        /// <remarks>
+        /// This method checks if the host implements ITaskFactoryBuildParameterProvider and queries it for:
+        /// 1. ForceOutOfProcessExecution - explicit override via environment variable
+        /// 2. IsMultiThreadedBuild - automatic out-of-proc when /mt flag is used
+        /// 
+        /// This logic is shared across RoslynCodeTaskFactory, CodeTaskFactory, and XamlTaskFactory.
+        /// It needs to be decided during task factory initialization time.
+        /// </remarks>
+        public static bool ShouldCompileForOutOfProcess(IBuildEngine taskFactoryEngineContext)
+        {
+            if (taskFactoryEngineContext is ITaskFactoryBuildParameterProvider hostContext)
+            {
+                return hostContext.ForceOutOfProcessExecution || hostContext.IsMultiThreadedBuild;
+            }
+
+            return false;
         }
 
         /// <summary>
