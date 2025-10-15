@@ -308,11 +308,17 @@ namespace Microsoft.Build.BackEnd
                 taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
             }
 
+            var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in _taskEnvironment.GetEnvironmentVariables())
+            {
+                environmentVariables[kvp.Key] = kvp.Value;
+            }
+
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
-                        NativeMethodsShared.GetCurrentDirectory(),
-                        CommunicationsUtilities.GetEnvironmentVariables(),
+                        _taskEnvironment.ProjectDirectory.Path,
+                        environmentVariables,
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
 #if FEATURE_APPDOMAIN
