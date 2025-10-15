@@ -1934,7 +1934,7 @@ namespace Microsoft.Build.CommandLine
             CultureInfo.CurrentUICulture = desiredCulture;
             CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
-            if (Environment.GetEnvironmentVariable("CONSOLE_USE_DEFAULT_ENCODING") != "1")
+            if (!Traits.Instance.ConsoleUseDefaultEncoding)
             {
 #if RUNTIME_TYPE_NETCORE
                 if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
