@@ -386,7 +386,6 @@ namespace Microsoft.Build.BackEnd
 
                 mergedParameters = AddNetHostParamsIfNeeded(runtime, architecture, getProperty);
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
                 TaskHostTask task = new TaskHostTask(
                     taskLocation,
                     taskLoggingContext,
@@ -435,6 +434,13 @@ namespace Microsoft.Build.BackEnd
                     AssemblyLoadsTracker.StopTracking(taskAppDomain);
                 }
 #endif
+
+                // Track non-sealed subclasses of Microsoft-owned MSBuild tasks
+                if (taskInstance != null)
+                {
+                    bool isMicrosoftOwned = IsMicrosoftAuthoredTask();
+                    _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
+                }
 
                 return taskInstance;
             }
@@ -670,6 +676,43 @@ namespace Microsoft.Build.BackEnd
 
             // if it doesn't not match, then it matches
             return true;
+        }
+
+        /// <summary>
+        /// Determines whether the current task is Microsoft-authored based on the assembly location and name.
+        /// </summary>
+        private bool IsMicrosoftAuthoredTask()
+        {
+            if (_loadedType?.Type == null)
+            {
+                return false;
+            }
+
+            // Check if the assembly is a Microsoft assembly by name
+            string assemblyName = _loadedType.Assembly.AssemblyName;
+            if (!string.IsNullOrEmpty(assemblyName) && Framework.FileClassifier.IsMicrosoftAssembly(assemblyName))
+            {
+                return true;
+            }
+
+            // Check if the assembly is from a Microsoft-controlled location
+            string assemblyFile = _loadedType.Assembly.AssemblyFile;
+            if (!string.IsNullOrEmpty(assemblyFile))
+            {
+                // Check if it's built-in MSBuild logic (e.g., from MSBuild installation)
+                if (Framework.FileClassifier.Shared.IsBuiltInLogic(assemblyFile))
+                {
+                    return true;
+                }
+
+                // Check if it's a Microsoft package from NuGet cache
+                if (Framework.FileClassifier.Shared.IsMicrosoftPackageInNugetCache(assemblyFile))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
