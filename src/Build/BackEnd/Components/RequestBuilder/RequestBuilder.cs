@@ -1086,8 +1086,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                 {
-                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
-                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
+                    // NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
                 }
                 else
                 {
@@ -1431,8 +1431,8 @@ namespace Microsoft.Build.BackEnd
                 
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                 {
-                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
-                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
+                    // NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
                 }
                 else
                 {
