@@ -431,6 +431,7 @@ namespace Microsoft.Build.BackEnd
                     if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                     {
                         _buildRequestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_buildRequestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
+                        NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
                     }
                     else
                     {
