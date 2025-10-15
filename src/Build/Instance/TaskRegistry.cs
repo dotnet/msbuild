@@ -24,6 +24,7 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
+using System.Runtime.CompilerServices;
 
 #nullable disable
 
@@ -273,6 +274,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <typeparam name="P">A type derived from IProperty</typeparam>
         /// <typeparam name="I">A type derived from IItem</typeparam>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private static void RegisterTasksFromUsingTaskElement
             <P, I>(
             LoggingContext loggingContext,
@@ -455,6 +457,7 @@ namespace Microsoft.Build.Execution
         /// Given a task name, this method retrieves the task class. If the task has been requested before, it will be found in
         /// the class cache; otherwise, &lt;UsingTask&gt; declarations will be used to search the appropriate assemblies.
         /// </summary>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         internal TaskFactoryWrapper GetRegisteredTask(
             string taskName,
             string taskProjectFile,
@@ -513,6 +516,7 @@ namespace Microsoft.Build.Execution
         /// <param name="retrievedFromCache">True if the record was retrieved from the cache.</param>
         /// <param name="isMultiThreadedBuild">Whether the build is running in multi-threaded mode.</param>
         /// <returns>The task registration record, or null if none was found.</returns>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         internal RegisteredTaskRecord GetTaskRegistrationRecord(
             string taskName,
             string taskProjectFile,
@@ -1360,6 +1364,7 @@ namespace Microsoft.Build.Execution
             /// loads an external file and uses that to generate the tasks.
             /// </summary>
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
+             [MethodImpl(MethodImplOptions.Synchronized)]
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
                 // First check (fast path - no locking)

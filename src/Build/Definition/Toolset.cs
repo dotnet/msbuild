@@ -21,6 +21,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+using System.Runtime.CompilerServices;
 
 #nullable disable
 
@@ -429,6 +430,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public string DefaultSubToolsetVersion
         {
+            [MethodImpl(MethodImplOptions.Synchronized)]
             get
             {
                 return _defaultSubToolsetVersionLazy.Value;
@@ -757,6 +759,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         /// <param name="loggingContext">The logging context to use to log during this registration.</param>
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
+        [MethodImpl(MethodImplOptions.Synchronized)]
         private void RegisterDefaultTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
             // Synchronization needed because TaskRegistry can be accessed from multiple threads

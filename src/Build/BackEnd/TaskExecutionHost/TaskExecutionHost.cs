@@ -164,6 +164,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal TaskEnvironment TaskEnvironment { get; set; }
 
+        private object _locker = new object();
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -278,7 +280,13 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The task requirements and task factory wrapper if the task is found, (null, null) otherwise.</returns>
         public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(IDictionary<string, string> taskIdentityParameters)
         {
-            _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
+            if (_taskFactoryWrapper == null)
+            {
+                lock (_locker)
+                {
+                    _taskFactoryWrapper = FindTaskInRegistry(taskIdentityParameters);
+                }
+            }
 
             if (_taskFactoryWrapper is null)
             {
