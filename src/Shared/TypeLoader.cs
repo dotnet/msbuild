@@ -45,6 +45,16 @@ namespace Microsoft.Build.Shared
 
         private static MetadataLoadContext _context;
 
+        /// <summary>
+        /// Lock for thread-safe MetadataLoadContext operations.
+        /// </summary>
+        private static readonly object s_contextLock = new object();
+
+        /// <summary>
+        /// Reference count for the MetadataLoadContext to prevent premature disposal.
+        /// </summary>
+        private static int _contextRefCount = 0;
+
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
         private static string microsoftBuildFrameworkPath;
 
@@ -191,22 +201,48 @@ namespace Microsoft.Build.Shared
         private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
-            string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
-
-            // Deduplicate between MSBuild assemblies and task dependencies.
-            Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
-            foreach (string localPath in localAssemblies)
+            
+            lock (s_contextLock)
             {
-                assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
-            }
+                if (_context == null)
+                {
+                    string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
 
-            foreach (string runtimeAssembly in runtimeAssemblies)
+                    // Deduplicate between MSBuild assemblies and task dependencies.
+                    Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
+                    foreach (string localPath in localAssemblies)
+                    {
+                        assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
+                    }
+
+                    foreach (string runtimeAssembly in runtimeAssemblies)
+                    {
+                        assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
+                    }
+
+                    _context = new(new PathAssemblyResolver(assembliesDictionary.Values));
+                }
+                
+                _contextRefCount++;
+                return _context.LoadFromAssemblyPath(path);
+            }
+        }
+
+        /// <summary>
+        /// Releases a reference to the MetadataLoadContext and disposes it if no more references exist.
+        /// </summary>
+        private static void ReleaseMetadataLoadContext()
+        {
+            lock (s_contextLock)
             {
-                assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
+                _contextRefCount--;
+                if (_contextRefCount <= 0)
+                {
+                    _context?.Dispose();
+                    _context = null;
+                    _contextRefCount = 0;
+                }
             }
-
-            _context = new(new PathAssemblyResolver(assembliesDictionary.Values));
-            return _context.LoadFromAssemblyPath(path);
         }
 
         /// <summary>
@@ -423,13 +459,26 @@ namespace Microsoft.Build.Shared
                     if (foundType != null)
                     {
                         MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                        var taskItemType = _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
+                        
+                        // Use the same context to load the task item type
+                        Assembly frameworkAssembly;
+                        lock (s_contextLock)
+                        {
+                            frameworkAssembly = _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath);
+                        }
+                        var taskItemType = frameworkAssembly.GetType(typeof(ITaskItem).FullName);
+                        
                         LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, loadedViaMetadataLoadContext: true);
-                        _context?.Dispose();
-                        _context = null;
+                        
+                        // Release our reference to the context
+                        ReleaseMetadataLoadContext();
+                        
                         MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
                         return loadedType;
                     }
+
+                    // Release our reference to the context even if no type was found
+                    ReleaseMetadataLoadContext();
 
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
 
