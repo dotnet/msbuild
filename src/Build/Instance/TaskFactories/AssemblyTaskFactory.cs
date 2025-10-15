@@ -341,8 +341,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             bool isOutOfProc,
             int scheduledNodeId,
-            Func<string, ProjectPropertyInstance> getProperty,
-            TaskEnvironment taskEnvironment = null) // TODO: taskEnvironment logic was not implemented yet
+            Func<string, ProjectPropertyInstance> getProperty)
         {
             bool useTaskFactory = false;
             Dictionary<string, string> mergedParameters = null;

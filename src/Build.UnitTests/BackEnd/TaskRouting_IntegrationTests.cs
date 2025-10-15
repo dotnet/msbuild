@@ -45,7 +45,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that a legacy task (no interface, no attribute) runs in TaskHost
+        /// Verifies that a NonEnlightened task (no interface, no attribute) runs in TaskHost
         /// when MultiThreaded mode is enabled.
         /// </summary>
         [Fact]
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             // Arrange
             string projectContent = CreateTestProject(
-                taskName: "LegacyTestTask",
+                taskName: "NonEnlightenedTestTask",
                 taskClass: "NonEnlightenedTask");
 
             string projectFile = Path.Combine(_testProjectsDir, "NonEnlightenedTaskProject.proj");
@@ -83,7 +83,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // Verify task was launched in TaskHost
-            logger.FullLog.ShouldContain("Launching task \"LegacyTestTask\"");
+            logger.FullLog.ShouldContain("Launching task \"NonEnlightenedTestTask\"");
             logger.FullLog.ShouldContain("external task host");
             
             // Verify task executed successfully
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that when MultiThreaded mode is disabled, even legacy tasks
+        /// Verifies that when MultiThreaded mode is disabled, even NonEnlightened tasks
         /// run in-process and do not use TaskHost.
         /// </summary>
         [Fact]
@@ -191,7 +191,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             // Arrange
             string projectContent = CreateTestProject(
-                taskName: "LegacyTestTask",
+                taskName: "NonEnlightenedTestTask",
                 taskClass: "NonEnlightenedTask");
 
             string projectFile = Path.Combine(_testProjectsDir, "NonEnlightenedTaskSingleThreaded.proj");
@@ -220,8 +220,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
-            // Verify task was NOT launched in TaskHost (runs in-process even though it's legacy)
-            logger.FullLog.ShouldNotContain("Launching task \"LegacyTestTask\"");
+            // Verify task was NOT launched in TaskHost (runs in-process even though it's NonEnlightened)
+            logger.FullLog.ShouldNotContain("Launching task \"NonEnlightenedTestTask\"");
             logger.FullLog.ShouldNotContain("external task host");
             
             // Verify task executed successfully
@@ -283,12 +283,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // Arrange
             string projectContent = $@"
 <Project>
-    <UsingTask TaskName=""LegacyTestTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <UsingTask TaskName=""NonEnlightenedTestTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
     <UsingTask TaskName=""InterfaceTestTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
     <UsingTask TaskName=""AttributeTestTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
     
     <Target Name=""TestTarget"">
-        <LegacyTestTask />
+        <NonEnlightenedTestTask />
         <InterfaceTestTask />
         <AttributeTestTask />
     </Target>
@@ -321,7 +321,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             
             // NonEnlightenedTask should use TaskHost
-            logger.FullLog.ShouldContain("Launching task \"LegacyTestTask\"");
+            logger.FullLog.ShouldContain("Launching task \"NonEnlightenedTestTask\"");
             
             // Interface and Attribute tasks should NOT use TaskHost
             logger.FullLog.ShouldNotContain("Launching task \"InterfaceTestTask\"");
@@ -349,10 +349,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     #region Test Task Implementations
 
     /// <summary>
-    /// Legacy task without IMultiThreadableTask interface or MSBuildMultiThreadableTaskAttribute.
+    /// NonEnlightened task without IMultiThreadableTask interface or MSBuildMultiThreadableTaskAttribute.
     /// Should run in TaskHost in multi-threaded mode.
     /// </summary>
-    public class LegacyTestTask : Task
+    public class NonEnlightenedTestTask : Task
     {
         public override bool Execute()
         {
