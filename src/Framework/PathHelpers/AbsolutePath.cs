@@ -47,7 +47,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The file system path to validate. Must not be null, empty, or a relative path.</param>
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
-        private void ValidatePath(string path)
+        private static void ValidatePath(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
