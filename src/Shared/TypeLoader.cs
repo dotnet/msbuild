@@ -43,8 +43,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private Func<Type, object, bool> _isDesiredType;
 
-        private static MetadataLoadContext _context;
-
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
         private static string microsoftBuildFrameworkPath;
 
@@ -188,7 +186,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
+        private static (Assembly assembly, MetadataLoadContext context) LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
             string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
@@ -205,8 +203,9 @@ namespace Microsoft.Build.Shared
                 assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
             }
 
-            _context = new(new PathAssemblyResolver(assembliesDictionary.Values));
-            return _context.LoadFromAssemblyPath(path);
+            MetadataLoadContext context = new(new PathAssemblyResolver(assembliesDictionary.Values));
+            Assembly assembly = context.LoadFromAssemblyPath(path);
+            return (assembly, context);
         }
 
         /// <summary>
@@ -384,56 +383,62 @@ namespace Microsoft.Build.Shared
                 return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
                 {
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
-                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    (Assembly loadedAssembly, MetadataLoadContext context) = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
                     Type foundType = null;
                     int numberOfTypesSearched = 0;
 
-                    // Try direct type lookup first (fastest)
-                    if (!string.IsNullOrEmpty(typeName))
+                    try
                     {
-                        foundType = loadedAssembly.GetType(typeName, throwOnError: false);
-                        if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
+                        // Try direct type lookup first (fastest)
+                        if (!string.IsNullOrEmpty(typeName))
                         {
-                            numberOfTypesSearched = 1;
-                        }
-                    }
-
-                    // Fallback: enumerate all types for partial matching
-                    if (foundType == null)
-                    {
-                        foreach (Type publicType in loadedAssembly.GetExportedTypes())
-                        {
-                            numberOfTypesSearched++;
-                            try
+                            foundType = loadedAssembly.GetType(typeName, throwOnError: false);
+                            if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
                             {
-                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                numberOfTypesSearched = 1;
+                            }
+                        }
+
+                        // Fallback: enumerate all types for partial matching
+                        if (foundType == null)
+                        {
+                            foreach (Type publicType in loadedAssembly.GetExportedTypes())
+                            {
+                                numberOfTypesSearched++;
+                                try
                                 {
-                                    foundType = publicType;
-                                    break;
+                                    if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                    {
+                                        foundType = publicType;
+                                        break;
+                                    }
+                                }
+                                catch
+                                {
+                                    // Ignore types that can't be loaded/reflected upon.
+                                    // These types might be needed out of proc and be resolved there.
                                 }
                             }
-                            catch
-                            {
-                                // Ignore types that can't be loaded/reflected upon.
-                                // These types might be needed out of proc and be resolved there.
-                            }
                         }
-                    }
 
-                    if (foundType != null)
+                        if (foundType != null)
+                        {
+                            MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
+                            var taskItemType = context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
+                            LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, loadedViaMetadataLoadContext: true);
+                            MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
+                            return loadedType;
+                        }
+
+                        MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
+
+                        return null;
+                    }
+                    finally
                     {
-                        MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                        var taskItemType = _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
-                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, loadedViaMetadataLoadContext: true);
-                        _context?.Dispose();
-                        _context = null;
-                        MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
-                        return loadedType;
+                        // Dispose the context after all reflection operations are complete
+                        context?.Dispose();
                     }
-
-                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
-
-                    return null;
                 });
             }
 
