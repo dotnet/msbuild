@@ -24,17 +24,17 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Tests verify that tasks with IMultiThreadableTask or MSBuildMultiThreadableTaskAttribute
     /// run in-process, while tasks without these indicators run in TaskHost for isolation.
     /// </summary>
-    public class TaskRouting_IntegrationTests : IDisposable
+    public class TaskRouter_IntegrationTests : IDisposable
     {
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
         private readonly string _testProjectsDir;
 
-        public TaskRouting_IntegrationTests(ITestOutputHelper output)
+        public TaskRouter_IntegrationTests(ITestOutputHelper output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
-            
+
             // Create directory for test projects
             _testProjectsDir = _env.CreateFolder().Path;
         }
@@ -81,10 +81,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            
+
             // Verify task was launched in TaskHost
-            TaskRoutingTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
-            
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
+
             // Verify task executed successfully
             logger.FullLog.ShouldContain("NonEnlightenedTask executed");
         }
@@ -126,10 +126,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            
+
             // Verify task was NOT launched in TaskHost (runs in-process)
-            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
-            
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
+
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithInterface executed");
         }
@@ -171,10 +171,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            
+
             // Verify task was NOT launched in TaskHost (runs in-process)
-            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "AttributeTestTask");
-            
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "AttributeTestTask");
+
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
@@ -216,10 +216,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            
+
             // Verify task was NOT launched in TaskHost (runs in-process even though it's NonEnlightened)
-            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "NonEnlightenedTestTask");
-            
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "NonEnlightenedTestTask");
+
             // Verify task executed successfully
             logger.FullLog.ShouldContain("NonEnlightenedTask executed");
         }
@@ -260,10 +260,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            
+
             // Verify task was NOT launched in TaskHost
-            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
-            
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
+
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithInterface executed");
         }
@@ -314,14 +314,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            
+
             // NonEnlightenedTask should use TaskHost
-            TaskRoutingTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
-            
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
+
             // Interface and Attribute tasks should NOT use TaskHost
-            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
-            TaskRoutingTestHelper.AssertTaskRanInProcess(logger, "AttributeTestTask");
-            
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
+            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "AttributeTestTask");
+
             // All tasks should execute successfully
             logger.FullLog.ShouldContain("NonEnlightenedTask executed");
             logger.FullLog.ShouldContain("TaskWithInterface executed");
@@ -372,13 +372,60 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            
+
             // Task should use TaskHost because TaskHostFactory was explicitly requested
             // This overrides the normal routing logic which would run this in-process
-            TaskRoutingTestHelper.AssertTaskUsedTaskHost(logger, "InterfaceTestTask");
-            
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "InterfaceTestTask");
+
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithInterface executed");
+        }
+
+        /// <summary>
+        /// Verifies that tasks inheriting IMultiThreadableTask from a base class (without directly
+        /// implementing it) are routed to TaskHost, not in-process. Only tasks that directly
+        /// implement the interface should run in-process.
+        /// </summary>
+        [Fact]
+        public void InheritedInterface_RunsInTaskHost_InMultiThreadedMode()
+        {
+            // Arrange
+            string projectContent = CreateTestProject(
+                taskName: "InheritedInterfaceTestTask",
+                taskClass: "InheritedInterfaceTask");
+
+            string projectFile = Path.Combine(_testProjectsDir, "InheritedInterfaceProject.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = true,
+                Loggers = new[] { logger },
+                DisableInProcNode = false,
+                EnableNodeReuse = false
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                new[] { "TestTarget" },
+                null);
+
+            // Act
+            var buildManager = BuildManager.DefaultBuildManager;
+            var result = buildManager.Build(buildParameters, buildRequestData);
+
+            // Assert
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Task should use TaskHost because it only inherits IMultiThreadableTask,
+            // doesn't directly implement it
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "InheritedInterfaceTestTask");
+
+            // Verify task executed successfully
+            logger.FullLog.ShouldContain("InheritedInterfaceTask executed");
         }
 
         private string CreateTestProject(string taskName, string taskClass)
@@ -398,7 +445,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Helper utilities for testing task routing behavior.
     /// Provides robust assertions that are less fragile than raw log string matching.
     /// </summary>
-    internal static class TaskRoutingTestHelper
+    internal static class TaskRouterTestHelper
     {
         /// <summary>
         /// Asserts that a task was launched in an external TaskHost process.
@@ -456,27 +503,35 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
     }
 
-    #endregion
-}
-
-// Custom attribute definition in Microsoft.Build.Framework namespace to match what TaskRoutingDecision expects
-// TaskRoutingDecision looks for attributes with FullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute"
-// Since the real attribute is internal in Framework, we define our own test version here
-namespace Microsoft.Build.Framework
-{
     /// <summary>
-    /// Test attribute to mark tasks as safe for multi-threaded execution.
-    /// This is a test copy in this test assembly that will be recognized
-    /// by name-based attribute detection in TaskRoutingDecision.
+    /// Base task class that implements IMultiThreadableTask.
+    /// This simulates a hypothetical MultiThreadableTask base class.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
-    public sealed class MSBuildMultiThreadableTaskAttribute : Attribute
+    public class BaseMultiThreadableTask : Task, IMultiThreadableTask
     {
-    }
-}
+        public TaskEnvironment TaskEnvironment { get; set; }
 
-namespace Microsoft.Build.Engine.UnitTests.BackEnd
-{
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "BaseMultiThreadableTask executed");
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Task that inherits from BaseMultiThreadableTask but doesn't directly implement IMultiThreadableTask.
+    /// Should run in TaskHost in multi-threaded mode (NOT in-process) because it only inherits
+    /// the interface, which is not enough information whether it opted in.
+    /// </summary>
+    public class InheritedInterfaceTestTask : BaseMultiThreadableTask
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "InheritedInterfaceTask executed");
+            return true;
+        }
+    }
+
     /// <summary>
     /// Task marked with MSBuildMultiThreadableTaskAttribute.
     /// Should run in-process in multi-threaded mode.
@@ -495,5 +550,23 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             Log.LogMessage(MessageImportance.High, "TaskWithAttribute executed");
             return true;
         }
+    }
+
+    #endregion
+}
+
+// Custom attribute definition in Microsoft.Build.Framework namespace to match what TaskRouter expects
+// TaskRouter looks for attributes with FullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute"
+// Since the real attribute is internal in Framework, we define our own test version here
+namespace Microsoft.Build.Framework
+{
+    /// <summary>
+    /// Test attribute to mark tasks as safe for multi-threaded execution.
+    /// This is a test copy in this test assembly that will be recognized
+    /// by name-based attribute detection in TaskRouter.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    public sealed class MSBuildMultiThreadableTaskAttribute : Attribute
+    {
     }
 }

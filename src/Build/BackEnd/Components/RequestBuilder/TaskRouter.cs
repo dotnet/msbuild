@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd
     /// This class should only be used when in multi-threaded mode. Traditional multi-proc builds
     /// have different semantics and should not use this routing logic.
     /// </remarks>
-    internal static class TaskRoutingDecision
+    internal static class TaskRouter
     {
         /// <summary>
         /// Cache of task types to their multi-threadable capability status.
@@ -72,13 +72,33 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Checks if a task type implements the IMultiThreadableTask interface.
+        /// Checks if a task type directly implements the IMultiThreadableTask interface.
+        /// This only returns true if the type itself declares the interface, not if it inherits it
+        /// from a base class. This ensures tasks must explicitly opt-in to thread-safe routing.
         /// </summary>
         /// <param name="taskType">The task type to check.</param>
-        /// <returns>True if the task implements IMultiThreadableTask; false otherwise.</returns>
+        /// <returns>True if the task directly implements IMultiThreadableTask; false otherwise.</returns>
+        /// <remarks>It's not possible to distinguish the case where it both inherits and declares the interface so that case falls under "inherited".</remarks>
         private static bool ImplementsIMultiThreadableTask(Type taskType)
         {
-            return typeof(IMultiThreadableTask).IsAssignableFrom(taskType);
+            // Check if task is assignable to IMultiThreadableTask
+            if (!typeof(IMultiThreadableTask).IsAssignableFrom(taskType))
+            {
+                return false;
+            }
+
+            // Check if base type is also assignable to IMultiThreadableTask
+            Type? baseType = taskType.BaseType;
+            if (baseType != null && typeof(IMultiThreadableTask).IsAssignableFrom(baseType))
+            {
+                // Base type implements the interface, so this task inherited it
+                // Return false to route to TaskHost
+                return false;
+            }
+
+            // Task implements the interface and base type doesn't
+            // This means the task directly declared it
+            return true;
         }
 
         /// <summary>

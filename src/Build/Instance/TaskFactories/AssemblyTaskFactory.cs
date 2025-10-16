@@ -371,7 +371,7 @@ namespace Microsoft.Build.BackEnd
                 && _loadedType?.Type != null 
                 && buildComponentHost?.BuildParameters?.MultiThreaded == true)
             {
-                if (TaskRoutingDecision.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
+                if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
                 {
                     useTaskFactory = true;
                 }
