@@ -57,7 +57,9 @@ namespace Microsoft.Build.Framework
         public IReadOnlyDictionary<string, string> GetEnvironmentVariables()
         {
             var variables = Environment.GetEnvironmentVariables();
-            var result = new Dictionary<string, string>(variables.Count, StringComparer.OrdinalIgnoreCase);
+            // On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive
+            var comparer = NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            var result = new Dictionary<string, string>(variables.Count, comparer);
 
             foreach (string key in variables.Keys)
             {

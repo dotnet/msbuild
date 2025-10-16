@@ -28,11 +28,7 @@ namespace Microsoft.Build.UnitTests
             return environmentType switch
             {
                 StubEnvironmentName => new TaskEnvironment(StubTaskEnvironmentDriver.Instance),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(
-                    Path.GetTempPath(),
-                    new Dictionary<string, string>(Environment.GetEnvironmentVariables().Cast<System.Collections.DictionaryEntry>()
-                        .Where(e => e.Key is not null && e.Value is not null)
-                        .ToDictionary(e => e.Key!.ToString()!, e => e.Value!.ToString()!)))),
+                MultithreadedEnvironmentName => new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(Path.GetTempPath())),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
         }
@@ -269,20 +265,90 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_EnvironmentVariableCaseSensitivity_ShouldMatchPlatform(string environmentType)
+        {
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+            string testVarName = $"MSBUILD_case_TEST_{environmentType}_{Guid.NewGuid():N}";
+            string testVarValue = "case_test_value";
+
+            try
+            {
+                taskEnvironment.SetEnvironmentVariable(testVarName, testVarValue);
+                
+                // Test GetEnvironmentVariables()
+                var envVars = taskEnvironment.GetEnvironmentVariables();
+                
+                // Test GetEnvironmentVariable()
+                string upperVarName = testVarName.ToUpperInvariant();
+                string lowerVarName = testVarName.ToLowerInvariant();
+                
+                if (NativeMethods.IsWindows)
+                {
+                    // On Windows, environment variables should be case-insensitive
+                    
+                    // Test GetEnvironmentVariables()
+                    envVars.TryGetValue(testVarName, out string? exactValue).ShouldBeTrue();
+                    exactValue.ShouldBe(testVarValue);
+                    
+                    envVars.TryGetValue(upperVarName, out string? upperValue).ShouldBeTrue();
+                    upperValue.ShouldBe(testVarValue);
+                    
+                    envVars.TryGetValue(lowerVarName, out string? lowerValue).ShouldBeTrue();
+                    lowerValue.ShouldBe(testVarValue);
+                    
+                    // Test GetEnvironmentVariable()
+                    taskEnvironment.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
+                    taskEnvironment.GetEnvironmentVariable(upperVarName).ShouldBe(testVarValue);
+                    taskEnvironment.GetEnvironmentVariable(lowerVarName).ShouldBe(testVarValue);
+                }
+                else
+                {
+                    // On Unix-like systems, environment variables should be case-sensitive
+                    
+                    // Test GetEnvironmentVariables()
+                    envVars.TryGetValue(testVarName, out string? exactValue).ShouldBeTrue();
+                    exactValue.ShouldBe(testVarValue);
+                    
+                    // Different case should not match on Unix-like systems
+                    envVars.TryGetValue(upperVarName, out string? upperValue).ShouldBe(upperVarName == testVarName);
+                    envVars.TryGetValue(lowerVarName, out string? lowerValue).ShouldBe(lowerVarName == testVarName);
+                    
+                    // Test GetEnvironmentVariable()
+                    taskEnvironment.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
+                    
+                    // Different case should only work if they're actually the same string
+                    var expectedUpperValue = upperVarName == testVarName ? testVarValue : null;
+                    var expectedLowerValue = lowerVarName == testVarName ? testVarValue : null;
+                    
+                    taskEnvironment.GetEnvironmentVariable(upperVarName).ShouldBe(expectedUpperValue);
+                    taskEnvironment.GetEnvironmentVariable(lowerVarName).ShouldBe(expectedLowerValue);
+                }
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable(testVarName, null);
+            }
+        }
+
         [Fact]
         public void TaskEnvironment_MultithreadedEnvironment_ShouldBeIsolatedFromSystem()
         {
             string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "multithreaded_test_value";
 
+            // On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive
+            var comparer = NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
             var multithreadedEnvironment = new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(
                 Path.GetTempPath(),
-                new Dictionary<string, string>()));
+                new Dictionary<string, string>(comparer)));
 
             try
             {
-                // Verify system doesn't have the test variable initially
+                // Verify system and environement doesn't have the test variable initially
                 Environment.GetEnvironmentVariable(testVarName).ShouldBeNull();
+                multithreadedEnvironment.GetEnvironmentVariable(testVarName).ShouldBeNull();
 
                 // Set variable in multithreaded environment
                 multithreadedEnvironment.SetEnvironmentVariable(testVarName, testVarValue);
