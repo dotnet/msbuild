@@ -28,9 +28,20 @@ namespace Microsoft.Build.UnitTests
             return environmentType switch
             {
                 StubEnvironmentName => new TaskEnvironment(StubTaskEnvironmentDriver.Instance),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(Path.GetTempPath())),
+                MultithreadedEnvironmentName => new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(GetResolvedTempPath())),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
+        }
+
+        /// <summary>
+        /// Gets the fully resolved temp directory path. On macOS, Path.GetTempPath() returns "/var/folders/..."
+        /// which is a symbolic link that resolves to "/private/var/folders/...". This method ensures we get
+        /// the canonical path to avoid test failures when comparing paths that should be equivalent.
+        /// </summary>
+        /// <returns>The fully resolved temp directory path</returns>
+        private static string GetResolvedTempPath()
+        {
+            return Path.GetFullPath(Path.GetTempPath());
         }
 
         [Theory]
@@ -125,7 +136,7 @@ namespace Microsoft.Build.UnitTests
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
             string originalDirectory = Directory.GetCurrentDirectory();
-            string testDirectory = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
+            string testDirectory = GetResolvedTempPath().TrimEnd(Path.DirectorySeparatorChar);
             string alternateDirectory = Path.GetDirectoryName(testDirectory)!;
 
             try
@@ -165,7 +176,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_GetAbsolutePath_ShouldResolveCorrectly(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string baseDirectory = Path.GetTempPath();
+            string baseDirectory = GetResolvedTempPath();
             string relativePath = Path.Combine("subdir", "file.txt");
             string originalDirectory = Directory.GetCurrentDirectory();
 
@@ -190,7 +201,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_GetAbsolutePath_WithAlreadyAbsolutePath_ShouldReturnUnchanged(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string absoluteInputPath = Path.Combine(Path.GetTempPath(), "already", "absolute", "path.txt");
+            string absoluteInputPath = Path.Combine(GetResolvedTempPath(), "already", "absolute", "path.txt");
 
             var resultPath = taskEnvironment.GetAbsolutePath(absoluteInputPath);
 
@@ -202,7 +213,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_GetProcessStartInfo_ShouldConfigureCorrectly(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string testDirectory = Path.GetTempPath();
+            string testDirectory = GetResolvedTempPath();
             string testVarName = $"MSBUILD_PROCESS_TEST_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = "process_test_value";
 
@@ -341,7 +352,7 @@ namespace Microsoft.Build.UnitTests
             // On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive
             var comparer = NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
             var multithreadedEnvironment = new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(
-                Path.GetTempPath(),
+                GetResolvedTempPath(),
                 new Dictionary<string, string>(comparer)));
 
             try
