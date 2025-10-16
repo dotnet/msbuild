@@ -73,8 +73,6 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            bool success = true;
-
             if (File == null)
             {
                 return true; // Nothing to do if no file is specified
@@ -110,6 +108,49 @@ namespace Microsoft.Build.Tasks
 
             try
             {
+                // Handle WriteOnlyWhenDifferent check in parent function
+                if (WriteOnlyWhenDifferent)
+                {
+                    if (!Overwrite)
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", targetFile);
+                    }
+                    else
+                    {
+                        // Read existing content only when needed for WriteOnlyWhenDifferent
+                        string existingContents = null;
+                        if (FileUtilities.FileExistsNoThrow(targetFile))
+                        {
+                            try
+                            {
+                                existingContents = FileSystems.Default.ReadFileAllText(targetFile);
+                            }
+                            catch (IOException)
+                            {
+                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", targetFile);
+                            }
+                        }
+
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
+                        if (existingContents != null && existingContents.Length == buffer.Length)
+                        {
+                            if (existingContents.Equals(contentsAsString))
+                            {
+                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", targetFile);
+                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, true);
+                                return !Log.HasLoggedErrors;
+                            }
+                            else if (FailIfNotIncremental)
+                            {
+                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", targetFile);
+                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, true);
+                                return false;
+                            }
+                        }
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, false);
+                    }
+                }
+
                 if (Transactional)
                 {
                     return ExecuteTransactional(targetFile, directoryPath, contentsAsString, encoding);
@@ -122,16 +163,14 @@ namespace Microsoft.Build.Tasks
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, e.Message, targetFile);
-                success = false;
             }
 
-            return success;
+            return !Log.HasLoggedErrors;
         }
 
         private bool ExecuteTransactional(string targetFile, string directoryPath, string contentsAsString, Encoding encoding)
         {
             // Implementation inspired by FileUtilities.cs[](https://github.com/microsoft/vs-editor-api/blob/main/src/Editor/Text/Impl/TextModel/FileUtilities.cs)
-            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.UsingTransactionalMode", targetFile);
 
             if (string.IsNullOrEmpty(targetFile))
             {
@@ -142,11 +181,11 @@ namespace Microsoft.Build.Tasks
             // Create directory if it doesn't exist
             Directory.CreateDirectory(directoryPath);
 
-            // Use hash for mutex name to avoid excessive string allocation
-            string tempFileName = $"temp_{targetFile.GetHashCode()}_{Guid.NewGuid():N}";
-            string tempFile = Path.Combine(directoryPath, tempFileName);
+            // Use hash for mutex name to avoid excessive string allocation 
             string normalizedTargetPath = targetFile.ToLowerInvariant();
             int stableHash = FowlerNollVo1aHash.ComputeHash32Fast(normalizedTargetPath);
+            string tempFileName = $"temp_{stableHash}_{Guid.NewGuid():N}";
+            string tempFile = Path.Combine(directoryPath, tempFileName);
             string mutexName = $"MSBuild_WriteLinesToFile_{stableHash}";
 
             // Retry acquiring mutex up to 5 times with 200ms delay
@@ -163,31 +202,6 @@ namespace Microsoft.Build.Tasks
                         acquiredMutex = true;
                         try
                         {
-                            // Handle WriteOnlyWhenDifferent check
-                            if (WriteOnlyWhenDifferent && FileUtilities.FileExistsNoThrow(targetFile))
-                            {
-                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
-                                try
-                                {
-                                    string existingContents = FileSystems.Default.ReadFileAllText(targetFile);
-                                    if (existingContents.Equals(contentsAsString))
-                                    {
-                                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", targetFile);
-                                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, true);
-                                        return true;
-                                    }
-                                    else if (FailIfNotIncremental)
-                                    {
-                                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", targetFile);
-                                        return false;
-                                    }
-                                }
-                                catch (IOException)
-                                {
-                                    Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", targetFile);
-                                }
-                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, false);
-                            }
 
                             // Prepare content for temp file following Visual Studio editor pattern
                             string tempFileContent;
@@ -237,16 +251,15 @@ namespace Microsoft.Build.Tasks
                                 try
                                 {
                                     System.IO.File.Replace(tempFile, targetFile, null, true);
-                                    return true;
+                                    return !Log.HasLoggedErrors;
                                 }
                                 catch (FileNotFoundException)
                                 {
                                     System.IO.File.Move(tempFile, targetFile);
-                                    return true;
+                                    return !Log.HasLoggedErrors;
                                 }
-                                catch (IOException ex)
+                                catch (IOException)
                                 {
-                                    Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.Retry", targetFile, maxRetries - remainingAttempts, maxRetries, ex.Message);
                                     Thread.Sleep(5);
                                 }
                             }
@@ -270,14 +283,13 @@ namespace Microsoft.Build.Tasks
                                 }
                                 catch (Exception ex)
                                 {
-                                    Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorDeletingTempFile", tempFile, ex.Message);
+                                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorDeletingTempFile", tempFile, ex.Message);
                                 }
                             }
                         }
                     }
                     else
                     {
-                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.Retry", targetFile, i + 1, mutexRetries, "Failed to acquire mutex.");
                         Thread.Sleep(mutexRetryDelayMs);
                     }
                 }
@@ -295,47 +307,10 @@ namespace Microsoft.Build.Tasks
                 {
                     Directory.CreateDirectory(directoryPath);
                     string contentsAsString = buffer.ToString();
-
-                    // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
-                    if (WriteOnlyWhenDifferent)
-                    {
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
-                        try
-                        {
-                            if (FileUtilities.FileExistsNoThrow(targetFile))
-                            {
-                                string existingContents = FileSystems.Default.ReadFileAllText(File.ItemSpec);
-                                if (existingContents.Length == buffer.Length)
-                                {
-                                    if (existingContents.Equals(contentsAsString))
-                                    {
-                                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
-                                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
-                                        return true;
-                                    }
-                                    else if (FailIfNotIncremental)
-                                    {
-                                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
-                                        return false;
-                                    }
-                                }
-                            }
-                        }
-                        catch (IOException)
-                        {
-                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", targetFile);
-                        }
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, false);
-                    }
-
                     System.IO.File.WriteAllText(targetFile, contentsAsString, encoding);
                 }
                 else
                 {
-                    if (WriteOnlyWhenDifferent)
-                    {
-                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", targetFile);
-                    }
                     Directory.CreateDirectory(directoryPath);
                     System.IO.File.AppendAllText(targetFile, buffer.ToString(), encoding);
                 }
@@ -346,7 +321,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            return true;
+            return !Log.HasLoggedErrors;
         }
     }
 }
