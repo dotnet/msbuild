@@ -1386,16 +1386,18 @@ namespace Microsoft.Build.Execution
             get => _sdkResolvedEnvironmentVariableProperties;
         }
 
+        /// <summary>
+        /// Adds an Environment Variable that was resolved by an <see cref="SdkResolver"/> to the set of properties tracked by this <see cref="ProjectInstance"/>.
+        /// </summary>
+        /// <param name="name">The name of the environment variable.</param>
+        /// <param name="value">The value of the environment variable.</param>
+        /// <remarks>
+        /// SDK-resolved environment variables override ambient environment variables, but do not override regular properties defined in XML.
+        /// </remarks>
         public void AddSdkResolvedEnvironmentVariable(string name, string value)
         {
-            // If the property has already been set as an environment variable, we do not overwrite it.
-            if (_environmentVariableProperties.Contains(name))
-            {
-                LogIfValueDiffers(_environmentVariableProperties, name, value, "SdkEnvironmentVariableAlreadySet");
-                return;
-            }
             // If another SDK already set it, we do not overwrite it.
-            else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
+            if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
                 LogIfValueDiffers(_sdkResolvedEnvironmentVariableProperties, name, value, "SdkEnvironmentVariableAlreadySetBySdk");
                 return;
@@ -1407,8 +1409,18 @@ namespace Microsoft.Build.Execution
 
             _sdkResolvedEnvironmentVariableProperties.Set(property);
 
-            // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
-            if (GetProperty(name) is null)
+            // SDK-resolved environment variables override ambient environment variables.
+            bool overridingAmbient = _environmentVariableProperties.Contains(name);
+            if (overridingAmbient)
+            {
+                _environmentVariableProperties.Remove(name);
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableOverridingAmbient", name, value);
+            }
+
+            // Set the property, overriding ambient environment variables but not regular properties defined in XML.
+            // If we're overriding an ambient variable, or if the property doesn't exist, set it.
+            // Otherwise, prioritize regular properties defined in XML.
+            if (overridingAmbient || GetProperty(name) is null)
             {
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
                    .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);

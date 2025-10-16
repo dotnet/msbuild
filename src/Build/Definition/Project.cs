@@ -4466,9 +4466,8 @@ namespace Microsoft.Build.Evaluation
             /// <param name="value">Environment variable value.</param>
             public void AddSdkResolvedEnvironmentVariable(string name, string value)
             {
-                // If the property has already been set as an environment variable or by another SDK, we do not overwrite it.
-                if (EnvironmentVariablePropertiesDictionary?.Contains(name) == true
-                    || SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
+                // If another SDK already set it, we do not overwrite it.
+                if (SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
                 {
                     return;
                 }
@@ -4478,6 +4477,7 @@ namespace Microsoft.Build.Evaluation
                 SdkResolvedEnvironmentVariablePropertiesDictionary ??= new();
                 SdkResolvedEnvironmentVariablePropertiesDictionary.Set(property);
 
+                // SDK-resolved environment variables override ambient environment variables.
                 SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: null);
             }
 
