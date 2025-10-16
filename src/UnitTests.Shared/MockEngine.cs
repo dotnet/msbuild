@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      *
      **************************************************************************/
-    public sealed class MockEngine : EngineServices, IBuildEngine10
+    public sealed class MockEngine : EngineServices, IBuildEngine10, ITaskFactoryBuildParameterProvider
     {
         private readonly LockType _lockObj = new LockType();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
@@ -61,6 +61,18 @@ namespace Microsoft.Build.UnitTests
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public MockLogger MockLogger { get; }
+
+        /// <summary>
+        /// Gets or sets whether the mock engine should report multi-threaded build mode.
+        /// Used to test ITaskFactoryBuildParameterProvider implementation.
+        /// </summary>
+        public bool IsMultiThreadedBuild { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether task factories should be forced to compile for out-of-process execution.
+        /// Used to test ITaskFactoryBuildParameterProvider implementation.
+        /// </summary>
+        public bool ForceOutOfProcessExecution { get; set; }
 
         public MockEngine(bool logToConsole)
         {
