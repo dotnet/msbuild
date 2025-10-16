@@ -549,6 +549,121 @@ namespace Microsoft.Build.UnitTests.Evaluation
             instance.GetItems("ExecThingsAsEnvironment").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
         }
 
+        [Fact]
+        public void SdkResolverEnvironmentVariablesOverrideAmbientEnvironmentVariables()
+        {
+            string originalValue = Environment.GetEnvironmentVariable("SDK_TEST_VAR");
+            try
+            {
+                // Set an ambient environment variable
+                Environment.SetEnvironmentVariable("SDK_TEST_VAR", "AmbientValue");
+
+                var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver((_, _, factory) =>
+                    factory.IndicateSuccess(Path.Combine(_testFolder, "Sdk"), "1.0.0", null, null, null, environmentVariablesToAdd: new Dictionary<string, string>
+                            {
+                                { "SDK_TEST_VAR", "SdkValue" }
+                            })));
+
+                string projectContent = """
+                    <Project Sdk="sdkenvvar">
+                        <PropertyGroup>
+                            <CapturedValue>$(SDK_TEST_VAR)</CapturedValue>
+                        </PropertyGroup>
+                        <Target Name="TestTarget">
+                            <PropertyGroup>
+                                <ExecValue>$(SDK_TEST_VAR)</ExecValue>
+                            </PropertyGroup>
+                        </Target>
+                    </Project>
+                    """;
+
+                string projectPath = Path.Combine(_testFolder, "project.proj");
+                File.WriteAllText(projectPath, projectContent);
+
+                string sdkPropsContents = "<Project />";
+                string sdkPropsPath = Path.Combine(_testFolder, "Sdk", "Sdk.props");
+                Directory.CreateDirectory(Path.Combine(_testFolder, "Sdk"));
+                File.WriteAllText(sdkPropsPath, sdkPropsContents);
+
+                string sdkTargetsContents = @"<Project />";
+                string sdkTargetsPath = Path.Combine(_testFolder, "Sdk", "Sdk.targets");
+                File.WriteAllText(sdkTargetsPath, sdkTargetsContents);
+
+                var project = CreateProject(projectPath, projectOptions);
+                var instance = project.CreateProjectInstance();
+
+                _logger.AssertNoErrors();
+                _logger.AssertNoWarnings();
+
+                // The SDK value should override the ambient environment variable
+                instance.GetPropertyValue("CapturedValue").ShouldBe("SdkValue");
+
+                instance.Build(["TestTarget"], [_logger], out var targetOutputs);
+
+                instance.GetPropertyValue("ExecValue").ShouldBe("SdkValue");
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("SDK_TEST_VAR", originalValue);
+            }
+        }
+
+        [Fact]
+        public void FirstSdkEnvironmentVariableWinsOverSubsequentSdks()
+        {
+            var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver((sdkReference, _, factory) =>
+            {
+                // First SDK sets the variable
+                if (sdkReference.Name == "FirstSdk")
+                {
+                    return factory.IndicateSuccess(Path.Combine(_testFolder, "Sdk1"), "1.0.0", null, null, null, environmentVariablesToAdd: new Dictionary<string, string>
+                    {
+                        { "SHARED_VAR", "FirstValue" }
+                    });
+                }
+                // Second SDK tries to set it, but should be ignored
+                else if (sdkReference.Name == "SecondSdk")
+                {
+                    return factory.IndicateSuccess(Path.Combine(_testFolder, "Sdk2"), "1.0.0", null, null, null, environmentVariablesToAdd: new Dictionary<string, string>
+                    {
+                        { "SHARED_VAR", "SecondValue" }
+                    });
+                }
+                return null;
+            }));
+
+            string projectContent = """
+                <Project>
+                    <Import Project="Sdk.props" Sdk="FirstSdk"/>
+                    <Import Project="Sdk.props" Sdk="SecondSdk"/>
+                    <PropertyGroup>
+                        <CapturedValue>$(SHARED_VAR)</CapturedValue>
+                    </PropertyGroup>
+                </Project>
+                """;
+
+            string projectPath = Path.Combine(_testFolder, "project.proj");
+            File.WriteAllText(projectPath, projectContent);
+
+            string sdk1PropsContents = "<Project />";
+            string sdk1PropsPath = Path.Combine(_testFolder, "Sdk1", "Sdk.props");
+            Directory.CreateDirectory(Path.Combine(_testFolder, "Sdk1"));
+            File.WriteAllText(sdk1PropsPath, sdk1PropsContents);
+
+            string sdk2PropsContents = "<Project />";
+            string sdk2PropsPath = Path.Combine(_testFolder, "Sdk2", "Sdk.props");
+            Directory.CreateDirectory(Path.Combine(_testFolder, "Sdk2"));
+            File.WriteAllText(sdk2PropsPath, sdk2PropsContents);
+
+            var project = CreateProject(projectPath, projectOptions);
+
+            _logger.AssertNoErrors();
+            _logger.AssertNoWarnings();
+
+            // The first SDK's value should win
+            project.GetPropertyValue("CapturedValue").ShouldBe("FirstValue");
+        }
+
         public void Dispose()
         {
             _env.Dispose();

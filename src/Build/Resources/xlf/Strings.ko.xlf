@@ -901,6 +901,11 @@ Errors: {3}</source>
         <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 다른 SDK에 의해 설정되었습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
         <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했습니다.</target>

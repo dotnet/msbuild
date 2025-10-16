@@ -92,6 +92,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                                            keyTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                            valueTranslator: SdkResultTranslationHelpers.Translate,
                                            dictionaryCreator: count => new Dictionary<string, SdkResultItem>(count, StringComparer.OrdinalIgnoreCase));
+            translator.TranslateDictionary(ref _environmentVariablesToAdd, count => new Dictionary<string, string>(count, StringComparer.OrdinalIgnoreCase));
 
             translator.Translate(ref _sdkReference);
         }
@@ -112,6 +113,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                   _additionalPaths?.Count == result._additionalPaths?.Count &&
                   _propertiesToAdd?.Count == result._propertiesToAdd?.Count &&
                   _itemsToAdd?.Count == result._propertiesToAdd?.Count &&
+                  _environmentVariablesToAdd?.Count == result._environmentVariablesToAdd?.Count &&
                   EqualityComparer<SdkReference>.Default.Equals(_sdkReference, result._sdkReference))
             {
                 if (_additionalPaths != null)
@@ -141,6 +143,17 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     foreach (var itemToAdd in _itemsToAdd)
                     {
                         if (!result._itemsToAdd[itemToAdd.Key].Equals(itemToAdd.Value))
+                        {
+                            return false;
+                        }
+                    }
+                }
+
+                if (_environmentVariablesToAdd != null)
+                {
+                    foreach (var envVarToAdd in _environmentVariablesToAdd)
+                    {
+                        if (result._environmentVariablesToAdd[envVarToAdd.Key] != envVarToAdd.Value)
                         {
                             return false;
                         }
@@ -183,6 +196,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     hashCode = (hashCode * -1521134295) + itemToAdd.Key.GetHashCode();
                     hashCode = (hashCode * -1521134295) + itemToAdd.Value.GetHashCode();
+                }
+            }
+            if (_environmentVariablesToAdd != null)
+            {
+                foreach (var envVarToAdd in _environmentVariablesToAdd)
+                {
+                    hashCode = (hashCode * -1521134295) + envVarToAdd.Key.GetHashCode();
+                    hashCode = (hashCode * -1521134295) + envVarToAdd.Value.GetHashCode();
                 }
             }
 

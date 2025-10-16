@@ -901,6 +901,11 @@ Fehler: {3}</target>
         <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits von einem anderen SDK festgelegt.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
         <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen.</target>
