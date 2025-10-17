@@ -72,13 +72,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Checks if a task type directly implements the IMultiThreadableTask interface.
-        /// This only returns true if the type itself declares the interface, not if it inherits it
-        /// from a base class. This ensures tasks must explicitly opt-in to thread-safe routing.
+        /// Checks if a task type implements the IMultiThreadableTask interface.
+        /// By default, the interface has inheritable semantics - if a task inherits from a base class
+        /// that implements IMultiThreadableTask, it is also considered thread-safe.
+        /// However, if the base class is marked with InternalMSBuildTaskAttribute (tasks from MSBuild repo),
+        /// non-inheritable semantics apply for backward compatibility.
         /// </summary>
         /// <param name="taskType">The task type to check.</param>
-        /// <returns>True if the task directly implements IMultiThreadableTask; false otherwise.</returns>
-        /// <remarks>It's not possible to distinguish the case where it both inherits and declares the interface so that case falls under "inherited".</remarks>
+        /// <returns>True if the task should be considered multi-threadable; false otherwise.</returns>
         private static bool ImplementsIMultiThreadableTask(Type taskType)
         {
             // Check if task is assignable to IMultiThreadableTask
@@ -91,14 +92,36 @@ namespace Microsoft.Build.BackEnd
             Type? baseType = taskType.BaseType;
             if (baseType != null && typeof(IMultiThreadableTask).IsAssignableFrom(baseType))
             {
-                // Base type implements the interface, so this task inherited it
-                // Return false to route to TaskHost
-                return false;
+                // Inherited from base type - non-inheritable if base is from MSBuild repo
+                return !HasInternalMSBuildTaskAttribute(baseType);
             }
 
             // Task implements the interface and base type doesn't
             // This means the task directly declared it
             return true;
+        }
+
+        /// <summary>
+        /// Checks if a task type is marked with InternalMSBuildTaskAttribute.
+        /// This attribute marks tasks from the MSBuild repository that need non-inheritable
+        /// IMultiThreadableTask semantics for backward compatibility.
+        /// </summary>
+        /// <param name="taskType">The task type to check.</param>
+        /// <returns>True if the task has the attribute; false otherwise.</returns>
+        private static bool HasInternalMSBuildTaskAttribute(Type taskType)
+        {
+            const string attributeFullName = "Microsoft.Build.Framework.InternalMSBuildTaskAttribute";
+
+            // Check for the attribute by full name
+            foreach (object attr in taskType.GetCustomAttributes(inherit: true))
+            {
+                if (attr.GetType().FullName == attributeFullName)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
