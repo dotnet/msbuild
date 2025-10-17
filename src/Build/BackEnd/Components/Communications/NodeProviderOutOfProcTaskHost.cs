@@ -488,7 +488,7 @@ namespace Microsoft.Build.BackEnd
         {
 #if NETFRAMEWORK
             // MSB4233: Check if .NET runtime is requested, which is not supported in .NET Framework builds of MSBuild (17.14 and earlier).
-            // .NET Core/5+ builds of MSBuild (18.0+) do support .NET runtime tasks, so this check is not needed there.
+            // .NET Core/5+ builds of MSBuild do support .NET runtime tasks, so this check is not needed there.
             // This provides a clear error message instead of the confusing "MSBuild.dll not found" error that would otherwise occur.
             if ((hostContext & HandshakeOptions.NET) == HandshakeOptions.NET)
             {

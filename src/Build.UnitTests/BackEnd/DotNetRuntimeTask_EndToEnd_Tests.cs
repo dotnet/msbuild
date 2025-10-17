@@ -37,7 +37,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 #if NETFRAMEWORK
             string projectContent = @"
 <Project>
-    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" Runtime=""NET"" Architecture=""x64"" />
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" Runtime=""NET"" />
     <Target Name='TestTask'>
         <ProcessIdTask>
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
