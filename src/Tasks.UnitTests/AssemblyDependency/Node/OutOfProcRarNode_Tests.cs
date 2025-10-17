@@ -63,9 +63,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // Wait for endpoint server to be ready before calling Execute.
             // Introduce a short delay to reduce race between endpoint startup and connection attempt.
             // This improves reliability without changing test semantics.
+            // 200ms was chosen as a balance between test speed and allowing the async endpoint to start.
             const int startupDelayMs = 200;
             output.WriteLine($"Waiting {startupDelayMs}ms for endpoint startup...");
-            System.Threading.Tasks.Task.Delay(startupDelayMs).Wait();
+            Thread.Sleep(startupDelayMs);
 
             Stopwatch sw = Stopwatch.StartNew();
             bool result = rar.Execute();
