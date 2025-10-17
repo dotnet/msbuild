@@ -926,6 +926,11 @@ Errors: {3}</source>
         <target state="translated">MSB4181: “{0}”任务返回了 false，但未记录错误。</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
+      <trans-unit id="TaskRuntimeNET">
+        <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To load .NET tasks, MSBuild 18.0 or Visual Studio 2026 must be used.</source>
+        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To load .NET tasks, MSBuild 18.0 or Visual Studio 2026 must be used.</target>
+        <note>{StrBegin="MSB4233: "}LOCALIZATION: .NET should not be localized.</note>
+      </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
         <target state="translated">{0}{1} 测试 {2} ({3} 秒)</target>

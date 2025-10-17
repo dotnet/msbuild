@@ -486,6 +486,21 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
+            // Check if .NET runtime is requested, which is not supported in this version
+            if ((hostContext & HandshakeOptions.NET) == HandshakeOptions.NET)
+            {
+                throw new Exceptions.InvalidProjectFileException(
+                    configuration.ProjectFileOfTask,
+                    configuration.LineNumberOfTask,
+                    configuration.ColumnNumberOfTask,
+                    0,
+                    0,
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskRuntimeNET", configuration.TaskName, configuration.TaskLocation),
+                    null,
+                    null,
+                    null);
+            }
+
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(hostContext))
             {
