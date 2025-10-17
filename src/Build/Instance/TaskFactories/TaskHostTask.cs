@@ -299,6 +299,9 @@ namespace Microsoft.Build.BackEnd
                 _taskHostParameters.Runtime,
                 _taskHostParameters.Architecture);
 
+            // Log the directory that will be used by the task host
+            _taskLoggingContext.LogCommentFromText(MessageImportance.Low, "TaskHost will use directory: {0}", _taskEnvironment.ProjectDirectory.Path);
+
             // set up the node
             lock (_taskHostLock)
             {
