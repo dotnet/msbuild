@@ -61,19 +61,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             System.Threading.Tasks.Task runTask = endpoint.RunAsync(cts.Token);
 
             // Wait for endpoint server to be ready before calling Execute.
-            // Poll for a short time to reduce race between endpoint startup and connection attempt.
+            // Introduce a short delay to reduce race between endpoint startup and connection attempt.
             // This improves reliability without changing test semantics.
-            const int maxAttempts = 5;
-            const int delayMs = 50;
-            for (int i = 0; i < maxAttempts; i++)
-            {
-                if (i > 0)
-                {
-                    output.WriteLine($"Waiting {delayMs}ms before execute attempt {i + 1}...");
-                    System.Threading.Tasks.Task.Delay(delayMs).Wait();
-                }
-            }
-            output.WriteLine($"Total startup wait: {(maxAttempts - 1) * delayMs}ms");
+            const int startupDelayMs = 200;
+            output.WriteLine($"Waiting {startupDelayMs}ms for endpoint startup...");
+            System.Threading.Tasks.Task.Delay(startupDelayMs).Wait();
 
             Stopwatch sw = Stopwatch.StartNew();
             bool result = rar.Execute();
