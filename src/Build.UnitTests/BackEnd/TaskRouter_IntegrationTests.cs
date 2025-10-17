@@ -787,14 +787,4 @@ namespace Microsoft.Build.Framework
     public sealed class MSBuildMultiThreadableTaskAttribute : Attribute
     {
     }
-
-    /// <summary>
-    /// Test attribute to mark tasks that are part of the MSBuild repository.
-    /// This is a test copy in this test assembly that will be recognized
-    /// by name-based attribute detection in TaskRouter.
-    /// </summary>
-    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    internal sealed class InternalMSBuildTaskAttribute : Attribute
-    {
-    }
 }
