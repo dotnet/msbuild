@@ -10,8 +10,6 @@ using Xunit;
 using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
 
-#nullable disable
-
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
