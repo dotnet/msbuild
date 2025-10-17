@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.IO;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -35,64 +34,21 @@ namespace Microsoft.Build.UnitTests
 #if NETFRAMEWORK
             using (var env = TestEnvironment.Create(_output))
             {
-                // Create a simple .NET task DLL content for testing
-                string taskAssemblyContent = @"
-using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
-
-namespace TestTasks
-{
-    public class SimpleTask : Task
-    {
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, ""SimpleTask executed"");
-            return true;
-        }
-    }
-}";
-
-                // Create the task assembly project
-                string taskProjectContent = @"
-<Project Sdk=""Microsoft.NET.Sdk"">
-    <PropertyGroup>
-        <TargetFramework>net472</TargetFramework>
-    </PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include=""Microsoft.Build.Framework"" Version=""17.0.0"" />
-        <PackageReference Include=""Microsoft.Build.Utilities.Core"" Version=""17.0.0"" />
-    </ItemGroup>
-</Project>";
-
-                var taskProjectFile = env.CreateFile("SimpleTask.csproj", taskProjectContent).Path;
-                var taskSourceFile = env.CreateFile("SimpleTask.cs", taskAssemblyContent).Path;
-
-                // Build the task assembly (this should succeed)
-                string buildTaskOutput = RunnerUtilities.ExecMSBuild($"\"{taskProjectFile}\" /t:Build /v:m", out bool taskBuildSuccess);
-                
-                // If task build fails, skip the test as it's an environment issue, not what we're testing
-                if (!taskBuildSuccess)
-                {
-                    _output.WriteLine("Warning: Could not build test task assembly. Skipping test.");
-                    _output.WriteLine(buildTaskOutput);
-                    return;
-                }
-
-                string taskAssemblyPath = Path.Combine(Path.GetDirectoryName(taskProjectFile), "bin", "Debug", "net472", "SimpleTask.dll");
-
-                // Now create a project that uses the task with Runtime="NET"
-                string projectContent = $@"
+                // Use the same ProcessIdTask from Microsoft.Build.Engine.UnitTests that is built during the repo build
+                string projectContent = @"
 <Project>
-    <UsingTask TaskName=""TestTasks.SimpleTask"" AssemblyFile=""{taskAssemblyPath}"" Runtime=""NET"" Architecture=""x64"" />
-    <Target Name='TestTarget'>
-        <SimpleTask />
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" Runtime=""NET"" />
+    <Target Name='TestTask'>
+        <ProcessIdTask>
+            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
+        </ProcessIdTask>
     </Target>
 </Project>";
 
                 var projectFile = env.CreateFile("test.proj", projectContent).Path;
 
                 // Execute MSBuild on the project - should fail with MSB4233
-                string output = RunnerUtilities.ExecMSBuild($"\"{projectFile}\" /t:TestTarget", out bool success, _output);
+                string output = RunnerUtilities.ExecMSBuild($"\"{projectFile}\" /t:TestTask", out bool success, _output);
 
                 // Build should fail
                 success.ShouldBeFalse();
@@ -101,7 +57,7 @@ namespace TestTasks
                 output.ShouldContain("MSB4233");
 
                 // Output should contain clear error message about .NET runtime not being supported
-                output.ShouldContain("SimpleTask");
+                output.ShouldContain("ProcessIdTask");
                 output.ShouldContain(".NET runtime");
                 output.ShouldContain("MSBuild 18.0");
             }
