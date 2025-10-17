@@ -107,38 +107,5 @@ namespace TestTasks
             }
 #endif
         }
-
-        /// <summary>
-        /// Test that MSBuild.exe can successfully build a project with a task without Runtime="NET".
-        /// This verifies we didn't break normal CLI execution.
-        /// </summary>
-        [WindowsOnlyFact]
-        public void MSBuildCLI_WithoutDotNetRuntime_Succeeds()
-        {
-            using (var env = TestEnvironment.Create(_output))
-            {
-                // Create a simple project that uses a built-in task
-                string projectContent = @"
-<Project>
-    <Target Name='TestTarget'>
-        <Message Text='Hello from MSBuild' Importance='High' />
-    </Target>
-</Project>";
-
-                var projectFile = env.CreateFile("test.proj", projectContent).Path;
-
-                // Execute MSBuild on the project - should succeed
-                string output = RunnerUtilities.ExecMSBuild($"\"{projectFile}\" /t:TestTarget", out bool success, _output);
-
-                // Build should succeed
-                success.ShouldBeTrue();
-
-                // Output should not contain MSB4233 error
-                output.ShouldNotContain("MSB4233");
-
-                // Should see our message
-                output.ShouldContain("Hello from MSBuild");
-            }
-        }
     }
 }

@@ -927,8 +927,8 @@ Errors: {3}</source>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
       <trans-unit id="TaskRuntimeNET">
-        <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To load .NET tasks, MSBuild 18.0 or Visual Studio 2026 must be used.</source>
-        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To load .NET tasks, MSBuild 18.0 or Visual Studio 2026 must be used.</target>
+        <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, MSBuild 18.0 or Visual Studio 2026 or higher must be used.</source>
+        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, MSBuild 18.0 or Visual Studio 2026 or higher must be used.</target>
         <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="MSBuild"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, MSBuild, and Visual Studio 2026 should not be localized.</note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
