@@ -293,6 +293,9 @@ namespace Microsoft.Build.BackEnd
             string architecture = _taskHostParameters[XMakeAttributes.architecture];
         
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
+            
+            // Log the directory that will be used by the task host
+            _taskLoggingContext.LogCommentFromText(MessageImportance.Low, "TaskHost will use directory: {0}", _taskEnvironment.ProjectDirectory.Path);
 
             // set up the node
             lock (_taskHostLock)
