@@ -492,16 +492,11 @@ namespace Microsoft.Build.BackEnd
             // This provides a clear error message instead of the confusing "MSBuild.dll not found" error that would otherwise occur.
             if ((hostContext & HandshakeOptions.NET) == HandshakeOptions.NET)
             {
-                throw new Exceptions.InvalidProjectFileException(
-                    configuration.ProjectFileOfTask,
-                    configuration.LineNumberOfTask,
-                    configuration.ColumnNumberOfTask,
-                    0,
-                    0,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskRuntimeNET", configuration.TaskName, configuration.TaskLocation),
-                    null,
-                    null,
-                    null);
+                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                    new BuildEventFileInfo(configuration.ProjectFileOfTask, configuration.LineNumberOfTask, configuration.ColumnNumberOfTask),
+                    "TaskRuntimeNET",
+                    configuration.TaskName,
+                    configuration.TaskLocation);
             }
 #endif
 
