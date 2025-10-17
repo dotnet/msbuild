@@ -486,7 +486,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool AcquireAndSetUpHost(HandshakeOptions hostContext, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration)
         {
-            // Check if .NET runtime is requested, which is not supported in this version
+#if NETFRAMEWORK
+            // Check if .NET runtime is requested, which is not supported in .NET Framework version of MSBuild
             if ((hostContext & HandshakeOptions.NET) == HandshakeOptions.NET)
             {
                 throw new Exceptions.InvalidProjectFileException(
@@ -500,6 +501,7 @@ namespace Microsoft.Build.BackEnd
                     null,
                     null);
             }
+#endif
 
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(hostContext))
