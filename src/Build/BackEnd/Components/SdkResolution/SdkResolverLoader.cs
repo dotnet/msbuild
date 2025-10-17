@@ -119,7 +119,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 bool assemblyAdded = false;
 
                 // Prefer manifest over the assembly. Try to read the xml first, and if not found then look for an assembly.
-                assemblyAdded = TryAddAssemblyManifestFromXml(manifest, subfolder.FullName, manifestsList, location);
+                assemblyAdded = TryAddAssemblyManifestFromXml(manifest, new AbsolutePath(subfolder.FullName), manifestsList, location);
                 if (!assemblyAdded)
                 {
                     assemblyAdded = TryAddAssemblyManifestFromDll(assembly, manifestsList);
@@ -172,7 +172,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             }
         }
 
-        private bool TryAddAssemblyManifestFromXml(string pathToManifest, string manifestFolder, List<SdkResolverManifest> manifestsList, ElementLocation location)
+        private bool TryAddAssemblyManifestFromXml(string pathToManifest, AbsolutePath manifestFolder, List<SdkResolverManifest> manifestsList, ElementLocation location)
         {
             if (!string.IsNullOrEmpty(pathToManifest) && !FileUtilities.FileExistsNoThrow(pathToManifest))
             {

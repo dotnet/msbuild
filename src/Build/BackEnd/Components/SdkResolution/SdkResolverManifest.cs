@@ -60,7 +60,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <param name="filePath">Path to the manifest xml file.</param>
         /// <param name="manifestFolder">Path to the directory containing the manifest.</param>
         /// <returns>New deserialized collection instance.</returns>
-        internal static SdkResolverManifest Load(string filePath, string manifestFolder)
+        internal static SdkResolverManifest Load(string filePath, Framework.AbsolutePath manifestFolder)
         {
             XmlReaderSettings readerSettings = new XmlReaderSettings()
             {
@@ -83,7 +83,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         if (!System.IO.Path.IsPathRooted(manifest.Path))
                         {
                             manifest.Path = System.IO.Path.Combine(manifestFolder, manifest.Path);
-                            manifest.Path = System.IO.Path.GetFullPath(manifest.Path);
+                            // Does nothing because manifestFolder is AbsolutePath ??? 
+                            // manifest.Path = System.IO.Path.GetFullPath(manifest.Path);
                         }
 
                         return manifest;
