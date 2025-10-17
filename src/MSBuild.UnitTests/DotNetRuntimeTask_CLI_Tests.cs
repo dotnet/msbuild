@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -35,9 +36,12 @@ namespace Microsoft.Build.UnitTests
             using (var env = TestEnvironment.Create(_output))
             {
                 // Use the same ProcessIdTask from Microsoft.Build.Engine.UnitTests that is built during the repo build
-                string projectContent = @"
+                // Get the path to the Microsoft.Build.Engine.UnitTests assembly
+                string taskAssemblyPath = typeof(Microsoft.Build.UnitTests.ProcessIdTask).Assembly.Location;
+                
+                string projectContent = $@"
 <Project>
-    <UsingTask TaskName=""ProcessIdTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests"" Runtime=""NET"" />
+    <UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{taskAssemblyPath}"" Runtime=""NET"" />
     <Target Name='TestTask'>
         <ProcessIdTask>
             <Output PropertyName=""PID"" TaskParameter=""Pid"" />
