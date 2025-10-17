@@ -84,7 +84,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         {
                             manifest.Path = System.IO.Path.Combine(manifestFolder, manifest.Path);
                             // Does nothing because manifestFolder is AbsolutePath ??? 
-                            // manifest.Path = System.IO.Path.GetFullPath(manifest.Path);
+                            manifest.Path = System.IO.Path.GetFullPath(manifest.Path);
                         }
 
                         return manifest;
