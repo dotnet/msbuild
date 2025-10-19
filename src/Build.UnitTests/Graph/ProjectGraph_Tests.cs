@@ -2923,6 +2923,75 @@ $@"
             }
         }
 
+        [Fact]
+        public void InvalidProjectReferenceErrorIncludesReferringProject()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                // Create a project that references a non-existent project
+                TransientTestFile project1 = env.CreateFile("project1.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""missing.proj"" />
+  </ItemGroup>
+</Project>");
+
+                // Attempt to create a graph should throw an exception
+                var exception = Should.Throw<AggregateException>(() => new ProjectGraph(project1.Path));
+                
+                // The exception should be an InvalidProjectFileException
+                exception.InnerExceptions.ShouldHaveSingleItem();
+                var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+                
+                // The error message should mention the referring project
+                innerException.Message.ShouldContain("project1.proj");
+                innerException.Message.ShouldContain("referenced by");
+            }
+        }
+
+        [Fact]
+        public void InvalidProjectReferenceErrorIncludesMultipleReferringProjects()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                // Create two projects that both reference a non-existent project
+                TransientTestFile project1 = env.CreateFile("project1.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""missing.proj"" />
+  </ItemGroup>
+</Project>");
+
+                TransientTestFile project2 = env.CreateFile("project2.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""missing.proj"" />
+  </ItemGroup>
+</Project>");
+
+                TransientTestFile main = env.CreateFile("main.proj", @"
+<Project>
+  <ItemGroup>
+    <ProjectReference Include=""project1.proj"" />
+    <ProjectReference Include=""project2.proj"" />
+  </ItemGroup>
+</Project>");
+
+                // Attempt to create a graph should throw an exception
+                var exception = Should.Throw<AggregateException>(() => new ProjectGraph(main.Path));
+                
+                // The exception should be an InvalidProjectFileException
+                exception.InnerExceptions.ShouldHaveSingleItem();
+                var innerException = exception.InnerExceptions[0].ShouldBeOfType<InvalidProjectFileException>();
+                
+                // The error message should mention at least one referring project
+                innerException.Message.ShouldContain("referenced by");
+                bool hasProject1 = innerException.Message.Contains("project1.proj");
+                bool hasProject2 = innerException.Message.Contains("project2.proj");
+                (hasProject1 || hasProject2).ShouldBeTrue();
+            }
+        }
+
         public void Dispose()
         {
             _env.Dispose();
