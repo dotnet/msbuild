@@ -550,10 +550,20 @@ namespace Microsoft.Build.Graph
                 {
                     // Create a new exception with enriched message that includes the referring project(s)
                     string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
-                    string referrerInfo = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    
+                    // Extract specific error details by removing the generic prefix if present
+                    string errorDetails = ex.BaseMessage;
+                    const string genericPrefix = "The project file could not be loaded. ";
+                    if (errorDetails.StartsWith(genericPrefix, StringComparison.Ordinal))
+                    {
+                        errorDetails = errorDetails.Substring(genericPrefix.Length);
+                    }
+                    
+                    string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
+                        configurationMetadata.ProjectFullPath,
                         referrerList,
-                        ex.BaseMessage);
+                        errorDetails);
 
                     throw new InvalidProjectFileException(
                         ex.ProjectFile ?? configurationMetadata.ProjectFullPath,
@@ -561,7 +571,7 @@ namespace Microsoft.Build.Graph
                         ex.ColumnNumber,
                         ex.EndLineNumber,
                         ex.EndColumnNumber,
-                        referrerInfo,
+                        enrichedMessage,
                         ex.ErrorSubcategory,
                         ex.ErrorCode,
                         ex.HelpKeyword,
