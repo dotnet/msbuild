@@ -543,42 +543,27 @@ namespace Microsoft.Build.Graph
                     globalProperties,
                     _projectCollection);
             }
-            catch (InvalidProjectFileException ex)
+            catch (InvalidProjectFileException ex) when (_projectReferrers.TryGetValue(configurationMetadata, out var referrers) && !referrers.IsEmpty)
             {
                 // Enrich the exception with information about which project(s) referenced this project
-                if (_projectReferrers.TryGetValue(configurationMetadata, out var referrers) && !referrers.IsEmpty)
-                {
-                    // Create a new exception with enriched message that includes the referring project(s)
-                    string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
-                    
-                    // Extract specific error details by removing the generic prefix if present
-                    string errorDetails = ex.BaseMessage;
-                    const string genericPrefix = "The project file could not be loaded. ";
-                    if (errorDetails.StartsWith(genericPrefix, StringComparison.Ordinal))
-                    {
-                        errorDetails = errorDetails.Substring(genericPrefix.Length);
-                    }
-                    
-                    string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
-                        configurationMetadata.ProjectFullPath,
-                        referrerList,
-                        errorDetails);
+                string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
+                
+                string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
+                    referrerList,
+                    ex.Message);
 
-                    throw new InvalidProjectFileException(
-                        ex.ProjectFile ?? configurationMetadata.ProjectFullPath,
-                        ex.LineNumber,
-                        ex.ColumnNumber,
-                        ex.EndLineNumber,
-                        ex.EndColumnNumber,
-                        enrichedMessage,
-                        ex.ErrorSubcategory,
-                        ex.ErrorCode,
-                        ex.HelpKeyword,
-                        ex.InnerException);
-                }
-
-                throw;
+                throw new InvalidProjectFileException(
+                    ex.ProjectFile ?? configurationMetadata.ProjectFullPath,
+                    ex.LineNumber,
+                    ex.ColumnNumber,
+                    ex.EndLineNumber,
+                    ex.EndColumnNumber,
+                    enrichedMessage,
+                    ex.ErrorSubcategory,
+                    ex.ErrorCode,
+                    ex.HelpKeyword,
+                    ex.InnerException);
             }
 
             if (projectInstance == null)

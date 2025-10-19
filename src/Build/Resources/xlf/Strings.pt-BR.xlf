@@ -821,14 +821,12 @@
     </note>
       </trans-unit>
       <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
-        <source>The project file '{0}' could not be loaded when referenced by {1}. {2}</source>
-        <target state="new">The project file '{0}' could not be loaded when referenced by {1}. {2}</target>
+        <source>Referenced by: {0}. {1}</source>
+        <target state="new">Referenced by: {0}. {1}</target>
         <note>
-      This message is shown during static graph construction when a referenced project file cannot be loaded, 
-      along with information about which project(s) are referencing the failed project.
-      {0} is the path to the project that failed to load
-      {1} is a comma-separated list of projects that reference the failed project
-      {2} is the specific error details
+      This message is prepended to the original error when a referenced project file cannot be loaded during static graph construction.
+      {0} is a comma-separated list of projects that reference the failed project
+      {1} is the complete original error message
     </note>
       </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
