@@ -602,7 +602,6 @@
     <Compile Include="Logging\ParallelLogger\ParallelConsoleLogger.cs" />
     <Compile Include="Logging\SimpleErrorLogger.cs" />
     <Compile Include="Logging\ParallelLogger\ConsoleOutputAligner.cs" />
-    <Compile Include="Logging\EventLogger.cs" />
     <Compile Include="Logging\FileLogger.cs" />
     <Compile Include="Logging\LogFormatter.cs" />
     <Compile Include="ObjectModelRemoting\DefinitionObjectsLinks\ProjectMetadataLink.cs" />
