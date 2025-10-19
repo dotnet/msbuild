@@ -550,9 +550,8 @@ namespace Microsoft.Build.Graph
                 {
                     // Create a new exception with enriched message that includes the referring project(s)
                     string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
-                    string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    string referrerInfo = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
-                        configurationMetadata.ProjectFullPath,
                         referrerList,
                         ex.BaseMessage);
 
@@ -562,7 +561,7 @@ namespace Microsoft.Build.Graph
                         ex.ColumnNumber,
                         ex.EndLineNumber,
                         ex.EndColumnNumber,
-                        enrichedMessage,
+                        referrerInfo,
                         ex.ErrorSubcategory,
                         ex.ErrorCode,
                         ex.HelpKeyword,
