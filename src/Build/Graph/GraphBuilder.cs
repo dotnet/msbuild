@@ -52,6 +52,14 @@ namespace Microsoft.Build.Graph
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
         private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
 
+        /// <summary>
+        /// Tracks which projects are referencing each project. Used to provide better error messages
+        /// when a referenced project fails to load.
+        /// Key: The project being referenced
+        /// Value: Set of projects that reference it
+        /// </summary>
+        private readonly ConcurrentDictionary<ConfigurationMetadata, ConcurrentBag<string>> _projectReferrers = new();
+
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
             ProjectCollection projectCollection,
@@ -527,10 +535,42 @@ namespace Microsoft.Build.Graph
             // TODO: ProjectInstance just converts the dictionary back to a PropertyDictionary, so find a way to directly provide it.
             var globalProperties = configurationMetadata.GlobalProperties.ToDictionary();
 
-            var projectInstance = _projectInstanceFactory(
-                configurationMetadata.ProjectFullPath,
-                globalProperties,
-                _projectCollection);
+            ProjectInstance projectInstance;
+            try
+            {
+                projectInstance = _projectInstanceFactory(
+                    configurationMetadata.ProjectFullPath,
+                    globalProperties,
+                    _projectCollection);
+            }
+            catch (InvalidProjectFileException ex)
+            {
+                // Enrich the exception with information about which project(s) referenced this project
+                if (_projectReferrers.TryGetValue(configurationMetadata, out var referrers) && !referrers.IsEmpty)
+                {
+                    // Create a new exception with enriched message that includes the referring project(s)
+                    string referrerList = string.Join(", ", referrers.Distinct().OrderBy(r => r));
+                    string enrichedMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "ProjectGraphProjectFileCannotBeLoadedWithReferrers",
+                        configurationMetadata.ProjectFullPath,
+                        referrerList,
+                        ex.BaseMessage);
+
+                    throw new InvalidProjectFileException(
+                        ex.ProjectFile ?? configurationMetadata.ProjectFullPath,
+                        ex.LineNumber,
+                        ex.ColumnNumber,
+                        ex.EndLineNumber,
+                        ex.EndColumnNumber,
+                        enrichedMessage,
+                        ex.ErrorSubcategory,
+                        ex.ErrorCode,
+                        ex.HelpKeyword,
+                        ex.InnerException);
+                }
+
+                throw;
+            }
 
             if (projectInstance == null)
             {
@@ -583,6 +623,10 @@ namespace Microsoft.Build.Graph
                         referenceInfo.ReferenceConfiguration.ProjectFullPath,
                         referenceInfo.ReferenceConfiguration.ProjectFullPath));
                 }
+
+                // Track that this project is referencing the target project
+                _projectReferrers.GetOrAdd(referenceInfo.ReferenceConfiguration, _ => new ConcurrentBag<string>())
+                    .Add(parsedProject.ProjectInstance.FullPath);
 
                 SubmitProjectForParsing(referenceInfo.ReferenceConfiguration);
 
