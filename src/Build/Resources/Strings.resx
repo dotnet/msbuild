@@ -1831,12 +1831,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     </comment>
   </data>
   <data name="ProjectGraphProjectFileCannotBeLoadedWithReferrers" xml:space="preserve">
-    <value>It is referenced by: {0}. {1}</value>
+    <value>The project file '{0}' could not be loaded when referenced by {1}. {2}</value>
     <comment>
       This message is shown during static graph construction when a referenced project file cannot be loaded, 
-      along with information about which project(s) are referencing the failed project. This is prepended to the original error message.
-      {0} is a comma-separated list of projects that reference the failed project
-      {1} is the original error message
+      along with information about which project(s) are referencing the failed project.
+      {0} is the path to the project that failed to load
+      {1} is a comma-separated list of projects that reference the failed project
+      {2} is the specific error details
     </comment>
   </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" xml:space="preserve">
