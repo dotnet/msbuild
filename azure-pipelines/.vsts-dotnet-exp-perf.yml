@@ -30,6 +30,8 @@ variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
   - name: OptProfDrop
     value: ''
+  - name: requireDefaultChannels
+    value: false
   - name: SourceBranch
     value: $(IbcSourceBranchName)
   # Use main as our optprof collection branch by default in exp branches.
@@ -68,9 +70,19 @@ extends:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
     sdl:
+      policheck:
+        enabled: true
+        exclusionsFile: $(Build.SourcesDirectory)\eng\policheck_exclusions.xml
+      tsa:
+        enabled: true
       # We generate SBOM ourselves, so don't need steps injected by 1ES.
       sbom:
         enabled: false
+      codeSignValidation:
+        enabled: false
+        additionalTargetsGlobPattern: -|**\bootstrapper\**\vs_enterprise.exe
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
     - stage: build
@@ -83,7 +95,7 @@ extends:
           signTypeParameter: ${{ parameters.signTypeParameter }}
           enableOptProf: ${{ parameters.enableOptProf }}
 
-    - template: /eng/common/templates/post-build/post-build.yml@self
+    - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:
         publishingInfraVersion: 3
         enableSymbolValidation: true

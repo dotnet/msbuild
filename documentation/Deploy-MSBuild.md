@@ -26,3 +26,14 @@ Deploy-MSBuild can also patch a .NET (Core) SDK installation. Pass the `-runtime
 ### Linux
 
 There isn’t a shell script for deploying MSBuild. Instead, you’ll need to [install the PowerShell tool](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux) and execute `Deploy-MSBuild.ps1` using the tool on Unix platforms with the command: `pwsh scripts\Deploy-MSBuild.ps1`.
+
+## Automatically-Patched SDK from Bootstrap
+
+As of [recent changes to the bootstrap process](https://github.com/dotnet/msbuild/blob/9c89563239bd60739920991211649d899b32ecb4/documentation/wiki/Bootstrap.md), building MSBuild now automatically creates a patched .NET SDK as part of the normal build output. This patched SDK is located in the bootstrap folder and contains the fresh MSBuild bits integrated with a compatible .NET SDK version.
+The bootstrap SDK is primarily used for:
+
+- End-to-end testing
+- CI runs
+- Development and testing scenarios where you need MSBuild changes integrated with the .NET SDK
+
+For most development and testing scenarios, you can use this automatically generated bootstrap SDK instead of manually patching an existing SDK installation.

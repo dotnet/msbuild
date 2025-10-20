@@ -9,7 +9,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 #if !RUNTIME_TYPE_NETCORE
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 #endif
 

@@ -2,13 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -28,7 +24,9 @@ namespace Microsoft.Build.Instance.ImmutableProjectCollections
     /// _globalProperties is checked to determine whether the named property is actually
     /// a global property and, if it is, then instance is retrieved from _allProperties.
     /// </remarks>
-    internal class ImmutableGlobalPropertiesCollectionConverter : IRetrievableEntryHashSet<ProjectPropertyInstance>
+    internal class ImmutableGlobalPropertiesCollectionConverter :
+        IRetrievableValuedEntryHashSet<ProjectPropertyInstance>,
+        IValueDictionaryConverter
     {
         private readonly IDictionary<string, string> _globalProperties;
         private readonly PropertyDictionary<ProjectPropertyInstance> _allProperties;
@@ -132,9 +130,13 @@ namespace Microsoft.Build.Instance.ImmutableProjectCollections
 
         public bool Remove(KeyValuePair<string, ProjectPropertyInstance> item) => throw new NotSupportedException();
 
+        public IDictionary<string, string> ToReadOnlyDictionary() => new System.Collections.ObjectModel.ReadOnlyDictionary<string, string>(_globalProperties);
+
         public void TrimExcess()
         {
         }
+
+        public bool TryGetEscapedValue(string key, out string escapedValue) => _globalProperties.TryGetValue(key, out escapedValue);
 
         public bool TryGetValue(string key, out ProjectPropertyInstance value)
         {

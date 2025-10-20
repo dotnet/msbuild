@@ -3,7 +3,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
@@ -25,6 +24,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// The project's full path
         /// </summary>
         private string _projectFullPath;
+
+        /// <summary>
+        /// Telemetry data for a project
+        /// </summary>
+        private readonly ProjectTelemetry _projectTelemetry = new ProjectTelemetry();
 
         /// <summary>
         /// Constructs a project logging context.
@@ -253,6 +257,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 evaluationId,
                 projectContextId);
         }
+
+        /// <summary>
+        /// Telemetry data for a project
+        /// </summary>
+        internal ProjectTelemetry ProjectTelemetry => _projectTelemetry;
 
         /// <summary>
         /// Log that the project has finished

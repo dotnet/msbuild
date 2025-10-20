@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+#if !NET
 using System.Collections.ObjectModel;
+#endif
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 

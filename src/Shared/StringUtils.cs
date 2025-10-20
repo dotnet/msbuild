@@ -16,6 +16,10 @@ namespace Microsoft.Build.Shared
         /// <returns>Random generated string of the specified length.</returns>
         public static string GenerateRandomString(int length)
         {
+#if NET
+            return string.Create(length, 0, static (dest, _) =>
+                Random.Shared.GetItems("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+_", dest));
+#else
             // Base64, 2^6 = 64
             const int eachStringCharEncodesBites = 6;
             const int eachByteHasBits = 8;
@@ -32,6 +36,7 @@ namespace Microsoft.Build.Shared
             string randomBase64String = Convert.ToBase64String(randomBytes).Replace('/', '_');
 
             return randomBase64String.Substring(0, length);
+#endif
         }
 
         /// <summary>
@@ -45,10 +50,14 @@ namespace Microsoft.Build.Shared
         {
             int lastOccurrenceIndex = fromString.LastIndexOf(substring, comparison);
 
-            if (lastOccurrenceIndex != -1)
+            if (lastOccurrenceIndex >= 0)
             {
-                fromString = fromString.Substring(0, lastOccurrenceIndex) +
-                             fromString.Substring(lastOccurrenceIndex + substring.Length);
+                fromString =
+#if NET
+                    $"{fromString.AsSpan(0, lastOccurrenceIndex)}{fromString.AsSpan(lastOccurrenceIndex + substring.Length)}";
+#else
+                    $"{fromString.Substring(0, lastOccurrenceIndex)}{fromString.Substring(lastOccurrenceIndex + substring.Length)}";
+#endif
             }
 
             return fromString;

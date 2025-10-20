@@ -1,4 +1,5 @@
-﻿directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning!
+﻿The plugin credential provider could not acquire credentials.Authentication may require manual action. Consider re-running the command with --interactive for `dotnet`, /p:NuGetInteractive="true" for MSBuild or removing the -NonInteractive switch for `NuGet`
+directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning!
 directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: 
   A
   Multi

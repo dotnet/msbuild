@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+
 #if FEATURE_APARTMENT_STATE
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -120,7 +121,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The object used to synchronize access to the task execution host.
         /// </summary>
-        private Object _taskExecutionHostSync = new Object();
+        private LockType _taskExecutionHostSync = new();
 
         /// <summary>
         /// Constructor
@@ -252,17 +253,17 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Add parameters on any output tags
-            foreach (ProjectTaskInstanceChild taskOutputSpecification in _taskNode.Outputs)
+            // Perf: Moved to indexed based for loop to avoid boxing of the enumerator for IList.
+            for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
-                ProjectTaskOutputItemInstance outputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
-                if (outputItemInstance != null)
+                ProjectTaskInstanceChild taskOutputSpecification = _taskNode.Outputs[i];
+                if (taskOutputSpecification is ProjectTaskOutputItemInstance outputItemInstance)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                ProjectTaskOutputPropertyInstance outputPropertyInstance = taskOutputSpecification as ProjectTaskOutputPropertyInstance;
-                if (outputPropertyInstance != null)
+                if (taskOutputSpecification is ProjectTaskOutputPropertyInstance outputPropertyInstance)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
@@ -291,7 +292,7 @@ namespace Microsoft.Build.BackEnd
         /// Called to execute a task within a target. This method instantiates the task, sets its parameters, and executes it.
         /// </summary>
         /// <returns>true, if successful</returns>
-        private async Task<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
+        private async ValueTask<WorkUnitResult> ExecuteTask(TaskExecutionMode mode, Lookup lookup)
         {
             ErrorUtilities.VerifyThrowArgumentNull(lookup);
 
@@ -366,7 +367,7 @@ namespace Microsoft.Build.BackEnd
         /// Execute a single bucket
         /// </summary>
         /// <returns>true if execution succeeded</returns>
-        private async Task<WorkUnitResult> ExecuteBucket(TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask, Dictionary<string, string> lookupHash)
+        private async ValueTask<WorkUnitResult> ExecuteBucket(TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask, Dictionary<string, string> lookupHash)
         {
             // On Intrinsic tasks, we do not allow batchable params, therefore metadata is excluded.
             ParserOptions parserOptions = (_taskNode == null) ? ParserOptions.AllowPropertiesAndItemLists : ParserOptions.AllowAll;
@@ -428,8 +429,10 @@ namespace Microsoft.Build.BackEnd
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                        // Can be condition with _componentHost.BuildParameters.IsTelemetryEnabled) - but it's a cheap call
-                        taskFactoryWrapper?.Statistics?.ExecutionStarted();
+                        if (_componentHost.BuildParameters.IsTelemetryEnabled)
+                        {
+                            taskFactoryWrapper?.Statistics?.ExecutionStarted();
+                        }
 
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
@@ -479,7 +482,10 @@ namespace Microsoft.Build.BackEnd
 
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
-                            taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                            if (_componentHost.BuildParameters.IsTelemetryEnabled)
+                            {
+                                taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                            }
 
                             if (taskResult.ResultCode == WorkUnitResultCode.Failed && _continueOnError == ContinueOnError.WarnAndContinue)
                             {
@@ -532,12 +538,12 @@ namespace Microsoft.Build.BackEnd
 
             // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
             // a null set will be treated as equivalent to all parameters being "don't care".
-            if (msbuildRuntime != String.Empty || msbuildArchitecture != String.Empty)
+            if (msbuildRuntime != string.Empty || msbuildArchitecture != string.Empty)
             {
                 taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                msbuildArchitecture = msbuildArchitecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
-                msbuildRuntime = msbuildRuntime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
+                msbuildArchitecture = msbuildArchitecture == string.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
+                msbuildRuntime = msbuildRuntime == string.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
 
                 taskIdentityParameters.Add(XMakeAttributes.runtime, msbuildRuntime);
                 taskIdentityParameters.Add(XMakeAttributes.architecture, msbuildArchitecture);
@@ -613,7 +619,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
-                    if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                    if (_targetLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&
+                        !_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
                         string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
@@ -738,7 +745,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="bucket">The batching bucket</param>
         /// <param name="howToExecuteTask">The task execution mode</param>
         /// <returns>The result of running the task.</returns>
-        private async Task<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
+        private async ValueTask<WorkUnitResult> ExecuteInstantiatedTask(TaskExecutionHost taskExecutionHost, TaskLoggingContext taskLoggingContext, TaskHost taskHost, ItemBucket bucket, TaskExecutionMode howToExecuteTask)
         {
             UpdateContinueOnError(bucket, taskHost);
 
@@ -859,7 +866,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else if (type == typeof(ThreadAbortException))
                     {
-#if !NET6_0_OR_GREATER && !NET6_0 // This is redundant but works around https://github.com/dotnet/sdk/issues/20700
+#if !NET
                         Thread.ResetAbort();
 #endif
                         _continueOnError = ContinueOnError.ErrorAndStop;

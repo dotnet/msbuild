@@ -7,6 +7,11 @@
     <Description Condition="'$(Description)' == ''">$(TargetFileName)</Description>
   </PropertyGroup>
 
+  <!-- Disable package validation as source build filters out target frameworks. -->
+  <PropertyGroup Condition="'$(DotNetBuildSourceOnly)' == 'true'">
+    <EnablePackageValidation>false</EnablePackageValidation>
+  </PropertyGroup>
+
   <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" />
     <None Include="README.md" Pack="true" PackagePath="\" />
@@ -25,6 +30,14 @@
   </ItemGroup>
 
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
+
+  <!-- Put it after Sdk.targets imports to override values from StrongName.targets. It's needed to avoid NGEN validation issues on VS exp insertions.  -->
+  <PropertyGroup Condition="'$(SignType)' == 'test'">
+    <!-- Remove open source signing -->
+    <PublicSign>false</PublicSign>
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>true</DelaySign>
+  </PropertyGroup>
 
   <Target Name="DeleteDevPackage" AfterTargets="GenerateNuspec">
     <!-- If package just built was already in global packages folder, delete it.  This helps support a local dev cycle where you are consuming

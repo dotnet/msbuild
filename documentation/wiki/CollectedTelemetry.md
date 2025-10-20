@@ -26,11 +26,8 @@ Expressed and collected via [LoggingConfigurationTelemetry type](https://github.
 | >= 8.0.100   | Default choice on terminal logger enablement. |
 | >= 8.0.100   | Source of default choice on terminal logger enablement. |
 | >= 8.0.100   | Indication if Console logger was used. |
-| >= 8.0.100   | Console logger type (serial, parallel). |
 | >= 8.0.100   | Console logger verbosity. |
 | >= 8.0.100   | Indication if File logger was used. |
-| >= 8.0.100   | File logger type (serial, parallel). |
-| >= 8.0.100   | Number of file loggers. |
 | >= 8.0.100   | File logger verbosity. |
 | >= 8.0.100   | Indication if Binary logger was used. |
 | >= 8.0.100   | Indication if Binary logger used with default log name. |
@@ -94,3 +91,4 @@ Expressed and collected via [BuildTelemetry type](https://github.com/dotnet/msbu
 | All          | Version of MSBuild. |
 | >= 9.0.100   | Indication of enablement of BuildCheck feature. |
 | >= 9.0.100   | Indication of Smart App Control being in evaluation mode on machine executing the build. |
+| >= 10.0.100  | Indication if the build was run in multithreaded mode. |

@@ -38,14 +38,19 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            text = text.Replace(Separator, "\\" + Separator);
+            text = text.Replace(Separator, $"\\{Separator}");
 
             if (text.Length > 100)
             {
-                text = text.Remove(100) + "...";
+                text =
+#if NET
+                    $"{text.AsSpan(0, 100)}...";
+#else
+                    $"{text.Remove(100)}...";
+#endif
             }
 
-            return '`' + text + '`';
+            return $"`{text}`";
         }
     }
 }
