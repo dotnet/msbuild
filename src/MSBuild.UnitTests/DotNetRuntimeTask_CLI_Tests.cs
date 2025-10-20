@@ -1,7 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -36,8 +37,11 @@ namespace Microsoft.Build.UnitTests
             using (var env = TestEnvironment.Create(_output))
             {
                 // Use the same ProcessIdTask from Microsoft.Build.Engine.UnitTests that is built during the repo build
-                // Get the path to the Microsoft.Build.Engine.UnitTests assembly
-                string taskAssemblyPath = typeof(Microsoft.Build.UnitTests.ProcessIdTask).Assembly.Location;
+                // Construct the path to the Microsoft.Build.Engine.UnitTests assembly dynamically
+                // since we don't have a direct reference to it from this test project
+                string currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
+                string currentDirectory = Path.GetDirectoryName(currentAssemblyPath)!;
+                string taskAssemblyPath = Path.Combine(currentDirectory, "Microsoft.Build.Engine.UnitTests.dll");
                 
                 string projectContent = $@"
 <Project>
