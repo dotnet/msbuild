@@ -644,8 +644,8 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
-            string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
+            // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
+            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
             IList<NodeContext> nodeContexts;
             int nodeId = (int)hostContext;

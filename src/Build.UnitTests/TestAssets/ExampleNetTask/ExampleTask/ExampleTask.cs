@@ -26,7 +26,7 @@ namespace NetTask
                 string[] args = Environment.GetCommandLineArgs();
                 for (int i = 0; i < args.Length; i++)
                 {
-                    Log.LogMessage(MessageImportance.High, $"{args[i]}");
+                    Log.LogMessage(MessageImportance.High, $"Arg[{i}]: {args[i]}");
                 }
 
                 return true;
