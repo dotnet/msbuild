@@ -13,7 +13,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
+#if FEATURE_REPORTFILEACCESSES
 using System.Runtime.CompilerServices;
+#endif
+
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -459,8 +463,9 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            InitializeTelemetry();
-
+#if NETFRAMEWORK
+            VSTelemetryManager telemetryManager = new VSTelemetryManager(isStandalone: false);
+#endif
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -525,6 +530,7 @@ namespace Microsoft.Build.Execution
                     _buildTelemetry = new()
                     {
                         StartAt = now,
+                        IsStandaloneExecution = false,
                     };
                 }
 
@@ -585,7 +591,6 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                _buildParameters.IsTelemetryEnabled |= OpenTelemetryManager.Instance.IsActive();
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
@@ -739,25 +744,6 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void InitializeTelemetry()
-        {
-            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
-            string? failureMessage = OpenTelemetryManager.Instance.LoadFailureExceptionMessage;
-            if (_deferredBuildMessages != null &&
-                failureMessage != null &&
-                _deferredBuildMessages is ICollection<DeferredBuildMessage> deferredBuildMessagesCollection)
-            {
-                deferredBuildMessagesCollection.Add(
-                    new DeferredBuildMessage(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                            "OpenTelemetryLoadFailed",
-                            failureMessage),
-                    MessageImportance.Low));
-
-                // clean up the message from OpenTelemetryManager to avoid double logging it
-                OpenTelemetryManager.Instance.LoadFailureExceptionMessage = null;
-            }
-        }
 
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
@@ -1127,11 +1113,9 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-                            if (OpenTelemetryManager.Instance.IsActive())
-                            {
-                                EndBuildTelemetry();
-                            }
-
+#if NETFRAMEWORK
+                            EndBuildTelemetry();
+#endif
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
@@ -1179,20 +1163,18 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads of System.Diagnostics.DiagnosticSource, TODO: when this is agreed to perf-wise enable instrumenting using activities anywhere...
+#if NETFRAMEWORK
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
-            OpenTelemetryManager.Instance.DefaultActivitySource?
-                .StartActivity("Build")?
+            VSTelemetryManager.StartActivity("Build")?
                 .WithTags(_buildTelemetry)
                 .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                     includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                     includeTargetDetails: false))
-                .WithStartTime(_buildTelemetry!.InnerStartAt)
                 .Dispose();
-            OpenTelemetryManager.Instance.ForceFlush();
         }
-
+#endif
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.
         /// </summary>

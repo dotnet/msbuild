@@ -47,6 +47,8 @@ internal static class TelemetryConstants
     /// Name of the property for inner build duration.
     /// </summary>
     public const string InnerBuildDurationPropertyName = "InnerBuildDurationInMilliseconds";
+
+    public const string BuildEvent = nameof(BuildEvent);
 }
 
 internal static class NodeTelemetryTags

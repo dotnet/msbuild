@@ -27,6 +27,7 @@
     <!-- Telemetry in Framework-->
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" PrivateAssets="all" />
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.Telemetry" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Framework and standard don't have these. -->

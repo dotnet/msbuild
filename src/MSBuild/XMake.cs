@@ -248,9 +248,12 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
-            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
-            // Initialize OpenTelemetry infrastructure
-            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true};
+
+            // Initialize VSTelemetry
+#if NETFRAMEWORK
+            VSTelemetryManager tm = new VSTelemetryManager(isStandalone: true);
+#endif
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -298,11 +301,12 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
-            OpenTelemetryManager.Instance.Shutdown();
 
+#if NETFRAMEWORK
+            VSTelemetryManager.Dispose();
+#endif
             return exitCode;
         }
-
 
         /// <summary>
         /// Returns true if arguments allows or make sense to leverage msbuild server.

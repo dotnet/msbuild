@@ -33,6 +33,11 @@ namespace Microsoft.Build.Framework.Telemetry
         public DateTime? InnerStartAt { get; set; }
 
         /// <summary>
+        /// True if MSBuild runs from command line.
+        /// </summary>
+        public bool? IsStandaloneExecution { get; set; }
+
+        /// <summary>
         /// Time at which build have finished.
         /// </summary>
         public DateTime? FinishedAt { get; set; }
@@ -104,78 +109,42 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             var properties = new Dictionary<string, string>();
 
-            // populate property values
-            if (BuildEngineDisplayVersion != null)
-            {
-                properties[nameof(BuildEngineDisplayVersion)] = BuildEngineDisplayVersion;
-            }
+            AddIfNotNull(nameof(BuildEngineDisplayVersion), BuildEngineDisplayVersion);
+            AddIfNotNull(nameof(BuildEngineFrameworkName), BuildEngineFrameworkName);
+            AddIfNotNull(nameof(BuildEngineHost), BuildEngineHost);
+            AddIfNotNull(nameof(InitialMSBuildServerState), InitialMSBuildServerState);
+            AddIfNotNull(nameof(ProjectPath), ProjectPath);
+            AddIfNotNull(nameof(ServerFallbackReason), ServerFallbackReason);
+            AddIfNotNull(nameof(BuildTarget), BuildTarget);
+            AddIfNotNull(nameof(BuildEngineVersion), BuildEngineVersion?.ToString());
+            AddIfNotNull(nameof(BuildSuccess), BuildSuccess?.ToString());
+            AddIfNotNull(nameof(BuildCheckEnabled), BuildCheckEnabled?.ToString());
+            AddIfNotNull(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled?.ToString());
+            AddIfNotNull(nameof(SACEnabled), SACEnabled?.ToString());
+            AddIfNotNull(nameof(IsStandaloneExecution), IsStandaloneExecution?.ToString());
 
+            // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)
             {
-                properties[TelemetryConstants.BuildDurationPropertyName] = (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
+                properties[TelemetryConstants.BuildDurationPropertyName] =
+                    (FinishedAt.Value - StartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
             if (InnerStartAt.HasValue && FinishedAt.HasValue)
             {
-                properties[TelemetryConstants.InnerBuildDurationPropertyName] = (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
-            }
-
-            if (BuildEngineFrameworkName != null)
-            {
-                properties[nameof(BuildEngineFrameworkName)] = BuildEngineFrameworkName;
-            }
-
-            if (BuildEngineHost != null)
-            {
-                properties[nameof(BuildEngineHost)] = BuildEngineHost;
-            }
-
-            if (InitialMSBuildServerState != null)
-            {
-                properties[nameof(InitialMSBuildServerState)] = InitialMSBuildServerState;
-            }
-
-            if (ProjectPath != null)
-            {
-                properties[nameof(ProjectPath)] = ProjectPath;
-            }
-
-            if (ServerFallbackReason != null)
-            {
-                properties[nameof(ServerFallbackReason)] = ServerFallbackReason;
-            }
-
-            if (BuildSuccess.HasValue)
-            {
-                properties[nameof(BuildSuccess)] = BuildSuccess.Value.ToString(CultureInfo.InvariantCulture);
-            }
-
-            if (BuildTarget != null)
-            {
-                properties[nameof(BuildTarget)] = BuildTarget;
-            }
-
-            if (BuildEngineVersion != null)
-            {
-                properties[nameof(BuildEngineVersion)] = BuildEngineVersion.ToString();
-            }
-
-            if (BuildCheckEnabled != null)
-            {
-                properties[nameof(BuildCheckEnabled)] = BuildCheckEnabled.Value.ToString(CultureInfo.InvariantCulture);
-            }
-
-            if (MultiThreadedModeEnabled != null)
-            {
-                properties[nameof(MultiThreadedModeEnabled)] = MultiThreadedModeEnabled.Value.ToString(CultureInfo.InvariantCulture);
-            }
-
-            if (SACEnabled != null)
-            {
-                properties[nameof(SACEnabled)] = SACEnabled.Value.ToString(CultureInfo.InvariantCulture);
+                properties[TelemetryConstants.InnerBuildDurationPropertyName] =
+                    (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
             }
 
             return properties;
+
+            void AddIfNotNull(string key, string? value)
+            {
+                if (value != null)
+                {
+                    properties[key] = value;
+                }
+            }
         }
 
         /// <summary>
@@ -196,42 +165,24 @@ namespace Microsoft.Build.Framework.Telemetry
                 telemetryItems.Add(new TelemetryItem(TelemetryConstants.InnerBuildDurationPropertyName, (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds, false));
             }
 
-            if (BuildEngineHost != null)
-            {
-                telemetryItems.Add(new TelemetryItem(nameof(BuildEngineHost), BuildEngineHost, false));
-            }
-
-            if (BuildSuccess.HasValue)
-            {
-                telemetryItems.Add(new TelemetryItem(nameof(BuildSuccess), BuildSuccess, false));
-            }
-
-            if (BuildTarget != null)
-            {
-                telemetryItems.Add(new TelemetryItem(nameof(BuildTarget), BuildTarget, true));
-            }
-
-            if (BuildEngineVersion != null)
-            {
-                telemetryItems.Add(new TelemetryItem(nameof(BuildEngineVersion), BuildEngineVersion.ToString(), false));
-            }
-
-            if (BuildCheckEnabled != null)
-            {
-                telemetryItems.Add(new TelemetryItem(nameof(BuildCheckEnabled), BuildCheckEnabled, false));
-            }
-
-            if (MultiThreadedModeEnabled != null)
-            {
-                telemetryItems.Add(new TelemetryItem(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled, false));
-            }
-
-            if (SACEnabled != null)
-            {
-                telemetryItems.Add(new TelemetryItem(nameof(SACEnabled), SACEnabled, false));
-            }
+            AddIfNotNull(nameof(BuildEngineHost), BuildEngineHost);
+            AddIfNotNull(nameof(BuildSuccess), BuildSuccess?.ToString());
+            AddIfNotNull(nameof(BuildTarget), BuildTarget);
+            AddIfNotNull(nameof(BuildEngineVersion), BuildEngineVersion?.ToString());
+            AddIfNotNull(nameof(BuildCheckEnabled), BuildCheckEnabled?.ToString());
+            AddIfNotNull(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled?.ToString());
+            AddIfNotNull(nameof(SACEnabled), SACEnabled?.ToString());
+            AddIfNotNull(nameof(IsStandaloneExecution), IsStandaloneExecution?.ToString());
 
             return telemetryItems;
+
+            void AddIfNotNull(string key, string? value)
+            {
+                if (value != null)
+                {
+                    telemetryItems.Add(new TelemetryItem(key, value, NeedsHashing: false));
+                }
+            }
         }
     }
 }
