@@ -643,16 +643,6 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Is the class being loaded a task factory class
-        /// </summary>
-        private static bool IsTaskFactoryClass(Type type, object unused)
-        {
-            return type.GetTypeInfo().IsClass &&
-                !type.GetTypeInfo().IsAbstract &&
-                typeof(Microsoft.Build.Framework.ITaskFactory).IsAssignableFrom(type);
-        }
-
-        /// <summary>
         /// Searches all task declarations for the given task name.
         /// If no exact match is found, looks for partial matches.
         /// A task name that is not fully qualified may produce several partial matches.
@@ -1094,22 +1084,12 @@ namespace Microsoft.Build.Execution
             /// </summary>
             internal const string XamlTaskFactory = "XamlTaskFactory";
 
-            /// <summary>
-            /// Lock for the taskFactoryTypeLoader
-            /// </summary>
-            private static readonly LockType s_taskFactoryTypeLoaderLock = new();
-
 #if DEBUG
             /// <summary>
             /// Inform users that this is a problem from a task factory, a bug should be opened against the factory user
             /// </summary>
             private const string UnhandledFactoryError = "\nThis is an unhandled exception from a task factory-- PLEASE OPEN A BUG AGAINST THE TASK FACTORY OWNER. ";
 #endif
-
-            /// <summary>
-            /// Type filter to make sure we only look for taskFactoryClasses
-            /// </summary>
-            private static readonly Func<Type, object, bool> s_taskFactoryTypeFilter = IsTaskFactoryClass;
 
             /// <summary>
             /// Lock object to ensure that only one thread can access the task factory type loader at a time.
@@ -1120,11 +1100,6 @@ namespace Microsoft.Build.Execution
             /// Identity of this task.
             /// </summary>
             private RegisteredTaskIdentity _taskIdentity;
-
-            /// <summary>
-            /// Typeloader for taskFactories
-            /// </summary>
-            private static TypeLoader s_taskFactoryTypeLoader;
 
             /// <summary>
             /// The task name this record was registered with from the using task element
@@ -1529,16 +1504,8 @@ namespace Microsoft.Build.Execution
 
                             try
                             {
-                                lock (s_taskFactoryTypeLoaderLock)
-                                {
-                                    if (s_taskFactoryTypeLoader == null)
-                                    {
-                                        s_taskFactoryTypeLoader = new TypeLoader(s_taskFactoryTypeFilter);
-                                    }
-                                }
-
                                 // Make sure we only look for task factory classes when loading based on the name
-                                loadedType = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo);
+                                loadedType = TypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo, TypeLoader.TypeFilter.TaskFactory);
 
                                 if (loadedType == null)
                                 {
