@@ -2107,7 +2107,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCache<SystemState>(TaskEnvironment.GetAbsolutePath(_stateFile), Log);
+            string stateFilePath = string.IsNullOrEmpty(_stateFile) ? null : TaskEnvironment.GetAbsolutePath(_stateFile);
+            _cache = SystemState.DeserializeCache<SystemState>(stateFilePath, Log);
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
@@ -3327,47 +3328,78 @@ namespace Microsoft.Build.Tasks
 
             for (int i = 0; i < _candidateAssemblyFiles.Length; i++)
             {
-                _candidateAssemblyFiles[i] = TaskEnvironment.GetAbsolutePath(_candidateAssemblyFiles[i]);
+                if (!string.IsNullOrEmpty(_candidateAssemblyFiles[i]))
+                {
+                    _candidateAssemblyFiles[i] = TaskEnvironment.GetAbsolutePath(_candidateAssemblyFiles[i]);
+                }
             }
 
             for (int i = 0; i < _targetFrameworkDirectories.Length; i++)
             {
-                _targetFrameworkDirectories[i] = TaskEnvironment.GetAbsolutePath(_targetFrameworkDirectories[i]);
+                if (!string.IsNullOrEmpty(_targetFrameworkDirectories[i]))
+                {
+                    _targetFrameworkDirectories[i] = TaskEnvironment.GetAbsolutePath(_targetFrameworkDirectories[i]);
+                }
             }
 
             for (int i = 0; i < _fullFrameworkFolders.Length; i++)
             {
-                _fullFrameworkFolders[i] = TaskEnvironment.GetAbsolutePath(_fullFrameworkFolders[i]);
+                if (!string.IsNullOrEmpty(_fullFrameworkFolders[i]))
+                {
+                    _fullFrameworkFolders[i] = TaskEnvironment.GetAbsolutePath(_fullFrameworkFolders[i]);
+                }
             }
 
             for (int i = 0; i < _latestTargetFrameworkDirectories.Length; i++)
             {
-                _latestTargetFrameworkDirectories[i] = TaskEnvironment.GetAbsolutePath(_latestTargetFrameworkDirectories[i]);
+                if (!string.IsNullOrEmpty(_latestTargetFrameworkDirectories[i]))
+                {
+                    _latestTargetFrameworkDirectories[i] = TaskEnvironment.GetAbsolutePath(_latestTargetFrameworkDirectories[i]);
+                }
             }
 
-            _appConfigFile = TaskEnvironment.GetAbsolutePath(_appConfigFile);
-            _stateFile = TaskEnvironment.GetAbsolutePath(_stateFile);
+            if (!string.IsNullOrEmpty(_appConfigFile))
+            {
+                _appConfigFile = TaskEnvironment.GetAbsolutePath(_appConfigFile);
+            }
+            
+            if (!string.IsNullOrEmpty(_stateFile))
+            {
+                _stateFile = TaskEnvironment.GetAbsolutePath(_stateFile);
+            }
 
             for (int i = 0; i < _installedAssemblyTables.Length; i++)
             {
                 // TODO: check if it could be URI.
                 // It is said that it's on disk in docu, but code does not prohibit URI.
-                _installedAssemblyTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_installedAssemblyTables[i].ItemSpec);
+                if (!string.IsNullOrEmpty(_installedAssemblyTables[i].ItemSpec))
+                {
+                    _installedAssemblyTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_installedAssemblyTables[i].ItemSpec);
+                }
             }
 
             for (int i = 0; i < _installedAssemblySubsetTables.Length; i++)
             {
-                _installedAssemblySubsetTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_installedAssemblySubsetTables[i].ItemSpec);
+                if (!string.IsNullOrEmpty(_installedAssemblySubsetTables[i].ItemSpec))
+                {
+                    _installedAssemblySubsetTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_installedAssemblySubsetTables[i].ItemSpec);
+                }
             }
 
             for (int i = 0; i < _fullFrameworkAssemblyTables.Length; i++)
             {
-                _fullFrameworkAssemblyTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_fullFrameworkAssemblyTables[i].ItemSpec);
+                if (!string.IsNullOrEmpty(_fullFrameworkAssemblyTables[i].ItemSpec))
+                {
+                    _fullFrameworkAssemblyTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_fullFrameworkAssemblyTables[i].ItemSpec);
+                }
             }
 
             for (int i = 0; i < _resolvedSDKReferences.Length; i++)
             {
-                _resolvedSDKReferences[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_resolvedSDKReferences[i].ItemSpec);
+                if (!string.IsNullOrEmpty(_resolvedSDKReferences[i].ItemSpec))
+                {
+                    _resolvedSDKReferences[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_resolvedSDKReferences[i].ItemSpec);
+                }
             }
         }
     }
