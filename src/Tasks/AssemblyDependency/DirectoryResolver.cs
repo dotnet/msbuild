@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -22,8 +23,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public DirectoryResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, string parentAssembly)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
+        public DirectoryResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, string parentAssembly, TaskEnvironment taskEnvironment)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, taskEnvironment)
         {
             this.parentAssembly = parentAssembly;
         }
@@ -46,6 +47,7 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
+            string directory = FullSearchPath;
             string resolvedPath;
 
             if (parentAssembly != null)
@@ -53,7 +55,7 @@ namespace Microsoft.Build.Tasks
                 var searchLocationsWithParentAssembly = new List<ResolutionSearchLocation>();
 
                 // Resolve to the given path.
-                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, searchLocationsWithParentAssembly);
+                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directory, searchLocationsWithParentAssembly);
 
                 foreach (var searchLocation in searchLocationsWithParentAssembly)
                 {
@@ -64,7 +66,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
+                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, directory, assembliesConsideredAndRejected);
             }
 
             if (resolvedPath != null)

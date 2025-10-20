@@ -6703,7 +6703,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
+                null, null, null, new Version("4.0"), null, null, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>(), new TaskEnvironment(StubTaskEnvironmentDriver.Instance));
             MockEngine mockEngine;
             ResolveAssemblyReference rar;
             Dictionary<string, string> denyList;
@@ -6881,7 +6881,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 #if FEATURE_WIN32_REGISTRY
                 null, null, null,
 #endif
-                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>());
+                null, null, new Version("4.0"), null, log, null, true, false, null, null, false, null, WarnOrErrorOnTargetArchitectureMismatchBehavior.None, false, false, null, Array.Empty<string>(), new TaskEnvironment(StubTaskEnvironmentDriver.Instance));
             return referenceTable;
         }
 

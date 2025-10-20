@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -22,8 +23,9 @@ namespace Microsoft.Build.Tasks
         /// <param name="fileExists">Delegate that returns if the file exists.</param>
         /// <param name="getRuntimeVersion">Delegate that returns the clr runtime version for the file.</param>
         /// <param name="targetedRuntimeVesion">The targeted runtime version.</param>
-        public AssemblyFoldersResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
+        /// <param name="taskEnvironment"></param>
+        public AssemblyFoldersResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, TaskEnvironment taskEnvironment)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, taskEnvironment)
         {
         }
 
