@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     /// Create a new list of items that have &lt;TargetPath&gt; attributes if none was present in
     /// the input.
     /// </summary>
-    public class AssignTargetPath : TaskExtension
+    public class AssignTargetPath : TaskExtension, IMultiThreadableTask
     {
         #region Properties
 
@@ -37,6 +37,11 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] AssignedFiles { get; private set; }
 
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         #endregion
 
         /// <summary>
@@ -52,12 +57,12 @@ namespace Microsoft.Build.Tasks
                 // Compose a file in the root folder.
                 // NOTE: at this point fullRootPath may or may not have a trailing
                 // slash because Path.GetFullPath() does not add or remove it
-                string fullRootPath = Path.GetFullPath(RootFolder);
+                string fullRootPath = TaskEnvironment?.GetAbsolutePath(RootFolder) ?? Path.GetFullPath(RootFolder);
 
                 // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
                 fullRootPath = FileUtilities.EnsureTrailingSlash(fullRootPath);
 
-                string currentDirectory = Directory.GetCurrentDirectory();
+                string currentDirectory = TaskEnvironment?.ProjectDirectory ?? Directory.GetCurrentDirectory();
 
                 // check if the root folder is the same as the current directory
                 // NOTE: the path returned from Directory.GetCurrentDirectory()
@@ -104,7 +109,7 @@ namespace Microsoft.Build.Tasks
                         {
                             // PERF WARNING: Path.GetFullPath() is expensive in terms of memory;
                             // we should avoid calling it whenever possible
-                            string itemSpecFullFileNamePath = Path.GetFullPath(Files[i].ItemSpec);
+                            string itemSpecFullFileNamePath = TaskEnvironment?.GetAbsolutePath(Files[i].ItemSpec) ?? Path.GetFullPath(Files[i].ItemSpec);
 
                             if (String.Compare(fullRootPath, 0, itemSpecFullFileNamePath, 0, fullRootPath.Length, StringComparison.CurrentCultureIgnoreCase) == 0)
                             {
