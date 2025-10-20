@@ -537,7 +537,7 @@ namespace Microsoft.Build.UnitTests
                 fileLogger.NodeId = 1;
                 fileLogger.Parameters = "logfile=";
                 fileLogger.Initialize(new EventSourceSink());
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         #endregion

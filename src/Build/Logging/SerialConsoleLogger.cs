@@ -517,8 +517,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     setColor(ConsoleColor.DarkGray);
                 }
 
-                string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty ?
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentDerivedProperty.EnvironmentVariableName, e.Message)
+                string nonNullMessage = e is EnvironmentVariableReadEventArgs environmentDerivedProperty
+                    ? ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("EnvironmentDerivedPropertyRead", environmentDerivedProperty.EnvironmentVariableName, e.Message)
                     : e.Message ?? String.Empty;
 
                 // Include file information if present.
@@ -586,6 +586,10 @@ namespace Microsoft.Build.BackEnd.Logging
                         WriteItems(itemList);
                     }
                 }
+            }
+            else if (e is BuildCanceledEventArgs buildCanceled)
+            {;
+                Console.WriteLine(e.Message);
             }
         }
 

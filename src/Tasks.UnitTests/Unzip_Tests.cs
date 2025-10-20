@@ -7,6 +7,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
@@ -448,6 +449,40 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 _mockEngine.Log.ShouldContain("MSB3938", customMessage: _mockEngine.Log);
             }
+        }
+
+        [UnixOnlyFact]
+        public void CanKeepUnixFilePermissions()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            TransientTestFolder source = testEnvironment.CreateFolder(createFolder: true);
+            string executableName = "myapp";
+            var sourceFile = testEnvironment.CreateFile(source, executableName, "Dummy executable");
+
+            var ExecuteCommand = (string command, string filePath) =>
+            {
+                string output = RunnerUtilities.RunProcessAndGetOutput($"/bin/sh", $"-c \"{command} {sourceFile.Path}\"", out bool success);
+                return output;
+            };
+            ExecuteCommand("chmod +x", sourceFile.Path);
+            var permissions = ExecuteCommand("ls -l", sourceFile.Path).Substring(0, 10);
+
+            TransientZipArchive zipArchive = TransientZipArchive.Create(source, testEnvironment.CreateFolder(createFolder: true));
+            TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+            Unzip unzip = new Unzip
+            {
+                BuildEngine = _mockEngine,
+                DestinationFolder = new TaskItem(destination.Path),
+                OverwriteReadOnlyFiles = true,
+                SkipUnchangedFiles = false,
+                SourceFiles = new ITaskItem[] { new TaskItem(zipArchive.Path) },
+            };
+            unzip.Execute().ShouldBeTrue(_mockEngine.Log);
+            string unzippedFilePath = Path.Combine(destination.Path, executableName);
+            _mockEngine.Log.ShouldContain(unzippedFilePath, customMessage: _mockEngine.Log);
+            File.Exists(unzippedFilePath).ShouldBeTrue();
+            var unzippedFilePermissions = ExecuteCommand("ls -l", unzippedFilePath).Substring(0, 10);
+            unzippedFilePermissions.ShouldBe(permissions);
         }
     }
 }

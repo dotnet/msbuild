@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using FluentAssertions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Shouldly;
@@ -148,7 +149,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                             var eventEvaluationId = args.BuildEventContext.EvaluationId;
 
                             eventEvaluationId.ShouldNotBe(BuildEventContext.InvalidEvaluationId);
-                            project.LastEvaluationId.ShouldBe(eventEvaluationId);
+                            project.LastEvaluationId.Should().Be(eventEvaluationId);
                         }
                     }
                 });

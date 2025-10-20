@@ -98,7 +98,7 @@ namespace Microsoft.Build.Internal
             }
             else if (string.IsNullOrEmpty(element.NamespaceURI))
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_4) && Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
+                if (Path.GetExtension(element.Location.File).Equals(".dwproj", StringComparison.OrdinalIgnoreCase))
                 {
                     bool validMSBuildProject = true;
                     foreach (XmlNode child in element.ChildNodes)

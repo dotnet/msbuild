@@ -63,10 +63,10 @@ namespace Microsoft.Build.UnitTests.Shared
             BootstrapLocationAttribute attribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
-            string binaryFolder = attribute.BootstrapMsbuildBinaryLocation;
+            string binaryFolder = attribute.BootstrapMsBuildBinaryLocation;
 #if NET
-            string pathToExecutable = EnvironmentProvider.GetDotnetExePath()!;
-            msbuildParameters = Path.Combine(binaryFolder, "MSBuild.dll") + " " + msbuildParameters;
+            string pathToExecutable = EnvironmentProvider.GetDotnetExePathFromFolder(binaryFolder);
+            msbuildParameters = Path.Combine(binaryFolder, "sdk", attribute.BootstrapSdkVersion, "MSBuild.dll") + " " + msbuildParameters;
 #else
             string pathToExecutable = Path.Combine(binaryFolder, "MSBuild.exe");
 #endif

@@ -269,7 +269,7 @@ EndGlobal
                 }
                 finally
                 {
-                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", "");
+                    Environment.SetEnvironmentVariable("MSBuildSolutionBatchTargets", null);
                 }
             }
         }
@@ -1264,7 +1264,7 @@ EndGlobal
                 }
                 else
                 {
-                    Assert.True(false, "Unexpected project seen:" + item.ItemSpec);
+                    Assert.Fail("Unexpected project seen:" + item.ItemSpec);
                 }
             }
         }
@@ -1910,7 +1910,7 @@ EndGlobal
                 }
                 else
                 {
-                    Assert.True(false, "Something went really wrong!  The SolutionFile wasn't even created!");
+                    Assert.Fail("Something went really wrong!  The SolutionFile wasn't even created!");
                 }
             }
         }
@@ -2762,7 +2762,7 @@ EndProject";
                 }
             }
 
-            Assert.True(false);
+            Assert.Fail();
         }
 
         /// <summary>

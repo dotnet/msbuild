@@ -30,9 +30,18 @@
 
   <Import Project="..\..\eng\BootStrapMsBuild.props" />
 
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <TestBootstrapBinaryDestination>$(BootstrapDestination)Current\Bin</TestBootstrapBinaryDestination>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <TestBootstrapBinaryDestination>$(ArtifactsBinDir)bootstrap\core</TestBootstrapBinaryDestination>
+  </PropertyGroup>
+
   <ItemGroup>
     <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.BootstrapLocationAttribute">
-      <_Parameter1>$(BootstrapBinaryDestination)</_Parameter1>
+      <_Parameter1>$(TestBootstrapBinaryDestination)</_Parameter1>
+      <_Parameter2>$(BootstrapSdkVersion)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
 </Project>

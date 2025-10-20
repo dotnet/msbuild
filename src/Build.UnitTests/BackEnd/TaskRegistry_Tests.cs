@@ -1380,7 +1380,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1423,7 +1423,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1469,7 +1469,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1487,7 +1487,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1558,7 +1558,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1605,7 +1605,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1652,7 +1652,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 List<ProjectUsingTaskElement> elementList = CreateParameterElementWithAttributes(output, required, type);
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -1809,7 +1809,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string evaluate = "RandomStuff";
                 List<ProjectUsingTaskElement> elementList = CreateTaskBodyElementWithAttributes(evaluate, "");
                 CreateTaskRegistryAndRegisterTasks(elementList);
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>

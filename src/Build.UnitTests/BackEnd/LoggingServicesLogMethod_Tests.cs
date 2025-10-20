@@ -1001,39 +1001,23 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Make sure we can log a build started event correctly.
         /// Test both the LogOnlyCriticalEvents true and false
         /// </summary>
-        [Fact]
-        public void LogBuildStarted()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void LogBuildStarted(bool onlyLogCriticalEvents)
         {
             ProcessBuildEventHelper service =
                 (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-
+            service.OnlyLogCriticalEvents = onlyLogCriticalEvents;
             service.LogBuildStarted();
+
+            string message = onlyLogCriticalEvents ? string.Empty : ResourceUtilities.GetResourceString("BuildStarted");
 
             BuildStartedEventArgs buildEvent =
                 new BuildStartedEventArgs(
-                    ResourceUtilities.GetResourceString("BuildStarted"),
+                    message,
                     null /* no help keyword */,
                     service.ProcessedBuildEvent.Timestamp);
-
-            Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
-            Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
-                new EventArgsEqualityComparer<BuildStartedEventArgs>());
-        }
-
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/437")]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        public void LogBuildStartedCriticalOnly()
-        {
-            ProcessBuildEventHelper service =
-                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-            service.OnlyLogCriticalEvents = true;
-            service.LogBuildStarted();
-
-            BuildStartedEventArgs buildEvent =
-                new BuildStartedEventArgs(
-                    string.Empty,
-                    null /* no help keyword */);
 
             Assert.IsType<BuildStartedEventArgs>(service.ProcessedBuildEvent);
             Assert.Equal(buildEvent, (BuildStartedEventArgs)service.ProcessedBuildEvent,
@@ -1062,6 +1046,24 @@ namespace Microsoft.Build.UnitTests.Logging
             service.LogBuildFinished(true);
             buildEvent = new BuildFinishedEventArgs(string.Empty, null /* no help keyword */, true, service.ProcessedBuildEvent.Timestamp);
             Assert.True(((BuildFinishedEventArgs)service.ProcessedBuildEvent).IsEquivalent(buildEvent));
+        }
+
+        [Fact]
+        public void LogBuildCanceled()
+        {
+            ProcessBuildEventHelper service =
+                (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
+            service.LogBuildCanceled();
+
+
+            BuildCanceledEventArgs buildEvent =
+                new BuildCanceledEventArgs(
+                    ResourceUtilities.GetResourceString("AbortingBuild"),
+                    service.ProcessedBuildEvent.Timestamp);
+
+            Assert.IsType<BuildCanceledEventArgs>(service.ProcessedBuildEvent);
+            Assert.Equal(buildEvent, (BuildCanceledEventArgs)service.ProcessedBuildEvent,
+                new EventArgsEqualityComparer<BuildCanceledEventArgs>());
         }
 
         /// <summary>

@@ -68,6 +68,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// https://github.com/dotnet/msbuild/issues/10497
+        /// .NET Framework Path.Combine should have exception handling for invalid path characters
+        /// </summary>
+        [Fact]
+        public void InvalidPathInTargetOutPuts()
+        {
+            MockLogger ml = new MockLogger();
+            var content = ObjectModelHelpers.CleanupFileContents(
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+	                <ItemGroup>
+	                    <MyFile Include='foo'>
+                            <DestinationFolder>""$(Output)\bin""</DestinationFolder>
+                        </MyFile>
+	                </ItemGroup>
+	                <Target Name='Build'
+	                        Inputs=""@(MyFile)""
+                            Outputs=""@(MyFile->'%(DestinationFolder)')"">
+	                </Target>
+	            </Project>");
+            using ProjectFromString projectFromString = new(content);
+            Project p = projectFromString.Project;
+
+            bool success = p.Build(new string[] { "Build" }, new ILogger[] { ml });
+            ml.AssertLogDoesntContain("This is an unhandled exception");
+        }
+
+        /// <summary>
         /// Verify missing output metadata does not cause errors.
         /// </summary>
         [Fact]
