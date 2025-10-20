@@ -105,6 +105,11 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static string DebugPath { get; private set; }
 
+        /// <summary>
+        /// Returns true if the current process is an out-of-proc TaskHost node.
+        /// </summary>
+        public static bool IsInTaskHostNode() => ProcessNodeMode.Value == NodeMode.OutOfProcTaskHostNode;
+
         public static string FindNextAvailableDebugFilePath(string fileName)
         {
             var extension = Path.GetExtension(fileName);

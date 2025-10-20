@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Shouldly;
 using Xunit;
 
@@ -37,6 +38,14 @@ namespace Microsoft.Build.UnitTests
                 File.ReadAllText(exceptionFile).ShouldContain("hello world");
                 File.Delete(exceptionFile);
             }
+        }
+
+        [Fact]
+        public void IsInTaskHostNode_ReturnsFalseForCentralNode()
+        {
+            // When running in the main test process (no /nodemode argument),
+            // we should not be in a TaskHost node
+            DebugUtils.IsInTaskHostNode().ShouldBeFalse();
         }
     }
 }
