@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates a bootstrapper for ClickOnce deployment projects.
     /// </summary>
-    public sealed class GenerateBootstrapper : TaskExtension, IGenerateBootstrapperTaskContract
+    public sealed class GenerateBootstrapper : TaskExtension, IGenerateBootstrapperTaskContract, IMultiThreadableTask
     {
         public string ApplicationName { get; set; }
 
@@ -41,7 +41,12 @@ namespace Microsoft.Build.Tasks
 
         public string FallbackCulture { get; set; } = Util.DefaultCultureInfo.Name;
 
-        public string OutputPath { get; set; } = Directory.GetCurrentDirectory();
+        private string _outputPath;
+        public string OutputPath 
+        { 
+            get => _outputPath ?? TaskEnvironment?.ProjectDirectory ?? Directory.GetCurrentDirectory();
+            set => _outputPath = value; 
+        }
 
         public string Path { get; set; }
 
@@ -56,6 +61,11 @@ namespace Microsoft.Build.Tasks
 
         [Output]
         public string[] BootstrapperComponentFiles { get; set; }
+
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Generate the bootstrapper.

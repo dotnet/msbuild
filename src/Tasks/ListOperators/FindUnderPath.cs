@@ -15,7 +15,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Given a list of items, determine which are in the cone of the folder passed in and which aren't.
     /// </summary>
-    public class FindUnderPath : TaskExtension
+    public class FindUnderPath : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
         /// Filter based on whether items fall under this path or not.
@@ -46,6 +46,11 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] OutOfPath { get; set; }
 
         /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
+
+        /// <summary>
         /// Execute the task.
         /// </summary>
         public override bool Execute()
@@ -57,9 +62,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                conePath =
-                    Strings.WeakIntern(
-                        System.IO.Path.GetFullPath(FileUtilities.FixFilePath(Path.ItemSpec)));
+                string pathSpec = FileUtilities.FixFilePath(Path.ItemSpec);
+                conePath = TaskEnvironment?.GetAbsolutePath(pathSpec) ?? System.IO.Path.GetFullPath(pathSpec);
+                conePath = Strings.WeakIntern(conePath);
                 conePath = FileUtilities.EnsureTrailingSlash(conePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -78,9 +83,9 @@ namespace Microsoft.Build.Tasks
                 string fullPath;
                 try
                 {
-                    fullPath =
-                        Strings.WeakIntern(
-                            System.IO.Path.GetFullPath(FileUtilities.FixFilePath(item.ItemSpec)));
+                    string itemSpec = FileUtilities.FixFilePath(item.ItemSpec);
+                    fullPath = TaskEnvironment?.GetAbsolutePath(itemSpec) ?? System.IO.Path.GetFullPath(itemSpec);
+                    fullPath = Strings.WeakIntern(fullPath);
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {

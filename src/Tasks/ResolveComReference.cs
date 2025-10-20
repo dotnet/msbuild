@@ -196,7 +196,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Main class for the COM reference resolution task
     /// </summary>
-    public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IResolveComReferenceTaskContract, IComReferenceResolver
+    public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IResolveComReferenceTaskContract, IComReferenceResolver, IMultiThreadableTask
     {
 #pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
@@ -279,6 +279,11 @@ namespace Microsoft.Build.Tasks
         public string StateFile { get; set; }
 
         public string TargetFrameworkVersion { get; set; } = String.Empty;
+
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         private Version _projectTargetFramework;
 
@@ -738,7 +743,7 @@ namespace Microsoft.Build.Tasks
                 string refPath = tlbFiles[i].ItemSpec;
                 if (!Path.IsPathRooted(refPath))
                 {
-                    refPath = Path.Combine(Directory.GetCurrentDirectory(), refPath);
+                    refPath = Path.Combine(TaskEnvironment?.ProjectDirectory ?? Directory.GetCurrentDirectory(), refPath);
                 }
 
                 var projectRefInfo = new ComReferenceInfo();
